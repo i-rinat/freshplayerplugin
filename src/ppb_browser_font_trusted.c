@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_BrowserFont_Trusted ppb_browser_font_trusted = {
+const struct PPB_BrowserFont_Trusted_1_0 ppb_browser_font_trusted_interface_1_0 = {
     .GetFontFamilies = NULL,
     .Create = NULL,
     .IsFont = NULL,

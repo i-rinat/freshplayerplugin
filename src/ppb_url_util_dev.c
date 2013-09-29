@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_URLUtil_Dev ppb_url_util_dev = {
+const struct PPB_URLUtil_Dev_0_6 ppb_url_util_dev_interface_0_6 = {
     .Canonicalize = NULL,
     .ResolveRelativeToURL = NULL,
     .ResolveRelativeToDocument = NULL,

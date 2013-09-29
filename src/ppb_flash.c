@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Flash ppb_flash = {
+const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .SetInstanceAlwaysOnTop = NULL,
     .DrawGlyphs = NULL,
     .GetProxyForURL = NULL,

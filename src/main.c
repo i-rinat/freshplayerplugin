@@ -18,86 +18,86 @@ const void *
 browser_get_interface(const char* interface_name)
 {
     trace_info("called PPB_GetInterface(\"%s\")\n", interface_name);
-    if (!strcmp(interface_name, PPB_CORE_INTERFACE)) {
-        return &ppb_core;
-    } else if (!strcmp(interface_name, PPB_AUDIO_CONFIG_INTERFACE)) {
-        return &ppb_audio_config;
-    } else if (!strcmp(interface_name, PPB_AUDIO_INPUT_DEV_INTERFACE)) {
-        return &ppb_audio_input_dev;
-    } else if (!strcmp(interface_name, PPB_AUDIO_INTERFACE)) {
-        return &ppb_audio;
-    } else if (!strcmp(interface_name, PPB_BROWSERFONT_TRUSTED_INTERFACE)) {
-        return &ppb_browser_font_trusted;
-    } else if (!strcmp(interface_name, PPB_BUFFER_DEV_INTERFACE)) {
-        return &ppb_buffer_dev;
-    } else if (!strcmp(interface_name, PPB_CHAR_SET_DEV_INTERFACE)) {
-        return &ppb_char_set_dev;
-    } else if (!strcmp(interface_name, PPB_CRYPTO_DEV_INTERFACE)) {
-        return &ppb_crypto_dev;
-    } else if (!strcmp(interface_name, PPB_CURSOR_CONTROL_DEV_INTERFACE)) {
-        return &ppb_cursor_control_dev;
-    } else if (!strcmp(interface_name, PPB_FILECHOOSER_DEV_INTERFACE)) {
-        return &ppb_file_chooser_dev;
-    } else if (!strcmp(interface_name, PPB_FILECHOOSER_TRUSTED_INTERFACE)) {
-        return &ppb_file_chooser_trusted;
+    if (!strcmp(interface_name, PPB_CORE_INTERFACE_1_0)) {
+        return &ppb_core_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_AUDIO_CONFIG_INTERFACE_1_1)) {
+        return &ppb_audio_config_interface_1_1;
+    } else if (!strcmp(interface_name, PPB_AUDIO_INPUT_DEV_INTERFACE_0_3)) {
+        return &ppb_audio_input_dev_interface_0_3;
+    } else if (!strcmp(interface_name, PPB_AUDIO_INTERFACE_1_0)) {
+        return &ppb_audio_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_BROWSERFONT_TRUSTED_INTERFACE_1_0)) {
+        return &ppb_browser_font_trusted_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_BUFFER_DEV_INTERFACE_0_4)) {
+        return &ppb_buffer_dev_interface_0_4;
+    } else if (!strcmp(interface_name, PPB_CHAR_SET_DEV_INTERFACE_0_4)) {
+        return &ppb_char_set_dev_interface_0_4;
+    } else if (!strcmp(interface_name, PPB_CRYPTO_DEV_INTERFACE_0_1)) {
+        return &ppb_crypto_dev_interface_0_1;
+    } else if (!strcmp(interface_name, PPB_CURSOR_CONTROL_DEV_INTERFACE_0_4)) {
+        return &ppb_cursor_control_dev_interface_0_4;
+    } else if (!strcmp(interface_name, PPB_FILECHOOSER_DEV_INTERFACE_0_6)) {
+        return &ppb_file_chooser_dev_interface_0_6;
+    } else if (!strcmp(interface_name, PPB_FILECHOOSER_TRUSTED_INTERFACE_0_6)) {
+        return &ppb_file_chooser_trusted_interface_0_6;
     } else if (!strcmp(interface_name, PPB_FILEREF_INTERFACE_1_0)) {
-        return &ppb_file_ref_1_0;
-    } else if (!strcmp(interface_name, PPB_FLASH_CLIPBOARD_INTERFACE)) {
-        return &ppb_flash_clipboard;
+        return &ppb_file_ref_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_FLASH_CLIPBOARD_INTERFACE_5_0)) {
+        return &ppb_flash_clipboard_interface_5_0;
     } else if (!strcmp(interface_name, PPB_FLASH_FILE_FILEREF_INTERFACE)) {
-        return &ppb_flash_file_file_ref;
-    } else if (!strcmp(interface_name, PPB_FLASH_FILE_MODULELOCAL_INTERFACE)) {
-        return &ppb_flash_file_modulelocal;
-    } else if (!strcmp(interface_name, PPB_FLASH_FONTFILE_INTERFACE)) {
-        return &ppb_flash_font_file;
-    } else if (!strcmp(interface_name, PPB_FLASHFULLSCREEN_INTERFACE)) {
-        return &ppb_flash_fullscreen;
-    } else if (!strcmp(interface_name, PPB_FLASH_INTERFACE)) {
-        return &ppb_flash;
-    } else if (!strcmp(interface_name, PPB_FLASH_MENU_INTERFACE)) {
-        return &ppb_flash_menu;
+        return &ppb_flash_file_file_ref_interface_2_0;
+    } else if (!strcmp(interface_name, PPB_FLASH_FILE_MODULELOCAL_INTERFACE_3_0)) {
+        return &ppb_flash_file_modulelocal_interface_3_0;
+    } else if (!strcmp(interface_name, PPB_FLASH_FONTFILE_INTERFACE_0_1)) {
+        return &ppb_flash_font_file_interface_0_1;
+    } else if (!strcmp(interface_name, PPB_FLASHFULLSCREEN_INTERFACE_1_0)) {
+        return &ppb_flash_fullscreen_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_FLASH_INTERFACE_13_0)) {
+        return &ppb_flash_interface_13_0;
+    } else if (!strcmp(interface_name, PPB_FLASH_MENU_INTERFACE_0_2)) {
+        return &ppb_flash_menu_interface_0_2;
     } else if (!strcmp(interface_name, PPB_GRAPHICS_2D_INTERFACE_1_0)) {
-        return &ppb_graphics2d_1_0;
-    } else if (!strcmp(interface_name, PPB_GRAPHICS_3D_INTERFACE)) {
-        return &ppb_graphics3d;
-    } else if (!strcmp(interface_name, PPB_IMAGEDATA_INTERFACE)) {
-        return &ppb_image_data;
-    } else if (!strcmp(interface_name, PPB_IME_INPUT_EVENT_DEV_INTERFACE)) {
-        return &ppb_ime_input_event_dev;
-    } else if (!strcmp(interface_name, PPB_INPUT_EVENT_INTERFACE)) {
-        return &ppb_input_event;
-    } else if (!strcmp(interface_name, PPB_INSTANCE_INTERFACE)) {
-        return &ppb_instance;
-    } else if (!strcmp(interface_name, PPB_MEMORY_DEV_INTERFACE)) {
-        return &ppb_memory_dev;
-    } else if (!strcmp(interface_name, PPB_NETADDRESS_PRIVATE_INTERFACE)) {
-        return &ppb_net_address_private;
-    } else if (!strcmp(interface_name, PPB_OPENGLES2_CHROMIUMMAPSUB_INTERFACE)) {
-        return &ppb_opengles2_chromium_map_sub;
-    } else if (!strcmp(interface_name, PPB_OPENGLES2_INTERFACE)) {
-        return &ppb_opengles2;
+        return &ppb_graphics2d_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_GRAPHICS_3D_INTERFACE_1_0)) {
+        return &ppb_graphics3d_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_IMAGEDATA_INTERFACE_1_0)) {
+        return &ppb_image_data_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_IME_INPUT_EVENT_DEV_INTERFACE_0_2)) {
+        return &ppb_ime_input_event_dev_interface_0_2;
+    } else if (!strcmp(interface_name, PPB_INPUT_EVENT_INTERFACE_1_0)) {
+        return &ppb_input_event_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_INSTANCE_INTERFACE_1_0)) {
+        return &ppb_instance_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_MEMORY_DEV_INTERFACE_0_1)) {
+        return &ppb_memory_dev_interface_0_1;
+    } else if (!strcmp(interface_name, PPB_NETADDRESS_PRIVATE_INTERFACE_1_1)) {
+        return &ppb_net_address_private_interface_1_1;
+    } else if (!strcmp(interface_name, PPB_OPENGLES2_CHROMIUMMAPSUB_INTERFACE_1_0)) {
+        return &ppb_opengles2_chromium_map_sub_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_OPENGLES2_INTERFACE_1_0)) {
+        return &ppb_opengles2_interface_1_0;
     } else if (!strcmp(interface_name, PPB_TCPSOCKET_PRIVATE_INTERFACE_0_4)) {
-        return &ppb_tcp_socket_private_0_4;
-    } else if (!strcmp(interface_name, PPB_TEXTINPUT_DEV_INTERFACE)) {
-        return &ppb_text_input_dev;
-    } else if (!strcmp(interface_name, PPB_UDPSOCKET_PRIVATE_INTERFACE)) {
-        return &ppb_udp_socket_private;
-    } else if (!strcmp(interface_name, PPB_URLLOADER_INTERFACE)) {
-        return &ppb_url_loader;
-    } else if (!strcmp(interface_name, PPB_URLLOADERTRUSTED_INTERFACE)) {
-        return &ppb_url_loader_trusted;
-    } else if (!strcmp(interface_name, PPB_URLREQUESTINFO_INTERFACE)) {
-        return &ppb_url_request_info;
-    } else if (!strcmp(interface_name, PPB_URLRESPONSEINFO_INTERFACE)) {
-        return &ppb_url_response_info;
-    } else if (!strcmp(interface_name, PPB_URLUTIL_DEV_INTERFACE)) {
-        return &ppb_url_util_dev;
-    } else if (!strcmp(interface_name, PPB_VAR_INTERFACE)) {
-        return &ppb_var;
-    } else if (!strcmp(interface_name, PPB_VIDEOCAPTURE_DEV_INTERFACE)) {
-        return &ppb_video_capture_dev;
+        return &ppb_tcp_socket_private_interface_0_4;
+    } else if (!strcmp(interface_name, PPB_TEXTINPUT_DEV_INTERFACE_0_2)) {
+        return &ppb_text_input_dev_interface_0_2;
+    } else if (!strcmp(interface_name, PPB_UDPSOCKET_PRIVATE_INTERFACE_0_4)) {
+        return &ppb_udp_socket_private_interface_0_4;
+    } else if (!strcmp(interface_name, PPB_URLLOADER_INTERFACE_1_0)) {
+        return &ppb_url_loader_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_URLLOADERTRUSTED_INTERFACE_0_3)) {
+        return &ppb_url_loader_trusted_interface_0_3;
+    } else if (!strcmp(interface_name, PPB_URLREQUESTINFO_INTERFACE_1_0)) {
+        return &ppb_url_request_info_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_URLRESPONSEINFO_INTERFACE_1_0)) {
+        return &ppb_url_response_info_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_URLUTIL_DEV_INTERFACE_0_6)) {
+        return &ppb_url_util_dev_interface_0_6;
+    } else if (!strcmp(interface_name, PPB_VAR_INTERFACE_1_1)) {
+        return &ppb_var_interface_1_1;
+    } else if (!strcmp(interface_name, PPB_VIDEOCAPTURE_DEV_INTERFACE_0_3)) {
+        return &ppb_video_capture_dev_interface_0_3;
     } else if (!strcmp(interface_name, PPB_VIEW_INTERFACE_1_0)) {
-        return &ppb_view_1_0;
+        return &ppb_view_interface_1_0;
     } else {
         trace_info("not implemented: %s\n", interface_name);
         return NULL;

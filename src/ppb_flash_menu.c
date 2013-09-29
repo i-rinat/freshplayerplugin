@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Flash_Menu ppb_flash_menu = {
+const struct PPB_Flash_Menu_0_2 ppb_flash_menu_interface_0_2 = {
     .Create = NULL,
     .IsFlashMenu = NULL,
     .Show = NULL

@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Memory_Dev ppb_memory_dev = {
+const struct PPB_Memory_Dev_0_1 ppb_memory_dev_interface_0_1 = {
     .MemAlloc = NULL,
     .MemFree = NULL
 };

@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_UDPSocket_Private ppb_udp_socket_private = {
+const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
     .Create = NULL,
     .IsUDPSocket = NULL,
     .SetSocketFeature = NULL,

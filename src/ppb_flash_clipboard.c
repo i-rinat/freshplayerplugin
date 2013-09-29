@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Flash_Clipboard ppb_flash_clipboard = {
+const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
     .RegisterCustomFormat = NULL,
     .IsFormatAvailable = NULL,
     .ReadData = NULL,

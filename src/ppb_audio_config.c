@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_AudioConfig ppb_audio_config = {
+const struct PPB_AudioConfig_1_1 ppb_audio_config_interface_1_1 = {
     .CreateStereo16Bit = NULL,
     .RecommendSampleFrameCount = NULL,
     .IsAudioConfig = NULL,

@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Graphics3D ppb_graphics3d = {
+const struct PPB_Graphics3D_1_0 ppb_graphics3d_interface_1_0 = {
     .GetAttribMaxValue = NULL,
     .Create = NULL,
     .IsGraphics3D = NULL,

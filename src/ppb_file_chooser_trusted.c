@@ -2,6 +2,6 @@
 #include <stddef.h>
 
 
-const PPB_FileChooserTrusted ppb_file_chooser_trusted = {
+const struct PPB_FileChooserTrusted_0_6 ppb_file_chooser_trusted_interface_0_6 = {
     .ShowWithoutUserGesture = NULL
 };

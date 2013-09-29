@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Var ppb_var = {
+const struct PPB_Var_1_1 ppb_var_interface_1_1 = {
     .AddRef = NULL,
     .Release = NULL,
     .VarFromUtf8 = NULL,

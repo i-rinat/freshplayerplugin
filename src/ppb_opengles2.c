@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const struct PPB_OpenGLES2 ppb_opengles2 = {
+const struct PPB_OpenGLES2 ppb_opengles2_interface_1_0 = {
     .ActiveTexture = NULL,
     .AttachShader = NULL,
     .BindAttribLocation = NULL,

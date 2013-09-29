@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_FlashFullscreen ppb_flash_fullscreen = {
+const struct PPB_FlashFullscreen_1_0 ppb_flash_fullscreen_interface_1_0 = {
     .IsFullscreen = NULL,
     .SetFullscreen = NULL,
     .GetScreenSize = NULL

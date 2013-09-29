@@ -2,6 +2,6 @@
 #include <stddef.h>
 
 
-const PPB_Crypto_Dev ppb_crypto_dev = {
+const struct PPB_Crypto_Dev_0_1 ppb_crypto_dev_interface_0_1 = {
     .GetRandomBytes = NULL
 };

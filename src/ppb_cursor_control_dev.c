@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_CursorControl_Dev ppb_cursor_control_dev = {
+const struct PPB_CursorControl_Dev_0_4 ppb_cursor_control_dev_interface_0_4 = {
     .SetCursor = NULL,
     .LockCursor = NULL,
     .UnlockCursor = NULL,

@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_TextInput_Dev ppb_text_input_dev = {
+const struct PPB_TextInput_Dev_0_2 ppb_text_input_dev_interface_0_2 = {
     .SetTextInputType = NULL,
     .UpdateCaretPosition = NULL,
     .CancelCompositionText = NULL,

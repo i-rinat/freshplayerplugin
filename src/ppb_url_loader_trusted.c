@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_URLLoaderTrusted ppb_url_loader_trusted = {
+const struct PPB_URLLoaderTrusted_0_3 ppb_url_loader_trusted_interface_0_3 = {
     .GrantUniversalAccess = NULL,
     .RegisterStatusCallback = NULL
 };

@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_NetAddress_Private ppb_net_address_private = {
+const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = {
     .AreEqual = NULL,
     .AreHostsEqual = NULL,
     .Describe = NULL,

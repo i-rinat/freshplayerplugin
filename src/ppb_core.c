@@ -48,7 +48,7 @@ ppb_core_is_main_thread(void)
     return PP_FALSE;
 }
 
-const PPB_Core ppb_core = {
+const struct PPB_Core_1_0 ppb_core_interface_1_0 = {
     .AddRefResource = ppb_core_add_ref_resource,
     .ReleaseResource = ppb_core_release_resource,
     .GetTime = ppb_core_get_time,

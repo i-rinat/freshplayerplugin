@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const struct PPB_TCPSocket_Private_0_4 ppb_tcp_socket_private_0_4 = {
+const struct PPB_TCPSocket_Private_0_4 ppb_tcp_socket_private_interface_0_4 = {
     .Create = NULL,
     .IsTCPSocket = NULL,
     .Connect = NULL,

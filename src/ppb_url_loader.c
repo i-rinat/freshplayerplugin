@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_URLLoader ppb_url_loader = {
+const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
     .Create = NULL,
     .IsURLLoader = NULL,
     .Open = NULL,

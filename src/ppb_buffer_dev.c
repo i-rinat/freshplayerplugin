@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Buffer_Dev ppb_buffer_dev = {
+const struct PPB_Buffer_Dev_0_4 ppb_buffer_dev_interface_0_4 = {
     .Create = NULL,
     .IsBuffer = NULL,
     .Describe = NULL,

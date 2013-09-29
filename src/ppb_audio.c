@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Audio ppb_audio = {
+const struct PPB_Audio_1_0 ppb_audio_interface_1_0 = {
     .Create = NULL,
     .IsAudio = NULL,
     .GetCurrentConfig = NULL,

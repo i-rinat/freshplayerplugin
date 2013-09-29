@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Flash_File_ModuleLocal ppb_flash_file_modulelocal = {
+const struct PPB_Flash_File_ModuleLocal_3_0 ppb_flash_file_modulelocal_interface_3_0 = {
     .CreateThreadAdapterForInstance = NULL,
     .ClearThreadAdapterForInstance = NULL,
     .OpenFile = NULL,

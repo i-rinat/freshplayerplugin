@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_CharSet_Dev ppb_char_set_dev = {
+const struct PPB_CharSet_Dev_0_4 ppb_char_set_dev_interface_0_4 = {
     .UTF16ToCharSet = NULL,
     .CharSetToUTF16 = NULL,
     .GetDefaultCharSet = NULL

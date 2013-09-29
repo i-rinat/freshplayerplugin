@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_FileChooser_Dev ppb_file_chooser_dev = {
+const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
     .Create = NULL,
     .IsFileChooser = NULL,
     .Show = NULL

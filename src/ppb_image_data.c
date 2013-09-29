@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_ImageData ppb_image_data = {
+const struct PPB_ImageData_1_0 ppb_image_data_interface_1_0 = {
     .GetNativeImageDataFormat = NULL,
     .IsImageDataFormatSupported = NULL,
     .Create = NULL,

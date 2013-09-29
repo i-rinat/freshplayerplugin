@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_VideoCapture_Dev ppb_video_capture_dev = {
+const struct PPB_VideoCapture_Dev_0_3 ppb_video_capture_dev_interface_0_3 = {
     .Create = NULL,
     .IsVideoCapture = NULL,
     .EnumerateDevices = NULL,

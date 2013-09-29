@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_IMEInputEvent_Dev ppb_ime_input_event_dev = {
+const struct PPB_IMEInputEvent_Dev_0_2 ppb_ime_input_event_dev_interface_0_2 = {
     .Create = NULL,
     .IsIMEInputEvent = NULL,
     .GetText = NULL,

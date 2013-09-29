@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_Flash_FontFile ppb_flash_font_file = {
+const struct PPB_Flash_FontFile_0_1 ppb_flash_font_file_interface_0_1 = {
     .Create = NULL,
     .IsFlashFontFile = NULL,
     .GetFontTable = NULL

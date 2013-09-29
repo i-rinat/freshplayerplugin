@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-const PPB_URLRequestInfo ppb_url_request_info = {
+const struct PPB_URLRequestInfo_1_0 ppb_url_request_info_interface_1_0 = {
     .Create = NULL,
     .IsURLRequestInfo = NULL,
     .SetProperty = NULL,
