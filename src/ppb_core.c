@@ -1,6 +1,6 @@
 #include <ppapi/c/ppb_core.h>
 #include <stddef.h>
-
+#include "trace.h"
 
 static
 void

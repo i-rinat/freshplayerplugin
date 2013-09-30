@@ -1,6 +1,6 @@
 project(freshplayerplugin)
-
 cmake_minimum_required(VERSION 2.6)
+add_definitions(-std=gnu99 -Wall -fvisibility=hidden)
 
 find_package(PkgConfig REQUIRED)
 
