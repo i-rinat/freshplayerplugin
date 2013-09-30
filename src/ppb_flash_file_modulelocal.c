@@ -22,7 +22,7 @@ int32_t
 ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
                                      PP_FileHandle *file)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("{zilch} %s\n        path = %s, mode = %d\n", __func__, path, mode);
     return 0;
 }
 
