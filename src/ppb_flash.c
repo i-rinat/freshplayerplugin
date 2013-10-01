@@ -81,8 +81,45 @@ static
 struct PP_Var
 ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
+    trace_info("{part} %s\n        setting = %d\n", __func__, setting);
     struct PP_Var var = {0};
-    trace_info("{zilch} %s\n", __func__);
+
+    switch (setting) {
+    case PP_FLASHSETTING_3DENABLED:
+        var.type = PP_VARTYPE_BOOL;
+        var.value.as_bool = PP_TRUE;
+        break;
+    case PP_FLASHSETTING_INCOGNITO:
+        // TODO: incognito?
+        var.type = PP_VARTYPE_BOOL;
+        var.value.as_bool = PP_FALSE;
+        break;
+    case PP_FLASHSETTING_STAGE3DENABLED:
+        var.type = PP_VARTYPE_BOOL;
+        var.value.as_bool = PP_TRUE;
+        break;
+    case PP_FLASHSETTING_LANGUAGE:
+        // TODO: detect language
+        var.type = PP_VARTYPE_STRING;
+        var.value.as_id = (int64_t)(void*)"ru-RU";
+        break;
+    case PP_FLASHSETTING_NUMCORES:
+        // TODO: check number of cores
+        var.type = PP_VARTYPE_INT32;
+        var.value.as_int = 2;
+        break;
+    case PP_FLASHSETTING_LSORESTRICTIONS:
+        // TODO: select restrictions
+        var.type = PP_VARTYPE_INT32;
+        var.value.as_int = PP_FLASHLSORESTRICTIONS_IN_MEMORY;
+        break;
+    case PP_FLASHSETTING_STAGE3DBASELINEENABLED:
+        // TODO: check if driver reliable enough
+        var.type = PP_VARTYPE_BOOL;
+        var.value.as_bool = PP_FALSE;
+        break;
+    }
+
     return var;
 }
 
