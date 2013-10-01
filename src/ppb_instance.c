@@ -1,8 +1,25 @@
 #include <ppapi/c/ppb_instance.h>
 #include <stddef.h>
+#include "trace.h"
+
+static
+PP_Bool
+ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
+{
+    trace_info("{zilch} %s\n        instance = %d, device = %d\n", __func__, instance, device);
+    return PP_TRUE;
+}
+
+static
+PP_Bool
+ppb_instance_is_full_frame(PP_Instance instance)
+{
+    trace_info("{zilch} %s\n        instance = %d\n", __func__, instance);
+    return PP_TRUE;
+}
 
 
 const struct PPB_Instance_1_0 ppb_instance_interface_1_0 = {
-    .BindGraphics = NULL,
-    .IsFullFrame = NULL
+    .BindGraphics = ppb_instance_bind_graphics,
+    .IsFullFrame = ppb_instance_is_full_frame,
 };
