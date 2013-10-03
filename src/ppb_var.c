@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <ppapi/c/ppb_var.h>
 #include <stddef.h>
 #include "trace.h"
@@ -39,7 +40,9 @@ static
 const char *
 ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("{zilch} %s\n        var = {.type = %d, .value.as_int = %d, .value.as_double = %f, "
+               ".value.as_id = 0x%" PRIx64 "\n", __func__, var.type, var.value.as_int,
+               var.value.as_double, var.value.as_id);
     *len = 5;
     return "zilch";
 }
