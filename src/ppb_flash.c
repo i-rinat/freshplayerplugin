@@ -12,8 +12,8 @@ ppb_flash_set_instance_always_on_top(PP_Instance instance, PP_Bool on_top)
 static
 PP_Bool
 ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
-                      const struct PP_BrowserFont_Trusted_Description* font_desc,
-                      uint32_t color, const struct PP_Point* position, const struct PP_Rect* clip,
+                      const struct PP_BrowserFont_Trusted_Description *font_desc,
+                      uint32_t color, const struct PP_Point *position, const struct PP_Rect *clip,
                       const float transformation[3][3], PP_Bool allow_subpixel_aa,
                       uint32_t glyph_count, const uint16_t glyph_indices[],
                       const struct PP_Point glyph_advances[])
@@ -24,7 +24,7 @@ ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
 
 static
 struct PP_Var
-ppb_flash_get_proxy_for_url(PP_Instance instance, const char* url)
+ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
 {
     struct PP_Var var = {0};
     trace_info("{zilch} %s\n", __func__);
@@ -33,7 +33,7 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char* url)
 
 static
 int32_t
-ppb_flash_navigate(PP_Resource request_info, const char* target, PP_Bool from_user_action)
+ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
     trace_info("{zilch} %s\n", __func__);
     return 0;
@@ -57,14 +57,14 @@ ppb_flash_get_command_line_args(PP_Module module)
 
 static
 void
-ppb_flash_preload_font_win(const void* logfontw)
+ppb_flash_preload_font_win(const void *logfontw)
 {
     trace_info("{zilch} %s\n", __func__);
 }
 
 static
 PP_Bool
-ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect* rect)
+ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect)
 {
     trace_info("{zilch} %s\n", __func__);
     return PP_TRUE;

@@ -18,7 +18,7 @@ ppb_var_release(struct PP_Var var)
 
 static
 struct PP_Var
-ppb_var_var_from_utf8(const char* data, uint32_t len)
+ppb_var_var_from_utf8(const char *data, uint32_t len)
 {
     trace_info("{zilch} %s\n        data = %.*s, len = %d\n", __func__, len, data, len);
     struct PP_Var var = {0};

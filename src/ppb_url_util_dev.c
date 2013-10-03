@@ -5,7 +5,7 @@
 
 static
 struct PP_Var
-ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev* components)
+ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
     trace_info("{zilch} %s\n", __func__);
@@ -15,7 +15,7 @@ ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev* co
 static
 struct PP_Var
 ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
-                                         struct PP_URLComponents_Dev* components)
+                                         struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
     trace_info("{zilch} %s\n", __func__);
@@ -25,7 +25,7 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
 static
 struct PP_Var
 ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
-                                              struct PP_URLComponents_Dev* components)
+                                              struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
     trace_info("{zilch} %s\n", __func__);
@@ -58,7 +58,7 @@ ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance ta
 
 static
 struct PP_Var
-ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev* components)
+ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
     trace_info("{zilch} %s\n", __func__);
@@ -68,7 +68,7 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
 static
 struct PP_Var
 ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
-                                         struct PP_URLComponents_Dev* components)
+                                         struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
     trace_info("{zilch} %s\n", __func__);

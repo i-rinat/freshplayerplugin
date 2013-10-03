@@ -14,10 +14,10 @@
 static int32_t (*ppp_initialize_module)(PP_Module module_id,
                                         PPB_GetInterface get_browser_interface);
 
-static const void* (*ppp_get_interface)(const char* interface_name);
+static const void *(*ppp_get_interface)(const char *interface_name);
 
 const void *
-browser_get_interface(const char* interface_name)
+browser_get_interface(const char *interface_name)
 {
     trace_info("called PPB_GetInterface(\"%s\")\n", interface_name);
     if (!strcmp(interface_name, PPB_CORE_INTERFACE_1_0)) {
