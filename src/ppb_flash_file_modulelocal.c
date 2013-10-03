@@ -57,7 +57,7 @@ int32_t
 ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
                                       struct PP_FileInfo *info)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("{zilch} %s\n        instance = %d, path = %s\n", __func__, instance, path);
     return 0;
 }
 

@@ -62,6 +62,8 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
 {
     struct PP_Var var = {0};
     trace_info("{zilch} %s\n", __func__);
+    var.type = PP_VARTYPE_STRING;
+    var.value.as_id = (int64_t)(void*)"http://127.0.0.1/flashtest/";
     return var;
 }
 
