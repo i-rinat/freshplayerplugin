@@ -3,9 +3,9 @@
 
 
 const struct PPB_CursorControl_Dev_0_4 ppb_cursor_control_dev_interface_0_4 = {
-    .SetCursor = NULL,
-    .LockCursor = NULL,
-    .UnlockCursor = NULL,
-    .HasCursorLock = NULL,
-    .CanLockCursor = NULL
+    .SetCursor = (void *)269,
+    .LockCursor = (void *)270,
+    .UnlockCursor = (void *)271,
+    .HasCursorLock = (void *)272,
+    .CanLockCursor = (void *)273,
 };

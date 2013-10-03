@@ -3,8 +3,8 @@
 
 
 const struct PPB_OpenGLES2ChromiumMapSub ppb_opengles2_chromium_map_sub_interface_1_0 = {
-    .MapBufferSubDataCHROMIUM = NULL,
-    .UnmapBufferSubDataCHROMIUM = NULL,
-    .MapTexSubImage2DCHROMIUM = NULL,
-    .UnmapTexSubImage2DCHROMIUM = NULL
+    .MapBufferSubDataCHROMIUM = (void *)53,
+    .UnmapBufferSubDataCHROMIUM = (void *)54,
+    .MapTexSubImage2DCHROMIUM = (void *)55,
+    .UnmapTexSubImage2DCHROMIUM = (void *)56,
 };

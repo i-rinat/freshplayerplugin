@@ -3,10 +3,10 @@
 
 
 const struct PPB_View_1_0 ppb_view_interface_1_0 = {
-    .IsView = NULL,
-    .GetRect = NULL,
-    .IsFullscreen = NULL,
-    .IsVisible = NULL,
-    .IsPageVisible = NULL,
-    .GetClipRect = NULL
+    .IsView = (void *)1,
+    .GetRect = (void *)2,
+    .IsFullscreen = (void *)3,
+    .IsVisible = (void *)4,
+    .IsPageVisible = (void *)5,
+    .GetClipRect = (void *)6,
 };

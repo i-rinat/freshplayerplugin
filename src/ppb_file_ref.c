@@ -3,14 +3,14 @@
 
 
 const struct PPB_FileRef_1_0 ppb_file_ref_interface_1_0 = {
-    .Create = NULL,
-    .IsFileRef = NULL,
-    .GetFileSystemType = NULL,
-    .GetName = NULL,
-    .GetPath = NULL,
-    .GetParent = NULL,
-    .MakeDirectory = NULL,
-    .Touch = NULL,
-    .Delete = NULL,
-    .Rename = NULL
+    .Create = (void *)256,
+    .IsFileRef = (void *)257,
+    .GetFileSystemType = (void *)258,
+    .GetName = (void *)259,
+    .GetPath = (void *)260,
+    .GetParent = (void *)261,
+    .MakeDirectory = (void *)262,
+    .Touch = (void *)263,
+    .Delete = (void *)264,
+    .Rename = (void *)265,
 };

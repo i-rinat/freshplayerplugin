@@ -3,6 +3,6 @@
 
 
 const struct PPB_Flash_File_FileRef ppb_flash_file_file_ref_interface_2_0 = {
-    .OpenFile = NULL,
-    .QueryFile = NULL
+    .OpenFile = (void *)250,
+    .QueryFile = (void *)251,
 };

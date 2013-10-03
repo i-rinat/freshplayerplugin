@@ -3,7 +3,7 @@
 
 
 const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
-    .Create = NULL,
-    .IsFileChooser = NULL,
-    .Show = NULL
+    .Create = (void *)266,
+    .IsFileChooser = (void *)267,
+    .Show = (void *)268,
 };

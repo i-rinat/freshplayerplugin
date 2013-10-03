@@ -3,9 +3,9 @@
 
 
 const struct PPB_Audio_1_0 ppb_audio_interface_1_0 = {
-    .Create = NULL,
-    .IsAudio = NULL,
-    .GetCurrentConfig = NULL,
-    .StartPlayback = NULL,
-    .StopPlayback = NULL
+    .Create = (void *)290,
+    .IsAudio = (void *)291,
+    .GetCurrentConfig = (void *)292,
+    .StartPlayback = (void *)293,
+    .StopPlayback = (void *)294,
 };

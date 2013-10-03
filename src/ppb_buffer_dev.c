@@ -3,9 +3,9 @@
 
 
 const struct PPB_Buffer_Dev_0_4 ppb_buffer_dev_interface_0_4 = {
-    .Create = NULL,
-    .IsBuffer = NULL,
-    .Describe = NULL,
-    .Map = NULL,
-    .Unmap = NULL
+    .Create = (void *)277,
+    .IsBuffer = (void *)278,
+    .Describe = (void *)279,
+    .Map = (void *)280,
+    .Unmap = (void *)281,
 };

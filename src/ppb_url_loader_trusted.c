@@ -3,6 +3,6 @@
 
 
 const struct PPB_URLLoaderTrusted_0_3 ppb_url_loader_trusted_interface_0_3 = {
-    .GrantUniversalAccess = NULL,
-    .RegisterStatusCallback = NULL
+    .GrantUniversalAccess = (void *)15,
+    .RegisterStatusCallback = (void *)16,
 };

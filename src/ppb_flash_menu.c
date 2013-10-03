@@ -3,7 +3,7 @@
 
 
 const struct PPB_Flash_Menu_0_2 ppb_flash_menu_interface_0_2 = {
-    .Create = NULL,
-    .IsFlashMenu = NULL,
-    .Show = NULL
+    .Create = (void *)241,
+    .IsFlashMenu = (void *)242,
+    .Show = (void *)243,
 };
