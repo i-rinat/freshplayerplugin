@@ -94,6 +94,8 @@ browser_get_interface(const char *interface_name)
         return &ppb_url_response_info_interface_1_0;
     } else if (!strcmp(interface_name, PPB_URLUTIL_DEV_INTERFACE_0_6)) {
         return &ppb_url_util_dev_interface_0_6;
+    } else if (!strcmp(interface_name, PPB_VAR_INTERFACE_1_0)) {
+        return &ppb_var_interface_1_0;
     } else if (!strcmp(interface_name, PPB_VAR_INTERFACE_1_1)) {
         return &ppb_var_interface_1_1;
     } else if (!strcmp(interface_name, PPB_VIDEOCAPTURE_DEV_INTERFACE_0_3)) {

@@ -79,6 +79,7 @@ extern const struct PPB_URLLoaderTrusted_0_3        ppb_url_loader_trusted_inter
 extern const struct PPB_URLRequestInfo_1_0          ppb_url_request_info_interface_1_0;
 extern const struct PPB_URLResponseInfo_1_0         ppb_url_response_info_interface_1_0;
 extern const struct PPB_URLUtil_Dev_0_6             ppb_url_util_dev_interface_0_6;
+extern const struct PPB_Var_1_0                     ppb_var_interface_1_0;
 extern const struct PPB_Var_1_1                     ppb_var_interface_1_1;
 extern const struct PPB_VideoCapture_Dev_0_3        ppb_video_capture_dev_interface_0_3;
 extern const struct PPB_View_1_0                    ppb_view_interface_1_0;
