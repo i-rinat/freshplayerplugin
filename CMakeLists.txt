@@ -4,8 +4,15 @@ add_definitions(-std=gnu99 -Wall -fvisibility=hidden)
 
 find_package(PkgConfig REQUIRED)
 
+pkg_check_modules(GLIB_2_0 glib-2.0 REQUIRED)
+
 include_directories(
 	include
+	${GLIB_2_0_INCLUDE_DIRS}
+)
+
+link_directories(
+	${GLIB_2_0_LIBRARY_DIRS}
 )
 
 add_executable(aaa
@@ -55,6 +62,7 @@ add_executable(aaa
 
 target_link_libraries(aaa
 	-ldl
+	${GLIB_2_0_LIBRARIES}
 )
 
 
