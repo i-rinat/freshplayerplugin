@@ -63,7 +63,7 @@ struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("{part} %s\n        instance = %d\n", __func__, instance);
+    trace_info("{fake} %s\n        instance = %d\n", __func__, instance);
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (int64_t)(void*)strdup("http://127.0.0.1/flashtest/");
     ref_var(var);
@@ -95,7 +95,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("{part} %s\n        instance = %d\n", __func__, instance);
+    trace_info("{fake} %s\n        instance = %d\n", __func__, instance);
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (int64_t)(void*)strdup("http://127.0.0.1/flashtest/flowplayer-3.2.16.swf");
     ref_var(var);
