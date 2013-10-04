@@ -36,6 +36,7 @@
 #include <ppapi/c/private/ppb_flash_fullscreen.h>
 #include <ppapi/c/private/ppb_flash.h>
 #include <ppapi/c/private/ppb_flash_menu.h>
+#include <ppapi/c/private/ppb_instance_private.h>
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
 #include <ppapi/c/private/ppb_udp_socket_private.h>
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
@@ -67,6 +68,7 @@ extern const struct PPB_ImageData_1_0               ppb_image_data_interface_1_0
 extern const struct PPB_IMEInputEvent_Dev_0_2       ppb_ime_input_event_dev_interface_0_2;
 extern const struct PPB_InputEvent_1_0              ppb_input_event_interface_1_0;
 extern const struct PPB_Instance_1_0                ppb_instance_interface_1_0;
+extern const struct PPB_Instance_Private_0_1        ppb_instance_private_interface_0_1;
 extern const struct PPB_Memory_Dev_0_1              ppb_memory_dev_interface_0_1;
 extern const struct PPB_NetAddress_Private_1_1      ppb_net_address_private_interface_1_1;
 extern const struct PPB_OpenGLES2ChromiumMapSub     ppb_opengles2_chromium_map_sub_interface_1_0;

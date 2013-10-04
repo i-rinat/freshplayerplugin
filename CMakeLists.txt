@@ -42,6 +42,7 @@ add_executable(aaa
 	src/ppb_ime_input_event_dev.c
 	src/ppb_input_event.c
 	src/ppb_instance.c
+	src/ppb_instance_private.c
 	src/ppb_memory_dev.c
 	src/ppb_net_address_private.c
 	src/ppb_opengles2_chromium_map_sub.c

@@ -70,6 +70,8 @@ browser_get_interface(const char *interface_name)
         return &ppb_input_event_interface_1_0;
     } else if (!strcmp(interface_name, PPB_INSTANCE_INTERFACE_1_0)) {
         return &ppb_instance_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_INSTANCE_PRIVATE_INTERFACE_0_1)) {
+        return &ppb_instance_private_interface_0_1;
     } else if (!strcmp(interface_name, PPB_MEMORY_DEV_INTERFACE_0_1)) {
         return &ppb_memory_dev_interface_0_1;
     } else if (!strcmp(interface_name, PPB_NETADDRESS_PRIVATE_INTERFACE_1_1)) {
