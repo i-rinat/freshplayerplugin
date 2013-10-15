@@ -1,22 +1,21 @@
 project(freshplayerplugin)
 cmake_minimum_required(VERSION 2.6)
-add_definitions(-std=gnu99 -Wall -fvisibility=hidden)
+add_definitions(-std=gnu99 -Wall -fPIC -fvisibility=hidden)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(GLIB_2_0 glib-2.0 REQUIRED)
+pkg_check_modules(REQ glib-2.0 mozilla-plugin REQUIRED)
 
 include_directories(
 	include
-	${GLIB_2_0_INCLUDE_DIRS}
+	${REQ_INCLUDE_DIRS}
 )
 
 link_directories(
-	${GLIB_2_0_LIBRARY_DIRS}
+	${REQ_LIBRARY_DIRS}
 )
 
-add_executable(aaa
-	src/main.c
+add_library(common STATIC
 	src/ppb_core.c
 	src/ppb_audio_config.c
 	src/ppb_audio_input_dev.c
@@ -61,11 +60,22 @@ add_executable(aaa
 	src/trace.c
 )
 
-target_link_libraries(aaa
-	-ldl
-	${GLIB_2_0_LIBRARIES}
+add_library(freshwrapper SHARED
+	src/npapi_plugin_entry.c
 )
 
+add_executable(aaa
+	src/main.c
+)
 
+target_link_libraries(freshwrapper
+	common
+	-ldl
+	${REQ_LIBRARIES}
+)
 
-
+target_link_libraries(aaa
+	common
+	-ldl
+	${REQ_LIBRARIES}
+)
