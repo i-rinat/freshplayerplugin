@@ -62,6 +62,8 @@ add_library(common STATIC
 
 add_library(freshwrapper SHARED
 	src/npapi_plugin_entry.c
+	src/globals.c
+	src/np_plugin_functions.c
 )
 
 add_executable(aaa
