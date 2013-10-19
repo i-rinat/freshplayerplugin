@@ -1,21 +1,59 @@
 #include <assert.h>
 #include <npapi.h>
 #include <stdlib.h>
+#include <X11/Xlib.h>
+#include <pthread.h>
 #include "trace.h"
 #include "reverse_constant.h"
+#include "pp_interface.h"
+#include <ppapi/c/ppp_instance.h>
 
 #define NO_IMPL assert(0 && "no implementation yet")
 
+struct priv_s {
+    Window                          wnd;
+    const struct PPP_Instance_1_1  *ppp_instance_1_1;
+    PP_Instance                     pp_instance_id;
+};
+
+static
+PP_Instance
+generate_new_pp_instance_id(void)
+{
+    static int32_t instance_id = 10;
+    static pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+
+    pthread_mutex_lock(&m);
+    int32_t result = instance_id++;
+    pthread_mutex_unlock(&m);
+
+    return result;
+}
 
 NPError
 NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[],
         char* argv[], NPSavedData* saved)
 {
+    // TODO: mode parameter handling
     int k;
+    struct priv_s *priv;
     trace_info("[NPP] %s pluginType=%s instance=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                pluginType, instance, mode, argc, saved);
     for (k = 0; k < argc; k ++)
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
+
+    priv = calloc(sizeof(*priv), 1);
+    if (!priv)
+        return NPERR_OUT_OF_MEMORY_ERROR;
+
+    priv->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
+    if (!priv->ppp_instance_1_1)
+        return NPERR_GENERIC_ERROR;
+
+    priv->pp_instance_id = generate_new_pp_instance_id();
+    priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id,
+                                      argc, (const char **)argn, (const char **)argv);
+    instance->pdata = priv;
     return NPERR_NO_ERROR;
 }
 
@@ -23,6 +61,9 @@ NPError
 NPP_Destroy(NPP instance, NPSavedData** save)
 {
     trace_info("[NPP] %s instance=%p, save=%p\n", __func__, instance, save);
+    struct priv_s *priv = instance->pdata;
+    priv->ppp_instance_1_1->DidDestroy(priv->pp_instance_id);
+    *save = NULL;
     return NPERR_NO_ERROR;
 }
 

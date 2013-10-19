@@ -1,9 +1,16 @@
+#include <dlfcn.h>
 #include <npapi.h>
 #include <npfunctions.h>
 #include <string.h>
+#include <ppapi/c/ppb.h>
+#include <ppapi/c/pp_module.h>
 #include "globals.h"
 #include "trace.h"
 #include "reverse_constant.h"
+#include "pp_interface.h"
+
+#define PPFP_PATH "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
+
 
 __attribute__((visibility("default")))
 const char *
@@ -44,8 +51,9 @@ __attribute__((visibility("default")))
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
+    int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
+
     trace_info("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p\n", __func__, aNPNFuncs, aNPPFuncs);
-    // TODO: implement
 
     memcpy(&npn, aNPNFuncs, sizeof(npn) < aNPNFuncs->size ? sizeof(npn) : aNPNFuncs->size);
 
@@ -70,6 +78,27 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     aNPPFuncs->clearsitedata = NPP_ClearSiteData;
     aNPPFuncs->getsiteswithdata = NPP_GetSitesWithData;
     aNPPFuncs->didComposite = NPP_DidComposite;
+
+    void *h = dlopen(PPFP_PATH, RTLD_LAZY);
+    if (!h) {
+        trace_info("can't open " PPFP_PATH "\n");
+        return NPERR_GENERIC_ERROR;
+    }
+
+    ppp_initialize_module = dlsym(h, "PPP_InitializeModule");
+    ppp_get_interface = dlsym(h, "PPP_GetInterface");
+
+    if (!ppp_initialize_module || !ppp_get_interface) {
+        trace_info("one of required PPP_* is missing\n");
+        return NPERR_GENERIC_ERROR;
+    }
+
+    // TODO: make module ids distinct
+    int res = ppp_initialize_module(42, ppb_get_interface);
+    if (0 != res) {
+        trace_info("PPP_InitializeModule returned %d\n", res);
+        return NPERR_GENERIC_ERROR;
+    }
 
     return NPERR_NO_ERROR;
 }

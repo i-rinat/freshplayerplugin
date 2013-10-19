@@ -4,18 +4,18 @@ add_definitions(-std=gnu99 -Wall -fPIC -fvisibility=hidden)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(REQ glib-2.0 mozilla-plugin REQUIRED)
+pkg_check_modules(REQ glib-2.0 mozilla-plugin x11 REQUIRED)
 
-include_directories(
-	include
-	${REQ_INCLUDE_DIRS}
-)
+include_directories(include ${REQ_INCLUDE_DIRS})
+link_directories(${REQ_LIBRARY_DIRS})
 
-link_directories(
-	${REQ_LIBRARY_DIRS}
-)
-
-add_library(common STATIC
+add_library(freshwrapper SHARED
+	src/npapi_plugin_entry.c
+	src/globals.c
+	src/np_plugin_functions.c
+	src/reverse_constant.c
+	src/trace.c
+	src/pp_interface.c
 	src/ppb_core.c
 	src/ppb_audio_config.c
 	src/ppb_audio_input_dev.c
@@ -57,28 +57,9 @@ add_library(common STATIC
 	src/ppb_var.c
 	src/ppb_video_capture_dev.c
 	src/ppb_view.c
-	src/trace.c
-)
-
-add_library(freshwrapper SHARED
-	src/npapi_plugin_entry.c
-	src/globals.c
-	src/np_plugin_functions.c
-	src/reverse_constant.c
-)
-
-add_executable(aaa
-	src/main.c
 )
 
 target_link_libraries(freshwrapper
-	common
-	-ldl
-	${REQ_LIBRARIES}
-)
-
-target_link_libraries(aaa
-	common
 	-ldl
 	${REQ_LIBRARIES}
 )
