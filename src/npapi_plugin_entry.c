@@ -21,11 +21,11 @@ NP_GetMIMEDescription(void)
 }
 
 __attribute__((visibility("default")))
-const char *
+char *
 NP_GetPluginVersion(void)
 {
     // TODO: get version from manifest
-    return "11,9,123,456";
+    return (char*)"11,9,123,456";
 }
 
 __attribute__((visibility("default")))
@@ -104,9 +104,9 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 }
 
 __attribute__((visibility("default")))
-void
+NPError
 NP_Shutdown(void)
 {
     trace_info("[NP] %s\n", __func__);
-    return;
+    return NPERR_NO_ERROR;
 }

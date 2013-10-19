@@ -7,6 +7,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(REQ glib-2.0 mozilla-plugin x11 REQUIRED)
 
 include_directories(include ${REQ_INCLUDE_DIRS})
+add_definitions(${REQ_CFLAGS_OTHER})
 link_directories(${REQ_LIBRARY_DIRS})
 
 add_library(freshwrapper SHARED

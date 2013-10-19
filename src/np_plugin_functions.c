@@ -70,7 +70,17 @@ NPP_Destroy(NPP instance, NPSavedData** save)
 NPError
 NPP_SetWindow(NPP instance, NPWindow* window)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, window=%p\n", __func__, instance, window);
+    if (!window) {
+        trace_info("[NPP] {zilch} %s instance=%p, window=(nil)\n", __func__, instance);
+    } else {
+        trace_info("[NPP] {zilch} %s instance=%p, window={.window=%p, .x=%u, .y=%u, .width=%u, "
+                   ".height, .clipRect={.top=%u, .left=%u, .bottom=%u, .right=%u}, .ws_info=%p, "
+                   ".type=%d}\n", __func__, instance, window->window, window->x, window->y,
+                   window->width, window->height, window->clipRect.top, window->clipRect.left,
+                   window->clipRect.bottom, window->clipRect.right, window->ws_info, window->type);
+    }
+    struct priv_s *priv = instance->pdata;
+    priv->wnd = (Window)window->window;
     return NPERR_NO_ERROR;
 }
 
