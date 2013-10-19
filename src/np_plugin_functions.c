@@ -1,8 +1,7 @@
 #include <npapi.h>
 #include <stdlib.h>
 #include "trace.h"
-
-
+#include "reverse_constant.h"
 
 
 NPError
@@ -16,7 +15,6 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
     return NPERR_NO_ERROR;
 }
-
 
 NPError
 NPP_Destroy(NPP instance, NPSavedData** save)
@@ -95,16 +93,16 @@ NPP_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
 NPError
 NPP_GetValue(NPP instance, NPPVariable variable, void *value)
 {
-    trace_info("[NPP] %s instance=%p, variable=%d, value=%p\n", __func__,
-               instance, variable, value);
+    trace_info("[NPP] %s instance=%p, variable=%s, value=%p\n", __func__,
+               instance, reverse_npp_variable(variable), value);
     return NPERR_NO_ERROR;
 }
 
 NPError
 NPP_SetValue(NPP instance, NPNVariable variable, void *value)
 {
-    trace_info("[NPP] %s instance=%p, variable=%d, value=%p\n", __func__,
-               instance, variable, value);
+    trace_info("[NPP] %s instance=%p, variable=%s, value=%p\n", __func__,
+               instance, reverse_npn_variable(variable), value);
     return NPERR_NO_ERROR;
 }
 

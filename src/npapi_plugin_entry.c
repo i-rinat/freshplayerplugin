@@ -3,6 +3,7 @@
 #include <string.h>
 #include "globals.h"
 #include "trace.h"
+#include "reverse_constant.h"
 
 __attribute__((visibility("default")))
 const char *
@@ -24,8 +25,8 @@ __attribute__((visibility("default")))
 NPError
 NP_GetValue(void *instance, NPPVariable variable, void *value)
 {
-    trace_info("[NP] %s instance=%p, variable=%d, value=%p\n", __func__, instance, variable,
-               value);
+    trace_info("[NP] %s instance=%p, variable=%s, value=%p\n", __func__, instance,
+               reverse_npp_variable(variable), value);
     switch (variable) {
     case NPPVpluginNameString:
         *(const char **)value = "FreshPrayerPlugin";
