@@ -64,6 +64,7 @@ add_library(freshwrapper SHARED
 	src/npapi_plugin_entry.c
 	src/globals.c
 	src/np_plugin_functions.c
+	src/reverse_constant.c
 )
 
 add_executable(aaa
