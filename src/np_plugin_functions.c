@@ -14,6 +14,13 @@ struct priv_s {
     Window                          wnd;
     const struct PPP_Instance_1_1  *ppp_instance_1_1;
     PP_Instance                     pp_instance_id;
+    uint32_t                        x;
+    uint32_t                        y;
+    uint32_t                        width;
+    uint32_t                        height;
+    NPRect                          clip_rect;
+    void                           *ws_info;
+    NPWindowType                    window_type;
 };
 
 static
@@ -71,16 +78,24 @@ NPError
 NPP_SetWindow(NPP instance, NPWindow* window)
 {
     if (!window) {
-        trace_info("[NPP] {zilch} %s instance=%p, window=(nil)\n", __func__, instance);
+        trace_info("[NPP] {part} %s instance=%p, window=(nil)\n", __func__, instance);
     } else {
-        trace_info("[NPP] {zilch} %s instance=%p, window={.window=%p, .x=%u, .y=%u, .width=%u, "
-                   ".height, .clipRect={.top=%u, .left=%u, .bottom=%u, .right=%u}, .ws_info=%p, "
-                   ".type=%d}\n", __func__, instance, window->window, window->x, window->y,
+        trace_info("[NPP] {part} %s instance=%p, window={.window=%p, .x=%u, .y=%u, .width=%u, "
+                   ".height=%u, .clipRect={.top=%u, .left=%u, .bottom=%u, .right=%u}, .ws_info=%p,"
+                   " .type=%d}\n", __func__, instance, window->window, window->x, window->y,
                    window->width, window->height, window->clipRect.top, window->clipRect.left,
                    window->clipRect.bottom, window->clipRect.right, window->ws_info, window->type);
     }
+
     struct priv_s *priv = instance->pdata;
     priv->wnd = (Window)window->window;
+    priv->x = window->x;
+    priv->y = window->y;
+    priv->width = window->width;
+    priv->height = window->height;
+    priv->clip_rect = window->clipRect;
+    priv->ws_info = window->ws_info;
+    priv->window_type = window->type;
     return NPERR_NO_ERROR;
 }
 
