@@ -23,7 +23,18 @@ __attribute__((visibility("default")))
 NPError
 NP_GetValue(void *instance, NPPVariable variable, void *value)
 {
-    trace_info("[NP] %s stub\n", __func__);
+    trace_info("[NP] %s instance=%p, variable=%d, value=%p\n", __func__, instance, variable,
+               value);
+    switch (variable) {
+    case NPPVpluginNameString:
+        *(const char **)value = "FreshPrayerPlugin";
+        break;
+    case NPPVpluginDescriptionString:
+        *(const char **)value = "Wrapper around PepperFlash for NPAPI enabled browsers";
+        break;
+    default:
+        trace_info("    not implemented variable %d\n", variable);
+    }
     return NPERR_NO_ERROR;
 }
 
@@ -31,6 +42,7 @@ __attribute__((visibility("default")))
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
+    trace_info("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p\n", __func__, aNPNFuncs, aNPPFuncs);
     // TODO: implement
     return NPERR_NO_ERROR;
 }
@@ -39,6 +51,6 @@ __attribute__((visibility("default")))
 void
 NP_Shutdown(void)
 {
-    // TODO: implement
+    trace_info("[NP] %s\n", __func__);
     return;
 }
