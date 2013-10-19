@@ -1,7 +1,10 @@
+#include <assert.h>
 #include <npapi.h>
 #include <stdlib.h>
 #include "trace.h"
 #include "reverse_constant.h"
+
+#define NO_IMPL assert(0 && "no implementation yet")
 
 
 NPError
@@ -95,6 +98,55 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
 {
     trace_info("[NPP] %s instance=%p, variable=%s, value=%p\n", __func__,
                instance, reverse_npp_variable(variable), value);
+    switch (variable) {
+    case NPPVpluginNameString:
+        NO_IMPL; break;
+    case NPPVpluginDescriptionString:
+        NO_IMPL; break;
+    case NPPVpluginWindowBool:
+        NO_IMPL; break;
+    case NPPVpluginTransparentBool:
+        NO_IMPL; break;
+    case NPPVjavaClass:
+        NO_IMPL; break;
+    case NPPVpluginWindowSize:
+        NO_IMPL; break;
+    case NPPVpluginTimerInterval:
+        NO_IMPL; break;
+    case NPPVpluginScriptableInstance:
+        NO_IMPL; break;
+    case NPPVpluginScriptableIID:
+        NO_IMPL; break;
+    case NPPVjavascriptPushCallerBool:
+        NO_IMPL; break;
+    case NPPVpluginKeepLibraryInMemory:
+        NO_IMPL; break;
+    case NPPVpluginNeedsXEmbed:
+        *(int *)value = 1;
+        break;
+    case NPPVpluginScriptableNPObject:
+        *(void **)value = NULL;
+        break;
+    case NPPVformValue:
+        NO_IMPL; break;
+    case NPPVpluginUrlRequestsDisplayedBool:
+        NO_IMPL; break;
+    case NPPVpluginWantsAllNetworkStreams:
+        NO_IMPL; break;
+    case NPPVpluginNativeAccessibleAtkPlugId:
+        NO_IMPL; break;
+    case NPPVpluginCancelSrcStream:
+        NO_IMPL; break;
+    case NPPVsupportsAdvancedKeyHandling:
+        NO_IMPL; break;
+    case NPPVpluginUsesDOMForCursorBool:
+        NO_IMPL; break;
+    case NPPVpluginDrawingModel:
+        NO_IMPL; break;
+    default:
+        NO_IMPL; break;
+    }
+
     return NPERR_NO_ERROR;
 }
 
