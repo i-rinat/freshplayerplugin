@@ -11,7 +11,7 @@ struct PP_Var
 ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     return var;
 }
 
@@ -21,7 +21,7 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
                                          struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     return var;
 }
 
@@ -31,7 +31,7 @@ ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Va
                                               struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     return var;
 }
 
@@ -39,7 +39,7 @@ static
 PP_Bool
 ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     return PP_TRUE;
 }
 
@@ -47,7 +47,7 @@ static
 PP_Bool
 ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     return PP_TRUE;
 }
 
@@ -55,7 +55,7 @@ static
 PP_Bool
 ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s active=%d, target=%d\n", __func__, active, target);
     return PP_TRUE;
 }
 
@@ -127,7 +127,7 @@ struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("{fake} %s\n        instance = %d\n", __func__, instance);
+    trace_info("[PPB] {fake} %s instance=%d\n", __func__, instance);
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (int64_t)(void*)strdup("http://127.0.0.1/flashtest/");
     tables_ref_var(var);
@@ -144,9 +144,10 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("{fake} %s\n        instance = %d\n", __func__, instance);
+    struct np_priv_s *priv = tables_pp_instance_to_np_priv(instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__, instance);
     var.type = PP_VARTYPE_STRING;
-    var.value.as_id = (int64_t)(void*)strdup("http://127.0.0.1/flashtest/flowplayer-3.2.16.swf");
+    var.value.as_id = (int64_t)(void*)strdup(priv->instance_url);
     tables_ref_var(var);
     if (components) {
         parse_url_string((void*)(size_t)var.value.as_id, components);

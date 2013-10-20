@@ -8,6 +8,7 @@
 #include "reverse_constant.h"
 #include "np.h"
 #include "pp_interface.h"
+#include "tables.h"
 #include <ppapi/c/ppp_instance.h>
 
 #define NO_IMPL assert(0 && "no implementation yet")
@@ -150,6 +151,7 @@ NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
         priv->instance_loaded = 1;
         priv->swf_fname = strdup(fname);
         priv->instance_url = strdup(stream->url);
+        tables_add_pp_np_mapping(priv->pp_instance_id, priv);
         priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
     } else {
         trace_info("            not implemented yet\n");
