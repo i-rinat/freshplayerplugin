@@ -49,7 +49,7 @@ ppb_var_add_ref(struct PP_Var var)
         var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
         var.type == PP_VARTYPE_ARRAY_BUFFER)
     {
-        ref_var(var);
+        tables_ref_var(var);
     }
 }
 
@@ -62,7 +62,7 @@ ppb_var_release(struct PP_Var var)
         var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
         var.type == PP_VARTYPE_ARRAY_BUFFER)
     {
-        if (unref_var(var) == 0 && var.type == PP_VARTYPE_STRING)
+        if (tables_unref_var(var) == 0 && var.type == PP_VARTYPE_STRING)
             free((void*)(size_t)var.value.as_id);
     }
 }
@@ -79,7 +79,7 @@ ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
     memcpy(cpy, data, len);
     cpy[len] = 0;
     var.value.as_id = (size_t)(void *)cpy;
-    ref_var(var);
+    tables_ref_var(var);
     return var;
 }
 
@@ -95,7 +95,7 @@ ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
     memcpy(cpy, data, len);
     cpy[len] = 0;
     var.value.as_id = (size_t)(void *)cpy;
-    ref_var(var);
+    tables_ref_var(var);
 
     return var;
 }

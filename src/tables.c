@@ -21,7 +21,7 @@ destructor_tables(void)
 }
 
 int
-ref_var(struct PP_Var var)
+tables_ref_var(struct PP_Var var)
 {
     int refcnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, (void*)(size_t)var.value.as_id));
     g_hash_table_replace(var_ht, (void*)(size_t)var.value.as_id, GINT_TO_POINTER(refcnt + 1));
@@ -29,7 +29,7 @@ ref_var(struct PP_Var var)
 }
 
 int
-unref_var(struct PP_Var var)
+tables_unref_var(struct PP_Var var)
 {
     int refcnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, (void*)(size_t)var.value.as_id));
     g_hash_table_replace(var_ht, (void*)(size_t)var.value.as_id, GINT_TO_POINTER(refcnt - 1));
