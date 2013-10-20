@@ -44,7 +44,7 @@ static
 PP_Bool
 ppb_core_is_main_thread(void)
 {
-    trace_info("{zilch} ppb_core_is_main_thread\n");
+    trace_info("{fake} ppb_core_is_main_thread\n");
     return PP_FALSE;
 }
 
