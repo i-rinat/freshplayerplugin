@@ -6,29 +6,11 @@
 #include <pthread.h>
 #include "trace.h"
 #include "reverse_constant.h"
+#include "np.h"
 #include "pp_interface.h"
 #include <ppapi/c/ppp_instance.h>
 
 #define NO_IMPL assert(0 && "no implementation yet")
-
-struct priv_s {
-    const struct PPP_Instance_1_1  *ppp_instance_1_1;
-    Window          wnd;
-    PP_Instance     pp_instance_id;
-    uint32_t        x;
-    uint32_t        y;
-    uint32_t        width;
-    uint32_t        height;
-    NPRect          clip_rect;
-    void           *ws_info;
-    NPWindowType    window_type;
-    int             argc;
-    const char    **argn;
-    const char    **argv;
-    int             instance_loaded;
-    const char     *swf_fname;
-    const char     *instance_url;
-};
 
 static
 PP_Instance
@@ -50,7 +32,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
 {
     // TODO: mode parameter handling
     int k;
-    struct priv_s *priv;
+    struct np_priv_s *priv;
     trace_info("[NPP] {part} %s pluginType=%s instance=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                pluginType, instance, mode, argc, saved);
     for (k = 0; k < argc; k ++)
@@ -81,7 +63,7 @@ NPError
 NPP_Destroy(NPP instance, NPSavedData** save)
 {
     trace_info("[NPP] {full} %s instance=%p, save=%p\n", __func__, instance, save);
-    struct priv_s *priv = instance->pdata;
+    struct np_priv_s *priv = instance->pdata;
     priv->ppp_instance_1_1->DidDestroy(priv->pp_instance_id);
     *save = NULL;
     return NPERR_NO_ERROR;
@@ -100,7 +82,7 @@ NPP_SetWindow(NPP instance, NPWindow* window)
                    window->clipRect.bottom, window->clipRect.right, window->ws_info, window->type);
     }
 
-    struct priv_s *priv = instance->pdata;
+    struct np_priv_s *priv = instance->pdata;
     priv->wnd = (Window)window->window;
     priv->x = window->x;
     priv->y = window->y;
@@ -115,7 +97,7 @@ NPP_SetWindow(NPP instance, NPWindow* window)
 NPError
 NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
 {
-    struct priv_s *priv = instance->pdata;
+    struct np_priv_s *priv = instance->pdata;
     trace_info("[NPP] {part} %s instance=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
                "end=%u, lastmodified=%u, .headers=%s}, seekable=%d\n", __func__, instance, type,
                stream->pdata, stream->ndata, stream->url, stream->end, stream->lastmodified,
@@ -159,7 +141,7 @@ NPP_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buf
 void
 NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
 {
-    struct priv_s *priv = instance->pdata;
+    struct np_priv_s *priv = instance->pdata;
     trace_info("[NPP] {part} %s instance=%p, stream=%p, fname=%s\n", __func__,
                instance, stream, fname);
 
