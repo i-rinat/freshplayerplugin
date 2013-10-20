@@ -1,29 +1,11 @@
 #include <inttypes.h>
-#include <glib.h>
 #include <ppapi/c/ppb_var.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include "trace.h"
+#include "tables.h"
 
-
-static GHashTable *var_ht;
-
-static
-void
-__attribute__((constructor))
-constructor_ppb_var(void)
-{
-    var_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
-}
-
-static
-void
-__attribute__((destructor))
-destructor_ppb_var(void)
-{
-    g_hash_table_unref(var_ht);
-}
 
 static
 void
@@ -56,22 +38,6 @@ trace_var(const char *impl_status, const char *func, struct PP_Var var)
                    impl_status, func, var.type);
         break;
     }
-}
-
-int
-ref_var(struct PP_Var var)
-{
-    int refcnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, (void*)(size_t)var.value.as_id));
-    g_hash_table_replace(var_ht, (void*)(size_t)var.value.as_id, GINT_TO_POINTER(refcnt + 1));
-    return refcnt + 1;
-}
-
-int
-unref_var(struct PP_Var var)
-{
-    int refcnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, (void*)(size_t)var.value.as_id));
-    g_hash_table_replace(var_ht, (void*)(size_t)var.value.as_id, GINT_TO_POINTER(refcnt - 1));
-    return refcnt - 1;
 }
 
 static
@@ -113,7 +79,7 @@ ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
     memcpy(cpy, data, len);
     cpy[len] = 0;
     var.value.as_id = (size_t)(void *)cpy;
-    g_hash_table_insert(var_ht, cpy, GINT_TO_POINTER(1));
+    ref_var(var);
     return var;
 }
 
@@ -129,7 +95,7 @@ ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
     memcpy(cpy, data, len);
     cpy[len] = 0;
     var.value.as_id = (size_t)(void *)cpy;
-    g_hash_table_insert(var_ht, cpy, GINT_TO_POINTER(1));
+    ref_var(var);
 
     return var;
 }
