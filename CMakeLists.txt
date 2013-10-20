@@ -11,9 +11,9 @@ add_definitions(${REQ_CFLAGS_OTHER})
 link_directories(${REQ_LIBRARY_DIRS})
 
 add_library(freshwrapper SHARED
-	src/npapi_plugin_entry.c
+	src/np_entry.c
+	src/np_functions.c
 	src/globals.c
-	src/np_plugin_functions.c
 	src/reverse_constant.c
 	src/trace.c
 	src/pp_interface.c
