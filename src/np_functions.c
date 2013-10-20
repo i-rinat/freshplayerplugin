@@ -164,8 +164,8 @@ NPP_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
 NPError
 NPP_GetValue(NPP instance, NPPVariable variable, void *value)
 {
-    trace_info("[NPP] {part} %s instance=%p, variable=%s, value=%p\n", __func__,
-               instance, reverse_npp_variable(variable), value);
+    trace_info("[NPP] {part} %s instance=%p, variable=%s\n", __func__,
+               instance, reverse_npp_variable(variable));
     switch (variable) {
     case NPPVpluginNameString:
         NO_IMPL; break;
