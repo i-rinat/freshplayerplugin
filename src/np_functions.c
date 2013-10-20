@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <npapi.h>
 #include <stdlib.h>
+#include <string.h>
 #include <X11/Xlib.h>
 #include <pthread.h>
 #include "trace.h"
@@ -11,16 +12,22 @@
 #define NO_IMPL assert(0 && "no implementation yet")
 
 struct priv_s {
-    Window                          wnd;
     const struct PPP_Instance_1_1  *ppp_instance_1_1;
-    PP_Instance                     pp_instance_id;
-    uint32_t                        x;
-    uint32_t                        y;
-    uint32_t                        width;
-    uint32_t                        height;
-    NPRect                          clip_rect;
-    void                           *ws_info;
-    NPWindowType                    window_type;
+    Window          wnd;
+    PP_Instance     pp_instance_id;
+    uint32_t        x;
+    uint32_t        y;
+    uint32_t        width;
+    uint32_t        height;
+    NPRect          clip_rect;
+    void           *ws_info;
+    NPWindowType    window_type;
+    int             argc;
+    const char    **argn;
+    const char    **argv;
+    int             instance_loaded;
+    const char     *swf_fname;
+    const char     *instance_url;
 };
 
 static
@@ -57,9 +64,15 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     if (!priv->ppp_instance_1_1)
         return NPERR_GENERIC_ERROR;
 
-    priv->pp_instance_id = generate_new_pp_instance_id();
-    priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id,
-                                      argc, (const char **)argn, (const char **)argv);
+    priv->argc = argc;
+    priv->argn = malloc(argc * sizeof(char*));
+    priv->argv = malloc(argc * sizeof(char*));
+    for (k = 0; k < argc; k ++) {
+        priv->argn[k] = strdup(argn[k]);
+        priv->argv[k] = strdup(argv[k]);
+    }
+    priv->instance_loaded = 0;
+
     instance->pdata = priv;
     return NPERR_NO_ERROR;
 }
@@ -102,8 +115,21 @@ NPP_SetWindow(NPP instance, NPWindow* window)
 NPError
 NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, type=%s, stream=%p, seekable=%d, stype=%p\n", __func__,
-               instance, type, stream, seekable, stype);
+    struct priv_s *priv = instance->pdata;
+    trace_info("[NPP] {part} %s instance=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
+               "end=%u, lastmodified=%u, .headers=%s}, seekable=%d\n", __func__, instance, type,
+               stream->pdata, stream->ndata, stream->url, stream->end, stream->lastmodified,
+               stream->headers, seekable);
+
+    if (strcmp(type, "application/x-shockwave-flash") == 0 &&
+        !priv->instance_loaded)
+    {
+        // first stream is flash file itself
+        *stype = NP_ASFILEONLY;
+    } else {
+        *stype = NP_NORMAL;
+    }
+
     return NPERR_NO_ERROR;
 }
 
@@ -118,23 +144,35 @@ NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason)
 int32_t
 NPP_WriteReady(NPP instance, NPStream* stream)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, stream=%p\n", __func__, instance, stream);
-    return 0;
+    trace_info("[NPP] {fake} %s instance=%p, stream=%p\n", __func__, instance, stream);
+    return 1024*1024;
 }
 
 int32_t
 NPP_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
+    trace_info("[NPP] {fake} %s instance=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
                instance, stream, offset, len, buffer);
-    return 0;
+    return len;
 }
 
 void
 NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, stream=%p, fname=%s\n", __func__,
+    struct priv_s *priv = instance->pdata;
+    trace_info("[NPP] {part} %s instance=%p, stream=%p, fname=%s\n", __func__,
                instance, stream, fname);
+
+    if (!priv->instance_loaded) {
+        priv->pp_instance_id = generate_new_pp_instance_id();
+        priv->instance_loaded = 1;
+        priv->swf_fname = strdup(fname);
+        priv->instance_url = strdup(stream->url);
+        priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
+    } else {
+        trace_info("            not implemented yet\n");
+    }
+
     return;
 }
 
