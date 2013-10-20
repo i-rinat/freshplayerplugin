@@ -4,7 +4,7 @@ add_definitions(-std=gnu99 -Wall -fPIC -fvisibility=hidden)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(REQ glib-2.0 mozilla-plugin x11 REQUIRED)
+pkg_check_modules(REQ glib-2.0 mozilla-plugin x11 liburiparser REQUIRED)
 
 include_directories(include ${REQ_INCLUDE_DIRS})
 add_definitions(${REQ_CFLAGS_OTHER})
