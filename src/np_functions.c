@@ -153,6 +153,9 @@ NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
         priv->instance_url = strdup(stream->url);
         tables_add_pp_np_mapping(priv->pp_instance_id, priv);
         priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
+
+        trace_info("=========================================\n");
+        priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, 422);
     } else {
         trace_info("            not implemented yet\n");
     }
