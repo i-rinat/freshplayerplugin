@@ -9,42 +9,11 @@
 
 static
 void
-trace_var(const char *impl_status, const char *func, struct PP_Var var)
-{
-    switch (var.type) {
-    case PP_VARTYPE_UNDEFINED:
-        trace_info("[PPB] %s %s var = {.type=UNDEFINED}\n", impl_status, func);
-        break;
-    case PP_VARTYPE_NULL:
-        trace_info("[PPB] %s %s var = {.type=NULL}\n", impl_status, func);
-        break;
-    case PP_VARTYPE_BOOL:
-        trace_info("[PPB] %s %s var = {.type=BOOL, .value.as_int=%d}\n",
-                   impl_status, func, var.value.as_int);
-        break;
-    case PP_VARTYPE_INT32:
-        trace_info("[PPB] %s %s var = {.type=INT32, .value.as_int=%d}\n",
-                   impl_status, func, var.value.as_int);
-    case PP_VARTYPE_DOUBLE:
-        trace_info("[PPB] %s %s var = {.type=DOUBLE, .value.as_double=%f}\n",
-                   impl_status, func, var.value.as_double);
-        break;
-    case PP_VARTYPE_STRING:
-        trace_info("[PPB] %s %s var = {.type=STRING, .value.as_id(str)=%s}\n",
-                   impl_status, func, (char *)(size_t)var.value.as_id);
-        break;
-    default:
-        trace_info("[PPB] %s %s var = {.type=NOTIMPLEMENTED (%d)}\n",
-                   impl_status, func, var.type);
-        break;
-    }
-}
-
-static
-void
 ppb_var_add_ref(struct PP_Var var)
 {
-    trace_var("{full}", __func__, var);
+    char *var_str = trace_var_as_string(var);
+    trace_info("[PPB] {full} %s var=%s\n", __func__, var_str);
+    free(var_str);
     if (var.type == PP_VARTYPE_STRING || var.type == PP_VARTYPE_OBJECT ||
         var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
         var.type == PP_VARTYPE_ARRAY_BUFFER)
@@ -57,7 +26,9 @@ static
 void
 ppb_var_release(struct PP_Var var)
 {
-    trace_var("{full}", __func__, var);
+    char *var_str = trace_var_as_string(var);
+    trace_info("[PPB] {full} %s var=%s\n", __func__, var_str);
+    free(var_str);
     if (var.type == PP_VARTYPE_STRING || var.type == PP_VARTYPE_OBJECT ||
         var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
         var.type == PP_VARTYPE_ARRAY_BUFFER)
@@ -104,13 +75,15 @@ static
 const char *
 ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
 {
-    trace_var("{full}", __func__, var);
+    char *var_str = trace_var_as_string(var);
+    trace_info("[PPB] {full} %s var=%s\n", __func__, var_str);
+    free(var_str);
     if (PP_VARTYPE_STRING == var.type) {
         const char *s = (void *)(size_t)var.value.as_id;
         *len = strlen(s);
         return s;
     } else {
-        trace_warning("var is not string in %s\n", __func__);
+        trace_warning("var is not a string in %s\n", __func__);
         *len = 0;
         return "";
     }

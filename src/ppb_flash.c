@@ -1,5 +1,6 @@
 #include <ppapi/c/private/ppb_flash.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
 
 static
@@ -127,7 +128,9 @@ static
 PP_Bool
 ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struct PP_Var value)
 {
-    trace_info("{zilch} %s\n", __func__);
+    char *value_str = trace_var_as_string(value);
+    trace_info("{zilch} %s instance=%d, key=%d, value=%s\n", __func__, instance, key, value_str);
+    free(value_str);
     return PP_TRUE;
 }
 
