@@ -1,6 +1,7 @@
 #include <ppapi/c/ppb_url_response_info.h>
 #include <stddef.h>
 #include "trace.h"
+#include "reverse_constant.h"
 
 
 static
@@ -16,7 +17,8 @@ struct PP_Var
 ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
     struct PP_Var var = {0};
-    trace_info("[PPB] {zilch} %s response=%d, property=%d\n", __func__, response, property);
+    trace_info("[PPB] {zilch} %s response=%d, property=%s\n", __func__, response,
+               reverse_pp_url_response_property(property));
     return var;
 }
 

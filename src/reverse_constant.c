@@ -1,31 +1,34 @@
 #include "reverse_constant.h"
 
+#define CASE(q) case q: return #q
+
+
 const char *
 reverse_npp_variable(NPPVariable var)
 {
     switch (var) {
-    case NPPVpluginNameString: return "NPPVpluginNameString";
-    case NPPVpluginDescriptionString: return "NPPVpluginDescriptionString";
-    case NPPVpluginWindowBool: return "NPPVpluginWindowBool";
-    case NPPVpluginTransparentBool: return "NPPVpluginTransparentBool";
-    case NPPVjavaClass: return "NPPVjavaClass";
-    case NPPVpluginWindowSize: return "NPPVpluginWindowSize";
-    case NPPVpluginTimerInterval: return "NPPVpluginTimerInterval";
-    case NPPVpluginScriptableInstance: return "NPPVpluginScriptableInstance";
-    case NPPVpluginScriptableIID: return "NPPVpluginScriptableIID";
-    case NPPVjavascriptPushCallerBool: return "NPPVjavascriptPushCallerBool";
-    case NPPVpluginKeepLibraryInMemory: return "NPPVpluginKeepLibraryInMemory";
-    case NPPVpluginNeedsXEmbed: return "NPPVpluginNeedsXEmbed";
-    case NPPVpluginScriptableNPObject: return "NPPVpluginScriptableNPObject";
-    case NPPVformValue: return "NPPVformValue";
-    case NPPVpluginUrlRequestsDisplayedBool: return "NPPVpluginUrlRequestsDisplayedBool";
-    case NPPVpluginWantsAllNetworkStreams: return "NPPVpluginWantsAllNetworkStreams";
-    case NPPVpluginNativeAccessibleAtkPlugId: return "NPPVpluginNativeAccessibleAtkPlugId";
-    case NPPVpluginCancelSrcStream: return "NPPVpluginCancelSrcStream";
-    case NPPVsupportsAdvancedKeyHandling: return "NPPVsupportsAdvancedKeyHandling";
-    case NPPVpluginUsesDOMForCursorBool: return "NPPVpluginUsesDOMForCursorBool";
-    case NPPVpluginDrawingModel: return "NPPVpluginDrawingModel";
-    default: return "UNKNOWNVARIABLE";
+    CASE(NPPVpluginNameString);
+    CASE(NPPVpluginDescriptionString);
+    CASE(NPPVpluginWindowBool);
+    CASE(NPPVpluginTransparentBool);
+    CASE(NPPVjavaClass);
+    CASE(NPPVpluginWindowSize);
+    CASE(NPPVpluginTimerInterval);
+    CASE(NPPVpluginScriptableInstance);
+    CASE(NPPVpluginScriptableIID);
+    CASE(NPPVjavascriptPushCallerBool);
+    CASE(NPPVpluginKeepLibraryInMemory);
+    CASE(NPPVpluginNeedsXEmbed);
+    CASE(NPPVpluginScriptableNPObject);
+    CASE(NPPVformValue);
+    CASE(NPPVpluginUrlRequestsDisplayedBool);
+    CASE(NPPVpluginWantsAllNetworkStreams);
+    CASE(NPPVpluginNativeAccessibleAtkPlugId);
+    CASE(NPPVpluginCancelSrcStream);
+    CASE(NPPVsupportsAdvancedKeyHandling);
+    CASE(NPPVpluginUsesDOMForCursorBool);
+    CASE(NPPVpluginDrawingModel);
+    default: return "UNKNOWNVAR";
     }
 }
 
@@ -33,25 +36,39 @@ const char *
 reverse_npn_variable(NPNVariable var)
 {
     switch (var) {
-    case NPNVxDisplay: return "NPNVxDisplay";
-    case NPNVxtAppContext: return "NPNVxtAppContext";
-    case NPNVnetscapeWindow: return "NPNVnetscapeWindow";
-    case NPNVjavascriptEnabledBool: return "NPNVjavascriptEnabledBool";
-    case NPNVasdEnabledBool: return "NPNVasdEnabledBool";
-    case NPNVisOfflineBool: return "NPNVisOfflineBool";
-    case NPNVserviceManager: return "NPNVserviceManager";
-    case NPNVDOMElement: return "NPNVDOMElement";
-    case NPNVDOMWindow: return "NPNVDOMWindow";
-    case NPNVToolkit: return "NPNVToolkit";
-    case NPNVSupportsXEmbedBool: return "NPNVSupportsXEmbedBool";
-    case NPNVWindowNPObject: return "NPNVWindowNPObject";
-    case NPNVPluginElementNPObject: return "NPNVPluginElementNPObject";
-    case NPNVSupportsWindowless: return "NPNVSupportsWindowless";
-    case NPNVprivateModeBool: return "NPNVprivateModeBool";
-    case NPNVsupportsAdvancedKeyHandling: return "NPNVsupportsAdvancedKeyHandling";
-    case NPNVdocumentOrigin: return "NPNVdocumentOrigin";
-    case NPNVpluginDrawingModel: return "NPNVpluginDrawingModel";
-    case NPNVsupportsAsyncBitmapSurfaceBool: return "NPNVsupportsAsyncBitmapSurfaceBool";
-    default: return "UNKNOWNVARIABLE";
+    CASE(NPNVxDisplay);
+    CASE(NPNVxtAppContext);
+    CASE(NPNVnetscapeWindow);
+    CASE(NPNVjavascriptEnabledBool);
+    CASE(NPNVasdEnabledBool);
+    CASE(NPNVisOfflineBool);
+    CASE(NPNVserviceManager);
+    CASE(NPNVDOMElement);
+    CASE(NPNVDOMWindow);
+    CASE(NPNVToolkit);
+    CASE(NPNVSupportsXEmbedBool);
+    CASE(NPNVWindowNPObject);
+    CASE(NPNVPluginElementNPObject);
+    CASE(NPNVSupportsWindowless);
+    CASE(NPNVprivateModeBool);
+    CASE(NPNVsupportsAdvancedKeyHandling);
+    CASE(NPNVdocumentOrigin);
+    CASE(NPNVpluginDrawingModel);
+    CASE(NPNVsupportsAsyncBitmapSurfaceBool);
+    default: return "UNKNOWNVAR";
+    }
+}
+
+const char *
+reverse_pp_url_response_property(PP_URLResponseProperty prop)
+{
+    switch (prop) {
+    CASE(PP_URLRESPONSEPROPERTY_URL);
+    CASE(PP_URLRESPONSEPROPERTY_REDIRECTURL);
+    CASE(PP_URLRESPONSEPROPERTY_REDIRECTMETHOD);
+    CASE(PP_URLRESPONSEPROPERTY_STATUSCODE);
+    CASE(PP_URLRESPONSEPROPERTY_STATUSLINE);
+    CASE(PP_URLRESPONSEPROPERTY_HEADERS);
+    default: return "UNKNOWNPROP";
     }
 }

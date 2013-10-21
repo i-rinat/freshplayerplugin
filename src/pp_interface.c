@@ -10,7 +10,7 @@ const void *(*ppp_get_interface)(const char *interface_name);
 const void *
 ppb_get_interface(const char *interface_name)
 {
-    trace_info("called PPB_GetInterface(\"%s\")\n", interface_name);
+    trace_info("[PPB] {full} %s interface_name=%s\n", __func__, interface_name);
     if (!strcmp(interface_name, PPB_CORE_INTERFACE_1_0)) {
         return &ppb_core_interface_1_0;
     } else if (!strcmp(interface_name, PPB_AUDIO_CONFIG_INTERFACE_1_1)) {
