@@ -34,7 +34,7 @@ static
 int32_t
 ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s loader=%d, callback={.func=%p, .user_data=%p, .flags=%p}\n",
+    trace_info("[PPB] {zilch} %s loader=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
                __func__, loader, callback.func, callback.user_data, callback.flags);
     return 0;
 }
@@ -71,7 +71,7 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
                                   struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s loader=%d, buffer=%p, bytes_to_read=%d, callback={.func=%p, "
-               ".user_data=%p, .flags=%p}\n", __func__, loader, buffer, bytes_to_read,
+               ".user_data=%p, .flags=%d}\n", __func__, loader, buffer, bytes_to_read,
                callback.func, callback.user_data, callback.flags);
     return 0;
 }
@@ -81,7 +81,7 @@ int32_t
 ppb_url_loader_finish_streaming_to_file(PP_Resource loader, struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s loader=%d callback={.func=%p, .user_data=%p, flags=%d}\n",
-               __func__, callback.func, callback.user_data, callback.flags);
+               __func__, loader, callback.func, callback.user_data, callback.flags);
     return 0;
 }
 

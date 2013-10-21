@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <inttypes.h>
 #include <npapi.h>
 #include <stdlib.h>
 #include <string.h>
@@ -276,7 +277,7 @@ NPP_URLRedirectNotify(NPP instance, const char* url, int32_t status, void* notif
 NPError
 NPP_ClearSiteData(const char* site, uint64_t flags, uint64_t maxAge)
 {
-    trace_info("[NPP] {zilch} %s site=%s, flags=%llu, maxAge=%llu\n", __func__,
+    trace_info("[NPP] {zilch} %s site=%s, flags=%"PRIu64", maxAge=%"PRIu64"\n", __func__,
                site, flags, maxAge);
     return NPERR_NO_ERROR;
 }
