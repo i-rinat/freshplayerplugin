@@ -36,7 +36,7 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
                reverse_npp_variable(variable), value);
     switch (variable) {
     case NPPVpluginNameString:
-        *(const char **)value = "FreshPrayerPlugin";
+        *(const char **)value = "FreshPlayerPlugin";
         break;
     case NPPVpluginDescriptionString:
         *(const char **)value = "Wrapper around PepperFlash for NPAPI enabled browsers";
