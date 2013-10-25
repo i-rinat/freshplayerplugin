@@ -1,22 +1,23 @@
 #include <ppapi/c/ppb_url_loader.h>
 #include <stddef.h>
 #include "trace.h"
+#include "pp_resource.h"
 
 
 static
 PP_Resource
 ppb_url_loader_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__, instance);
-    return 0;
+    trace_info("[PPB] {full} %s instance=%d\n", __func__, instance);
+    return pp_resource_allocate(PP_RESOURCE_URL_LOADER);
 }
 
 static
 PP_Bool
 ppb_url_loader_is_url_loader(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__, resource);
-    return PP_TRUE;
+    trace_info("[PPB] {full} %s resource=%d\n", __func__, resource);
+    return PP_RESOURCE_URL_LOADER == pp_resource_get_type(resource);
 }
 
 static
