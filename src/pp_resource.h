@@ -12,6 +12,7 @@ enum pp_resource_type_e {
 
 struct pp_resource_generic_s {
     int         type;
+    int         ref_cnt;
 };
 
 struct pp_url_loader_resource_s {
@@ -28,6 +29,8 @@ void                    pp_resource_expunge(PP_Resource resource);
 void                   *pp_resource_acquire(PP_Resource resource);
 void                    pp_resource_release(PP_Resource resource);
 enum pp_resource_type_e pp_resource_get_type(PP_Resource resource);
+void                    pp_resource_ref(PP_Resource resource);
+void                    pp_resource_unref(PP_Resource resource);
 
 
 #endif // FFP__PP_RESOURCE_H

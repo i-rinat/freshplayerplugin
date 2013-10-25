@@ -1,26 +1,29 @@
 #include <ppapi/c/ppb_core.h>
 #include <stddef.h>
 #include "trace.h"
+#include "pp_resource.h"
 
 static
 void
 ppb_core_add_ref_resource(PP_Resource resource)
 {
-    trace_info("{zilch} %s resource=%d\n", __func__, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__, resource);
+    pp_resource_ref(resource);
 }
 
 static
 void
 ppb_core_release_resource(PP_Resource resource)
 {
-    trace_info("{zilch} %s resource=%d\n", __func__, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__, resource);
+    pp_resource_unref(resource);
 }
 
 static
 PP_Time
 ppb_core_get_time(void)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     return 0;
 }
 
@@ -28,7 +31,7 @@ static
 PP_TimeTicks
 ppb_core_get_time_ticks(void)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     return 0;
 }
 
@@ -37,7 +40,7 @@ void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result)
 {
-    trace_info("{zilch} %s delay_in_milliseconds=%d, callback={.func=%p, .user_data=%p, "
+    trace_info("[PPB] {zilch} %s delay_in_milliseconds=%d, callback={.func=%p, .user_data=%p, "
                ".flags=%d}, result=%d\n", __func__, delay_in_milliseconds, callback.func,
                callback.user_data, callback.flags, result);
 }
@@ -46,7 +49,7 @@ static
 PP_Bool
 ppb_core_is_main_thread(void)
 {
-    trace_info("{fake} %s\n", __func__);
+    trace_info("[PPB] {fake} %s\n", __func__);
     return PP_FALSE;
 }
 

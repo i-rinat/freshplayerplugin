@@ -23,7 +23,8 @@ pp_resource_allocate(enum pp_resource_type_e type)
 
 #define ALLOC_HELPER(typename)              \
     ptr = calloc(sizeof(typename), 1);      \
-    ((typename *)ptr)->_parent.type = type;
+    ((typename *)ptr)->_parent.type = type; \
+    ((typename *)ptr)->_parent.ref_cnt = 1;
 
     pthread_mutex_lock(&res_tbl_lock);
     switch (type) {
@@ -100,4 +101,33 @@ pp_resource_get_type(PP_Resource resource)
 
     pthread_mutex_unlock(&res_tbl_lock);
     return type;
+}
+
+void
+pp_resource_ref(PP_Resource resource)
+{
+    pthread_mutex_lock(&res_tbl_lock);
+    if (resource < 1 || resource >= res_tbl->len) {
+        pthread_mutex_unlock(&res_tbl_lock);
+        return;
+    }
+    struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
+    ptr->ref_cnt ++;
+    pthread_mutex_unlock(&res_tbl_lock);
+}
+
+void
+pp_resource_unref(PP_Resource resource)
+{
+    pthread_mutex_lock(&res_tbl_lock);
+    if (resource < 1 || resource >= res_tbl->len) {
+        pthread_mutex_unlock(&res_tbl_lock);
+        return;
+    }
+    struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
+    ptr->ref_cnt --;
+    pthread_mutex_unlock(&res_tbl_lock);
+
+    if (0 == ptr->ref_cnt)
+        pp_resource_expunge(resource);
 }
