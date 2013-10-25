@@ -18,6 +18,7 @@ add_library(freshwrapper SHARED
 	src/tables.c
 	src/trace.c
 	src/pp_interface.c
+	src/pp_resource.c
 	src/ppb_core.c
 	src/ppb_audio_config.c
 	src/ppb_audio_input_dev.c
