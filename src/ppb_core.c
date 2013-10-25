@@ -1,7 +1,19 @@
 #include <ppapi/c/ppb_core.h>
 #include <stddef.h>
+#include <pthread.h>
 #include "trace.h"
 #include "pp_resource.h"
+
+
+static pthread_t main_thread;
+
+ __attribute__((constructor))
+static
+void
+ppb_core_constructor(void)
+{
+    main_thread = pthread_self();
+}
 
 static
 void
@@ -49,8 +61,8 @@ static
 PP_Bool
 ppb_core_is_main_thread(void)
 {
-    trace_info("[PPB] {fake} %s\n", __func__);
-    return PP_FALSE;
+    trace_info("[PPB] {full} %s\n", __func__);
+    return pthread_equal(main_thread, pthread_self());
 }
 
 const struct PPB_Core_1_0 ppb_core_interface_1_0 = {
