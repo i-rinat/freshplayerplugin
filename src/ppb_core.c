@@ -1,6 +1,7 @@
 #include <ppapi/c/ppb_core.h>
 #include <stddef.h>
 #include <pthread.h>
+#include <time.h>
 #include "trace.h"
 #include "pp_resource.h"
 
@@ -35,16 +36,20 @@ static
 PP_Time
 ppb_core_get_time(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__);
-    return 0;
+    trace_info("[PPB] {full} %s\n", __func__);
+    struct timespec t;
+    clock_gettime(CLOCK_REALTIME, &t);
+    return t.tv_sec + t.tv_nsec / 1e9;
 }
 
 static
 PP_TimeTicks
 ppb_core_get_time_ticks(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__);
-    return 0;
+    trace_info("[PPB] {full} %s\n", __func__);
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_sec + t.tv_nsec / 1e9;
 }
 
 static
