@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <dirent.h>
 #include "trace.h"
 
 
@@ -198,8 +199,41 @@ int32_t
 ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const char *path,
                                             struct PP_DirContents_Dev **contents)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, path=%s\n", __func__, instance, path);
-    return 0;
+    trace_info("[PPB] {full} %s instance=%d, path=%s\n", __func__, instance, path);
+    struct dirent **namelist;
+    char *abs_path = to_abs_path(path);
+    int n = scandir(abs_path, &namelist, NULL, alphasort);
+    *contents = NULL;
+    if (n < 0)
+        goto err;
+
+    *contents = malloc(sizeof(struct PP_DirContents_Dev));
+    if (!*contents)
+        goto err;
+    (*contents)->count = n;
+    (*contents)->entries = malloc(n * sizeof(struct PP_DirEntry_Dev));
+    if (!(*contents)->entries)
+        goto err2;
+
+    for (int k = 0; k < n; k ++) {
+        char *fname;
+        struct stat sb;
+        (*contents)->entries[k].name = strdup(namelist[k]->d_name);
+        asprintf(&fname, "%s/%s", abs_path, namelist[k]->d_name);
+        lstat(fname, &sb);
+        free(fname);
+        (*contents)->entries[k].is_dir = S_ISDIR(sb.st_mode);
+        free(namelist[k]);
+    }
+
+    free(namelist);
+    free(abs_path);
+    return PP_OK;
+err2:
+    free(*contents);
+err:
+    free(abs_path);
+    return PP_ERROR_FAILED;
 }
 
 
@@ -208,7 +242,11 @@ void
 ppb_flash_file_modulelocal_free_dir_contents(PP_Instance instance,
                                              struct PP_DirContents_Dev *contents)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__, instance);
+    trace_info("[PPB] {full} %s instance=%d, contents=%p\n", __func__, instance, contents);
+    for (int k = 0; k < contents->count; k ++)
+        free((char*)contents->entries[k].name);
+    free(contents->entries);
+    free(contents);
 }
 
 static
