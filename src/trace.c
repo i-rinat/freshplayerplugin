@@ -71,3 +71,14 @@ trace_rect_as_string(const struct PP_Rect *rect)
     return res;
 }
 
+char *
+trace_point_as_string(const struct PP_Point *point)
+{
+    char *res = NULL;
+    if (point)
+        asprintf(&res, "{.x=%d, .y=%d}", point->x, point->y);
+    else
+        asprintf(&res, "(nil)");
+
+    return res;
+}
