@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include "trace.h"
 
 
@@ -103,8 +104,19 @@ int32_t
 ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
                                      PP_FileHandle *file)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, path=%s, mode=%d\n", __func__, instance, path, mode);
-    return 0;
+    trace_info("[PPB] {full} %s instance=%d, path=%s, mode=%d\n", __func__, instance, path, mode);
+    char *abs_path = to_abs_path(path);
+    int fd = open(abs_path, O_LARGEFILE, mode);
+    free(abs_path);
+    *file = fd;
+    if (fd > 0)
+        return PP_OK;
+    else
+        switch (errno) {
+            case ENOENT: return PP_ERROR_FILENOTFOUND;
+            case EACCES: return PP_ERROR_NOACCESS;
+            default:     return PP_ERROR_FAILED;
+        }
 }
 
 static
