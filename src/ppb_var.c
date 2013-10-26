@@ -42,7 +42,7 @@ static
 struct PP_Var
 ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
 {
-    trace_info("{full} %s data=%.*s, len=%d\n", __func__, len, data, len);
+    trace_info("[PPB] {full} %s data=%.*s, len=%d\n", __func__, len, data, len);
     struct PP_Var var = {0};
     char *cpy = malloc(len + 1);
 
@@ -58,7 +58,7 @@ static
 struct PP_Var
 ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
 {
-    trace_info("{full} %s module=%d, data=%.*s, len=%d\n", __func__, module, len, data, len);
+    trace_info("[PPB] {full} %s module=%d, data=%.*s, len=%d\n", __func__, module, len, data, len);
     struct PP_Var var = {0};
     char *cpy = malloc(len + 1);
 

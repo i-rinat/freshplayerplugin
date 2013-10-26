@@ -145,7 +145,7 @@ PP_Bool
 ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struct PP_Var value)
 {
     char *value_str = trace_var_as_string(value);
-    trace_info("{zilch} %s instance=%d, key=%d, value=%s\n", __func__, instance, key, value_str);
+    trace_info("[PPB] {zilch} %s instance=%d, key=%d, value=%s\n", __func__, instance, key, value_str);
     free(value_str);
     return PP_TRUE;
 }
@@ -155,9 +155,10 @@ int32_t
 ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resource video_capture,
                                           struct PP_ArrayOutput devices)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     return 0;
 }
+
 
 const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .SetInstanceAlwaysOnTop = ppb_flash_set_instance_always_on_top,

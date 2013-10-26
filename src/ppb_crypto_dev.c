@@ -30,7 +30,7 @@ static
 void
 ppb_crypto_dev_get_random_bytes(char *buffer, uint32_t num_bytes)
 {
-    trace_info("{full} %s\n        num_bytes = %d\n", __func__, num_bytes);
+    trace_info("[PPB] {full} %s num_bytes=%d\n", __func__, num_bytes);
     read(rand_fd, buffer, num_bytes);
 }
 

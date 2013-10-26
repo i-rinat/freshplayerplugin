@@ -6,7 +6,7 @@ static
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
-    trace_info("{zilch} %s\n        instance = %d, device = %d\n", __func__, instance, device);
+    trace_info("[PPB] {zilch} %s instance=%d, device=%d\n", __func__, instance, device);
     return PP_TRUE;
 }
 
@@ -14,7 +14,7 @@ static
 PP_Bool
 ppb_instance_is_full_frame(PP_Instance instance)
 {
-    trace_info("{zilch} %s\n        instance = %d\n", __func__, instance);
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__, instance);
     return PP_TRUE;
 }
 

@@ -6,7 +6,7 @@ static
 struct PP_Var
 ppb_instance_private_get_window_object(PP_Instance instance)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     struct PP_Var var = {0};
     return var;
 }
@@ -15,7 +15,7 @@ static
 struct PP_Var
 ppb_instance_private_get_owner_element_object(PP_Instance instance)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     struct PP_Var var = {0};
     return var;
 }
@@ -25,7 +25,7 @@ struct PP_Var
 ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
                                     struct PP_Var *exception)
 {
-    trace_info("{zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s\n", __func__);
     struct PP_Var var = {0};
     return var;
 }
