@@ -94,3 +94,19 @@ reverse_pp_url_request_property(PP_URLRequestProperty prop)
     default: return "UNKNONWPROP";
     }
 }
+
+const char *
+reverse_pp_text_input_type(PP_TextInput_Type type)
+{
+    switch (type) {
+    CASE(PP_TEXTINPUT_TYPE_NONE);
+    CASE(PP_TEXTINPUT_TYPE_TEXT);
+    CASE(PP_TEXTINPUT_TYPE_PASSWORD);
+    CASE(PP_TEXTINPUT_TYPE_SEARCH);
+    CASE(PP_TEXTINPUT_TYPE_EMAIL);
+    CASE(PP_TEXTINPUT_TYPE_NUMBER);
+    CASE(PP_TEXTINPUT_TYPE_TELEPHONE);
+    CASE(PP_TEXTINPUT_TYPE_URL);
+    default: return "UNKNOWNTYPE";
+    }
+}
