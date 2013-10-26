@@ -57,3 +57,17 @@ trace_var_as_string(struct PP_Var var)
     return res;
 }
 
+char *
+trace_rect_as_string(const struct PP_Rect *rect)
+{
+    char *res = NULL;
+    if (rect) {
+        asprintf(&res, "{.x=%d, .y=%d, .w=%d, .h=%d}", rect->point.x, rect->point.y,
+                 rect->size.width, rect->size.height);
+    } else {
+        asprintf(&res, "(nil)");
+    }
+
+    return res;
+}
+
