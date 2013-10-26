@@ -143,8 +143,18 @@ static
 int32_t
 ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, path=%s\n", __func__, instance, path);
-    return 0;
+    trace_info("[PPB] {full} %s instance=%d, path=%s\n", __func__, instance, path);
+    char *abs_path = to_abs_path(path);
+    int ret = mkdir(abs_path, 0777);
+    free(abs_path);
+    if (ret < 0) {
+        switch (errno) {
+        case EACCES: return PP_ERROR_NOACCESS;
+        default:     return PP_ERROR_FAILED;
+        }
+    }
+
+    return PP_OK;
 }
 
 static
