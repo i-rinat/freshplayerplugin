@@ -110,3 +110,18 @@ reverse_pp_text_input_type(PP_TextInput_Type type)
     default: return "UNKNOWNTYPE";
     }
 }
+
+const char *
+reverse_pp_flash_setting(PP_FlashSetting setting)
+{
+    switch (setting) {
+    CASE(PP_FLASHSETTING_3DENABLED);
+    CASE(PP_FLASHSETTING_INCOGNITO);
+    CASE(PP_FLASHSETTING_STAGE3DENABLED);
+    CASE(PP_FLASHSETTING_LANGUAGE);
+    CASE(PP_FLASHSETTING_NUMCORES);
+    CASE(PP_FLASHSETTING_LSORESTRICTIONS);
+    CASE(PP_FLASHSETTING_STAGE3DBASELINEENABLED);
+    default: return "UNKNOWNSETTING";
+    }
+}
