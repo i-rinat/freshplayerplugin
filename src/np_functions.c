@@ -9,6 +9,7 @@
 #include "reverse_constant.h"
 #include "np.h"
 #include "pp_interface.h"
+#include "interface_list.h"
 #include "tables.h"
 #include <ppapi/c/ppp_instance.h>
 
@@ -66,8 +67,12 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     tables_add_pp_np_mapping(priv->pp_instance_id, priv);
     priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
 
+    trace_info("-----------------------------------------\n");
+    PP_Resource urll = ppb_url_loader_interface_1_0.Create(priv->pp_instance_id);
+    PP_Resource urlri = ppb_url_request_info_interface_1_0.Create(priv->pp_instance_id);
+    ppb_url_loader_interface_1_0.Open(urll, urlri, PP_BlockUntilComplete());
     trace_info("=========================================\n");
-    priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, 422);
+    priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
 
     return NPERR_NO_ERROR;
 }
