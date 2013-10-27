@@ -2,6 +2,7 @@
 #include <ppapi/c/private/ppb_flash_file.h>
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/c/pp_file_info.h>
+#include <ppapi/c/ppb_file_io.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <Uri.h>
@@ -101,13 +102,35 @@ ppb_flash_file_modulelocal_clear_thread_adapter_for_instance(PP_Instance instanc
 }
 
 static
+int
+pp_mode_to_open_mode(int32_t mode)
+{
+    int ret = 0;
+    if ((mode & PP_FILEOPENFLAG_READ) && !(mode & PP_FILEOPENFLAG_WRITE))
+        ret = O_RDONLY;
+    if (!(mode & PP_FILEOPENFLAG_READ) && (mode & PP_FILEOPENFLAG_WRITE))
+        ret = O_WRONLY;
+    if ((mode & PP_FILEOPENFLAG_READ) && (mode & PP_FILEOPENFLAG_WRITE))
+        ret = O_RDWR;
+    if (mode & PP_FILEOPENFLAG_CREATE)
+        ret |= O_CREAT;
+    if (mode & PP_FILEOPENFLAG_TRUNCATE)
+        ret |= O_TRUNC;
+    if (mode & PP_FILEOPENFLAG_EXCLUSIVE)
+        ret |= O_EXCL;
+    if (mode & PP_FILEOPENFLAG_APPEND)
+        ret |= O_APPEND;
+    return ret;
+}
+
+static
 int32_t
 ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
                                      PP_FileHandle *file)
 {
     trace_info("[PPB] {full} %s instance=%d, path=%s, mode=%d\n", __func__, instance, path, mode);
     char *abs_path = to_abs_path(path);
-    int fd = open(abs_path, O_LARGEFILE, mode);
+    int fd = open(abs_path, O_LARGEFILE, pp_mode_to_open_mode(mode));
     free(abs_path);
     *file = fd;
     if (fd > 0)
