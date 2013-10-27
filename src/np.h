@@ -20,7 +20,6 @@ struct np_priv_s {
     const char    **argn;
     const char    **argv;
     int             instance_loaded;
-    const char     *swf_fname;
     const char     *instance_url;
 };
 

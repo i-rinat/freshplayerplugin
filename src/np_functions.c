@@ -41,6 +41,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
     priv = calloc(sizeof(*priv), 1);
+    instance->pdata = priv;
     if (!priv)
         return NPERR_OUT_OF_MEMORY_ERROR;
 
@@ -54,10 +55,20 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     for (k = 0; k < argc; k ++) {
         priv->argn[k] = strdup(argn[k]);
         priv->argv[k] = strdup(argv[k]);
-    }
-    priv->instance_loaded = 0;
 
-    instance->pdata = priv;
+        if (strcasecmp(argn[k], "src") == 0) {
+            priv->instance_url = strdup(argv[k]);
+        }
+    }
+
+    priv->pp_instance_id = generate_new_pp_instance_id();
+    priv->instance_loaded = 1;
+    tables_add_pp_np_mapping(priv->pp_instance_id, priv);
+    priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
+
+    trace_info("=========================================\n");
+    priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, 422);
+
     return NPERR_NO_ERROR;
 }
 
@@ -74,15 +85,9 @@ NPP_Destroy(NPP instance, NPSavedData** save)
 NPError
 NPP_SetWindow(NPP instance, NPWindow* window)
 {
-    if (!window) {
-        trace_info("[NPP] {part} %s instance=%p, window=(nil)\n", __func__, instance);
-    } else {
-        trace_info("[NPP] {part} %s instance=%p, window={.window=%p, .x=%u, .y=%u, .width=%u, "
-                   ".height=%u, .clipRect={.top=%u, .left=%u, .bottom=%u, .right=%u}, .ws_info=%p,"
-                   " .type=%d}\n", __func__, instance, window->window, window->x, window->y,
-                   window->width, window->height, window->clipRect.top, window->clipRect.left,
-                   window->clipRect.bottom, window->clipRect.right, window->ws_info, window->type);
-    }
+    char *window_str = trace_np_window_as_string(window);
+    trace_info("[NPP] {part} %s instance=%p, window=%s\n", __func__, instance, window_str);
+    free(window_str);
 
     struct np_priv_s *priv = instance->pdata;
     priv->wnd = (Window)window->window;
@@ -99,20 +104,10 @@ NPP_SetWindow(NPP instance, NPWindow* window)
 NPError
 NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
 {
-    struct np_priv_s *priv = instance->pdata;
-    trace_info("[NPP] {part} %s instance=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
+    trace_info("[NPP] {zilch} %s instance=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
                "end=%u, lastmodified=%u, .headers=%s}, seekable=%d\n", __func__, instance, type,
                stream->pdata, stream->ndata, stream->url, stream->end, stream->lastmodified,
                stream->headers, seekable);
-
-    if (strcmp(type, "application/x-shockwave-flash") == 0 &&
-        !priv->instance_loaded)
-    {
-        // first stream is flash file itself
-        *stype = NP_ASFILEONLY;
-    } else {
-        *stype = NP_NORMAL;
-    }
 
     return NPERR_NO_ERROR;
 }
@@ -143,24 +138,8 @@ NPP_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buf
 void
 NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
 {
-    struct np_priv_s *priv = instance->pdata;
-    trace_info("[NPP] {part} %s instance=%p, stream=%p, fname=%s\n", __func__,
+    trace_info("[NPP] {zilch} %s instance=%p, stream=%p, fname=%s\n", __func__,
                instance, stream, fname);
-
-    if (!priv->instance_loaded) {
-        priv->pp_instance_id = generate_new_pp_instance_id();
-        priv->instance_loaded = 1;
-        priv->swf_fname = strdup(fname);
-        priv->instance_url = strdup(stream->url);
-        tables_add_pp_np_mapping(priv->pp_instance_id, priv);
-        priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
-
-        trace_info("=========================================\n");
-        priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, 422);
-    } else {
-        trace_info("            not implemented yet\n");
-    }
-
     return;
 }
 

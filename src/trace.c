@@ -82,3 +82,19 @@ trace_point_as_string(const struct PP_Point *point)
 
     return res;
 }
+
+char *
+trace_np_window_as_string(const NPWindow *window)
+{
+    char *res = NULL;
+    if (window) {
+        asprintf(&res, "{.window=%p, .x=%u, .y=%u, .width=%u, .height=%u, .clipRect={.top=%u, "
+                 ".left=%u, .bottom=%u, .right=%u}, .ws_info=%p, .type=%d}", window->window,
+                 window->x, window->y, window->width, window->height, window->clipRect.top,
+                 window->clipRect.left, window->clipRect.bottom, window->clipRect.right,
+                 window->ws_info, window->type);
+    } else {
+        asprintf(&res, "(nil)");
+    }
+    return res;
+}
