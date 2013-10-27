@@ -34,6 +34,9 @@ pp_resource_allocate(enum pp_resource_type_e type)
     case PP_RESOURCE_URL_REQUEST_INFO:
         ALLOC_HELPER(struct pp_url_request_info_resource_s);
         break;
+    case PP_RESOURCE_URL_RESPONSE_INFO:
+        ALLOC_HELPER(struct pp_url_response_info_resource_s);
+        break;
     default:
         // fall through
     case PP_RESOURCE_UNKNOWN:

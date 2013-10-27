@@ -7,6 +7,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,
     PP_RESOURCE_URL_LOADER,
     PP_RESOURCE_URL_REQUEST_INFO,
+    PP_RESOURCE_URL_RESPONSE_INFO,
 };
 
 
@@ -22,6 +23,10 @@ struct pp_url_loader_resource_s {
 struct pp_url_request_info_resource_s {
     struct pp_resource_generic_s _parent;
 };
+
+struct pp_url_response_info_resource_s {
+    struct pp_resource_generic_s _parent;
+}
 
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type);
