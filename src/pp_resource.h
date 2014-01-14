@@ -26,7 +26,7 @@ struct pp_url_request_info_resource_s {
 
 struct pp_url_response_info_resource_s {
     struct pp_resource_generic_s _parent;
-}
+};
 
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type);
