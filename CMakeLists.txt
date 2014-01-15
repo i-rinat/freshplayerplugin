@@ -60,6 +60,7 @@ add_library(freshwrapper SHARED
 	src/ppb_var.c
 	src/ppb_video_capture_dev.c
 	src/ppb_view.c
+	src/ppp_entry.c
 )
 
 target_link_libraries(freshwrapper

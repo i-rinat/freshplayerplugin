@@ -12,6 +12,7 @@
 #include "interface_list.h"
 #include "tables.h"
 #include <ppapi/c/ppp_instance.h>
+#include "ppp_entry.h"
 
 #define NO_IMPL assert(0 && "no implementation yet")
 
@@ -54,8 +55,8 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     priv->argn = malloc(argc * sizeof(char*));
     priv->argv = malloc(argc * sizeof(char*));
     for (k = 0; k < argc; k ++) {
-        priv->argn[k] = strdup(argn[k]);
-        priv->argv[k] = strdup(argv[k]);
+        priv->argn[k] = strdup(argn[k] ? argn[k] : "");
+        priv->argv[k] = strdup(argv[k] ? argv[k] : "");
 
         if (strcasecmp(argn[k], "src") == 0) {
             priv->instance_url = strdup(argv[k]);
@@ -65,14 +66,8 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     priv->pp_instance_id = generate_new_pp_instance_id();
     priv->instance_loaded = 1;
     tables_add_pp_np_mapping(priv->pp_instance_id, priv);
-    priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
 
-    trace_info("-----------------------------------------\n");
-    PP_Resource urll = ppb_url_loader_interface_1_0.Create(priv->pp_instance_id);
-    PP_Resource urlri = ppb_url_request_info_interface_1_0.Create(priv->pp_instance_id);
-    ppb_url_loader_interface_1_0.Open(urll, urlri, PP_BlockUntilComplete());
-    trace_info("=========================================\n");
-    priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
+    pthread_create(&priv->pp_thread, NULL, pepper_plugin_thread_func, priv);
 
     return NPERR_NO_ERROR;
 }

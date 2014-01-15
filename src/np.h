@@ -21,6 +21,7 @@ struct np_priv_s {
     const char    **argv;
     int             instance_loaded;
     const char     *instance_url;
+    pthread_t       pp_thread;
 };
 
 #endif // FPP_NP_H
