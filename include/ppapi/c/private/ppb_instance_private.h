@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From private/ppb_instance_private.idl modified Mon Oct  8 10:50:04 2012. */
+/* From private/ppb_instance_private.idl modified Tue Jul 23 13:19:04 2013. */
 
 #ifndef PPAPI_C_PRIVATE_PPB_INSTANCE_PRIVATE_H_
 #define PPAPI_C_PRIVATE_PPB_INSTANCE_PRIVATE_H_
@@ -24,6 +24,29 @@
  * instances.
  */
 
+
+/**
+ * @addtogroup Enums
+ * @{
+ */
+/**
+ * The <code>PP_ExternalPluginResult </code> enum contains result codes from
+ * launching an external plugin.
+ */
+typedef enum {
+  /** Successful external plugin call */
+  PP_EXTERNAL_PLUGIN_OK = 0,
+  /** Unspecified external plugin error */
+  PP_EXTERNAL_PLUGIN_FAILED = 1,
+  /** Error creating the module */
+  PP_EXTERNAL_PLUGIN_ERROR_MODULE = 2,
+  /** Error creating and initializing the instance */
+  PP_EXTERNAL_PLUGIN_ERROR_INSTANCE = 3
+} PP_ExternalPluginResult;
+PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_ExternalPluginResult, 4);
+/**
+ * @}
+ */
 
 /**
  * @addtogroup Interfaces

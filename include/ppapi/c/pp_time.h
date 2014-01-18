@@ -1,9 +1,9 @@
-/* Copyright (c) 2011 The Chromium Authors. All rights reserved.
+/* Copyright (c) 2012 The Chromium Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
 
-/* From pp_time.idl modified Tue Jul  5 16:02:03 2011. */
+/* From pp_time.idl modified Fri May 10 15:48:42 2013. */
 
 #ifndef PPAPI_C_PP_TIME_H_
 #define PPAPI_C_PP_TIME_H_
@@ -13,7 +13,7 @@
 
 /**
  * @file
- * This file defines time and time ticks types.
+ * This file defines time, time ticks and time delta types.
  */
 
 
@@ -41,6 +41,13 @@ PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_Time, 8);
  */
 typedef double PP_TimeTicks;
 PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_TimeTicks, 8);
+
+/**
+ * A <code>PP_TimeDelta</code> value represents a duration of time which is
+ * measured in seconds.
+ */
+typedef double PP_TimeDelta;
+PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_TimeDelta, 8);
 /**
  * @}
  */

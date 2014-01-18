@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From dev/ppb_text_input_dev.idl modified Thu Mar 28 10:54:47 2013. */
+/* From dev/ppb_text_input_dev.idl modified Tue Aug  6 10:37:25 2013. */
 
 #ifndef PPAPI_C_DEV_PPB_TEXT_INPUT_DEV_H_
 #define PPAPI_C_DEV_PPB_TEXT_INPUT_DEV_H_
@@ -37,23 +37,23 @@ typedef enum {
   /**
    * Input caret is not in an editable mode, no input method shall be used.
    */
-  PP_TEXTINPUT_TYPE_NONE = 0,
+  PP_TEXTINPUT_TYPE_DEV_NONE = 0,
   /**
    * Input caret is in a normal editable mode, any input method can be used.
    */
-  PP_TEXTINPUT_TYPE_TEXT = 1,
+  PP_TEXTINPUT_TYPE_DEV_TEXT = 1,
   /**
    * Input caret is in a password box, an input method may be used only if
    * it's suitable for password input.
    */
-  PP_TEXTINPUT_TYPE_PASSWORD = 2,
-  PP_TEXTINPUT_TYPE_SEARCH = 3,
-  PP_TEXTINPUT_TYPE_EMAIL = 4,
-  PP_TEXTINPUT_TYPE_NUMBER = 5,
-  PP_TEXTINPUT_TYPE_TELEPHONE = 6,
-  PP_TEXTINPUT_TYPE_URL = 7
-} PP_TextInput_Type;
-PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_TextInput_Type, 4);
+  PP_TEXTINPUT_TYPE_DEV_PASSWORD = 2,
+  PP_TEXTINPUT_TYPE_DEV_SEARCH = 3,
+  PP_TEXTINPUT_TYPE_DEV_EMAIL = 4,
+  PP_TEXTINPUT_TYPE_DEV_NUMBER = 5,
+  PP_TEXTINPUT_TYPE_DEV_TELEPHONE = 6,
+  PP_TEXTINPUT_TYPE_DEV_URL = 7
+} PP_TextInput_Type_Dev;
+PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_TextInput_Type_Dev, 4);
 /**
  * @}
  */
@@ -75,7 +75,7 @@ struct PPB_TextInput_Dev_0_2 {
    * keyboards in touch screen based devices, or input method editors often
    * used for composing East Asian characters).
    */
-  void (*SetTextInputType)(PP_Instance instance, PP_TextInput_Type type);
+  void (*SetTextInputType)(PP_Instance instance, PP_TextInput_Type_Dev type);
   /**
    * Informs the browser about the coordinates of the text input caret and the
    * bounding box of the text input area. Typical use of this information in
@@ -128,7 +128,7 @@ struct PPB_TextInput_Dev_0_2 {
 typedef struct PPB_TextInput_Dev_0_2 PPB_TextInput_Dev;
 
 struct PPB_TextInput_Dev_0_1 {
-  void (*SetTextInputType)(PP_Instance instance, PP_TextInput_Type type);
+  void (*SetTextInputType)(PP_Instance instance, PP_TextInput_Type_Dev type);
   void (*UpdateCaretPosition)(PP_Instance instance,
                               const struct PP_Rect* caret,
                               const struct PP_Rect* bounding_box);

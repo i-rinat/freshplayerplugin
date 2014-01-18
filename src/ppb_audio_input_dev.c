@@ -79,7 +79,7 @@ ppb_audio_input_dev_close(PP_Resource audio_input)
 }
 
 
-const struct PPB_AudioInput_Dev_0_3 ppb_audio_input_dev_interface_0_3 = {
+const struct PPB_AudioInput_Dev_0_4 ppb_audio_input_dev_interface_0_4 = {
     .Create = ppb_audio_input_dev_create,
     .IsAudioInput = ppb_audio_input_dev_is_audio_input,
     .EnumerateDevices = ppb_audio_input_dev_enumerate_devices,

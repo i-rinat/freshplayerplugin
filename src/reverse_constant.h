@@ -11,7 +11,7 @@ const char *reverse_npp_variable(NPPVariable var);
 const char *reverse_npn_variable(NPNVariable var);
 const char *reverse_pp_url_response_property(PP_URLResponseProperty prop);
 const char *reverse_pp_url_request_property(PP_URLRequestProperty prop);
-const char *reverse_pp_text_input_type(PP_TextInput_Type type);
+const char *reverse_pp_text_input_type(PP_TextInput_Type_Dev type);
 const char *reverse_pp_flash_setting(PP_FlashSetting setting);
 
 #endif // FPP__REVERSE_CONSTANT_H

@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_file_ref.idl modified Wed May 22 15:08:49 2013. */
+/* From ppb_file_ref.idl modified Thu Aug 15 10:50:43 2013. */
 
 #ifndef PPAPI_C_PPB_FILE_REF_H_
 #define PPAPI_C_PPB_FILE_REF_H_
@@ -45,7 +45,7 @@ struct PPB_FileRef_1_1 {
    *
    * @param[in] resource A <code>PP_Resource</code> corresponding to a file
    * system.
-   * @param[in] path A path to the file.
+   * @param[in] path A path to the file. Must begin with a '/' character.
    *
    * @return A <code>PP_Resource</code> corresponding to a file reference if
    * successful or 0 if the path is malformed.

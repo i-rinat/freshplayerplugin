@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_graphics_3d.idl modified Thu Mar 28 10:12:11 2013. */
+/* From ppb_graphics_3d.idl modified Fri Aug 30 08:36:16 2013. */
 
 #ifndef PPAPI_C_PPB_GRAPHICS_3D_H_
 #define PPAPI_C_PPB_GRAPHICS_3D_H_
@@ -42,14 +42,17 @@
  * int32_t attribs[] = {PP_GRAPHICS3DATTRIB_WIDTH, 800,
  *                      PP_GRAPHICS3DATTRIB_HEIGHT, 800,
  *                      PP_GRAPHICS3DATTRIB_NONE};
- * context = g3d->Create(instance, attribs, &context);
+ * context = g3d->Create(instance, 0, attribs);
  * inst->BindGraphics(instance, context);
  * @endcode
  *
  * <strong>Present one frame:</strong>
  * @code
- * gles2->Clear(context, GL_COLOR_BUFFER);
- * g3d->SwapBuffers(context);
+ * PP_CompletionCallback callback = {
+ *   DidFinishSwappingBuffers, 0, PP_COMPLETIONCALLBACK_FLAG_NONE,
+ * };
+ * gles2->Clear(context, GL_COLOR_BUFFER_BIT);
+ * g3d->SwapBuffers(context, callback);
  * @endcode
  *
  * <strong>Shutdown:</strong>
@@ -102,7 +105,7 @@ struct PPB_Graphics3D_1_0 {
    * already shares with, and the newly created context. An arbitrary number of
    * <code>PPB_Graphics3D</code> can share data in this fashion.
    *
-   * @param[out] attrib_list specifies a list of attributes for the context.
+   * @param[in] attrib_list specifies a list of attributes for the context.
    * It is a list of attribute name-value pairs in which each attribute is
    * immediately followed by the corresponding desired value. The list is
    * terminated with <code>PP_GRAPHICS3DATTRIB_NONE</code>.

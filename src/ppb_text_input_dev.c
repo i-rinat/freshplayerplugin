@@ -6,7 +6,7 @@
 
 static
 void
-ppb_text_input_dev_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type type)
+ppb_text_input_dev_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type_Dev type)
 {
     trace_info("[PPB] {zilch} %s instance=%d, type=%s\n", __func__, instance,
                reverse_pp_text_input_type(type));
