@@ -12,7 +12,7 @@
 #include "interface_list.h"
 #include "tables.h"
 #include <ppapi/c/ppp_instance.h>
-#include "ppp_entry.h"
+#include "globals.h"
 
 #define NO_IMPL assert(0 && "no implementation yet")
 
@@ -67,7 +67,17 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     priv->instance_loaded = 1;
     tables_add_pp_np_mapping(priv->pp_instance_id, priv);
 
-    pthread_create(&priv->pp_thread, NULL, pepper_plugin_thread_func, priv);
+    // request windowless operation
+    npn.setvalue(instance, NPPVpluginWindowBool, (void*)0);
+
+    priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
+    trace_info("-----------------------------------------\n");
+    PP_Resource urll = ppb_url_loader_interface_1_0.Create(priv->pp_instance_id);
+    PP_Resource urlri = ppb_url_request_info_interface_1_0.Create(priv->pp_instance_id);
+    ppb_url_loader_interface_1_0.Open(urll, urlri, PP_BlockUntilComplete());
+    trace_info("=========================================\n");
+    priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
+    trace_info("=========================================\n");
 
     return NPERR_NO_ERROR;
 }
