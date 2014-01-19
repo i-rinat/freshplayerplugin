@@ -45,6 +45,7 @@
 
 extern const struct PPB_Core_1_0                    ppb_core_interface_1_0;
 extern const struct PPB_AudioConfig_1_1             ppb_audio_config_interface_1_1;
+extern const struct PPB_AudioInput_Dev_0_3          ppb_audio_input_dev_interface_0_3;
 extern const struct PPB_AudioInput_Dev_0_4          ppb_audio_input_dev_interface_0_4;
 extern const struct PPB_Audio_1_0                   ppb_audio_interface_1_0;
 extern const struct PPB_BrowserFont_Trusted_1_0     ppb_browser_font_trusted_interface_1_0;

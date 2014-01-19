@@ -15,6 +15,8 @@ ppb_get_interface(const char *interface_name)
         return &ppb_core_interface_1_0;
     } else if (!strcmp(interface_name, PPB_AUDIO_CONFIG_INTERFACE_1_1)) {
         return &ppb_audio_config_interface_1_1;
+    } else if (!strcmp(interface_name, PPB_AUDIO_INPUT_DEV_INTERFACE_0_3)) {
+        return &ppb_audio_input_dev_interface_0_3;
     } else if (!strcmp(interface_name, PPB_AUDIO_INPUT_DEV_INTERFACE_0_4)) {
         return &ppb_audio_input_dev_interface_0_4;
     } else if (!strcmp(interface_name, PPB_AUDIO_INTERFACE_1_0)) {

@@ -39,6 +39,16 @@ ppb_audio_input_dev_monitor_device_change(PP_Resource audio_input,
 
 static
 int32_t
+ppb_audio_input_dev_open_0_3(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
+                         PPB_AudioInput_Callback_0_2 audio_input_callback, void *user_data,
+                         struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__);
+    return 0;
+}
+
+static
+int32_t
 ppb_audio_input_dev_open(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
                          PPB_AudioInput_Callback audio_input_callback, void *user_data,
                          struct PP_CompletionCallback callback)
@@ -78,6 +88,17 @@ ppb_audio_input_dev_close(PP_Resource audio_input)
     trace_info("[PPB] {zilch} %s\n", __func__);
 }
 
+const struct PPB_AudioInput_Dev_0_3 ppb_audio_input_dev_interface_0_3 = {
+    .Create = ppb_audio_input_dev_create,
+    .IsAudioInput = ppb_audio_input_dev_is_audio_input,
+    .EnumerateDevices = ppb_audio_input_dev_enumerate_devices,
+    .MonitorDeviceChange = ppb_audio_input_dev_monitor_device_change,
+    .Open = ppb_audio_input_dev_open_0_3,
+    .GetCurrentConfig = ppb_audio_input_dev_get_current_config,
+    .StartCapture = ppb_audio_input_dev_start_capture,
+    .StopCapture = ppb_audio_input_dev_stop_capture,
+    .Close = ppb_audio_input_dev_close
+};
 
 const struct PPB_AudioInput_Dev_0_4 ppb_audio_input_dev_interface_0_4 = {
     .Create = ppb_audio_input_dev_create,
