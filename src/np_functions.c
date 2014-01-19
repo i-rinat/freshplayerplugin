@@ -88,7 +88,8 @@ NPP_Destroy(NPP instance, NPSavedData** save)
     trace_info("[NPP] {full} %s instance=%p, save=%p\n", __func__, instance, save);
     struct np_priv_s *priv = instance->pdata;
     priv->ppp_instance_1_1->DidDestroy(priv->pp_instance_id);
-    *save = NULL;
+    if (save)
+        *save = NULL;
     return NPERR_NO_ERROR;
 }
 
