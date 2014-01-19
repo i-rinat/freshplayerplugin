@@ -2,7 +2,6 @@
 #include <stddef.h>
 #include "trace.h"
 
-static
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
@@ -10,7 +9,6 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
     return PP_TRUE;
 }
 
-static
 PP_Bool
 ppb_instance_is_full_frame(PP_Instance instance)
 {

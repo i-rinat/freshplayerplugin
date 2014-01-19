@@ -26,7 +26,6 @@ destructor_ppb_crypto_dev(void)
     close(rand_fd);
 }
 
-static
 void
 ppb_crypto_dev_get_random_bytes(char *buffer, uint32_t num_bytes)
 {

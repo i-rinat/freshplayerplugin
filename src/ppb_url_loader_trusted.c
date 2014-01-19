@@ -3,14 +3,12 @@
 #include "trace.h"
 
 
-static
 void
 ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
 {
     trace_info("[PPB] {zilch} %s loader=%d\n", __func__, loader);
 }
 
-static
 void
 ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
                                                 PP_URLLoaderTrusted_StatusCallback cb)

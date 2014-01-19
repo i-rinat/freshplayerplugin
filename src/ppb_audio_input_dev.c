@@ -3,7 +3,6 @@
 #include "trace.h"
 
 
-static
 PP_Resource
 ppb_audio_input_dev_create(PP_Instance instance)
 {
@@ -11,7 +10,6 @@ ppb_audio_input_dev_create(PP_Instance instance)
     return 0;
 }
 
-static
 PP_Bool
 ppb_audio_input_dev_is_audio_input(PP_Resource resource)
 {
@@ -19,7 +17,6 @@ ppb_audio_input_dev_is_audio_input(PP_Resource resource)
     return PP_TRUE;
 }
 
-static
 int32_t
 ppb_audio_input_dev_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput output,
                                       struct PP_CompletionCallback callback)
@@ -28,7 +25,6 @@ ppb_audio_input_dev_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOu
     return 0;
 }
 
-static
 int32_t
 ppb_audio_input_dev_monitor_device_change(PP_Resource audio_input,
                                           PP_MonitorDeviceChangeCallback callback, void *user_data)
@@ -37,7 +33,6 @@ ppb_audio_input_dev_monitor_device_change(PP_Resource audio_input,
     return 0;
 }
 
-static
 int32_t
 ppb_audio_input_dev_open_0_3(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
                          PPB_AudioInput_Callback_0_2 audio_input_callback, void *user_data,
@@ -47,7 +42,6 @@ ppb_audio_input_dev_open_0_3(PP_Resource audio_input, PP_Resource device_ref, PP
     return 0;
 }
 
-static
 int32_t
 ppb_audio_input_dev_open(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
                          PPB_AudioInput_Callback audio_input_callback, void *user_data,
@@ -57,7 +51,6 @@ ppb_audio_input_dev_open(PP_Resource audio_input, PP_Resource device_ref, PP_Res
     return 0;
 }
 
-static
 PP_Resource
 ppb_audio_input_dev_get_current_config(PP_Resource audio_input)
 {
@@ -65,7 +58,6 @@ ppb_audio_input_dev_get_current_config(PP_Resource audio_input)
     return 0;
 }
 
-static
 PP_Bool
 ppb_audio_input_dev_start_capture(PP_Resource audio_input)
 {
@@ -73,7 +65,6 @@ ppb_audio_input_dev_start_capture(PP_Resource audio_input)
     return 0;
 }
 
-static
 PP_Bool
 ppb_audio_input_dev_stop_capture(PP_Resource audio_input)
 {
@@ -81,7 +72,6 @@ ppb_audio_input_dev_stop_capture(PP_Resource audio_input)
     return 0;
 }
 
-static
 void
 ppb_audio_input_dev_close(PP_Resource audio_input)
 {

@@ -8,7 +8,6 @@
 #include "reverse_constant.h"
 
 
-static
 PP_Resource
 ppb_url_request_info_create(PP_Instance instance)
 {
@@ -16,7 +15,6 @@ ppb_url_request_info_create(PP_Instance instance)
     return pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO);
 }
 
-static
 PP_Bool
 ppb_url_request_info_is_url_request_info(PP_Resource resource)
 {
@@ -24,7 +22,6 @@ ppb_url_request_info_is_url_request_info(PP_Resource resource)
     return PP_RESOURCE_URL_REQUEST_INFO == pp_resource_get_type(resource);
 }
 
-static
 PP_Bool
 ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty property,
                                   struct PP_Var value)
@@ -83,7 +80,6 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
     return PP_TRUE;
 }
 
-static
 PP_Bool
 ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, uint32_t len)
 {
@@ -91,7 +87,6 @@ ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, 
     return PP_TRUE;
 }
 
-static
 PP_Bool
 ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource file_ref,
                                          int64_t start_offset, int64_t number_of_bytes,

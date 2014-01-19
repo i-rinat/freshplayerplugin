@@ -3,7 +3,6 @@
 #include "trace.h"
 
 
-static
 PP_Bool
 ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
 {
@@ -11,7 +10,6 @@ ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
     return PP_TRUE;
 }
 
-static
 PP_Bool
 ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 {
@@ -19,7 +17,6 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
     return PP_TRUE;
 }
 
-static
 PP_Bool
 ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size* size)
 {

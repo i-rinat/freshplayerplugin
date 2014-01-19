@@ -4,14 +4,13 @@
 #include "trace.h"
 #include "reverse_constant.h"
 
-static
+
 void
 ppb_flash_set_instance_always_on_top(PP_Instance instance, PP_Bool on_top)
 {
     trace_info("[PPB] {zilch} %s\n", __func__);
 }
 
-static
 PP_Bool
 ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
                       const struct PP_BrowserFont_Trusted_Description *font_desc,
@@ -35,7 +34,6 @@ ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
     return PP_TRUE;
 }
 
-static
 struct PP_Var
 ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
 {
@@ -44,7 +42,6 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
     return var;
 }
 
-static
 int32_t
 ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
@@ -53,7 +50,6 @@ ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_us
     return 0;
 }
 
-static
 double
 ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 {
@@ -69,14 +65,12 @@ ppb_flash_get_command_line_args(PP_Module module)
     return var;
 }
 
-static
 void
 ppb_flash_preload_font_win(const void *logfontw)
 {
     trace_info("[PPB] {zilch} %s logfontw=%p\n", __func__, logfontw);
 }
 
-static
 PP_Bool
 ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect)
 {
@@ -86,14 +80,12 @@ ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect)
     return PP_TRUE;
 }
 
-static
 void
 ppb_flash_update_activity(PP_Instance instance)
 {
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__, instance);
 }
 
-static
 struct PP_Var
 ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
@@ -140,7 +132,6 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
     return var;
 }
 
-static
 PP_Bool
 ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struct PP_Var value)
 {
@@ -150,7 +141,6 @@ ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struct PP_V
     return PP_TRUE;
 }
 
-static
 int32_t
 ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resource video_capture,
                                           struct PP_ArrayOutput devices)

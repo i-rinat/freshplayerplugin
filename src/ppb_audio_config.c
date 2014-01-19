@@ -3,7 +3,6 @@
 #include "trace.h"
 
 
-static
 PP_Resource
 ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                       uint32_t sample_frame_count)
@@ -12,7 +11,6 @@ ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate s
     return 0;
 }
 
-static
 uint32_t
 ppb_audio_config_recommend_sample_frame_count(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                               uint32_t requested_sample_frame_count)
@@ -21,7 +19,6 @@ ppb_audio_config_recommend_sample_frame_count(PP_Instance instance, PP_AudioSamp
     return 0;
 }
 
-static
 PP_Bool
 ppb_audio_config_is_audio_config(PP_Resource resource)
 {
@@ -29,7 +26,6 @@ ppb_audio_config_is_audio_config(PP_Resource resource)
     return PP_TRUE;
 }
 
-static
 PP_AudioSampleRate
 ppb_audio_config_get_sample_rate(PP_Resource config)
 {
@@ -37,7 +33,6 @@ ppb_audio_config_get_sample_rate(PP_Resource config)
     return 0;
 }
 
-static
 uint32_t
 ppb_audio_config_get_sample_frame_count(PP_Resource config)
 {
@@ -45,7 +40,6 @@ ppb_audio_config_get_sample_frame_count(PP_Resource config)
     return 0;
 }
 
-static
 PP_AudioSampleRate
 ppb_audio_config_recommend_sample_rate(PP_Instance instance)
 {

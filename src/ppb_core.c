@@ -16,7 +16,6 @@ ppb_core_constructor(void)
     main_thread = pthread_self();
 }
 
-static
 void
 ppb_core_add_ref_resource(PP_Resource resource)
 {
@@ -24,7 +23,6 @@ ppb_core_add_ref_resource(PP_Resource resource)
     pp_resource_ref(resource);
 }
 
-static
 void
 ppb_core_release_resource(PP_Resource resource)
 {
@@ -32,7 +30,6 @@ ppb_core_release_resource(PP_Resource resource)
     pp_resource_unref(resource);
 }
 
-static
 PP_Time
 ppb_core_get_time(void)
 {
@@ -42,7 +39,6 @@ ppb_core_get_time(void)
     return t.tv_sec + t.tv_nsec / 1e9;
 }
 
-static
 PP_TimeTicks
 ppb_core_get_time_ticks(void)
 {
@@ -52,7 +48,6 @@ ppb_core_get_time_ticks(void)
     return t.tv_sec + t.tv_nsec / 1e9;
 }
 
-static
 void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result)
@@ -62,7 +57,6 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
                callback.user_data, callback.flags, result);
 }
 
-static
 PP_Bool
 ppb_core_is_main_thread(void)
 {

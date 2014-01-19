@@ -4,7 +4,6 @@
 #include "reverse_constant.h"
 
 
-static
 PP_Bool
 ppb_url_response_info_is_url_response_info(PP_Resource resource)
 {
@@ -12,7 +11,6 @@ ppb_url_response_info_is_url_response_info(PP_Resource resource)
     return PP_TRUE;
 }
 
-static
 struct PP_Var
 ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
@@ -22,7 +20,6 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
     return var;
 }
 
-static
 PP_Resource
 ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 {

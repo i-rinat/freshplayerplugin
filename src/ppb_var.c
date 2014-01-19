@@ -7,7 +7,6 @@
 #include "tables.h"
 
 
-static
 void
 ppb_var_add_ref(struct PP_Var var)
 {
@@ -22,7 +21,6 @@ ppb_var_add_ref(struct PP_Var var)
     }
 }
 
-static
 void
 ppb_var_release(struct PP_Var var)
 {
@@ -38,7 +36,6 @@ ppb_var_release(struct PP_Var var)
     }
 }
 
-static
 struct PP_Var
 ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
 {
@@ -54,7 +51,6 @@ ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
     return var;
 }
 
-static
 struct PP_Var
 ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
 {
@@ -71,7 +67,6 @@ ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
     return var;
 }
 
-static
 const char *
 ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
 {

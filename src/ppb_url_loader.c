@@ -4,7 +4,6 @@
 #include "pp_resource.h"
 
 
-static
 PP_Resource
 ppb_url_loader_create(PP_Instance instance)
 {
@@ -12,7 +11,6 @@ ppb_url_loader_create(PP_Instance instance)
     return pp_resource_allocate(PP_RESOURCE_URL_LOADER);
 }
 
-static
 PP_Bool
 ppb_url_loader_is_url_loader(PP_Resource resource)
 {
@@ -20,7 +18,6 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
     return PP_RESOURCE_URL_LOADER == pp_resource_get_type(resource);
 }
 
-static
 int32_t
 ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback)
@@ -31,7 +28,6 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     return 0;
 }
 
-static
 int32_t
 ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback callback)
 {
@@ -40,7 +36,6 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     return 0;
 }
 
-static
 PP_Bool
 ppb_url_loader_get_upload_progress(PP_Resource loader, int64_t *bytes_sent,
                                    int64_t *total_bytes_to_be_sent)
@@ -49,7 +44,6 @@ ppb_url_loader_get_upload_progress(PP_Resource loader, int64_t *bytes_sent,
     return PP_TRUE;
 }
 
-static
 PP_Bool
 ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received,
                                      int64_t *total_bytes_to_be_received)
@@ -58,7 +52,6 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
     return PP_TRUE;
 }
 
-static
 PP_Resource
 ppb_url_loader_get_response_info(PP_Resource loader)
 {
@@ -66,7 +59,6 @@ ppb_url_loader_get_response_info(PP_Resource loader)
     return 0;
 }
 
-static
 int32_t
 ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t bytes_to_read,
                                   struct PP_CompletionCallback callback)
@@ -77,7 +69,6 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
     return 0;
 }
 
-static
 int32_t
 ppb_url_loader_finish_streaming_to_file(PP_Resource loader, struct PP_CompletionCallback callback)
 {
@@ -86,7 +77,6 @@ ppb_url_loader_finish_streaming_to_file(PP_Resource loader, struct PP_Completion
     return 0;
 }
 
-static
 void
 ppb_url_loader_close(PP_Resource loader)
 {

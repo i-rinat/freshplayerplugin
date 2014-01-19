@@ -19,6 +19,7 @@ static const char *pepper_data_dir = "/tmp/freshplayerplugin";
 
 
 /// resolve pp module local path to absolute one
+static
 char *
 to_abs_path(const char *s)
 {
@@ -83,7 +84,6 @@ err:
     return NULL;
 }
 
-static
 PP_Bool
 ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance instance)
 {
@@ -92,7 +92,6 @@ ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance instan
     return PP_TRUE;
 }
 
-static
 void
 ppb_flash_file_modulelocal_clear_thread_adapter_for_instance(PP_Instance instance)
 {
@@ -123,7 +122,6 @@ pp_mode_to_open_mode(int32_t mode)
     return ret;
 }
 
-static
 int32_t
 ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
                                      PP_FileHandle *file)
@@ -143,7 +141,6 @@ ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int
         }
 }
 
-static
 int32_t
 ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *path_from,
                                        const char *path_to)
@@ -153,7 +150,6 @@ ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *path_fr
     return 0;
 }
 
-static
 int32_t
 ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *path,
                                               PP_Bool recursive)
@@ -163,7 +159,6 @@ ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *
     return 0;
 }
 
-static
 int32_t
 ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
 {
@@ -182,7 +177,6 @@ ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
     return PP_OK;
 }
 
-static
 int32_t
 ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
                                       struct PP_FileInfo *info)
@@ -218,7 +212,6 @@ ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
     return PP_OK;
 }
 
-static
 int32_t
 ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const char *path,
                                             struct PP_DirContents_Dev **contents)
@@ -260,8 +253,6 @@ err:
     return PP_ERROR_FAILED;
 }
 
-
-static
 void
 ppb_flash_file_modulelocal_free_dir_contents(PP_Instance instance,
                                              struct PP_DirContents_Dev *contents)
@@ -273,7 +264,6 @@ ppb_flash_file_modulelocal_free_dir_contents(PP_Instance instance,
     free(contents);
 }
 
-static
 int32_t
 ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHandle *file)
 {

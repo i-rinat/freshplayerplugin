@@ -6,7 +6,6 @@
 #include "tables.h"
 
 
-static
 struct PP_Var
 ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
@@ -15,7 +14,6 @@ ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *co
     return var;
 }
 
-static
 struct PP_Var
 ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
                                          struct PP_URLComponents_Dev *components)
@@ -25,7 +23,6 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
     return var;
 }
 
-static
 struct PP_Var
 ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
                                               struct PP_URLComponents_Dev *components)
@@ -35,7 +32,6 @@ ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Va
     return var;
 }
 
-static
 PP_Bool
 ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
 {
@@ -43,7 +39,6 @@ ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_
     return PP_TRUE;
 }
 
-static
 PP_Bool
 ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
 {
@@ -51,7 +46,6 @@ ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
     return PP_TRUE;
 }
 
-static
 PP_Bool
 ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
 {
@@ -122,7 +116,6 @@ parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
     uriFreeUriMembersA(&uri);
 }
 
-static
 struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
@@ -138,7 +131,6 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
     return var;
 }
 
-static
 struct PP_Var
 ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)

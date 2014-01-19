@@ -4,7 +4,6 @@
 #include "reverse_constant.h"
 
 
-static
 void
 ppb_text_input_dev_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type_Dev type)
 {
@@ -12,7 +11,6 @@ ppb_text_input_dev_interface_set_text_input_type(PP_Instance instance, PP_TextIn
                reverse_pp_text_input_type(type));
 }
 
-static
 void
 ppb_text_input_dev_interface_update_caret_position(PP_Instance instance,
                                                    const struct PP_Rect *caret,
@@ -26,14 +24,12 @@ ppb_text_input_dev_interface_update_caret_position(PP_Instance instance,
     free(bounding_box_str);
 }
 
-static
 void
 ppb_text_input_dev_interface_cancel_composition_text(PP_Instance instance)
 {
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__, instance);
 }
 
-static
 void
 ppb_text_input_dev_interface_update_surrounding_text(PP_Instance instance, const char *text,
                                                      uint32_t caret, uint32_t anchor)
@@ -42,7 +38,6 @@ ppb_text_input_dev_interface_update_surrounding_text(PP_Instance instance, const
                text, caret, anchor);
 }
 
-static
 void
 ppb_text_input_dev_interface_selection_changed(PP_Instance instance)
 {

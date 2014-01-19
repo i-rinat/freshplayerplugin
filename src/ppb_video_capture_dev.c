@@ -3,7 +3,6 @@
 #include "trace.h"
 
 
-static
 PP_Resource
 ppb_video_capture_dev_create(PP_Instance instance)
 {
@@ -11,7 +10,6 @@ ppb_video_capture_dev_create(PP_Instance instance)
     return 0;
 }
 
-static
 PP_Bool
 ppb_video_capture_dev_is_video_capture(PP_Resource video_capture)
 {
@@ -19,7 +17,6 @@ ppb_video_capture_dev_is_video_capture(PP_Resource video_capture)
     return PP_TRUE;
 }
 
-static
 int32_t
 ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOutput output,
                                         struct PP_CompletionCallback callback)
@@ -28,7 +25,6 @@ ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture, struct PP_Arr
     return 0;
 }
 
-static
 int32_t
 ppb_video_capture_dev_monitor_device_change(PP_Resource video_capture,
                                             PP_MonitorDeviceChangeCallback callback,
@@ -38,7 +34,6 @@ ppb_video_capture_dev_monitor_device_change(PP_Resource video_capture,
     return 0;
 }
 
-static
 int32_t
 ppb_video_capture_dev_open(PP_Resource video_capture, PP_Resource device_ref,
                            const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
@@ -48,7 +43,6 @@ ppb_video_capture_dev_open(PP_Resource video_capture, PP_Resource device_ref,
     return 0;
 }
 
-static
 int32_t
 ppb_video_capture_dev_start_capture(PP_Resource video_capture)
 {
@@ -56,7 +50,6 @@ ppb_video_capture_dev_start_capture(PP_Resource video_capture)
     return 0;
 }
 
-static
 int32_t
 ppb_video_capture_dev_reuse_buffer(PP_Resource video_capture, uint32_t buffer)
 {
@@ -64,7 +57,6 @@ ppb_video_capture_dev_reuse_buffer(PP_Resource video_capture, uint32_t buffer)
     return 0;
 }
 
-static
 int32_t
 ppb_video_capture_dev_stop_capture(PP_Resource video_capture)
 {
@@ -72,7 +64,6 @@ ppb_video_capture_dev_stop_capture(PP_Resource video_capture)
     return 0;
 }
 
-static
 void
 ppb_video_capture_dev_close(PP_Resource video_capture)
 {
