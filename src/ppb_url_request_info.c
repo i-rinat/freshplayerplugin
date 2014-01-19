@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ppapi/c/ppb_url_request_info.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -31,6 +32,53 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
     char *value_str = trace_var_as_string(value);
     trace_info("[PPB] {zilch} %s request=%d, property=%s, value=%s\n", __func__, request,
                reverse_pp_url_request_property(property), value_str);
+    switch (property) {
+    case PP_URLREQUESTPROPERTY_URL:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_METHOD:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_HEADERS:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_STREAMTOFILE:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_FOLLOWREDIRECTS:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_RECORDDOWNLOADPROGRESS:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_RECORDUPLOADPROGRESS:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_CUSTOMREFERRERURL:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_ALLOWCROSSORIGINREQUESTS:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_ALLOWCREDENTIALS:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_CUSTOMCONTENTTRANSFERENCODING:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_PREFETCHBUFFERUPPERTHRESHOLD:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_PREFETCHBUFFERLOWERTHRESHOLD:
+        assert(0);
+        break;
+    case PP_URLREQUESTPROPERTY_CUSTOMUSERAGENT:
+        assert(0);
+        break;
+    default:
+        assert(0);
+        break;
+    }
     free(value_str);
     return PP_TRUE;
 }
