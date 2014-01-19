@@ -10,6 +10,7 @@
 #include <ppapi/c/ppb.h>
 #include <ppapi/c/ppb_image_data.h>
 #include <ppapi/c/ppb_instance.h>
+#include <ppapi/c/ppb_network_monitor.h>
 #include <ppapi/c/ppb_opengles2.h>
 #include <ppapi/c/ppb_url_loader.h>
 #include <ppapi/c/ppb_url_request_info.h>
@@ -72,6 +73,7 @@ extern const struct PPB_Instance_1_0                ppb_instance_interface_1_0;
 extern const struct PPB_Instance_Private_0_1        ppb_instance_private_interface_0_1;
 extern const struct PPB_Memory_Dev_0_1              ppb_memory_dev_interface_0_1;
 extern const struct PPB_NetAddress_Private_1_1      ppb_net_address_private_interface_1_1;
+extern const struct PPB_NetworkMonitor_1_0          ppb_network_monitor_interface_1_0;
 extern const struct PPB_OpenGLES2ChromiumMapSub     ppb_opengles2_chromium_map_sub_interface_1_0;
 extern const struct PPB_OpenGLES2                   ppb_opengles2_interface_1_0;
 extern const struct PPB_TCPSocket_Private_0_4       ppb_tcp_socket_private_interface_0_4;

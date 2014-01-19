@@ -69,6 +69,8 @@ ppb_get_interface(const char *interface_name)
         return &ppb_memory_dev_interface_0_1;
     } else if (!strcmp(interface_name, PPB_NETADDRESS_PRIVATE_INTERFACE_1_1)) {
         return &ppb_net_address_private_interface_1_1;
+    } else if (!strcmp(interface_name, PPB_NETWORKMONITOR_INTERFACE_1_0)) {
+        return &ppb_network_monitor_interface_1_0;
     } else if (!strcmp(interface_name, PPB_OPENGLES2_CHROMIUMMAPSUB_INTERFACE_1_0)) {
         return &ppb_opengles2_chromium_map_sub_interface_1_0;
     } else if (!strcmp(interface_name, PPB_OPENGLES2_INTERFACE_1_0)) {
