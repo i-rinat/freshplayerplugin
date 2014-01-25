@@ -10,7 +10,6 @@ struct PP_Var
 ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("[PPB] {zilch} %s\n", __func__);
     return var;
 }
 
@@ -19,7 +18,6 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
                                          struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("[PPB] {zilch} %s\n", __func__);
     return var;
 }
 
@@ -28,28 +26,24 @@ ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Va
                                               struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("[PPB] {zilch} %s\n", __func__);
     return var;
 }
 
 PP_Bool
 ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__);
     return PP_TRUE;
 }
 
 PP_Bool
 ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__);
     return PP_TRUE;
 }
 
 PP_Bool
 ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
 {
-    trace_info("[PPB] {zilch} %s active=%d, target=%d\n", __func__, active, target);
     return PP_TRUE;
 }
 
@@ -120,7 +114,7 @@ struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    trace_info("[PPB] {fake} %s instance=%d\n", __func__, instance);
+
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (int64_t)(void*)strdup("http://127.0.0.1/flashtest/");
     tables_ref_var(var);
@@ -137,7 +131,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
 {
     struct PP_Var var = {0};
     struct np_priv_s *priv = tables_pp_instance_to_np_priv(instance);
-    trace_info("[PPB] {full} %s instance=%d\n", __func__, instance);
+
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (int64_t)(void*)strdup(priv->instance_url);
     tables_ref_var(var);
@@ -148,13 +142,85 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
     return var;
 }
 
+// trace wrappers
+static
+struct PP_Var
+trace_ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_url_util_dev_canonicalize(url, components);
+}
+
+static
+struct PP_Var
+trace_ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url,
+                                               struct PP_Var relative_string,
+                                               struct PP_URLComponents_Dev *components)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_url_util_dev_resolve_relative_to_url(base_url, relative_string, components);
+}
+
+static
+struct PP_Var
+trace_ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance,
+                                                    struct PP_Var relative_string,
+                                                    struct PP_URLComponents_Dev *components)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_url_util_dev_resolve_relative_to_document(instance, relative_string, components);
+}
+
+static
+PP_Bool
+trace_ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_url_util_dev_is_same_security_origin(url_a, url_b);
+}
+
+static
+PP_Bool
+trace_ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_url_util_dev_document_can_request(instance, url);
+}
+
+static
+PP_Bool
+trace_ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
+{
+    trace_info("[PPB] {zilch} %s active=%d, target=%d\n", __func__+6, active, target);
+    return ppb_url_util_dev_document_can_access_document(active, target);
+}
+
+static
+struct PP_Var
+trace_ppb_url_util_dev_get_document_url(PP_Instance instance,
+                                        struct PP_URLComponents_Dev *components)
+{
+    trace_info("[PPB] {fake} %s instance=%d\n", __func__+6, instance);
+    return ppb_url_util_dev_get_document_url(instance, components);
+}
+
+static
+struct PP_Var
+trace_ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
+                                               struct PP_URLComponents_Dev *components)
+{
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
+    return ppb_url_util_dev_get_plugin_instance_url(instance, components);
+}
+
+
 const struct PPB_URLUtil_Dev_0_6 ppb_url_util_dev_interface_0_6 = {
-    .Canonicalize = ppb_url_util_dev_canonicalize,
-    .ResolveRelativeToURL = ppb_url_util_dev_resolve_relative_to_url,
-    .ResolveRelativeToDocument = ppb_url_util_dev_resolve_relative_to_document,
-    .IsSameSecurityOrigin = ppb_url_util_dev_is_same_security_origin,
-    .DocumentCanRequest = ppb_url_util_dev_document_can_request,
-    .DocumentCanAccessDocument = ppb_url_util_dev_document_can_access_document,
-    .GetDocumentURL = ppb_url_util_dev_get_document_url,
-    .GetPluginInstanceURL = ppb_url_util_dev_get_plugin_instance_url
+    .Canonicalize =             trace_ppb_url_util_dev_canonicalize,
+    .ResolveRelativeToURL =     trace_ppb_url_util_dev_resolve_relative_to_url,
+    .ResolveRelativeToDocument = trace_ppb_url_util_dev_resolve_relative_to_document,
+    .IsSameSecurityOrigin =     trace_ppb_url_util_dev_is_same_security_origin,
+    .DocumentCanRequest =       trace_ppb_url_util_dev_document_can_request,
+    .DocumentCanAccessDocument = trace_ppb_url_util_dev_document_can_access_document,
+    .GetDocumentURL =           trace_ppb_url_util_dev_get_document_url,
+    .GetPluginInstanceURL =     trace_ppb_url_util_dev_get_plugin_instance_url
 };
