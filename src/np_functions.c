@@ -39,6 +39,10 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     struct np_priv_s *priv;
     trace_info("[NPP] {part} %s pluginType=%s instance=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                pluginType, instance, mode, argc, saved);
+
+    if (!obligatory_npp_instance)
+        obligatory_npp_instance = instance;
+
     for (k = 0; k < argc; k ++)
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
