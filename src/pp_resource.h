@@ -26,6 +26,7 @@ struct pp_url_request_info_resource_s {
 
 struct pp_url_response_info_resource_s {
     struct pp_resource_generic_s _parent;
+    PP_Resource     url_loader;
 };
 
 

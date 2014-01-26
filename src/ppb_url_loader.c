@@ -46,7 +46,12 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
 PP_Resource
 ppb_url_loader_get_response_info(PP_Resource loader)
 {
-    return 0;
+    PP_Resource ri = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO);
+    struct pp_url_response_info_resource_s *rir = pp_resource_acquire(ri);
+
+    rir->url_loader = loader;
+    pp_resource_release(ri);
+    return ri;
 }
 
 int32_t
@@ -127,7 +132,7 @@ static
 PP_Resource
 trace_ppb_url_loader_get_response_info(PP_Resource loader)
 {
-    trace_info("[PPB] {zilch} %s loader=%d\n", __func__+6, loader);
+    trace_info("[PPB] {full} %s loader=%d\n", __func__+6, loader);
     return ppb_url_loader_get_response_info(loader);
 }
 
