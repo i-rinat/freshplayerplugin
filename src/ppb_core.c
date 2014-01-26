@@ -1,9 +1,11 @@
+#include <assert.h>
 #include <ppapi/c/ppb_core.h>
 #include <stddef.h>
 #include <pthread.h>
 #include <time.h>
 #include "trace.h"
 #include "pp_resource.h"
+#include "globals.h"
 
 
 static pthread_t main_thread;
@@ -44,10 +46,34 @@ ppb_core_get_time_ticks(void)
     return t.tv_sec + t.tv_nsec / 1e9;
 }
 
+struct comt_proxy_param_s {
+    struct PP_CompletionCallback    callback;
+    int32_t                         result_to_pass;
+};
+
+static
+void
+comt_proxy(void *param)
+{
+    struct comt_proxy_param_s *p = param;
+
+    if (p->callback.func) {
+        p->callback.func(p->callback.user_data, p->result_to_pass);
+    }
+    free(p);
+}
+
 void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result)
 {
+    struct comt_proxy_param_s *p = malloc(sizeof(*p));
+
+    p->callback.func = callback.func;
+    p->callback.user_data = callback.user_data;
+    p->callback.flags = callback.flags;
+    p->result_to_pass = result;
+    npn.pluginthreadasynccall(obligatory_npp_instance, comt_proxy, p);
     return;
 }
 
@@ -95,7 +121,7 @@ void
 trace_ppb_core_call_on_main_thread(int32_t delay_in_milliseconds,
                                    struct PP_CompletionCallback callback, int32_t result)
 {
-    trace_info("[PPB] {zilch} %s delay_in_milliseconds=%d, callback={.func=%p, .user_data=%p, "
+    trace_info("[PPB] {full} %s delay_in_milliseconds=%d, callback={.func=%p, .user_data=%p, "
                ".flags=%d}, result=%d\n", __func__+6, delay_in_milliseconds, callback.func,
                callback.user_data, callback.flags, result);
     ppb_core_call_on_main_thread(delay_in_milliseconds, callback, result);
