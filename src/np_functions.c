@@ -72,10 +72,9 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
 
     priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
     trace_info("-----------------------------------------\n");
-    PP_Resource urll = ppb_url_loader_interface_1_0.Create(priv->pp_instance_id);
-    PP_Resource urlri = ppb_url_request_info_interface_1_0.Create(priv->pp_instance_id);
-    ppb_url_loader_interface_1_0.Open(urll, urlri, PP_BlockUntilComplete());
-    trace_info("=========================================\n");
+    PP_Resource urll = ppb_url_loader_create(priv->pp_instance_id);
+    PP_Resource urlri = ppb_url_request_info_create(priv->pp_instance_id);
+    ppb_url_loader_open(urll, urlri, PP_BlockUntilComplete());
     priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
     trace_info("=========================================\n");
 
