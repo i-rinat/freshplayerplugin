@@ -1,9 +1,18 @@
 #include <glib.h>
+#include <stdlib.h>
+#include <string.h>
 #include "tables.h"
 
 
-static GHashTable *var_ht;
-static GHashTable *pp_to_np_ht;
+// URL/urlloader resource mapping
+struct url_pair_s {
+    const char *url;
+    PP_Resource resource;
+};
+
+static GHashTable  *var_ht;
+static GHashTable  *pp_to_np_ht;
+static GList       *url_pair_list;
 
 static
 void
@@ -12,6 +21,7 @@ constructor_tables(void)
 {
     var_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
     pp_to_np_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+    url_pair_list = NULL;
 }
 
 static
@@ -21,6 +31,7 @@ destructor_tables(void)
 {
     g_hash_table_unref(var_ht);
     g_hash_table_unref(pp_to_np_ht);
+    g_list_free(url_pair_list);
 }
 
 int
@@ -49,4 +60,32 @@ void
 tables_add_pp_np_mapping(PP_Instance instance, struct np_priv_s *priv)
 {
     g_hash_table_replace(pp_to_np_ht, GINT_TO_POINTER(instance), priv);
+}
+
+void               
+tables_push_url_pair(const char *url, PP_Resource resource)
+{
+    struct url_pair_s *pair = malloc(sizeof(*pair));
+    pair->url = url;
+    pair->resource = resource;
+    url_pair_list = g_list_append(url_pair_list, pair);
+}
+
+PP_Resource
+tables_pop_url_pair(const char *url)
+{
+    GList *ptr = g_list_first(url_pair_list);
+    while (ptr) {
+        struct url_pair_s *pair = ptr->data;
+
+        if (!strcmp(pair->url, url)) {
+            PP_Resource ret = pair->resource;
+            url_pair_list = g_list_remove_link(url_pair_list, ptr);
+            g_list_free(ptr);
+            return ret;
+        }
+        ptr = g_list_next(ptr);
+    }
+
+    return 0;
 }
