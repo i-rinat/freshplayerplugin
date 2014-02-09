@@ -1,5 +1,5 @@
-#ifndef FFP__PP_RESOURCE_H
-#define FFP__PP_RESOURCE_H
+#ifndef FPP__PP_RESOURCE_H
+#define FPP__PP_RESOURCE_H
 
 #include <ppapi/c/pp_resource.h>
 
@@ -39,4 +39,4 @@ void                    pp_resource_ref(PP_Resource resource);
 void                    pp_resource_unref(PP_Resource resource);
 
 
-#endif // FFP__PP_RESOURCE_H
+#endif // FPP__PP_RESOURCE_H

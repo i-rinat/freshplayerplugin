@@ -1,5 +1,5 @@
-#ifndef FFP__TRACE_H
-#define FFP__TRACE_H
+#ifndef FPP__TRACE_H
+#define FPP__TRACE_H
 
 #include <ppapi/c/pp_var.h>
 #include <ppapi/c/pp_rect.h>
@@ -13,4 +13,4 @@ char   *trace_rect_as_string(const struct PP_Rect *rect);
 char   *trace_point_as_string(const struct PP_Point *point);
 char   *trace_np_window_as_string(const NPWindow *window);
 
-#endif // FFP__TRACE_H
+#endif // FPP__TRACE_H
