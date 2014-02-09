@@ -4,6 +4,7 @@
 #include "pp_resource.h"
 #include "interface_list.h"
 #include "globals.h"
+#include "tables.h"
 
 
 PP_Resource
@@ -22,9 +23,16 @@ static
 void
 _url_loader_open_comt(void *user_data, int32_t result)
 {
+    struct {
+        const char *url;
+        PP_Resource loader;
+    } *pair = user_data;
+
     // called on main thread
-    printf("hello from main thread\n");
-    npn.geturl(obligatory_npp_instance, "http://127.0.0.1/flashtest/flowplayer-3.2.16.swf", NULL);
+    printf("hello from main thread, url=%s\n", pair->url);
+    tables_push_url_pair(pair->url, pair->loader);
+    npn.geturl(obligatory_npp_instance, pair->url, NULL);
+    free(pair);
 }
 
 int32_t
@@ -33,8 +41,16 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
 {
     struct pp_url_loader_resource_s *ulr = pp_resource_acquire(loader);
     struct pp_url_request_info_resource_s *rir = pp_resource_acquire(request_info);
+    struct {
+        const char *url;
+        PP_Resource loader;
+    } *pair;
 
-    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt};
+    pair = malloc(sizeof(*pair));
+    pair->url = "http://127.0.0.1/flashtest/flowplayer-3.2.16.swf";
+    pair->loader = loader;
+
+    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = pair};
 
     ppb_core_call_on_main_thread(0, mt_cb, 0);
 

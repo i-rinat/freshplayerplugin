@@ -123,6 +123,14 @@ NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, 
                stream->pdata, stream->ndata, stream->url, stream->end, stream->lastmodified,
                stream->headers, seekable);
 
+    PP_Resource loader = tables_pop_url_pair(stream->url);
+    if (!loader) {
+        // ignoring unrequested streams
+        return NPERR_NO_ERROR;
+    }
+
+    printf("Hi from NPP_NewStream. loader = %d\n", loader);
+
     return NPERR_NO_ERROR;
 }
 
