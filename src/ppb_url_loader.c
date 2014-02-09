@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include "trace.h"
 #include "pp_resource.h"
+#include "interface_list.h"
+#include "globals.h"
 
 
 PP_Resource
@@ -16,10 +18,28 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
     return PP_RESOURCE_URL_LOADER == pp_resource_get_type(resource);
 }
 
+static
+void
+_url_loader_open_comt(void *user_data, int32_t result)
+{
+    // called on main thread
+    printf("hello from main thread\n");
+    npn.geturl(obligatory_npp_instance, "http://127.0.0.1/flashtest/flowplayer-3.2.16.swf", NULL);
+}
+
 int32_t
 ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback)
 {
+    struct pp_url_loader_resource_s *ulr = pp_resource_acquire(loader);
+    struct pp_url_request_info_resource_s *rir = pp_resource_acquire(request_info);
+
+    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt};
+
+    ppb_core_call_on_main_thread(0, mt_cb, 0);
+
+    pp_resource_release(request_info);
+    pp_resource_release(loader);
     return 0;
 }
 

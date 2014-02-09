@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "trace.h"
 #include "reverse_constant.h"
+#include "pp_resource.h"
 
 
 PP_Bool
@@ -14,6 +15,26 @@ struct PP_Var
 ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
     struct PP_Var var = {0};
+    struct pp_url_response_info_resource_s *rir = pp_resource_acquire(response);
+    struct pp_url_loader_resource_s *ulr = pp_resource_acquire(rir->url_loader);
+
+    switch (property) {
+    case PP_URLRESPONSEPROPERTY_URL:
+        break;
+    case PP_URLRESPONSEPROPERTY_REDIRECTURL:
+        break;
+    case PP_URLRESPONSEPROPERTY_REDIRECTMETHOD:
+        break;
+    case PP_URLRESPONSEPROPERTY_STATUSCODE:
+        break;
+    case PP_URLRESPONSEPROPERTY_STATUSLINE:
+        break;
+    case PP_URLRESPONSEPROPERTY_HEADERS:
+        break;
+    }
+
+    pp_resource_release(rir->url_loader);
+    pp_resource_release(response);
     return var;
 }
 
