@@ -9,6 +9,7 @@
 #include "reverse_constant.h"
 #include "np.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
 #include "interface_list.h"
 #include "tables.h"
 #include <ppapi/c/ppp_instance.h>
@@ -118,7 +119,7 @@ NPP_SetWindow(NPP instance, NPWindow* window)
 NPError
 NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
+    trace_info("[NPP] {part} %s instance=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
                "end=%u, lastmodified=%u, .headers=%s}, seekable=%d\n", __func__, instance, type,
                stream->pdata, stream->ndata, stream->url, stream->end, stream->lastmodified,
                stream->headers, seekable);
@@ -126,11 +127,17 @@ NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, 
     PP_Resource loader = tables_pop_url_pair(stream->url);
     if (!loader) {
         // ignoring unrequested streams
+        trace_info("      ignoring unrequested stream\n");
         return NPERR_NO_ERROR;
     }
 
-    printf("Hi from NPP_NewStream. loader = %d\n", loader);
+    stream->pdata = (void*)(size_t)loader;
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
 
+    ul->headers = strdup(stream->headers ? stream->headers : "");
+
+    pp_resource_release(loader);
+    printf("Hi from NPP_NewStream. loader = %d\n", loader);
     return NPERR_NO_ERROR;
 }
 
@@ -145,7 +152,7 @@ NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason)
 int32_t
 NPP_WriteReady(NPP instance, NPStream* stream)
 {
-    trace_info("[NPP] {fake} %s instance=%p, stream=%p\n", __func__, instance, stream);
+    trace_info("[NPP] {part} %s instance=%p, stream=%p\n", __func__, instance, stream);
     return 1024*1024;
 }
 
@@ -154,6 +161,12 @@ NPP_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buf
 {
     trace_info("[NPP] {fake} %s instance=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
                instance, stream, offset, len, buffer);
+    PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
+    struct pp_url_loader_resource_s *ul = pp_resource_acquire(loader);
+
+
+
+    pp_resource_release(loader);
     return len;
 }
 

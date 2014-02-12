@@ -16,15 +16,16 @@ struct pp_resource_generic_s {
     int         ref_cnt;
 };
 
-struct pp_url_loader_resource_s {
+struct pp_url_loader_s {
+    struct pp_resource_generic_s _parent;
+    const char *headers;
+};
+
+struct pp_url_request_info_s {
     struct pp_resource_generic_s _parent;
 };
 
-struct pp_url_request_info_resource_s {
-    struct pp_resource_generic_s _parent;
-};
-
-struct pp_url_response_info_resource_s {
+struct pp_url_response_info_s {
     struct pp_resource_generic_s _parent;
     PP_Resource     url_loader;
 };

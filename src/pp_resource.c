@@ -29,13 +29,13 @@ pp_resource_allocate(enum pp_resource_type_e type)
     pthread_mutex_lock(&res_tbl_lock);
     switch (type) {
     case PP_RESOURCE_URL_LOADER:
-        ALLOC_HELPER(struct pp_url_loader_resource_s);
+        ALLOC_HELPER(struct pp_url_loader_s);
         break;
     case PP_RESOURCE_URL_REQUEST_INFO:
-        ALLOC_HELPER(struct pp_url_request_info_resource_s);
+        ALLOC_HELPER(struct pp_url_request_info_s);
         break;
     case PP_RESOURCE_URL_RESPONSE_INFO:
-        ALLOC_HELPER(struct pp_url_response_info_resource_s);
+        ALLOC_HELPER(struct pp_url_response_info_s);
         break;
     default:
         // fall through

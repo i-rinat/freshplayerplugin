@@ -39,8 +39,8 @@ int32_t
 ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback)
 {
-    struct pp_url_loader_resource_s *ulr = pp_resource_acquire(loader);
-    struct pp_url_request_info_resource_s *rir = pp_resource_acquire(request_info);
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+    struct pp_url_request_info_s *ri = pp_resource_acquire(request_info);
     struct {
         const char *url;
         PP_Resource loader;
@@ -82,12 +82,12 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
 PP_Resource
 ppb_url_loader_get_response_info(PP_Resource loader)
 {
-    PP_Resource ri = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO);
-    struct pp_url_response_info_resource_s *rir = pp_resource_acquire(ri);
+    PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO);
+    struct pp_url_response_info_s *ri = pp_resource_acquire(response_info);
 
-    rir->url_loader = loader;
-    pp_resource_release(ri);
-    return ri;
+    ri->url_loader = loader;
+    pp_resource_release(response_info);
+    return response_info;
 }
 
 int32_t
