@@ -2,6 +2,7 @@
 #define FPP__PP_RESOURCE_H
 
 #include <ppapi/c/pp_resource.h>
+#include <stddef.h>
 
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,
@@ -17,8 +18,12 @@ struct pp_resource_generic_s {
 };
 
 struct pp_url_loader_s {
-    struct pp_resource_generic_s _parent;
-    const char *headers;
+    struct pp_resource_generic_s    _parent;
+    const char     *headers;
+    char           *body;
+    size_t          body_size;
+    size_t          body_allocated;
+    int             loaded;         ///< if all stream loaded
 };
 
 struct pp_url_request_info_s {

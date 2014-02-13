@@ -127,6 +127,7 @@ NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, 
     PP_Resource loader = tables_pop_url_pair(stream->url);
     if (!loader) {
         // ignoring unrequested streams
+        stream->pdata = NULL;
         trace_info("      ignoring unrequested stream\n");
         return NPERR_NO_ERROR;
     }
@@ -146,6 +147,14 @@ NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason)
 {
     trace_info("[NPP] {zilch} %s instance=%p, stream=%p, reason=%d\n", __func__,
                instance, stream, reason);
+
+    PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
+    if (!loader)
+        return NPERR_NO_ERROR;
+
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+    ul->loaded = 1;
+    pp_resource_release(loader);
     return NPERR_NO_ERROR;
 }
 
@@ -159,12 +168,25 @@ NPP_WriteReady(NPP instance, NPStream* stream)
 int32_t
 NPP_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer)
 {
-    trace_info("[NPP] {fake} %s instance=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
+    trace_info("[NPP] {part} %s instance=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
                instance, stream, offset, len, buffer);
+
     PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
-    struct pp_url_loader_resource_s *ul = pp_resource_acquire(loader);
+    if (!loader)
+        return len;
 
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
 
+    if (offset + len > ul->body_allocated) {
+        size_t nsize = ul->body_allocated + (ul->body_allocated >> 1);
+        if (offset + len > nsize)
+            nsize = offset + len;
+        ul->body = realloc(ul->body, nsize);
+        ul->body_allocated = nsize;
+    }
+
+    memcpy(ul->body + offset, buffer, len);
+    ul->body_size += len;
 
     pp_resource_release(loader);
     return len;
