@@ -1,9 +1,9 @@
 About
 =====
 
-Use PPAPI Flash Player in browsers with NPAPI support.
+PPAPI-host NPAPI-plugin adapter.
 
 Status
 ======
 
-Exploring API.
+Prototyping.
