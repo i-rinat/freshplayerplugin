@@ -6,6 +6,7 @@
 #include "trace.h"
 #include "pp_resource.h"
 #include "globals.h"
+#include "interface_list.h"
 
 
 static pthread_t main_thread;

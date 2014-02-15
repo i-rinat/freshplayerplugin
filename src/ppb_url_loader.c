@@ -1,5 +1,8 @@
+#define _XOPEN_SOURCE   500
 #include <ppapi/c/ppb_url_loader.h>
 #include <stddef.h>
+#include <pthread.h>
+#include <unistd.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "interface_list.h"
@@ -29,7 +32,6 @@ _url_loader_open_comt(void *user_data, int32_t result)
     } *pair = user_data;
 
     // called on main thread
-    printf("hello from main thread, url=%s\n", pair->url);
     tables_push_url_pair(pair->url, pair->loader);
     npn.geturl(obligatory_npp_instance, pair->url, NULL);
     free(pair);
@@ -51,11 +53,27 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     pair->loader = loader;
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = pair};
-
     ppb_core_call_on_main_thread(0, mt_cb, 0);
+    ul->ccb = callback;
 
     pp_resource_release(request_info);
     pp_resource_release(loader);
+
+    if (callback.func == NULL) {
+        int done = 0;
+        while (!done) {
+            ul = pp_resource_acquire(loader);
+            if (ul) {
+                done = ul->loaded;
+                pp_resource_release(loader);
+            } else {
+                break;
+            }
+            printf("waitin'\n");
+            usleep(10000);
+        }
+    }
+
     return 0;
 }
 

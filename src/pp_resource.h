@@ -2,6 +2,7 @@
 #define FPP__PP_RESOURCE_H
 
 #include <ppapi/c/pp_resource.h>
+#include <ppapi/c/pp_completion_callback.h>
 #include <stddef.h>
 
 enum pp_resource_type_e {
@@ -24,6 +25,7 @@ struct pp_url_loader_s {
     size_t          body_size;
     size_t          body_allocated;
     int             loaded;         ///< if all stream loaded
+    struct PP_CompletionCallback    ccb;
 };
 
 struct pp_url_request_info_s {

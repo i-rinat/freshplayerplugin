@@ -31,6 +31,20 @@ generate_new_pp_instance_id(void)
     return result;
 }
 
+static
+void *fn(void *p)
+{
+    struct np_priv_s *priv = p;
+
+    trace_info("-----------------------------------------\n");
+    PP_Resource urll = ppb_url_loader_create(priv->pp_instance_id);
+    PP_Resource urlri = ppb_url_request_info_create(priv->pp_instance_id);
+    ppb_url_loader_open(urll, urlri, PP_BlockUntilComplete());
+    priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
+    trace_info("=========================================\n");
+    return NULL;
+}
+
 NPError
 NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[],
         char* argv[], NPSavedData* saved)
@@ -76,12 +90,9 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     npn.setvalue(instance, NPPVpluginWindowBool, (void*)0);
 
     priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
-    trace_info("-----------------------------------------\n");
-    PP_Resource urll = ppb_url_loader_create(priv->pp_instance_id);
-    PP_Resource urlri = ppb_url_request_info_create(priv->pp_instance_id);
-    ppb_url_loader_open(urll, urlri, PP_BlockUntilComplete());
-    priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
-    trace_info("=========================================\n");
+
+    pthread_t t;
+    pthread_create(&t, NULL, fn, priv);
 
     return NPERR_NO_ERROR;
 }
@@ -138,14 +149,13 @@ NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, 
     ul->headers = strdup(stream->headers ? stream->headers : "");
 
     pp_resource_release(loader);
-    printf("Hi from NPP_NewStream. loader = %d\n", loader);
     return NPERR_NO_ERROR;
 }
 
 NPError
 NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, stream=%p, reason=%d\n", __func__,
+    trace_info("[NPP] {part} %s instance=%p, stream=%p, reason=%d\n", __func__,
                instance, stream, reason);
 
     PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
