@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "interface_list.h"
@@ -51,6 +52,8 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     pair = malloc(sizeof(*pair));
     pair->url = "http://127.0.0.1/flashtest/flowplayer-3.2.16.swf";
     pair->loader = loader;
+
+    ul->url = strdup(pair->url);
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = pair};
     ppb_core_call_on_main_thread(0, mt_cb, 0);

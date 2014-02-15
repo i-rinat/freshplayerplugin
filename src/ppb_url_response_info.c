@@ -1,8 +1,11 @@
+#include <assert.h>
 #include <ppapi/c/ppb_url_response_info.h>
 #include <stddef.h>
+#include <string.h>
 #include "trace.h"
 #include "reverse_constant.h"
 #include "pp_resource.h"
+#include "interface_list.h"
 
 
 PP_Bool
@@ -20,16 +23,24 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
 
     switch (property) {
     case PP_URLRESPONSEPROPERTY_URL:
+        var = ppb_var_var_from_utf8_1_1(ul->url, strlen(ul->url));
         break;
     case PP_URLRESPONSEPROPERTY_REDIRECTURL:
+        assert(0);
         break;
     case PP_URLRESPONSEPROPERTY_REDIRECTMETHOD:
+        assert(0);
         break;
     case PP_URLRESPONSEPROPERTY_STATUSCODE:
+        // TODO: parse headers to get actual status code
+        var.type = PP_VARTYPE_INT32;
+        var.value.as_int = 200;
         break;
     case PP_URLRESPONSEPROPERTY_STATUSLINE:
+        assert(0);
         break;
     case PP_URLRESPONSEPROPERTY_HEADERS:
+        var = ppb_var_var_from_utf8_1_1(ul->headers, strlen(ul->headers));
         break;
     }
 
@@ -57,7 +68,7 @@ static
 struct PP_Var
 trace_ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
-    trace_info("[PPB] {zilch} %s response=%d, property=%s\n", __func__+6, response,
+    trace_info("[PPB] {part} %s response=%d, property=%s\n", __func__+6, response,
                reverse_pp_url_response_property(property));
     return ppb_url_response_info_get_property(response, property);
 }

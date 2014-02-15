@@ -20,11 +20,12 @@ struct pp_resource_generic_s {
 
 struct pp_url_loader_s {
     struct pp_resource_generic_s _;
-    const char     *headers;
-    char           *body;
-    size_t          body_size;
-    size_t          body_allocated;
-    int             loaded;         ///< if all stream loaded
+    char        *headers;
+    char        *body;
+    size_t       body_size;
+    size_t       body_allocated;
+    char        *url;
+    int          loaded;        ///< if all stream loaded
     struct PP_CompletionCallback    ccb;
 };
 

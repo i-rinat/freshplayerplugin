@@ -2,6 +2,7 @@
 #include <glib.h>
 #include <stdlib.h>
 
+#define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
 
 static GArray          *res_tbl;
 static pthread_mutex_t  res_tbl_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -128,9 +129,19 @@ pp_resource_unref(PP_Resource resource)
         pthread_mutex_unlock(&res_tbl_lock);
         return;
     }
+
     struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
+    ptr->ref_cnt --;
 
     switch (ptr->type) {
+    case PP_RESOURCE_URL_LOADER:
+        if (ptr->ref_cnt <= 0) {
+            struct pp_url_loader_s *ul = (void *)ptr;
+            FREE_IF_NOT_NULL(ul->headers);
+            FREE_IF_NOT_NULL(ul->body);
+            FREE_IF_NOT_NULL(ul->url);
+        }
+        break;
     case PP_RESOURCE_URL_RESPONSE_INFO:
         parent = ((struct pp_url_response_info_s *)ptr)->url_loader;
         break;
@@ -138,7 +149,6 @@ pp_resource_unref(PP_Resource resource)
         break;
     }
 
-    ptr->ref_cnt --;
     pthread_mutex_unlock(&res_tbl_lock);
 
     if (0 == ptr->ref_cnt) {
