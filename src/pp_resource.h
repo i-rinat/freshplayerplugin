@@ -19,7 +19,7 @@ struct pp_resource_generic_s {
 };
 
 struct pp_url_loader_s {
-    struct pp_resource_generic_s    _parent;
+    struct pp_resource_generic_s _;
     const char     *headers;
     char           *body;
     size_t          body_size;
@@ -29,11 +29,11 @@ struct pp_url_loader_s {
 };
 
 struct pp_url_request_info_s {
-    struct pp_resource_generic_s _parent;
+    struct pp_resource_generic_s _;
 };
 
 struct pp_url_response_info_s {
-    struct pp_resource_generic_s _parent;
+    struct pp_resource_generic_s _;
     PP_Resource     url_loader;
 };
 
