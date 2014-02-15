@@ -102,7 +102,7 @@ ppb_url_loader_get_response_info(PP_Resource loader)
 {
     PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO);
     struct pp_url_response_info_s *ri = pp_resource_acquire(response_info);
-
+    pp_resource_ref(loader);
     ri->url_loader = loader;
     pp_resource_release(response_info);
     return response_info;

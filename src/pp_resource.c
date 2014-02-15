@@ -122,15 +122,28 @@ pp_resource_ref(PP_Resource resource)
 void
 pp_resource_unref(PP_Resource resource)
 {
+    PP_Resource parent = 0;
     pthread_mutex_lock(&res_tbl_lock);
     if (resource < 1 || resource >= res_tbl->len) {
         pthread_mutex_unlock(&res_tbl_lock);
         return;
     }
     struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
+
+    switch (ptr->type) {
+    case PP_RESOURCE_URL_RESPONSE_INFO:
+        parent = ((struct pp_url_response_info_s *)ptr)->url_loader;
+        break;
+    default:
+        break;
+    }
+
     ptr->ref_cnt --;
     pthread_mutex_unlock(&res_tbl_lock);
 
-    if (0 == ptr->ref_cnt)
+    if (0 == ptr->ref_cnt) {
         pp_resource_expunge(resource);
+        if (parent)
+            pp_resource_unref(parent);
+    }
 }
