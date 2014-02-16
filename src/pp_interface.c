@@ -99,6 +99,8 @@ ppb_get_interface(const char *interface_name)
         return &ppb_video_capture_dev_interface_0_3;
     } else if (!strcmp(interface_name, PPB_VIEW_INTERFACE_1_0)) {
         return &ppb_view_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_VIEW_INTERFACE_1_1)) {
+        return &ppb_view_interface_1_1;
     } else {
         trace_info("not implemented: %s\n", interface_name);
         return NULL;

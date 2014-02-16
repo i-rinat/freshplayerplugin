@@ -88,6 +88,7 @@ extern const struct PPB_Var_1_0                     ppb_var_interface_1_0;
 extern const struct PPB_Var_1_1                     ppb_var_interface_1_1;
 extern const struct PPB_VideoCapture_Dev_0_3        ppb_video_capture_dev_interface_0_3;
 extern const struct PPB_View_1_0                    ppb_view_interface_1_0;
+extern const struct PPB_View_1_1                    ppb_view_interface_1_1;
 
 
 PP_Resource
@@ -461,6 +462,30 @@ ppb_video_capture_dev_stop_capture(PP_Resource video_capture);
 
 void
 ppb_video_capture_dev_close(PP_Resource video_capture);
+
+PP_Bool
+ppb_view_is_view(PP_Resource resource);
+
+PP_Bool
+ppb_view_get_rect(PP_Resource resource, struct PP_Rect* rect);
+
+PP_Bool
+ppb_view_is_fullscreen(PP_Resource resource);
+
+PP_Bool
+ppb_view_is_visible(PP_Resource resource);
+
+PP_Bool
+ppb_view_is_page_visible(PP_Resource resource);
+
+PP_Bool
+ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect* clip);
+
+float
+ppb_view_get_device_scale(PP_Resource resource);
+
+float
+ppb_view_get_css_scale(PP_Resource resource);
 
 
 #endif // FPP__INTERFACE_LIST_H
