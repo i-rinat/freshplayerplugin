@@ -97,6 +97,13 @@ PP_Bool
 ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received,
                                      int64_t *total_bytes_to_be_received)
 {
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+
+    // TODO: determine total bytes to be received
+    *total_bytes_to_be_received = -1;
+    *bytes_received = ul->body_size;
+
+    pp_resource_release(loader);
     return PP_TRUE;
 }
 
@@ -194,7 +201,7 @@ PP_Bool
 trace_ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received,
                                            int64_t *total_bytes_to_be_received)
 {
-    trace_info("[PPB] {zilch} %s loader=%d\n", __func__+6, loader);
+    trace_info("[PPB] {part} %s loader=%d\n", __func__+6, loader);
     return ppb_url_loader_get_download_progress(loader, bytes_received, total_bytes_to_be_received);
 }
 
