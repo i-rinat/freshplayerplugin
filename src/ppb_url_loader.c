@@ -115,7 +115,20 @@ int32_t
 ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t bytes_to_read,
                                   struct PP_CompletionCallback callback)
 {
-    return 0;
+    // TODO: maybe some locking?
+    // TODO: async reads, callback calls
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+
+    const int32_t awailable = ul->body_size - ul->body_pos;
+    if (bytes_to_read > awailable)
+        bytes_to_read = awailable;
+
+    memcpy(buffer, ul->body + ul->body_pos, bytes_to_read);
+    ul->body_pos += bytes_to_read;
+
+    pp_resource_release(loader);
+    printf("bytes_to_read = %d\n", bytes_to_read);
+    return bytes_to_read;
 }
 
 int32_t
@@ -198,7 +211,7 @@ int32_t
 trace_ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t bytes_to_read,
                                         struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s loader=%d, buffer=%p, bytes_to_read=%d, callback={.func=%p, "
+    trace_info("[PPB] {part} %s loader=%d, buffer=%p, bytes_to_read=%d, callback={.func=%p, "
                ".user_data=%p, .flags=%d}\n", __func__+6, loader, buffer, bytes_to_read,
                callback.func, callback.user_data, callback.flags);
     return ppb_url_loader_read_response_body(loader, buffer, bytes_to_read, callback);
