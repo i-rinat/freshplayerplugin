@@ -124,6 +124,9 @@ NPP_SetWindow(NPP instance, NPWindow* window)
     priv->clip_rect = window->clipRect;
     priv->ws_info = window->ws_info;
     priv->window_type = window->type;
+
+    priv->ppp_instance_1_1->DidChangeView(priv->pp_instance_id, 0);
+
     return NPERR_NO_ERROR;
 }
 
