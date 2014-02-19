@@ -72,6 +72,19 @@ trace_rect_as_string(const struct PP_Rect *rect)
 }
 
 char *
+trace_size_as_string(const struct PP_Size *size)
+{
+    char *res = NULL;
+    if (size) {
+        asprintf(&res, "{.w=%d, .h=%d}", size->width, size->height);
+    } else {
+        asprintf(&res, "(nil)");
+    }
+
+    return res;
+}
+
+char *
 trace_point_as_string(const struct PP_Point *point)
 {
     char *res = NULL;
