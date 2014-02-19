@@ -65,6 +65,7 @@ extern const struct PPB_FlashFullscreen_1_0         ppb_flash_fullscreen_interfa
 extern const struct PPB_Flash_13_0                  ppb_flash_interface_13_0;
 extern const struct PPB_Flash_Menu_0_2              ppb_flash_menu_interface_0_2;
 extern const struct PPB_Graphics2D_1_0              ppb_graphics2d_interface_1_0;
+extern const struct PPB_Graphics2D_1_1              ppb_graphics2d_interface_1_1;
 extern const struct PPB_Graphics3D_1_0              ppb_graphics3d_interface_1_0;
 extern const struct PPB_ImageData_1_0               ppb_image_data_interface_1_0;
 extern const struct PPB_IMEInputEvent_Dev_0_2       ppb_ime_input_event_dev_interface_0_2;

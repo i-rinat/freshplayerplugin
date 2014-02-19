@@ -53,6 +53,8 @@ ppb_get_interface(const char *interface_name)
         return &ppb_flash_menu_interface_0_2;
     } else if (!strcmp(interface_name, PPB_GRAPHICS_2D_INTERFACE_1_0)) {
         return &ppb_graphics2d_interface_1_0;
+    } else if (!strcmp(interface_name, PPB_GRAPHICS_2D_INTERFACE_1_1)) {
+        return &ppb_graphics2d_interface_1_1;
     } else if (!strcmp(interface_name, PPB_GRAPHICS_3D_INTERFACE_1_0)) {
         return &ppb_graphics3d_interface_1_0;
     } else if (!strcmp(interface_name, PPB_IMAGEDATA_INTERFACE_1_0)) {
