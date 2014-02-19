@@ -12,6 +12,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_URL_RESPONSE_INFO,
     PP_RESOURCE_VIEW,
     PP_RESOURCE_GRAPHICS3D,
+    PP_RESOURCE_IMAGE_DATA,
 };
 
 
@@ -46,6 +47,10 @@ struct pp_view_s {
 };
 
 struct pp_graphics3d_s {
+    struct pp_resource_generic_s _;
+};
+
+struct pp_image_data_s {
     struct pp_resource_generic_s _;
 };
 

@@ -983,4 +983,27 @@ void
 ppb_opengles2_Viewport(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height);
 
 
+PP_ImageDataFormat
+ppb_image_data_get_native_image_data_format(void);
+
+PP_Bool
+ppb_image_data_is_image_data_format_supported(PP_ImageDataFormat format);
+
+PP_Resource
+ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
+                      const struct PP_Size* size, PP_Bool init_to_zero);
+
+PP_Bool
+ppb_image_data_is_image_data(PP_Resource image_data);
+
+PP_Bool
+ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc* desc);
+
+void *
+ppb_image_data_map(PP_Resource image_data);
+
+void
+ppb_image_data_unmap(PP_Resource image_data);
+
+
 #endif // FPP__INTERFACE_LIST_H
