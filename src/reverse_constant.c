@@ -125,3 +125,13 @@ reverse_pp_flash_setting(PP_FlashSetting setting)
     default: return "UNKNOWNSETTING";
     }
 }
+
+const char *
+reverse_pp_image_data_format(PP_ImageDataFormat fmt)
+{
+    switch (fmt) {
+    CASE(PP_IMAGEDATAFORMAT_BGRA_PREMUL);
+    CASE(PP_IMAGEDATAFORMAT_RGBA_PREMUL);
+    default: return "UNKNOWNIMAGEDATAFORMAT";
+    }
+}
