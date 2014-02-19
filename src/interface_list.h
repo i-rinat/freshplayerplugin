@@ -488,4 +488,28 @@ float
 ppb_view_get_css_scale(PP_Resource resource);
 
 
+int32_t
+ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t* value);
+
+PP_Resource
+ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int32_t attrib_list[]);
+
+PP_Bool
+ppb_graphics3d_is_graphics3d(PP_Resource resource);
+
+int32_t
+ppb_graphics3d_get_attribs(PP_Resource context, int32_t attrib_list[]);
+
+int32_t
+ppb_graphics3d_set_attribs(PP_Resource context, const int32_t attrib_list[]);
+
+int32_t
+ppb_graphics3d_get_error(PP_Resource context);
+
+int32_t
+ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height);
+
+int32_t
+ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback);
+
 #endif // FPP__INTERFACE_LIST_H
