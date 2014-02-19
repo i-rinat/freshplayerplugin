@@ -1006,4 +1006,34 @@ void
 ppb_image_data_unmap(PP_Resource image_data);
 
 
+PP_Resource
+ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque);
+
+PP_Bool
+ppb_graphics2d_is_graphics2d(PP_Resource resource);
+
+PP_Bool
+ppb_graphics2d_describe(PP_Resource graphics_2d, struct PP_Size *size, PP_Bool *is_always_opaque);
+
+void
+ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image_data,
+                                const struct PP_Point *top_left, const struct PP_Rect *src_rect);
+
+void
+ppb_graphics2d_scroll(PP_Resource graphics_2d, const struct PP_Rect *clip_rect,
+                      const struct PP_Point *amount);
+
+void
+ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data);
+
+int32_t
+ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callback);
+
+PP_Bool
+ppb_graphics2d_set_scale(PP_Resource resource, float scale);
+
+float
+ppb_graphics2d_get_scale(PP_Resource resource);
+
+
 #endif // FPP__INTERFACE_LIST_H
