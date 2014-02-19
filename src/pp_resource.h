@@ -10,6 +10,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_URL_LOADER,
     PP_RESOURCE_URL_REQUEST_INFO,
     PP_RESOURCE_URL_RESPONSE_INFO,
+    PP_RESOURCE_VIEW,
 };
 
 
@@ -37,6 +38,10 @@ struct pp_url_request_info_s {
 struct pp_url_response_info_s {
     struct pp_resource_generic_s _;
     PP_Resource     url_loader;
+};
+
+struct pp_view_s {
+    struct pp_resource_generic_s _;
 };
 
 
