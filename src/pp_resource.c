@@ -105,7 +105,7 @@ pp_resource_expunge(PP_Resource resource)
 }
 
 void *
-pp_resource_acquire(PP_Resource resource)
+pp_resource_acquire_any(PP_Resource resource)
 {
     pthread_mutex_lock(&res_tbl_lock);
     if (resource < 1 || resource >= res_tbl->len) {
@@ -119,6 +119,17 @@ pp_resource_acquire(PP_Resource resource)
 
     pthread_mutex_unlock(&res_tbl_lock);
     return ptr;
+}
+
+void *
+pp_resource_acquire(PP_Resource resource, enum pp_resource_type_e type)
+{
+    struct pp_resource_generic_s *gr = pp_resource_acquire_any(resource);
+    if (gr->type != type) {
+        pp_resource_release(resource);
+        return NULL;
+    }
+    return gr;
 }
 
 void

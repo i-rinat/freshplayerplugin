@@ -171,7 +171,7 @@ NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, 
     }
 
     stream->pdata = (void*)(size_t)loader;
-    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
     ul->headers = strdup(stream->headers ? stream->headers : "");
 
@@ -189,7 +189,7 @@ NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason)
     if (!loader)
         return NPERR_NO_ERROR;
 
-    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     ul->loaded = 1;
     pp_resource_release(loader);
     return NPERR_NO_ERROR;
@@ -212,7 +212,7 @@ NPP_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buf
     if (!loader)
         return len;
 
-    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
     if (offset + len > ul->body_allocated) {
         size_t nsize = ul->body_allocated + (ul->body_allocated >> 1);

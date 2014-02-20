@@ -42,8 +42,8 @@ struct PP_Var
 ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
     struct PP_Var var = {0};
-    struct pp_url_response_info_s *ri = pp_resource_acquire(response);
-    struct pp_url_loader_s *ul = pp_resource_acquire(ri->url_loader);
+    struct pp_url_response_info_s *ri = pp_resource_acquire(response,PP_RESOURCE_URL_RESPONSE_INFO);
+    struct pp_url_loader_s *ul = pp_resource_acquire(ri->url_loader, PP_RESOURCE_URL_LOADER);
 
     switch (property) {
     case PP_URLRESPONSEPROPERTY_URL:

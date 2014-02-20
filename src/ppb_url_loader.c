@@ -66,8 +66,9 @@ int32_t
 ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback)
 {
-    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
-    struct pp_url_request_info_s *ri = pp_resource_acquire(request_info);
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    struct pp_url_request_info_s *ri = pp_resource_acquire(request_info,
+                                                           PP_RESOURCE_URL_REQUEST_INFO);
     struct {
         const char *url;
         PP_Resource loader;
@@ -89,7 +90,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     if (callback.func == NULL) {
         int done = 0;
         while (!done) {
-            ul = pp_resource_acquire(loader);
+            ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
             if (ul) {
                 done = ul->loaded;
                 pp_resource_release(loader);
@@ -121,7 +122,7 @@ PP_Bool
 ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received,
                                      int64_t *total_bytes_to_be_received)
 {
-    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
     // TODO: determine total bytes to be received
     *total_bytes_to_be_received = -1;
@@ -135,7 +136,8 @@ PP_Resource
 ppb_url_loader_get_response_info(PP_Resource loader)
 {
     PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO);
-    struct pp_url_response_info_s *ri = pp_resource_acquire(response_info);
+    struct pp_url_response_info_s *ri = pp_resource_acquire(response_info,
+                                                            PP_RESOURCE_URL_RESPONSE_INFO);
     pp_resource_ref(loader);
     ri->url_loader = loader;
     pp_resource_release(response_info);
@@ -148,7 +150,7 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
 {
     // TODO: maybe some locking?
     // TODO: async reads, callback calls
-    struct pp_url_loader_s *ul = pp_resource_acquire(loader);
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
     const int32_t awailable = ul->body_size - ul->body_pos;
     if (bytes_to_read > awailable)
