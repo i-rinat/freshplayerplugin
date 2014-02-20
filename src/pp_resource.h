@@ -27,6 +27,7 @@
 
 #include <ppapi/c/pp_resource.h>
 #include <ppapi/c/pp_completion_callback.h>
+#include <ppapi/c/ppb_image_data.h>
 #include <stddef.h>
 
 enum pp_resource_type_e {
@@ -77,6 +78,11 @@ struct pp_graphics3d_s {
 
 struct pp_image_data_s {
     struct pp_resource_generic_s _;
+    int32_t             width;
+    int32_t             height;
+    int32_t             stride;
+    char               *data;
+    PP_ImageDataFormat  format;
 };
 
 struct pp_graphics2d_s {

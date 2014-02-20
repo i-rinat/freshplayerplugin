@@ -24,30 +24,57 @@
 
 #include <ppapi/c/ppb_image_data.h>
 #include <stddef.h>
+#include <string.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
+#include "interface_list.h"
 
 PP_ImageDataFormat
 ppb_image_data_get_native_image_data_format(void)
 {
-    return 0;
+    return PP_IMAGEDATAFORMAT_BGRA_PREMUL;
 }
 
 PP_Bool
 ppb_image_data_is_image_data_format_supported(PP_ImageDataFormat format)
 {
-    return PP_TRUE;
+    switch (format) {
+    case PP_IMAGEDATAFORMAT_BGRA_PREMUL:
+        return PP_TRUE;
+    case PP_IMAGEDATAFORMAT_RGBA_PREMUL:
+        return PP_TRUE;
+    default:
+        return PP_FALSE;
+    }
 }
 
 PP_Resource
 ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
                       const struct PP_Size* size, PP_Bool init_to_zero)
 {
+    (void)instance;
     PP_Resource image_data = pp_resource_allocate(PP_RESOURCE_IMAGE_DATA);
+    struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
+    if (!id)
+        return 0;
 
-    // TODO: fill
+    id->format = format;
+    id->width = size->width;
+    id->height = size->height;
+    id->stride = id->width * 4;
 
+    id->data = malloc(id->stride * id->height);
+    if (!id->data) {
+        pp_resource_release(image_data);
+        ppb_core_release_resource(image_data);
+        return 0;
+    }
+
+    (void)init_to_zero; // ignore flag, always clear memory
+    memset(id->data, 0, id->stride * id->height);
+
+    pp_resource_release(image_data);
     return image_data;
 }
 
@@ -60,18 +87,41 @@ ppb_image_data_is_image_data(PP_Resource image_data)
 PP_Bool
 ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc* desc)
 {
+    struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
+    if (!id)
+        return PP_FALSE;
+
+    desc->format = id->format;
+    desc->size.width = id->width;
+    desc->size.height = id->height;
+    desc->stride = id->stride;
+
+    pp_resource_release(image_data);
     return PP_TRUE;
 }
 
 void *
 ppb_image_data_map(PP_Resource image_data)
 {
-    return (void*)0xdeadbeef;
+    void *data_ptr;
+    struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
+    if (!id)
+        return NULL;
+
+    id->_.ref_cnt++;
+    data_ptr = id->data;
+    pp_resource_release(image_data);
+    return data_ptr;
 }
 
 void
 ppb_image_data_unmap(PP_Resource image_data)
 {
+    struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
+    if (!id)
+        return;
+    id->_.ref_cnt--;
+    pp_resource_release(image_data);
 }
 
 // trace wrappers
@@ -79,7 +129,7 @@ static
 PP_ImageDataFormat
 trace_ppb_image_data_get_native_image_data_format(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_image_data_get_native_image_data_format();
 }
 
@@ -87,7 +137,7 @@ static
 PP_Bool
 trace_ppb_image_data_is_image_data_format_supported(PP_ImageDataFormat format)
 {
-    trace_info("[PPB] {zilch} %s format=%s\n", __func__+6, reverse_pp_image_data_format(format));
+    trace_info("[PPB] {full} %s format=%s\n", __func__+6, reverse_pp_image_data_format(format));
     return ppb_image_data_is_image_data_format_supported(format);
 }
 
@@ -97,7 +147,7 @@ trace_ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
                             const struct PP_Size* size, PP_Bool init_to_zero)
 {
     char *s_size = trace_size_as_string(size);
-    trace_info("[PPB] {part} %s instance=%d, format=%s, size=%s, init_to_zero=%d\n", __func__+6,
+    trace_info("[PPB] {full} %s instance=%d, format=%s, size=%s, init_to_zero=%d\n", __func__+6,
                instance, reverse_pp_image_data_format(format), s_size, init_to_zero);
     free(s_size);
     return ppb_image_data_create(instance, format, size, init_to_zero);
@@ -115,7 +165,7 @@ static
 PP_Bool
 trace_ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc* desc)
 {
-    trace_info("[PPB] {zilch} %s image_data=%d, desc=%p\n", __func__+6, image_data, desc);
+    trace_info("[PPB] {full} %s image_data=%d, desc=%p\n", __func__+6, image_data, desc);
     return ppb_image_data_describe(image_data, desc);
 }
 
@@ -123,7 +173,7 @@ static
 void *
 trace_ppb_image_data_map(PP_Resource image_data)
 {
-    trace_info("[PPB] {zilch} %s image_data=%d\n", __func__+6, image_data);
+    trace_info("[PPB] {full} %s image_data=%d\n", __func__+6, image_data);
     return ppb_image_data_map(image_data);
 }
 
@@ -131,7 +181,7 @@ static
 void
 trace_ppb_image_data_unmap(PP_Resource image_data)
 {
-    trace_info("[PPB] {zilch} %s image_data=%d\n", __func__+6, image_data);
+    trace_info("[PPB] {full} %s image_data=%d\n", __func__+6, image_data);
     ppb_image_data_unmap(image_data);
 }
 
