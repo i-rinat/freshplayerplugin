@@ -193,7 +193,7 @@ pp_resource_unref(PP_Resource resource)
         parent = ((struct pp_url_response_info_s *)ptr)->url_loader;
         break;
     case PP_RESOURCE_IMAGE_DATA:
-        {
+        if (ptr->ref_cnt <= 0) {
             struct pp_image_data_s *id = (void *)ptr;
             if (id->data)
                 free(id->data);
