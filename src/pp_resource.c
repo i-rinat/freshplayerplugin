@@ -199,6 +199,13 @@ pp_resource_unref(PP_Resource resource)
                 free(id->data);
         };
         break;
+    case PP_RESOURCE_GRAPHICS2D:
+        if (ptr->ref_cnt <= 0) {
+            struct pp_graphics2d_s *g2d = (void *)ptr;
+            if (g2d->data)
+                free(g2d->data);
+        }
+        break;
     default:
         break;
     }

@@ -23,16 +23,35 @@
  */
 
 #include <ppapi/c/ppb_graphics_2d.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
 #include "pp_resource.h"
+#include "interface_list.h"
 
 
 PP_Resource
 ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque)
 {
     PP_Resource graphics_2d = pp_resource_allocate(PP_RESOURCE_GRAPHICS2D);
-    // TODO: fill parameters, allocate storage
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
+    if (!g2d) {
+        trace_warning("%s, can't create graphics2d resource\n", __func__);
+        return 0;
+    }
+
+    g2d->is_always_opaque = is_always_opaque;
+    g2d->width = size->width;
+    g2d->height = size->height;
+    g2d->stride = 4 * size->width;
+    g2d->data = calloc(g2d->stride * g2d->height, 1);
+    if (!g2d->data) {
+        trace_warning("%s, can't allocate memory\n", __func__);
+        pp_resource_release(graphics_2d);
+        ppb_core_release_resource(graphics_2d);
+        return 0;
+    }
+
+    pp_resource_release(graphics_2d);
     return graphics_2d;
 }
 
@@ -90,7 +109,7 @@ trace_ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size,
                             PP_Bool is_always_opaque)
 {
     char *s_size = trace_size_as_string(size);
-    trace_info("[PPB] {part} %s instance=%d, size=%s, is_always_opaque=%d\n", __func__+6,
+    trace_info("[PPB] {full} %s instance=%d, size=%s, is_always_opaque=%d\n", __func__+6,
                instance, s_size, is_always_opaque);
     free(s_size);
     return ppb_graphics2d_create(instance, size, is_always_opaque);

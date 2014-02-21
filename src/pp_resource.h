@@ -89,6 +89,11 @@ struct pp_image_data_s {
 
 struct pp_graphics2d_s {
     struct pp_resource_generic_s _;
+    int         is_always_opaque;
+    int32_t     width;
+    int32_t     height;
+    int32_t     stride;
+    char       *data;
 };
 
 
