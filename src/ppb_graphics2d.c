@@ -82,6 +82,19 @@ ppb_graphics2d_scroll(PP_Resource graphics_2d, const struct PP_Rect *clip_rect,
 void
 ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 {
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
+    struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
+
+    if (g2d->width == id->width && g2d->height == id->height) {
+        void *tmp = g2d->data;
+        g2d->data = id->data;
+        id->data = tmp;
+    } else {
+        trace_warning("%s, slow path is not implemented\n", __func__);
+    }
+
+    pp_resource_release(graphics_2d);
+    pp_resource_release(image_data);
 }
 
 int32_t
@@ -166,7 +179,7 @@ static
 void
 trace_ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 {
-    trace_info("[PPB] {zilch} %s graphics_2d=%d, image_data=%d\n", __func__+6, graphics_2d,
+    trace_info("[PPB] {part} %s graphics_2d=%d, image_data=%d\n", __func__+6, graphics_2d,
                image_data);
     ppb_graphics2d_replace_contents(graphics_2d, image_data);
 }
