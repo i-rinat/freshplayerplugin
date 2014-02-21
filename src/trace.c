@@ -25,6 +25,8 @@
 #define _GNU_SOURCE     // asprintf
 #include <stdarg.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/syscall.h>
 #include <stdlib.h>
 #include "trace.h"
 
@@ -34,6 +36,7 @@ trace_info(const char *fmt, ...)
 {
     va_list args;
     fprintf(stdout, "[fresh] ");
+//    fprintf(stdout, "[fresh %5d] ", (int)syscall(__NR_gettid));
     va_start(args, fmt);
     vfprintf(stdout, fmt, args);
     va_end(args);
