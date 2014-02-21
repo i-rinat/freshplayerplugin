@@ -2,6 +2,14 @@ project(freshplayerplugin)
 cmake_minimum_required(VERSION 2.6)
 add_definitions(-std=gnu99 -Wall -fPIC -fvisibility=hidden)
 
+# add missing NDEBUG in RelWithDebugInfo
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG -ggdb3")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG -ggdb3")
+
+# generate more debug info for Debug build type
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb3")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -ggdb3")
+
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(REQ glib-2.0 mozilla-plugin x11 liburiparser REQUIRED)
