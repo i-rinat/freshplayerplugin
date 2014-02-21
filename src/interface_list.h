@@ -51,6 +51,7 @@
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
 #include <ppapi/c/dev/ppb_ime_input_event_dev.h>
 #include <ppapi/c/dev/ppb_memory_dev.h>
+#include <ppapi/c/dev/ppb_printing_dev.h>
 #include <ppapi/c/dev/ppb_text_input_dev.h>
 #include <ppapi/c/dev/ppb_url_util_dev.h>
 #include <ppapi/c/dev/ppb_video_capture_dev.h>
@@ -102,6 +103,7 @@ extern const struct PPB_NetAddress_Private_1_1      ppb_net_address_private_inte
 extern const struct PPB_NetworkMonitor_1_0          ppb_network_monitor_interface_1_0;
 extern const struct PPB_OpenGLES2ChromiumMapSub     ppb_opengles2_chromium_map_sub_interface_1_0;
 extern const struct PPB_OpenGLES2                   ppb_opengles2_interface_1_0;
+extern const struct PPB_Printing_Dev_0_7            ppb_printing_dev_0_7;
 extern const struct PPB_TCPSocket_Private_0_4       ppb_tcp_socket_private_interface_0_4;
 extern const struct PPB_TextInput_Dev_0_2           ppb_text_input_dev_interface_0_2;
 extern const struct PPB_UDPSocket_Private_0_4       ppb_udp_socket_private_interface_0_4;
@@ -1082,5 +1084,13 @@ ppb_graphics2d_set_scale(PP_Resource resource, float scale);
 float
 ppb_graphics2d_get_scale(PP_Resource resource);
 
+
+PP_Resource
+ppb_printing_dev_create(PP_Instance instance);
+
+int32_t
+ppb_printing_dev_get_default_print_settings(PP_Resource resource,
+                                            struct PP_PrintSettings_Dev *print_settings,
+                                            struct PP_CompletionCallback callback);
 
 #endif // FPP__INTERFACE_LIST_H
