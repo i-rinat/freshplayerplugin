@@ -256,7 +256,10 @@ NPP_Print(NPP instance, NPPrint* platformPrint)
 int16_t
 NPP_HandleEvent(NPP instance, void* event)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, event=%p\n", __func__, instance, event);
+    XAnyEvent *xaev = event;
+    trace_info("[NPP] {zilch} %s instance=%p, event={.type=%s, .serial=%lu, .send_event=%d, "
+               ".display=%p, .window=0x%x}\n", __func__, instance, reverse_xevent_type(xaev->type),
+               xaev->serial, xaev->send_event, xaev->display, (int32_t)xaev->window);
     return 0;
 }
 
