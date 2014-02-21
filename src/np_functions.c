@@ -37,6 +37,7 @@
 #include "interface_list.h"
 #include "tables.h"
 #include <ppapi/c/ppp_instance.h>
+#include <ppapi/c/pp_errors.h>
 #include "globals.h"
 
 #define NO_IMPL assert(0 && "no implementation yet")
@@ -65,6 +66,7 @@ void *fn(void *p)
     PP_Resource urlri = ppb_url_request_info_create(priv->pp_instance_id);
     ppb_url_loader_open(urll, urlri, PP_BlockUntilComplete());
     priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
+    priv->instance_loaded = 1;
     trace_info("=========================================\n");
     return NULL;
 }
@@ -108,7 +110,6 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     }
 
     priv->pp_instance_id = generate_new_pp_instance_id();
-    priv->instance_loaded = 1;
     tables_add_pp_np_mapping(priv->pp_instance_id, priv);
 
     // request windowless operation
@@ -158,7 +159,9 @@ NPP_SetWindow(NPP instance, NPWindow* window)
     v->rect.size.height = window->height;
     // ignoring clipRect, will use full rect instead
     pp_resource_release(view);
-    priv->ppp_instance_1_1->DidChangeView(priv->pp_instance_id, view);
+
+    if (priv->instance_loaded)
+        priv->ppp_instance_1_1->DidChangeView(priv->pp_instance_id, view);
 
     return NPERR_NO_ERROR;
 }
@@ -254,6 +257,35 @@ NPP_Print(NPP instance, NPPrint* platformPrint)
     return;
 }
 
+static
+int16_t
+handle_GraphicsExpose_event(NPP instance, void *event)
+{
+    XGraphicsExposeEvent *ev = event;
+    struct np_priv_s *np_priv = instance->pdata;
+    if (!np_priv->draw_in_progress)
+        return 0;
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(np_priv->graphics, PP_RESOURCE_GRAPHICS2D);
+    if (!g2d)
+        return 0;
+    Display *dpy = ev->display;
+    Drawable drawable = ev->drawable;
+    int screen = 0;
+    memset(g2d->data, 0x76, g2d->width * g2d->height);
+    XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0, g2d->data,
+                              g2d->width, g2d->height, 32, g2d->stride);
+
+    XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g2d->width, g2d->height);
+
+    free(xi);
+    pp_resource_release(np_priv->graphics);
+
+    np_priv->draw_in_progress = 0;
+    np_priv->draw_completion_callback.func(np_priv->draw_completion_callback.user_data, PP_OK);
+
+    return 1;
+}
+
 int16_t
 NPP_HandleEvent(NPP instance, void* event)
 {
@@ -261,6 +293,16 @@ NPP_HandleEvent(NPP instance, void* event)
     trace_info("[NPP] {zilch} %s instance=%p, event={.type=%s, .serial=%lu, .send_event=%d, "
                ".display=%p, .window=0x%x}\n", __func__, instance, reverse_xevent_type(xaev->type),
                xaev->serial, xaev->send_event, xaev->display, (int32_t)xaev->window);
+
+    switch (xaev->type) {
+    case GraphicsExpose:
+        return handle_GraphicsExpose_event(instance, event);
+        break;
+    default:
+        trace_warning("%s, event %s not handled\n", __func__, reverse_xevent_type(xaev->type));
+        break;
+    }
+
     return 0;
 }
 
