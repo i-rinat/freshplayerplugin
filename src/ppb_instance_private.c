@@ -23,6 +23,7 @@
  */
 
 #include <ppapi/c/private/ppb_instance_private.h>
+#include <stdlib.h>
 #include "trace.h"
 
 
@@ -53,7 +54,7 @@ static
 struct PP_Var
 trace_ppb_instance_private_get_window_object(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_instance_private_get_window_object(instance);
 }
 
@@ -61,7 +62,7 @@ static
 struct PP_Var
 trace_ppb_instance_private_get_owner_element_object(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_instance_private_get_owner_element_object(instance);
 }
 
@@ -70,7 +71,9 @@ struct PP_Var
 trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
                                           struct PP_Var *exception)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_script = trace_var_as_string(script);
+    trace_info("[PPB] {zilch} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
+    free(s_script);
     return ppb_instance_private_execute_script(instance, script, exception);
 }
 
