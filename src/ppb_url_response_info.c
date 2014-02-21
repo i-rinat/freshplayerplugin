@@ -76,7 +76,7 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
 PP_Resource
 ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 {
-    return 0;
+    return 123003;
 }
 
 // trace wrappers

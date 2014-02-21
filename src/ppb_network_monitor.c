@@ -29,7 +29,7 @@
 PP_Resource
 ppb_network_monitor_create(PP_Instance instance)
 {
-    return 0;
+    return 123001;
 }
 
 int32_t

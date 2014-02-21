@@ -30,7 +30,7 @@
 PP_Resource
 ppb_video_capture_dev_create(PP_Instance instance)
 {
-    return 0;
+    return 123002;
 }
 
 PP_Bool

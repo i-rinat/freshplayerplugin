@@ -30,7 +30,7 @@
 PP_Resource
 ppb_audio_input_dev_create(PP_Instance instance)
 {
-    return 0;
+    return 123006;
 }
 
 PP_Bool
@@ -72,7 +72,7 @@ ppb_audio_input_dev_open(PP_Resource audio_input, PP_Resource device_ref, PP_Res
 PP_Resource
 ppb_audio_input_dev_get_current_config(PP_Resource audio_input)
 {
-    return 0;
+    return 123005;
 }
 
 PP_Bool

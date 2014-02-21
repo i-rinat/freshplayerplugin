@@ -31,7 +31,7 @@ PP_Resource
 ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                       uint32_t sample_frame_count)
 {
-    return 0;
+    return 123009;
 }
 
 uint32_t
@@ -50,7 +50,7 @@ ppb_audio_config_is_audio_config(PP_Resource resource)
 PP_AudioSampleRate
 ppb_audio_config_get_sample_rate(PP_Resource config)
 {
-    return 0;
+    return 123008;
 }
 
 uint32_t
@@ -62,7 +62,7 @@ ppb_audio_config_get_sample_frame_count(PP_Resource config)
 PP_AudioSampleRate
 ppb_audio_config_recommend_sample_rate(PP_Instance instance)
 {
-    return 0;
+    return 123007;
 }
 
 // trace wrappers
