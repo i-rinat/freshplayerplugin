@@ -61,10 +61,10 @@ void *fn(void *p)
 {
     struct np_priv_s *priv = p;
 
-    trace_info("-----------------------------------------\n");
     PP_Resource urll = ppb_url_loader_create(priv->pp_instance_id);
     PP_Resource urlri = ppb_url_request_info_create(priv->pp_instance_id);
     ppb_url_loader_open(urll, urlri, PP_BlockUntilComplete());
+    trace_info("-----------------------------------------\n");
     priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
     priv->instance_loaded = 1;
     trace_info("=========================================\n");

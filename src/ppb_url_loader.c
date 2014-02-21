@@ -24,6 +24,7 @@
 
 #define _XOPEN_SOURCE   500
 #include <ppapi/c/ppb_url_loader.h>
+#include <ppapi/c/pp_errors.h>
 #include <stddef.h>
 #include <pthread.h>
 #include <unistd.h>
