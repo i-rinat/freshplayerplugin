@@ -23,9 +23,10 @@
  */
 
 #include "reverse_constant.h"
+#include <X11/Xlib.h>
+
 
 #define CASE(q) case q: return #q
-
 
 const char *
 reverse_npp_variable(NPPVariable var)
@@ -157,5 +158,48 @@ reverse_pp_image_data_format(PP_ImageDataFormat fmt)
     CASE(PP_IMAGEDATAFORMAT_BGRA_PREMUL);
     CASE(PP_IMAGEDATAFORMAT_RGBA_PREMUL);
     default: return "UNKNOWNIMAGEDATAFORMAT";
+    }
+}
+
+const char *
+reverse_xevent_type(int type)
+{
+    switch (type) {
+    CASE(KeyPress);
+    CASE(KeyRelease);
+    CASE(ButtonPress);
+    CASE(ButtonRelease);
+    CASE(MotionNotify);
+    CASE(EnterNotify);
+    CASE(LeaveNotify);
+    CASE(FocusIn);
+    CASE(FocusOut);
+    CASE(KeymapNotify);
+    CASE(Expose);
+    CASE(GraphicsExpose);
+    CASE(NoExpose);
+    CASE(VisibilityNotify);
+    CASE(CreateNotify);
+    CASE(DestroyNotify);
+    CASE(UnmapNotify);
+    CASE(MapNotify);
+    CASE(MapRequest);
+    CASE(ReparentNotify);
+    CASE(ConfigureNotify);
+    CASE(ConfigureRequest);
+    CASE(GravityNotify);
+    CASE(ResizeRequest);
+    CASE(CirculateNotify);
+    CASE(CirculateRequest);
+    CASE(PropertyNotify);
+    CASE(SelectionClear);
+    CASE(SelectionRequest);
+    CASE(SelectionNotify);
+    CASE(ColormapNotify);
+    CASE(ClientMessage);
+    CASE(MappingNotify);
+    CASE(GenericEvent);
+    default:
+        return "UNKNOWNXEVENT";
     }
 }
