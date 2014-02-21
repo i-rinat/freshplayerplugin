@@ -290,7 +290,7 @@ int16_t
 NPP_HandleEvent(NPP instance, void* event)
 {
     XAnyEvent *xaev = event;
-    trace_info("[NPP] {zilch} %s instance=%p, event={.type=%s, .serial=%lu, .send_event=%d, "
+    trace_info("[NPP] {part} %s instance=%p, event={.type=%s, .serial=%lu, .send_event=%d, "
                ".display=%p, .window=0x%x}\n", __func__, instance, reverse_xevent_type(xaev->type),
                xaev->serial, xaev->send_event, xaev->display, (int32_t)xaev->window);
 
