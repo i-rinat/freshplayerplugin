@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tables.h"
+#include "trace.h"
 
 
 // URL/urlloader resource mapping
@@ -111,5 +112,6 @@ tables_pop_url_pair(const char *url)
         ptr = g_list_next(ptr);
     }
 
+    trace_warning("%s, no corresponding resource in tables for url=\"%s\"\n", __func__, url);
     return 0;
 }
