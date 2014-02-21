@@ -109,6 +109,7 @@ extern const struct PPB_URLLoaderTrusted_0_3        ppb_url_loader_trusted_inter
 extern const struct PPB_URLRequestInfo_1_0          ppb_url_request_info_interface_1_0;
 extern const struct PPB_URLResponseInfo_1_0         ppb_url_response_info_interface_1_0;
 extern const struct PPB_URLUtil_Dev_0_6             ppb_url_util_dev_interface_0_6;
+extern const struct PPB_URLUtil_Dev_0_7             ppb_url_util_dev_interface_0_7;
 extern const struct PPB_Var_1_0                     ppb_var_interface_1_0;
 extern const struct PPB_Var_1_1                     ppb_var_interface_1_1;
 extern const struct PPB_VideoCapture_Dev_0_3        ppb_video_capture_dev_interface_0_3;
@@ -440,6 +441,10 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
 struct PP_Var
 ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components);
+
+struct PP_Var
+ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
+                                         struct PP_URLComponents_Dev* components);
 
 void
 ppb_var_add_ref(struct PP_Var var);
