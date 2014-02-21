@@ -76,6 +76,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
 
     pair = malloc(sizeof(*pair));
     pair->url = "http://127.0.0.1/flashtest/flowplayer-3.2.16.swf";
+    (void)ri;   // TODO: use it
     pair->loader = loader;
 
     ul->url = strdup(pair->url);
