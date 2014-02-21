@@ -66,16 +66,14 @@ ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
     id->height = size->height;
     id->stride = id->width * 4;
 
-    id->data = malloc(id->stride * id->height);
+    (void)init_to_zero; // ignore flag, always clear memory
+    id->data = calloc(id->stride * id->height, 1);
     if (!id->data) {
         pp_resource_release(image_data);
         ppb_core_release_resource(image_data);
         trace_warning("%s, can't allocate memory for image\n", __func__);
         return 0;
     }
-
-    (void)init_to_zero; // ignore flag, always clear memory
-    memset(id->data, 0, id->stride * id->height);
 
     pp_resource_release(image_data);
     return image_data;
