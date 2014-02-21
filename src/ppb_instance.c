@@ -25,16 +25,23 @@
 #include <ppapi/c/ppb_instance.h>
 #include <stddef.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
+    struct np_priv_s *priv = tables_pp_instance_to_np_priv(instance);
+    if (!priv) {
+        trace_warning("%s, priv is NULL\n", __func__);
+        return PP_FALSE;
+    }
     struct pp_graphics2d_s *g2d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS2D);
     struct pp_graphics2d_s *g3d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS3D);
 
     if (g2d) {
         g2d->instance = instance;
+        priv->graphics = device;
         pp_resource_release(device);
         return PP_TRUE;
     } else if (g3d) {

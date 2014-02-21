@@ -26,6 +26,7 @@
 #define FPP__NP_H
 
 #include <ppapi/c/ppp_instance.h>
+#include <ppapi/c/pp_resource.h>
 #include <X11/Xlib.h>
 #include <npapi.h>
 
@@ -46,6 +47,7 @@ struct np_priv_s {
     int             instance_loaded;
     const char     *instance_url;
     pthread_t       pp_thread;
+    PP_Resource     graphics;
 };
 
 #endif // FPP_NP_H
