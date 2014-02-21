@@ -86,6 +86,7 @@ extern const struct PPB_Flash_File_FileRef          ppb_flash_file_file_ref_inte
 extern const struct PPB_Flash_File_ModuleLocal_3_0  ppb_flash_file_modulelocal_interface_3_0;
 extern const struct PPB_Flash_FontFile_0_1          ppb_flash_font_file_interface_0_1;
 extern const struct PPB_FlashFullscreen_1_0         ppb_flash_fullscreen_interface_1_0;
+extern const struct PPB_Flash_12_6                  ppb_flash_interface_12_6;
 extern const struct PPB_Flash_13_0                  ppb_flash_interface_13_0;
 extern const struct PPB_Flash_Menu_0_2              ppb_flash_menu_interface_0_2;
 extern const struct PPB_Graphics2D_1_0              ppb_graphics2d_interface_1_0;
@@ -236,6 +237,22 @@ ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struct PP_V
 int32_t
 ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resource video_capture,
                                           struct PP_ArrayOutput devices);
+
+void
+ppb_flash_run_message_loop(PP_Instance instance);
+
+void
+ppb_flash_quit_message_loop(PP_Instance instance);
+
+int32_t
+ppb_flash_invoke_printing(PP_Instance instance);
+
+struct PP_Var
+ppb_flash_get_device_id(PP_Instance instance);
+
+int32_t
+ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting);
+
 
 PP_Bool
 ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance instance);

@@ -147,6 +147,38 @@ ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resource vide
     return 0;
 }
 
+void
+ppb_flash_run_message_loop(PP_Instance instance)
+{
+    return;
+}
+
+void
+ppb_flash_quit_message_loop(PP_Instance instance)
+{
+    return;
+}
+
+int32_t
+ppb_flash_invoke_printing(PP_Instance instance)
+{
+    return 0;
+}
+
+struct PP_Var
+ppb_flash_get_device_id(PP_Instance instance)
+{
+    struct PP_Var var = {0};
+    return var;
+}
+
+int32_t
+ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
+{
+    return 0;
+}
+
+
 // trace wrappers
 static
 void
@@ -270,6 +302,47 @@ trace_ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resourc
     return ppb_flash_enumerate_video_capture_devices(instance, video_capture, devices);
 }
 
+static
+void
+trace_ppb_flash_run_message_loop(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    ppb_flash_run_message_loop(instance);
+}
+
+static
+void
+trace_ppb_flash_quit_message_loop(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    ppb_flash_quit_message_loop(instance);
+}
+
+static
+int32_t
+trace_ppb_flash_invoke_printing(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    return ppb_flash_invoke_printing(instance);
+}
+
+static
+struct PP_Var
+trace_ppb_flash_get_device_id(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    return ppb_flash_get_device_id(instance);
+}
+
+static
+int32_t
+trace_ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
+{
+    trace_info("[PPB] {zilch} %s instance=%d, setting=%s\n", __func__+6, instance,
+               reverse_pp_flash_setting(setting));
+    return ppb_flash_get_setting_int(instance, setting);
+}
+
 
 const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .SetInstanceAlwaysOnTop = trace_ppb_flash_set_instance_always_on_top,
@@ -284,4 +357,24 @@ const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .GetSetting =           trace_ppb_flash_get_setting,
     .SetCrashData =         trace_ppb_flash_set_crash_data,
     .EnumerateVideoCaptureDevices = trace_ppb_flash_enumerate_video_capture_devices
+};
+
+const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
+    .SetInstanceAlwaysOnTop = trace_ppb_flash_set_instance_always_on_top,
+    .DrawGlyphs =           trace_ppb_flash_draw_glyphs,
+    .GetProxyForURL =       trace_ppb_flash_get_proxy_for_url,
+    .Navigate =             trace_ppb_flash_navigate,
+    .RunMessageLoop =       trace_ppb_flash_run_message_loop,
+    .QuitMessageLoop =      trace_ppb_flash_quit_message_loop,
+    .GetLocalTimeZoneOffset = trace_ppb_flash_get_local_time_zone_offset,
+    .GetCommandLineArgs =   trace_ppb_flash_get_command_line_args,
+    .PreloadFontWin =       trace_ppb_flash_preload_font_win,
+    .IsRectTopmost =        trace_ppb_flash_is_rect_topmost,
+    .InvokePrinting =       trace_ppb_flash_invoke_printing,
+    .UpdateActivity =       trace_ppb_flash_update_activity,
+    .GetDeviceID =          trace_ppb_flash_get_device_id,
+    .GetSettingInt =        trace_ppb_flash_get_setting_int,
+    .GetSetting =           trace_ppb_flash_get_setting,
+    .SetCrashData =         trace_ppb_flash_set_crash_data,
+    .EnumerateVideoCaptureDevices = trace_ppb_flash_enumerate_video_capture_devices,
 };
