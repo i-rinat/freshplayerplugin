@@ -26,6 +26,7 @@
 #define FPP__NP_H
 
 #include <ppapi/c/ppp_instance.h>
+#include <ppapi/c/pp_completion_callback.h>
 #include <ppapi/c/pp_resource.h>
 #include <X11/Xlib.h>
 #include <npapi.h>
@@ -34,6 +35,7 @@ struct np_priv_s {
     const struct PPP_Instance_1_1  *ppp_instance_1_1;
     Window          wnd;
     PP_Instance     pp_instance_id;
+    NPP             npp;
     uint32_t        x;
     uint32_t        y;
     uint32_t        width;
@@ -48,6 +50,8 @@ struct np_priv_s {
     const char     *instance_url;
     pthread_t       pp_thread;
     PP_Resource     graphics;
+    int             draw_in_progress;
+    struct PP_CompletionCallback draw_completion_callback;
 };
 
 #endif // FPP_NP_H

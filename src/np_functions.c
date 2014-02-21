@@ -90,6 +90,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
     if (!priv)
         return NPERR_OUT_OF_MEMORY_ERROR;
 
+    priv->npp = instance;
     priv->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
     if (!priv->ppp_instance_1_1)
         return NPERR_GENERIC_ERROR;

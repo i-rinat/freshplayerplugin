@@ -23,8 +23,11 @@
  */
 
 #include <ppapi/c/ppb_graphics_2d.h>
+#include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
+#include "globals.h"
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 #include "interface_list.h"
 
@@ -100,7 +103,28 @@ ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 int32_t
 ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callback)
 {
-    return 0;
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
+    if (!g2d) {
+        trace_warning("%s, wrong graphics_2d\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    struct np_priv_s *np_priv = tables_pp_instance_to_np_priv(g2d->instance);
+    pp_resource_release(graphics_2d);
+
+    if (np_priv->draw_in_progress) {
+        trace_warning("%s, flush in progress already\n", __func__);
+        return PP_ERROR_INPROGRESS;
+    }
+
+    np_priv->draw_in_progress = 1;
+    np_priv->draw_completion_callback = callback;
+
+    NPRect npr = {.top = 0, .left = 0, .bottom = g2d->height, .right = g2d->width};
+    npn.invalidaterect(np_priv->npp, &npr);
+    npn.forceredraw(np_priv->npp);
+
+    return PP_OK;
 }
 
 PP_Bool
@@ -188,7 +212,7 @@ static
 int32_t
 trace_ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s graphics_2d=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
+    trace_info("[PPB] {full} %s graphics_2d=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
                __func__+6, graphics_2d, callback.func, callback.user_data, callback.flags);
     return ppb_graphics2d_flush(graphics_2d, callback);
 }
