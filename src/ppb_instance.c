@@ -25,11 +25,28 @@
 #include <ppapi/c/ppb_instance.h>
 #include <stddef.h>
 #include "trace.h"
+#include "pp_resource.h"
 
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
-    return PP_TRUE;
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS2D);
+    struct pp_graphics2d_s *g3d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS3D);
+
+    if (g2d) {
+        g2d->instance = instance;
+        pp_resource_release(device);
+        return PP_TRUE;
+    } else if (g3d) {
+        // TODO: implement 3d graphics
+        trace_warning("%s, 3d graphics not supported\n", __func__);
+        pp_resource_release(device);
+        return PP_FALSE;
+    } else {
+        trace_warning("%s, unsupported graphics resource %d on instance %d\n", __func__,
+                      device, instance);
+        return PP_FALSE;
+    }
 }
 
 PP_Bool
@@ -43,7 +60,7 @@ static
 PP_Bool
 trace_ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, device=%d\n", __func__+6, instance, device);
+    trace_info("[PPB] {part} %s instance=%d, device=%d\n", __func__+6, instance, device);
     return ppb_instance_bind_graphics(instance, device);
 }
 

@@ -89,6 +89,7 @@ struct pp_image_data_s {
 
 struct pp_graphics2d_s {
     struct pp_resource_generic_s _;
+    PP_Instance instance;
     int         is_always_opaque;
     int32_t     width;
     int32_t     height;
