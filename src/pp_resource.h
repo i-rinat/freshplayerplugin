@@ -25,8 +25,9 @@
 #ifndef FPP__PP_RESOURCE_H
 #define FPP__PP_RESOURCE_H
 
-#include <ppapi/c/pp_resource.h>
 #include <ppapi/c/pp_completion_callback.h>
+#include <ppapi/c/pp_rect.h>
+#include <ppapi/c/pp_resource.h>
 #include <ppapi/c/ppb_image_data.h>
 #include <stddef.h>
 
@@ -70,6 +71,7 @@ struct pp_url_response_info_s {
 
 struct pp_view_s {
     struct pp_resource_generic_s _;
+    struct PP_Rect      rect;
 };
 
 struct pp_graphics3d_s {

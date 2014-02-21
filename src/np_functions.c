@@ -149,7 +149,15 @@ NPP_SetWindow(NPP instance, NPWindow* window)
     priv->ws_info = window->ws_info;
     priv->window_type = window->type;
 
-    priv->ppp_instance_1_1->DidChangeView(priv->pp_instance_id, 0);
+    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW);
+    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+    v->rect.point.x = window->x;
+    v->rect.point.y = window->y;
+    v->rect.size.width = window->width;
+    v->rect.size.height = window->height;
+    // ignoring clipRect, will use full rect instead
+    pp_resource_release(view);
+    priv->ppp_instance_1_1->DidChangeView(priv->pp_instance_id, view);
 
     return NPERR_NO_ERROR;
 }
