@@ -61,6 +61,7 @@ add_library(freshwrapper SHARED
 	src/ppb_opengles2_framebuffer_blit.c
 	src/ppb_opengles2_framebuffer_multisample.c
 	src/ppb_opengles2_instanced_arrays.c
+	src/ppb_opengles2_query.c
 	src/ppb_opengles2.c
 	src/ppb_printing_dev.c
 	src/ppb_tcp_socket_private.c
