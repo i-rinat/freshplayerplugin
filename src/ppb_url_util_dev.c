@@ -121,7 +121,8 @@ parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
     C_PARSE(host, hostText);
     C_PARSE(port, portText);
     components->path.begin = uri.pathHead ? uri.pathHead->text.first - s + 1 : 0;
-    components->path.len = uri.pathHead ? uri.pathTail->text.afterLast - uri.pathHead->text.first : -1;
+    components->path.len = uri.pathHead ? uri.pathTail->text.afterLast - uri.pathHead->text.first
+                                        : -1;
     if (components->path.begin > 0) {
         components->path.begin -= 1;
         components->path.len += 1;
@@ -168,7 +169,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
 
 struct PP_Var
 ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
-                                         struct PP_URLComponents_Dev* components)
+                                         struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
     return var;
@@ -248,7 +249,7 @@ trace_ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
 static
 struct PP_Var
 trace_ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
-                                               struct PP_URLComponents_Dev* components)
+                                               struct PP_URLComponents_Dev *components)
 {
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_url_util_dev_get_plugin_referrer_url(instance, components);

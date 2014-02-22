@@ -29,7 +29,7 @@
 
 GLboolean
 ppb_opengles2_chromium_enable_feature_enable_feature_chromium(PP_Resource context,
-                                                              const char* feature)
+                                                              const char *feature)
 {
     return PP_FALSE;
 }
@@ -37,7 +37,7 @@ ppb_opengles2_chromium_enable_feature_enable_feature_chromium(PP_Resource contex
 static
 GLboolean
 trace_ppb_opengles2_chromium_enable_feature_enable_feature_chromium(PP_Resource context,
-                                                                    const char* feature)
+                                                                    const char *feature)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_opengles2_chromium_enable_feature_enable_feature_chromium(context, feature);

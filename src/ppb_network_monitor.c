@@ -33,8 +33,8 @@ ppb_network_monitor_create(PP_Instance instance)
 }
 
 int32_t
-ppb_network_monitor_update_network_list(PP_Resource network_monitor, PP_Resource* network_list,
-                                     struct PP_CompletionCallback callback)
+ppb_network_monitor_update_network_list(PP_Resource network_monitor, PP_Resource *network_list,
+                                        struct PP_CompletionCallback callback)
 {
     return 0;
 }
@@ -57,7 +57,7 @@ trace_ppb_network_monitor_create(PP_Instance instance)
 static
 int32_t
 trace_ppb_network_monitor_update_network_list(PP_Resource network_monitor,
-                                              PP_Resource* network_list,
+                                              PP_Resource *network_list,
                                               struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);

@@ -36,7 +36,7 @@ ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle(PP_Resource context, 
 void
 ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(PP_Resource context, GLenum mode,
                                                              GLsizei count, GLenum type,
-                                                             const void* indices, GLsizei primcount)
+                                                             const void *indices, GLsizei primcount)
 {
 }
 
@@ -64,7 +64,7 @@ static
 void
 trace_ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(PP_Resource context, GLenum mode,
                                                                    GLsizei count, GLenum type,
-                                                                   const void* indices,
+                                                                   const void *indices,
                                                                    GLsizei primcount)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);

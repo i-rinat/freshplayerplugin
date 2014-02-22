@@ -51,7 +51,7 @@ ppb_image_data_is_image_data_format_supported(PP_ImageDataFormat format)
 
 PP_Resource
 ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
-                      const struct PP_Size* size, PP_Bool init_to_zero)
+                      const struct PP_Size *size, PP_Bool init_to_zero)
 {
     (void)instance;
     PP_Resource image_data = pp_resource_allocate(PP_RESOURCE_IMAGE_DATA);
@@ -86,7 +86,7 @@ ppb_image_data_is_image_data(PP_Resource image_data)
 }
 
 PP_Bool
-ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc* desc)
+ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc *desc)
 {
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
     if (!id)
@@ -145,7 +145,7 @@ trace_ppb_image_data_is_image_data_format_supported(PP_ImageDataFormat format)
 static
 PP_Resource
 trace_ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
-                            const struct PP_Size* size, PP_Bool init_to_zero)
+                            const struct PP_Size *size, PP_Bool init_to_zero)
 {
     char *s_size = trace_size_as_string(size);
     trace_info("[PPB] {full} %s instance=%d, format=%s, size=%s, init_to_zero=%d\n", __func__+6,
@@ -164,7 +164,7 @@ trace_ppb_image_data_is_image_data(PP_Resource image_data)
 
 static
 PP_Bool
-trace_ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc* desc)
+trace_ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc *desc)
 {
     trace_info("[PPB] {full} %s image_data=%d, desc=%p\n", __func__+6, image_data, desc);
     return ppb_image_data_describe(image_data, desc);

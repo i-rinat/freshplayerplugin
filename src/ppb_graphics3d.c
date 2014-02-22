@@ -29,7 +29,7 @@
 
 
 int32_t
-ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t* value)
+ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t *value)
 {
     return 0;
 }
@@ -84,7 +84,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
 // trace wrappers
 static
 int32_t
-trace_ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t* value)
+trace_ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t *value)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_graphics3d_get_attrib_max_value(instance, attribute, value);

@@ -35,7 +35,7 @@ ppb_view_is_view(PP_Resource resource)
 }
 
 PP_Bool
-ppb_view_get_rect(PP_Resource resource, struct PP_Rect* rect)
+ppb_view_get_rect(PP_Resource resource, struct PP_Rect *rect)
 {
     struct pp_view_s *v = pp_resource_acquire(resource, PP_RESOURCE_VIEW);
     rect->point.x =     v->rect.point.x;
@@ -68,7 +68,7 @@ ppb_view_is_page_visible(PP_Resource resource)
 }
 
 PP_Bool
-ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect* clip)
+ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
 {
     struct pp_view_s *v = pp_resource_acquire(resource, PP_RESOURCE_VIEW);
     clip->point.x =     v->rect.point.x;
@@ -102,7 +102,7 @@ trace_ppb_view_is_view(PP_Resource resource)
 }
 
 PP_Bool
-trace_ppb_view_get_rect(PP_Resource resource, struct PP_Rect* rect)
+trace_ppb_view_get_rect(PP_Resource resource, struct PP_Rect *rect)
 {
     trace_info("[PPB] {full} %s resource=%d, rect=%p\n", __func__+6, resource, rect);
     return ppb_view_get_rect(resource, rect);
@@ -130,7 +130,7 @@ trace_ppb_view_is_page_visible(PP_Resource resource)
 }
 
 PP_Bool
-trace_ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect* clip)
+trace_ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
 {
     trace_info("[PPB] {full} %s resource=%d, clip=%p\n", __func__+6, resource, clip);
     return ppb_view_get_clip_rect(resource, clip);

@@ -72,8 +72,8 @@ void *fn(void *p)
 }
 
 NPError
-NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[],
-        char* argv[], NPSavedData* saved)
+NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *argn[],
+        char *argv[], NPSavedData *saved)
 {
     // TODO: mode parameter handling
     int k;
@@ -124,7 +124,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
 }
 
 NPError
-NPP_Destroy(NPP instance, NPSavedData** save)
+NPP_Destroy(NPP instance, NPSavedData **save)
 {
     trace_info("[NPP] {full} %s instance=%p, save=%p\n", __func__, instance, save);
     struct np_priv_s *priv = instance->pdata;
@@ -135,7 +135,7 @@ NPP_Destroy(NPP instance, NPSavedData** save)
 }
 
 NPError
-NPP_SetWindow(NPP instance, NPWindow* window)
+NPP_SetWindow(NPP instance, NPWindow *window)
 {
     char *window_str = trace_np_window_as_string(window);
     trace_info("[NPP] {part} %s instance=%p, window=%s\n", __func__, instance, window_str);
@@ -167,7 +167,7 @@ NPP_SetWindow(NPP instance, NPWindow* window)
 }
 
 NPError
-NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
+NPP_NewStream(NPP instance, NPMIMEType type, NPStream *stream, NPBool seekable, uint16_t *stype)
 {
     trace_info("[NPP] {part} %s instance=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
                "end=%u, lastmodified=%u, .headers=%s}, seekable=%d\n", __func__, instance, type,
@@ -192,7 +192,7 @@ NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, 
 }
 
 NPError
-NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason)
+NPP_DestroyStream(NPP instance, NPStream *stream, NPReason reason)
 {
     trace_info("[NPP] {part} %s instance=%p, stream=%p, reason=%d\n", __func__,
                instance, stream, reason);
@@ -208,14 +208,14 @@ NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason)
 }
 
 int32_t
-NPP_WriteReady(NPP instance, NPStream* stream)
+NPP_WriteReady(NPP instance, NPStream *stream)
 {
     trace_info("[NPP] {part} %s instance=%p, stream=%p\n", __func__, instance, stream);
     return 1024*1024;
 }
 
 int32_t
-NPP_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer)
+NPP_Write(NPP instance, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 {
     trace_info("[NPP] {part} %s instance=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
                instance, stream, offset, len, buffer);
@@ -242,7 +242,7 @@ NPP_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buf
 }
 
 void
-NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
+NPP_StreamAsFile(NPP instance, NPStream *stream, const char *fname)
 {
     trace_info("[NPP] {zilch} %s instance=%p, stream=%p, fname=%s\n", __func__,
                instance, stream, fname);
@@ -250,7 +250,7 @@ NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
 }
 
 void
-NPP_Print(NPP instance, NPPrint* platformPrint)
+NPP_Print(NPP instance, NPPrint *platformPrint)
 {
     trace_info("[NPP] {zilch} %s instance=%p, platformPrint=%p\n", __func__,
                instance, platformPrint);
@@ -287,7 +287,7 @@ handle_GraphicsExpose_event(NPP instance, void *event)
 }
 
 int16_t
-NPP_HandleEvent(NPP instance, void* event)
+NPP_HandleEvent(NPP instance, void *event)
 {
     XAnyEvent *xaev = event;
     trace_info("[NPP] {part} %s instance=%p, event={.type=%s, .serial=%lu, .send_event=%d, "
@@ -307,7 +307,7 @@ NPP_HandleEvent(NPP instance, void* event)
 }
 
 void
-NPP_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
+NPP_URLNotify(NPP instance, const char *url, NPReason reason, void *notifyData)
 {
     trace_info("[NPP] {zilch} %s instance=%p, url=%s, reason=%d, notifyData=%p\n", __func__,
                instance, url, reason, notifyData);
@@ -394,7 +394,7 @@ NPP_LostFocus(NPP instance)
 }
 
 void
-NPP_URLRedirectNotify(NPP instance, const char* url, int32_t status, void* notifyData)
+NPP_URLRedirectNotify(NPP instance, const char *url, int32_t status, void *notifyData)
 {
     trace_info("[NPP] {zilch} %s instance=%p, url=%s, status=%d, notifyData=%p\n", __func__,
                instance, url, status, notifyData);
@@ -402,7 +402,7 @@ NPP_URLRedirectNotify(NPP instance, const char* url, int32_t status, void* notif
 }
 
 NPError
-NPP_ClearSiteData(const char* site, uint64_t flags, uint64_t maxAge)
+NPP_ClearSiteData(const char *site, uint64_t flags, uint64_t maxAge)
 {
     trace_info("[NPP] {zilch} %s site=%s, flags=%"PRIu64", maxAge=%"PRIu64"\n", __func__,
                site, flags, maxAge);

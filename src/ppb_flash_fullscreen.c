@@ -40,7 +40,7 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 }
 
 PP_Bool
-ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size* size)
+ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
 {
     size->width = 1366;
     size->height = 768;
@@ -66,7 +66,7 @@ trace_ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscre
 
 static
 PP_Bool
-trace_ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size* size)
+trace_ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
 {
     trace_info("[PPB] {fake} %s instance=%d\n", __func__+6, instance);
     return ppb_flash_fullscreen_get_screen_size(instance, size);
