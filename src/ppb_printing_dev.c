@@ -47,7 +47,7 @@ static
 PP_Resource
 trace_ppb_printing_dev_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__, instance);
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_printing_dev_create(instance);
 }
 
@@ -58,7 +58,7 @@ trace_ppb_printing_dev_get_default_print_settings(PP_Resource resource,
                                                   struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s resource=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
-               __func__, resource, callback.func, callback.user_data, callback.flags);
+               __func__+6, resource, callback.func, callback.user_data, callback.flags);
     return ppb_printing_dev_get_default_print_settings(resource, print_settings, callback);
 }
 
