@@ -56,6 +56,7 @@ add_library(freshwrapper SHARED
 	src/ppb_memory_dev.c
 	src/ppb_net_address_private.c
 	src/ppb_network_monitor.c
+	src/ppb_opengles2_chromium_enable_feature.c
 	src/ppb_opengles2_chromium_map_sub.c
 	src/ppb_opengles2_instanced_arrays.c
 	src/ppb_opengles2.c
