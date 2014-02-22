@@ -104,6 +104,7 @@ extern const struct PPB_NetworkMonitor_1_0          ppb_network_monitor_interfac
 extern const struct PPB_OpenGLES2ChromiumEnableFeature ppb_opengles2_chromium_enable_feature_interface_1_0;
 extern const struct PPB_OpenGLES2ChromiumMapSub     ppb_opengles2_chromium_map_sub_interface_1_0;
 extern const struct PPB_OpenGLES2FramebufferBlit    ppb_opengles2_framebuffer_blit_interface_1_0;
+extern const struct PPB_OpenGLES2FramebufferMultisample ppb_opengles2_framebuffer_multisample_interface_1_0;
 extern const struct PPB_OpenGLES2InstancedArrays    ppb_opengles2_instanced_arrays_interface_1_0;
 extern const struct PPB_OpenGLES2                   ppb_opengles2_interface_1_0;
 extern const struct PPB_Printing_Dev_0_7            ppb_printing_dev_0_7;
