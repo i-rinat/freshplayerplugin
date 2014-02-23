@@ -170,6 +170,7 @@ void
 ppb_opengles2_CompileShader(PP_Resource context, GLuint shader)
 {
     setup_ctx(context);
+    glCompileShader(shader);
 }
 
 void
@@ -1121,7 +1122,7 @@ static
 void
 trace_ppb_opengles2_CompileShader(PP_Resource context, GLuint shader)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, shader=%d\n", __func__+6, context, shader);
     ppb_opengles2_CompileShader(context, shader);
 }
 
