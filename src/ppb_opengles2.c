@@ -472,6 +472,7 @@ void
 ppb_opengles2_GetShaderiv(PP_Resource context, GLuint shader, GLenum pname, GLint *params)
 {
     setup_ctx(context);
+    glGetShaderiv(shader, pname, params);
 }
 
 void
@@ -1524,7 +1525,8 @@ static
 void
 trace_ppb_opengles2_GetShaderiv(PP_Resource context, GLuint shader, GLenum pname, GLint *params)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, shader=%d, pname=0x%x\n", __func__+6, context,
+               shader, pname);
     ppb_opengles2_GetShaderiv(context, shader, pname, params);
 }
 
