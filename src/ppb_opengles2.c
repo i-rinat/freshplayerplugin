@@ -213,7 +213,7 @@ GLuint
 ppb_opengles2_CreateShader(PP_Resource context, GLenum type)
 {
     setup_ctx(context);
-    return 0;
+    return glCreateShader(type);
 }
 
 void
@@ -1180,7 +1180,7 @@ static
 GLuint
 trace_ppb_opengles2_CreateShader(PP_Resource context, GLenum type)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d type=0x%x\n", __func__+6, context, type);
     return ppb_opengles2_CreateShader(context, type);
 }
 
