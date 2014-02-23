@@ -674,6 +674,7 @@ ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count, co
                            const GLint *length)
 {
     setup_ctx(context);
+    glShaderSource(shader, count, str, length);
 }
 
 void
@@ -1783,7 +1784,8 @@ void
 trace_ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count,
                                  const char **str, const GLint *length)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, shader=%d, count=%d, str=%p, length=%p\n",
+               __func__+6, context, shader, count, str, length);
     ppb_opengles2_ShaderSource(context, shader, count, str, length);
 }
 
