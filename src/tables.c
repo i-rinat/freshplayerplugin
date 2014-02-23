@@ -76,13 +76,13 @@ tables_unref_var(struct PP_Var var)
 }
 
 struct pp_instance_s *
-tables_pp_instance_to_np_priv(PP_Instance instance)
+tables_get_pp_instance(PP_Instance instance)
 {
     return g_hash_table_lookup(pp_to_np_ht, GINT_TO_POINTER(instance));
 }
 
 void
-tables_add_pp_np_mapping(PP_Instance instance, struct pp_instance_s *pp_i)
+tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i)
 {
     g_hash_table_replace(pp_to_np_ht, GINT_TO_POINTER(instance), pp_i);
 }

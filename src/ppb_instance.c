@@ -31,7 +31,7 @@
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
-    struct pp_instance_s *pp_i = tables_pp_instance_to_np_priv(instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
         trace_warning("%s, pp_i is NULL\n", __func__);
         return PP_FALSE;

@@ -28,13 +28,13 @@
 #include <ppapi/c/pp_var.h>
 #include "pp_resource.h"
 
-int                 tables_ref_var(struct PP_Var var);
-int                 tables_unref_var(struct PP_Var var);
+int         tables_ref_var(struct PP_Var var);
+int         tables_unref_var(struct PP_Var var);
+void        tables_push_url_pair(const char *url, PP_Resource resource);
+PP_Resource tables_pop_url_pair(const char *url);
 
-struct pp_instance_s *tables_pp_instance_to_np_priv(PP_Instance instance);
-void                tables_add_pp_np_mapping(PP_Instance instance, struct pp_instance_s *pp_i);
+struct pp_instance_s   *tables_get_pp_instance(PP_Instance instance);
+void                    tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i);
 
-void                tables_push_url_pair(const char *url, PP_Resource resource);
-PP_Resource         tables_pop_url_pair(const char *url);
 
 #endif // FPP__TABLES_H

@@ -155,7 +155,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    struct pp_instance_s *pp_i = tables_pp_instance_to_np_priv(instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
 
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (int64_t)(void*)strdup(pp_i->instance_url);

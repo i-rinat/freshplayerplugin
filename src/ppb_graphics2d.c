@@ -109,7 +109,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         return PP_ERROR_BADRESOURCE;
     }
 
-    struct pp_instance_s *pp_i = tables_pp_instance_to_np_priv(g2d->instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(g2d->instance);
     pp_resource_release(graphics_2d);
 
     if (pp_i->draw_in_progress) {

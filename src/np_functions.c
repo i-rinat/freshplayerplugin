@@ -109,7 +109,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
     }
 
     pp_i->pp_instance_id = generate_new_pp_instance_id();
-    tables_add_pp_np_mapping(pp_i->pp_instance_id, pp_i);
+    tables_add_pp_instance(pp_i->pp_instance_id, pp_i);
 
     // request windowless operation
     npn.setvalue(instance, NPPVpluginWindowBool, (void*)0);
