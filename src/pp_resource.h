@@ -32,6 +32,7 @@
 #include <stddef.h>
 #include <X11/Xlib.h>
 #include <npapi.h>
+#include <EGL/egl.h>
 
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,
@@ -66,6 +67,8 @@ struct pp_instance_s {
     PP_Resource     graphics;
     int             draw_in_progress;
     struct PP_CompletionCallback draw_completion_callback;
+    Display        *dpy;
+    EGLDisplay      egl_dpy;
 };
 
 struct pp_resource_generic_s {
@@ -101,6 +104,12 @@ struct pp_view_s {
 
 struct pp_graphics3d_s {
     struct pp_resource_generic_s _;
+    EGLDisplay      egl_dpy;
+    EGLContext      egl_ctx;
+    EGLConfig       egl_config;
+    EGLSurface      egl_surf;
+    int32_t         width;
+    int32_t         height;
 };
 
 struct pp_image_data_s {

@@ -110,6 +110,22 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
 
     pp_i->pp_instance_id = generate_new_pp_instance_id();
     tables_add_pp_instance(pp_i->pp_instance_id, pp_i);
+    pp_i->dpy = XOpenDisplay(NULL);
+    if (!pp_i->dpy) {
+        trace_error("%s, can't open X Display\n", __func__);
+    }
+    pp_i->egl_dpy = eglGetDisplay(pp_i->dpy);
+    if (!pp_i->egl_dpy) {
+        trace_error("%s, can't open EGL display\n", __func__);
+    }
+
+    {
+        EGLint v_major, v_minor;
+        if (!eglInitialize(pp_i->egl_dpy, &v_major, &v_minor)) {
+            trace_error("%s, can't initialize EGL\n", __func__);
+        }
+        trace_info("EGL version %d.%d\n", v_major, v_minor);
+    }
 
     // request windowless operation
     npn.setvalue(instance, NPPVpluginWindowBool, (void*)0);
