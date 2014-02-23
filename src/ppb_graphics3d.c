@@ -86,7 +86,7 @@ static
 int32_t
 trace_ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t *value)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d, attribute=%d\n", __func__+6, instance, attribute);
     return ppb_graphics3d_get_attrib_max_value(instance, attribute, value);
 }
 
@@ -95,7 +95,8 @@ PP_Resource
 trace_ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context,
                             const int32_t attrib_list[])
 {
-    trace_info("[PPB] {part} %s\n", __func__+6);
+    trace_info("[PPB] {part} %s intance=%d, share_context=%d, attrib_list={TODO}\n", __func__+6,
+               instance, share_context);
     return ppb_graphics3d_create(instance, share_context, attrib_list);
 }
 
@@ -103,7 +104,7 @@ static
 PP_Bool
 trace_ppb_graphics3d_is_graphics3d(PP_Resource resource)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_graphics3d_is_graphics3d(resource);
 }
 
@@ -111,7 +112,7 @@ static
 int32_t
 trace_ppb_graphics3d_get_attribs(PP_Resource context, int32_t attrib_list[])
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
     return ppb_graphics3d_get_attribs(context, attrib_list);
 }
 
@@ -119,7 +120,7 @@ static
 int32_t
 trace_ppb_graphics3d_set_attribs(PP_Resource context, const int32_t attrib_list[])
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, attrib_list={TODO}\n", __func__+6, context);
     return ppb_graphics3d_set_attribs(context, attrib_list);
 }
 
@@ -127,7 +128,7 @@ static
 int32_t
 trace_ppb_graphics3d_get_error(PP_Resource context)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
     return ppb_graphics3d_get_error(context);
 }
 
@@ -135,7 +136,8 @@ static
 int32_t
 trace_ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, width=%d, height=%d\n", __func__+6, context,
+               width, height);
     return ppb_graphics3d_resize_buffers(context, width, height);
 }
 
@@ -143,7 +145,8 @@ static
 int32_t
 trace_ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
+               __func__+6, context, callback.func, callback.user_data, callback.flags);
     return ppb_graphics3d_swap_buffers(context, callback);
 }
 
