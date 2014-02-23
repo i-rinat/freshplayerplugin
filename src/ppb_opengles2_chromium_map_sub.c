@@ -24,11 +24,86 @@
 
 #include <ppapi/c/ppb_opengles2.h>
 #include <stddef.h>
+#include "trace.h"
+
+
+void *
+ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(PP_Resource context, GLuint target,
+                                                            GLintptr offset, GLsizeiptr size,
+                                                            GLenum access)
+{
+    return NULL;
+}
+
+void
+ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(PP_Resource context, const void *mem)
+{
+}
+
+void *
+ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context, GLenum target,
+                                                             GLint level, GLint xoffset,
+                                                             GLint yoffset, GLsizei width,
+                                                             GLsizei height, GLenum format,
+                                                             GLenum type, GLenum access)
+{
+    return NULL;
+}
+
+void
+ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
+                                                               const void *mem)
+{
+}
+
+// trace wrappers
+static
+void *
+trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(PP_Resource context,
+                                                                  GLuint target, GLintptr offset,
+                                                                  GLsizeiptr size, GLenum access)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__);
+    return ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(context, target, offset,
+                                                                       size, access);
+}
+
+static
+void
+trace_ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(PP_Resource context,
+                                                                    const void *mem)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__);
+    ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(context, mem);
+}
+
+static
+void *
+trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context,
+                                                                   GLenum target, GLint level,
+                                                                   GLint xoffset, GLint yoffset,
+                                                                   GLsizei width, GLsizei height,
+                                                                   GLenum format, GLenum type,
+                                                                   GLenum access)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__);
+    return ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(context, target, level,
+                                        xoffset, yoffset, width, height, format, type, access);
+}
+
+static
+void
+trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
+                                                                     const void *mem)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__);
+    ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(context, mem);
+}
 
 
 const struct PPB_OpenGLES2ChromiumMapSub ppb_opengles2_chromium_map_sub_interface_1_0 = {
-    .MapBufferSubDataCHROMIUM = (void *)53,
-    .UnmapBufferSubDataCHROMIUM = (void *)54,
-    .MapTexSubImage2DCHROMIUM = (void *)55,
-    .UnmapTexSubImage2DCHROMIUM = (void *)56,
+    .MapBufferSubDataCHROMIUM =   trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium,
+    .UnmapBufferSubDataCHROMIUM = trace_ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium,
+    .MapTexSubImage2DCHROMIUM =   trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium,
+    .UnmapTexSubImage2DCHROMIUM = trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium,
 };
