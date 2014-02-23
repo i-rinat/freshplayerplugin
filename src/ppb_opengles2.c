@@ -48,6 +48,7 @@ void
 ppb_opengles2_AttachShader(PP_Resource context, GLuint program, GLuint shader)
 {
     setup_ctx(context);
+    glAttachShader(program, shader);
 }
 
 void
@@ -55,6 +56,7 @@ ppb_opengles2_BindAttribLocation(PP_Resource context, GLuint program, GLuint ind
                                  const char *name)
 {
     setup_ctx(context);
+    glBindAttribLocation(program, index, name);
 }
 
 void
@@ -79,6 +81,7 @@ void
 ppb_opengles2_BindTexture(PP_Resource context, GLenum target, GLuint texture)
 {
     setup_ctx(context);
+    glBindTexture(target, texture);
 }
 
 void
@@ -207,7 +210,7 @@ GLuint
 ppb_opengles2_CreateProgram(PP_Resource context)
 {
     setup_ctx(context);
-    return 0;
+    return glCreateProgram();
 }
 
 GLuint
@@ -251,6 +254,7 @@ void
 ppb_opengles2_DeleteShader(PP_Resource context, GLuint shader)
 {
     setup_ctx(context);
+    glDeleteShader(shader);
 }
 
 void
@@ -380,6 +384,7 @@ void
 ppb_opengles2_GenTextures(PP_Resource context, GLsizei n, GLuint *textures)
 {
     setup_ctx(context);
+    glGenTextures(n, textures);
 }
 
 void
@@ -446,12 +451,14 @@ void
 ppb_opengles2_GetIntegerv(PP_Resource context, GLenum pname, GLint *params)
 {
     setup_ctx(context);
+    glGetIntegerv(pname, params);
 }
 
 void
 ppb_opengles2_GetProgramiv(PP_Resource context, GLuint program, GLenum pname, GLint *params)
 {
     setup_ctx(context);
+    glGetProgramiv(program, pname, params);
 }
 
 void
@@ -531,7 +538,7 @@ GLint
 ppb_opengles2_GetUniformLocation(PP_Resource context, GLuint program, const char *name)
 {
     setup_ctx(context);
-    return 0;
+    return glGetUniformLocation(program, name);
 }
 
 void
@@ -618,6 +625,7 @@ void
 ppb_opengles2_LinkProgram(PP_Resource context, GLuint program)
 {
     setup_ctx(context);
+    glLinkProgram(program);
 }
 
 void
@@ -723,6 +731,7 @@ ppb_opengles2_TexImage2D(PP_Resource context, GLenum target, GLint level, GLint 
                          const void *pixels)
 {
     setup_ctx(context);
+    glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 }
 
 void
@@ -774,6 +783,7 @@ void
 ppb_opengles2_Uniform1i(PP_Resource context, GLint location, GLint x)
 {
     setup_ctx(context);
+    glUniform1i(location, x);
 }
 
 void
@@ -880,6 +890,7 @@ void
 ppb_opengles2_UseProgram(PP_Resource context, GLuint program)
 {
     setup_ctx(context);
+    glUseProgram(program);
 }
 
 void
@@ -964,7 +975,8 @@ static
 void
 trace_ppb_opengles2_AttachShader(PP_Resource context, GLuint program, GLuint shader)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%d, shader=%d\n", __func__+6, context,
+               program, shader);
     ppb_opengles2_AttachShader(context, program, shader);
 }
 
@@ -973,7 +985,8 @@ void
 trace_ppb_opengles2_BindAttribLocation(PP_Resource context, GLuint program, GLuint index,
                                        const char *name)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%d, index=%d, name=%s\n", __func__+6,
+               context, program, index, name);
     ppb_opengles2_BindAttribLocation(context, program, index, name);
 }
 
@@ -1005,7 +1018,8 @@ static
 void
 trace_ppb_opengles2_BindTexture(PP_Resource context, GLenum target, GLuint texture)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=0x%x, texture=%d\n", __func__+6, context,
+               target, texture);
     ppb_opengles2_BindTexture(context, target, texture);
 }
 
@@ -1175,7 +1189,7 @@ static
 GLuint
 trace_ppb_opengles2_CreateProgram(PP_Resource context)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
     return ppb_opengles2_CreateProgram(context);
 }
 
@@ -1231,7 +1245,7 @@ static
 void
 trace_ppb_opengles2_DeleteShader(PP_Resource context, GLuint shader)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, shader=%d\n", __func__+6, context, shader);
     ppb_opengles2_DeleteShader(context, shader);
 }
 
@@ -1403,7 +1417,7 @@ static
 void
 trace_ppb_opengles2_GenTextures(PP_Resource context, GLsizei n, GLuint *textures)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d\n", __func__+6, context, n);
     ppb_opengles2_GenTextures(context, n, textures);
 }
 
@@ -1491,7 +1505,7 @@ static
 void
 trace_ppb_opengles2_GetIntegerv(PP_Resource context, GLenum pname, GLint *params)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, pname=0x%x\n", __func__+6, context, pname);
     ppb_opengles2_GetIntegerv(context, pname, params);
 }
 
@@ -1499,7 +1513,8 @@ static
 void
 trace_ppb_opengles2_GetProgramiv(PP_Resource context, GLuint program, GLenum pname, GLint *params)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%d, pname=0x%x\n", __func__+6, context,
+               program, pname);
     ppb_opengles2_GetProgramiv(context, program, pname, params);
 }
 
@@ -1604,7 +1619,8 @@ static
 GLint
 trace_ppb_opengles2_GetUniformLocation(PP_Resource context, GLuint program, const char *name)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%d, name=%s\n", __func__+6, context,
+               program, name);
     return ppb_opengles2_GetUniformLocation(context, program, name);
 }
 
@@ -1711,7 +1727,7 @@ static
 void
 trace_ppb_opengles2_LinkProgram(PP_Resource context, GLuint program)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%d\n", __func__+6, context, program);
     ppb_opengles2_LinkProgram(context, program);
 }
 
@@ -1848,7 +1864,9 @@ trace_ppb_opengles2_TexImage2D(PP_Resource context, GLenum target, GLint level,
                                GLint internalformat, GLsizei width, GLsizei height, GLint border,
                                GLenum format, GLenum type, const void *pixels)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=0x%x, level=%d, internalformat=0x%x, width=%d, "
+               "height=%d, border=%d, format=0x%x, type=0x%x\n", __func__+6, context, target,
+               level, internalformat, width, height, border, format, type);
     ppb_opengles2_TexImage2D(context, target, level, internalformat, width, height, border, format,
                              type, pixels);
 }
@@ -1918,7 +1936,7 @@ static
 void
 trace_ppb_opengles2_Uniform1i(PP_Resource context, GLint location, GLint x)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, x=%d\n", __func__+6, context, location, x);
     ppb_opengles2_Uniform1i(context, location, x);
 }
 
@@ -2059,7 +2077,7 @@ static
 void
 trace_ppb_opengles2_UseProgram(PP_Resource context, GLuint program)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%d\n", __func__+6, context, program);
     ppb_opengles2_UseProgram(context, program);
 }
 
