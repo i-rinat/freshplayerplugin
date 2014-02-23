@@ -22,10 +22,21 @@
  * SOFTWARE.
  */
 
+#include <GLES2/gl2.h>
 #include <ppapi/c/ppb_opengles2.h>
 #include <stddef.h>
 #include "trace.h"
+#include "pp_resource.h"
 
+
+static
+void
+setup_ctx(PP_Resource context)
+{
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
+    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->egl_ctx);
+    pp_resource_release(context);
+}
 
 void
 ppb_opengles2_ActiveTexture(PP_Resource context, GLenum texture)
@@ -415,7 +426,8 @@ ppb_opengles2_GetShaderSource(PP_Resource context, GLuint shader, GLsizei bufsiz
 const GLubyte *
 ppb_opengles2_GetString(PP_Resource context, GLenum name)
 {
-    return (const GLubyte *)"";
+    setup_ctx(context);
+    return glGetString(name);
 }
 
 void
@@ -1404,7 +1416,7 @@ static
 const GLubyte*
 trace_ppb_opengles2_GetString(PP_Resource context, GLenum name)
 {
-    trace_info("[PPB] {zilch} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d name=0x%x\n", __func__+6, context, name);
     return ppb_opengles2_GetString(context, name);
 }
 
