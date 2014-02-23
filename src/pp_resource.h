@@ -42,6 +42,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_GRAPHICS3D,
     PP_RESOURCE_IMAGE_DATA,
     PP_RESOURCE_GRAPHICS2D,
+    PP_RESOURCE_NETWORK_MONITOR,
 };
 
 struct pp_instance_s {
@@ -119,6 +120,10 @@ struct pp_graphics2d_s {
     int32_t     height;
     int32_t     stride;
     char       *data;
+};
+
+struct pp_network_monitor_s {
+    struct pp_resource_generic_s _;
 };
 
 

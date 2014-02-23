@@ -23,26 +23,29 @@
  */
 
 #include <ppapi/c/ppb_network_monitor.h>
+#include <ppapi/c/pp_errors.h>
 #include <stddef.h>
+#include "pp_resource.h"
 #include "trace.h"
 
 PP_Resource
 ppb_network_monitor_create(PP_Instance instance)
 {
-    return 123001;
+    PP_Resource network_monitor = pp_resource_allocate(PP_RESOURCE_NETWORK_MONITOR);
+    return network_monitor;
 }
 
 int32_t
 ppb_network_monitor_update_network_list(PP_Resource network_monitor, PP_Resource *network_list,
                                         struct PP_CompletionCallback callback)
 {
-    return 0;
+    return PP_ERROR_NOACCESS;
 }
 
 PP_Bool
 ppb_network_monitor_is_network_monitor(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_NETWORK_MONITOR;
 }
 
 // trace wrappers
@@ -50,7 +53,7 @@ static
 PP_Resource
 trace_ppb_network_monitor_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_network_monitor_create(instance);
 }
 
@@ -68,7 +71,7 @@ static
 PP_Bool
 trace_ppb_network_monitor_is_network_monitor(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_network_monitor_is_network_monitor(resource);
 }
 

@@ -74,6 +74,9 @@ pp_resource_allocate(enum pp_resource_type_e type)
     case PP_RESOURCE_GRAPHICS2D:
         ALLOC_HELPER(struct pp_graphics2d_s);
         break;
+    case PP_RESOURCE_NETWORK_MONITOR:
+        ALLOC_HELPER(struct pp_network_monitor_s);
+        break;
     default:
         // fall through
     case PP_RESOURCE_UNKNOWN:
