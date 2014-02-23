@@ -31,7 +31,6 @@
 #include <pthread.h>
 #include "trace.h"
 #include "reverse_constant.h"
-#include "np.h"
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "interface_list.h"
@@ -59,14 +58,14 @@ generate_new_pp_instance_id(void)
 static
 void *fn(void *p)
 {
-    struct np_priv_s *priv = p;
+    struct pp_instance_s *pp_i = p;
 
-    PP_Resource urll = ppb_url_loader_create(priv->pp_instance_id);
-    PP_Resource urlri = ppb_url_request_info_create(priv->pp_instance_id);
+    PP_Resource urll = ppb_url_loader_create(pp_i->pp_instance_id);
+    PP_Resource urlri = ppb_url_request_info_create(pp_i->pp_instance_id);
     ppb_url_loader_open(urll, urlri, PP_BlockUntilComplete());
     trace_info("-----------------------------------------\n");
-    priv->ppp_instance_1_1->HandleDocumentLoad(priv->pp_instance_id, urll);
-    priv->instance_loaded = 1;
+    pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->pp_instance_id, urll);
+    pp_i->instance_loaded = 1;
     trace_info("=========================================\n");
     return NULL;
 }
@@ -77,7 +76,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
 {
     // TODO: mode parameter handling
     int k;
-    struct np_priv_s *priv;
+    struct pp_instance_s *pp_i;
     trace_info("[NPP] {part} %s pluginType=%s instance=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                pluginType, instance, mode, argc, saved);
 
@@ -87,38 +86,38 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
     for (k = 0; k < argc; k ++)
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
-    priv = calloc(sizeof(*priv), 1);
-    instance->pdata = priv;
-    if (!priv)
+    pp_i = calloc(sizeof(*pp_i), 1);
+    instance->pdata = pp_i;
+    if (!pp_i)
         return NPERR_OUT_OF_MEMORY_ERROR;
 
-    priv->npp = instance;
-    priv->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
-    if (!priv->ppp_instance_1_1)
+    pp_i->npp = instance;
+    pp_i->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
+    if (!pp_i->ppp_instance_1_1)
         return NPERR_GENERIC_ERROR;
 
-    priv->argc = argc;
-    priv->argn = malloc(argc * sizeof(char*));
-    priv->argv = malloc(argc * sizeof(char*));
+    pp_i->argc = argc;
+    pp_i->argn = malloc(argc * sizeof(char*));
+    pp_i->argv = malloc(argc * sizeof(char*));
     for (k = 0; k < argc; k ++) {
-        priv->argn[k] = strdup(argn[k] ? argn[k] : "");
-        priv->argv[k] = strdup(argv[k] ? argv[k] : "");
+        pp_i->argn[k] = strdup(argn[k] ? argn[k] : "");
+        pp_i->argv[k] = strdup(argv[k] ? argv[k] : "");
 
         if (strcasecmp(argn[k], "src") == 0) {
-            priv->instance_url = strdup(argv[k]);
+            pp_i->instance_url = strdup(argv[k]);
         }
     }
 
-    priv->pp_instance_id = generate_new_pp_instance_id();
-    tables_add_pp_np_mapping(priv->pp_instance_id, priv);
+    pp_i->pp_instance_id = generate_new_pp_instance_id();
+    tables_add_pp_np_mapping(pp_i->pp_instance_id, pp_i);
 
     // request windowless operation
     npn.setvalue(instance, NPPVpluginWindowBool, (void*)0);
 
-    priv->ppp_instance_1_1->DidCreate(priv->pp_instance_id, priv->argc, priv->argn, priv->argv);
+    pp_i->ppp_instance_1_1->DidCreate(pp_i->pp_instance_id, pp_i->argc, pp_i->argn, pp_i->argv);
 
     pthread_t t;
-    pthread_create(&t, NULL, fn, priv);
+    pthread_create(&t, NULL, fn, pp_i);
 
     return NPERR_NO_ERROR;
 }
@@ -127,8 +126,8 @@ NPError
 NPP_Destroy(NPP instance, NPSavedData **save)
 {
     trace_info("[NPP] {full} %s instance=%p, save=%p\n", __func__, instance, save);
-    struct np_priv_s *priv = instance->pdata;
-    priv->ppp_instance_1_1->DidDestroy(priv->pp_instance_id);
+    struct pp_instance_s *pp_i = instance->pdata;
+    pp_i->ppp_instance_1_1->DidDestroy(pp_i->pp_instance_id);
     if (save)
         *save = NULL;
     return NPERR_NO_ERROR;
@@ -141,15 +140,15 @@ NPP_SetWindow(NPP instance, NPWindow *window)
     trace_info("[NPP] {part} %s instance=%p, window=%s\n", __func__, instance, window_str);
     free(window_str);
 
-    struct np_priv_s *priv = instance->pdata;
-    priv->wnd = (Window)window->window;
-    priv->x = window->x;
-    priv->y = window->y;
-    priv->width = window->width;
-    priv->height = window->height;
-    priv->clip_rect = window->clipRect;
-    priv->ws_info = window->ws_info;
-    priv->window_type = window->type;
+    struct pp_instance_s *pp_i = instance->pdata;
+    pp_i->wnd = (Window)window->window;
+    pp_i->x = window->x;
+    pp_i->y = window->y;
+    pp_i->width = window->width;
+    pp_i->height = window->height;
+    pp_i->clip_rect = window->clipRect;
+    pp_i->ws_info = window->ws_info;
+    pp_i->window_type = window->type;
 
     PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW);
     struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
@@ -160,8 +159,8 @@ NPP_SetWindow(NPP instance, NPWindow *window)
     // ignoring clipRect, will use full rect instead
     pp_resource_release(view);
 
-    if (priv->instance_loaded)
-        priv->ppp_instance_1_1->DidChangeView(priv->pp_instance_id, view);
+    if (pp_i->instance_loaded)
+        pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
 
     return NPERR_NO_ERROR;
 }
@@ -262,10 +261,10 @@ int16_t
 handle_GraphicsExpose_event(NPP instance, void *event)
 {
     XGraphicsExposeEvent *ev = event;
-    struct np_priv_s *np_priv = instance->pdata;
-    if (!np_priv->draw_in_progress)
+    struct pp_instance_s *pp_i = instance->pdata;
+    if (!pp_i->draw_in_progress)
         return 0;
-    struct pp_graphics2d_s *g2d = pp_resource_acquire(np_priv->graphics, PP_RESOURCE_GRAPHICS2D);
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(pp_i->graphics, PP_RESOURCE_GRAPHICS2D);
     if (!g2d)
         return 0;
     Display *dpy = ev->display;
@@ -278,10 +277,10 @@ handle_GraphicsExpose_event(NPP instance, void *event)
     XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g2d->width, g2d->height);
 
     free(xi);
-    pp_resource_release(np_priv->graphics);
+    pp_resource_release(pp_i->graphics);
 
-    np_priv->draw_in_progress = 0;
-    np_priv->draw_completion_callback.func(np_priv->draw_completion_callback.user_data, PP_OK);
+    pp_i->draw_in_progress = 0;
+    pp_i->draw_completion_callback.func(pp_i->draw_completion_callback.user_data, PP_OK);
 
     return 1;
 }

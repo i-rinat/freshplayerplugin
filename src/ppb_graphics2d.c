@@ -109,20 +109,20 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         return PP_ERROR_BADRESOURCE;
     }
 
-    struct np_priv_s *np_priv = tables_pp_instance_to_np_priv(g2d->instance);
+    struct pp_instance_s *pp_i = tables_pp_instance_to_np_priv(g2d->instance);
     pp_resource_release(graphics_2d);
 
-    if (np_priv->draw_in_progress) {
+    if (pp_i->draw_in_progress) {
         trace_warning("%s, flush in progress already\n", __func__);
         return PP_ERROR_INPROGRESS;
     }
 
-    np_priv->draw_in_progress = 1;
-    np_priv->draw_completion_callback = callback;
+    pp_i->draw_in_progress = 1;
+    pp_i->draw_completion_callback = callback;
 
     NPRect npr = {.top = 0, .left = 0, .bottom = g2d->height, .right = g2d->width};
-    npn.invalidaterect(np_priv->npp, &npr);
-    npn.forceredraw(np_priv->npp);
+    npn.invalidaterect(pp_i->npp, &npr);
+    npn.forceredraw(pp_i->npp);
 
     return PP_OK;
 }

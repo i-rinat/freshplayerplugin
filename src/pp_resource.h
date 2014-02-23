@@ -30,6 +30,8 @@
 #include <ppapi/c/pp_resource.h>
 #include <ppapi/c/ppb_image_data.h>
 #include <stddef.h>
+#include <X11/Xlib.h>
+#include <npapi.h>
 
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,
@@ -42,6 +44,28 @@ enum pp_resource_type_e {
     PP_RESOURCE_GRAPHICS2D,
 };
 
+struct pp_instance_s {
+    const struct PPP_Instance_1_1  *ppp_instance_1_1;
+    Window          wnd;
+    PP_Instance     pp_instance_id;
+    NPP             npp;
+    uint32_t        x;
+    uint32_t        y;
+    uint32_t        width;
+    uint32_t        height;
+    NPRect          clip_rect;
+    void           *ws_info;
+    NPWindowType    window_type;
+    int             argc;
+    const char    **argn;
+    const char    **argv;
+    int             instance_loaded;
+    const char     *instance_url;
+    pthread_t       pp_thread;
+    PP_Resource     graphics;
+    int             draw_in_progress;
+    struct PP_CompletionCallback draw_completion_callback;
+};
 
 struct pp_resource_generic_s {
     int         type;

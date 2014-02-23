@@ -31,9 +31,9 @@
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
-    struct np_priv_s *priv = tables_pp_instance_to_np_priv(instance);
-    if (!priv) {
-        trace_warning("%s, priv is NULL\n", __func__);
+    struct pp_instance_s *pp_i = tables_pp_instance_to_np_priv(instance);
+    if (!pp_i) {
+        trace_warning("%s, pp_i is NULL\n", __func__);
         return PP_FALSE;
     }
     struct pp_graphics2d_s *g2d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS2D);
@@ -41,7 +41,7 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 
     if (g2d) {
         g2d->instance = instance;
-        priv->graphics = device;
+        pp_i->graphics = device;
         pp_resource_release(device);
         return PP_TRUE;
     } else if (g3d) {

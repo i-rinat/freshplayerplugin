@@ -155,10 +155,10 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
     struct PP_Var var = {0};
-    struct np_priv_s *priv = tables_pp_instance_to_np_priv(instance);
+    struct pp_instance_s *pp_i = tables_pp_instance_to_np_priv(instance);
 
     var.type = PP_VARTYPE_STRING;
-    var.value.as_id = (int64_t)(void*)strdup(priv->instance_url);
+    var.value.as_id = (int64_t)(void*)strdup(pp_i->instance_url);
     tables_ref_var(var);
     if (components) {
         parse_url_string((void*)(size_t)var.value.as_id, components);
