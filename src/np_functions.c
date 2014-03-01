@@ -55,21 +55,6 @@ generate_new_pp_instance_id(void)
     return result;
 }
 
-static
-void *fn(void *p)
-{
-    struct pp_instance_s *pp_i = p;
-
-    PP_Resource urll = ppb_url_loader_create(pp_i->pp_instance_id);
-    PP_Resource urlri = ppb_url_request_info_create(pp_i->pp_instance_id);
-    ppb_url_loader_open(urll, urlri, PP_BlockUntilComplete());
-    trace_info("-----------------------------------------\n");
-    pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->pp_instance_id, urll);
-    pp_i->instance_loaded = 1;
-    trace_info("=========================================\n");
-    return NULL;
-}
-
 NPError
 NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
@@ -131,9 +116,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
     npn.setvalue(instance, NPPVpluginWindowBool, (void*)0);
 
     pp_i->ppp_instance_1_1->DidCreate(pp_i->pp_instance_id, pp_i->argc, pp_i->argn, pp_i->argv);
-
-    pthread_t t;
-    pthread_create(&t, NULL, fn, pp_i);
+    pp_i->instance_loaded = 1;
 
     return NPERR_NO_ERROR;
 }
