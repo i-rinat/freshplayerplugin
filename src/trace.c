@@ -29,6 +29,7 @@
 #include <sys/syscall.h>
 #include <stdlib.h>
 #include "trace.h"
+#include "pp_resource.h"
 
 
 void
@@ -85,6 +86,12 @@ trace_var_as_string(struct PP_Var var)
         break;
     case PP_VARTYPE_STRING:
         asprintf(&res, "{STRING:%s}", (char*)(size_t)var.value.as_id);
+        break;
+    case PP_VARTYPE_OBJECT:
+        {
+            struct pp_var_object_s *obj = (void*)(size_t)var.value.as_id;
+            asprintf(&res, "{OBJECT:class=%p,data=%p}", obj->klass, obj->data);
+        }
         break;
     default:
         asprintf(&res, "{NOTIMPLEMENTED:%d}", var.type);
