@@ -46,6 +46,11 @@ enum pp_resource_type_e {
     PP_RESOURCE_NETWORK_MONITOR,
 };
 
+struct pp_var_object_s {
+    const struct PPP_Class_Deprecated *klass;
+    void *data;
+};
+
 struct pp_instance_s {
     const struct PPP_Instance_1_1  *ppp_instance_1_1;
     Window          wnd;

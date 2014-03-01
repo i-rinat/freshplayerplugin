@@ -49,8 +49,21 @@ ppb_var_release(struct PP_Var var)
         var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
         var.type == PP_VARTYPE_ARRAY_BUFFER)
     {
-        if (tables_unref_var(var) == 0 && var.type == PP_VARTYPE_STRING)
+        int ref_cnt = tables_unref_var(var);
+        if (ref_cnt != 0)
+            return;
+
+        switch (var.type) {
+        case PP_VARTYPE_STRING:
             free((void*)(size_t)var.value.as_id);
+            break;
+        case PP_VARTYPE_OBJECT:
+            free((void*)(size_t)var.value.as_id);
+            break;
+        default:
+            // do nothing
+            break;
+        }
     }
 }
 
