@@ -53,6 +53,7 @@ ppb_instance_private_get_window_object(PP_Instance instance)
     obj = malloc(sizeof(*obj));
     obj->klass = &browser_object_class;
     obj->data = np_window_obj;
+    obj->npp =  pp_i->npp;
 
     var.type = PP_VARTYPE_OBJECT;
     var.value.as_id = (size_t)(void *)obj;

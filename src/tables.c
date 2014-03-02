@@ -87,7 +87,7 @@ tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i)
     g_hash_table_replace(pp_to_np_ht, GINT_TO_POINTER(instance), pp_i);
 }
 
-void               
+void
 tables_push_url_pair(const char *url, PP_Resource resource)
 {
     struct url_pair_s *pair = malloc(sizeof(*pair));
@@ -114,4 +114,64 @@ tables_pop_url_pair(const char *url)
 
     trace_warning("%s, no corresponding resource in tables for url=\"%s\"\n", __func__, url);
     return 0;
+}
+
+struct PP_Var
+PP_MakeString(const char *s)
+{
+    struct PP_Var var;
+
+    var.type = PP_VARTYPE_STRING;
+    var.value.as_id = (size_t)(void *)strdup(s);
+    tables_ref_var(var);
+    return var;
+}
+
+struct PP_Var
+PP_MakeStringN(const char *s, unsigned int len)
+{
+    struct PP_Var var;
+    char *ptr;
+
+    ptr = malloc(len + 1);
+    memcpy(ptr, s, len);
+    ptr[len] = 0;
+
+    var.type = PP_VARTYPE_STRING;
+    var.value.as_id = (size_t)(void *)ptr;
+    tables_ref_var(var);
+    return var;
+}
+
+
+struct PP_Var
+PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj)
+{
+    struct PP_Var var;
+    struct pp_var_object_s *obj;
+
+    obj = malloc(sizeof(*obj));
+    obj->klass = reference_obj->klass;
+    obj->npp = reference_obj->npp;
+    obj->data = data;
+    var.type = PP_VARTYPE_OBJECT;
+    var.value.as_id = (size_t)(void *)obj;
+    tables_ref_var(var);
+    return var;
+}
+
+struct PP_Var
+np_variant_to_pp_var(NPVariant v, const struct pp_var_object_s *reference_obj)
+{
+    switch (v.type) {
+    case NPVariantType_Void:    return PP_MakeUndefined();
+    case NPVariantType_Null:    return PP_MakeNull();
+    case NPVariantType_Bool:    return PP_MakeBool(v.value.boolValue);
+    case NPVariantType_Int32:   return PP_MakeInt32(v.value.intValue);
+    case NPVariantType_Double:  return PP_MakeDouble(v.value.doubleValue);
+    case NPVariantType_String:  return PP_MakeStringN(v.value.stringValue.UTF8Characters,
+                                                      v.value.stringValue.UTF8Length);
+    case NPVariantType_Object:  return PP_MakeBrowserObject(v.value.objectValue, reference_obj);
+    default:                    return PP_MakeUndefined();
+    }
 }

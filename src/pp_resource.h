@@ -49,6 +49,7 @@ enum pp_resource_type_e {
 struct pp_var_object_s {
     const struct PPP_Class_Deprecated *klass;
     void *data;
+    NPP   npp;
 };
 
 struct pp_instance_s {
