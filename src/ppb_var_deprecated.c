@@ -27,6 +27,7 @@
 #include <stddef.h>
 #include "pp_resource.h"
 #include "trace.h"
+#include "browser_object.h"
 
 
 void

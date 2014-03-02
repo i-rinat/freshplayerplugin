@@ -1,0 +1,182 @@
+/*
+ * Copyright © 2013-2014  Rinat Ibragimov
+ *
+ * This file is part of FreshPlayerPlugin.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "browser_object.h"
+#include "ppapi/c/dev/deprecated_bool.h"
+#include "trace.h"
+
+
+static
+bool
+bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+{
+    return true;
+}
+
+static
+bool
+bobj_HasMethod(void *object, struct PP_Var name, struct PP_Var *exception)
+{
+    return true;
+}
+
+static
+struct PP_Var
+bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+{
+    struct PP_Var var = {0};
+    return var;
+}
+
+static
+void
+bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties, 
+                         struct PP_Var *exception)
+{
+}
+
+static
+void
+bobj_SetProperty(void *object, struct PP_Var name, struct PP_Var value, struct PP_Var *exception)
+{
+}
+
+static
+void
+bobj_RemoveProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+{
+}
+
+static
+struct PP_Var
+bobj_Call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
+          struct PP_Var *exception)
+{
+    struct PP_Var var = {0};
+    return var;
+}
+
+static
+struct PP_Var
+bobj_Construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
+{
+    struct PP_Var var = {0};
+    return var;
+}
+
+static
+void
+bobj_Deallocate(void *object)
+{
+}
+
+
+// trace wrappers
+static
+bool
+trace_bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    return bobj_HasProperty(object, name, exception);
+}
+
+static
+bool
+trace_bobj_HasMethod(void *object, struct PP_Var name, struct PP_Var *exception)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    return bobj_HasMethod(object, name, exception);
+}
+
+static
+struct PP_Var
+trace_bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    return bobj_GetProperty(object, name, exception);
+}
+
+static
+void
+trace_bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties, 
+                               struct PP_Var *exception)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    bobj_GetAllPropertyNames(object, property_count, properties, exception);
+}
+
+static
+void
+trace_bobj_SetProperty(void *object, struct PP_Var name, struct PP_Var value,
+                       struct PP_Var *exception)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    bobj_SetProperty(object, name, value, exception);
+}
+
+static
+void
+trace_bobj_RemoveProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    bobj_RemoveProperty(object, name, exception);
+}
+
+static
+struct PP_Var
+trace_bobj_Call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
+                struct PP_Var *exception)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    return bobj_Call(object, method_name, argc, argv, exception);
+}
+
+static
+struct PP_Var
+trace_bobj_Construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    return bobj_Construct(object, argc, argv, exception);
+}
+
+static
+void
+trace_bobj_Deallocate(void *object)
+{
+    trace_info("[cls] {zilch} %s\n", __func__+6);
+    bobj_Deallocate(object);
+}
+
+
+const struct PPP_Class_Deprecated browser_object_class = {
+    .HasProperty =          trace_bobj_HasProperty,
+    .HasMethod =            trace_bobj_HasMethod,
+    .GetProperty =          trace_bobj_GetProperty,
+    .GetAllPropertyNames =  trace_bobj_GetAllPropertyNames,
+    .SetProperty =          trace_bobj_SetProperty,
+    .RemoveProperty =       trace_bobj_RemoveProperty,
+    .Call =                 trace_bobj_Call,
+    .Construct =            trace_bobj_Construct,
+    .Deallocate =           trace_bobj_Deallocate,
+};

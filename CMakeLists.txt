@@ -25,6 +25,7 @@ add_library(freshwrapper SHARED
 	src/reverse_constant.c
 	src/tables.c
 	src/trace.c
+	src/browser_object.c
 	src/pp_interface.c
 	src/pp_resource.c
 	src/ppb_core.c
