@@ -23,14 +23,41 @@
  */
 
 #include <ppapi/c/private/ppb_instance_private.h>
+#include <ppapi/c/pp_var.h>
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
+#include "globals.h"
+#include "browser_object.h"
 
 
 struct PP_Var
 ppb_instance_private_get_window_object(PP_Instance instance)
 {
     struct PP_Var var = {0};
+    struct pp_var_object_s *obj;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    NPObject *np_window_obj;
+
+    if (!pp_i) {
+        trace_error("%s, wrong instance %d\n", __func__, instance);
+        return var;
+    }
+
+    NPError err = npn.getvalue(pp_i->npp, NPNVWindowNPObject, &np_window_obj);
+    if (err != NPERR_NO_ERROR) {
+        trace_error("%s, NPN_GetValue returned %d\n", __func__, err);
+        return var;
+    }
+
+    obj = malloc(sizeof(*obj));
+    obj->klass = &browser_object_class;
+    obj->data = np_window_obj;
+
+    var.type = PP_VARTYPE_OBJECT;
+    var.value.as_id = (size_t)(void *)obj;
+    tables_ref_var(var);
+
     return var;
 }
 
@@ -54,7 +81,7 @@ static
 struct PP_Var
 trace_ppb_instance_private_get_window_object(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_instance_private_get_window_object(instance);
 }
 
