@@ -68,8 +68,13 @@ ppb_var_deprecated_has_method(struct PP_Var object, struct PP_Var name, struct P
 struct PP_Var
 ppb_var_deprecated_get_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
-    struct PP_Var var = {0};
-    return var;
+    if (object.type != PP_VARTYPE_OBJECT) {
+        // TODO: fill exception
+        return PP_MakeUndefined();
+    }
+
+    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+    return obj->klass->GetProperty(obj, name, exception);
 }
 
 void
@@ -205,7 +210,7 @@ trace_ppb_var_deprecated_get_property(struct PP_Var object, struct PP_Var name,
 {
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
-    trace_info("[PPB] {zilch} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
+    trace_info("[PPB] {full} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
     free(s_name);
     free(s_object);
     return ppb_var_deprecated_get_property(object, name, exception);

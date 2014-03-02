@@ -25,6 +25,10 @@
 #include "browser_object.h"
 #include "ppapi/c/dev/deprecated_bool.h"
 #include "trace.h"
+#include "tables.h"
+#include "globals.h"
+#include "pp_resource.h"
+#include <npruntime.h>
 
 
 static
@@ -45,8 +49,18 @@ static
 struct PP_Var
 bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    struct PP_Var var = {0};
-    return var;
+    if (name.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return PP_MakeUndefined();
+    }
+
+    const char *s_name = (void *)(size_t)name.value.as_id;
+    const struct pp_var_object_s *obj = object;
+    NPIdentifier identifier = npn.getstringidentifier(s_name);
+    NPVariant value;
+    npn.getproperty(obj->npp, obj->data, identifier, &value);
+
+    return np_variant_to_pp_var(value, obj);
 }
 
 static
@@ -113,7 +127,7 @@ static
 struct PP_Var
 trace_bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[cls] {full} %s\n", __func__+6);
     return bobj_GetProperty(object, name, exception);
 }
 
