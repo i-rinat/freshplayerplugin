@@ -59,7 +59,7 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 PP_Bool
 ppb_instance_is_full_frame(PP_Instance instance)
 {
-    return PP_TRUE;
+    return PP_FALSE;
 }
 
 // trace wrappers
