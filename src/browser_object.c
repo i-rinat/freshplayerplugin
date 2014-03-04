@@ -127,7 +127,9 @@ static
 struct PP_Var
 trace_bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    trace_info("[cls] {full} %s\n", __func__+6);
+    char *s_name = trace_var_as_string(name);
+    trace_info("[cls] {full} %s object=%p, name=%s\n", __func__+6, object, s_name);
+    free(s_name);
     return bobj_GetProperty(object, name, exception);
 }
 
