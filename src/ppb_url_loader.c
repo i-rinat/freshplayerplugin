@@ -60,14 +60,16 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
     return PP_RESOURCE_URL_LOADER == pp_resource_get_type(resource);
 }
 
+struct pair_s {
+        const char *url;
+        PP_Resource loader;
+};
+
 static
 void
 _url_loader_open_comt(void *user_data, int32_t result)
 {
-    struct {
-        const char *url;
-        PP_Resource loader;
-    } *pair = user_data;
+    struct pair_s *pair = user_data;
 
     // called on main thread
     tables_push_url_pair(pair->url, pair->loader);
@@ -82,14 +84,8 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     struct pp_url_request_info_s *ri = pp_resource_acquire(request_info,
                                                            PP_RESOURCE_URL_REQUEST_INFO);
-    struct {
-        const char *url;
-        PP_Resource loader;
-    } *pair;
-
-    pair = malloc(sizeof(*pair));
-    pair->url = "http://127.0.0.1/flashtest/flowplayer-3.2.16.swf";
-    (void)ri;   // TODO: use it
+    struct pair_s *pair = malloc(sizeof(*pair));
+    pair->url = strdup(ri->url ? ri->url : "");
     pair->loader = loader;
 
     ul->url = strdup(pair->url);
