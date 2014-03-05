@@ -39,7 +39,7 @@
 PP_Resource
 ppb_url_loader_create(PP_Instance instance)
 {
-    return pp_resource_allocate(PP_RESOURCE_URL_LOADER);
+    return pp_resource_allocate(PP_RESOURCE_URL_LOADER, instance);
 }
 
 void
@@ -145,9 +145,11 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
 PP_Resource
 ppb_url_loader_get_response_info(PP_Resource loader)
 {
-    PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO);
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO, ul->_.instance);
     struct pp_url_response_info_s *ri = pp_resource_acquire(response_info,
                                                             PP_RESOURCE_URL_RESPONSE_INFO);
+    pp_resource_release(loader);
     pp_resource_ref(loader);
     ri->url_loader = loader;
     pp_resource_release(response_info);

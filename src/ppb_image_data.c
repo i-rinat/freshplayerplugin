@@ -54,7 +54,7 @@ ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
                       const struct PP_Size *size, PP_Bool init_to_zero)
 {
     (void)instance;
-    PP_Resource image_data = pp_resource_allocate(PP_RESOURCE_IMAGE_DATA);
+    PP_Resource image_data = pp_resource_allocate(PP_RESOURCE_IMAGE_DATA, instance);
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
     if (!id) {
         trace_warning("%s, failed to create image data resource\n", __func__);

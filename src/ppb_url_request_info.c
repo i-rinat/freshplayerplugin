@@ -35,7 +35,7 @@
 PP_Resource
 ppb_url_request_info_create(PP_Instance instance)
 {
-    return pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO);
+    return pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO, instance);
 }
 
 void

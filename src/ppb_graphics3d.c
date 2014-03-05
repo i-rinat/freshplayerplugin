@@ -39,7 +39,7 @@ ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int
 PP_Resource
 ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int32_t attrib_list[])
 {
-    PP_Resource context = pp_resource_allocate(PP_RESOURCE_GRAPHICS3D);
+    PP_Resource context = pp_resource_allocate(PP_RESOURCE_GRAPHICS3D, instance);
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d) {
         trace_warning("%s, can't create context\n", __func__);

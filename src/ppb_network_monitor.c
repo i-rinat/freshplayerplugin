@@ -31,7 +31,7 @@
 PP_Resource
 ppb_network_monitor_create(PP_Instance instance)
 {
-    PP_Resource network_monitor = pp_resource_allocate(PP_RESOURCE_NETWORK_MONITOR);
+    PP_Resource network_monitor = pp_resource_allocate(PP_RESOURCE_NETWORK_MONITOR, instance);
     return network_monitor;
 }
 

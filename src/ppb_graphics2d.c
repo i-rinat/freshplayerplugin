@@ -35,7 +35,7 @@
 PP_Resource
 ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque)
 {
-    PP_Resource graphics_2d = pp_resource_allocate(PP_RESOURCE_GRAPHICS2D);
+    PP_Resource graphics_2d = pp_resource_allocate(PP_RESOURCE_GRAPHICS2D, instance);
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
     if (!g2d) {
         trace_warning("%s, can't create graphics2d resource\n", __func__);

@@ -43,14 +43,15 @@ pp_resource_constructor(void)
 }
 
 PP_Resource
-pp_resource_allocate(enum pp_resource_type_e type)
+pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
 {
     void *ptr;
 
-#define ALLOC_HELPER(typename)              \
-    ptr = calloc(sizeof(typename), 1);      \
-    ((typename *)ptr)->_.type = type; \
-    ((typename *)ptr)->_.ref_cnt = 1;
+#define ALLOC_HELPER(typename)                  \
+    ptr = calloc(sizeof(typename), 1);          \
+    ((typename *)ptr)->_.type = type;           \
+    ((typename *)ptr)->_.ref_cnt = 1;           \
+    ((typename *)ptr)->_.instance = instance;
 
     pthread_mutex_lock(&res_tbl_lock);
     switch (type) {

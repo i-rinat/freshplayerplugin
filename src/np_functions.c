@@ -149,7 +149,7 @@ NPP_SetWindow(NPP instance, NPWindow *window)
     pp_i->ws_info = window->ws_info;
     pp_i->window_type = window->type;
 
-    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW);
+    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
     struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
     v->rect.point.x = window->x;
     v->rect.point.y = window->y;
