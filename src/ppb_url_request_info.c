@@ -38,6 +38,20 @@ ppb_url_request_info_create(PP_Instance instance)
     return pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO);
 }
 
+void
+ppb_url_request_info_destroy(void *p)
+{
+    struct pp_url_request_info_s *ri = p;
+    if (!ri)
+        return;
+
+    FREE_HELPER(ri, url);
+    FREE_HELPER(ri, headers);
+    FREE_HELPER(ri, custom_referrer_url);
+    FREE_HELPER(ri, custom_content_transfer_encoding);
+    FREE_HELPER(ri, custom_user_agent);
+}
+
 PP_Bool
 ppb_url_request_info_is_url_request_info(PP_Resource resource)
 {

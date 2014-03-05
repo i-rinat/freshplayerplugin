@@ -25,6 +25,7 @@
 #include "pp_resource.h"
 #include <glib.h>
 #include <stdlib.h>
+#include "pp_destructors.h"
 
 #define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
 
@@ -183,34 +184,26 @@ pp_resource_unref(PP_Resource resource)
     struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
     ptr->ref_cnt --;
 
-    switch (ptr->type) {
-    case PP_RESOURCE_URL_LOADER:
-        if (ptr->ref_cnt <= 0) {
-            struct pp_url_loader_s *ul = (void *)ptr;
-            FREE_IF_NOT_NULL(ul->headers);
-            FREE_IF_NOT_NULL(ul->body);
-            FREE_IF_NOT_NULL(ul->url);
+    if (ptr->ref_cnt <= 0) {
+        switch (ptr->type) {
+        case PP_RESOURCE_URL_LOADER:
+            ppb_url_loader_destroy(ptr);
+            break;
+        case PP_RESOURCE_URL_RESPONSE_INFO:
+            parent = ((struct pp_url_response_info_s *)ptr)->url_loader;
+            break;
+        case PP_RESOURCE_URL_REQUEST_INFO:
+            ppb_url_request_info_destroy(ptr);
+            break;
+        case PP_RESOURCE_IMAGE_DATA:
+            ppb_image_data_destroy(ptr);
+            break;
+        case PP_RESOURCE_GRAPHICS2D:
+            ppb_graphics2d_destroy(ptr);
+            break;
+        default:
+            break;
         }
-        break;
-    case PP_RESOURCE_URL_RESPONSE_INFO:
-        parent = ((struct pp_url_response_info_s *)ptr)->url_loader;
-        break;
-    case PP_RESOURCE_IMAGE_DATA:
-        if (ptr->ref_cnt <= 0) {
-            struct pp_image_data_s *id = (void *)ptr;
-            if (id->data)
-                free(id->data);
-        };
-        break;
-    case PP_RESOURCE_GRAPHICS2D:
-        if (ptr->ref_cnt <= 0) {
-            struct pp_graphics2d_s *g2d = (void *)ptr;
-            if (g2d->data)
-                free(g2d->data);
-        }
-        break;
-    default:
-        break;
     }
 
     pthread_mutex_unlock(&res_tbl_lock);

@@ -42,6 +42,18 @@ ppb_url_loader_create(PP_Instance instance)
     return pp_resource_allocate(PP_RESOURCE_URL_LOADER);
 }
 
+void
+ppb_url_loader_destroy(void *p)
+{
+    if (!p)
+        return;
+    struct pp_url_loader_s *ul = p;
+
+    FREE_HELPER(ul, headers);
+    FREE_HELPER(ul, body);
+    FREE_HELPER(ul, url);
+}
+
 PP_Bool
 ppb_url_loader_is_url_loader(PP_Resource resource)
 {

@@ -34,6 +34,8 @@
 #include <npapi.h>
 #include <EGL/egl.h>
 
+#define FREE_HELPER(st, field)  if (st->field) { free(st->field); st->field = NULL; }
+
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,
     PP_RESOURCE_URL_LOADER,
@@ -44,6 +46,12 @@ enum pp_resource_type_e {
     PP_RESOURCE_IMAGE_DATA,
     PP_RESOURCE_GRAPHICS2D,
     PP_RESOURCE_NETWORK_MONITOR,
+};
+
+enum pp_request_method_e {
+    PP_METHOD_UNKNOWN,
+    PP_METHOD_GET,
+    PP_METHOD_POST,
 };
 
 struct pp_var_object_s {
@@ -96,6 +104,20 @@ struct pp_url_loader_s {
 
 struct pp_url_request_info_s {
     struct pp_resource_generic_s _;
+    enum pp_request_method_e    method;
+    char       *url;
+    char       *headers;
+    PP_Bool     stream_to_file;
+    PP_Bool     follow_redirects;
+    PP_Bool     record_download_progress;
+    PP_Bool     record_upload_progress;
+    char       *custom_referrer_url;
+    PP_Bool     allow_cross_origin_requests;
+    PP_Bool     allow_credentials;
+    char       *custom_content_transfer_encoding;
+    int32_t     prefetch_buffer_upper_threshold;
+    int32_t     prefetch_buffer_lower_threshold;
+    char       *custom_user_agent;
 };
 
 struct pp_url_response_info_s {

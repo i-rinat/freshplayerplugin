@@ -58,6 +58,18 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     return graphics_2d;
 }
 
+void
+ppb_graphics2d_destroy(void *p)
+{
+    if (!p)
+        return;
+    struct pp_graphics2d_s *g2d = p;
+    if (g2d->data) {
+        free(g2d->data);
+        g2d->data = NULL;
+    }
+}
+
 PP_Bool
 ppb_graphics2d_is_graphics2d(PP_Resource resource)
 {

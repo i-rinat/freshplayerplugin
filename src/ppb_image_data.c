@@ -79,6 +79,18 @@ ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
     return image_data;
 }
 
+void
+ppb_image_data_destroy(void *p)
+{
+    if (!p)
+        return;
+    struct pp_image_data_s *id = p;
+    if (id->data) {
+        free(id->data);
+        id->data = NULL;
+    }
+}
+
 PP_Bool
 ppb_image_data_is_image_data(PP_Resource image_data)
 {
