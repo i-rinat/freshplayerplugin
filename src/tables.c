@@ -122,7 +122,7 @@ PP_MakeString(const char *s)
     struct PP_Var var;
 
     var.type = PP_VARTYPE_STRING;
-    var.value.as_id = (size_t)(void *)strdup(s);
+    var.value.as_id = (size_t)(void *)strdup(s ? s : "");
     tables_ref_var(var);
     return var;
 }

@@ -129,6 +129,8 @@ void *
 pp_resource_acquire(PP_Resource resource, enum pp_resource_type_e type)
 {
     struct pp_resource_generic_s *gr = pp_resource_acquire_any(resource);
+    if (!gr)
+        return NULL;
     if (gr->type != type) {
         pp_resource_release(resource);
         return NULL;

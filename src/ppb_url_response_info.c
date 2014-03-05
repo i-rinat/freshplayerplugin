@@ -27,6 +27,7 @@
 #include <stddef.h>
 #include <string.h>
 #include "trace.h"
+#include "tables.h"
 #include "reverse_constant.h"
 #include "pp_resource.h"
 #include "interface_list.h"
@@ -47,7 +48,7 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
 
     switch (property) {
     case PP_URLRESPONSEPROPERTY_URL:
-        var = ppb_var_var_from_utf8_1_1(ul->url, strlen(ul->url));
+        var = PP_MakeString(ul->url);
         break;
     case PP_URLRESPONSEPROPERTY_REDIRECTURL:
         assert(0);
@@ -64,7 +65,7 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
         assert(0);
         break;
     case PP_URLRESPONSEPROPERTY_HEADERS:
-        var = ppb_var_var_from_utf8_1_1(ul->headers, strlen(ul->headers));
+        var = PP_MakeString(ul->headers);
         break;
     }
 
