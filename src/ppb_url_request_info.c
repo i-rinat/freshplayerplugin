@@ -24,8 +24,8 @@
 
 #include <assert.h>
 #include <ppapi/c/ppb_url_request_info.h>
-#include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 #include <inttypes.h>
 #include "trace.h"
 #include "pp_resource.h"
@@ -62,54 +62,99 @@ PP_Bool
 ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty property,
                                   struct PP_Var value)
 {
+    char *tmp;
+    PP_Bool retval = PP_TRUE;
+    struct pp_url_request_info_s *ri = pp_resource_acquire(request, PP_RESOURCE_URL_REQUEST_INFO);
+    if (!ri) {
+        trace_error("%s, %d is not a request info\n", __func__, request);
+        return PP_FALSE;
+    }
+
+#define ENSURE_TYPE(vartype) if (value.type != vartype) { retval = PP_FALSE; break; }
+
     switch (property) {
     case PP_URLREQUESTPROPERTY_URL:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_STRING);
+        if (ri->url)
+            free(ri->url);
+        ri->url = strdup((void*)(size_t)value.value.as_id);
         break;
     case PP_URLREQUESTPROPERTY_METHOD:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_STRING);
+        tmp = (void *)(size_t)value.value.as_id;
+        if (strcmp(tmp, "GET") == 0) {
+            ri->method = PP_METHOD_GET;
+        } else if (strcmp(tmp, "POST") == 0) {
+            ri->method = PP_METHOD_POST;
+        } else {
+            trace_warning("%s, unknown method %s\n", __func__, tmp);
+            ri->method = PP_METHOD_UNKNOWN;
+        }
         break;
     case PP_URLREQUESTPROPERTY_HEADERS:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_STRING);
+        if (ri->headers)
+            free(ri->headers);
+        ri->headers = strdup((void *)(size_t)value.value.as_id);
         break;
     case PP_URLREQUESTPROPERTY_STREAMTOFILE:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_BOOL);
+        ri->stream_to_file = value.value.as_bool;
         break;
     case PP_URLREQUESTPROPERTY_FOLLOWREDIRECTS:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_BOOL);
+        ri->follow_redirects = value.value.as_bool;
         break;
     case PP_URLREQUESTPROPERTY_RECORDDOWNLOADPROGRESS:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_BOOL);
+        ri->record_download_progress = value.value.as_bool;
         break;
     case PP_URLREQUESTPROPERTY_RECORDUPLOADPROGRESS:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_BOOL);
+        ri->record_upload_progress = value.value.as_bool;
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMREFERRERURL:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_STRING);
+        if (ri->custom_referrer_url)
+            free(ri->custom_referrer_url);
+        ri->custom_referrer_url = strdup((void *)(size_t)value.value.as_id);
         break;
     case PP_URLREQUESTPROPERTY_ALLOWCROSSORIGINREQUESTS:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_BOOL);
+        ri->allow_cross_origin_requests = value.value.as_bool;
         break;
     case PP_URLREQUESTPROPERTY_ALLOWCREDENTIALS:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_BOOL);
+        ri->allow_credentials = value.value.as_bool;
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMCONTENTTRANSFERENCODING:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_STRING);
+        if (ri->custom_content_transfer_encoding)
+            free(ri->custom_content_transfer_encoding);
+        ri->custom_content_transfer_encoding = strdup((void *)(size_t)value.value.as_id);
         break;
     case PP_URLREQUESTPROPERTY_PREFETCHBUFFERUPPERTHRESHOLD:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_INT32);
+        ri->prefetch_buffer_upper_threshold = value.value.as_int;
         break;
     case PP_URLREQUESTPROPERTY_PREFETCHBUFFERLOWERTHRESHOLD:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_INT32);
+        ri->prefetch_buffer_lower_threshold = value.value.as_int;
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMUSERAGENT:
-        assert(0);
+        ENSURE_TYPE(PP_VARTYPE_STRING);
+        if (ri->custom_user_agent)
+            free(ri->custom_user_agent);
+        ri->custom_user_agent = strdup((void *)(size_t)value.value.as_id);
         break;
     default:
-        assert(0);
+        trace_error("%s, unknown url request property %d\n", __func__, property);
+        retval = PP_FALSE;
         break;
     }
-    return PP_TRUE;
+
+    pp_resource_release(request);
+    return retval;
 }
 
 PP_Bool
@@ -150,7 +195,7 @@ trace_ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProper
                                         struct PP_Var value)
 {
     char *value_str = trace_var_as_string(value);
-    trace_info("[PPB] {zilch} %s request=%d, property=%s, value=%s\n", __func__+6, request,
+    trace_info("[PPB] {full} %s request=%d, property=%s, value=%s\n", __func__+6, request,
                reverse_pp_url_request_property(property), value_str);
     free(value_str);
     return ppb_url_request_info_set_property(request, property, value);
