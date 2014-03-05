@@ -30,46 +30,6 @@
 #include "tables.h"
 
 
-struct PP_Var
-ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
-{
-    struct PP_Var var = {0};
-    return var;
-}
-
-struct PP_Var
-ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
-                                         struct PP_URLComponents_Dev *components)
-{
-    struct PP_Var var = {0};
-    return var;
-}
-
-struct PP_Var
-ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
-                                              struct PP_URLComponents_Dev *components)
-{
-    struct PP_Var var = {0};
-    return var;
-}
-
-PP_Bool
-ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
-{
-    return PP_TRUE;
-}
-
-PP_Bool
-ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
-{
-    return PP_TRUE;
-}
-
-PP_Bool
-ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
-{
-    return PP_TRUE;
-}
 
 static
 void
@@ -84,10 +44,6 @@ parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
         trace_warning("failure at %s\n", __func__);
         return;
     }
-
-#ifdef C_PARSE
-#error conflicting defininition of C_PARSE
-#endif
 
 #define C_PARSE(c1, c2) \
     components->c1.begin = uri.c2.first ? uri.c2.first - s + 1 : 0; \
@@ -134,6 +90,96 @@ parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
 
     uriFreeUriMembersA(&uri);
 }
+
+struct PP_Var
+ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
+{
+    struct PP_Var var = {0};
+    return var;
+}
+
+struct PP_Var
+ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
+                                         struct PP_URLComponents_Dev *components)
+{
+    struct PP_Var var = PP_MakeNull();
+
+    if (base_url.type != PP_VARTYPE_STRING) {
+        trace_warning("%s, base_url is not a string\n", __func__);
+        return PP_MakeNull();
+    }
+
+    if (relative_string.type != PP_VARTYPE_STRING) {
+        trace_warning("%s, relative_string is not a string\n", __func__);
+        return PP_MakeNull();
+    }
+
+    const char *s_base_url = (void *)(size_t)base_url.value.as_id;
+    const char *s_relative_string = (void *)(size_t)relative_string.value.as_id;
+
+    UriParserStateA ups;
+    UriUriA uri_base, uri_rel, uri_result;
+
+    ups.uri = &uri_base;
+    if (uriParseUriA(&ups, s_base_url) != URI_SUCCESS) {
+        trace_warning("%s, can't parse s_base_url\n", __func__);
+        goto err_1;
+    }
+
+    ups.uri = &uri_rel;
+    if (uriParseUriA(&ups, s_relative_string) != URI_SUCCESS) {
+        trace_warning("%s, can't parse s_relative_string\n", __func__);
+        goto err_2;
+    }
+
+    if (uriAddBaseUriA(&uri_result, &uri_base, &uri_rel) != URI_SUCCESS) {
+        trace_warning("%s, can't merge base and rel\n", __func__);
+        goto err_3;
+    }
+
+    int len;
+    uriToStringCharsRequiredA(&uri_result, &len);
+    len++;
+    char *str = malloc(len);
+    uriToStringA(str, &uri_result, len, NULL);
+    var = PP_MakeString(str);
+    free(str);
+
+    if (components)
+        parse_url_string(str, components);
+
+err_3:  uriFreeUriMembersA(&uri_result);
+err_2:  uriFreeUriMembersA(&uri_rel);
+err_1:  uriFreeUriMembersA(&uri_base);
+    return var;
+}
+
+struct PP_Var
+ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
+                                              struct PP_URLComponents_Dev *components)
+{
+    struct PP_Var var = {0};
+    return var;
+}
+
+PP_Bool
+ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
+{
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
+{
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
+{
+    return PP_TRUE;
+}
+
 
 struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
@@ -190,7 +236,7 @@ trace_ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url,
                                                struct PP_Var relative_string,
                                                struct PP_URLComponents_Dev *components)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_url_util_dev_resolve_relative_to_url(base_url, relative_string, components);
 }
 
