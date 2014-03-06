@@ -183,14 +183,10 @@ ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance ta
 struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
-    struct PP_Var var = {0};
+    struct PP_Var var = PP_MakeString("http://127.0.0.1/flashtest/");
 
-    var.type = PP_VARTYPE_STRING;
-    var.value.as_id = (int64_t)(void*)strdup("http://127.0.0.1/flashtest/");
-    tables_ref_var(var);
-    if (components) {
+    if (components)
         parse_url_string((void*)(size_t)var.value.as_id, components);
-    }
 
     return var;
 }
@@ -199,15 +195,11 @@ struct PP_Var
 ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
-    struct PP_Var var = {0};
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    struct PP_Var var = PP_MakeString(pp_i->instance_url);
 
-    var.type = PP_VARTYPE_STRING;
-    var.value.as_id = (int64_t)(void*)strdup(pp_i->instance_url);
-    tables_ref_var(var);
-    if (components) {
+    if (components)
         parse_url_string((void*)(size_t)var.value.as_id, components);
-    }
 
     return var;
 }

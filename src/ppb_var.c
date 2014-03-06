@@ -69,30 +69,14 @@ ppb_var_release(struct PP_Var var)
 struct PP_Var
 ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
 {
-    struct PP_Var var = {0};
-    char *cpy = malloc(len + 1);
-
-    var.type = PP_VARTYPE_STRING;
-    memcpy(cpy, data, len);
-    cpy[len] = 0;
-    var.value.as_id = (size_t)(void *)cpy;
-    tables_ref_var(var);
-    return var;
+    return PP_MakeStringN(data, len);
 }
 
 struct PP_Var
 ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
 {
-    struct PP_Var var = {0};
-    char *cpy = malloc(len + 1);
-
-    var.type = PP_VARTYPE_STRING;
-    memcpy(cpy, data, len);
-    cpy[len] = 0;
-    var.value.as_id = (size_t)(void *)cpy;
-    tables_ref_var(var);
-
-    return var;
+    (void)module;
+    return PP_MakeStringN(data, len);
 }
 
 const char *

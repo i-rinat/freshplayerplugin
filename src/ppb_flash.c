@@ -26,6 +26,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 #include "reverse_constant.h"
 
 
@@ -111,8 +112,7 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
         break;
     case PP_FLASHSETTING_LANGUAGE:
         // TODO: detect language
-        var.type = PP_VARTYPE_STRING;
-        var.value.as_id = (int64_t)(void*)"ru-RU";
+        var = PP_MakeString("ru-RU");
         break;
     case PP_FLASHSETTING_NUMCORES:
         // TODO: check number of cores
