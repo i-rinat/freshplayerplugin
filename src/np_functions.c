@@ -183,9 +183,11 @@ NPP_NewStream(NPP instance, NPMIMEType type, NPStream *stream, NPBool seekable, 
     stream->pdata = (void*)(size_t)loader;
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
-    ul->headers = strdup(stream->headers ? stream->headers : "");
+    if (ul) {
+        ul->headers = strdup(stream->headers ? stream->headers : "");
+        pp_resource_release(loader);
+    }
 
-    pp_resource_release(loader);
     return NPERR_NO_ERROR;
 }
 
