@@ -25,6 +25,8 @@
 #define _XOPEN_SOURCE   500
 #include "ppb_url_loader.h"
 #include "ppb_core.h"
+#include "ppb_url_util_dev.h"
+#include "ppb_var.h"
 #include <ppapi/c/pp_errors.h>
 #include <stddef.h>
 #include <pthread.h>
@@ -84,9 +86,17 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     struct pp_url_request_info_s *ri = pp_resource_acquire(request_info,
                                                            PP_RESOURCE_URL_REQUEST_INFO);
+
+    struct PP_Var rel_url = PP_MakeString(ri->url);
+    struct PP_Var full_url =
+        ppb_url_util_dev_resolve_relative_to_document(ul->_.instance, rel_url, NULL);
+    ppb_var_release(rel_url);
+
+    uint32_t len;
     struct pair_s *pair = malloc(sizeof(*pair));
-    pair->url = strdup(ri->url ? ri->url : "");
+    pair->url = strdup(ppb_var_var_to_utf8(full_url, &len));
     pair->loader = loader;
+    ppb_var_release(full_url);
 
     ul->url = strdup(pair->url);
 

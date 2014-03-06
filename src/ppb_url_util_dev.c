@@ -131,7 +131,7 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
         goto err_2;
     }
 
-    if (uriAddBaseUriA(&uri_result, &uri_base, &uri_rel) != URI_SUCCESS) {
+    if (uriAddBaseUriA(&uri_result, &uri_rel, &uri_base) != URI_SUCCESS) {
         trace_warning("%s, can't merge base and rel\n", __func__);
         goto err_3;
     }
