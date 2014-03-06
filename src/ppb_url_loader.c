@@ -120,9 +120,10 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
             printf("waitin'\n");
             usleep(10000);
         }
+        return PP_OK;
     }
 
-    return 0;
+    return PP_OK_COMPLETIONPENDING;
 }
 
 int32_t
