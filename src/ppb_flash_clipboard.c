@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_flash_clipboard.h>
+#include "ppb_flash_clipboard.h"
 #include <stddef.h>
 
 

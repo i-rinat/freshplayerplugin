@@ -41,7 +41,7 @@ add_library(freshwrapper SHARED
 	src/ppb_file_chooser_trusted.c
 	src/ppb_file_ref.c
 	src/ppb_flash_clipboard.c
-	src/ppb_flash_file_file_ref.c
+	src/ppb_flash_file.c
 	src/ppb_flash_file_modulelocal.c
 	src/ppb_flash_font_file.c
 	src/ppb_flash_fullscreen.c

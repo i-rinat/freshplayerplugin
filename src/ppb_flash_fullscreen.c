@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_flash_fullscreen.h>
+#include "ppb_flash_fullscreen.h"
 #include <stddef.h>
 #include "trace.h"
 

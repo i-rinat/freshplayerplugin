@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/pp_completion_callback.h>
-#include <ppapi/c/dev/ppb_printing_dev.h>
+#include "ppb_printing_dev.h"
 #include "trace.h"
 
 

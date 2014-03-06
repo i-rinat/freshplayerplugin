@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_opengles2.h>
+#include "ppb_opengles2.h"
 #include <stddef.h>
 #include "trace.h"
 

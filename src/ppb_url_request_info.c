@@ -23,7 +23,7 @@
  */
 
 #include <assert.h>
-#include <ppapi/c/ppb_url_request_info.h>
+#include "ppb_url_request_info.h"
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>

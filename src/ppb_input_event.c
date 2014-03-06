@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_input_event.h>
+#include "ppb_input_event.h"
 #include <stddef.h>
 #include "trace.h"
 

@@ -23,7 +23,7 @@
  */
 
 #include <assert.h>
-#include <ppapi/c/ppb_graphics_3d.h>
+#include "ppb_graphics3d.h"
 #include <stddef.h>
 #include "trace.h"
 #include "pp_resource.h"

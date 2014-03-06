@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 
+#include "ppb_var.h"
 #include <inttypes.h>
-#include <ppapi/c/ppb_var.h>
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include "trace.h"

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_text_input_dev.h>
+#include "ppb_text_input_dev.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "reverse_constant.h"

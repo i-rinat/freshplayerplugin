@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_instance.h>
+#include "ppb_instance.h"
 #include <stddef.h>
 #include "trace.h"
 #include "tables.h"

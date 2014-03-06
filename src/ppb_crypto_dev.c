@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_crypto_dev.h>
+#include "ppb_crypto_dev.h"
 #include <fcntl.h>
 #include <stddef.h>
 #include <sys/types.h>

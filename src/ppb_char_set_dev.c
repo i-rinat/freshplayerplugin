@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_char_set_dev.h>
+#include "ppb_char_set_dev.h"
 #include <stddef.h>
 
 

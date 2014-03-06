@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_ime_input_event_dev.h>
+#include "ppb_ime_input_event_dev.h"
 #include <stddef.h>
 
 

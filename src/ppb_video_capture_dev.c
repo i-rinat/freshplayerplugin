@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_video_capture_dev.h>
+#include "ppb_video_capture_dev.h"
 #include <stddef.h>
 #include "trace.h"
 

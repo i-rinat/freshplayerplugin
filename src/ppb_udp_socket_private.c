@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_udp_socket_private.h>
+#include "ppb_udp_socket_private.h"
 #include <stddef.h>
 
 

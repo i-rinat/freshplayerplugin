@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_flash_menu.h>
+#include "ppb_flash_menu.h"
 #include <stddef.h>
 
 

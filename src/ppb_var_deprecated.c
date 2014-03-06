@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
+#include "ppb_var_deprecated.h"
 #include <inttypes.h>
-#include <ppapi/c/dev/ppb_var_deprecated.h>
 #include <stddef.h>
 #include "pp_resource.h"
 #include "trace.h"

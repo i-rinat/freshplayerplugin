@@ -23,14 +23,13 @@
  */
 
 #include <assert.h>
-#include <ppapi/c/ppb_core.h>
+#include "ppb_core.h"
 #include <stddef.h>
 #include <pthread.h>
 #include <time.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "globals.h"
-#include "interface_list.h"
 
 
 static pthread_t main_thread;

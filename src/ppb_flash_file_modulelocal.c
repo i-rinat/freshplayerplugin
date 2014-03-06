@@ -23,7 +23,7 @@
  */
 
 #define _GNU_SOURCE
-#include <ppapi/c/private/ppb_flash_file.h>
+#include "ppb_flash_file_modulelocal.h"
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/c/pp_file_info.h>
 #include <ppapi/c/ppb_file_io.h>

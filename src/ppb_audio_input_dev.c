@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_audio_input_dev.h>
+#include "ppb_audio_input_dev.h"
 #include <stddef.h>
 #include "trace.h"
 

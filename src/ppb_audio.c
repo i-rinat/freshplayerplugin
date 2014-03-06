@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_audio.h>
+#include "ppb_audio.h"
 #include <stddef.h>
 
 

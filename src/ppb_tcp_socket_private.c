@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_tcp_socket_private.h>
+#include "ppb_tcp_socket_private.h"
 #include <stddef.h>
 
 

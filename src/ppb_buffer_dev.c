@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_buffer_dev.h>
+#include "ppb_buffer_dev.h"
 #include <stddef.h>
 
 

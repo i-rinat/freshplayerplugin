@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_file_chooser_dev.h>
+#include "ppb_file_chooser_dev.h"
 #include <stddef.h>
 
 

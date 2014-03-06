@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_file_ref.h>
+#include "ppb_file_ref.h"
 #include <stddef.h>
 
 

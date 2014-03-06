@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_audio_config.h>
+#include "ppb_audio_config.h"
 #include <stddef.h>
 #include "trace.h"
 

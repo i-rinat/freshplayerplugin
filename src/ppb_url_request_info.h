@@ -22,11 +22,30 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_flash_file.h>
-#include <stddef.h>
+#ifndef FPP__PPB_URL_REQUEST_INFO_H
+#define FPP__PPB_URL_REQUEST_INFO_H
 
+#include <ppapi/c/ppb_url_request_info.h>
 
-const struct PPB_Flash_File_FileRef ppb_flash_file_file_ref_interface_2_0 = {
-    .OpenFile = (void *)250,
-    .QueryFile = (void *)251,
-};
+PP_Resource
+ppb_url_request_info_create(PP_Instance instance);
+
+void
+ppb_url_request_info_destroy(void *p);
+
+PP_Bool
+ppb_url_request_info_is_url_request_info(PP_Resource resource);
+
+PP_Bool
+ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty property,
+                                  struct PP_Var value);
+
+PP_Bool
+ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, uint32_t len);
+
+PP_Bool
+ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource file_ref,
+                                         int64_t start_offset, int64_t number_of_bytes,
+                                         PP_Time expected_last_modified_time);
+
+#endif // FPP__PPB_URL_REQUEST_INFO_H

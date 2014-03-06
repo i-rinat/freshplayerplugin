@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_view.h>
+#include "ppb_view.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "pp_resource.h"

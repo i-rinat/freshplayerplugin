@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/trusted/ppb_file_chooser_trusted.h>
+#include "ppb_file_chooser_trusted.h"
 #include <stddef.h>
 
 

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/dev/ppb_cursor_control_dev.h>
+#include "ppb_cursor_control_dev.h"
 #include <stddef.h>
 
 

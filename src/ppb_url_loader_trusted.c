@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/trusted/ppb_url_loader_trusted.h>
+#include "ppb_url_loader_trusted.h"
 #include <stddef.h>
 #include "trace.h"
 

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_network_monitor.h>
+#include "ppb_network_monitor.h"
 #include <ppapi/c/pp_errors.h>
 #include <stddef.h>
 #include "pp_resource.h"

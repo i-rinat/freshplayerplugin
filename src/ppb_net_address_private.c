@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_net_address_private.h>
+#include "ppb_net_address_private.h"
 #include <stddef.h>
 
 

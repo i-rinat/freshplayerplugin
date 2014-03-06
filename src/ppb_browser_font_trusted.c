@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/trusted/ppb_browser_font_trusted.h>
+#include "ppb_browser_font_trusted.h"
 #include <stddef.h>
 
 

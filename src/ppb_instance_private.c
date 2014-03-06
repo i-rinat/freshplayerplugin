@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_instance_private.h>
+#include "ppb_instance_private.h"
 #include <ppapi/c/pp_var.h>
 #include <stdlib.h>
 #include "trace.h"

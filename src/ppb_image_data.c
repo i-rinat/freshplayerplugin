@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/ppb_image_data.h>
+#include "ppb_image_data.h"
+#include "ppb_core.h"
 #include <stddef.h>
 #include <string.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
-#include "interface_list.h"
 
 PP_ImageDataFormat
 ppb_image_data_get_native_image_data_format(void)

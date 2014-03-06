@@ -22,19 +22,11 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PP_DESTRUCTORS_H
-#define FPP__PP_DESTRUCTORS_H
+#include "ppb_flash_file.h"
+#include <stddef.h>
 
-void
-ppb_url_request_info_destroy(void *p);
 
-void
-ppb_graphics2d_destroy(void *p);
-
-void
-ppb_image_data_destroy(void *p);
-
-void
-ppb_url_loader_destroy(void *p);
-
-#endif // FPP__PP_DESTRUCTORS_H
+const struct PPB_Flash_File_FileRef ppb_flash_file_file_ref_interface_2_0 = {
+    .OpenFile = (void *)250,
+    .QueryFile = (void *)251,
+};

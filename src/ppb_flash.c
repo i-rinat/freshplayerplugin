@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_flash.h>
+#include "ppb_flash.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include "trace.h"

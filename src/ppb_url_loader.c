@@ -23,7 +23,8 @@
  */
 
 #define _XOPEN_SOURCE   500
-#include <ppapi/c/ppb_url_loader.h>
+#include "ppb_url_loader.h"
+#include "ppb_core.h"
 #include <ppapi/c/pp_errors.h>
 #include <stddef.h>
 #include <pthread.h>
@@ -31,7 +32,6 @@
 #include <string.h>
 #include "trace.h"
 #include "pp_resource.h"
-#include "interface_list.h"
 #include "globals.h"
 #include "tables.h"
 

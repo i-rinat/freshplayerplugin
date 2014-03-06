@@ -23,14 +23,13 @@
  */
 
 #include <assert.h>
-#include <ppapi/c/ppb_url_response_info.h>
+#include "ppb_url_response_info.h"
 #include <stddef.h>
 #include <string.h>
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
 #include "pp_resource.h"
-#include "interface_list.h"
 
 
 PP_Bool

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include <ppapi/c/private/ppb_flash_font_file.h>
+#include "ppb_flash_font_file.h"
 #include <stddef.h>
 
 

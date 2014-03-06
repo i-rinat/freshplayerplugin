@@ -25,7 +25,11 @@
 #include "pp_resource.h"
 #include <glib.h>
 #include <stdlib.h>
-#include "pp_destructors.h"
+#include "ppb_graphics2d.h"
+#include "ppb_image_data.h"
+#include "ppb_url_loader.h"
+#include "ppb_url_request_info.h"
+
 
 #define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
 
