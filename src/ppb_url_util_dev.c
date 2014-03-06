@@ -157,8 +157,8 @@ struct PP_Var
 ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
                                               struct PP_URLComponents_Dev *components)
 {
-    struct PP_Var var = {0};
-    return var;
+    struct PP_Var base = ppb_url_util_dev_get_document_url(instance, NULL);
+    return ppb_url_util_dev_resolve_relative_to_url(base, relative_string, components);
 }
 
 PP_Bool
@@ -245,7 +245,7 @@ trace_ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance,
                                                     struct PP_Var relative_string,
                                                     struct PP_URLComponents_Dev *components)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_url_util_dev_resolve_relative_to_document(instance, relative_string, components);
 }
 
