@@ -202,8 +202,13 @@ NPP_DestroyStream(NPP instance, NPStream *stream, NPReason reason)
         return NPERR_NO_ERROR;
 
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
-    ul->loaded = 1;
-    pp_resource_release(loader);
+    if (ul) {
+        ul->loaded = 1;
+        if (ul->ccb.func) {
+            ul->ccb.func(ul->ccb.user_data, PP_OK);
+        }
+        pp_resource_release(loader);
+    }
     return NPERR_NO_ERROR;
 }
 
