@@ -221,7 +221,7 @@ int32_t
 trace_ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                           struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s loader=%d, request_info=%d, callback={.func=%p, .user_data=%p, "
+    trace_info("[PPB] {part} %s loader=%d, request_info=%d, callback={.func=%p, .user_data=%p, "
                ".flags=%d}\n", __func__+6, loader, request_info, callback.func, callback.user_data,
                callback.flags);
     return ppb_url_loader_open(loader, request_info, callback);
