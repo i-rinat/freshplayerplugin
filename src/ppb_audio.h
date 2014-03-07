@@ -27,4 +27,21 @@
 
 #include <ppapi/c/ppb_audio.h>
 
+
+PP_Resource
+ppb_audio_create(PP_Instance instance, PP_Resource config,
+                 PPB_Audio_Callback_1_0 audio_callback, void *user_data);
+
+PP_Bool
+ppb_audio_is_audio(PP_Resource resource);
+
+PP_Resource
+ppb_audio_get_current_config(PP_Resource audio);
+
+PP_Bool
+ppb_audio_start_playback(PP_Resource audio);
+
+PP_Bool
+ppb_audio_stop_playback(PP_Resource audio);
+
 #endif // FPP__PPB_AUDIO_H

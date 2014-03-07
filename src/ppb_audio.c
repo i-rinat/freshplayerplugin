@@ -24,12 +24,86 @@
 
 #include "ppb_audio.h"
 #include <stddef.h>
+#include "trace.h"
 
+PP_Resource
+ppb_audio_create(PP_Instance instance, PP_Resource config,
+                 PPB_Audio_Callback_1_0 audio_callback, void *user_data)
+{
+    return 0;
+}
+
+PP_Bool
+ppb_audio_is_audio(PP_Resource resource)
+{
+    return PP_TRUE;
+}
+
+PP_Resource
+ppb_audio_get_current_config(PP_Resource audio)
+{
+    return 0;
+}
+
+PP_Bool
+ppb_audio_start_playback(PP_Resource audio)
+{
+    return PP_FALSE;
+}
+
+PP_Bool
+ppb_audio_stop_playback(PP_Resource audio)
+{
+    return PP_FALSE;
+}
+
+
+// trace wrappers
+static
+PP_Resource
+trace_ppb_audio_create(PP_Instance instance, PP_Resource config,
+                       PPB_Audio_Callback_1_0 audio_callback, void *user_data)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_audio_create(instance, config, audio_callback, user_data);
+}
+
+static
+PP_Bool
+trace_ppb_audio_is_audio(PP_Resource resource)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_audio_is_audio(resource);
+}
+
+static
+PP_Resource
+trace_ppb_audio_get_current_config(PP_Resource audio)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_audio_get_current_config(audio);
+}
+
+static
+PP_Bool
+trace_ppb_audio_start_playback(PP_Resource audio)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_audio_start_playback(audio);
+}
+
+static
+PP_Bool
+trace_ppb_audio_stop_playback(PP_Resource audio)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_audio_stop_playback(audio);
+}
 
 const struct PPB_Audio_1_0 ppb_audio_interface_1_0 = {
-    .Create = (void *)290,
-    .IsAudio = (void *)291,
-    .GetCurrentConfig = (void *)292,
-    .StartPlayback = (void *)293,
-    .StopPlayback = (void *)294,
+    .Create =           trace_ppb_audio_create,
+    .IsAudio =          trace_ppb_audio_is_audio,
+    .GetCurrentConfig = trace_ppb_audio_get_current_config,
+    .StartPlayback =    trace_ppb_audio_start_playback,
+    .StopPlayback =     trace_ppb_audio_stop_playback,
 };
