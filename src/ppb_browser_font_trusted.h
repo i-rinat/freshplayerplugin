@@ -27,4 +27,38 @@
 
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 
+
+struct PP_Var
+ppb_browser_font_trusted_get_font_families(PP_Instance instance);
+
+PP_Resource
+ppb_browser_font_trusted_create(PP_Instance instance,
+                                const struct PP_BrowserFont_Trusted_Description *description);
+
+PP_Bool
+ppb_browser_font_trusted_is_font(PP_Resource resource);
+
+PP_Bool
+ppb_browser_font_trusted_describe(PP_Resource font,
+                                  struct PP_BrowserFont_Trusted_Description *description,
+                                  struct PP_BrowserFont_Trusted_Metrics *metrics);
+
+PP_Bool
+ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
+                                      const struct PP_BrowserFont_Trusted_TextRun *text,
+                                      const struct PP_Point *position, uint32_t color,
+                                      const struct PP_Rect *clip, PP_Bool image_data_is_opaque);
+
+int32_t
+ppb_browser_font_trusted_measure_text(PP_Resource font,
+                                      const struct PP_BrowserFont_Trusted_TextRun *text);
+
+uint32_t
+ppb_browser_font_trusted_character_offset_for_pixel(PP_Resource font,
+                    const struct PP_BrowserFont_Trusted_TextRun *text, int32_t pixel_position);
+
+int32_t
+ppb_browser_font_trusted_pixel_offset_for_character(PP_Resource font,
+                    const struct PP_BrowserFont_Trusted_TextRun *text, uint32_t char_offset);
+
 #endif // FPP__PPB_BROWSER_FONT_TRUSTED_H
