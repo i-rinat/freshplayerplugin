@@ -12,7 +12,13 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -ggdb3")
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(REQ glib-2.0 mozilla-plugin x11 liburiparser REQUIRED)
+pkg_check_modules(REQ
+	glib-2.0
+	mozilla-plugin
+	x11
+	liburiparser
+	pango
+	REQUIRED)
 
 include_directories(include ${REQ_INCLUDE_DIRS})
 add_definitions(${REQ_CFLAGS_OTHER})

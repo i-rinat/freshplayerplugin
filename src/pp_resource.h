@@ -33,6 +33,7 @@
 #include <X11/Xlib.h>
 #include <npapi.h>
 #include <EGL/egl.h>
+#include <pango/pango.h>
 
 #define FREE_HELPER(st, field)  if (st->field) { free(st->field); st->field = NULL; }
 
@@ -167,6 +168,10 @@ struct pp_network_monitor_s {
 
 struct pp_browser_font_s {
     struct pp_resource_generic_s _;
+    PangoContext   *ctx;
+    PangoFont      *font;
+    int32_t         letter_spacing;
+    int32_t         word_spacing;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);

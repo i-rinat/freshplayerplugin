@@ -23,10 +23,12 @@
  */
 
 #include "ppb_browser_font_trusted.h"
-#include <ppapi/c/pp_var.h>
+#include "ppb_var.h"
 #include "trace.h"
 #include "tables.h"
 #include <stdlib.h>
+#include <string.h>
+#include "pp_resource.h"
 
 
 struct PP_Var
@@ -40,14 +42,65 @@ ppb_browser_font_trusted_create(PP_Instance instance,
                                 const struct PP_BrowserFont_Trusted_Description *description)
 {
     PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, instance);
-    // TODO: store data provided in description
+    struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
+    PangoFontDescription *font_desc;
+
+    bf->ctx = pango_context_new();
+
+    if (description->face.type == PP_VARTYPE_STRING) {
+        uint32_t len;
+        const char *sn = ppb_var_var_to_utf8(description->face, &len);
+        char *s = malloc(len + 1);
+
+        memcpy(s, sn, len);
+        s[len] = 0;
+        font_desc = pango_font_description_from_string(s);
+        free(s);
+    } else {
+        font_desc = pango_font_description_new();
+    }
+
+    switch (description->family) {
+    case PP_BROWSERFONT_TRUSTED_FAMILY_SERIF:
+        pango_font_description_set_family(font_desc, "serif");
+        break;
+    case PP_BROWSERFONT_TRUSTED_FAMILY_SANSSERIF:
+        pango_font_description_set_family(font_desc, "sans-serif");
+        break;
+    case PP_BROWSERFONT_TRUSTED_FAMILY_MONOSPACE:
+        pango_font_description_set_family(font_desc, "monospace");
+        break;
+    case PP_BROWSERFONT_TRUSTED_FAMILY_DEFAULT:
+        // fall through
+    default:
+        // do nothing
+        break;
+    }
+
+    pango_font_description_set_size(font_desc, description->size);
+    pango_font_description_set_weight(font_desc, (description->weight + 1) * 100);
+    if (description->italic)
+        pango_font_description_set_style(font_desc, PANGO_STYLE_ITALIC);
+    if (description->small_caps)
+        pango_font_description_set_variant(font_desc, PANGO_VARIANT_SMALL_CAPS);
+
+    bf->letter_spacing = description->letter_spacing;
+    bf->word_spacing = description->word_spacing;
+    bf->font = pango_context_load_font(bf->ctx, font_desc);
+    pango_font_description_free(font_desc);
+
+    pp_resource_release(font);
     return font;
 }
 
 void
 ppb_browser_font_trusted_destroy(void *p)
 {
-    // nothing here yet to destroy
+    struct pp_browser_font_s *bf = p;
+    if (!bf)
+        return;
+
+    g_object_unref(bf->ctx);
 }
 
 PP_Bool
@@ -110,7 +163,7 @@ trace_ppb_browser_font_trusted_create(PP_Instance instance,
                                 const struct PP_BrowserFont_Trusted_Description *description)
 {
     char *s_face = trace_var_as_string(description->face);
-    trace_info("[PPB] {part} %s instance=%d, description={.face=%s, .family=%d, .size=%u, "
+    trace_info("[PPB] {full} %s instance=%d, description={.face=%s, .family=%d, .size=%u, "
                ".weight=%d, .italic=%u, .small_caps=%u, .letter_spacing=%d, .word_spacing=%d}\n",
                __func__+6, instance, s_face, description->family, description->size,
                description->weight, description->italic, description->small_caps,
