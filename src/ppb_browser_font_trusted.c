@@ -183,6 +183,7 @@ ppb_browser_font_trusted_measure_text(PP_Resource font,
     pango_layout_get_pixel_size(layout, &width, &height);
     g_object_unref(layout);
 
+    pp_resource_release(font);
     return width;
 }
 
