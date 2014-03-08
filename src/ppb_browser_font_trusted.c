@@ -100,7 +100,7 @@ static
 struct PP_Var
 trace_ppb_browser_font_trusted_get_font_families(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_browser_font_trusted_get_font_families(instance);
 }
 
@@ -109,7 +109,13 @@ PP_Resource
 trace_ppb_browser_font_trusted_create(PP_Instance instance,
                                 const struct PP_BrowserFont_Trusted_Description *description)
 {
-    trace_info("[PPB] {part} %s\n", __func__+6);
+    char *s_face = trace_var_as_string(description->face);
+    trace_info("[PPB] {part} %s instance=%d, description={.face=%s, .family=%d, .size=%u, "
+               ".weight=%d, .italic=%u, .small_caps=%u, .letter_spacing=%d, .word_spacing=%d}\n",
+               __func__+6, instance, s_face, description->family, description->size,
+               description->weight, description->italic, description->small_caps,
+               description->letter_spacing, description->word_spacing);
+    free(s_face);
     return ppb_browser_font_trusted_create(instance, description);
 }
 
@@ -117,7 +123,7 @@ static
 PP_Bool
 trace_ppb_browser_font_trusted_is_font(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_browser_font_trusted_is_font(resource);
 }
 
@@ -127,7 +133,7 @@ trace_ppb_browser_font_trusted_describe(PP_Resource font,
                                   struct PP_BrowserFont_Trusted_Description *description,
                                   struct PP_BrowserFont_Trusted_Metrics *metrics)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s font=%d\n", __func__+6, font);
     return ppb_browser_font_trusted_describe(font, description, metrics);
 }
 
@@ -138,7 +144,16 @@ trace_ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_
                                       const struct PP_Point *position, uint32_t color,
                                       const struct PP_Rect *clip, PP_Bool image_data_is_opaque)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_text_text = trace_var_as_string(text->text);
+    char *s_position = trace_point_as_string(position);
+    char *s_clip = trace_rect_as_string(clip);
+    trace_info("[PPB] {zilch} %s font=%d, image_data=%d, text={.text=%s, .rtl=%u, "
+               ".override_direction=%u}, position=%s, color=0x%06x, clip=%s, "
+               "image_data_is_opaque=%u\n", __func__+6, font, image_data, s_text_text, text->rtl,
+               text->override_direction, s_position, color, s_clip, image_data_is_opaque);
+    free(s_text_text);
+    free(s_position);
+    free(s_clip);
     return ppb_browser_font_trusted_draw_text_at(font, image_data, text, position, color, clip,
                                                  image_data_is_opaque);
 }
@@ -148,7 +163,10 @@ int32_t
 trace_ppb_browser_font_trusted_measure_text(PP_Resource font,
                                       const struct PP_BrowserFont_Trusted_TextRun *text)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_text_text = trace_var_as_string(text->text);
+    trace_info("[PPB] {zilch} %s font=%d, text={.text=%s, .rtl=%u, .override_direction=%u}\n",
+               __func__+6, font, s_text_text, text->rtl, text->override_direction);
+    free(s_text_text);
     return ppb_browser_font_trusted_measure_text(font, text);
 }
 
@@ -157,7 +175,11 @@ uint32_t
 trace_ppb_browser_font_trusted_character_offset_for_pixel(PP_Resource font,
                     const struct PP_BrowserFont_Trusted_TextRun *text, int32_t pixel_position)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_text_text = trace_var_as_string(text->text);
+    trace_info("[PPB] {zilch} %s font=%d, text={.text=%s, .rtl=%u, .override_direction=%u}, "
+               "pixel_position=%d\n", __func__+6, font, s_text_text, text->rtl,
+               text->override_direction, pixel_position);
+    free(s_text_text);
     return ppb_browser_font_trusted_character_offset_for_pixel(font, text, pixel_position);
 }
 
@@ -166,7 +188,11 @@ int32_t
 trace_ppb_browser_font_trusted_pixel_offset_for_character(PP_Resource font,
                     const struct PP_BrowserFont_Trusted_TextRun *text, uint32_t char_offset)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_text_text = trace_var_as_string(text->text);
+    trace_info("[PPB] {zilch} %s font=%d, text={.text=%s, .rtl=%u, .override_direction=%u}, "
+               "char_offset=%u\n", __func__+6, font, s_text_text, text->rtl,
+               text->override_direction, char_offset);
+    free(s_text_text);
     return ppb_browser_font_trusted_pixel_offset_for_character(font, text, char_offset);
 }
 
