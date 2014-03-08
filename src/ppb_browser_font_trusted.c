@@ -90,6 +90,7 @@ ppb_browser_font_trusted_create(PP_Instance instance,
     bf->letter_spacing = description->letter_spacing;
     bf->word_spacing = description->word_spacing;
     bf->font = pango_context_load_font(bf->ctx, font_desc);
+    bf->font_desc = pango_font_describe(bf->font);
     pango_font_description_free(font_desc);
 
     pp_resource_release(font);
@@ -124,19 +125,18 @@ ppb_browser_font_trusted_describe(PP_Resource font,
     memset(description, 0, sizeof(*description));
     memset(metrics, 0, sizeof(*metrics));
 
-    PangoFontDescription *desc = pango_font_describe(bf->font);
-    const char *s_family = pango_font_description_get_family(desc);
+    const char *s_family = pango_font_description_get_family(bf->font_desc);
     description->face = PP_MakeString(s_family);
 
     description->family = PP_BROWSERFONT_TRUSTED_FAMILY_DEFAULT; // TODO: determine family
 
-    description->size = pango_font_description_get_size(desc);
-    description->weight = pango_font_description_get_weight(desc)/100 - 1;
-    description->italic = (pango_font_description_get_style(desc) != PANGO_STYLE_NORMAL);
-    description->small_caps = (pango_font_description_get_variant(desc)==PANGO_VARIANT_SMALL_CAPS);
+    description->size = pango_font_description_get_size(bf->font_desc);
+    description->weight = pango_font_description_get_weight(bf->font_desc)/100 - 1;
+    description->italic = (pango_font_description_get_style(bf->font_desc) != PANGO_STYLE_NORMAL);
+    description->small_caps =
+            (pango_font_description_get_variant(bf->font_desc) == PANGO_VARIANT_SMALL_CAPS);
     description->letter_spacing = bf->letter_spacing;
     description->word_spacing = bf->word_spacing;
-    pango_font_description_free(desc);
 
     PangoFontMetrics *m = pango_font_get_metrics(bf->font, NULL);
     metrics->ascent = pango_font_metrics_get_ascent(m);
@@ -156,6 +156,48 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
                                       const struct PP_Point *position, uint32_t color,
                                       const struct PP_Rect *clip, PP_Bool image_data_is_opaque)
 {
+    (void)image_data_is_opaque; // TODO: is it worth implementing?
+    struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
+    if (!bf)
+        return PP_FALSE;
+    struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
+    if (!id) {
+        pp_resource_release(font);
+        return PP_FALSE;
+    }
+
+    cairo_surface_mark_dirty(id->cairo_surf);
+    if (position)
+        cairo_move_to(id->cairo_ctx, position->x, position->y);
+    else
+        cairo_move_to(id->cairo_ctx, 0, 0);
+
+    cairo_reset_clip(id->cairo_ctx);
+    if (clip) {
+        cairo_rectangle(id->cairo_ctx, clip->point.x, clip->point.y,
+                        clip->size.width, clip->size.height);
+        cairo_clip(id->cairo_ctx);
+    }
+
+    cairo_set_source_rgba(id->cairo_ctx, (color & 0xffu) / 255.0, ((color >> 8) & 0xffu) / 255.0,
+                          ((color >> 16) & 0xffu) / 255.0, ((color >> 24) & 0xffu) / 255.0);
+
+    PangoLayout *layout = pango_cairo_create_layout(id->cairo_ctx);
+    uint32_t len = 0;
+    const char *s = "";
+    if (text->text.type == PP_VARTYPE_STRING)
+        s = ppb_var_var_to_utf8(text->text, &len);
+
+    // TODO: factor into rtl direction
+    pango_layout_set_font_description(layout, bf->font_desc);
+    pango_layout_set_text(layout, s, len);
+    pango_cairo_layout_path(id->cairo_ctx, layout);
+    cairo_stroke(id->cairo_ctx);
+    g_object_unref(layout);
+    cairo_surface_flush(id->cairo_surf);
+
+    pp_resource_release(font);
+    pp_resource_release(image_data);
     return PP_FALSE;
 }
 
@@ -168,14 +210,10 @@ ppb_browser_font_trusted_measure_text(PP_Resource font,
         return -1;
 
     PangoLayout *layout = pango_layout_new(bf->ctx);
-    uint32_t len;
+    uint32_t len = 0;
     const char *s = "";
-    if (text->text.type == PP_VARTYPE_STRING) {
+    if (text->text.type == PP_VARTYPE_STRING)
         s = ppb_var_var_to_utf8(text->text, &len);
-    } else {
-        s = "";
-        len = 0;
-    }
 
     // TODO: factor into rtl direction
     pango_layout_set_text(layout, s, len);
@@ -254,7 +292,7 @@ trace_ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_
     char *s_text_text = trace_var_as_string(text->text);
     char *s_position = trace_point_as_string(position);
     char *s_clip = trace_rect_as_string(clip);
-    trace_info("[PPB] {zilch} %s font=%d, image_data=%d, text={.text=%s, .rtl=%u, "
+    trace_info("[PPB] {full} %s font=%d, image_data=%d, text={.text=%s, .rtl=%u, "
                ".override_direction=%u}, position=%s, color=0x%06x, clip=%s, "
                "image_data_is_opaque=%u\n", __func__+6, font, image_data, s_text_text, text->rtl,
                text->override_direction, s_position, color, s_clip, image_data_is_opaque);

@@ -17,6 +17,7 @@ pkg_check_modules(REQ
 	mozilla-plugin
 	x11
 	liburiparser
+	cairo
 	pango
 	pangoft2
 	freetype2

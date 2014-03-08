@@ -35,6 +35,8 @@
 #include <EGL/egl.h>
 #include <pango/pango.h>
 #include <pango/pangoft2.h>
+#include <pango/pangocairo.h>
+#include <cairo.h>
 
 #define FREE_HELPER(st, field)  if (st->field) { free(st->field); st->field = NULL; }
 
@@ -151,6 +153,8 @@ struct pp_image_data_s {
     int32_t             stride;
     char               *data;
     PP_ImageDataFormat  format;
+    cairo_surface_t    *cairo_surf;
+    cairo_t            *cairo_ctx;
 };
 
 struct pp_graphics2d_s {
@@ -169,10 +173,11 @@ struct pp_network_monitor_s {
 
 struct pp_browser_font_s {
     struct pp_resource_generic_s _;
-    PangoContext   *ctx;
-    PangoFont      *font;
-    int32_t         letter_spacing;
-    int32_t         word_spacing;
+    PangoContext           *ctx;
+    PangoFont              *font;
+    PangoFontDescription   *font_desc;
+    int32_t                 letter_spacing;
+    int32_t                 word_spacing;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
