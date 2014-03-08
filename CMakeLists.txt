@@ -18,6 +18,8 @@ pkg_check_modules(REQ
 	x11
 	liburiparser
 	pango
+	pangoft2
+	freetype2
 	REQUIRED)
 
 include_directories(include ${REQ_INCLUDE_DIRS})

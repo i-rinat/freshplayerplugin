@@ -34,6 +34,7 @@
 #include <npapi.h>
 #include <EGL/egl.h>
 #include <pango/pango.h>
+#include <pango/pangoft2.h>
 
 #define FREE_HELPER(st, field)  if (st->field) { free(st->field); st->field = NULL; }
 

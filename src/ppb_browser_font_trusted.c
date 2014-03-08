@@ -44,8 +44,11 @@ ppb_browser_font_trusted_create(PP_Instance instance,
     PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, instance);
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
     PangoFontDescription *font_desc;
+    PangoFontMap *fm;
 
-    bf->ctx = pango_context_new();
+    fm = pango_ft2_font_map_new();
+    bf->ctx = pango_font_map_create_context(fm);
+    g_object_unref(fm);
 
     if (description->face.type == PP_VARTYPE_STRING) {
         uint32_t len;
@@ -77,7 +80,7 @@ ppb_browser_font_trusted_create(PP_Instance instance,
         break;
     }
 
-    pango_font_description_set_size(font_desc, description->size);
+    pango_font_description_set_size(font_desc, description->size * PANGO_SCALE);
     pango_font_description_set_weight(font_desc, (description->weight + 1) * 100);
     if (description->italic)
         pango_font_description_set_style(font_desc, PANGO_STYLE_ITALIC);
@@ -114,7 +117,37 @@ ppb_browser_font_trusted_describe(PP_Resource font,
                                   struct PP_BrowserFont_Trusted_Description *description,
                                   struct PP_BrowserFont_Trusted_Metrics *metrics)
 {
-    return PP_FALSE;
+    struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
+    if (!bf)
+        return PP_FALSE;
+
+    memset(description, 0, sizeof(*description));
+    memset(metrics, 0, sizeof(*metrics));
+
+    PangoFontDescription *desc = pango_font_describe(bf->font);
+    const char *s_family = pango_font_description_get_family(desc);
+    description->face = PP_MakeString(s_family);
+
+    description->family = PP_BROWSERFONT_TRUSTED_FAMILY_DEFAULT; // TODO: determine family
+
+    description->size = pango_font_description_get_size(desc);
+    description->weight = pango_font_description_get_weight(desc)/100 - 1;
+    description->italic = (pango_font_description_get_style(desc) != PANGO_STYLE_NORMAL);
+    description->small_caps = (pango_font_description_get_variant(desc)==PANGO_VARIANT_SMALL_CAPS);
+    description->letter_spacing = bf->letter_spacing;
+    description->word_spacing = bf->word_spacing;
+    pango_font_description_free(desc);
+
+    PangoFontMetrics *m = pango_font_get_metrics(bf->font, NULL);
+    metrics->ascent = pango_font_metrics_get_ascent(m);
+    metrics->descent = pango_font_metrics_get_descent(m);
+    metrics->height = metrics->ascent - metrics->descent;   // TODO: find out actual height
+    metrics->line_spacing = 1; // TODO: get actual line spacing
+    metrics->x_height = metrics->height;    // TODO: find out actual x-height
+    // TODO: use fontconfig-specific structures in pango to determine values;
+    pango_font_metrics_unref(m);
+
+    return PP_TRUE;
 }
 
 PP_Bool
@@ -186,7 +219,7 @@ trace_ppb_browser_font_trusted_describe(PP_Resource font,
                                   struct PP_BrowserFont_Trusted_Description *description,
                                   struct PP_BrowserFont_Trusted_Metrics *metrics)
 {
-    trace_info("[PPB] {zilch} %s font=%d\n", __func__+6, font);
+    trace_info("[PPB] {full} %s font=%d\n", __func__+6, font);
     return ppb_browser_font_trusted_describe(font, description, metrics);
 }
 
