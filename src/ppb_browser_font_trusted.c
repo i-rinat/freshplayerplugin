@@ -163,7 +163,27 @@ int32_t
 ppb_browser_font_trusted_measure_text(PP_Resource font,
                                       const struct PP_BrowserFont_Trusted_TextRun *text)
 {
-    return 0;
+    struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
+    if (!bf)
+        return -1;
+
+    PangoLayout *layout = pango_layout_new(bf->ctx);
+    uint32_t len;
+    const char *s = "";
+    if (text->text.type == PP_VARTYPE_STRING) {
+        s = ppb_var_var_to_utf8(text->text, &len);
+    } else {
+        s = "";
+        len = 0;
+    }
+
+    // TODO: factor into rtl direction
+    pango_layout_set_text(layout, s, len);
+    int width, height;
+    pango_layout_get_pixel_size(layout, &width, &height);
+    g_object_unref(layout);
+
+    return width;
 }
 
 uint32_t
@@ -250,7 +270,7 @@ trace_ppb_browser_font_trusted_measure_text(PP_Resource font,
                                       const struct PP_BrowserFont_Trusted_TextRun *text)
 {
     char *s_text_text = trace_var_as_string(text->text);
-    trace_info("[PPB] {zilch} %s font=%d, text={.text=%s, .rtl=%u, .override_direction=%u}\n",
+    trace_info("[PPB] {full} %s font=%d, text={.text=%s, .rtl=%u, .override_direction=%u}\n",
                __func__+6, font, s_text_text, text->rtl, text->override_direction);
     free(s_text_text);
     return ppb_browser_font_trusted_measure_text(font, text);
