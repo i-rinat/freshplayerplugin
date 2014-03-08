@@ -23,7 +23,7 @@
  */
 
 #include "ppb_instance_private.h"
-#include <ppapi/c/pp_var.h>
+#include "ppb_var.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
@@ -73,7 +73,33 @@ struct PP_Var
 ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
                                     struct PP_Var *exception)
 {
-    struct PP_Var var = {0};
+    NPError err;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    NPObject *np_window_obj;
+    NPString  np_script;
+    NPVariant np_result;
+
+    err = npn.getvalue(pp_i->npp, NPNVWindowNPObject, &np_window_obj);
+    if (err != NPERR_NO_ERROR) {
+        trace_error("%s, NPN_GetValue failed with code %d\n", __func__, err);
+        return PP_MakeUndefined();
+    }
+
+    np_script.UTF8Characters = ppb_var_var_to_utf8(script, &np_script.UTF8Length);
+    if (!npn.evaluate(pp_i->npp, np_window_obj, &np_script, &np_result)) {
+        trace_error("%s, NPN_Evaluate failed\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    struct pp_var_object_s refobj;
+    refobj.klass = &browser_object_class;
+    refobj.data = np_window_obj;
+    refobj.npp =  pp_i->npp;
+
+    // TODO: find out what exception is
+    struct PP_Var var = np_variant_to_pp_var(np_result, &refobj);
+    npn.releasevariantvalue(&np_result);
+
     return var;
 }
 
@@ -100,7 +126,7 @@ trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var sc
                                           struct PP_Var *exception)
 {
     char *s_script = trace_var_as_string(script);
-    trace_info("[PPB] {zilch} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
+    trace_info("[PPB] {part} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
     free(s_script);
     return ppb_instance_private_execute_script(instance, script, exception);
 }
