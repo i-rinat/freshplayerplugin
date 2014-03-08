@@ -53,7 +53,7 @@ ppb_browser_font_trusted_destroy(void *p)
 PP_Bool
 ppb_browser_font_trusted_is_font(PP_Resource resource)
 {
-    return PP_TRUE;
+    return PP_RESOURCE_BROWSER_FONT == pp_resource_get_type(resource);
 }
 
 PP_Bool
@@ -123,7 +123,7 @@ static
 PP_Bool
 trace_ppb_browser_font_trusted_is_font(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_browser_font_trusted_is_font(resource);
 }
 
