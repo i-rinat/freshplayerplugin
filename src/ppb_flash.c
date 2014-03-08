@@ -99,7 +99,7 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
     switch (setting) {
     case PP_FLASHSETTING_3DENABLED:
         var.type = PP_VARTYPE_BOOL;
-        var.value.as_bool = PP_TRUE;
+        var.value.as_bool = PP_FALSE; // TODO: reenable 3d
         break;
     case PP_FLASHSETTING_INCOGNITO:
         // TODO: incognito?
@@ -108,7 +108,7 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
         break;
     case PP_FLASHSETTING_STAGE3DENABLED:
         var.type = PP_VARTYPE_BOOL;
-        var.value.as_bool = PP_TRUE;
+        var.value.as_bool = PP_FALSE; // TODO: reenable 3d
         break;
     case PP_FLASHSETTING_LANGUAGE:
         // TODO: detect language
