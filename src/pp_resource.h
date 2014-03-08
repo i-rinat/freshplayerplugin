@@ -46,6 +46,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_IMAGE_DATA,
     PP_RESOURCE_GRAPHICS2D,
     PP_RESOURCE_NETWORK_MONITOR,
+    PP_RESOURCE_BROWSER_FONT,
 };
 
 enum pp_request_method_e {
@@ -164,6 +165,9 @@ struct pp_network_monitor_s {
     struct pp_resource_generic_s _;
 };
 
+struct pp_browser_font_s {
+    struct pp_resource_generic_s _;
+};
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
 void                    pp_resource_expunge(PP_Resource resource);

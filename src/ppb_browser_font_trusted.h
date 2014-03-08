@@ -35,6 +35,9 @@ PP_Resource
 ppb_browser_font_trusted_create(PP_Instance instance,
                                 const struct PP_BrowserFont_Trusted_Description *description);
 
+void
+ppb_browser_font_trusted_destroy(void *p);
+
 PP_Bool
 ppb_browser_font_trusted_is_font(PP_Resource resource);
 

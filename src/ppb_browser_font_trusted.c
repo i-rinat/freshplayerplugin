@@ -39,7 +39,15 @@ PP_Resource
 ppb_browser_font_trusted_create(PP_Instance instance,
                                 const struct PP_BrowserFont_Trusted_Description *description)
 {
-    return 0;
+    PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, instance);
+    // TODO: store data provided in description
+    return font;
+}
+
+void
+ppb_browser_font_trusted_destroy(void *p)
+{
+    // nothing here yet to destroy
 }
 
 PP_Bool
@@ -101,7 +109,7 @@ PP_Resource
 trace_ppb_browser_font_trusted_create(PP_Instance instance,
                                 const struct PP_BrowserFont_Trusted_Description *description)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {part} %s\n", __func__+6);
     return ppb_browser_font_trusted_create(instance, description);
 }
 
