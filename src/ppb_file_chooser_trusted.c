@@ -23,9 +23,34 @@
  */
 
 #include "ppb_file_chooser_trusted.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "trace.h"
 
+
+int32_t
+ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
+                                                   struct PP_Var suggested_file_name,
+                                                   struct PP_ArrayOutput output,
+                                                   struct PP_CompletionCallback callback)
+{
+    return 0;
+}
+
+
+// trace wrappers
+static
+int32_t
+trace_ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
+                                                         struct PP_Var suggested_file_name,
+                                                         struct PP_ArrayOutput output,
+                                                         struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_file_chooser_trusted_show_without_user_gesture(chooser, save_as,
+                                                              suggested_file_name, output,
+                                                              callback);
+}
 
 const struct PPB_FileChooserTrusted_0_6 ppb_file_chooser_trusted_interface_0_6 = {
-    .ShowWithoutUserGesture = NULL
+    .ShowWithoutUserGesture = trace_ppb_file_chooser_trusted_show_without_user_gesture,
 };

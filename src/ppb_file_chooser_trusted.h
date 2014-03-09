@@ -27,4 +27,11 @@
 
 #include <ppapi/c/trusted/ppb_file_chooser_trusted.h>
 
+
+int32_t
+ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
+                                                   struct PP_Var suggested_file_name,
+                                                   struct PP_ArrayOutput output,
+                                                   struct PP_CompletionCallback callback);
+
 #endif // FPP__PPB_FILE_CHOOSER_TRUSTED_H
