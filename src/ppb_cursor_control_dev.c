@@ -23,13 +23,88 @@
  */
 
 #include "ppb_cursor_control_dev.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "trace.h"
 
+
+PP_Bool
+ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
+                                  PP_Resource custom_image, const struct PP_Point *hot_spot)
+{
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_cursor_control_dev_lock_cursor(PP_Instance instance)
+{
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_cursor_control_dev_unlock_cursor(PP_Instance instance)
+{
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_cursor_control_dev_has_cursor_lock(PP_Instance instance)
+{
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance)
+{
+    return PP_TRUE;
+}
+
+
+// trace wrappers
+static
+PP_Bool
+trace_ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
+                                        PP_Resource custom_image, const struct PP_Point *hot_spot)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_cursor_control_dev_set_cursor(instance, type, custom_image, hot_spot);
+}
+
+static
+PP_Bool
+trace_ppb_cursor_control_dev_lock_cursor(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_cursor_control_dev_lock_cursor(instance);
+}
+
+static
+PP_Bool
+trace_ppb_cursor_control_dev_unlock_cursor(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_cursor_control_dev_unlock_cursor(instance);
+}
+
+static
+PP_Bool
+trace_ppb_cursor_control_dev_has_cursor_lock(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_cursor_control_dev_has_cursor_lock(instance);
+}
+
+static
+PP_Bool
+trace_ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_cursor_control_dev_can_lock_cursor(instance);
+}
 
 const struct PPB_CursorControl_Dev_0_4 ppb_cursor_control_dev_interface_0_4 = {
-    .SetCursor = (void *)269,
-    .LockCursor = (void *)270,
-    .UnlockCursor = (void *)271,
-    .HasCursorLock = (void *)272,
-    .CanLockCursor = (void *)273,
+    .SetCursor =        trace_ppb_cursor_control_dev_set_cursor,
+    .LockCursor =       trace_ppb_cursor_control_dev_lock_cursor,
+    .UnlockCursor =     trace_ppb_cursor_control_dev_unlock_cursor,
+    .HasCursorLock =    trace_ppb_cursor_control_dev_has_cursor_lock,
+    .CanLockCursor =    trace_ppb_cursor_control_dev_can_lock_cursor,
 };
