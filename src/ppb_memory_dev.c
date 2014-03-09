@@ -23,10 +23,40 @@
  */
 
 #include "ppb_memory_dev.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "trace.h"
 
+
+void *
+ppb_memory_dev_mem_alloc(uint32_t num_bytes)
+{
+    return NULL;
+}
+
+void
+ppb_memory_dev_mem_free(void *ptr)
+{
+}
+
+
+// trace wrappers
+static
+void *
+trace_ppb_memory_dev_mem_alloc(uint32_t num_bytes)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_memory_dev_mem_alloc(num_bytes);
+}
+
+static
+void
+trace_ppb_memory_dev_mem_free(void *ptr)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_memory_dev_mem_free(ptr);
+}
 
 const struct PPB_Memory_Dev_0_1 ppb_memory_dev_interface_0_1 = {
-    .MemAlloc = (void *)210,
-    .MemFree = (void *)211,
+    .MemAlloc = trace_ppb_memory_dev_mem_alloc,
+    .MemFree =  trace_ppb_memory_dev_mem_free,
 };

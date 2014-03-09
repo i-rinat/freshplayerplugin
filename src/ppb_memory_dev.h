@@ -27,4 +27,11 @@
 
 #include <ppapi/c/dev/ppb_memory_dev.h>
 
+
+void *
+ppb_memory_dev_mem_alloc(uint32_t num_bytes);
+
+void
+ppb_memory_dev_mem_free(void *ptr);
+
 #endif // FPP__PPB_MEMORY_DEV_H
