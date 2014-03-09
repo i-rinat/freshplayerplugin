@@ -139,14 +139,15 @@ ppb_browser_font_trusted_describe(PP_Resource font,
     description->word_spacing = bf->word_spacing;
 
     PangoFontMetrics *m = pango_font_get_metrics(bf->font, NULL);
-    metrics->ascent = pango_font_metrics_get_ascent(m);
-    metrics->descent = pango_font_metrics_get_descent(m);
-    metrics->height = metrics->ascent - metrics->descent;   // TODO: find out actual height
+    // TODO: use fontconfig-specific structures in pango to determine height and x-height
+    metrics->ascent = pango_font_metrics_get_ascent(m) / PANGO_SCALE;
+    metrics->descent = pango_font_metrics_get_descent(m) / PANGO_SCALE;
+    metrics->height = (pango_font_metrics_get_ascent(m) +
+                       pango_font_metrics_get_descent(m)) / PANGO_SCALE;
     metrics->line_spacing = 1; // TODO: get actual line spacing
     metrics->x_height = metrics->height;    // TODO: find out actual x-height
-    // TODO: use fontconfig-specific structures in pango to determine values;
-    pango_font_metrics_unref(m);
 
+    pango_font_metrics_unref(m);
     return PP_TRUE;
 }
 
@@ -166,11 +167,14 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
         return PP_FALSE;
     }
 
+    PangoFontMetrics *m = pango_font_get_metrics(bf->font, NULL);
+    int32_t ascent = pango_font_metrics_get_ascent(m) / PANGO_SCALE;
     cairo_surface_mark_dirty(id->cairo_surf);
     if (position)
-        cairo_move_to(id->cairo_ctx, position->x, position->y);
+        cairo_move_to(id->cairo_ctx, position->x, position->y - ascent);
     else
         cairo_move_to(id->cairo_ctx, 0, 0);
+    pango_font_metrics_unref(m);
 
     cairo_reset_clip(id->cairo_ctx);
     if (clip) {
