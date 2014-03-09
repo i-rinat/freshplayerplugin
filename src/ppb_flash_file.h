@@ -27,4 +27,11 @@
 
 #include <ppapi/c/private/ppb_flash_file.h>
 
+
+int32_t
+ppb_flash_file_file_ref_open_file(PP_Resource file_ref_id, int32_t mode, PP_FileHandle *file);
+
+int32_t
+ppb_flash_file_file_ref_query_file(PP_Resource file_ref_id, struct PP_FileInfo *info);
+
 #endif // FPP__PPB_FLASH_FILE_H
