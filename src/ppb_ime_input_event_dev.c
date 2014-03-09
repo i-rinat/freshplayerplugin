@@ -23,15 +23,125 @@
  */
 
 #include "ppb_ime_input_event_dev.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "trace.h"
+
+
+PP_Resource
+ppb_ime_input_event_dev_create(PP_Instance instance, PP_InputEvent_Type type,
+                               PP_TimeTicks time_stamp, struct PP_Var text, uint32_t segment_number,
+                               const uint32_t segment_offsets[], int32_t target_segment,
+                               uint32_t selection_start, uint32_t selection_end)
+{
+    return 0;
+}
+
+PP_Bool
+ppb_ime_input_event_dev_is_ime_input_event(PP_Resource resource)
+{
+    return PP_TRUE;
+}
+
+struct PP_Var
+ppb_ime_input_event_dev_get_text(PP_Resource ime_event)
+{
+    return PP_MakeUndefined();
+}
+
+uint32_t
+ppb_ime_input_event_dev_get_segment_number(PP_Resource ime_event)
+{
+    return 0;
+}
+
+uint32_t
+ppb_ime_input_event_dev_get_segment_offset(PP_Resource ime_event, uint32_t index)
+{
+    return 0;
+}
+
+int32_t
+ppb_ime_input_event_dev_get_target_segment(PP_Resource ime_event)
+{
+    return -1;
+}
+
+void
+ppb_ime_input_event_dev_get_selection(PP_Resource ime_event, uint32_t *start, uint32_t *end)
+{
+}
+
+
+// trace wrappers
+static
+PP_Resource
+trace_ppb_ime_input_event_dev_create(PP_Instance instance, PP_InputEvent_Type type,
+                                     PP_TimeTicks time_stamp, struct PP_Var text,
+                                     uint32_t segment_number, const uint32_t segment_offsets[],
+                                     int32_t target_segment, uint32_t selection_start,
+                                     uint32_t selection_end)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_ime_input_event_dev_create(instance, type, time_stamp, text, segment_number,
+                                          segment_offsets, target_segment, selection_start,
+                                          selection_end);
+}
+
+static
+PP_Bool
+trace_ppb_ime_input_event_dev_is_ime_input_event(PP_Resource resource)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_ime_input_event_dev_is_ime_input_event(resource);
+}
+
+static
+struct PP_Var
+trace_ppb_ime_input_event_dev_get_text(PP_Resource ime_event)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_ime_input_event_dev_get_text(ime_event);
+}
+
+static
+uint32_t
+trace_ppb_ime_input_event_dev_get_segment_number(PP_Resource ime_event)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_ime_input_event_dev_get_segment_number(ime_event);
+}
+
+static
+uint32_t
+trace_ppb_ime_input_event_dev_get_segment_offset(PP_Resource ime_event, uint32_t index)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_ime_input_event_dev_get_segment_offset(ime_event, index);
+}
+
+static
+int32_t
+trace_ppb_ime_input_event_dev_get_target_segment(PP_Resource ime_event)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_ime_input_event_dev_get_target_segment(ime_event);
+}
+
+static
+void
+trace_ppb_ime_input_event_dev_get_selection(PP_Resource ime_event, uint32_t *start, uint32_t *end)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_ime_input_event_dev_get_selection(ime_event, start, end);
+}
 
 
 const struct PPB_IMEInputEvent_Dev_0_2 ppb_ime_input_event_dev_interface_0_2 = {
-    .Create = (void *)212,
-    .IsIMEInputEvent = (void *)213,
-    .GetText = (void *)214,
-    .GetSegmentNumber = (void *)215,
-    .GetSegmentOffset = (void *)216,
-    .GetTargetSegment = (void *)217,
-    .GetSelection = (void *)218,
+    .Create =           trace_ppb_ime_input_event_dev_create,
+    .IsIMEInputEvent =  trace_ppb_ime_input_event_dev_is_ime_input_event,
+    .GetText =          trace_ppb_ime_input_event_dev_get_text,
+    .GetSegmentNumber = trace_ppb_ime_input_event_dev_get_segment_number,
+    .GetSegmentOffset = trace_ppb_ime_input_event_dev_get_segment_offset,
+    .GetTargetSegment = trace_ppb_ime_input_event_dev_get_target_segment,
+    .GetSelection =     trace_ppb_ime_input_event_dev_get_selection,
 };

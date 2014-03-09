@@ -27,4 +27,29 @@
 
 #include <ppapi/c/dev/ppb_ime_input_event_dev.h>
 
+
+PP_Resource
+ppb_ime_input_event_dev_create(PP_Instance instance, PP_InputEvent_Type type,
+                               PP_TimeTicks time_stamp, struct PP_Var text, uint32_t segment_number,
+                               const uint32_t segment_offsets[], int32_t target_segment,
+                               uint32_t selection_start, uint32_t selection_end);
+
+PP_Bool
+ppb_ime_input_event_dev_is_ime_input_event(PP_Resource resource);
+
+struct PP_Var
+ppb_ime_input_event_dev_get_text(PP_Resource ime_event);
+
+uint32_t
+ppb_ime_input_event_dev_get_segment_number(PP_Resource ime_event);
+
+uint32_t
+ppb_ime_input_event_dev_get_segment_offset(PP_Resource ime_event, uint32_t index);
+
+int32_t
+ppb_ime_input_event_dev_get_target_segment(PP_Resource ime_event);
+
+void
+ppb_ime_input_event_dev_get_selection(PP_Resource ime_event, uint32_t *start, uint32_t *end);
+
 #endif // FPP__PPB_IME_INPUT_EVENT_DEV_H
