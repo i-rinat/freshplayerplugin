@@ -27,4 +27,20 @@
 
 #include <ppapi/c/dev/ppb_char_set_dev.h>
 
+
+char *
+ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,
+                                   const char *output_char_set,
+                                   enum PP_CharSet_ConversionError on_error,
+                                   uint32_t *output_length);
+
+uint16_t *
+ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t input_len,
+                                   const char *input_char_set,
+                                   enum PP_CharSet_ConversionError on_error,
+                                   uint32_t *output_length);
+
+struct PP_Var
+ppb_char_set_dev_get_default_char_set(PP_Instance instance);
+
 #endif // FPP__PPB_CHAR_SET_DEV_H

@@ -23,11 +23,71 @@
  */
 
 #include "ppb_char_set_dev.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "trace.h"
+#include "tables.h"
 
+
+char *
+ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,
+                                   const char *output_char_set,
+                                   enum PP_CharSet_ConversionError on_error,
+                                   uint32_t *output_length)
+{
+    return NULL;
+}
+
+uint16_t *
+ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t input_len,
+                                   const char *input_char_set,
+                                   enum PP_CharSet_ConversionError on_error,
+                                   uint32_t *output_length)
+{
+    return NULL;
+}
+
+struct PP_Var
+ppb_char_set_dev_get_default_char_set(PP_Instance instance)
+{
+    return PP_MakeUndefined();
+}
+
+
+// trace wrappers
+static
+char *
+trace_ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16,
+                                         uint32_t utf16_len, const char *output_char_set,
+                                         enum PP_CharSet_ConversionError on_error,
+                                         uint32_t *output_length)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_char_set_dev_utf16_to_char_set(instance, utf16, utf16_len, output_char_set,
+                                              on_error, output_length);
+}
+
+static
+uint16_t *
+trace_ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input,
+                                         uint32_t input_len, const char *input_char_set,
+                                         enum PP_CharSet_ConversionError on_error,
+                                         uint32_t *output_length)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_char_set_dev_char_set_to_utf16(instance, input, input_len, input_char_set,
+                                              on_error, output_length);
+}
+
+static
+struct PP_Var
+trace_ppb_char_set_dev_get_default_char_set(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_char_set_dev_get_default_char_set(instance);
+}
 
 const struct PPB_CharSet_Dev_0_4 ppb_char_set_dev_interface_0_4 = {
-    .UTF16ToCharSet = (void *)274,
-    .CharSetToUTF16 = (void *)275,
-    .GetDefaultCharSet = (void *)276,
+    .UTF16ToCharSet =       trace_ppb_char_set_dev_utf16_to_char_set,
+    .CharSetToUTF16 =       trace_ppb_char_set_dev_char_set_to_utf16,
+    .GetDefaultCharSet =    trace_ppb_char_set_dev_get_default_char_set,
 };
