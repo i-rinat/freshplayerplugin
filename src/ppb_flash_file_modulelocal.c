@@ -280,7 +280,14 @@ ppb_flash_file_modulelocal_free_dir_contents(PP_Instance instance,
 int32_t
 ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHandle *file)
 {
-    return 0;
+    (void)instance;
+    char *tmpfname;
+    // TODO: find a good directory for temporary files
+    asprintf(&tmpfname, "/tmp/FreshXXXXXX");
+    *file = mkstemp(tmpfname);
+    if (*file < 0)
+        return PP_ERROR_FAILED;
+    return PP_OK;
 }
 
 // trace wrappers
@@ -368,7 +375,7 @@ static
 int32_t
 trace_ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHandle *file)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_flash_file_modulelocal_create_temporary_file(instance, file);
 }
 
