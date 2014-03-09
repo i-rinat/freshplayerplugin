@@ -80,7 +80,7 @@ ppb_browser_font_trusted_create(PP_Instance instance,
         break;
     }
 
-    pango_font_description_set_size(font_desc, description->size * PANGO_SCALE);
+    pango_font_description_set_absolute_size(font_desc, description->size * PANGO_SCALE);
     pango_font_description_set_weight(font_desc, (description->weight + 1) * 100);
     if (description->italic)
         pango_font_description_set_style(font_desc, PANGO_STYLE_ITALIC);
@@ -90,7 +90,7 @@ ppb_browser_font_trusted_create(PP_Instance instance,
     bf->letter_spacing = description->letter_spacing;
     bf->word_spacing = description->word_spacing;
     bf->font = pango_context_load_font(bf->ctx, font_desc);
-    bf->font_desc = pango_font_describe(bf->font);
+    bf->font_desc = pango_font_describe_with_absolute_size(bf->font);
     pango_font_description_free(font_desc);
 
     pp_resource_release(font);
@@ -167,6 +167,13 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
         return PP_FALSE;
     }
 
+    cairo_reset_clip(id->cairo_ctx);
+    if (clip) {
+        cairo_rectangle(id->cairo_ctx, clip->point.x, clip->point.y,
+                        clip->size.width, clip->size.height);
+        cairo_clip(id->cairo_ctx);
+    }
+
     PangoFontMetrics *m = pango_font_get_metrics(bf->font, NULL);
     int32_t ascent = pango_font_metrics_get_ascent(m) / PANGO_SCALE;
     cairo_surface_mark_dirty(id->cairo_surf);
@@ -175,13 +182,6 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
     else
         cairo_move_to(id->cairo_ctx, 0, 0);
     pango_font_metrics_unref(m);
-
-    cairo_reset_clip(id->cairo_ctx);
-    if (clip) {
-        cairo_rectangle(id->cairo_ctx, clip->point.x, clip->point.y,
-                        clip->size.width, clip->size.height);
-        cairo_clip(id->cairo_ctx);
-    }
 
     cairo_set_source_rgba(id->cairo_ctx, (color & 0xffu) / 255.0, ((color >> 8) & 0xffu) / 255.0,
                           ((color >> 16) & 0xffu) / 255.0, ((color >> 24) & 0xffu) / 255.0);
