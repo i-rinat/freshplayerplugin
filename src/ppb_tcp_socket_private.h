@@ -27,4 +27,54 @@
 
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
 
+
+PP_Resource
+ppb_tcp_socket_private_create(PP_Instance instance);
+
+PP_Bool
+ppb_tcp_socket_private_is_tcp_socket(PP_Resource resource);
+
+int32_t
+ppb_tcp_socket_private_connect(PP_Resource tcp_socket, const char *host, uint16_t port,
+                               struct PP_CompletionCallback callback);
+
+int32_t
+ppb_tcp_socket_private_connect_with_net_address(PP_Resource tcp_socket,
+                                                const struct PP_NetAddress_Private *addr,
+                                                struct PP_CompletionCallback callback);
+
+PP_Bool
+ppb_tcp_socket_private_get_local_address(PP_Resource tcp_socket,
+                                         struct PP_NetAddress_Private *local_addr);
+
+PP_Bool
+ppb_tcp_socket_private_get_remote_address(PP_Resource tcp_socket,
+                                          struct PP_NetAddress_Private *remote_addr);
+
+int32_t
+ppb_tcp_socket_private_ssl_handshake(PP_Resource tcp_socket, const char *server_name,
+                                     uint16_t server_port, struct PP_CompletionCallback callback);
+
+PP_Resource
+ppb_tcp_socket_private_get_server_certificate(PP_Resource tcp_socket);
+
+PP_Bool
+ppb_tcp_socket_private_add_chain_building_certificate(PP_Resource tcp_socket,
+                                                      PP_Resource certificate, PP_Bool is_trusted);
+
+int32_t
+ppb_tcp_socket_private_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
+                            struct PP_CompletionCallback callback);
+
+int32_t
+ppb_tcp_socket_private_write(PP_Resource tcp_socket, const char *buffer, int32_t bytes_to_write,
+                             struct PP_CompletionCallback callback);
+
+void
+ppb_tcp_socket_private_disconnect(PP_Resource tcp_socket);
+
+int32_t
+ppb_tcp_socket_private_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Private name,
+                                  struct PP_Var value, struct PP_CompletionCallback callback);
+
 #endif // FPP__PPB_TCP_SOCKET_PRIVATE_H
