@@ -83,6 +83,7 @@ extern const struct PPB_CursorControl_Dev_0_4       ppb_cursor_control_dev_inter
 extern const struct PPB_FileChooser_Dev_0_6         ppb_file_chooser_dev_interface_0_6;
 extern const struct PPB_FileChooserTrusted_0_6      ppb_file_chooser_trusted_interface_0_6;
 extern const struct PPB_FileRef_1_0                 ppb_file_ref_interface_1_0;
+extern const struct PPB_FileRef_1_1                 ppb_file_ref_interface_1_1;
 extern const struct PPB_Flash_Clipboard_5_0         ppb_flash_clipboard_interface_5_0;
 extern const struct PPB_Flash_File_FileRef          ppb_flash_file_file_ref_interface_2_0;
 extern const struct PPB_Flash_File_ModuleLocal_3_0  ppb_flash_file_modulelocal_interface_3_0;

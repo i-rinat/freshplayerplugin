@@ -27,4 +27,46 @@
 
 #include <ppapi/c/ppb_file_ref.h>
 
+
+PP_Resource
+ppb_file_ref_create(PP_Resource file_system, const char *path);
+
+PP_Bool
+ppb_file_ref_is_file_ref(PP_Resource resource);
+
+PP_FileSystemType
+ppb_file_ref_get_file_system_type(PP_Resource file_ref);
+
+struct PP_Var
+ppb_file_ref_get_name(PP_Resource file_ref);
+
+struct PP_Var
+ppb_file_ref_get_path(PP_Resource file_ref);
+
+PP_Resource
+ppb_file_ref_get_parent(PP_Resource file_ref);
+
+int32_t
+ppb_file_ref_make_directory(PP_Resource directory_ref, PP_Bool make_ancestors,
+                            struct PP_CompletionCallback callback);
+
+int32_t
+ppb_file_ref_touch(PP_Resource file_ref, PP_Time last_access_time, PP_Time last_modified_time,
+                   struct PP_CompletionCallback callback);
+
+int32_t
+ppb_file_ref_delete(PP_Resource file_ref, struct PP_CompletionCallback callback);
+
+int32_t
+ppb_file_ref_rename(PP_Resource file_ref, PP_Resource new_file_ref,
+                    struct PP_CompletionCallback callback);
+
+int32_t
+ppb_file_ref_query(PP_Resource file_ref, struct PP_FileInfo *info,
+                   struct PP_CompletionCallback callback);
+
+int32_t
+ppb_file_ref_read_directory_entries(PP_Resource file_ref, struct PP_ArrayOutput output,
+                                    struct PP_CompletionCallback callback);
+
 #endif // FPP__PPB_FILE_REF_H
