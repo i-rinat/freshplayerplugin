@@ -27,4 +27,20 @@
 
 #include <ppapi/c/dev/ppb_buffer_dev.h>
 
+
+PP_Resource
+ppb_buffer_dev_create(PP_Instance instance, uint32_t size_in_bytes);
+
+PP_Bool
+ppb_buffer_dev_is_buffer(PP_Resource resource);
+
+PP_Bool
+ppb_buffer_dev_describe(PP_Resource resource, uint32_t *size_in_bytes);
+
+void *
+ppb_buffer_dev_map(PP_Resource resource);
+
+void
+ppb_buffer_dev_unmap(PP_Resource resource);
+
 #endif // FPP__PPB_BUFFER_DEV_H
