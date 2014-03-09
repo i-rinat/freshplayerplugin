@@ -27,4 +27,21 @@
 
 #include <ppapi/c/private/ppb_flash_clipboard.h>
 
+
+uint32_t
+ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const char *format_name);
+
+PP_Bool
+ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
+                                        PP_Flash_Clipboard_Type clipboard_type, uint32_t format);
+
+struct PP_Var
+ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type clipboard_type,
+                              uint32_t format);
+
+int32_t
+ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type clipboard_type,
+                               uint32_t data_item_count, const uint32_t formats[],
+                               const struct PP_Var data_items[]);
+
 #endif // FPP__PPB_FLASH_CLIPBOARD_H
