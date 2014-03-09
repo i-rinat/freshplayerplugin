@@ -276,7 +276,6 @@ handle_GraphicsExpose_event(NPP instance, void *event)
     Display *dpy = ev->display;
     Drawable drawable = ev->drawable;
     int screen = 0;
-    memset(g2d->data, 0x76, g2d->width * g2d->height);
     XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0, g2d->data,
                               g2d->width, g2d->height, 32, g2d->stride);
 
