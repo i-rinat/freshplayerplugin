@@ -27,4 +27,15 @@
 
 #include <ppapi/c/private/ppb_flash_menu.h>
 
+
+PP_Resource
+ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_data);
+
+PP_Bool
+ppb_flash_menu_is_flash_menu(PP_Resource resource_id);
+
+int32_t
+ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_t *selected_id,
+                    struct PP_CompletionCallback callback);
+
 #endif // FPP__PPB_FLASH_MENU_H
