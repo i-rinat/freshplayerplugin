@@ -116,6 +116,13 @@ ppb_var_deprecated_is_instance_of(struct PP_Var var,
                                   const struct PPP_Class_Deprecated *object_class,
                                   void **object_data)
 {
+    if (var.type != PP_VARTYPE_OBJECT)
+        return false;
+    struct pp_var_object_s *obj = (void *)(size_t)var.value.as_id;
+    if (obj->klass == object_class) {
+        *object_data = obj->data;
+        return true;
+    }
     return false;
 }
 
@@ -283,7 +290,7 @@ trace_ppb_var_deprecated_is_instance_of(struct PP_Var var,
                                         void **object_data)
 {
     char *s_var = trace_var_as_string(var);
-    trace_info("[PPB] {zilch} %s var=%s, object_class=%p\n", __func__+6, s_var, object_class);
+    trace_info("[PPB] {full} %s var=%s, object_class=%p\n", __func__+6, s_var, object_class);
     free(s_var);
     return ppb_var_deprecated_is_instance_of(var, object_class, object_data);
 }
