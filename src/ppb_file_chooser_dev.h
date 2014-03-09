@@ -27,4 +27,16 @@
 
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
 
+
+PP_Resource
+ppb_file_chooser_dev_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
+                            struct PP_Var accept_types);
+
+PP_Bool
+ppb_file_chooser_dev_is_file_chooser(PP_Resource resource);
+
+int32_t
+ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
+                          struct PP_CompletionCallback callback);
+
 #endif // FPP__PPB_FILE_CHOOSER_DEV_H

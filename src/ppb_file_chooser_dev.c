@@ -23,11 +23,59 @@
  */
 
 #include "ppb_file_chooser_dev.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "trace.h"
 
+
+PP_Resource
+ppb_file_chooser_dev_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
+                            struct PP_Var accept_types)
+{
+    return 0;
+}
+
+PP_Bool
+ppb_file_chooser_dev_is_file_chooser(PP_Resource resource)
+{
+    return PP_TRUE;
+}
+
+int32_t
+ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
+                          struct PP_CompletionCallback callback)
+{
+    return 0;
+}
+
+// trace wrappers
+static
+PP_Resource
+trace_ppb_file_chooser_dev_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
+                                  struct PP_Var accept_types)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_file_chooser_dev_create(instance, mode, accept_types);
+}
+
+static
+PP_Bool
+trace_ppb_file_chooser_dev_is_file_chooser(PP_Resource resource)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_file_chooser_dev_is_file_chooser(resource);
+}
+
+static
+int32_t
+trace_ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
+                                struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_file_chooser_dev_show(chooser, output, callback);
+}
 
 const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
-    .Create = (void *)266,
-    .IsFileChooser = (void *)267,
-    .Show = (void *)268,
+    .Create =           trace_ppb_file_chooser_dev_create,
+    .IsFileChooser =    trace_ppb_file_chooser_dev_is_file_chooser,
+    .Show =             trace_ppb_file_chooser_dev_show,
 };
