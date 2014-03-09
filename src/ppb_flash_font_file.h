@@ -27,4 +27,16 @@
 
 #include <ppapi/c/private/ppb_flash_font_file.h>
 
+PP_Resource
+ppb_flash_font_file_create(PP_Instance instance,
+                           const struct PP_BrowserFont_Trusted_Description *description,
+                           PP_PrivateFontCharset charset);
+
+PP_Bool
+ppb_flash_font_file_is_flash_font_file(PP_Resource resource);
+
+PP_Bool
+ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *output,
+                                   uint32_t *output_length);
+
 #endif // FPP__PPB_FLASH_FONT_FILE_H

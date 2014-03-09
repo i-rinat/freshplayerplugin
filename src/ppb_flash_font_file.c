@@ -23,11 +23,63 @@
  */
 
 #include "ppb_flash_font_file.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "trace.h"
+
+
+PP_Resource
+ppb_flash_font_file_create(PP_Instance instance,
+                           const struct PP_BrowserFont_Trusted_Description *description,
+                           PP_PrivateFontCharset charset)
+{
+    return 0;
+}
+
+PP_Bool
+ppb_flash_font_file_is_flash_font_file(PP_Resource resource)
+{
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *output,
+                                   uint32_t *output_length)
+{
+    return PP_FALSE;
+}
+
+
+// trace wrappers
+static
+PP_Resource
+trace_ppb_flash_font_file_create(PP_Instance instance,
+                                 const struct PP_BrowserFont_Trusted_Description *description,
+                                 PP_PrivateFontCharset charset)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_flash_font_file_create(instance, description, charset);
+}
+
+static
+PP_Bool
+trace_ppb_flash_font_file_is_flash_font_file(PP_Resource resource)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_flash_font_file_is_flash_font_file(resource);
+}
+
+static
+PP_Bool
+trace_ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *output,
+                                         uint32_t *output_length)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_flash_font_file_get_font_table(font_file, table, output, output_length);
+}
 
 
 const struct PPB_Flash_FontFile_0_1 ppb_flash_font_file_interface_0_1 = {
-    .Create = (void *)247,
-    .IsFlashFontFile = (void *)248,
-    .GetFontTable = (void *)249,
+    .Create =           trace_ppb_flash_font_file_create,
+    .IsFlashFontFile =  trace_ppb_flash_font_file_is_flash_font_file,
+    .GetFontTable =     trace_ppb_flash_font_file_get_font_table,
 };
