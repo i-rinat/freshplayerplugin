@@ -32,6 +32,7 @@
 #include <stddef.h>
 #include <X11/Xlib.h>
 #include <npapi.h>
+#include <glib.h>
 #include <EGL/egl.h>
 #include <pango/pango.h>
 #include <pango/pangoft2.h>
@@ -154,17 +155,18 @@ struct pp_image_data_s {
     char               *data;
     PP_ImageDataFormat  format;
     cairo_surface_t    *cairo_surf;
-    cairo_t            *cairo_ctx;
 };
 
 struct pp_graphics2d_s {
     struct pp_resource_generic_s _;
-    PP_Instance instance;
-    int         is_always_opaque;
-    int32_t     width;
-    int32_t     height;
-    int32_t     stride;
-    char       *data;
+    PP_Instance         instance;
+    int                 is_always_opaque;
+    int32_t             width;
+    int32_t             height;
+    int32_t             stride;
+    char               *data;
+    cairo_surface_t    *cairo_surf;
+    GList              *task_list;
 };
 
 struct pp_network_monitor_s {

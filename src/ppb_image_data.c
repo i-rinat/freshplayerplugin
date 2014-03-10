@@ -77,8 +77,6 @@ ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
 
     id->cairo_surf = cairo_image_surface_create_for_data((void *)id->data, CAIRO_FORMAT_ARGB32,
                                                          id->width, id->height, id->stride);
-    id->cairo_ctx = cairo_create(id->cairo_surf);
-
     pp_resource_release(image_data);
     return image_data;
 }
@@ -90,10 +88,6 @@ ppb_image_data_destroy(void *p)
         return;
     struct pp_image_data_s *id = p;
 
-    if (id->cairo_ctx) {
-        cairo_destroy(id->cairo_ctx);
-        id->cairo_ctx = NULL;
-    }
     if (id->cairo_surf) {
         cairo_surface_destroy(id->cairo_surf);
         id->cairo_surf = NULL;

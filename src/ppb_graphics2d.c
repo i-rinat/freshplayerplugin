@@ -32,6 +32,17 @@
 #include "pp_resource.h"
 
 
+struct g2d_paint_task_s {
+    enum g2d_paint_task_type_e {
+        gpt_paint_id,
+        gpt_replace_contents,
+    } type;
+    PP_Resource     image_data;
+    struct PP_Point dst;
+    struct PP_Rect  src;
+    int             src_is_set;
+};
+
 PP_Resource
 ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque)
 {
@@ -53,6 +64,9 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
         ppb_core_release_resource(graphics_2d);
         return 0;
     }
+    g2d->cairo_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->data,
+                            CAIRO_FORMAT_ARGB32, g2d->width, g2d->height, g2d->stride);
+    g2d->task_list = NULL;
 
     pp_resource_release(graphics_2d);
     return graphics_2d;
@@ -67,6 +81,10 @@ ppb_graphics2d_destroy(void *p)
     if (g2d->data) {
         free(g2d->data);
         g2d->data = NULL;
+    }
+    if (g2d->cairo_surf) {
+        cairo_surface_destroy(g2d->cairo_surf);
+        g2d->cairo_surf = NULL;
     }
 }
 
@@ -86,6 +104,25 @@ void
 ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image_data,
                                 const struct PP_Point *top_left, const struct PP_Rect *src_rect)
 {
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
+    if (!g2d)
+        return;
+    struct g2d_paint_task_s *pt = malloc(sizeof(*pt));
+
+    pt->type = gpt_paint_id;
+    pp_resource_ref(image_data);
+    pt->image_data = image_data;
+    pt->src_is_set = !!src_rect;
+
+    if (top_left) {
+        memcpy(&pt->dst, top_left, sizeof(*top_left));
+    } else {
+        pt->dst.x = pt->dst.y = 0;
+    }
+    if (src_rect)
+        memcpy(&pt->src, src_rect, sizeof(*src_rect));
+
+    g2d->task_list = g_list_append(g2d->task_list, pt);
 }
 
 void
@@ -98,18 +135,17 @@ void
 ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 {
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
-    struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
+    if (!g2d)
+        return;
 
-    if (g2d->width == id->width && g2d->height == id->height) {
-        void *tmp = g2d->data;
-        g2d->data = id->data;
-        id->data = tmp;
-    } else {
-        trace_warning("%s, slow path is not implemented\n", __func__);
-    }
+    struct g2d_paint_task_s *pt = malloc(sizeof(*pt));
+
+    pt->type = gpt_replace_contents;
+    pp_resource_ref(image_data);
+    pt->image_data = image_data;
+    g2d->task_list = g_list_append(g2d->task_list, pt);
 
     pp_resource_release(graphics_2d);
-    pp_resource_release(image_data);
 }
 
 int32_t
@@ -131,6 +167,51 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     pp_i->draw_in_progress = 1;
     pp_i->draw_completion_callback = callback;
+
+    while (g2d->task_list) {
+        GList *link = g_list_first(g2d->task_list);
+        struct g2d_paint_task_s *pt = link->data;
+        struct pp_image_data_s  *id;
+        void    *tmp;
+        cairo_t *cr;
+
+        g2d->task_list = g_list_delete_link(g2d->task_list, link);
+        switch (pt->type) {
+        case gpt_paint_id:
+            id = pp_resource_acquire(pt->image_data, PP_RESOURCE_IMAGE_DATA);
+            if (!id)
+                break;
+
+            cairo_surface_mark_dirty(g2d->cairo_surf);
+            cr = cairo_create(g2d->cairo_surf);
+            cairo_set_source_surface(cr, id->cairo_surf, pt->dst.x - pt->src.point.x,
+                                     pt->dst.y - pt->src.point.y);
+            if (pt->src_is_set) {
+                cairo_rectangle(cr, pt->dst.x, pt->dst.y, pt->src.size.width, pt->src.size.height);
+                cairo_fill(cr);
+            } else {
+                cairo_paint(cr);
+            }
+            cairo_surface_flush(g2d->cairo_surf);
+            cairo_destroy(cr);
+            pp_resource_release(pt->image_data);
+            pp_resource_unref(pt->image_data);
+            break;
+        case gpt_replace_contents:
+            id = pp_resource_acquire(pt->image_data, PP_RESOURCE_IMAGE_DATA);
+            if (!id)
+                break;
+            if (id->width == g2d->width || id->height == g2d->height) {
+                tmp = g2d->data;
+                g2d->data = id->data;
+                id->data = tmp;
+            }
+            pp_resource_release(pt->image_data);
+            pp_resource_unref(pt->image_data);
+            break;
+        }
+        free(pt);
+    }
 
     NPRect npr = {.top = 0, .left = 0, .bottom = g2d->height, .right = g2d->width};
     npn.invalidaterect(pp_i->npp, &npr);

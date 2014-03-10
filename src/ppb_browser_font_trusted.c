@@ -167,26 +167,25 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
         return PP_FALSE;
     }
 
-    cairo_reset_clip(id->cairo_ctx);
+    cairo_t *cr = cairo_create(id->cairo_surf);
     if (clip) {
-        cairo_rectangle(id->cairo_ctx, clip->point.x, clip->point.y,
-                        clip->size.width, clip->size.height);
-        cairo_clip(id->cairo_ctx);
+        cairo_rectangle(cr, clip->point.x, clip->point.y, clip->size.width, clip->size.height);
+        cairo_clip(cr);
     }
 
     PangoFontMetrics *m = pango_font_get_metrics(bf->font, NULL);
     int32_t ascent = pango_font_metrics_get_ascent(m) / PANGO_SCALE;
     cairo_surface_mark_dirty(id->cairo_surf);
     if (position)
-        cairo_move_to(id->cairo_ctx, position->x, position->y - ascent);
+        cairo_move_to(cr, position->x, position->y - ascent);
     else
-        cairo_move_to(id->cairo_ctx, 0, 0);
+        cairo_move_to(cr, 0, 0);
     pango_font_metrics_unref(m);
 
-    cairo_set_source_rgba(id->cairo_ctx, (color & 0xffu) / 255.0, ((color >> 8) & 0xffu) / 255.0,
+    cairo_set_source_rgba(cr, (color & 0xffu) / 255.0, ((color >> 8) & 0xffu) / 255.0,
                           ((color >> 16) & 0xffu) / 255.0, ((color >> 24) & 0xffu) / 255.0);
 
-    PangoLayout *layout = pango_cairo_create_layout(id->cairo_ctx);
+    PangoLayout *layout = pango_cairo_create_layout(cr);
     uint32_t len = 0;
     const char *s = "";
     if (text->text.type == PP_VARTYPE_STRING)
@@ -195,10 +194,11 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
     // TODO: factor into rtl direction
     pango_layout_set_font_description(layout, bf->font_desc);
     pango_layout_set_text(layout, s, len);
-    pango_cairo_layout_path(id->cairo_ctx, layout);
-    cairo_stroke(id->cairo_ctx);
+    pango_cairo_layout_path(cr, layout);
+    cairo_stroke(cr);
     g_object_unref(layout);
     cairo_surface_flush(id->cairo_surf);
+    cairo_destroy(cr);
 
     pp_resource_release(font);
     pp_resource_release(image_data);
