@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#define _GNU_SOURCE
 #include "ppb_flash.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -63,7 +64,9 @@ ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_us
 double
 ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 {
-    return 0.0;
+    struct tm lt = {0};
+    localtime_r((const time_t*)&t, &lt);
+    return lt.tm_gmtoff;
 }
 
 struct PP_Var
@@ -235,7 +238,7 @@ static
 double
 trace_ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, t=%f\n", __func__+6, instance, t);
+    trace_info("[PPB] {full} %s instance=%d, t=%f\n", __func__+6, instance, t);
     return ppb_flash_get_local_time_zone_offset(instance, t);
 }
 
