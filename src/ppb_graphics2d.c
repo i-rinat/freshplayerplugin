@@ -271,7 +271,7 @@ trace_ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image
 {
     char *s_top_left = trace_point_as_string(top_left);
     char *s_src_rect = trace_rect_as_string(src_rect);
-    trace_info("[PPB] {zilch} %s graphics_2d=%d, image_data=%d, top_left=%s, src_rect=%s\n",
+    trace_info("[PPB] {full} %s graphics_2d=%d, image_data=%d, top_left=%s, src_rect=%s\n",
                __func__+6, graphics_2d, image_data, s_top_left, s_src_rect);
     free(s_top_left);
     free(s_src_rect);
@@ -296,7 +296,7 @@ static
 void
 trace_ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 {
-    trace_info("[PPB] {part} %s graphics_2d=%d, image_data=%d\n", __func__+6, graphics_2d,
+    trace_info("[PPB] {full} %s graphics_2d=%d, image_data=%d\n", __func__+6, graphics_2d,
                image_data);
     ppb_graphics2d_replace_contents(graphics_2d, image_data);
 }
