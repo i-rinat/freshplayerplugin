@@ -229,6 +229,10 @@ NPP_Write(NPP instance, NPStream *stream, int32_t offset, int32_t len, void *buf
         return len;
 
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    if (!ul) {
+            trace_error("%s, ul is NULL\n", __func__);
+            return len;
+    }
 
     if (offset + len > ul->body_allocated) {
         size_t nsize = ul->body_allocated + (ul->body_allocated >> 1);
