@@ -39,7 +39,6 @@
 #include <ppapi/c/pp_errors.h>
 #include "globals.h"
 
-#define NO_IMPL assert(0 && "no implementation yet")
 
 static
 PP_Instance
@@ -325,27 +324,38 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
                instance, reverse_npp_variable(variable));
     switch (variable) {
     case NPPVpluginNameString:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginNameString not implemented\n");
+        break;
     case NPPVpluginDescriptionString:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginDescriptionString not implemented\n");
+        break;
     case NPPVpluginWindowBool:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginWindowBool not implemented\n");
+        break;
     case NPPVpluginTransparentBool:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginTransparentBool not implemented\n");
+        break;
     case NPPVjavaClass:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVjavaClass not implemented\n");
+        break;
     case NPPVpluginWindowSize:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginWindowSize not implemented\n");
+        break;
     case NPPVpluginTimerInterval:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginTimerInterval not implemented\n");
+        break;
     case NPPVpluginScriptableInstance:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginScriptableInstance not implemented\n");
+        break;
     case NPPVpluginScriptableIID:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginScriptableIID not implemented\n");
+        break;
     case NPPVjavascriptPushCallerBool:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVjavascriptPushCallerBool not implemented\n");
+        break;
     case NPPVpluginKeepLibraryInMemory:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginKeepLibraryInMemory not implemented\n");
+        break;
     case NPPVpluginNeedsXEmbed:
         *(int *)value = 1;
         break;
@@ -353,23 +363,32 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
         *(void **)value = NULL;
         break;
     case NPPVformValue:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVformValue not implemented\n");
+        break;
     case NPPVpluginUrlRequestsDisplayedBool:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginUrlRequestsDisplayedBool not implemented\n");
+        break;
     case NPPVpluginWantsAllNetworkStreams:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginWantsAllNetworkStreams not implemented\n");
+        break;
     case NPPVpluginNativeAccessibleAtkPlugId:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginNativeAccessibleAtkPlugId not implemented\n");
+        break;
     case NPPVpluginCancelSrcStream:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginCancelSrcStream not implemented\n");
+        break;
     case NPPVsupportsAdvancedKeyHandling:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVsupportsAdvancedKeyHandling not implemented\n");
+        break;
     case NPPVpluginUsesDOMForCursorBool:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginUsesDOMForCursorBool not implemented\n");
+        break;
     case NPPVpluginDrawingModel:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} NPPVpluginDrawingModel not implemented\n");
+        break;
     default:
-        NO_IMPL; break;
+        trace_info("[NPP] {zilch} UNKNOWN not implemented\n");
+        break;
     }
 
     return NPERR_NO_ERROR;
