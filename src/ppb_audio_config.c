@@ -38,7 +38,13 @@ uint32_t
 ppb_audio_config_recommend_sample_frame_count(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                               uint32_t requested_sample_frame_count)
 {
-    return 0;
+
+    (void)instance;
+    (void)sample_rate;
+    uint32_t sfc = requested_sample_frame_count;
+    sfc = sfc < PP_AUDIOMINSAMPLEFRAMECOUNT ? PP_AUDIOMINSAMPLEFRAMECOUNT : sfc;
+    sfc = sfc > PP_AUDIOMAXSAMPLEFRAMECOUNT ? PP_AUDIOMAXSAMPLEFRAMECOUNT : sfc;
+    return sfc;
 }
 
 PP_Bool
@@ -81,7 +87,7 @@ trace_ppb_audio_config_recommend_sample_frame_count(PP_Instance instance,
                                                     PP_AudioSampleRate sample_rate,
                                                     uint32_t requested_sample_frame_count)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_config_recommend_sample_frame_count(instance, sample_rate,
                                                          requested_sample_frame_count);
 }
