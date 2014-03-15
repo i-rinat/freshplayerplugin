@@ -23,20 +23,106 @@
  */
 
 #include "ppb_audio.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
+#include "pp_resource.h"
+
 
 PP_Resource
 ppb_audio_create(PP_Instance instance, PP_Resource config,
                  PPB_Audio_Callback_1_0 audio_callback, void *user_data)
 {
+    PP_Resource audio = pp_resource_allocate(PP_RESOURCE_AUDIO, instance);
+    struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
+    if (!a)
+        return 0;
+
+    struct pp_audio_config_s *ac = pp_resource_acquire(config, PP_RESOURCE_AUDIO_CONFIG);
+    if (!ac)
+        goto err;
+
+    a->sample_rate = ac->sample_rate;
+    a->sample_frame_count = ac->sample_frame_count;
+
+    snd_pcm_hw_params_t *hw_params;
+    snd_pcm_sw_params_t *sw_params;
+
+#define ERR_CHECK(errcode, funcname, jumpoutstatement)                          \
+    if (errcode < 0) {                                                          \
+        trace_error("%s, " #funcname ", %s\n", __func__, snd_strerror(errcode));\
+        jumpoutstatement;                                                       \
+    }
+
+    int res;
+    res = snd_pcm_open(&a->ph, "default", SND_PCM_STREAM_PLAYBACK, 0);
+    ERR_CHECK(res, snd_pcm_open, goto err);
+
+    res = snd_pcm_hw_params_malloc(&hw_params);
+    ERR_CHECK(res, snd_pcm_hw_params_malloc, goto err);
+
+    res = snd_pcm_hw_params_any(a->ph, hw_params);
+    ERR_CHECK(res, snd_pcm_hw_params_any, goto err);
+
+    res = snd_pcm_hw_params_set_access(a->ph, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
+    ERR_CHECK(res, snd_pcm_hw_params_set_access, goto err);
+
+    res = snd_pcm_hw_params_set_format(a->ph, hw_params, SND_PCM_FORMAT_S16_LE);
+    ERR_CHECK(res, snd_pcm_hw_params_set_format, goto err);
+
+    res = snd_pcm_hw_params_set_rate_near(a->ph, hw_params, &a->sample_rate, 0);
+    ERR_CHECK(res, snd_pcm_hw_params_set_rate_near, goto err);
+
+    res = snd_pcm_hw_params_set_channels(a->ph, hw_params, 2);
+    ERR_CHECK(res, snd_pcm_hw_params_set_channels, goto err);
+
+    res = snd_pcm_hw_params(a->ph, hw_params);
+    ERR_CHECK(res, snd_pcm_hw_params, goto err);
+
+    snd_pcm_hw_params_free(hw_params);
+
+    res = snd_pcm_sw_params_malloc(&sw_params);
+    ERR_CHECK(res, snd_pcm_sw_params_malloc, goto err);
+
+    res = snd_pcm_sw_params_current(a->ph, sw_params);
+    ERR_CHECK(res, snd_pcm_sw_params_current, goto err);
+
+    res = snd_pcm_sw_params_set_avail_min(a->ph, sw_params, a->sample_frame_count);
+    ERR_CHECK(res, snd_pcm_sw_params_set_avail_min, goto err);
+
+    res = snd_pcm_sw_params_set_start_threshold(a->ph, sw_params, 0U);
+    ERR_CHECK(res, snd_pcm_sw_params_set_start_threshold, goto err);
+
+    res = snd_pcm_sw_params(a->ph, sw_params);
+    ERR_CHECK(res, snd_pcm_sw_params, goto err);
+
+    res = snd_pcm_prepare(a->ph);
+    ERR_CHECK(res, snd_pcm_prepare, goto err);
+
+    snd_pcm_sw_params_free(sw_params);
+
+#undef ERR_CHECK
+
+    pp_resource_release(audio);
+    return audio;
+err:
+    pp_resource_release(audio);
+    pp_resource_expunge(audio);
     return 0;
+}
+
+void
+ppb_audio_destroy(void *p)
+{
+    struct pp_audio_s *a = p;
+    if (!a)
+        return;
+    snd_pcm_close(a->ph);
 }
 
 PP_Bool
 ppb_audio_is_audio(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_AUDIO;
 }
 
 PP_Resource
@@ -64,7 +150,7 @@ PP_Resource
 trace_ppb_audio_create(PP_Instance instance, PP_Resource config,
                        PPB_Audio_Callback_1_0 audio_callback, void *user_data)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_create(instance, config, audio_callback, user_data);
 }
 
@@ -72,7 +158,7 @@ static
 PP_Bool
 trace_ppb_audio_is_audio(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_is_audio(resource);
 }
 

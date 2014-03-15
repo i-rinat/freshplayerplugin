@@ -39,6 +39,7 @@
 #include <pango/pangoft2.h>
 #include <pango/pangocairo.h>
 #include <cairo.h>
+#include <asoundlib.h>
 
 #define FREE_HELPER(st, field)  if (st->field) { free(st->field); st->field = NULL; }
 
@@ -54,6 +55,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_NETWORK_MONITOR,
     PP_RESOURCE_BROWSER_FONT,
     PP_RESOURCE_AUDIO_CONFIG,
+    PP_RESOURCE_AUDIO,
 };
 
 enum pp_request_method_e {
@@ -188,6 +190,13 @@ struct pp_audio_config_s {
     struct pp_resource_generic_s _;
     PP_AudioSampleRate      sample_rate;
     uint32_t                sample_frame_count;
+};
+
+struct pp_audio_s {
+    struct pp_resource_generic_s _;
+    uint32_t            sample_rate;
+    uint32_t            sample_frame_count;
+    snd_pcm_t          *ph;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);

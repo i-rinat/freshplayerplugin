@@ -13,6 +13,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -ggdb3")
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(REQ
+	alsa
 	glib-2.0
 	mozilla-plugin
 	x11
