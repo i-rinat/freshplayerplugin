@@ -186,20 +186,26 @@ struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+
     NPIdentifier location_id = npn.getstringidentifier("location");
     NPIdentifier href_id = npn.getstringidentifier("href");
     NPObject *window_obj, *location_obj;
     NPVariant location_var, href_var;
 
-    npn.getvalue(pp_i->npp, NPNVWindowNPObject, &window_obj);
-    npn.getproperty(pp_i->npp, window_obj, location_id, &location_var);
+    if (npn.getvalue(pp_i->npp, NPNVWindowNPObject, &window_obj) != NPERR_NO_ERROR)
+        return PP_MakeUndefined();
+
+    if (!npn.getproperty(pp_i->npp, window_obj, location_id, &location_var))
+        return PP_MakeUndefined();
+
     location_obj = location_var.value.objectValue;
+    if (!npn.getproperty(pp_i->npp, location_obj, href_id, &href_var))
+        return PP_MakeUndefined();
 
-    npn.getproperty(pp_i->npp, location_obj, href_id, &href_var);
     struct PP_Var result = np_variant_to_pp_var(href_var, NULL);
-
     npn.releasevariantvalue(&location_var);
     npn.releasevariantvalue(&href_var);
+
     return result;
 }
 
