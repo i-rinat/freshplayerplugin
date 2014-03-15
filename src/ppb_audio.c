@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+#define _GNU_SOURCE
+#include <pthread.h>
 #include "ppb_audio.h"
 #include <stdlib.h>
 #include "trace.h"
@@ -102,6 +104,12 @@ ppb_audio_create(PP_Instance instance, PP_Resource config,
 
 #undef ERR_CHECK
 
+    a->callback = audio_callback;
+    a->user_data = user_data;
+    a->audio_buffer = malloc(a->sample_frame_count * 2 * sizeof(int16_t));
+    if (!a->audio_buffer)
+        goto err;
+
     pp_resource_release(audio);
     return audio;
 err:
@@ -116,7 +124,14 @@ ppb_audio_destroy(void *p)
     struct pp_audio_s *a = p;
     if (!a)
         return;
+
+    if (a->playing) {
+        a->shutdown = 1;
+        while (a->playing)
+            pthread_yield();
+    }
     snd_pcm_close(a->ph);
+    free(a->audio_buffer);
 }
 
 PP_Bool
@@ -146,16 +161,60 @@ ppb_audio_get_current_config(PP_Resource audio)
     return audio_config;
 }
 
+static
+void *
+audio_player_thread(void *p)
+{
+    struct pp_audio_s *a = p;
+
+    while (1) {
+        if (a->shutdown)
+            break;
+        snd_pcm_wait(a->ph, 1000);
+        int frame_count = snd_pcm_avail_update(a->ph);
+        if (frame_count > 0) {
+            if (frame_count > a->sample_frame_count)
+                frame_count = a->sample_frame_count;
+
+            a->callback(a->audio_buffer, frame_count * 2 * sizeof(int16_t), a->user_data);
+            snd_pcm_writei(a->ph, a->audio_buffer, frame_count);
+        }
+    }
+
+    a->playing = 0;
+    return NULL;
+}
+
+
 PP_Bool
 ppb_audio_start_playback(PP_Resource audio)
 {
-    return PP_FALSE;
+    struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
+    if (!a)
+        return PP_FALSE;
+    if (a->playing) {
+        pp_resource_release(audio);
+        return PP_TRUE;
+    }
+
+    pthread_create(&a->thread, NULL, audio_player_thread, a);
+    pp_resource_release(audio);
+    return PP_TRUE;
 }
 
 PP_Bool
 ppb_audio_stop_playback(PP_Resource audio)
 {
-    return PP_FALSE;
+    struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
+    if (!a)
+        return PP_FALSE;
+
+    if (a->playing) {
+        a->shutdown = 1;
+        while (a->playing)
+            pthread_yield();
+    }
+    return PP_TRUE;
 }
 
 
@@ -189,7 +248,7 @@ static
 PP_Bool
 trace_ppb_audio_start_playback(PP_Resource audio)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_start_playback(audio);
 }
 
@@ -197,7 +256,7 @@ static
 PP_Bool
 trace_ppb_audio_stop_playback(PP_Resource audio)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_stop_playback(audio);
 }
 

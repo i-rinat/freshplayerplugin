@@ -30,6 +30,7 @@
 #include <ppapi/c/pp_resource.h>
 #include <ppapi/c/ppb_image_data.h>
 #include <ppapi/c/ppb_audio_config.h>
+#include <ppapi/c/ppb_audio.h>
 #include <stddef.h>
 #include <X11/Xlib.h>
 #include <npapi.h>
@@ -194,9 +195,15 @@ struct pp_audio_config_s {
 
 struct pp_audio_s {
     struct pp_resource_generic_s _;
-    uint32_t            sample_rate;
-    uint32_t            sample_frame_count;
-    snd_pcm_t          *ph;
+    uint32_t                sample_rate;
+    uint32_t                sample_frame_count;
+    snd_pcm_t              *ph;
+    void                   *audio_buffer;
+    pthread_t               thread;
+    uint32_t                playing;
+    uint32_t                shutdown;
+    PPB_Audio_Callback_1_0  callback;
+    void                   *user_data;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
