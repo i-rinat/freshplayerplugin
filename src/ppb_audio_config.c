@@ -68,7 +68,8 @@ ppb_audio_config_get_sample_frame_count(PP_Resource config)
 PP_AudioSampleRate
 ppb_audio_config_recommend_sample_rate(PP_Instance instance)
 {
-    return 123007;
+    (void)instance;
+    return PP_AUDIOSAMPLERATE_48000;
 }
 
 // trace wrappers
@@ -120,7 +121,7 @@ static
 PP_AudioSampleRate
 trace_ppb_audio_config_recommend_sample_rate(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_config_recommend_sample_rate(instance);
 }
 
