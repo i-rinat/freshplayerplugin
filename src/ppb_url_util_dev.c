@@ -23,6 +23,8 @@
  */
 
 #include "ppb_url_util_dev.h"
+#include "ppb_var.h"
+#include "globals.h"
 #include <stddef.h>
 #include <string.h>
 #include <Uri.h>
@@ -183,12 +185,22 @@ ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance ta
 struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
-    struct PP_Var var = PP_MakeString("http://127.0.0.1/flashtest/");
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    NPIdentifier location_id = npn.getstringidentifier("location");
+    NPIdentifier href_id = npn.getstringidentifier("href");
+    NPObject *window_obj, *location_obj;
+    NPVariant location_var, href_var;
 
-    if (components)
-        parse_url_string((void*)(size_t)var.value.as_id, components);
+    npn.getvalue(pp_i->npp, NPNVWindowNPObject, &window_obj);
+    npn.getproperty(pp_i->npp, window_obj, location_id, &location_var);
+    location_obj = location_var.value.objectValue;
 
-    return var;
+    npn.getproperty(pp_i->npp, location_obj, href_id, &href_var);
+    struct PP_Var result = np_variant_to_pp_var(href_var, NULL);
+
+    npn.releasevariantvalue(&location_var);
+    npn.releasevariantvalue(&href_var);
+    return result;
 }
 
 struct PP_Var
@@ -270,7 +282,7 @@ struct PP_Var
 trace_ppb_url_util_dev_get_document_url(PP_Instance instance,
                                         struct PP_URLComponents_Dev *components)
 {
-    trace_info("[PPB] {fake} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_url_util_dev_get_document_url(instance, components);
 }
 
