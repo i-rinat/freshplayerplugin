@@ -82,7 +82,12 @@ ppb_audio_config_is_audio_config(PP_Resource resource)
 PP_AudioSampleRate
 ppb_audio_config_get_sample_rate(PP_Resource config)
 {
-    return 123008;
+    struct pp_audio_config_s *ac = pp_resource_acquire(config, PP_RESOURCE_AUDIO_CONFIG);
+    if (!ac)
+        return PP_AUDIOSAMPLERATE_NONE;
+    PP_AudioSampleRate sample_rate = ac->sample_rate;
+    pp_resource_release(config);
+    return sample_rate;
 }
 
 uint32_t
@@ -131,7 +136,7 @@ static
 PP_AudioSampleRate
 trace_ppb_audio_config_get_sample_rate(PP_Resource config)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_config_get_sample_rate(config);
 }
 
