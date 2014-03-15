@@ -128,7 +128,22 @@ ppb_audio_is_audio(PP_Resource resource)
 PP_Resource
 ppb_audio_get_current_config(PP_Resource audio)
 {
-    return 0;
+    struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
+    if (!a)
+        return 0;
+    PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, a->_.instance);
+    struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
+    if (!ac) {
+        pp_resource_release(audio);
+        return 0;
+    }
+
+    ac->sample_rate = a->sample_rate;
+    ac->sample_frame_count = a->sample_frame_count;
+    pp_resource_release(audio);
+    pp_resource_release(audio_config);
+
+    return audio_config;
 }
 
 PP_Bool
@@ -166,7 +181,7 @@ static
 PP_Resource
 trace_ppb_audio_get_current_config(PP_Resource audio)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_get_current_config(audio);
 }
 
