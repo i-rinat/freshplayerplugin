@@ -93,7 +93,12 @@ ppb_audio_config_get_sample_rate(PP_Resource config)
 uint32_t
 ppb_audio_config_get_sample_frame_count(PP_Resource config)
 {
-    return 0;
+    struct pp_audio_config_s *ac = pp_resource_acquire(config, PP_RESOURCE_AUDIO_CONFIG);
+    if (!ac)
+        return 0;
+    uint32_t sample_frame_count = ac->sample_frame_count;
+    pp_resource_release(config);
+    return sample_frame_count;
 }
 
 PP_AudioSampleRate
@@ -144,7 +149,7 @@ static
 uint32_t
 trace_ppb_audio_config_get_sample_frame_count(PP_Resource config)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_config_get_sample_frame_count(config);
 }
 
