@@ -29,6 +29,7 @@
 #include <ppapi/c/pp_rect.h>
 #include <ppapi/c/pp_resource.h>
 #include <ppapi/c/ppb_image_data.h>
+#include <ppapi/c/ppb_audio_config.h>
 #include <stddef.h>
 #include <X11/Xlib.h>
 #include <npapi.h>
@@ -52,6 +53,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_GRAPHICS2D,
     PP_RESOURCE_NETWORK_MONITOR,
     PP_RESOURCE_BROWSER_FONT,
+    PP_RESOURCE_AUDIO_CONFIG,
 };
 
 enum pp_request_method_e {
@@ -180,6 +182,12 @@ struct pp_browser_font_s {
     PangoFontDescription   *font_desc;
     int32_t                 letter_spacing;
     int32_t                 word_spacing;
+};
+
+struct pp_audio_config_s {
+    struct pp_resource_generic_s _;
+    PP_AudioSampleRate      sample_rate;
+    uint32_t                sample_frame_count;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
