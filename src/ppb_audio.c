@@ -167,6 +167,7 @@ audio_player_thread(void *p)
 {
     struct pp_audio_s *a = p;
 
+    a->playing = 1;
     while (1) {
         if (a->shutdown)
             break;
