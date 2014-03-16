@@ -36,7 +36,8 @@
 
 #define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
 
-static GArray          *res_tbl;
+static GHashTable      *res_tbl;
+static int              res_tbl_next = 0;
 static pthread_mutex_t  res_tbl_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static
@@ -44,9 +45,8 @@ __attribute__((constructor))
 void
 pp_resource_constructor(void)
 {
-    void *null_val = NULL;
-    res_tbl = g_array_new(FALSE, FALSE, sizeof(void*));
-    g_array_append_val(res_tbl, null_val);
+    res_tbl = g_hash_table_new(g_direct_hash, g_direct_equal);
+    res_tbl_next = 1;
 }
 
 PP_Resource
@@ -103,8 +103,8 @@ pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
         break;
     }
 
-    int handle = res_tbl->len;
-    g_array_append_val(res_tbl, ptr);
+    int handle = res_tbl_next ++;
+    g_hash_table_insert(res_tbl, GINT_TO_POINTER(handle), ptr);
 
     pthread_mutex_unlock(&res_tbl_lock);
     return handle;
@@ -114,14 +114,11 @@ void
 pp_resource_expunge(PP_Resource resource)
 {
     pthread_mutex_lock(&res_tbl_lock);
-    if (resource < 1 || resource >= res_tbl->len) {
-        pthread_mutex_unlock(&res_tbl_lock);
-        return;
+    void *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
+    if (ptr) {
+        free(ptr);
+        g_hash_table_remove(res_tbl, GINT_TO_POINTER(resource));
     }
-
-    void **ptr = &g_array_index(res_tbl, void *, resource);
-    free(*ptr);
-    *ptr = NULL;
     pthread_mutex_unlock(&res_tbl_lock);
 }
 
@@ -129,14 +126,10 @@ void *
 pp_resource_acquire_any(PP_Resource resource)
 {
     pthread_mutex_lock(&res_tbl_lock);
-    if (resource < 1 || resource >= res_tbl->len) {
-        pthread_mutex_unlock(&res_tbl_lock);
-        return NULL;
-    }
 
     // TODO: add mutexes for every resource
     // TODO: lock mutex of particular resource handle
-    struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
+    struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
 
     pthread_mutex_unlock(&res_tbl_lock);
     return ptr;
@@ -164,15 +157,12 @@ pp_resource_release(PP_Resource resource)
 enum pp_resource_type_e
 pp_resource_get_type(PP_Resource resource)
 {
+    enum pp_resource_type_e type = PP_RESOURCE_UNKNOWN;
     pthread_mutex_lock(&res_tbl_lock);
-    if (resource < 1 || resource >= res_tbl->len) {
-        pthread_mutex_unlock(&res_tbl_lock);
-        return PP_RESOURCE_UNKNOWN;
+    struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
+    if (ptr) {
+        type = ptr->type;
     }
-
-    struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
-    enum pp_resource_type_e type = ptr->type;
-
     pthread_mutex_unlock(&res_tbl_lock);
     return type;
 }
@@ -181,12 +171,10 @@ void
 pp_resource_ref(PP_Resource resource)
 {
     pthread_mutex_lock(&res_tbl_lock);
-    if (resource < 1 || resource >= res_tbl->len) {
-        pthread_mutex_unlock(&res_tbl_lock);
-        return;
+    struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
+    if (ptr) {
+        ptr->ref_cnt ++;
     }
-    struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
-    ptr->ref_cnt ++;
     pthread_mutex_unlock(&res_tbl_lock);
 }
 
@@ -195,14 +183,14 @@ pp_resource_unref(PP_Resource resource)
 {
     PP_Resource parent = 0;
     pthread_mutex_lock(&res_tbl_lock);
-    if (resource < 1 || resource >= res_tbl->len) {
+
+    struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
+    if (!ptr) {
         pthread_mutex_unlock(&res_tbl_lock);
         return;
     }
 
-    struct pp_resource_generic_s *ptr = g_array_index(res_tbl, void*, resource);
     ptr->ref_cnt --;
-
     if (ptr->ref_cnt <= 0) {
         switch (ptr->type) {
         case PP_RESOURCE_URL_LOADER:
