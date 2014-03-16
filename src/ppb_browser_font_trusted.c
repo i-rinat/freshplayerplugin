@@ -31,6 +31,28 @@
 #include "pp_resource.h"
 
 
+static PangoContext *pango_ctx = NULL;
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_browser_font_trusted(void)
+{
+    PangoFontMap *fm;
+    fm = pango_ft2_font_map_new();
+    pango_ctx = pango_font_map_create_context(fm);
+    g_object_unref(fm);
+}
+
+static
+void
+__attribute__((destructor))
+destructor_ppb_browser_font_trusted(void)
+{
+    g_object_unref(pango_ctx);
+    pango_ctx = NULL;
+}
+
 struct PP_Var
 ppb_browser_font_trusted_get_font_families(PP_Instance instance)
 {
@@ -44,11 +66,6 @@ ppb_browser_font_trusted_create(PP_Instance instance,
     PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, instance);
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
     PangoFontDescription *font_desc;
-    PangoFontMap *fm;
-
-    fm = pango_ft2_font_map_new();
-    bf->ctx = pango_font_map_create_context(fm);
-    g_object_unref(fm);
 
     if (description->face.type == PP_VARTYPE_STRING) {
         uint32_t len;
@@ -89,7 +106,7 @@ ppb_browser_font_trusted_create(PP_Instance instance,
 
     bf->letter_spacing = description->letter_spacing;
     bf->word_spacing = description->word_spacing;
-    bf->font = pango_context_load_font(bf->ctx, font_desc);
+    bf->font = pango_context_load_font(pango_ctx, font_desc);
     bf->font_desc = pango_font_describe_with_absolute_size(bf->font);
     pango_font_description_free(font_desc);
 
@@ -103,8 +120,6 @@ ppb_browser_font_trusted_destroy(void *p)
     struct pp_browser_font_s *bf = p;
     if (!bf)
         return;
-
-    g_object_unref(bf->ctx);
 }
 
 PP_Bool
@@ -213,7 +228,7 @@ ppb_browser_font_trusted_measure_text(PP_Resource font,
     if (!bf)
         return -1;
 
-    PangoLayout *layout = pango_layout_new(bf->ctx);
+    PangoLayout *layout = pango_layout_new(pango_ctx);
     uint32_t len = 0;
     const char *s = "";
     if (text->text.type == PP_VARTYPE_STRING)

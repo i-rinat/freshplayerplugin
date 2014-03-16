@@ -180,7 +180,6 @@ struct pp_network_monitor_s {
 
 struct pp_browser_font_s {
     struct pp_resource_generic_s _;
-    PangoContext           *ctx;
     PangoFont              *font;
     PangoFontDescription   *font_desc;
     int32_t                 letter_spacing;
