@@ -206,6 +206,9 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
     npn.releasevariantvalue(&location_var);
     npn.releasevariantvalue(&href_var);
 
+    if (components)
+        parse_url_string((void*)(size_t)result.value.as_id, components);
+
     return result;
 }
 
