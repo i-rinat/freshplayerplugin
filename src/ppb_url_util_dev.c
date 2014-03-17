@@ -46,6 +46,15 @@ parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
         return;
     }
 
+    components->scheme.begin =   0;     components->scheme.len =   -1;
+    components->username.begin = 0;     components->username.len = -1;
+    components->password.begin = 0;     components->password.len = -1;
+    components->host.begin =     0;     components->host.len =     -1;
+    components->port.begin =     0;     components->port.len =     -1;
+    components->path.begin =     0;     components->path.len =     -1;
+    components->query.begin =    0;     components->query.len =    -1;
+    components->ref.begin =      0;     components->ref.len =      -1;
+
 #define C_PARSE(c1, c2) \
     components->c1.begin = uri.c2.first ? uri.c2.first - s + 1 : 0; \
     components->c1.len = uri.c2.first ? uri.c2.afterLast - uri.c2.first : -1;
