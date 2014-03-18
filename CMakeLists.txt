@@ -20,6 +20,7 @@ pkg_check_modules(REQ
 	liburiparser
 	cairo
 	pango
+	pangocairo
 	pangoft2
 	freetype2
 	REQUIRED)
