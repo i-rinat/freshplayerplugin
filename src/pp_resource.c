@@ -182,6 +182,7 @@ void
 pp_resource_unref(PP_Resource resource)
 {
     PP_Resource parent = 0;
+    int ref_cnt;
     pthread_mutex_lock(&res_tbl_lock);
 
     struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
@@ -190,8 +191,8 @@ pp_resource_unref(PP_Resource resource)
         return;
     }
 
-    ptr->ref_cnt --;
-    if (ptr->ref_cnt <= 0) {
+    ref_cnt = --ptr->ref_cnt;
+    if (ref_cnt <= 0) {
         switch (ptr->type) {
         case PP_RESOURCE_URL_LOADER:
             ppb_url_loader_destroy(ptr);
@@ -224,7 +225,7 @@ pp_resource_unref(PP_Resource resource)
 
     pthread_mutex_unlock(&res_tbl_lock);
 
-    if (0 == ptr->ref_cnt) {
+    if (ref_cnt <= 0) {
         pp_resource_expunge(resource);
         if (parent)
             pp_resource_unref(parent);
