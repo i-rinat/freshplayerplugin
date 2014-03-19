@@ -128,7 +128,6 @@ ppb_image_data_map(PP_Resource image_data)
     if (!id)
         return NULL;
 
-    id->_.ref_cnt++;
     data_ptr = id->data;
     pp_resource_release(image_data);
     return data_ptr;
@@ -140,7 +139,6 @@ ppb_image_data_unmap(PP_Resource image_data)
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
     if (!id)
         return;
-    id->_.ref_cnt--;
     pp_resource_release(image_data);
 }
 
