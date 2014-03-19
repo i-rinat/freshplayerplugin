@@ -172,7 +172,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         GList *link = g_list_first(g2d->task_list);
         struct g2d_paint_task_s *pt = link->data;
         struct pp_image_data_s  *id;
-        void    *tmp;
+
         cairo_t *cr;
 
         g2d->task_list = g_list_delete_link(g2d->task_list, link);
@@ -202,9 +202,19 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
             if (!id)
                 break;
             if (id->width == g2d->width || id->height == g2d->height) {
+                void            *tmp;
+                cairo_surface_t *tmp_surf;
+
+                cairo_surface_flush(id->cairo_surf);
+                cairo_surface_flush(g2d->cairo_surf);
+
                 tmp = g2d->data;
                 g2d->data = id->data;
                 id->data = tmp;
+
+                tmp_surf = g2d->cairo_surf;
+                g2d->cairo_surf = id->cairo_surf;
+                id->cairo_surf = tmp_surf;
             }
             pp_resource_release(pt->image_data);
             pp_resource_unref(pt->image_data);
