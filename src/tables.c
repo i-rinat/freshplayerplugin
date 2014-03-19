@@ -62,17 +62,34 @@ destructor_tables(void)
 int
 tables_ref_var(struct PP_Var var)
 {
-    int refcnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, (void*)(size_t)var.value.as_id));
-    g_hash_table_replace(var_ht, (void*)(size_t)var.value.as_id, GINT_TO_POINTER(refcnt + 1));
-    return refcnt + 1;
+    void *key = (void*)(size_t)var.value.as_id;
+    int ref_cnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, key));
+
+    if (ref_cnt > 0) {
+        ref_cnt ++;
+        g_hash_table_replace(var_ht, key, GINT_TO_POINTER(ref_cnt));
+    } else {
+        ref_cnt = 1;
+        g_hash_table_insert(var_ht, key, GINT_TO_POINTER(1));
+    }
+
+    return ref_cnt;
 }
 
 int
 tables_unref_var(struct PP_Var var)
 {
-    int refcnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, (void*)(size_t)var.value.as_id));
-    g_hash_table_replace(var_ht, (void*)(size_t)var.value.as_id, GINT_TO_POINTER(refcnt - 1));
-    return refcnt - 1;
+    void *key = (void*)(size_t)var.value.as_id;
+    int ref_cnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, key));
+
+    if (ref_cnt > 1) {
+        ref_cnt --;
+        g_hash_table_replace(var_ht, key, GINT_TO_POINTER(ref_cnt));
+    } else {
+        ref_cnt = 0;
+        g_hash_table_remove(var_ht, key);
+    }
+    return ref_cnt;
 }
 
 struct pp_instance_s *
