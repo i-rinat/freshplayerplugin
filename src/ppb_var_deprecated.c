@@ -27,6 +27,7 @@
 #include <stddef.h>
 #include "pp_resource.h"
 #include "trace.h"
+#include "tables.h"
 #include "browser_object.h"
 
 
@@ -139,6 +140,7 @@ ppb_var_deprecated_create_object(PP_Instance instance,
     var.value.as_id = (int64_t)(size_t)obj;
     obj->klass = object_class;
     obj->data = object_data;
+    tables_ref_var(var);
 
     return var;
 }
