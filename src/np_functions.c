@@ -36,6 +36,7 @@
 #include "interface_list.h"
 #include "tables.h"
 #include <ppapi/c/ppp_instance.h>
+#include <ppapi/c/ppp_input_event.h>
 #include <ppapi/c/pp_errors.h>
 #include "globals.h"
 
@@ -79,6 +80,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
     pp_i->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
     if (!pp_i->ppp_instance_1_1)
         return NPERR_GENERIC_ERROR;
+    pp_i->ppp_input_event = ppp_get_interface(PPP_INPUT_EVENT_INTERFACE_0_1);
 
     pp_i->argc = argc;
     pp_i->argn = malloc(argc * sizeof(char*));

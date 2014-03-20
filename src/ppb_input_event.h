@@ -26,6 +26,7 @@
 #define FPP__PPB_INPUT_EVENT_H
 
 #include <ppapi/c/ppb_input_event.h>
+#include <ppapi/c/ppp_input_event.h>
 
 
 int32_t
