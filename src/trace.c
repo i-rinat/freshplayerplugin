@@ -155,3 +155,31 @@ trace_np_window_as_string(const NPWindow *window)
     }
     return res;
 }
+
+char *
+trace_event_classes_as_string(uint32_t ec)
+{
+    int req_len = 0;
+    char *res;
+
+    req_len += (ec & PP_INPUTEVENT_CLASS_MOUSE) ?    strlen("MOUSE|") : 0;
+    req_len += (ec & PP_INPUTEVENT_CLASS_KEYBOARD) ? strlen("KEYBOARD|") : 0;
+    req_len += (ec & PP_INPUTEVENT_CLASS_WHEEL) ?    strlen("WHEEL|") : 0;
+    req_len += (ec & PP_INPUTEVENT_CLASS_TOUCH) ?    strlen("TOUCH|") : 0;
+    req_len += (ec & PP_INPUTEVENT_CLASS_IME) ?      strlen("IME|") : 0;
+    req_len += 1;
+    res = malloc(req_len);
+
+    strcpy(res, "");
+    if (ec & PP_INPUTEVENT_CLASS_MOUSE)     strcat(res, "MOUSE|");
+    if (ec & PP_INPUTEVENT_CLASS_KEYBOARD)  strcat(res, "KEYBOARD|");
+    if (ec & PP_INPUTEVENT_CLASS_WHEEL)     strcat(res, "WHEEL|");
+    if (ec & PP_INPUTEVENT_CLASS_TOUCH)     strcat(res, "TOUCH|");
+    if (ec & PP_INPUTEVENT_CLASS_IME)       strcat(res, "IME|");
+
+    // delete trailing '|'
+    if (strlen(res) > 0)
+        res[strlen(res) - 1] = 0;
+
+    return res;
+}
