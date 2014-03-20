@@ -23,7 +23,7 @@
  */
 
 #include "ppb_input_event.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
 
 
@@ -75,7 +75,10 @@ static
 int32_t
 trace_ppb_input_event_request_input_events(PP_Instance instance, uint32_t event_classes)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_event_classes = trace_event_classes_as_string(event_classes);
+    trace_info("[PPB] {zilch} %s instance=%d, event_classes=%s\n", __func__+6, instance,
+               s_event_classes);
+    free(s_event_classes);
     return ppb_input_event_request_input_events(instance, event_classes);
 }
 
@@ -83,7 +86,10 @@ static
 int32_t
 trace_ppb_input_event_request_filtering_input_events(PP_Instance instance, uint32_t event_classes)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_event_classes = trace_event_classes_as_string(event_classes);
+    trace_info("[PPB] {zilch} %s instance=%d, event_classes=%s\n", __func__+6, instance,
+               s_event_classes);
+    free(s_event_classes);
     return ppb_input_event_request_filtering_input_events(instance, event_classes);
 }
 
@@ -91,7 +97,10 @@ static
 void
 trace_ppb_input_event_clear_input_event_request(PP_Instance instance, uint32_t event_classes)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_event_classes = trace_event_classes_as_string(event_classes);
+    trace_info("[PPB] {zilch} %s instance=%d, event_classes=%s\n", __func__+6, instance,
+               s_event_classes);
+    free(s_event_classes);
     ppb_input_event_clear_input_event_request(instance, event_classes);
 }
 
@@ -99,7 +108,7 @@ static
 PP_Bool
 trace_ppb_input_event_is_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_input_event_is_input_event(resource);
 }
 
@@ -107,7 +116,7 @@ static
 PP_InputEvent_Type
 trace_ppb_input_event_get_type(PP_Resource event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s event=%d\n", __func__+6, event);
     return ppb_input_event_get_type(event);
 }
 
@@ -115,7 +124,7 @@ static
 PP_TimeTicks
 trace_ppb_input_event_get_time_stamp(PP_Resource event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s event=%d\n", __func__+6, event);
     return ppb_input_event_get_time_stamp(event);
 }
 
@@ -123,7 +132,7 @@ static
 uint32_t
 trace_ppb_input_event_get_modifiers(PP_Resource event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s event=%d\n", __func__+6, event);
     return ppb_input_event_get_modifiers(event);
 }
 

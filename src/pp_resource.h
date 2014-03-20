@@ -29,6 +29,7 @@
 #include <ppapi/c/pp_rect.h>
 #include <ppapi/c/pp_resource.h>
 #include <ppapi/c/ppb_image_data.h>
+#include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
 #include <stddef.h>
