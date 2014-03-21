@@ -54,6 +54,12 @@ ppb_input_event_request_filtering_input_events(PP_Instance instance, uint32_t ev
 void
 ppb_input_event_clear_input_event_request(PP_Instance instance, uint32_t event_classes)
 {
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return;
+
+    pp_i->event_mask &= ~event_classes;
+    pp_i->filtered_event_mask &= ~event_classes;
     return;
 }
 
@@ -110,7 +116,7 @@ void
 trace_ppb_input_event_clear_input_event_request(PP_Instance instance, uint32_t event_classes)
 {
     char *s_event_classes = trace_event_classes_as_string(event_classes);
-    trace_info("[PPB] {zilch} %s instance=%d, event_classes=%s\n", __func__+6, instance,
+    trace_info("[PPB] {full} %s instance=%d, event_classes=%s\n", __func__+6, instance,
                s_event_classes);
     free(s_event_classes);
     ppb_input_event_clear_input_event_request(instance, event_classes);
