@@ -50,4 +50,103 @@ ppb_input_event_get_time_stamp(PP_Resource event);
 uint32_t
 ppb_input_event_get_modifiers(PP_Resource event);
 
+PP_Resource
+ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
+                             PP_TimeTicks time_stamp, uint32_t modifiers,
+                             PP_InputEvent_MouseButton mouse_button,
+                             const struct PP_Point *mouse_position, int32_t click_count,
+                             const struct PP_Point *mouse_movement);
+
+PP_Bool
+ppb_mouse_input_event_is_mouse_input_event(PP_Resource resource);
+
+PP_InputEvent_MouseButton
+ppb_mouse_input_event_get_button(PP_Resource mouse_event);
+
+struct PP_Point
+ppb_mouse_input_event_get_position(PP_Resource mouse_event);
+
+int32_t
+ppb_mouse_input_event_get_click_count(PP_Resource mouse_event);
+
+struct PP_Point
+ppb_mouse_input_event_get_movement(PP_Resource mouse_event);
+
+PP_Resource
+ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp, uint32_t modifiers,
+                             const struct PP_FloatPoint *wheel_delta,
+                             const struct PP_FloatPoint *wheel_ticks, PP_Bool scroll_by_page);
+
+PP_Bool
+ppb_wheel_input_event_is_wheel_input_event(PP_Resource resource);
+
+struct PP_FloatPoint
+ppb_wheel_input_event_get_delta(PP_Resource wheel_event);
+
+struct PP_FloatPoint
+ppb_wheel_input_event_get_ticks(PP_Resource wheel_event);
+
+PP_Bool
+ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event);
+
+PP_Resource
+ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
+                                PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
+                                struct PP_Var character_text);
+
+PP_Bool
+ppb_keyboard_input_event_is_keyboard_input_event(PP_Resource resource);
+
+uint32_t
+ppb_keyboard_input_event_get_key_code(PP_Resource key_event);
+
+struct PP_Var
+ppb_keyboard_input_event_get_character_text(PP_Resource character_event);
+
+PP_Resource
+ppb_touch_input_event_create(PP_Instance instance, PP_InputEvent_Type type, PP_TimeTicks time_stamp,
+                             uint32_t modifiers);
+
+void
+ppb_touch_input_event_add_touch_point(PP_Resource touch_event, PP_TouchListType list,
+                                      const struct PP_TouchPoint *point);
+
+PP_Bool
+ppb_touch_input_event_is_touch_input_event(PP_Resource resource);
+
+uint32_t
+ppb_touch_input_event_get_touch_count(PP_Resource resource, PP_TouchListType list);
+
+struct PP_TouchPoint
+ppb_touch_input_event_get_touch_by_index(PP_Resource resource, PP_TouchListType list,
+                                         uint32_t index);
+
+struct PP_TouchPoint
+ppb_touch_input_event_get_touch_by_id(PP_Resource resource, PP_TouchListType list,
+                                      uint32_t touch_id);
+
+PP_Resource
+ppb_ime_input_event_create(PP_Instance instance, PP_InputEvent_Type type, PP_TimeTicks time_stamp,
+                           struct PP_Var text, uint32_t segment_number,
+                           const uint32_t segment_offsets[], int32_t target_segment,
+                           uint32_t selection_start, uint32_t selection_end);
+
+PP_Bool
+ppb_ime_input_event_is_ime_input_event(PP_Resource resource);
+
+struct PP_Var
+ppb_ime_input_event_get_text(PP_Resource ime_event);
+
+uint32_t
+ppb_ime_input_event_get_segment_number(PP_Resource ime_event);
+
+uint32_t
+ppb_ime_input_event_get_segment_offset(PP_Resource ime_event, uint32_t index);
+
+int32_t
+ppb_ime_input_event_get_target_segment(PP_Resource ime_event);
+
+void
+ppb_ime_input_event_get_selection(PP_Resource ime_event, uint32_t *start, uint32_t *end);
+
 #endif // FPP__PPB_INPUT_EVENT_H

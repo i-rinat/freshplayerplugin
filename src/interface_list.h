@@ -33,6 +33,7 @@
 #include <ppapi/c/ppb_graphics_3d.h>
 #include <ppapi/c/ppb.h>
 #include <ppapi/c/ppb_image_data.h>
+#include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppb_instance.h>
 #include <ppapi/c/ppb_network_monitor.h>
 #include <ppapi/c/ppb_opengles2.h>
@@ -96,11 +97,14 @@ extern const struct PPB_Graphics2D_1_0              ppb_graphics2d_interface_1_0
 extern const struct PPB_Graphics2D_1_1              ppb_graphics2d_interface_1_1;
 extern const struct PPB_Graphics3D_1_0              ppb_graphics3d_interface_1_0;
 extern const struct PPB_ImageData_1_0               ppb_image_data_interface_1_0;
+extern const struct PPB_IMEInputEvent_1_0           ppb_ime_input_event_interface_1_0;
 extern const struct PPB_IMEInputEvent_Dev_0_2       ppb_ime_input_event_dev_interface_0_2;
 extern const struct PPB_InputEvent_1_0              ppb_input_event_interface_1_0;
 extern const struct PPB_Instance_1_0                ppb_instance_interface_1_0;
 extern const struct PPB_Instance_Private_0_1        ppb_instance_private_interface_0_1;
+extern const struct PPB_KeyboardInputEvent_1_0      ppb_keyboard_input_event_interface_1_0;
 extern const struct PPB_Memory_Dev_0_1              ppb_memory_dev_interface_0_1;
+extern const struct PPB_MouseInputEvent_1_1         ppb_mouse_input_event_interface_1_1;
 extern const struct PPB_NetAddress_Private_1_1      ppb_net_address_private_interface_1_1;
 extern const struct PPB_NetworkMonitor_1_0          ppb_network_monitor_interface_1_0;
 extern const struct PPB_OpenGLES2ChromiumEnableFeature ppb_opengles2_chromium_enable_feature_interface_1_0;
@@ -114,6 +118,7 @@ extern const struct PPB_Printing_Dev_0_7            ppb_printing_dev_0_7;
 extern const struct PPB_TCPSocket_Private_0_4       ppb_tcp_socket_private_interface_0_4;
 extern const struct PPB_TCPSocket_Private_0_5       ppb_tcp_socket_private_interface_0_5;
 extern const struct PPB_TextInput_Dev_0_2           ppb_text_input_dev_interface_0_2;
+extern const struct PPB_TouchInputEvent_1_0         ppb_touch_input_event_interface_1_0;
 extern const struct PPB_UDPSocket_Private_0_4       ppb_udp_socket_private_interface_0_4;
 extern const struct PPB_URLLoader_1_0               ppb_url_loader_interface_1_0;
 extern const struct PPB_URLLoaderTrusted_0_3        ppb_url_loader_trusted_interface_0_3;
@@ -127,5 +132,6 @@ extern const struct PPB_Var_Deprecated              ppb_var_deprecated_interface
 extern const struct PPB_VideoCapture_Dev_0_3        ppb_video_capture_dev_interface_0_3;
 extern const struct PPB_View_1_0                    ppb_view_interface_1_0;
 extern const struct PPB_View_1_1                    ppb_view_interface_1_1;
+extern const struct PPB_WheelInputEvent_1_0         ppb_wheel_input_event_interface_1_0;
 
 #endif // FPP__INTERFACE_LIST_H
