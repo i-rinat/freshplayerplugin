@@ -75,6 +75,8 @@ struct pp_var_object_s {
 struct pp_instance_s {
     const struct PPP_Instance_1_1  *ppp_instance_1_1;
     const struct PPP_InputEvent_0_1 *ppp_input_event;
+    uint32_t        event_mask;
+    uint32_t        filtered_event_mask;
     Window          wnd;
     PP_Instance     pp_instance_id;
     NPP             npp;
