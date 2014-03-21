@@ -39,6 +39,7 @@
 #include <ppapi/c/ppp_input_event.h>
 #include <ppapi/c/pp_errors.h>
 #include "globals.h"
+#include "ppb_input_event.h"
 
 
 static
@@ -295,6 +296,67 @@ handle_GraphicsExpose_event(NPP instance, void *event)
     return 1;
 }
 
+static
+unsigned int
+x_state_mask_to_pp_inputevent_modifier(unsigned int state)
+{
+    unsigned int mod = 0;
+
+    // TODO: refine this
+    if (state & ShiftMask)      mod |= PP_INPUTEVENT_MODIFIER_SHIFTKEY;
+    if (state & LockMask)       mod |= PP_INPUTEVENT_MODIFIER_CAPSLOCKKEY;
+    if (state & ControlMask)    mod |= PP_INPUTEVENT_MODIFIER_CONTROLKEY;
+    if (state & Mod1Mask)       mod |= PP_INPUTEVENT_MODIFIER_ALTKEY;
+    if (state & Mod2Mask)       mod |= PP_INPUTEVENT_MODIFIER_NUMLOCKKEY;
+    if (state & Mod4Mask)       mod |= PP_INPUTEVENT_MODIFIER_METAKEY;
+
+    if (state & Button1Mask)    mod |= PP_INPUTEVENT_MODIFIER_LEFTBUTTONDOWN;
+    if (state & Button2Mask)    mod |= PP_INPUTEVENT_MODIFIER_MIDDLEBUTTONDOWN;
+    if (state & Button3Mask)    mod |= PP_INPUTEVENT_MODIFIER_RIGHTBUTTONDOWN;
+
+    mod |= PP_INPUTEVENT_MODIFIER_ISLEFT;
+
+    return mod;
+}
+
+static
+int16_t
+handle_enter_event(NPP instance, void *event)
+{
+    XCrossingEvent *ev = event;
+    struct pp_instance_s *pp_i = instance->pdata;
+
+    // TODO: check if we want this event
+    PP_Resource mouse_event;
+    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+    struct PP_Point zero_point = {.x = 0, .y = 0};
+    unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+
+    mouse_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEENTER,
+                                               ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
+                                               &mouse_position, 0, &zero_point);
+    if (pp_i->ppp_input_event)
+        pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, mouse_event);
+
+    return 1;
+}
+
+static
+int16_t
+handle_leave_event(NPP instance, void *event)
+{
+    // TODO: implement
+    return 1;
+}
+
+static
+int16_t
+handle_motion_event(NPP instance, void *event)
+{
+    // TODO: implement
+    return 1;
+}
+
 int16_t
 NPP_HandleEvent(NPP instance, void *event)
 {
@@ -307,6 +369,12 @@ NPP_HandleEvent(NPP instance, void *event)
     case GraphicsExpose:
         return handle_GraphicsExpose_event(instance, event);
         break;
+    case EnterNotify:
+        return handle_enter_event(instance, event);
+    case LeaveNotify:
+        return handle_leave_event(instance, event);
+    case MotionNotify:
+        return handle_motion_event(instance, event);
     default:
         trace_warning("%s, event %s not handled\n", __func__, reverse_xevent_type(xaev->type));
         break;
