@@ -78,7 +78,11 @@ ppb_input_event_is_input_event(PP_Resource resource)
 PP_InputEvent_Type
 ppb_input_event_get_type(PP_Resource event)
 {
-    PP_InputEvent_Type t = {0};
+    struct pp_input_event_s *ie = pp_resource_acquire(event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_INPUTEVENT_TYPE_UNDEFINED;
+    PP_InputEvent_Type t = ie->type;
+    pp_resource_release(event);
     return t;
 }
 
@@ -337,7 +341,7 @@ static
 PP_InputEvent_Type
 trace_ppb_input_event_get_type(PP_Resource event)
 {
-    trace_info("[PPB] {zilch} %s event=%d\n", __func__+6, event);
+    trace_info("[PPB] {full} %s event=%d\n", __func__+6, event);
     return ppb_input_event_get_type(event);
 }
 
