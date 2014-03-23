@@ -148,7 +148,17 @@ ppb_mouse_input_event_get_button(PP_Resource mouse_event)
 struct PP_Point
 ppb_mouse_input_event_get_position(PP_Resource mouse_event)
 {
-    return PP_MakePoint(0, 0);
+    struct pp_input_event_s *ie = pp_resource_acquire(mouse_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_MakePoint(0, 0);
+    if (ie->event_class != PP_INPUTEVENT_CLASS_MOUSE) {
+        pp_resource_release(mouse_event);
+        return PP_MakePoint(0, 0);
+    }
+
+    struct PP_Point res = PP_MakePoint(ie->mouse_position.x, ie->mouse_position.y);
+    pp_resource_release(mouse_event);
+    return res;
 }
 
 int32_t
@@ -411,7 +421,7 @@ static
 struct PP_Point
 trace_ppb_mouse_input_event_get_position(PP_Resource mouse_event)
 {
-    trace_info("[PPB] {zilch} %s mouse_event=%d\n", __func__+6, mouse_event);
+    trace_info("[PPB] {full} %s mouse_event=%d\n", __func__+6, mouse_event);
     return ppb_mouse_input_event_get_position(mouse_event);
 }
 
