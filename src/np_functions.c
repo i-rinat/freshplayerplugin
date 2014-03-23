@@ -353,7 +353,23 @@ static
 int16_t
 handle_motion_event(NPP instance, void *event)
 {
-    // TODO: implement
+    XMotionEvent *ev = event;
+    struct pp_instance_s *pp_i = instance->pdata;
+
+    // TODO: check if we want this event
+    PP_Resource mouse_event;
+    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+    struct PP_Point zero_point = {.x = 0, .y = 0};
+    unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+
+    // TODO: MOUSEBUTTON_NONE ?
+    mouse_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
+                                               ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
+                                               &mouse_position, 0, &zero_point);
+
+    if (pp_i->ppp_input_event)
+        pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, mouse_event);
+
     return 1;
 }
 
