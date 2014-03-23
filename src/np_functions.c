@@ -346,6 +346,7 @@ int16_t
 handle_leave_event(NPP instance, void *event)
 {
     // TODO: implement
+    trace_warning("[NPP] not implemented %s\n", __func__);
     return 1;
 }
 
@@ -362,11 +363,54 @@ handle_motion_event(NPP instance, void *event)
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
 
-    // TODO: MOUSEBUTTON_NONE ?
     mouse_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
                                                ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
                                                &mouse_position, 0, &zero_point);
 
+    if (pp_i->ppp_input_event)
+        pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, mouse_event);
+
+    return 1;
+}
+
+static
+int16_t
+handle_button_press_release_event(NPP instance, void *event)
+{
+    XButtonEvent *ev = event;
+    struct pp_instance_s *pp_i = instance->pdata;
+
+    // TODO: check if we want this event
+    PP_InputEvent_MouseButton mouse_button = PP_INPUTEVENT_MOUSEBUTTON_NONE;
+    PP_Resource mouse_event;
+    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+    struct PP_Point zero_point = {.x = 0, .y = 0};
+    unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+
+    switch (ev->button) {
+    case 1:
+        mouse_button = PP_INPUTEVENT_MOUSEBUTTON_LEFT;
+        break;
+    case 2:
+        mouse_button = PP_INPUTEVENT_MOUSEBUTTON_MIDDLE;
+        break;
+    case 3:
+        mouse_button = PP_INPUTEVENT_MOUSEBUTTON_RIGHT;
+        break;
+
+    case 4: // up
+    case 5: // down
+    case 6: // left
+    case 7: // right
+        // TODO: wheel
+        break;
+    }
+
+    PP_InputEvent_Type event_type = ev->type == ButtonPress ? PP_INPUTEVENT_TYPE_MOUSEDOWN
+                                                            : PP_INPUTEVENT_TYPE_MOUSEUP;
+    mouse_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
+                                               ev->time/1.0e6, mod, mouse_button,
+                                               &mouse_position, 1, &zero_point);
     if (pp_i->ppp_input_event)
         pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, mouse_event);
 
@@ -391,6 +435,10 @@ NPP_HandleEvent(NPP instance, void *event)
         return handle_leave_event(instance, event);
     case MotionNotify:
         return handle_motion_event(instance, event);
+    case ButtonPress:
+        // fall through
+    case ButtonRelease:
+        return handle_button_press_release_event(instance, event);
     default:
         trace_warning("%s, event %s not handled\n", __func__, reverse_xevent_type(xaev->type));
         break;
