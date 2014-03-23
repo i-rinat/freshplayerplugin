@@ -174,7 +174,17 @@ ppb_mouse_input_event_get_position(PP_Resource mouse_event)
 int32_t
 ppb_mouse_input_event_get_click_count(PP_Resource mouse_event)
 {
-    return 0;
+    struct pp_input_event_s *ie = pp_resource_acquire(mouse_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return 0;
+    if (ie->event_class != PP_INPUTEVENT_CLASS_MOUSE) {
+        pp_resource_release(mouse_event);
+        return 0;
+    }
+
+    uint32_t click_count = ie->click_count;
+    pp_resource_release(mouse_event);
+    return click_count;
 }
 
 struct PP_Point
@@ -439,7 +449,7 @@ static
 int32_t
 trace_ppb_mouse_input_event_get_click_count(PP_Resource mouse_event)
 {
-    trace_info("[PPB] {zilch} %s mouse_event=%d\n", __func__+6, mouse_event);
+    trace_info("[PPB] {full} %s mouse_event=%d\n", __func__+6, mouse_event);
     return ppb_mouse_input_event_get_click_count(mouse_event);
 }
 
