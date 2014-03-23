@@ -237,16 +237,10 @@ NPP_Write(NPP instance, NPStream *stream, int32_t offset, int32_t len, void *buf
             return len;
     }
 
-    if (offset + len > ul->body_allocated) {
-        size_t nsize = ul->body_allocated + (ul->body_allocated >> 1);
-        if (offset + len > nsize)
-            nsize = offset + len;
-        ul->body = realloc(ul->body, nsize);
-        ul->body_allocated = nsize;
+    if (ul->fp) {
+        fseek(ul->fp, offset, SEEK_SET);
+        fwrite(buffer, len, 1, ul->fp);
     }
-
-    memcpy(ul->body + offset, buffer, len);
-    ul->body_size += len;
 
     pp_resource_release(loader);
     return len;

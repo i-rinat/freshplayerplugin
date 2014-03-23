@@ -110,10 +110,8 @@ struct pp_resource_generic_s {
 struct pp_url_loader_s {
     struct pp_resource_generic_s _;
     char       *headers;        ///< response headers
-    char       *body;           ///< storage for response
-    size_t      body_size;      ///< got so far
-    size_t      body_allocated; ///< allocated size for .body
-    size_t      body_pos;       ///< read stream position
+    FILE       *fp;             ///< file used to store response
+    size_t      read_pos;       ///< reading position
     char       *url;            ///< request URL
     int         loaded;         ///< if whole stream loaded already
     struct PP_CompletionCallback    ccb;

@@ -23,6 +23,7 @@
  */
 
 #define _XOPEN_SOURCE   500
+#define _GNU_SOURCE
 #include "ppb_url_loader.h"
 #include "ppb_core.h"
 #include "ppb_url_util_dev.h"
@@ -32,6 +33,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "globals.h"
@@ -51,8 +53,11 @@ ppb_url_loader_destroy(void *p)
         return;
     struct pp_url_loader_s *ul = p;
 
+    if (ul->fp) {
+        fclose(ul->fp);
+        ul->fp = NULL;
+    }
     FREE_HELPER(ul, headers);
-    FREE_HELPER(ul, body);
     FREE_HELPER(ul, url);
 }
 
@@ -99,6 +104,15 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ppb_var_release(full_url);
 
     ul->url = strdup(pair->url);
+    ul->read_pos = 0;
+
+    char *tmpfname;
+    // TODO: make temp path configurable
+    asprintf(&tmpfname, "/tmp/FreshStreamXXXXXX");
+    int fd = mkstemp(tmpfname);
+    unlink(tmpfname);
+    free(tmpfname);
+    ul->fp = fdopen(fd, "wb+");
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = pair};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
@@ -147,7 +161,12 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
 
     // TODO: determine total bytes to be received
     *total_bytes_to_be_received = -1;
-    *bytes_received = ul->body_size;
+
+    *bytes_received = 0;
+    if (ul->fp) {
+        fseek(ul->fp, 0, SEEK_END);
+        *bytes_received = ftell(ul->fp);
+    }
 
     pp_resource_release(loader);
     return PP_TRUE;
@@ -174,17 +193,16 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
     // TODO: maybe some locking?
     // TODO: async reads, callback calls
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    int read_bytes = 0;
 
-    const int32_t awailable = ul->body_size - ul->body_pos;
-    if (bytes_to_read > awailable)
-        bytes_to_read = awailable;
-
-    memcpy(buffer, ul->body + ul->body_pos, bytes_to_read);
-    ul->body_pos += bytes_to_read;
+    if (ul->fp) {
+        fseek(ul->fp, ul->read_pos, SEEK_SET);
+        read_bytes = fread(buffer, 1, bytes_to_read, ul->fp);
+        ul->read_pos += read_bytes;
+    }
 
     pp_resource_release(loader);
-    printf("bytes_to_read = %d\n", bytes_to_read);
-    return bytes_to_read;
+    return read_bytes;
 }
 
 int32_t
@@ -196,6 +214,17 @@ ppb_url_loader_finish_streaming_to_file(PP_Resource loader, struct PP_Completion
 void
 ppb_url_loader_close(PP_Resource loader)
 {
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    if (!ul)
+        return;
+
+    if (ul->fp) {
+        fclose(ul->fp);
+        ul->fp = NULL;
+    }
+    FREE_HELPER(ul, headers);
+    FREE_HELPER(ul, url);
+    pp_resource_release(loader);
     return;
 }
 
@@ -287,7 +316,7 @@ static
 void
 trace_ppb_url_loader_close(PP_Resource loader)
 {
-    trace_info("[PPB] {zilch} %s loader=%d\n", __func__+6, loader);
+    trace_info("[PPB] {full} %s loader=%d\n", __func__+6, loader);
     ppb_url_loader_close(loader);
 }
 
