@@ -72,7 +72,7 @@ ppb_input_event_clear_input_event_request(PP_Instance instance, uint32_t event_c
 PP_Bool
 ppb_input_event_is_input_event(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_INPUT_EVENT;
 }
 
 PP_InputEvent_Type
@@ -329,7 +329,7 @@ static
 PP_Bool
 trace_ppb_input_event_is_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_input_event_is_input_event(resource);
 }
 
