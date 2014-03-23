@@ -131,7 +131,12 @@ ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type, PP_T
 PP_Bool
 ppb_mouse_input_event_is_mouse_input_event(PP_Resource resource)
 {
-    return PP_TRUE;
+    struct pp_input_event_s *ie = pp_resource_acquire(resource, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_FALSE;
+    PP_Bool res = ie->event_class == PP_INPUTEVENT_CLASS_MOUSE;
+    pp_resource_release(resource);
+    return res;
 }
 
 PP_InputEvent_MouseButton
@@ -390,7 +395,7 @@ static
 PP_Bool
 trace_ppb_mouse_input_event_is_mouse_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_mouse_input_event_is_mouse_input_event(resource);
 }
 
