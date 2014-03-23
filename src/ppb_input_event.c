@@ -95,7 +95,12 @@ ppb_input_event_get_time_stamp(PP_Resource event)
 uint32_t
 ppb_input_event_get_modifiers(PP_Resource event)
 {
-    return 0;
+    struct pp_input_event_s *ie = pp_resource_acquire(event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return 0;
+    uint32_t modifiers = ie->modifiers;
+    pp_resource_release(event);
+    return modifiers;
 }
 
 PP_Resource
@@ -357,7 +362,7 @@ static
 uint32_t
 trace_ppb_input_event_get_modifiers(PP_Resource event)
 {
-    trace_info("[PPB] {zilch} %s event=%d\n", __func__+6, event);
+    trace_info("[PPB] {full} %s event=%d\n", __func__+6, event);
     return ppb_input_event_get_modifiers(event);
 }
 
