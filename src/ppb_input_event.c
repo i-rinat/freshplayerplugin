@@ -100,7 +100,23 @@ ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type, PP_T
                              const struct PP_Point *mouse_position, int32_t click_count,
                              const struct PP_Point *mouse_movement)
 {
-    return 0;
+    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, instance);
+    struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return 0;
+    ie->event_class = PP_INPUTEVENT_CLASS_MOUSE;
+    ie->type = type;
+    ie->time_stamp = time_stamp;
+    ie->modifiers = modifiers;
+    ie->mouse_button = mouse_button;
+    ie->mouse_position.x = mouse_position ? mouse_position->x : 0;
+    ie->mouse_position.y = mouse_position ? mouse_position->y : 0;
+    ie->click_count = 0;
+    ie->mouse_movement.x = mouse_movement ? mouse_movement->x : 0;
+    ie->mouse_movement.y = mouse_movement ? mouse_movement->y : 0;
+
+    pp_resource_release(input_event);
+    return input_event;
 }
 
 PP_Bool
@@ -351,7 +367,7 @@ trace_ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type
 {
     char *s_mouse_position = trace_point_as_string(mouse_position);
     char *s_mouse_movement = trace_point_as_string(mouse_movement);
-    trace_info("[PPB] {zilch} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
+    trace_info("[PPB] {full} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
                "mouse_button=%d, mouse_position=%s, click_count=%d, mouse_movement=%s\n",
                __func__+6, instance, type, time_stamp, modifiers, mouse_button, s_mouse_position,
                click_count, s_mouse_movement);

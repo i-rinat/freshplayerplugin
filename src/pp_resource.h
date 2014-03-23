@@ -212,6 +212,7 @@ struct pp_audio_s {
 
 struct pp_input_event_s {
     struct pp_resource_generic_s _;
+    uint32_t                    event_class;
     PP_InputEvent_Type          type;
     PP_TimeTicks                time_stamp;
     uint32_t                    modifiers;
