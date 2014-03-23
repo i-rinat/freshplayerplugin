@@ -321,7 +321,7 @@ x_state_mask_to_pp_inputevent_modifier(unsigned int state)
 
 static
 int16_t
-handle_enter_event(NPP instance, void *event)
+handle_enter_leave_event(NPP instance, void *event)
 {
     XCrossingEvent *ev = event;
     struct pp_instance_s *pp_i = instance->pdata;
@@ -331,22 +331,15 @@ handle_enter_event(NPP instance, void *event)
     struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+    PP_InputEvent_Type event_type = ev->type == EnterNotify ? PP_INPUTEVENT_TYPE_MOUSEENTER
+                                                            : PP_INPUTEVENT_TYPE_MOUSELEAVE;
 
-    mouse_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEENTER,
+    mouse_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
                                                ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
                                                &mouse_position, 0, &zero_point);
     if (pp_i->ppp_input_event)
         pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, mouse_event);
 
-    return 1;
-}
-
-static
-int16_t
-handle_leave_event(NPP instance, void *event)
-{
-    // TODO: implement
-    trace_warning("[NPP] not implemented %s\n", __func__);
     return 1;
 }
 
@@ -430,9 +423,9 @@ NPP_HandleEvent(NPP instance, void *event)
         return handle_GraphicsExpose_event(instance, event);
         break;
     case EnterNotify:
-        return handle_enter_event(instance, event);
+        // fall through
     case LeaveNotify:
-        return handle_leave_event(instance, event);
+        return handle_enter_leave_event(instance, event);
     case MotionNotify:
         return handle_motion_event(instance, event);
     case ButtonPress:
