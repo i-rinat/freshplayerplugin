@@ -29,6 +29,9 @@
 #include <ppapi/c/ppp_input_event.h>
 
 
+void
+ppb_input_event_destroy(void *p);
+
 int32_t
 ppb_input_event_request_input_events(PP_Instance instance, uint32_t event_classes);
 

@@ -58,6 +58,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_BROWSER_FONT,
     PP_RESOURCE_AUDIO_CONFIG,
     PP_RESOURCE_AUDIO,
+    PP_RESOURCE_INPUT_EVENT,
 };
 
 enum pp_request_method_e {
@@ -207,6 +208,17 @@ struct pp_audio_s {
     uint32_t                shutdown;
     PPB_Audio_Callback_1_0  callback;
     void                   *user_data;
+};
+
+struct pp_input_event_s {
+    struct pp_resource_generic_s _;
+    PP_InputEvent_Type          type;
+    PP_TimeTicks                time_stamp;
+    uint32_t                    modifiers;
+    PP_InputEvent_MouseButton   mouse_button;
+    struct PP_Point             mouse_position;
+    int32_t                     click_count;
+    struct PP_Point             mouse_movement;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);

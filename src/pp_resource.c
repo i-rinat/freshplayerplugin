@@ -32,6 +32,7 @@
 #include "ppb_browser_font_trusted.h"
 #include "ppb_audio_config.h"
 #include "ppb_audio.h"
+#include "ppb_input_event.h"
 
 
 #define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
@@ -94,6 +95,9 @@ pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
         break;
     case PP_RESOURCE_AUDIO:
         ALLOC_HELPER(struct pp_audio_s);
+        break;
+    case PP_RESOURCE_INPUT_EVENT:
+        ALLOC_HELPER(struct pp_input_event_s);
         break;
     default:
         // fall through
@@ -218,6 +222,8 @@ pp_resource_unref(PP_Resource resource)
         case PP_RESOURCE_AUDIO:
             ppb_audio_destroy(ptr);
             break;
+        case PP_RESOURCE_INPUT_EVENT:
+            ppb_input_event_destroy(ptr);
         default:
             break;
         }
