@@ -153,6 +153,24 @@ trace_float_point_as_string(const struct PP_FloatPoint *point)
 }
 
 char *
+trace_touch_point_as_string(const struct PP_TouchPoint *point)
+{
+    char *res = NULL;
+    if (point) {
+        char *s_position = trace_float_point_as_string(&point->position);
+        char *s_radius = trace_float_point_as_string(&point->radius);
+        asprintf(&res, "{.id=%u, .position=%s, .radius=%s, .rotation_angle=%f, .presure=%f}",
+                 point->id, s_position, s_radius, point->rotation_angle, point->pressure);
+        free(s_position);
+        free(s_radius);
+    } else {
+        asprintf(&res, "(nil)");
+    }
+
+    return res;
+}
+
+char *
 trace_np_window_as_string(const NPWindow *window)
 {
     char *res = NULL;

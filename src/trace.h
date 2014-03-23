@@ -27,6 +27,7 @@
 
 #include <ppapi/c/pp_var.h>
 #include <ppapi/c/pp_rect.h>
+#include <ppapi/c/pp_touch_point.h>
 #include <npapi.h>
 
 
@@ -38,6 +39,7 @@ char   *trace_size_as_string(const struct PP_Size *size);
 char   *trace_rect_as_string(const struct PP_Rect *rect);
 char   *trace_point_as_string(const struct PP_Point *point);
 char   *trace_float_point_as_string(const struct PP_FloatPoint *point);
+char   *trace_touch_point_as_string(const struct PP_TouchPoint *point);
 char   *trace_event_classes_as_string(uint32_t event_classes);
 char   *trace_np_window_as_string(const NPWindow *window);
 
