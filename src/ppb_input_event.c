@@ -343,7 +343,14 @@ trace_ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type
                                    const struct PP_Point *mouse_position, int32_t click_count,
                                    const struct PP_Point *mouse_movement)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_mouse_position = trace_point_as_string(mouse_position);
+    char *s_mouse_movement = trace_point_as_string(mouse_movement);
+    trace_info("[PPB] {zilch} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
+               "mouse_button=%d, mouse_position=%s, click_count=%d, mouse_movement=%s\n",
+               __func__+6, instance, type, time_stamp, modifiers, mouse_button, s_mouse_position,
+               click_count, s_mouse_movement);
+    free(s_mouse_position);
+    free(s_mouse_movement);
     return ppb_mouse_input_event_create(instance, type, time_stamp, modifiers, mouse_button,
                                         mouse_position, click_count, mouse_movement);
 }
@@ -352,7 +359,7 @@ static
 PP_Bool
 trace_ppb_mouse_input_event_is_mouse_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_mouse_input_event_is_mouse_input_event(resource);
 }
 
@@ -360,7 +367,7 @@ static
 PP_InputEvent_MouseButton
 trace_ppb_mouse_input_event_get_button(PP_Resource mouse_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s mouse_event=%d\n", __func__+6, mouse_event);
     return ppb_mouse_input_event_get_button(mouse_event);
 }
 
@@ -368,7 +375,7 @@ static
 struct PP_Point
 trace_ppb_mouse_input_event_get_position(PP_Resource mouse_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s mouse_event=%d\n", __func__+6, mouse_event);
     return ppb_mouse_input_event_get_position(mouse_event);
 }
 
@@ -376,7 +383,7 @@ static
 int32_t
 trace_ppb_mouse_input_event_get_click_count(PP_Resource mouse_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s mouse_event=%d\n", __func__+6, mouse_event);
     return ppb_mouse_input_event_get_click_count(mouse_event);
 }
 
@@ -384,7 +391,7 @@ static
 struct PP_Point
 trace_ppb_mouse_input_event_get_movement(PP_Resource mouse_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s mouse_event=%d\n", __func__+6, mouse_event);
     return ppb_mouse_input_event_get_movement(mouse_event);
 }
 
@@ -394,7 +401,13 @@ trace_ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp
                                    uint32_t modifiers, const struct PP_FloatPoint *wheel_delta,
                                    const struct PP_FloatPoint *wheel_ticks, PP_Bool scroll_by_page)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_wheel_delta = trace_float_point_as_string(wheel_delta);
+    char *s_wheel_ticks = trace_float_point_as_string(wheel_ticks);
+    trace_info("[PPB] {zilch} %s instance=%d, time_stamp=%f, modifiers=0x%x, wheel_delta=%s, "
+               "wheel_ticks=%s, scrool_by_page=%d\n", __func__+6, instance, time_stamp, modifiers,
+               s_wheel_delta, s_wheel_ticks, scroll_by_page);
+    free(s_wheel_delta);
+    free(s_wheel_ticks);
     return ppb_wheel_input_event_create(instance, time_stamp, modifiers, wheel_delta, wheel_ticks,
                                         scroll_by_page);
 }
@@ -403,7 +416,7 @@ static
 PP_Bool
 trace_ppb_wheel_input_event_is_wheel_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_wheel_input_event_is_wheel_input_event(resource);
 }
 
@@ -411,7 +424,7 @@ static
 struct PP_FloatPoint
 trace_ppb_wheel_input_event_get_delta(PP_Resource wheel_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s wheel_event=%d\n", __func__+6, wheel_event);
     return ppb_wheel_input_event_get_delta(wheel_event);
 }
 
@@ -419,7 +432,7 @@ static
 struct PP_FloatPoint
 trace_ppb_wheel_input_event_get_ticks(PP_Resource wheel_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s wheel_event=%d\n", __func__+6, wheel_event);
     return ppb_wheel_input_event_get_ticks(wheel_event);
 }
 
@@ -427,7 +440,7 @@ static
 PP_Bool
 trace_ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s wheel_event=%d\n", __func__+6, wheel_event);
     return ppb_wheel_input_event_get_scroll_by_page(wheel_event);
 }
 
@@ -437,7 +450,11 @@ trace_ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type t
                                       PP_TimeTicks time_stamp, uint32_t modifiers,
                                       uint32_t key_code, struct PP_Var character_text)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_character_text = trace_var_as_string(character_text);
+    trace_info("[PPB] {zilch} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
+               "key_code=%u, character_text=%s\n", __func__+6, instance, type, time_stamp,
+               modifiers, key_code, s_character_text);
+    free(s_character_text);
     return ppb_keyboard_input_event_create(instance, type, time_stamp, modifiers, key_code,
                                            character_text);
 }
@@ -446,7 +463,7 @@ static
 PP_Bool
 trace_ppb_keyboard_input_event_is_keyboard_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_keyboard_input_event_is_keyboard_input_event(resource);
 }
 
@@ -454,7 +471,7 @@ static
 uint32_t
 trace_ppb_keyboard_input_event_get_key_code(PP_Resource key_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s key_event=%d\n", __func__+6, key_event);
     return ppb_keyboard_input_event_get_key_code(key_event);
 }
 
@@ -462,7 +479,7 @@ static
 struct PP_Var
 trace_ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s character_event=%d\n", __func__+6, character_event);
     return ppb_keyboard_input_event_get_character_text(character_event);
 }
 
@@ -471,7 +488,8 @@ PP_Resource
 trace_ppb_touch_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                    PP_TimeTicks time_stamp, uint32_t modifiers)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x\n",
+               __func__+6, instance, type, time_stamp, modifiers);
     return ppb_touch_input_event_create(instance, type, time_stamp, modifiers);
 }
 
@@ -480,7 +498,10 @@ void
 trace_ppb_touch_input_event_add_touch_point(PP_Resource touch_event, PP_TouchListType list,
                                             const struct PP_TouchPoint *point)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_point = trace_touch_point_as_string(point);
+    trace_info("[PPB] {zilch} %s touch_event=%d, list=%d, point=%s\n", __func__+6, touch_event,
+               list, s_point);
+    free(s_point);
     return ppb_touch_input_event_add_touch_point(touch_event, list, point);
 }
 
@@ -488,7 +509,7 @@ static
 PP_Bool
 trace_ppb_touch_input_event_is_touch_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_touch_input_event_is_touch_input_event(resource);
 }
 
@@ -496,7 +517,7 @@ static
 uint32_t
 trace_ppb_touch_input_event_get_touch_count(PP_Resource resource, PP_TouchListType list)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d, list=%d\n", __func__+6, resource, list);
     return ppb_touch_input_event_get_touch_count(resource, list);
 }
 
@@ -505,7 +526,8 @@ struct PP_TouchPoint
 trace_ppb_touch_input_event_get_touch_by_index(PP_Resource resource, PP_TouchListType list,
                                                uint32_t index)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d, list=%d, index=%u\n", __func__+6, resource, list,
+               index);
     return ppb_touch_input_event_get_touch_by_index(resource, list, index);
 }
 
@@ -514,7 +536,8 @@ struct PP_TouchPoint
 trace_ppb_touch_input_event_get_touch_by_id(PP_Resource resource, PP_TouchListType list,
                                             uint32_t touch_id)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d, list=%d, touch_id=%u\n", __func__+6, resource, list,
+               touch_id);
     return ppb_touch_input_event_get_touch_by_id(resource, list, touch_id);
 }
 
@@ -526,7 +549,12 @@ trace_ppb_ime_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                  int32_t target_segment, uint32_t selection_start,
                                  uint32_t selection_end)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_text = trace_var_as_string(text);
+    trace_info("[PPB] {zilch} %s instance=%d, type=%d, time_stamp=%f, text=%s, segment_number=%u, "
+               "segment_offsets=%p, target_segment=%d, selection_start=%u, selection_end=%u\n",
+               __func__+6, instance, type, time_stamp, s_text, segment_number, segment_offsets,
+               target_segment, selection_start, selection_end);
+    free(s_text);
     return ppb_ime_input_event_create(instance, type, time_stamp, text, segment_number,
                                       segment_offsets, target_segment, selection_start,
                                       selection_end);
@@ -536,7 +564,7 @@ static
 PP_Bool
 trace_ppb_ime_input_event_is_ime_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_ime_input_event_is_ime_input_event(resource);
 }
 
@@ -544,7 +572,7 @@ static
 struct PP_Var
 trace_ppb_ime_input_event_get_text(PP_Resource ime_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s ime_event=%d\n", __func__+6, ime_event);
     return ppb_ime_input_event_get_text(ime_event);
 }
 
@@ -552,7 +580,7 @@ static
 uint32_t
 trace_ppb_ime_input_event_get_segment_number(PP_Resource ime_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s ime_event=%d\n", __func__+6, ime_event);
     return ppb_ime_input_event_get_segment_number(ime_event);
 }
 
@@ -560,7 +588,7 @@ static
 uint32_t
 trace_ppb_ime_input_event_get_segment_offset(PP_Resource ime_event, uint32_t index)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s ime_event=%d, index=%u\n", __func__+6, ime_event, index);
     return ppb_ime_input_event_get_segment_offset(ime_event, index);
 }
 
@@ -568,7 +596,7 @@ static
 int32_t
 trace_ppb_ime_input_event_get_target_segment(PP_Resource ime_event)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s ime_event=%d\n", __func__+6, ime_event);
     return ppb_ime_input_event_get_target_segment(ime_event);
 }
 
@@ -576,7 +604,7 @@ static
 void
 trace_ppb_ime_input_event_get_selection(PP_Resource ime_event, uint32_t *start, uint32_t *end)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s ime_event=%d\n", __func__+6, ime_event);
     return ppb_ime_input_event_get_selection(ime_event, start, end);
 }
 
