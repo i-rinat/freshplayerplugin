@@ -141,6 +141,18 @@ trace_point_as_string(const struct PP_Point *point)
 }
 
 char *
+trace_float_point_as_string(const struct PP_FloatPoint *point)
+{
+    char *res = NULL;
+    if (point)
+        asprintf(&res, "{.x=%f, .y=%f}", point->x, point->y);
+    else
+        asprintf(&res, "(nil)");
+
+    return res;
+}
+
+char *
 trace_np_window_as_string(const NPWindow *window)
 {
     char *res = NULL;

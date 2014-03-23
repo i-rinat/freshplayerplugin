@@ -37,6 +37,7 @@ char   *trace_var_as_string(struct PP_Var var);
 char   *trace_size_as_string(const struct PP_Size *size);
 char   *trace_rect_as_string(const struct PP_Rect *rect);
 char   *trace_point_as_string(const struct PP_Point *point);
+char   *trace_float_point_as_string(const struct PP_FloatPoint *point);
 char   *trace_event_classes_as_string(uint32_t event_classes);
 char   *trace_np_window_as_string(const NPWindow *window);
 
