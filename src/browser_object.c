@@ -57,10 +57,11 @@ bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
     const char *s_name = (void *)(size_t)name.value.as_id;
     const struct pp_var_object_s *obj = object;
     NPIdentifier identifier = npn.getstringidentifier(s_name);
-    NPVariant value;
-    npn.getproperty(obj->npp, obj->data, identifier, &value);
-
-    return np_variant_to_pp_var(value, obj);
+    NPVariant np_value;
+    npn.getproperty(obj->npp, obj->data, identifier, &np_value);
+    struct PP_Var var = np_variant_to_pp_var(np_value, obj);
+    npn.releasevariantvalue(&np_value);
+    return var;
 }
 
 static
