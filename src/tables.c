@@ -122,8 +122,7 @@ tables_pop_url_pair(const char *url)
 
         if (!strcmp(pair->url, url)) {
             PP_Resource ret = pair->resource;
-            url_pair_list = g_list_remove_link(url_pair_list, ptr);
-            g_list_free(ptr);
+            url_pair_list = g_list_delete_link(url_pair_list, ptr);
             return ret;
         }
         ptr = g_list_next(ptr);
