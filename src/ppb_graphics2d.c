@@ -58,8 +58,11 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     g2d->height = size->height;
     g2d->stride = 4 * size->width;
     g2d->data = calloc(g2d->stride * g2d->height, 1);
-    if (!g2d->data) {
+    g2d->second_buffer = calloc(g2d->stride * g2d->height, 1);
+    if (!g2d->data || !g2d->second_buffer) {
         trace_warning("%s, can't allocate memory\n", __func__);
+        FREE_HELPER(g2d, data);
+        FREE_HELPER(g2d, second_buffer);
         pp_resource_release(graphics_2d);
         ppb_core_release_resource(graphics_2d);
         return 0;
@@ -67,6 +70,7 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     g2d->cairo_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->data,
                             CAIRO_FORMAT_ARGB32, g2d->width, g2d->height, g2d->stride);
     g2d->task_list = NULL;
+    pthread_mutex_init(&g2d->lock, NULL);
 
     pp_resource_release(graphics_2d);
     return graphics_2d;
@@ -78,14 +82,13 @@ ppb_graphics2d_destroy(void *p)
     if (!p)
         return;
     struct pp_graphics2d_s *g2d = p;
-    if (g2d->data) {
-        free(g2d->data);
-        g2d->data = NULL;
-    }
+    FREE_HELPER(g2d, data);
+    FREE_HELPER(g2d, second_buffer);
     if (g2d->cairo_surf) {
         cairo_surface_destroy(g2d->cairo_surf);
         g2d->cairo_surf = NULL;
     }
+    pthread_mutex_destroy(&g2d->lock);
 }
 
 PP_Bool
@@ -158,15 +161,6 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     }
 
     struct pp_instance_s *pp_i = tables_get_pp_instance(g2d->instance);
-    pp_resource_release(graphics_2d);
-
-    if (pp_i->draw_in_progress) {
-        trace_warning("%s, flush in progress already\n", __func__);
-        return PP_ERROR_INPROGRESS;
-    }
-
-    pp_i->draw_in_progress = 1;
-    pp_i->draw_completion_callback = callback;
 
     while (g2d->task_list) {
         GList *link = g_list_first(g2d->task_list);
@@ -223,10 +217,18 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         free(pt);
     }
 
+    pthread_mutex_lock(&g2d->lock);
+    memcpy(g2d->second_buffer, g2d->data, g2d->stride * g2d->height);
+    pthread_mutex_unlock(&g2d->lock);
+
     NPRect npr = {.top = 0, .left = 0, .bottom = g2d->height, .right = g2d->width};
+    pp_resource_release(graphics_2d);
     npn.invalidaterect(pp_i->npp, &npr);
     npn.forceredraw(pp_i->npp);
 
+    if (callback.flags != PP_COMPLETIONCALLBACK_FLAG_OPTIONAL) {
+        trace_warning("%s, non-optional callback was skipped\n", __func__);
+    }
     return PP_OK;
 }
 

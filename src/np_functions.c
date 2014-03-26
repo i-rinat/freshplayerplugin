@@ -268,24 +268,20 @@ handle_GraphicsExpose_event(NPP instance, void *event)
 {
     XGraphicsExposeEvent *ev = event;
     struct pp_instance_s *pp_i = instance->pdata;
-    if (!pp_i->draw_in_progress)
-        return 0;
     struct pp_graphics2d_s *g2d = pp_resource_acquire(pp_i->graphics, PP_RESOURCE_GRAPHICS2D);
     if (!g2d)
         return 0;
     Display *dpy = ev->display;
     Drawable drawable = ev->drawable;
     int screen = 0;
-    XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0, g2d->data,
+    pthread_mutex_lock(&g2d->lock);
+    XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0, g2d->second_buffer,
                               g2d->width, g2d->height, 32, g2d->stride);
 
     XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g2d->width, g2d->height);
-
     free(xi);
+    pthread_mutex_unlock(&g2d->lock);
     pp_resource_release(pp_i->graphics);
-
-    pp_i->draw_in_progress = 0;
-    pp_i->draw_completion_callback.func(pp_i->draw_completion_callback.user_data, PP_OK);
 
     return 1;
 }

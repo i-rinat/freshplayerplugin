@@ -95,10 +95,9 @@ struct pp_instance_s {
     const char     *instance_url;
     pthread_t       pp_thread;
     PP_Resource     graphics;
-    int             draw_in_progress;
-    struct PP_CompletionCallback draw_completion_callback;
     Display        *dpy;
     EGLDisplay      egl_dpy;
+
 };
 
 struct pp_resource_generic_s {
@@ -173,6 +172,8 @@ struct pp_graphics2d_s {
     int32_t             height;
     int32_t             stride;
     char               *data;
+    char               *second_buffer;
+    pthread_mutex_t     lock;
     cairo_surface_t    *cairo_surf;
     GList              *task_list;
 };
