@@ -28,6 +28,8 @@
 #include <string.h>
 #include "trace.h"
 #include "tables.h"
+#include <ppapi/c/dev/ppb_var_deprecated.h>
+#include <ppapi/c/dev/ppp_class_deprecated.h>
 
 
 void
@@ -48,6 +50,7 @@ ppb_var_release(struct PP_Var var)
         var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
         var.type == PP_VARTYPE_ARRAY_BUFFER)
     {
+        struct pp_var_object_s *obj;
         int ref_cnt = tables_unref_var(var);
         if (ref_cnt != 0)
             return;
@@ -57,7 +60,9 @@ ppb_var_release(struct PP_Var var)
             free((void*)(size_t)var.value.as_id);
             break;
         case PP_VARTYPE_OBJECT:
-            free((void*)(size_t)var.value.as_id);
+            obj = (void*)(size_t)var.value.as_id;
+            obj->klass->Deallocate(obj);
+            free(obj);
             break;
         default:
             // do nothing

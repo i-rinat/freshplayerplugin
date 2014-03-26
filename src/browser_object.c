@@ -60,7 +60,8 @@ bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
     NPVariant np_value;
     if (npn.getproperty(obj->npp, obj->data, identifier, &np_value)) {
         struct PP_Var var = np_variant_to_pp_var(np_value, obj);
-        npn.releasevariantvalue(&np_value);
+        if (var.type != PP_VARTYPE_OBJECT)
+            npn.releasevariantvalue(&np_value);
         return var;
     } else {
         return PP_MakeUndefined();
@@ -107,6 +108,11 @@ static
 void
 bobj_Deallocate(void *object)
 {
+    const struct pp_var_object_s *obj = object;
+    NPVariant np_val;
+    np_val.type = NPVariantType_Object;
+    np_val.value.objectValue = obj->data;
+    npn.releasevariantvalue(&np_val);
 }
 
 
@@ -184,7 +190,7 @@ static
 void
 trace_bobj_Deallocate(void *object)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[cls] {full} %s\n", __func__+6);
     bobj_Deallocate(object);
 }
 
