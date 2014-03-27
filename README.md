@@ -6,8 +6,7 @@ PPAPI-host NPAPI-plugin adapter.
 Status
 ======
 
-Prototyping. Seen some graphics.
-
+Early alpha.
 
 License
 =======
