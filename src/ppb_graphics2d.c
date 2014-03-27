@@ -38,7 +38,7 @@ struct g2d_paint_task_s {
         gpt_replace_contents,
     } type;
     PP_Resource     image_data;
-    struct PP_Point dst;
+    struct PP_Point ofs;
     struct PP_Rect  src;
     int             src_is_set;
 };
@@ -118,9 +118,9 @@ ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image_data,
     pt->src_is_set = !!src_rect;
 
     if (top_left) {
-        memcpy(&pt->dst, top_left, sizeof(*top_left));
+        memcpy(&pt->ofs, top_left, sizeof(*top_left));
     } else {
-        pt->dst.x = pt->dst.y = 0;
+        pt->ofs.x = pt->ofs.y = 0;
     }
     if (src_rect)
         memcpy(&pt->src, src_rect, sizeof(*src_rect));
@@ -178,10 +178,10 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
             cairo_surface_mark_dirty(g2d->cairo_surf);
             cr = cairo_create(g2d->cairo_surf);
-            cairo_set_source_surface(cr, id->cairo_surf, pt->dst.x - pt->src.point.x,
-                                     pt->dst.y - pt->src.point.y);
+            cairo_set_source_surface(cr, id->cairo_surf, pt->ofs.x, pt->ofs.y);
             if (pt->src_is_set) {
-                cairo_rectangle(cr, pt->dst.x, pt->dst.y, pt->src.size.width, pt->src.size.height);
+                cairo_rectangle(cr, pt->src.point.x + pt->ofs.x, pt->src.point.y + pt->ofs.y,
+                                pt->src.size.width, pt->src.size.height);
                 cairo_fill(cr);
             } else {
                 cairo_paint(cr);
