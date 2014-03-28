@@ -263,7 +263,7 @@ NPP_Print(NPP instance, NPPrint *platformPrint)
 
 static
 int16_t
-handle_GraphicsExpose_event(NPP instance, void *event)
+handle_graphics_expose_event(NPP instance, void *event)
 {
     XGraphicsExposeEvent *ev = event;
     struct pp_instance_s *pp_i = instance->pdata;
@@ -409,7 +409,7 @@ NPP_HandleEvent(NPP instance, void *event)
 
     switch (xaev->type) {
     case GraphicsExpose:
-        return handle_GraphicsExpose_event(instance, event);
+        return handle_graphics_expose_event(instance, event);
         break;
     case EnterNotify:
         // fall through
