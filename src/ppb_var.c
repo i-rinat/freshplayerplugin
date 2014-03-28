@@ -61,7 +61,8 @@ ppb_var_release(struct PP_Var var)
             break;
         case PP_VARTYPE_OBJECT:
             obj = (void*)(size_t)var.value.as_id;
-            obj->klass->Deallocate(obj);
+            if (obj->klass->Deallocate)
+                obj->klass->Deallocate(obj->data);
             free(obj);
             break;
         default:
