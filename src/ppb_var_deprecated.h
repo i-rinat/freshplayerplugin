@@ -27,17 +27,6 @@
 
 #include <ppapi/c/dev/ppb_var_deprecated.h>
 
-void
-ppb_var_deprecated_add_ref(struct PP_Var var);
-
-void
-ppb_var_deprecated_release(struct PP_Var var);
-
-struct PP_Var
-ppb_var_deprecated_var_from_utf8(PP_Module module, const char *data, uint32_t len);
-
-const char *
-ppb_var_deprecated_var_to_utf8(struct PP_Var var, uint32_t *len);
 
 bool
 ppb_var_deprecated_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception);

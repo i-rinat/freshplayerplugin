@@ -23,6 +23,7 @@
  */
 
 #include "ppb_var_deprecated.h"
+#include "ppb_var.h"
 #include <inttypes.h>
 #include <stddef.h>
 #include "pp_resource.h"
@@ -30,29 +31,6 @@
 #include "tables.h"
 #include "browser_object.h"
 
-
-void
-ppb_var_deprecated_add_ref(struct PP_Var var)
-{
-}
-
-void
-ppb_var_deprecated_release(struct PP_Var var)
-{
-}
-
-struct PP_Var
-ppb_var_deprecated_var_from_utf8(PP_Module module, const char *data, uint32_t len)
-{
-    struct PP_Var var = {0};
-    return var;
-}
-
-const char *
-ppb_var_deprecated_var_to_utf8(struct PP_Var var, uint32_t *len)
-{
-    return "placeholder";
-}
 
 bool
 ppb_var_deprecated_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
@@ -158,35 +136,35 @@ void
 trace_ppb_var_deprecated_add_ref(struct PP_Var var)
 {
     char *s_var = trace_var_as_string(var);
-    trace_info("[PPB] {zilch} %s var=%s\n", __func__+6, s_var);
+    trace_info("[PPB] {full} %s var=%s\n", __func__+6, s_var);
     free(s_var);
-    ppb_var_deprecated_add_ref(var);
+    ppb_var_add_ref(var);
 }
 
 void
 trace_ppb_var_deprecated_release(struct PP_Var var)
 {
     char *s_var = trace_var_as_string(var);
-    trace_info("[PPB] {zilch} %s var=%s\n", __func__+6, s_var);
+    trace_info("[PPB] {full} %s var=%s\n", __func__+6, s_var);
     free(s_var);
-    ppb_var_deprecated_release(var);
+    ppb_var_release(var);
 }
 
 struct PP_Var
 trace_ppb_var_deprecated_var_from_utf8(PP_Module module, const char *data, uint32_t len)
 {
-    trace_info("[PPB] {zilch} %s module=%d, data=%.*s, len=%u\n", __func__+6,
+    trace_info("[PPB] {full} %s module=%d, data=%.*s, len=%u\n", __func__+6,
                module, len, data, len);
-    return ppb_var_deprecated_var_from_utf8(module, data, len);
+    return ppb_var_var_from_utf8_1_0(module, data, len);
 }
 
 const char *
 trace_ppb_var_deprecated_var_to_utf8(struct PP_Var var, uint32_t *len)
 {
     char *s_var = trace_var_as_string(var);
-    trace_info("[PPB] {zilch} %s var=%s\n", __func__+6, s_var);
+    trace_info("[PPB] {full} %s var=%s\n", __func__+6, s_var);
     free(s_var);
-    return ppb_var_deprecated_var_to_utf8(var, len);
+    return ppb_var_var_to_utf8(var, len);
 }
 
 bool
