@@ -35,17 +35,105 @@
 bool
 ppb_var_deprecated_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
-    return false;
+    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING)
+        return false;
+    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+
+    if (obj->klass->HasProperty)
+        return obj->klass->HasProperty(obj->data, name, exception);
+    else
+        return false;
 }
 
 bool
 ppb_var_deprecated_has_method(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
-    return false;
+    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING)
+        return false;
+    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+
+    if (obj->klass->HasMethod)
+        return obj->klass->HasMethod(obj->data, name, exception);
+    else
+        return false;
 }
 
 struct PP_Var
 ppb_var_deprecated_get_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
+{
+    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return PP_MakeUndefined();
+    }
+
+    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+    if (obj->klass->GetProperty)
+        return obj->klass->GetProperty(obj, name, exception);
+    else
+        return PP_MakeUndefined();
+}
+
+void
+ppb_var_deprecated_get_all_property_names(struct PP_Var object, uint32_t *property_count,
+                                          struct PP_Var **properties, struct PP_Var *exception)
+{
+    if (object.type != PP_VARTYPE_OBJECT) {
+        // TODO: fill exception
+        return;
+    }
+
+    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+    if (obj->klass->GetAllPropertyNames)
+        obj->klass->GetAllPropertyNames(obj->data, property_count, properties, exception);
+}
+
+void
+ppb_var_deprecated_set_property(struct PP_Var object, struct PP_Var name, struct PP_Var value,
+                                struct PP_Var *exception)
+{
+    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return;
+    }
+
+    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+    if (obj->klass->SetProperty)
+        obj->klass->SetProperty(obj->data, name, value, exception);
+}
+
+void
+ppb_var_deprecated_remove_property(struct PP_Var object, struct PP_Var name,
+                                   struct PP_Var *exception)
+{
+    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return;
+    }
+
+    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+    if (obj->klass->RemoveProperty)
+        obj->klass->RemoveProperty(obj->data, name, exception);
+}
+
+struct PP_Var
+ppb_var_deprecated_call(struct PP_Var object, struct PP_Var method_name, uint32_t argc,
+                        struct PP_Var *argv, struct PP_Var *exception)
+{
+    if (object.type != PP_VARTYPE_OBJECT || method_name.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return PP_MakeUndefined();
+    }
+
+    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+    if (obj->klass->Call)
+        return obj->klass->Call(obj->data, method_name, argc, argv, exception);
+    else
+        return PP_MakeUndefined();
+}
+
+struct PP_Var
+ppb_var_deprecated_construct(struct PP_Var object, uint32_t argc, struct PP_Var *argv,
+                             struct PP_Var *exception)
 {
     if (object.type != PP_VARTYPE_OBJECT) {
         // TODO: fill exception
@@ -53,41 +141,10 @@ ppb_var_deprecated_get_property(struct PP_Var object, struct PP_Var name, struct
     }
 
     struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
-    return obj->klass->GetProperty(obj, name, exception);
-}
-
-void
-ppb_var_deprecated_get_all_property_names(struct PP_Var object, uint32_t *property_count,
-                                          struct PP_Var **properties, struct PP_Var *exception)
-{
-}
-
-void
-ppb_var_deprecated_set_property(struct PP_Var object, struct PP_Var name, struct PP_Var value,
-                                struct PP_Var *exception)
-{
-}
-
-void
-ppb_var_deprecated_remove_property(struct PP_Var object, struct PP_Var name,
-                                   struct PP_Var *exception)
-{
-}
-
-struct PP_Var
-ppb_var_deprecated_call(struct PP_Var object, struct PP_Var method_name, uint32_t argc,
-                        struct PP_Var *argv, struct PP_Var *exception)
-{
-    struct PP_Var var = {0};
-    return var;
-}
-
-struct PP_Var
-ppb_var_deprecated_construct(struct PP_Var object, uint32_t argc, struct PP_Var *argv,
-                             struct PP_Var *exception)
-{
-    struct PP_Var var = {0};
-    return var;
+    if (obj->klass->Construct)
+        return obj->klass->Construct(obj->data, argc, argv, exception);
+    else
+        return PP_MakeUndefined();
 }
 
 bool
@@ -110,6 +167,7 @@ ppb_var_deprecated_create_object(PP_Instance instance,
                                  const struct PPP_Class_Deprecated *object_class,
                                  void *object_data)
 {
+    (void)instance;
     struct PP_Var var;
     struct pp_var_object_s *obj;
 
@@ -127,7 +185,17 @@ struct PP_Var
 ppb_var_deprecated_create_object_with_module_deprecated(PP_Module module,
                             const struct PPP_Class_Deprecated *object_class, void *object_data)
 {
-    struct PP_Var var = {0};
+    (void)module;
+    struct PP_Var var;
+    struct pp_var_object_s *obj;
+
+    obj = malloc(sizeof(*obj));
+    var.type = PP_VARTYPE_OBJECT;
+    var.value.as_id = (int64_t)(size_t)obj;
+    obj->klass = object_class;
+    obj->data = object_data;
+    tables_ref_var(var);
+
     return var;
 }
 
@@ -173,7 +241,7 @@ trace_ppb_var_deprecated_has_property(struct PP_Var object, struct PP_Var name,
 {
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
-    trace_info("[PPB] {zilch} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
+    trace_info("[PPB] {full} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
     free(s_name);
     free(s_object);
     return ppb_var_deprecated_has_property(object, name, exception);
@@ -185,7 +253,7 @@ trace_ppb_var_deprecated_has_method(struct PP_Var object, struct PP_Var name,
 {
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
-    trace_info("[PPB] {zilch} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
+    trace_info("[PPB] {full} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
     free(s_name);
     free(s_object);
     return ppb_var_deprecated_has_method(object, name, exception);
@@ -209,7 +277,7 @@ trace_ppb_var_deprecated_get_all_property_names(struct PP_Var object, uint32_t *
                                                 struct PP_Var *exception)
 {
     char *s_object = trace_var_as_string(object);
-    trace_info("[PPB] {zilch} %s object=%s\n", __func__+6, s_object);
+    trace_info("[PPB] {full} %s object=%s\n", __func__+6, s_object);
     free(s_object);
     ppb_var_deprecated_get_all_property_names(object, property_count, properties, exception);
 }
@@ -221,7 +289,7 @@ trace_ppb_var_deprecated_set_property(struct PP_Var object, struct PP_Var name, 
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
     char *s_value = trace_var_as_string(value);
-    trace_info("[PPB] {zilch} %s object=%s, name=%s, value=%s\n", __func__+6, s_object, s_name,
+    trace_info("[PPB] {full} %s object=%s, name=%s, value=%s\n", __func__+6, s_object, s_name,
                s_value);
     free(s_object);
     free(s_name);
@@ -235,7 +303,7 @@ trace_ppb_var_deprecated_remove_property(struct PP_Var object, struct PP_Var nam
 {
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
-    trace_info("[PPB] {zilch} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
+    trace_info("[PPB] {full} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
     free(s_object);
     free(s_name);
     ppb_var_deprecated_remove_property(object, name, exception);
@@ -247,7 +315,7 @@ trace_ppb_var_deprecated_call(struct PP_Var object, struct PP_Var method_name, u
 {
     char *s_object = trace_var_as_string(object);
     char *s_method_name = trace_var_as_string(method_name);
-    trace_info("[PPB] {zilch} %s object=%s, method_name=%s, argc=%u, argv=TODO\n", __func__+6,
+    trace_info("[PPB] {full} %s object=%s, method_name=%s, argc=%u, argv=TODO\n", __func__+6,
                s_object, s_method_name, argc);
     free(s_object);
     free(s_method_name);
@@ -259,7 +327,7 @@ trace_ppb_var_deprecated_construct(struct PP_Var object, uint32_t argc, struct P
                                    struct PP_Var *exception)
 {
     char *s_object = trace_var_as_string(object);
-    trace_info("[PPB] {zilch} %s object=%s, argc=%u, argv=TODO\n", __func__+6, s_object, argc);
+    trace_info("[PPB] {full} %s object=%s, argc=%u, argv=TODO\n", __func__+6, s_object, argc);
     free(s_object);
     return ppb_var_deprecated_construct(object, argc, argv, exception);
 }
@@ -289,7 +357,7 @@ struct PP_Var
 trace_ppb_var_deprecated_create_object_with_module_deprecated(PP_Module module,
             const struct PPP_Class_Deprecated *object_class, void *object_data)
 {
-    trace_info("[PPB] {zilch} %s module=%d, object_class=%p, object_data=%p\n", __func__+6,
+    trace_info("[PPB] {full} %s module=%d, object_class=%p, object_data=%p\n", __func__+6,
                module, object_class, object_data);
     return ppb_var_deprecated_create_object_with_module_deprecated(module, object_class,
                                                                    object_data);
