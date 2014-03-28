@@ -283,8 +283,9 @@ ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHa
     (void)instance;
     char *tmpfname;
     // TODO: find a good directory for temporary files
-    asprintf(&tmpfname, "/tmp/FreshXXXXXX");
+    asprintf(&tmpfname, "/tmp/FreshTempXXXXXX");
     *file = mkstemp(tmpfname);
+    unlink(tmpfname);
     free(tmpfname);
     if (*file < 0)
         return PP_ERROR_FAILED;
