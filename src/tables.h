@@ -28,7 +28,9 @@
 #include <ppapi/c/pp_var.h>
 #include "pp_resource.h"
 #include <npruntime.h>
+#include <npfunctions.h>
 
+extern NPNetscapeFuncs npn;
 
 int         tables_ref_var(struct PP_Var var);
 int         tables_unref_var(struct PP_Var var);
@@ -37,6 +39,10 @@ PP_Resource tables_pop_url_pair(const char *url);
 
 struct pp_instance_s   *tables_get_pp_instance(PP_Instance instance);
 void                    tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i);
+
+void    tables_add_npp_instance(NPP npp);
+void    tables_remove_npp_instance(NPP npp);
+NPP     tables_get_some_npp_instance(void);
 
 struct PP_Var       PP_MakeString(const char *s);
 struct PP_Var       PP_MakeStringN(const char *s, unsigned int len);

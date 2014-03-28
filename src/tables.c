@@ -29,6 +29,8 @@
 #include "trace.h"
 
 
+NPNetscapeFuncs npn;
+
 // URL/urlloader resource mapping
 struct url_pair_s {
     const char *url;
@@ -38,6 +40,7 @@ struct url_pair_s {
 static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;
 static GList       *url_pair_list;
+static GHashTable  *npp_ht;
 
 static
 void
@@ -46,6 +49,7 @@ constructor_tables(void)
 {
     var_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
     pp_to_np_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+    npp_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
     url_pair_list = NULL;
 }
 
@@ -56,6 +60,7 @@ destructor_tables(void)
 {
     g_hash_table_unref(var_ht);
     g_hash_table_unref(pp_to_np_ht);
+    g_hash_table_unref(npp_ht);
     g_list_free(url_pair_list);
 }
 
@@ -190,4 +195,28 @@ np_variant_to_pp_var(NPVariant v, const struct pp_var_object_s *reference_obj)
     case NPVariantType_Object:  return PP_MakeBrowserObject(v.value.objectValue, reference_obj);
     default:                    return PP_MakeUndefined();
     }
+}
+
+void
+tables_add_npp_instance(NPP npp)
+{
+    g_hash_table_insert(npp_ht, (gpointer)npp, GINT_TO_POINTER(1));
+}
+
+void
+tables_remove_npp_instance(NPP npp)
+{
+    g_hash_table_remove(npp_ht, (gpointer)npp);
+}
+
+NPP
+tables_get_some_npp_instance(void)
+{
+    gpointer key, val;
+    GHashTableIter iter;
+
+    g_hash_table_iter_init(&iter, npp_ht);
+    g_hash_table_iter_next(&iter, &key, &val);
+
+    return key;
 }

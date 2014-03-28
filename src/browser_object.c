@@ -26,7 +26,6 @@
 #include "ppapi/c/dev/deprecated_bool.h"
 #include "trace.h"
 #include "tables.h"
-#include "globals.h"
 #include "pp_resource.h"
 #include <npruntime.h>
 

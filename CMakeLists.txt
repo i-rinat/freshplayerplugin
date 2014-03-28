@@ -32,7 +32,6 @@ link_directories(${REQ_LIBRARY_DIRS})
 add_library(freshwrapper SHARED
 	src/np_entry.c
 	src/np_functions.c
-	src/globals.c
 	src/reverse_constant.c
 	src/tables.c
 	src/trace.c

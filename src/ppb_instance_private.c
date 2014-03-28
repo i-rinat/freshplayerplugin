@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
-#include "globals.h"
 #include "browser_object.h"
 
 

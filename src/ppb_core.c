@@ -28,8 +28,8 @@
 #include <pthread.h>
 #include <time.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
-#include "globals.h"
 
 
 static pthread_t main_thread;
@@ -97,7 +97,7 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
     p->callback.user_data = callback.user_data;
     p->callback.flags = callback.flags;
     p->result_to_pass = result;
-    npn.pluginthreadasynccall(obligatory_npp_instance, comt_proxy, p);
+    npn.pluginthreadasynccall(tables_get_some_npp_instance(), comt_proxy, p);
     return;
 }
 

@@ -28,8 +28,8 @@
 #include <string.h>
 #include <ppapi/c/ppb.h>
 #include <ppapi/c/pp_module.h>
-#include "globals.h"
 #include "trace.h"
+#include "tables.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
 

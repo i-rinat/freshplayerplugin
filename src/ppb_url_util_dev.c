@@ -24,8 +24,7 @@
 
 #include "ppb_url_util_dev.h"
 #include "ppb_var.h"
-#include "globals.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #include <Uri.h>
 #include "trace.h"

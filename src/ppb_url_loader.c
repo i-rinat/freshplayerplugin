@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include "trace.h"
 #include "pp_resource.h"
-#include "globals.h"
 #include "tables.h"
 
 
@@ -67,21 +66,23 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
     return PP_RESOURCE_URL_LOADER == pp_resource_get_type(resource);
 }
 
-struct pair_s {
+struct triple_s {
         const char *url;
         PP_Resource loader;
+        PP_Instance instance;
 };
 
 static
 void
 _url_loader_open_comt(void *user_data, int32_t result)
 {
-    struct pair_s *pair = user_data;
+    struct triple_s *triple = user_data;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(triple->instance);
 
     // called on main thread
-    tables_push_url_pair(pair->url, pair->loader);
-    npn.geturl(obligatory_npp_instance, pair->url, NULL);
-    free(pair);
+    tables_push_url_pair(triple->url, triple->loader);
+    npn.geturl(pp_i->npp, triple->url, NULL);
+    free(triple);
 }
 
 int32_t
@@ -98,12 +99,13 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ppb_var_release(rel_url);
 
     uint32_t len;
-    struct pair_s *pair = malloc(sizeof(*pair));
-    pair->url = strdup(ppb_var_var_to_utf8(full_url, &len));
-    pair->loader = loader;
+    struct triple_s *triple = malloc(sizeof(*triple));
+    triple->url = strdup(ppb_var_var_to_utf8(full_url, &len));
+    triple->loader = loader;
+    triple->instance = ul->_.instance;
     ppb_var_release(full_url);
 
-    ul->url = strdup(pair->url);
+    ul->url = strdup(triple->url);
     ul->read_pos = 0;
 
     char *tmpfname;
@@ -114,7 +116,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     free(tmpfname);
     ul->fp = fdopen(fd, "wb+");
 
-    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = pair};
+    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = triple};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
     ul->ccb = callback;
 

@@ -26,7 +26,6 @@
 #include "ppb_core.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
-#include "globals.h"
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"

@@ -38,7 +38,6 @@
 #include <ppapi/c/ppp_instance.h>
 #include <ppapi/c/ppp_input_event.h>
 #include <ppapi/c/pp_errors.h>
-#include "globals.h"
 #include "ppb_input_event.h"
 
 
@@ -66,8 +65,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
     trace_info("[NPP] {part} %s pluginType=%s instance=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                pluginType, instance, mode, argc, saved);
 
-    if (!obligatory_npp_instance)
-        obligatory_npp_instance = instance;
+    tables_add_npp_instance(instance);
 
     for (k = 0; k < argc; k ++)
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
@@ -129,6 +127,7 @@ NPP_Destroy(NPP instance, NPSavedData **save)
     trace_info("[NPP] {full} %s instance=%p, save=%p\n", __func__, instance, save);
     struct pp_instance_s *pp_i = instance->pdata;
     pp_i->ppp_instance_1_1->DidDestroy(pp_i->pp_instance_id);
+    tables_remove_npp_instance(instance);
     if (save)
         *save = NULL;
     return NPERR_NO_ERROR;
