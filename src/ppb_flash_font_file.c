@@ -56,7 +56,13 @@ trace_ppb_flash_font_file_create(PP_Instance instance,
                                  const struct PP_BrowserFont_Trusted_Description *description,
                                  PP_PrivateFontCharset charset)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    char *s_face = trace_var_as_string(description->face);
+    trace_info("[PPB] {zilch} %s instance=%d, description={.face=%s, .family=%d, .size=%u, "
+               ".weight=%d, .italic=%u, .small_caps=%u, .letter_spacing=%d, .word_spacing=%d}, "
+               ".charset=%d\n", __func__+6, instance, s_face, description->family,
+               description->size, description->weight, description->italic, description->small_caps,
+               description->letter_spacing, description->word_spacing, charset);
+    free(s_face);
     return ppb_flash_font_file_create(instance, description, charset);
 }
 
@@ -64,7 +70,7 @@ static
 PP_Bool
 trace_ppb_flash_font_file_is_flash_font_file(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_flash_font_file_is_flash_font_file(resource);
 }
 
@@ -73,7 +79,7 @@ PP_Bool
 trace_ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *output,
                                          uint32_t *output_length)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s font_file=%d, table=%d\n", __func__+6, font_file, table);
     return ppb_flash_font_file_get_font_table(font_file, table, output, output_length);
 }
 
