@@ -120,7 +120,7 @@ ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type, PP_T
     ie->mouse_button = mouse_button;
     ie->mouse_position.x = mouse_position ? mouse_position->x : 0;
     ie->mouse_position.y = mouse_position ? mouse_position->y : 0;
-    ie->click_count = 0;
+    ie->click_count = click_count;
     ie->mouse_movement.x = mouse_movement ? mouse_movement->x : 0;
     ie->mouse_movement.y = mouse_movement ? mouse_movement->y : 0;
 
