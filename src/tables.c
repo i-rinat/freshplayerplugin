@@ -42,6 +42,9 @@ static GHashTable  *pp_to_np_ht;
 static GList       *url_pair_list;
 static GHashTable  *npp_ht;
 
+static PangoContext *pango_ctx = NULL;
+static PangoFontMap *pango_fm = NULL;
+
 static
 void
 __attribute__((constructor))
@@ -51,6 +54,10 @@ constructor_tables(void)
     pp_to_np_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
     npp_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
     url_pair_list = NULL;
+
+    // pango
+    pango_fm = pango_ft2_font_map_new();
+    pango_ctx = pango_font_map_create_context(pango_fm);
 }
 
 static
@@ -62,6 +69,12 @@ destructor_tables(void)
     g_hash_table_unref(pp_to_np_ht);
     g_hash_table_unref(npp_ht);
     g_list_free(url_pair_list);
+
+    // pango
+    g_object_unref(pango_ctx);
+    g_object_unref(pango_fm);
+    pango_ctx = NULL;
+    pango_fm = NULL;
 }
 
 int
@@ -218,4 +231,16 @@ tables_get_some_npp_instance(void)
     g_hash_table_iter_next(&iter, &key, &val);
 
     return key;
+}
+
+PangoContext *
+tables_get_pango_ctx(void)
+{
+    return pango_ctx;
+}
+
+PangoFontMap *
+tables_get_pango_font_map(void)
+{
+    return pango_fm;
 }

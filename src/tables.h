@@ -49,4 +49,7 @@ struct PP_Var       PP_MakeStringN(const char *s, unsigned int len);
 struct PP_Var       PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj);
 struct PP_Var       np_variant_to_pp_var(NPVariant v, const struct pp_var_object_s *reference_obj);
 
+PangoContext   *tables_get_pango_ctx(void);
+PangoFontMap   *tables_get_pango_font_map(void);
+
 #endif // FPP__TABLES_H

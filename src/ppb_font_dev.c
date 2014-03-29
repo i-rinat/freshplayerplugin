@@ -35,10 +35,8 @@ ppb_font_dev_get_font_families(PP_Instance instance)
 {
     PangoFontFamily **families;
     int n, k, total_len;
-    PangoFontMap *fm;
 
-    fm = pango_ft2_font_map_new();
-    pango_font_map_list_families(fm, &families, &n);
+    pango_font_map_list_families(tables_get_pango_font_map(), &families, &n);
     total_len = 0;
     for (k = 0; k < n; k ++) {
         const char *name = pango_font_family_get_name(families[k]);
@@ -57,7 +55,6 @@ ppb_font_dev_get_font_families(PP_Instance instance)
     struct PP_Var var = PP_MakeStringN(s, total_len);
     free(s);
     g_free(families);
-    g_object_unref(fm);
 
     return var;
 }
