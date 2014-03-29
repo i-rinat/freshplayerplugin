@@ -57,6 +57,7 @@ add_library(freshwrapper SHARED
 	src/ppb_flash_fullscreen.c
 	src/ppb_flash.c
 	src/ppb_flash_menu.c
+	src/ppb_font_dev.c
 	src/ppb_graphics2d.c
 	src/ppb_graphics3d.c
 	src/ppb_image_data.c
