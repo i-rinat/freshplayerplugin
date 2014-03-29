@@ -188,6 +188,7 @@ struct pp_browser_font_s {
     PangoFontDescription   *font_desc;
     int32_t                 letter_spacing;
     int32_t                 word_spacing;
+    int32_t                 family;
 };
 
 struct pp_audio_config_s {

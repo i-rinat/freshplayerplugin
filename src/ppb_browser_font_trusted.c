@@ -76,25 +76,26 @@ ppb_browser_font_trusted_create(PP_Instance instance,
         s[len] = 0;
         font_desc = pango_font_description_from_string(s);
         free(s);
+        bf->family = -1;
     } else {
         font_desc = pango_font_description_new();
-    }
-
-    switch (description->family) {
-    case PP_BROWSERFONT_TRUSTED_FAMILY_SERIF:
-        pango_font_description_set_family(font_desc, "serif");
-        break;
-    case PP_BROWSERFONT_TRUSTED_FAMILY_SANSSERIF:
-        pango_font_description_set_family(font_desc, "sans-serif");
-        break;
-    case PP_BROWSERFONT_TRUSTED_FAMILY_MONOSPACE:
-        pango_font_description_set_family(font_desc, "monospace");
-        break;
-    case PP_BROWSERFONT_TRUSTED_FAMILY_DEFAULT:
-        // fall through
-    default:
-        // do nothing
-        break;
+        switch (description->family) {
+        case PP_BROWSERFONT_TRUSTED_FAMILY_SERIF:
+            pango_font_description_set_family(font_desc, "serif");
+            break;
+        case PP_BROWSERFONT_TRUSTED_FAMILY_SANSSERIF:
+            pango_font_description_set_family(font_desc, "sans-serif");
+            break;
+        case PP_BROWSERFONT_TRUSTED_FAMILY_MONOSPACE:
+            pango_font_description_set_family(font_desc, "monospace");
+            break;
+        case PP_BROWSERFONT_TRUSTED_FAMILY_DEFAULT:
+            // fall through
+        default:
+            // do nothing
+            break;
+        }
+        bf->family = description->family;
     }
 
     pango_font_description_set_absolute_size(font_desc, description->size * PANGO_SCALE);
@@ -143,9 +144,9 @@ ppb_browser_font_trusted_describe(PP_Resource font,
     const char *s_family = pango_font_description_get_family(bf->font_desc);
     description->face = PP_MakeString(s_family);
 
-    description->family = PP_BROWSERFONT_TRUSTED_FAMILY_DEFAULT; // TODO: determine family
+    description->family = bf->family >= 0 ? bf->family : 0;
 
-    description->size = pango_font_description_get_size(bf->font_desc);
+    description->size = pango_font_description_get_size(bf->font_desc) / PANGO_SCALE;
     description->weight = pango_font_description_get_weight(bf->font_desc)/100 - 1;
     description->italic = (pango_font_description_get_style(bf->font_desc) != PANGO_STYLE_NORMAL);
     description->small_caps =
