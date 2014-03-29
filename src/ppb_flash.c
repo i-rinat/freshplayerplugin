@@ -51,8 +51,7 @@ ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
 struct PP_Var
 ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
 {
-    struct PP_Var var = {0};
-    return var;
+    return PP_MakeUndefined();
 }
 
 int32_t
@@ -97,7 +96,7 @@ ppb_flash_update_activity(PP_Instance instance)
 struct PP_Var
 ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
-    struct PP_Var var = {0};
+    struct PP_Var var = PP_MakeUndefined();
 
     switch (setting) {
     case PP_FLASHSETTING_3DENABLED:
@@ -171,8 +170,7 @@ ppb_flash_invoke_printing(PP_Instance instance)
 struct PP_Var
 ppb_flash_get_device_id(PP_Instance instance)
 {
-    struct PP_Var var = {0};
-    return var;
+    return PP_MakeUndefined();
 }
 
 int32_t

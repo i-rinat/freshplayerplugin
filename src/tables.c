@@ -140,24 +140,23 @@ tables_pop_url_pair(const char *url)
 struct PP_Var
 PP_MakeString(const char *s)
 {
-    struct PP_Var var;
-
-    var.type = PP_VARTYPE_STRING;
-    var.value.as_id = (size_t)(void *)strdup(s ? s : "");
-    tables_ref_var(var);
-    return var;
+    return PP_MakeStringN(s, strlen(s));
 }
 
 struct PP_Var
 PP_MakeStringN(const char *s, unsigned int len)
 {
+    // strings are stored in format   [size]    [data...]
+    //                              (uint32_t)   (char)...
+    // where (size) is uint32_t string length, and (data) is actual
+    // string contents with appended '\0'
+
+    char *ptr = malloc(sizeof(uint32_t) + len + 1);
+    *(uint32_t *)ptr = len;
+    memcpy(ptr + sizeof(uint32_t), s, len);
+    ptr[len + sizeof(uint32_t)] = 0;
+
     struct PP_Var var;
-    char *ptr;
-
-    ptr = malloc(len + 1);
-    memcpy(ptr, s, len);
-    ptr[len] = 0;
-
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (size_t)(void *)ptr;
     tables_ref_var(var);

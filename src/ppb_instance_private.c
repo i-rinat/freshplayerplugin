@@ -33,39 +33,29 @@
 struct PP_Var
 ppb_instance_private_get_window_object(PP_Instance instance)
 {
-    struct PP_Var var = {0};
-    struct pp_var_object_s *obj;
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     NPObject *np_window_obj;
 
     if (!pp_i) {
         trace_error("%s, wrong instance %d\n", __func__, instance);
-        return var;
+        return PP_MakeUndefined();
     }
 
     NPError err = npn.getvalue(pp_i->npp, NPNVWindowNPObject, &np_window_obj);
     if (err != NPERR_NO_ERROR) {
         trace_error("%s, NPN_GetValue returned %d\n", __func__, err);
-        return var;
+        return PP_MakeUndefined();
     }
 
-    obj = malloc(sizeof(*obj));
-    obj->klass = &browser_object_class;
-    obj->data = np_window_obj;
-    obj->npp =  pp_i->npp;
-
-    var.type = PP_VARTYPE_OBJECT;
-    var.value.as_id = (size_t)(void *)obj;
-    tables_ref_var(var);
-
-    return var;
+    struct pp_var_object_s reference_obj =
+        { .klass = &browser_object_class, .data = NULL, .npp = pp_i->npp };
+    return PP_MakeBrowserObject(np_window_obj, &reference_obj);
 }
 
 struct PP_Var
 ppb_instance_private_get_owner_element_object(PP_Instance instance)
 {
-    struct PP_Var var = {0};
-    return var;
+    return PP_MakeUndefined();
 }
 
 struct PP_Var

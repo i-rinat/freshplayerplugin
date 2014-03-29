@@ -89,12 +89,14 @@ const char *
 ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
 {
     if (PP_VARTYPE_STRING == var.type) {
-        const char *s = (void *)(size_t)var.value.as_id;
-        *len = strlen(s);
+        const char *s = (void *)(size_t)(var.value.as_id + sizeof(uint32_t));
+        if (len)
+            *len = *(uint32_t *)(size_t)(var.value.as_id);
         return s;
     } else {
         trace_warning("var is not a string in %s\n", __func__);
-        *len = 0;
+        if (len)
+            *len = 0;
         return "";
     }
 }

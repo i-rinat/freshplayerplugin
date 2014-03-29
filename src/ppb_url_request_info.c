@@ -30,6 +30,7 @@
 #include "trace.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
+#include "ppb_var.h"
 
 
 PP_Resource
@@ -62,7 +63,7 @@ PP_Bool
 ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty property,
                                   struct PP_Var value)
 {
-    char *tmp;
+    const char *tmp;
     PP_Bool retval = PP_TRUE;
     struct pp_url_request_info_s *ri = pp_resource_acquire(request, PP_RESOURCE_URL_REQUEST_INFO);
     if (!ri) {
@@ -77,11 +78,11 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         ENSURE_TYPE(PP_VARTYPE_STRING);
         if (ri->url)
             free(ri->url);
-        ri->url = strdup((void*)(size_t)value.value.as_id);
+        ri->url = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_METHOD:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        tmp = (void *)(size_t)value.value.as_id;
+        tmp = ppb_var_var_to_utf8(value, NULL);
         if (strcmp(tmp, "GET") == 0) {
             ri->method = PP_METHOD_GET;
         } else if (strcmp(tmp, "POST") == 0) {
@@ -95,7 +96,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         ENSURE_TYPE(PP_VARTYPE_STRING);
         if (ri->headers)
             free(ri->headers);
-        ri->headers = strdup((void *)(size_t)value.value.as_id);
+        ri->headers = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_STREAMTOFILE:
         ENSURE_TYPE(PP_VARTYPE_BOOL);
@@ -117,7 +118,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         ENSURE_TYPE(PP_VARTYPE_STRING);
         if (ri->custom_referrer_url)
             free(ri->custom_referrer_url);
-        ri->custom_referrer_url = strdup((void *)(size_t)value.value.as_id);
+        ri->custom_referrer_url = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_ALLOWCROSSORIGINREQUESTS:
         ENSURE_TYPE(PP_VARTYPE_BOOL);
@@ -131,7 +132,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         ENSURE_TYPE(PP_VARTYPE_STRING);
         if (ri->custom_content_transfer_encoding)
             free(ri->custom_content_transfer_encoding);
-        ri->custom_content_transfer_encoding = strdup((void *)(size_t)value.value.as_id);
+        ri->custom_content_transfer_encoding = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_PREFETCHBUFFERUPPERTHRESHOLD:
         ENSURE_TYPE(PP_VARTYPE_INT32);
@@ -145,7 +146,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         ENSURE_TYPE(PP_VARTYPE_STRING);
         if (ri->custom_user_agent)
             free(ri->custom_user_agent);
-        ri->custom_user_agent = strdup((void *)(size_t)value.value.as_id);
+        ri->custom_user_agent = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     default:
         trace_error("%s, unknown url request property %d\n", __func__, property);

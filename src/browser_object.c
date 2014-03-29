@@ -28,6 +28,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include <npruntime.h>
+#include "ppb_var.h"
 
 
 static
@@ -53,7 +54,7 @@ bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
         return PP_MakeUndefined();
     }
 
-    const char *s_name = (void *)(size_t)name.value.as_id;
+    const char *s_name = ppb_var_var_to_utf8(name, NULL);
     const struct pp_var_object_s *obj = object;
     NPIdentifier identifier = npn.getstringidentifier(s_name);
     NPVariant np_value;
@@ -91,16 +92,14 @@ struct PP_Var
 bobj_Call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
           struct PP_Var *exception)
 {
-    struct PP_Var var = {0};
-    return var;
+    return PP_MakeUndefined();
 }
 
 static
 struct PP_Var
 bobj_Construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
-    struct PP_Var var = {0};
-    return var;
+    return PP_MakeUndefined();
 }
 
 static

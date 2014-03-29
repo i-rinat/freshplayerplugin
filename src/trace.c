@@ -85,7 +85,8 @@ trace_var_as_string(struct PP_Var var)
         asprintf(&res, "{DOUBLE:%f}", var.value.as_double);
         break;
     case PP_VARTYPE_STRING:
-        asprintf(&res, "{STRING:%s}", (char*)(size_t)var.value.as_id);
+        // TODO: handle inline '\0's
+        asprintf(&res, "{STRING:%s}", (char*)(size_t)(var.value.as_id + sizeof(uint32_t)));
         break;
     case PP_VARTYPE_OBJECT:
         {

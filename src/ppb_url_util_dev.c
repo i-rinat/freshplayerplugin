@@ -103,8 +103,7 @@ parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
 struct PP_Var
 ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
-    struct PP_Var var = {0};
-    return var;
+    return PP_MakeUndefined();
 }
 
 struct PP_Var
@@ -123,8 +122,8 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
         return PP_MakeNull();
     }
 
-    const char *s_base_url = (void *)(size_t)base_url.value.as_id;
-    const char *s_relative_string = (void *)(size_t)relative_string.value.as_id;
+    const char *s_base_url = ppb_var_var_to_utf8(base_url, NULL);
+    const char *s_relative_string = ppb_var_var_to_utf8(relative_string, NULL);
 
     UriParserStateA ups;
     UriUriA uri_base, uri_rel, uri_result;
@@ -215,7 +214,7 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
     npn.releasevariantvalue(&href_var);
 
     if (components)
-        parse_url_string((void*)(size_t)result.value.as_id, components);
+        parse_url_string(ppb_var_var_to_utf8(result, NULL), components);
 
     return result;
 }
@@ -228,7 +227,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
     struct PP_Var var = PP_MakeString(pp_i->instance_url);
 
     if (components)
-        parse_url_string((void*)(size_t)var.value.as_id, components);
+        parse_url_string(ppb_var_var_to_utf8(var, NULL), components);
 
     return var;
 }
@@ -237,8 +236,7 @@ struct PP_Var
 ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
-    struct PP_Var var = {0};
-    return var;
+    return PP_MakeUndefined();
 }
 
 // trace wrappers
