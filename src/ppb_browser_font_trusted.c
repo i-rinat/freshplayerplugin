@@ -211,7 +211,7 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
     pango_layout_set_font_description(layout, bf->font_desc);
     pango_layout_set_text(layout, s, len);
     pango_cairo_layout_path(cr, layout);
-    cairo_stroke(cr);
+    cairo_fill(cr);
     g_object_unref(layout);
     cairo_surface_flush(id->cairo_surf);
     cairo_destroy(cr);
