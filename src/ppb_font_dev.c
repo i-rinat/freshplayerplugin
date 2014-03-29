@@ -25,12 +25,41 @@
 #include "ppb_font_dev.h"
 #include <stdlib.h>
 #include "trace.h"
+#include <glib.h>
+#include <pango/pangoft2.h>
+#include "tables.h"
 
 
 struct PP_Var
 ppb_font_dev_get_font_families(PP_Instance instance)
 {
-    return PP_MakeUndefined();
+    PangoFontFamily **families;
+    int n, k, total_len;
+    PangoFontMap *fm;
+
+    fm = pango_ft2_font_map_new();
+    pango_font_map_list_families(fm, &families, &n);
+    total_len = 0;
+    for (k = 0; k < n; k ++) {
+        const char *name = pango_font_family_get_name(families[k]);
+        total_len += strlen(name) + 1; // with '\0' at the end
+    }
+
+    char *s = malloc(total_len);
+    char *ptr = s;
+    for (k = 0; k < n; k ++) {
+        const char *name = pango_font_family_get_name(families[k]);
+        const int len = strlen(name);
+        memcpy(ptr, name, len + 1); // with '\0' at the end
+        ptr += len + 1;
+    }
+
+    struct PP_Var var = PP_MakeStringN(s, total_len);
+    free(s);
+    g_free(families);
+    g_object_unref(fm);
+
+    return var;
 }
 
 PP_Resource
@@ -86,7 +115,7 @@ static
 struct PP_Var
 trace_ppb_font_dev_get_font_families(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_font_dev_get_font_families(instance);
 }
 
