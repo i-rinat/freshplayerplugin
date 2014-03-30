@@ -32,6 +32,9 @@ ppb_flash_font_file_create(PP_Instance instance,
                            const struct PP_BrowserFont_Trusted_Description *description,
                            PP_PrivateFontCharset charset);
 
+void
+ppb_flash_font_file_destroy(void *ptr);
+
 PP_Bool
 ppb_flash_font_file_is_flash_font_file(PP_Resource resource);
 

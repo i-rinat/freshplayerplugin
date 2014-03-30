@@ -28,10 +28,12 @@
 #include <ppapi/c/pp_completion_callback.h>
 #include <ppapi/c/pp_rect.h>
 #include <ppapi/c/pp_resource.h>
+#include <ppapi/c/private/pp_private_font_charset.h>
 #include <ppapi/c/ppb_image_data.h>
 #include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
+
 #include <stddef.h>
 #include <X11/Xlib.h>
 #include <npapi.h>
@@ -59,6 +61,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_AUDIO_CONFIG,
     PP_RESOURCE_AUDIO,
     PP_RESOURCE_INPUT_EVENT,
+    PP_RESOURCE_FLASH_FONT_FILE,
 };
 
 enum pp_request_method_e {
@@ -220,6 +223,13 @@ struct pp_input_event_s {
     struct PP_Point             mouse_position;
     int32_t                     click_count;
     struct PP_Point             mouse_movement;
+};
+
+struct pp_flash_font_file_s {
+    struct pp_resource_generic_s _;
+    PangoFont              *font;
+    FT_Face                 ft_face;
+    PP_PrivateFontCharset   charset;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
