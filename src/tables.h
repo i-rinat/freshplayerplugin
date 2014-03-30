@@ -26,9 +26,11 @@
 #define FPP__TABLES_H
 
 #include <ppapi/c/pp_var.h>
+#include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 #include "pp_resource.h"
 #include <npruntime.h>
 #include <npfunctions.h>
+
 
 extern NPNetscapeFuncs npn;
 
@@ -51,5 +53,8 @@ struct PP_Var       np_variant_to_pp_var(NPVariant v, const struct pp_var_object
 
 PangoContext   *tables_get_pango_ctx(void);
 PangoFontMap   *tables_get_pango_font_map(void);
+
+PangoFontDescription *
+pp_font_desc_to_pango_font_desc(const struct PP_BrowserFont_Trusted_Description *description);
 
 #endif // FPP__TABLES_H

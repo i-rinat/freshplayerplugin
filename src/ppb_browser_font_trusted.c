@@ -43,46 +43,9 @@ ppb_browser_font_trusted_create(PP_Instance instance,
 {
     PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, instance);
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
-    PangoFontDescription *font_desc;
+    PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
 
-    if (description->face.type == PP_VARTYPE_STRING) {
-        uint32_t len;
-        const char *sn = ppb_var_var_to_utf8(description->face, &len);
-        char *s = malloc(len + 1);
-
-        memcpy(s, sn, len);
-        s[len] = 0;
-        font_desc = pango_font_description_from_string(s);
-        free(s);
-        bf->family = -1;
-    } else {
-        font_desc = pango_font_description_new();
-        switch (description->family) {
-        case PP_BROWSERFONT_TRUSTED_FAMILY_SERIF:
-            pango_font_description_set_family(font_desc, "serif");
-            break;
-        case PP_BROWSERFONT_TRUSTED_FAMILY_SANSSERIF:
-            pango_font_description_set_family(font_desc, "sans-serif");
-            break;
-        case PP_BROWSERFONT_TRUSTED_FAMILY_MONOSPACE:
-            pango_font_description_set_family(font_desc, "monospace");
-            break;
-        case PP_BROWSERFONT_TRUSTED_FAMILY_DEFAULT:
-            // fall through
-        default:
-            // do nothing
-            break;
-        }
-        bf->family = description->family;
-    }
-
-    pango_font_description_set_absolute_size(font_desc, description->size * PANGO_SCALE);
-    pango_font_description_set_weight(font_desc, (description->weight + 1) * 100);
-    if (description->italic)
-        pango_font_description_set_style(font_desc, PANGO_STYLE_ITALIC);
-    if (description->small_caps)
-        pango_font_description_set_variant(font_desc, PANGO_VARIANT_SMALL_CAPS);
-
+    bf->family = description->face.type == PP_VARTYPE_STRING ? -1 : description->family;
     bf->letter_spacing = description->letter_spacing;
     bf->word_spacing = description->word_spacing;
     bf->font = pango_context_load_font(tables_get_pango_ctx(), font_desc);
