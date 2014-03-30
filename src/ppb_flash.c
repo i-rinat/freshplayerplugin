@@ -200,16 +200,22 @@ trace_ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
 {
     char *position_str = trace_point_as_string(position);
     char *clip_str = trace_rect_as_string(clip);
-    trace_info("[PPB] {zilch} %s instance=%d, pp_image_data=%d, font_desc=%p, color=0x%x, "
-               "position=%s, clip=%s, transformation={{%f,%f,%f},{%f,%f,%f},{%f,%f,%f}}, "
-               "allow_subpixel_aa=%d, glyph_count=%u, glyph_indices=%p, glyph_advances=%p\n",
-               __func__+6, instance, pp_image_data, font_desc, color, position_str, clip_str,
+    char *s_face = trace_var_as_string(font_desc->face);
+    trace_info("[PPB] {zilch} %s instance=%d, pp_image_data=%d, font_desc={.face=%s, .family=%d, "
+               ".size=%u, .weight=%d, .italic=%u, .small_caps=%u, .letter_spacing=%d, "
+               ".word_spacing=%d}, color=0x%x, position=%s, clip=%s, transformation={{%f,%f,%f},"
+               "{%f,%f,%f},{%f,%f,%f}}, allow_subpixel_aa=%d, glyph_count=%u, glyph_indices=%p, "
+               "glyph_advances=%p\n", __func__+6, instance, pp_image_data, s_face,
+               font_desc->family, font_desc->size, font_desc->weight, font_desc->italic,
+               font_desc->small_caps, font_desc->letter_spacing, font_desc->word_spacing,
+               color, position_str, clip_str,
                transformation[0][0], transformation[0][1], transformation[0][2],
                transformation[1][0], transformation[1][1], transformation[1][2],
                transformation[2][0], transformation[2][1], transformation[2][2],
                allow_subpixel_aa, glyph_count, glyph_indices, glyph_advances);
     free(position_str);
     free(clip_str);
+    free(s_face);
     return ppb_flash_draw_glyphs(instance, pp_image_data, font_desc, color, position, clip,
                                  transformation, allow_subpixel_aa, glyph_count, glyph_indices,
                                  glyph_advances);
