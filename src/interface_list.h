@@ -57,6 +57,7 @@
 #include <ppapi/c/dev/ppb_text_input_dev.h>
 #include <ppapi/c/dev/ppb_url_util_dev.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>
+#include <ppapi/c/dev/ppb_view_dev.h>
 #include <ppapi/c/dev/ppb_video_capture_dev.h>
 
 #include <ppapi/c/private/ppb_flash_clipboard.h>
@@ -132,6 +133,7 @@ extern const struct PPB_Var_1_0                     ppb_var_interface_1_0;
 extern const struct PPB_Var_1_1                     ppb_var_interface_1_1;
 extern const struct PPB_Var_Deprecated              ppb_var_deprecated_interface_0_3;
 extern const struct PPB_VideoCapture_Dev_0_3        ppb_video_capture_dev_interface_0_3;
+extern const struct PPB_View_Dev_0_1                ppb_view_dev_interface_0_1;
 extern const struct PPB_View_1_0                    ppb_view_interface_1_0;
 extern const struct PPB_View_1_1                    ppb_view_interface_1_1;
 extern const struct PPB_WheelInputEvent_1_0         ppb_wheel_input_event_interface_1_0;

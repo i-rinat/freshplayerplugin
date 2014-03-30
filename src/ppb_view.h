@@ -26,6 +26,7 @@
 #define FPP__PPB_VIEW_H
 
 #include <ppapi/c/ppb_view.h>
+#include <ppapi/c/dev/ppb_view_dev.h>
 
 PP_Bool
 ppb_view_is_view(PP_Resource resource);

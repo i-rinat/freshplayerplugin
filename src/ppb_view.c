@@ -150,6 +150,11 @@ trace_ppb_view_get_css_scale(PP_Resource resource)
     return ppb_view_get_css_scale(resource);
 }
 
+const struct PPB_View_Dev_0_1 ppb_view_dev_interface_0_1 = {
+    .GetDeviceScale =   trace_ppb_view_get_device_scale,
+    .GetCSSScale =      trace_ppb_view_get_css_scale,
+};
+
 const struct PPB_View_1_0 ppb_view_interface_1_0 = {
     .IsView =           trace_ppb_view_is_view,
     .GetRect =          trace_ppb_view_get_rect,
