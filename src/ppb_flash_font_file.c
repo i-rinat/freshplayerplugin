@@ -92,7 +92,6 @@ ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *
         retval = ft_error == 0 ? PP_TRUE : PP_FALSE;
     }
 
-printf("=== *output_length = %u, error=%d\n", *output_length, ft_error);
     pp_resource_release(font_file);
     return retval;
 }
