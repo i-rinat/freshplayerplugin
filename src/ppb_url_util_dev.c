@@ -26,7 +26,7 @@
 #include "ppb_var.h"
 #include <stdlib.h>
 #include <string.h>
-#include <Uri.h>
+#include <uriparser/Uri.h>
 #include "trace.h"
 #include "tables.h"
 

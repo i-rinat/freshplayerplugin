@@ -29,7 +29,7 @@
 #include <ppapi/c/ppb_file_io.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <Uri.h>
+#include <uriparser/Uri.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
