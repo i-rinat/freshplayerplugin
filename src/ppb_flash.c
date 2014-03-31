@@ -29,6 +29,8 @@
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
+#include "ppb_var.h"
+#include <ppapi/c/dev/ppb_font_dev.h>
 
 
 void
@@ -45,6 +47,79 @@ ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
                       uint32_t glyph_count, const uint16_t glyph_indices[],
                       const struct PP_Point glyph_advances[])
 {
+    struct pp_image_data_s *id = pp_resource_acquire(pp_image_data, PP_RESOURCE_IMAGE_DATA);
+    if (!id) {
+        return PP_FALSE;
+    }
+
+    cairo_t *cr = cairo_create(id->cairo_surf);
+
+    const char *font_family;
+    if (font_desc->face.type == PP_VARTYPE_STRING) {
+        font_family = ppb_var_var_to_utf8(font_desc->face, NULL);
+    } else {
+        switch (font_desc->family) {
+        case PP_BROWSERFONT_TRUSTED_FAMILY_SERIF:
+            font_family = "serif";
+            break;
+        case PP_BROWSERFONT_TRUSTED_FAMILY_SANSSERIF:
+            font_family = "sans-serif";
+            break;
+        case PP_BROWSERFONT_TRUSTED_FAMILY_MONOSPACE:
+            font_family = "monospace";
+            break;
+        default:
+            font_family = "";
+            break;
+        }
+    }
+
+    cairo_select_font_face(cr, font_family,
+                           font_desc->italic ? CAIRO_FONT_SLANT_ITALIC
+                                             : CAIRO_FONT_SLANT_NORMAL,
+                           font_desc->weight >= (int)PP_FONTWEIGHT_700 ? CAIRO_FONT_WEIGHT_BOLD
+                                                                       : CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, font_desc->size);
+
+    if (allow_subpixel_aa) {
+        cairo_font_options_t *options = cairo_font_options_create();
+        cairo_font_options_set_antialias(options, CAIRO_ANTIALIAS_SUBPIXEL);
+        cairo_set_font_options(cr, options);
+        cairo_font_options_destroy(options);
+    }
+
+    if (clip) {
+        cairo_rectangle(cr, clip->point.x, clip->point.y, clip->size.width, clip->size.height);
+        cairo_clip(cr);
+    }
+
+    cairo_set_source_rgba(cr, ((color >> 16) & 0xffu) / 255.0,
+                              ((color >> 8) & 0xffu) / 255.0,
+                              ((color >> 0) & 0xffu) / 255.0,
+                              ((color >> 24) & 0xffu) / 255.0);
+
+    cairo_matrix_t matrix;
+    cairo_matrix_init(&matrix, transformation[0][0], transformation[0][1],
+                               transformation[1][0], transformation[1][1],
+                               transformation[0][2], transformation[1][2]);
+    cairo_set_matrix(cr, &matrix);
+
+    cairo_glyph_t *c_glyphs = malloc(glyph_count * sizeof(cairo_glyph_t));
+    struct PP_Point current = {.x = 0, .y = 0};
+    for (uint32_t k = 0; k < glyph_count; k ++) {
+        c_glyphs[k].index = glyph_indices[k];
+        c_glyphs[k].x = current.x;
+        c_glyphs[k].y = current.y;
+        current.x += glyph_advances[k].x;
+        current.y += glyph_advances[k].y;
+    }
+    cairo_show_glyphs(cr, c_glyphs, glyph_count);
+    free(c_glyphs);
+
+    cairo_surface_flush(id->cairo_surf);
+    cairo_destroy(cr);
+
+    pp_resource_release(pp_image_data);
     return PP_TRUE;
 }
 
@@ -201,7 +276,7 @@ trace_ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
     char *position_str = trace_point_as_string(position);
     char *clip_str = trace_rect_as_string(clip);
     char *s_face = trace_var_as_string(font_desc->face);
-    trace_info("[PPB] {zilch} %s instance=%d, pp_image_data=%d, font_desc={.face=%s, .family=%d, "
+    trace_info("[PPB] {full} %s instance=%d, pp_image_data=%d, font_desc={.face=%s, .family=%d, "
                ".size=%u, .weight=%d, .italic=%u, .small_caps=%u, .letter_spacing=%d, "
                ".word_spacing=%d}, color=0x%x, position=%s, clip=%s, transformation={{%f,%f,%f},"
                "{%f,%f,%f},{%f,%f,%f}}, allow_subpixel_aa=%d, glyph_count=%u, glyph_indices=%p, "
