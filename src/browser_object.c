@@ -119,7 +119,7 @@ static
 bool
 trace_bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {zilch} %s\n", __func__+6);
     return bobj_HasProperty(object, name, exception);
 }
 
@@ -127,7 +127,7 @@ static
 bool
 trace_bobj_HasMethod(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {zilch} %s\n", __func__+6);
     return bobj_HasMethod(object, name, exception);
 }
 
@@ -136,7 +136,7 @@ struct PP_Var
 trace_bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     char *s_name = trace_var_as_string(name);
-    trace_info("[cls] {full} %s object=%p, name=%s\n", __func__+6, object, s_name);
+    trace_info("[CLS] {full} %s object=%p, name=%s\n", __func__+6, object, s_name);
     free(s_name);
     return bobj_GetProperty(object, name, exception);
 }
@@ -146,7 +146,7 @@ void
 trace_bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties, 
                                struct PP_Var *exception)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {zilch} %s\n", __func__+6);
     bobj_GetAllPropertyNames(object, property_count, properties, exception);
 }
 
@@ -155,7 +155,7 @@ void
 trace_bobj_SetProperty(void *object, struct PP_Var name, struct PP_Var value,
                        struct PP_Var *exception)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {zilch} %s\n", __func__+6);
     bobj_SetProperty(object, name, value, exception);
 }
 
@@ -163,7 +163,7 @@ static
 void
 trace_bobj_RemoveProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {zilch} %s\n", __func__+6);
     bobj_RemoveProperty(object, name, exception);
 }
 
@@ -172,7 +172,7 @@ struct PP_Var
 trace_bobj_Call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
                 struct PP_Var *exception)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {zilch} %s\n", __func__+6);
     return bobj_Call(object, method_name, argc, argv, exception);
 }
 
@@ -180,7 +180,7 @@ static
 struct PP_Var
 trace_bobj_Construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
-    trace_info("[cls] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {zilch} %s\n", __func__+6);
     return bobj_Construct(object, argc, argv, exception);
 }
 
@@ -188,7 +188,7 @@ static
 void
 trace_bobj_Deallocate(void *object)
 {
-    trace_info("[cls] {full} %s\n", __func__+6);
+    trace_info("[CLS] {full} %s\n", __func__+6);
     bobj_Deallocate(object);
 }
 
