@@ -66,7 +66,19 @@ iobj_invalidate(NPObject *npobj)
 bool
 iobj_has_method(NPObject *npobj, NPIdentifier name)
 {
-    return true;
+    if (!npn.identifierisstring(name))
+        return false;
+
+    struct instance_object_s *obj = (void *)npobj;
+    char *s = npn.utf8fromidentifier(name);
+    struct PP_Var exception = PP_MakeUndefined();
+    struct PP_Var method_name = PP_MakeString(s);
+    npn.memfree(s);
+    bool res = ppb_var_deprecated_has_method(obj->ppobj, method_name, &exception);
+    ppb_var_release(method_name);
+    ppb_var_release(exception);
+
+    return res;
 }
 
 bool
@@ -181,7 +193,9 @@ trace_iobj_invalidate(NPObject *npobj)
 bool
 trace_iobj_has_method(NPObject *npobj, NPIdentifier name)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    char *s_name = npn.utf8fromidentifier(name);
+    trace_info("[CLS] {full} %s npobj=%p, name=%s\n", __func__+6, npobj, s_name);
+    npn.memfree(s_name);
     return iobj_has_method(npobj, name);
 }
 
