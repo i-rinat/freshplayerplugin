@@ -34,9 +34,11 @@
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "tables.h"
+#include "instance_object.h"
 #include <ppapi/c/ppp_instance.h>
 #include <ppapi/c/ppp_input_event.h>
 #include <ppapi/c/pp_errors.h>
+#include <ppapi/c/private/ppp_instance_private.h>
 #include "ppb_input_event.h"
 
 
@@ -479,8 +481,24 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
         *(int *)value = 1;
         break;
     case NPPVpluginScriptableNPObject:
-        trace_info("[NPP] {zilch} NPPVpluginScriptableNPObject not implemented\n");
-        *(void **)value = NULL;
+        trace_info("[NPP] {part} NPPVpluginScriptableNPObject not implemented\n");
+        do {
+            NPObject *npobj;
+            struct PP_Var ppobj;
+            struct pp_instance_s *pp_i = instance->pdata;
+            const struct PPP_Instance_Private_0_1 *ppp_instance_private =
+                ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
+            if (!ppp_instance_private || !ppp_instance_private->GetInstanceObject) {
+                *(void **)value = NULL;
+                break;
+            }
+
+            ppobj = ppp_instance_private->GetInstanceObject(pp_i->pp_instance_id);
+            npobj = instance_object_class.allocate(instance, &instance_object_class);
+
+            instance_object_class.construct(npobj, (const NPVariant *)&ppobj, 1001, NULL);
+            *(void **)value = npobj;
+        } while (0);
         break;
     case NPPVformValue:
         trace_info("[NPP] {zilch} NPPVformValue not implemented\n");
