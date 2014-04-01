@@ -479,6 +479,7 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
         *(int *)value = 1;
         break;
     case NPPVpluginScriptableNPObject:
+        trace_info("[NPP] {zilch} NPPVpluginScriptableNPObject not implemented\n");
         *(void **)value = NULL;
         break;
     case NPPVformValue:
