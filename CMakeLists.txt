@@ -36,6 +36,7 @@ add_library(freshwrapper SHARED
 	src/tables.c
 	src/trace.c
 	src/browser_object.c
+	src/instance_object.c
 	src/pp_interface.c
 	src/pp_resource.c
 	src/ppb_core.c
