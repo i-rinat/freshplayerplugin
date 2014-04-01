@@ -210,6 +210,47 @@ np_variant_to_pp_var(NPVariant v, const struct pp_var_object_s *reference_obj)
     }
 }
 
+NPVariant
+pp_var_to_np_variant(struct PP_Var var)
+{
+    NPVariant res;
+    const char *s;
+
+    switch (var.type) {
+    case PP_VARTYPE_NULL:
+        NULL_TO_NPVARIANT(res);
+        break;
+    case PP_VARTYPE_BOOL:
+        BOOLEAN_TO_NPVARIANT(var.value.as_bool, res);
+        break;
+    case PP_VARTYPE_INT32:
+        INT32_TO_NPVARIANT(var.value.as_int, res);
+        break;
+    case PP_VARTYPE_DOUBLE:
+        DOUBLE_TO_NPVARIANT(var.value.as_double, res);
+        break;
+    case PP_VARTYPE_STRING:
+        s = ppb_var_var_to_utf8(var, NULL);
+        STRINGZ_TO_NPVARIANT(s, res);
+        break;
+    case PP_VARTYPE_OBJECT:
+        res.type = NPVariantType_Object;
+        trace_warning("%s, zilch implementation\n", __func__);
+        break;
+
+    case PP_VARTYPE_UNDEFINED:
+    case PP_VARTYPE_ARRAY:
+    case PP_VARTYPE_DICTIONARY:
+    case PP_VARTYPE_ARRAY_BUFFER:
+    case PP_VARTYPE_RESOURCE:
+    default:
+        VOID_TO_NPVARIANT(res);
+        break;
+    }
+
+    return res;
+}
+
 void
 tables_add_npp_instance(NPP npp)
 {

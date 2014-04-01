@@ -40,18 +40,10 @@ struct instance_object_s {
 NPObject *
 iobj_allocate(NPP npp, NPClass *aClass)
 {
-    // this function creates instances of one class only, thus ignores aClass parameter
-    (void)aClass;
-    struct pp_instance_s *pp_i = npp->pdata;
-    const struct PPP_Instance_Private_0_1 *ppp_instance_private =
-                                            ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
-    if (!ppp_instance_private || !ppp_instance_private->GetInstanceObject)
-        return NULL;
-
     struct instance_object_s *obj = npn.memalloc(sizeof(*obj));
     obj->npobj.referenceCount = 1;
-    obj->npobj._class = &instance_object_class;
-    obj->ppobj = ppp_instance_private->GetInstanceObject(pp_i->pp_instance_id);
+    obj->npobj._class = aClass;
+    obj->ppobj = PP_MakeUndefined();
 
     return (NPObject*)obj;
 }
@@ -99,6 +91,19 @@ iobj_has_property(NPObject *npobj, NPIdentifier name)
 bool
 iobj_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
 {
+    if (!npn.identifierisstring(name))
+        return false;
+
+    struct instance_object_s *obj = (void *)npobj;
+    char *s = npn.utf8fromidentifier(name);
+    struct PP_Var exception = PP_MakeUndefined();
+    struct PP_Var property_name = PP_MakeString(s);
+    npn.memfree(s);
+    struct PP_Var res = ppb_var_deprecated_get_property(obj->ppobj, property_name, &exception);
+
+    *result = pp_var_to_np_variant(res);
+    ppb_var_release(res);
+    ppb_var_release(exception);
     return true;
 }
 
@@ -123,6 +128,18 @@ iobj_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
 bool
 iobj_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
+    (void)result;
+    if (argCount != 1001) {
+        // TODO: figure out how to rid of magic numbers
+        trace_warning("%s, wrong magic %d\n", __func__, argCount);
+        return false;
+    }
+
+    struct PP_Var var = *(struct PP_Var *)args;
+    struct instance_object_s *obj = (void *)npobj;
+    tables_ref_var(var);
+    obj->ppobj = var;
+
     return true;
 }
 
@@ -182,7 +199,7 @@ trace_iobj_has_property(NPObject *npobj, NPIdentifier name)
 bool
 trace_iobj_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {full} %s\n", __func__+6);
     return iobj_get_property(npobj, name, result);
 }
 
@@ -210,7 +227,7 @@ trace_iobj_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
 bool
 trace_iobj_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {full} %s\n", __func__+6);
     return iobj_construct(npobj, args, argCount, result);
 }
 
