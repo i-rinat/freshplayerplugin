@@ -27,6 +27,9 @@
 #include "tables.h"
 #include <ppapi/c/private/ppp_instance_private.h>
 #include "pp_interface.h"
+#include "ppb_var.h"
+#include "ppb_var_deprecated.h"
+
 
 struct instance_object_s {
     NPObject npobj;
@@ -56,6 +59,11 @@ iobj_allocate(NPP npp, NPClass *aClass)
 void
 iobj_deallocate(NPObject *npobj)
 {
+    struct instance_object_s *obj = (void *)npobj;
+    if (--obj->npobj.referenceCount <= 0) {
+        ppb_var_release(obj->ppobj);
+        npn.memfree(npobj);
+    }
 }
 
 void
@@ -130,7 +138,7 @@ trace_iobj_allocate(NPP npp, NPClass *aClass)
 void
 trace_iobj_deallocate(NPObject *npobj)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {full} %s\n", __func__+6);
     iobj_deallocate(npobj);
 }
 
