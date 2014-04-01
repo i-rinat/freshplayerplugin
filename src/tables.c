@@ -28,6 +28,7 @@
 #include "tables.h"
 #include "trace.h"
 #include "ppb_var.h"
+#include "instance_object.h"
 
 
 NPNetscapeFuncs npn;
@@ -235,7 +236,9 @@ pp_var_to_np_variant(struct PP_Var var)
         break;
     case PP_VARTYPE_OBJECT:
         res.type = NPVariantType_Object;
-        trace_warning("%s, zilch implementation\n", __func__);
+        ppb_var_add_ref(var);
+        res.value.objectValue = instance_object_class.allocate(NULL, &instance_object_class);
+        instance_object_class.construct(res.value.objectValue, (void *)&var, 1001, NULL);
         break;
 
     case PP_VARTYPE_UNDEFINED:
