@@ -85,7 +85,19 @@ iobj_invoke_default(NPObject *npobj, const NPVariant *args, uint32_t argCount, N
 bool
 iobj_has_property(NPObject *npobj, NPIdentifier name)
 {
-    return true;
+    if (!npn.identifierisstring(name))
+        return false;
+
+    struct instance_object_s *obj = (void *)npobj;
+    char *s = npn.utf8fromidentifier(name);
+    struct PP_Var exception = PP_MakeUndefined();
+    struct PP_Var property_name = PP_MakeString(s);
+    npn.memfree(s);
+    bool res = ppb_var_deprecated_has_property(obj->ppobj, property_name, &exception);
+    ppb_var_release(property_name);
+    ppb_var_release(exception);
+
+    return res;
 }
 
 bool
@@ -192,7 +204,9 @@ trace_iobj_invoke_default(NPObject *npobj, const NPVariant *args, uint32_t argCo
 bool
 trace_iobj_has_property(NPObject *npobj, NPIdentifier name)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    char *s_name = npn.utf8fromidentifier(name);
+    trace_info("[CLS] {full} %s npobj=%p, name=%s\n", __func__+6, npobj, s_name);
+    npn.memfree(s_name);
     return iobj_has_property(npobj, name);
 }
 
