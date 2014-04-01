@@ -24,12 +24,33 @@
 
 #include "instance_object.h"
 #include "trace.h"
+#include "tables.h"
+#include <ppapi/c/private/ppp_instance_private.h>
+#include "pp_interface.h"
+
+struct instance_object_s {
+    NPObject npobj;
+    struct PP_Var ppobj;
+};
 
 
 NPObject *
 iobj_allocate(NPP npp, NPClass *aClass)
 {
-    return NULL;
+    // this function creates instances of one class only, thus ignores aClass parameter
+    (void)aClass;
+    struct pp_instance_s *pp_i = npp->pdata;
+    const struct PPP_Instance_Private_0_1 *ppp_instance_private =
+                                            ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
+    if (!ppp_instance_private || !ppp_instance_private->GetInstanceObject)
+        return NULL;
+
+    struct instance_object_s *obj = npn.memalloc(sizeof(*obj));
+    obj->npobj.referenceCount = 1;
+    obj->npobj._class = &instance_object_class;
+    obj->ppobj = ppp_instance_private->GetInstanceObject(pp_i->pp_instance_id);
+
+    return (NPObject*)obj;
 }
 
 void
@@ -102,7 +123,7 @@ iobj_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVari
 NPObject *
 trace_iobj_allocate(NPP npp, NPClass *aClass)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {full} %s\n", __func__+6);
     return iobj_allocate(npp, aClass);
 }
 
