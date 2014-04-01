@@ -35,14 +35,14 @@ static
 bool
 bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    return true;
+    return false;
 }
 
 static
 bool
 bobj_HasMethod(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    return true;
+    return false;
 }
 
 static
