@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__INSTANCE_OBJECT_H
-#define FPP__INSTANCE_OBJECT_H
+#ifndef FPP__P2N_PROXY_CLASS_H
+#define FPP__P2N_PROXY_CLASS_H
 
 #include <npapi.h>
 #include <npruntime.h>
 
 
-extern struct NPClass instance_object_class;
+extern struct NPClass p2n_proxy_class;
 
-#endif // FPP__INSTANCE_OBJECT_H
+#endif // FPP__P2N_PROXY_CLASS_H

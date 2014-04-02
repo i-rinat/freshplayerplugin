@@ -36,7 +36,7 @@ add_library(freshwrapper SHARED
 	src/tables.c
 	src/trace.c
 	src/n2p_proxy_class.c
-	src/instance_object.c
+	src/p2n_proxy_class.c
 	src/pp_interface.c
 	src/pp_resource.c
 	src/ppb_core.c

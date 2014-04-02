@@ -34,7 +34,7 @@
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "tables.h"
-#include "instance_object.h"
+#include "p2n_proxy_class.h"
 #include <ppapi/c/ppp_instance.h>
 #include <ppapi/c/ppp_input_event.h>
 #include <ppapi/c/pp_errors.h>
@@ -494,9 +494,9 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
             }
 
             ppobj = ppp_instance_private->GetInstanceObject(pp_i->pp_instance_id);
-            npobj = instance_object_class.allocate(instance, &instance_object_class);
+            npobj = p2n_proxy_class.allocate(instance, &p2n_proxy_class);
 
-            instance_object_class.construct(npobj, (const NPVariant *)&ppobj, 1001, NULL);
+            p2n_proxy_class.construct(npobj, (const NPVariant *)&ppobj, 1001, NULL);
             *(void **)value = npobj;
         } while (0);
         break;
