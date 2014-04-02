@@ -87,7 +87,8 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
 
     // TODO: find out what exception is
     struct PP_Var var = np_variant_to_pp_var(np_result, &refobj);
-    npn.releasevariantvalue(&np_result);
+    if (np_result.type != NPVariantType_Object)
+        npn.releasevariantvalue(&np_result);
 
     return var;
 }
