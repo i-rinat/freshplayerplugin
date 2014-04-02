@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__BROWSER_OBJECT_H
-#define FPP__BROWSER_OBJECT_H
+#ifndef FPP__N2P_PROXY_CLASS_H
+#define FPP__N2P_PROXY_CLASS_H
 
 #include <ppapi/c/dev/ppp_class_deprecated.h>
 
 
-extern const struct PPP_Class_Deprecated browser_object_class;
+extern const struct PPP_Class_Deprecated n2p_proxy_class;
 
-#endif // FPP__BROWSER_OBJECT_H
+#endif // FPP__N2P_PROXY_CLASS_H

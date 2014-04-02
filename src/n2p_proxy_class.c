@@ -22,7 +22,11 @@
  * SOFTWARE.
  */
 
-#include "browser_object.h"
+/*
+ * proxy class which wraps around NPObject while providing PP_Var object
+ */
+
+#include "n2p_proxy_class.h"
 #include "ppapi/c/dev/deprecated_bool.h"
 #include "trace.h"
 #include "tables.h"
@@ -33,7 +37,7 @@
 
 static
 bool
-bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     if (name.type != PP_VARTYPE_STRING) {
         // TODO: fill exception
@@ -51,14 +55,14 @@ bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 
 static
 bool
-bobj_HasMethod(void *object, struct PP_Var name, struct PP_Var *exception)
+n2p_has_method(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     return false;
 }
 
 static
 struct PP_Var
-bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     if (name.type != PP_VARTYPE_STRING) {
         // TODO: fill exception
@@ -81,41 +85,41 @@ bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 
 static
 void
-bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties,
-                         struct PP_Var *exception)
+n2p_get_all_property_names(void *object, uint32_t *property_count, struct PP_Var **properties,
+                           struct PP_Var *exception)
 {
 }
 
 static
 void
-bobj_SetProperty(void *object, struct PP_Var name, struct PP_Var value, struct PP_Var *exception)
+n2p_set_property(void *object, struct PP_Var name, struct PP_Var value, struct PP_Var *exception)
 {
 }
 
 static
 void
-bobj_RemoveProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+n2p_remove_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
 }
 
 static
 struct PP_Var
-bobj_Call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
-          struct PP_Var *exception)
+n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
+         struct PP_Var *exception)
 {
     return PP_MakeUndefined();
 }
 
 static
 struct PP_Var
-bobj_Construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
+n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
     return PP_MakeUndefined();
 }
 
 static
 void
-bobj_Deallocate(void *object)
+n2p_deallocate(void *object)
 {
     const struct pp_var_object_s *obj = object;
     NPVariant np_val;
@@ -128,92 +132,92 @@ bobj_Deallocate(void *object)
 // trace wrappers
 static
 bool
-trace_bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+trace_n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     char *s_name = trace_var_as_string(name);
     trace_info("[CLS] {full} %s object=%p, name=%s\n", __func__+6, object, s_name);
     free(s_name);
-    return bobj_HasProperty(object, name, exception);
+    return n2p_has_property(object, name, exception);
 }
 
 static
 bool
-trace_bobj_HasMethod(void *object, struct PP_Var name, struct PP_Var *exception)
+trace_n2p_has_method(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     trace_info("[CLS] {zilch} %s\n", __func__+6);
-    return bobj_HasMethod(object, name, exception);
+    return n2p_has_method(object, name, exception);
 }
 
 static
 struct PP_Var
-trace_bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+trace_n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     char *s_name = trace_var_as_string(name);
     trace_info("[CLS] {full} %s object=%p, name=%s\n", __func__+6, object, s_name);
     free(s_name);
-    return bobj_GetProperty(object, name, exception);
+    return n2p_get_property(object, name, exception);
 }
 
 static
 void
-trace_bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties,
-                               struct PP_Var *exception)
+trace_n2p_get_all_property_names(void *object, uint32_t *property_count, struct PP_Var **properties,
+                                 struct PP_Var *exception)
 {
     trace_info("[CLS] {zilch} %s\n", __func__+6);
-    bobj_GetAllPropertyNames(object, property_count, properties, exception);
+    n2p_get_all_property_names(object, property_count, properties, exception);
 }
 
 static
 void
-trace_bobj_SetProperty(void *object, struct PP_Var name, struct PP_Var value,
+trace_n2p_set_property(void *object, struct PP_Var name, struct PP_Var value,
                        struct PP_Var *exception)
 {
     trace_info("[CLS] {zilch} %s\n", __func__+6);
-    bobj_SetProperty(object, name, value, exception);
+    n2p_set_property(object, name, value, exception);
 }
 
 static
 void
-trace_bobj_RemoveProperty(void *object, struct PP_Var name, struct PP_Var *exception)
+trace_n2p_remove_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     trace_info("[CLS] {zilch} %s\n", __func__+6);
-    bobj_RemoveProperty(object, name, exception);
+    n2p_remove_property(object, name, exception);
 }
 
 static
 struct PP_Var
-trace_bobj_Call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
+trace_n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
                 struct PP_Var *exception)
 {
     trace_info("[CLS] {zilch} %s\n", __func__+6);
-    return bobj_Call(object, method_name, argc, argv, exception);
+    return n2p_call(object, method_name, argc, argv, exception);
 }
 
 static
 struct PP_Var
-trace_bobj_Construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
+trace_n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
     trace_info("[CLS] {zilch} %s\n", __func__+6);
-    return bobj_Construct(object, argc, argv, exception);
+    return n2p_construct(object, argc, argv, exception);
 }
 
 static
 void
-trace_bobj_Deallocate(void *object)
+trace_n2p_deallocate(void *object)
 {
     trace_info("[CLS] {full} %s\n", __func__+6);
-    bobj_Deallocate(object);
+    n2p_deallocate(object);
 }
 
 
-const struct PPP_Class_Deprecated browser_object_class = {
-    .HasProperty =          trace_bobj_HasProperty,
-    .HasMethod =            trace_bobj_HasMethod,
-    .GetProperty =          trace_bobj_GetProperty,
-    .GetAllPropertyNames =  trace_bobj_GetAllPropertyNames,
-    .SetProperty =          trace_bobj_SetProperty,
-    .RemoveProperty =       trace_bobj_RemoveProperty,
-    .Call =                 trace_bobj_Call,
-    .Construct =            trace_bobj_Construct,
-    .Deallocate =           trace_bobj_Deallocate,
+const struct PPP_Class_Deprecated n2p_proxy_class = {
+    .HasProperty =          trace_n2p_has_property,
+    .HasMethod =            trace_n2p_has_method,
+    .GetProperty =          trace_n2p_get_property,
+    .GetAllPropertyNames =  trace_n2p_get_all_property_names,
+    .SetProperty =          trace_n2p_set_property,
+    .RemoveProperty =       trace_n2p_remove_property,
+    .Call =                 trace_n2p_call,
+    .Construct =            trace_n2p_construct,
+    .Deallocate =           trace_n2p_deallocate,
 };

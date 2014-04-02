@@ -29,8 +29,7 @@
 #include "pp_resource.h"
 #include "trace.h"
 #include "tables.h"
-#include "browser_object.h"
-
+#include <ppapi/c/dev/ppp_class_deprecated.h>
 
 bool
 ppb_var_deprecated_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)

@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
-#include "browser_object.h"
+#include "n2p_proxy_class.h"
 
 
 struct PP_Var
@@ -48,7 +48,7 @@ ppb_instance_private_get_window_object(PP_Instance instance)
     }
 
     struct pp_var_object_s reference_obj =
-        { .klass = &browser_object_class, .data = NULL, .npp = pp_i->npp };
+        { .klass = &n2p_proxy_class, .data = NULL, .npp = pp_i->npp };
     return PP_MakeBrowserObject(np_window_obj, &reference_obj);
 }
 
@@ -81,7 +81,7 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     }
 
     struct pp_var_object_s refobj;
-    refobj.klass = &browser_object_class;
+    refobj.klass = &n2p_proxy_class;
     refobj.data = np_window_obj;
     refobj.npp =  pp_i->npp;
 
