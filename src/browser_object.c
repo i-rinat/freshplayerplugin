@@ -35,7 +35,18 @@ static
 bool
 bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    return false;
+    if (name.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return false;
+    }
+
+    const char *s_name = ppb_var_var_to_utf8(name, NULL);
+    const struct pp_var_object_s *obj = object;
+    NPIdentifier identifier = npn.getstringidentifier(s_name);
+
+    bool res = npn.hasproperty(obj->npp, obj->data, identifier);
+
+    return res;
 }
 
 static
@@ -70,7 +81,7 @@ bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 
 static
 void
-bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties, 
+bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties,
                          struct PP_Var *exception)
 {
 }
@@ -119,7 +130,9 @@ static
 bool
 trace_bobj_HasProperty(void *object, struct PP_Var name, struct PP_Var *exception)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    char *s_name = trace_var_as_string(name);
+    trace_info("[CLS] {full} %s object=%p, name=%s\n", __func__+6, object, s_name);
+    free(s_name);
     return bobj_HasProperty(object, name, exception);
 }
 
@@ -143,7 +156,7 @@ trace_bobj_GetProperty(void *object, struct PP_Var name, struct PP_Var *exceptio
 
 static
 void
-trace_bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties, 
+trace_bobj_GetAllPropertyNames(void *object, uint32_t *property_count, struct PP_Var **properties,
                                struct PP_Var *exception)
 {
     trace_info("[CLS] {zilch} %s\n", __func__+6);
