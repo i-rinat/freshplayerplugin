@@ -483,8 +483,6 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
     case NPPVpluginScriptableNPObject:
         trace_info("[NPP] {part} NPPVpluginScriptableNPObject not implemented\n");
         do {
-            NPObject *npobj;
-            struct PP_Var ppobj;
             struct pp_instance_s *pp_i = instance->pdata;
             const struct PPP_Instance_Private_0_1 *ppp_instance_private =
                 ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
@@ -493,11 +491,11 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
                 break;
             }
 
-            ppobj = ppp_instance_private->GetInstanceObject(pp_i->pp_instance_id);
-            npobj = p2n_proxy_class.allocate(instance, &p2n_proxy_class);
+            struct PP_Var ppobj = ppp_instance_private->GetInstanceObject(pp_i->pp_instance_id);
+            NPVariant np_var = pp_var_to_np_variant(ppobj);
+            ppb_var_release(ppobj);
 
-            p2n_proxy_class.construct(npobj, (const NPVariant *)&ppobj, 1001, NULL);
-            *(void **)value = npobj;
+            *(void **)value = np_var.value.objectValue;
         } while (0);
         break;
     case NPPVformValue:

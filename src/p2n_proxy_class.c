@@ -31,14 +31,9 @@
 #include "tables.h"
 #include <ppapi/c/private/ppp_instance_private.h>
 #include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_var.h"
 #include "ppb_var_deprecated.h"
-
-
-struct np_proxy_object_s {
-    NPObject npobj;
-    struct PP_Var ppobj;
-};
 
 
 NPObject *
@@ -303,7 +298,7 @@ trace_p2n_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, N
 }
 
 // can't be const due to npapi restrictions
-struct NPClass instance_object_class = {
+struct NPClass p2n_proxy_class = {
     .structVersion =    NP_CLASS_STRUCT_VERSION,
     .allocate =         trace_p2n_allocate,
     .deallocate =       trace_p2n_deallocate,

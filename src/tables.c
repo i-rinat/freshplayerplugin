@@ -216,6 +216,7 @@ pp_var_to_np_variant(struct PP_Var var)
 {
     NPVariant res;
     const char *s;
+    struct np_proxy_object_s *np_proxy_object;
 
     switch (var.type) {
     case PP_VARTYPE_NULL:
@@ -237,8 +238,12 @@ pp_var_to_np_variant(struct PP_Var var)
     case PP_VARTYPE_OBJECT:
         res.type = NPVariantType_Object;
         ppb_var_add_ref(var);
-        res.value.objectValue = p2n_proxy_class.allocate(NULL, &p2n_proxy_class);
-        p2n_proxy_class.construct(res.value.objectValue, (void *)&var, 1001, NULL);
+        np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
+        np_proxy_object->npobj.referenceCount = 1;
+        np_proxy_object->npobj._class = &p2n_proxy_class;
+        np_proxy_object->ppobj = var;
+        res.value.objectValue = (NPObject *)np_proxy_object;
+        tables_ref_var(var);
         break;
 
     case PP_VARTYPE_UNDEFINED:

@@ -37,6 +37,7 @@
 #include <stddef.h>
 #include <X11/Xlib.h>
 #include <npapi.h>
+#include <npruntime.h>
 #include <glib.h>
 #include <EGL/egl.h>
 #include <pango/pango.h>
@@ -74,6 +75,11 @@ struct pp_var_object_s {
     const struct PPP_Class_Deprecated *klass;
     void *data;
     NPP   npp;
+};
+
+struct np_proxy_object_s {
+    NPObject npobj;
+    struct PP_Var ppobj;
 };
 
 struct pp_instance_s {
