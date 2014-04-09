@@ -29,6 +29,7 @@
 #include "trace.h"
 #include "ppb_var.h"
 #include "p2n_proxy_class.h"
+#include "n2p_proxy_class.h"
 
 
 NPNetscapeFuncs npn;
@@ -206,8 +207,16 @@ np_variant_to_pp_var(NPVariant v, const struct pp_var_object_s *reference_obj)
     case NPVariantType_Double:  return PP_MakeDouble(v.value.doubleValue);
     case NPVariantType_String:  return PP_MakeStringN(v.value.stringValue.UTF8Characters,
                                                       v.value.stringValue.UTF8Length);
-    case NPVariantType_Object:  return PP_MakeBrowserObject(v.value.objectValue, reference_obj);
     default:                    return PP_MakeUndefined();
+
+    case NPVariantType_Object:
+        if (v.value.objectValue->_class == &p2n_proxy_class) {
+            struct np_proxy_object_s *p = (void *)v.value.objectValue;
+            return p->ppobj;
+        } else {
+            return PP_MakeBrowserObject(v.value.objectValue, reference_obj);
+        }
+        break;
     }
 }
 
@@ -217,6 +226,7 @@ pp_var_to_np_variant(struct PP_Var var)
     NPVariant res;
     const char *s;
     struct np_proxy_object_s *np_proxy_object;
+    struct pp_var_object_s *ppobj;
 
     switch (var.type) {
     case PP_VARTYPE_NULL:
@@ -236,14 +246,20 @@ pp_var_to_np_variant(struct PP_Var var)
         STRINGZ_TO_NPVARIANT(s, res);
         break;
     case PP_VARTYPE_OBJECT:
+        ppobj = (void *)(size_t)var.value.as_id;
         res.type = NPVariantType_Object;
-        ppb_var_add_ref(var);
-        np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
-        np_proxy_object->npobj.referenceCount = 1;
-        np_proxy_object->npobj._class = &p2n_proxy_class;
-        np_proxy_object->ppobj = var;
-        res.value.objectValue = (NPObject *)np_proxy_object;
-        tables_ref_var(var);
+        if (ppobj->klass == &n2p_proxy_class) {
+            res.type = NPVariantType_Object;
+            res.value.objectValue = ppobj->data;
+        } else {
+            res.type = NPVariantType_Object;
+            np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
+            np_proxy_object->npobj.referenceCount = 1;
+            np_proxy_object->npobj._class = &p2n_proxy_class;
+            np_proxy_object->ppobj = var;
+            res.value.objectValue = (NPObject *)np_proxy_object;
+            tables_ref_var(var);
+        }
         break;
 
     case PP_VARTYPE_UNDEFINED:

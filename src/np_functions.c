@@ -40,6 +40,7 @@
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/c/private/ppp_instance_private.h>
 #include "ppb_input_event.h"
+#include "ppb_var.h"
 
 
 static
@@ -481,7 +482,7 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
         *(int *)value = 1;
         break;
     case NPPVpluginScriptableNPObject:
-        trace_info("[NPP] {part} NPPVpluginScriptableNPObject not implemented\n");
+        trace_info("[NPP] {full} NPPVpluginScriptableNPObject\n");
         do {
             struct pp_instance_s *pp_i = instance->pdata;
             const struct PPP_Instance_Private_0_1 *ppp_instance_private =
