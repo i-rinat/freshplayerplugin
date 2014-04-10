@@ -46,10 +46,9 @@ ppb_instance_private_get_window_object(PP_Instance instance)
         trace_error("%s, NPN_GetValue returned %d\n", __func__, err);
         return PP_MakeUndefined();
     }
+    tables_add_npobj_npp_mapping(np_window_obj, pp_i->npp);
 
-    struct pp_var_object_s reference_obj =
-        { .klass = &n2p_proxy_class, .data = NULL, .npp = pp_i->npp };
-    return PP_MakeBrowserObject(np_window_obj, &reference_obj);
+    return PP_MakeBrowserObject(np_window_obj, NULL);
 }
 
 struct PP_Var
@@ -80,14 +79,11 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
         return PP_MakeUndefined();
     }
 
-    struct pp_var_object_s refobj;
-    refobj.klass = &n2p_proxy_class;
-    refobj.data = np_window_obj;
-    refobj.npp =  pp_i->npp;
-
     // TODO: find out what exception is
-    struct PP_Var var = np_variant_to_pp_var(np_result, &refobj);
-    if (np_result.type != NPVariantType_Object)
+    struct PP_Var var = np_variant_to_pp_var(np_result);
+    if (np_result.type == NPVariantType_Object)
+        tables_add_npobj_npp_mapping(np_result.value.objectValue, pp_i->npp);
+    else
         npn.releasevariantvalue(&np_result);
 
     return var;

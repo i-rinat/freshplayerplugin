@@ -74,7 +74,6 @@ enum pp_request_method_e {
 struct pp_var_object_s {
     const struct PPP_Class_Deprecated *klass;
     void *data;
-    NPP   npp;
 };
 
 struct np_proxy_object_s {

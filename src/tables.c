@@ -190,7 +190,11 @@ PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj)
     struct pp_var_object_s *obj;
 
     obj = malloc(sizeof(*obj));
-    obj->klass = reference_obj->klass;
+    if (reference_obj) {
+        obj->klass = reference_obj->klass;
+    } else {
+        obj->klass = &n2p_proxy_class;
+    }
     obj->data = data;
     var.type = PP_VARTYPE_OBJECT;
     var.value.as_id = (size_t)(void *)obj;
@@ -199,7 +203,7 @@ PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj)
 }
 
 struct PP_Var
-np_variant_to_pp_var(NPVariant v, const struct pp_var_object_s *reference_obj)
+np_variant_to_pp_var(NPVariant v)
 {
     switch (v.type) {
     case NPVariantType_Void:    return PP_MakeUndefined();
@@ -216,7 +220,7 @@ np_variant_to_pp_var(NPVariant v, const struct pp_var_object_s *reference_obj)
             struct np_proxy_object_s *p = (void *)v.value.objectValue;
             return p->ppobj;
         } else {
-            return PP_MakeBrowserObject(v.value.objectValue, reference_obj);
+            return PP_MakeBrowserObject(v.value.objectValue, NULL);
         }
         break;
     }

@@ -209,7 +209,7 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
     if (!npn.getproperty(pp_i->npp, location_obj, href_id, &href_var))
         return PP_MakeUndefined();
 
-    struct PP_Var result = np_variant_to_pp_var(href_var, NULL);
+    struct PP_Var result = np_variant_to_pp_var(href_var);
     npn.releasevariantvalue(&location_var);
     npn.releasevariantvalue(&href_var);
 

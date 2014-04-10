@@ -48,7 +48,8 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
     const struct pp_var_object_s *obj = object;
     NPIdentifier identifier = npn.getstringidentifier(s_name);
 
-    bool res = npn.hasproperty(obj->npp, obj->data, identifier);
+    NPP npp = tables_get_npobj_npp_mapping(obj->data);
+    bool res = npn.hasproperty(npp, obj->data, identifier);
 
     return res;
 }
@@ -73,10 +74,15 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
     const struct pp_var_object_s *obj = object;
     NPIdentifier identifier = npn.getstringidentifier(s_name);
     NPVariant np_value;
-    if (npn.getproperty(obj->npp, obj->data, identifier, &np_value)) {
-        struct PP_Var var = np_variant_to_pp_var(np_value, obj);
-        if (var.type != PP_VARTYPE_OBJECT)
+    NPP npp = tables_get_npobj_npp_mapping(obj->data);
+    if (npn.getproperty(npp, obj->data, identifier, &np_value)) {
+        struct PP_Var var = np_variant_to_pp_var(np_value);
+
+        if (np_value.type == NPVariantType_Object)
+            tables_add_npobj_npp_mapping(np_value.value.objectValue, npp);
+        else
             npn.releasevariantvalue(&np_value);
+
         return var;
     } else {
         return PP_MakeUndefined();

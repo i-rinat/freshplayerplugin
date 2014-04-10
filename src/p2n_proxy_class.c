@@ -98,8 +98,7 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
 
     struct PP_Var *pp_args = malloc(argCount * sizeof(*pp_args));
     for (k = 0; k < argCount; k ++) {
-        // TODO: objects
-        pp_args[k] = np_variant_to_pp_var(args[k], NULL);
+        pp_args[k] = np_variant_to_pp_var(args[k]);
     }
 
     res = ppb_var_deprecated_call(obj->ppobj, method_name, argCount, pp_args, &exception);
