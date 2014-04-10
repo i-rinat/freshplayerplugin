@@ -44,6 +44,7 @@ static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;
 static GList       *url_pair_list;
 static GHashTable  *npp_ht;
+static GHashTable  *npobj_to_npp_ht = NULL;     // NPObject-to-NPP mapping
 
 static PangoContext *pango_ctx = NULL;
 static PangoFontMap *pango_fm = NULL;
@@ -53,9 +54,10 @@ void
 __attribute__((constructor))
 constructor_tables(void)
 {
-    var_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
-    pp_to_np_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
-    npp_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+    var_ht =            g_hash_table_new(g_direct_hash, g_direct_equal);
+    pp_to_np_ht =       g_hash_table_new(g_direct_hash, g_direct_equal);
+    npp_ht =            g_hash_table_new(g_direct_hash, g_direct_equal);
+    npobj_to_npp_ht =   g_hash_table_new(g_direct_hash, g_direct_equal);
     url_pair_list = NULL;
 
     // pango
@@ -71,6 +73,7 @@ destructor_tables(void)
     g_hash_table_unref(var_ht);
     g_hash_table_unref(pp_to_np_ht);
     g_hash_table_unref(npp_ht);
+    g_hash_table_unref(npobj_to_npp_ht);
     g_list_free(url_pair_list);
 
     // pango
@@ -188,7 +191,6 @@ PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj)
 
     obj = malloc(sizeof(*obj));
     obj->klass = reference_obj->klass;
-    obj->npp = reference_obj->npp;
     obj->data = data;
     var.type = PP_VARTYPE_OBJECT;
     var.value.as_id = (size_t)(void *)obj;
@@ -347,4 +349,22 @@ pp_font_desc_to_pango_font_desc(const struct PP_BrowserFont_Trusted_Description 
         pango_font_description_set_variant(font_desc, PANGO_VARIANT_SMALL_CAPS);
 
     return font_desc;
+}
+
+void
+tables_add_npobj_npp_mapping(NPObject *npobj, NPP npp)
+{
+    g_hash_table_insert(npobj_to_npp_ht, npobj, npp);
+}
+
+NPP
+tables_get_npobj_npp_mapping(NPObject *npobj)
+{
+    return g_hash_table_lookup(npobj_to_npp_ht, npobj);
+}
+
+void
+tables_remove_npobj_npp_mapping(NPObject *npobj)
+{
+    g_hash_table_remove(npobj_to_npp_ht, npobj);
 }

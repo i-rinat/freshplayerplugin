@@ -58,4 +58,8 @@ PangoFontMap   *tables_get_pango_font_map(void);
 PangoFontDescription *
 pp_font_desc_to_pango_font_desc(const struct PP_BrowserFont_Trusted_Description *description);
 
+void    tables_add_npobj_npp_mapping(NPObject *npobj, NPP npp);
+NPP     tables_get_npobj_npp_mapping(NPObject *npobj);
+void    tables_remove_npobj_npp_mapping(NPObject *npobj);
+
 #endif // FPP__TABLES_H
