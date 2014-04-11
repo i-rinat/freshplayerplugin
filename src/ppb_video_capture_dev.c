@@ -23,20 +23,27 @@
  */
 
 #include "ppb_video_capture_dev.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "pp_resource.h"
 #include "trace.h"
 
 
 PP_Resource
 ppb_video_capture_dev_create(PP_Instance instance)
 {
-    return 123002;
+    PP_Resource video_capture = pp_resource_allocate(PP_RESOURCE_VIDEO_CAPTURE, instance);
+    return video_capture;
+}
+
+void
+ppb_video_capture_dev_destroy(void *p)
+{
 }
 
 PP_Bool
 ppb_video_capture_dev_is_video_capture(PP_Resource video_capture)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(video_capture) == PP_RESOURCE_VIDEO_CAPTURE;
 }
 
 int32_t
@@ -91,7 +98,7 @@ static
 PP_Resource
 trace_ppb_video_capture_dev_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_video_capture_dev_create(instance);
 }
 
@@ -99,7 +106,7 @@ static
 PP_Bool
 trace_ppb_video_capture_dev_is_video_capture(PP_Resource video_capture)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_video_capture_dev_is_video_capture(video_capture);
 }
 

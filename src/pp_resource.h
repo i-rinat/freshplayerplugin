@@ -64,6 +64,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_INPUT_EVENT,
     PP_RESOURCE_FLASH_FONT_FILE,
     PP_RESOURCE_PRINTING,
+    PP_RESOURCE_VIDEO_CAPTURE,
 };
 
 enum pp_request_method_e {
@@ -239,6 +240,10 @@ struct pp_flash_font_file_s {
 };
 
 struct pp_printing_s {
+    struct pp_resource_generic_s _;
+};
+
+struct pp_video_capture_s {
     struct pp_resource_generic_s _;
 };
 
