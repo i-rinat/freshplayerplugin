@@ -369,7 +369,7 @@ PP_Bool
 trace_ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struct PP_Var value)
 {
     char *value_str = trace_var_as_string(value);
-    trace_info("[PPB] {zilch} %s instance=%d, key=%d, value=%s\n", __func__+6, instance, key,
+    trace_info("[PPB] {fake} %s instance=%d, key=%d, value=%s\n", __func__+6, instance, key,
                value_str);
     free(value_str);
     return ppb_flash_set_crash_data(instance, key, value);

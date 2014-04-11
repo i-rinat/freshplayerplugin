@@ -75,7 +75,7 @@ static
 PP_Bool
 trace_ppb_instance_is_full_frame(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {fake} %s instance=%d\n", __func__+6, instance);
     return ppb_instance_is_full_frame(instance);
 }
 
