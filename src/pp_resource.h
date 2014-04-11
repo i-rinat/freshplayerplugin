@@ -63,6 +63,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_AUDIO,
     PP_RESOURCE_INPUT_EVENT,
     PP_RESOURCE_FLASH_FONT_FILE,
+    PP_RESOURCE_PRINTING,
 };
 
 enum pp_request_method_e {
@@ -235,6 +236,10 @@ struct pp_flash_font_file_s {
     PangoFont              *font;
     FT_Face                 ft_face;
     PP_PrivateFontCharset   charset;
+};
+
+struct pp_printing_s {
+    struct pp_resource_generic_s _;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);

@@ -23,13 +23,15 @@
  */
 
 #include "ppb_printing_dev.h"
+#include "pp_resource.h"
 #include "trace.h"
 
 
 PP_Resource
 ppb_printing_dev_create(PP_Instance instance)
 {
-    return 123010;
+    PP_Resource printing = pp_resource_allocate(PP_RESOURCE_PRINTING, instance);
+    return printing;
 }
 
 int32_t
@@ -46,7 +48,7 @@ static
 PP_Resource
 trace_ppb_printing_dev_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_printing_dev_create(instance);
 }
 

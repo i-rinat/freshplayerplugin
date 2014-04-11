@@ -103,6 +103,9 @@ pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
     case PP_RESOURCE_FLASH_FONT_FILE:
         ALLOC_HELPER(struct pp_flash_font_file_s);
         break;
+    case PP_RESOURCE_PRINTING:
+        ALLOC_HELPER(struct pp_printing_s);
+        break;
     default:
         // fall through
     case PP_RESOURCE_UNKNOWN:
