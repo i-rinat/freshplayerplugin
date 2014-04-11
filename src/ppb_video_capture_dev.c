@@ -23,9 +23,11 @@
  */
 
 #include "ppb_video_capture_dev.h"
+#include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
 #include "pp_resource.h"
 #include "trace.h"
+
 
 
 PP_Resource
@@ -50,7 +52,11 @@ int32_t
 ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOutput output,
                                         struct PP_CompletionCallback callback)
 {
-    return 0;
+    output.GetDataBuffer(output.user_data, 0, sizeof(int));
+
+    if (callback.func)
+        callback.func(callback.user_data, PP_OK);
+    return PP_OK;
 }
 
 int32_t
@@ -116,7 +122,7 @@ trace_ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture,
                                               struct PP_ArrayOutput output,
                                               struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {fake} %s\n", __func__+6);
     return ppb_video_capture_dev_enumerate_devices(video_capture, output, callback);
 }
 
@@ -169,7 +175,7 @@ static
 void
 trace_ppb_video_capture_dev_close(PP_Resource video_capture)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {fake} %s\n", __func__+6);
     ppb_video_capture_dev_close(video_capture);
 }
 
