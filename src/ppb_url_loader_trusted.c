@@ -30,6 +30,7 @@
 void
 ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
 {
+    // TODO: do something
     return;
 }
 
@@ -45,7 +46,7 @@ static
 void
 trace_ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
 {
-    trace_info("[PPB] {zilch} %s loader=%d\n", __func__+6, loader);
+    trace_info("[PPB] {fake} %s loader=%d\n", __func__+6, loader);
     ppb_url_loader_trusted_grant_universal_access(loader);
 }
 
