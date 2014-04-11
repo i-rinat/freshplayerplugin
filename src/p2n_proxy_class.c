@@ -33,7 +33,6 @@
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_var.h"
-#include "ppb_var_deprecated.h"
 
 
 NPObject *
@@ -74,7 +73,7 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
     struct PP_Var exception = PP_MakeUndefined();
     struct PP_Var method_name = PP_MakeString(s);
     npn.memfree(s);
-    bool res = ppb_var_deprecated_has_method(obj->ppobj, method_name, &exception);
+    bool res = ppb_var_has_method(obj->ppobj, method_name, &exception);
     ppb_var_release(method_name);
     ppb_var_release(exception);
 
@@ -101,7 +100,7 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         pp_args[k] = np_variant_to_pp_var(args[k]);
     }
 
-    res = ppb_var_deprecated_call(obj->ppobj, method_name, argCount, pp_args, &exception);
+    res = ppb_var_call(obj->ppobj, method_name, argCount, pp_args, &exception);
 
     for (k = 0; k < argCount; k ++)
         ppb_var_release(pp_args[k]);
@@ -134,7 +133,7 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
     struct PP_Var exception = PP_MakeUndefined();
     struct PP_Var property_name = PP_MakeString(s);
     npn.memfree(s);
-    bool res = ppb_var_deprecated_has_property(obj->ppobj, property_name, &exception);
+    bool res = ppb_var_has_property(obj->ppobj, property_name, &exception);
     ppb_var_release(property_name);
     ppb_var_release(exception);
 
@@ -152,7 +151,7 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
     struct PP_Var exception = PP_MakeUndefined();
     struct PP_Var property_name = PP_MakeString(s);
     npn.memfree(s);
-    struct PP_Var res = ppb_var_deprecated_get_property(obj->ppobj, property_name, &exception);
+    struct PP_Var res = ppb_var_get_property(obj->ppobj, property_name, &exception);
 
     *result = pp_var_to_np_variant(res);
     ppb_var_release(res);

@@ -86,7 +86,6 @@ add_library(freshwrapper SHARED
 	src/ppb_url_response_info.c
 	src/ppb_url_util_dev.c
 	src/ppb_var.c
-	src/ppb_var_deprecated.c
 	src/ppb_video_capture_dev.c
 	src/ppb_view.c
 )
