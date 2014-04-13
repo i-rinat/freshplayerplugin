@@ -155,10 +155,7 @@ void
 n2p_deallocate(void *object)
 {
     const struct pp_var_object_s *obj = object;
-    NPVariant np_val;
-    np_val.type = NPVariantType_Object;
-    np_val.value.objectValue = obj->data;
-    npn.releasevariantvalue(&np_val);
+    npn.releaseobject(obj->data);
 }
 
 

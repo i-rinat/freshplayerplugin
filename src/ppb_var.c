@@ -30,6 +30,7 @@
 #include "tables.h"
 #include <ppapi/c/dev/ppb_var_deprecated.h>
 #include <ppapi/c/dev/ppp_class_deprecated.h>
+#include "n2p_proxy_class.h"
 
 
 void
@@ -50,6 +51,7 @@ ppb_var_release(struct PP_Var var)
         var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
         var.type == PP_VARTYPE_ARRAY_BUFFER)
     {
+        struct pp_var_object_s *obj;
         int ref_cnt = tables_unref_var(var);
         if (ref_cnt != 0)
             return;
@@ -59,7 +61,10 @@ ppb_var_release(struct PP_Var var)
             free((void*)(size_t)var.value.as_id);
             break;
         case PP_VARTYPE_OBJECT:
-            free((void*)(size_t)var.value.as_id);
+            obj = (void*)(size_t)var.value.as_id;
+            if (obj->klass == &n2p_proxy_class)
+                n2p_proxy_class.Deallocate(obj);
+            free(obj);
             break;
         default:
             // do nothing

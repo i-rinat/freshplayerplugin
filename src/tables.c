@@ -257,6 +257,7 @@ pp_var_to_np_variant(struct PP_Var var)
         if (ppobj->klass == &n2p_proxy_class) {
             res.type = NPVariantType_Object;
             res.value.objectValue = ppobj->data;
+            npn.retainobject(res.value.objectValue);
         } else {
             res.type = NPVariantType_Object;
             np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
