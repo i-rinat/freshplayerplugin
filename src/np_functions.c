@@ -234,9 +234,8 @@ NPP_Write(NPP instance, NPStream *stream, int32_t offset, int32_t len, void *buf
 
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     if (!ul) {
-            trace_info("[NPP] %s, destroying stream since ul is NULL\n", __func__);
-            npn.destroystream(instance, stream, NPRES_USER_BREAK);
-            return 0;
+            trace_info("[NPP] %s, ignoring stream content\n", __func__);
+            return len;
     }
 
     if (ul->fp) {
