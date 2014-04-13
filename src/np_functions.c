@@ -507,7 +507,7 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
         trace_info("[NPP] {zilch} NPPVpluginUrlRequestsDisplayedBool not implemented\n");
         break;
     case NPPVpluginWantsAllNetworkStreams:
-        trace_info("[NPP] {zilch} NPPVpluginWantsAllNetworkStreams not implemented\n");
+        *(int *)value = 1;
         break;
     case NPPVpluginNativeAccessibleAtkPlugId:
         trace_info("[NPP] {zilch} NPPVpluginNativeAccessibleAtkPlugId not implemented\n");
