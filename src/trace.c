@@ -59,6 +59,11 @@ trace_error(const char *fmt, ...)
     va_list args;
     fprintf(stderr, "[fresh] [error] ");
     va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+
+    fprintf(stdout, "[fresh] [error] ");
+    va_start(args, fmt);
     vfprintf(stdout, fmt, args);
     va_end(args);
 }
