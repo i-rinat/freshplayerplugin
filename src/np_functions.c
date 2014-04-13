@@ -498,6 +498,7 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
             ppb_var_release(ppobj);
 
             *(void **)value = np_var.value.objectValue;
+            tables_add_npobj_npp_mapping(np_var.value.objectValue, instance);
         } while (0);
         break;
     case NPPVformValue:

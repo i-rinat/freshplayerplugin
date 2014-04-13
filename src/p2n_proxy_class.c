@@ -106,8 +106,13 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         ppb_var_release(pp_args[k]);
     free(pp_args);
 
-    if (result)
+    if (result) {
         *result = pp_var_to_np_variant(res);
+        if (result->type == NPVariantType_Object) {
+            NPP npp = tables_get_npobj_npp_mapping(npobj);
+            tables_add_npobj_npp_mapping(result->value.objectValue, npp);
+        }
+    }
 
     ppb_var_release(res);
     ppb_var_release(method_name);
