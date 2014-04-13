@@ -113,6 +113,33 @@ struct PP_Var
 n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
          struct PP_Var *exception)
 {
+    if (method_name.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return PP_MakeUndefined();
+    }
+
+    const char *s_method_name = ppb_var_var_to_utf8(method_name, NULL);
+    NPIdentifier np_method_name = npn.getstringidentifier(s_method_name);
+    NPVariant *np_args = malloc(argc * sizeof(NPVariant));
+    const struct pp_var_object_s *obj = object;
+    for (uint32_t k = 0; k < argc; k ++)
+        np_args[k] = pp_var_to_np_variant(argv[k]);
+
+    NPP npp = tables_get_npobj_npp_mapping(obj->data);
+    NPVariant np_result;
+    if (npn.invoke(npp, obj->data, np_method_name, np_args, argc, &np_result)) {
+        struct PP_Var var = np_variant_to_pp_var(np_result);
+
+        if (np_result.type == NPVariantType_Object)
+            tables_add_npobj_npp_mapping(np_result.value.objectValue, npp);
+        else
+            npn.releasevariantvalue(&np_result);
+
+        return var;
+    } else {
+        return PP_MakeUndefined();
+    }
+
     return PP_MakeUndefined();
 }
 
@@ -205,7 +232,7 @@ trace_n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP
                 struct PP_Var *exception)
 {
     char *s_method_name = trace_var_as_string(method_name);
-    trace_info("[CLS] {zilch} %s object=%p, method_name=%s, argc=%u, argv=%p\n", __func__+6,
+    trace_info("[CLS] {full} %s object=%p, method_name=%s, argc=%u, argv=%p\n", __func__+6,
                object, s_method_name, argc, argv);
     free(s_method_name);
     return n2p_call(object, method_name, argc, argv, exception);
