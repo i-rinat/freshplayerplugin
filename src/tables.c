@@ -159,7 +159,7 @@ tables_pop_url_pair(const char *url)
 struct PP_Var
 PP_MakeString(const char *s)
 {
-    return PP_MakeStringN(s, strlen(s));
+    return PP_MakeStringN(s, s ? strlen(s) : 0);
 }
 
 struct PP_Var
