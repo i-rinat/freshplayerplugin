@@ -144,7 +144,29 @@ static
 struct PP_Var
 n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
-    return PP_MakeUndefined();
+    NPVariant *np_args = malloc(argc * sizeof(NPVariant));
+    for (uint32_t k = 0; k < argc; k ++)
+        np_args[k] = pp_var_to_np_variant(argv[k]);
+    NPP npp = tables_get_npobj_npp_mapping(object);
+    NPVariant np_result;
+
+    bool res = npn.construct(npp, object, np_args, argc, &np_result);
+    for (uint32_t k = 0; k < argc; k ++)
+        npn.releasevariantvalue(&np_args[k]);
+    free(np_args);
+
+    if (res) {
+        struct PP_Var var = np_variant_to_pp_var(np_result);
+
+        if (np_result.type == NPVariantType_Object)
+            tables_add_npobj_npp_mapping(np_result.value.objectValue, npp);
+        else
+            npn.releasevariantvalue(&np_result);
+
+        return var;
+    } else {
+        return PP_MakeUndefined();
+    }
 }
 
 static
@@ -235,7 +257,7 @@ static
 struct PP_Var
 trace_n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
-    trace_info("[CLS] {zilch} %s object=%p, argc=%u, argv=%p\n", __func__+6, object, argc, argv);
+    trace_info("[CLS] {full} %s object=%p, argc=%u, argv=%p\n", __func__+6, object, argc, argv);
     return n2p_construct(object, argc, argv, exception);
 }
 
