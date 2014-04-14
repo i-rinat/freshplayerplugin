@@ -49,7 +49,7 @@ char *
 NP_GetPluginVersion(void)
 {
     // TODO: get version from manifest
-    return (char*)"11,9,123,456";
+    return (char*)"13.1.2.3";
 }
 
 __attribute__((visibility("default")))
@@ -60,10 +60,10 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
                reverse_npp_variable(variable), value);
     switch (variable) {
     case NPPVpluginNameString:
-        *(const char **)value = "FreshPlayerPlugin";
+        *(const char **)value = "Shockwave Flash";
         break;
     case NPPVpluginDescriptionString:
-        *(const char **)value = "Wrapper around PepperFlash for NPAPI enabled browsers";
+        *(const char **)value = "Shockwave Flash 13.1.2.3 (actual version unknown) (FreshPlayerPlugin)";
         break;
     default:
         trace_info("    not implemented variable %d\n", variable);
