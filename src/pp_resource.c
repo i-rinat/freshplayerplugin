@@ -25,6 +25,7 @@
 #include "pp_resource.h"
 #include <glib.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "ppb_graphics2d.h"
 #include "ppb_image_data.h"
 #include "ppb_url_loader.h"
@@ -138,35 +139,35 @@ pp_resource_expunge(PP_Resource resource)
 }
 
 void *
-pp_resource_acquire_any(PP_Resource resource)
-{
-    pthread_mutex_lock(&res_tbl_lock);
-
-    // TODO: add mutexes for every resource
-    // TODO: lock mutex of particular resource handle
-    struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
-
-    pthread_mutex_unlock(&res_tbl_lock);
-    return ptr;
-}
-
-void *
 pp_resource_acquire(PP_Resource resource, enum pp_resource_type_e type)
 {
-    struct pp_resource_generic_s *gr = pp_resource_acquire_any(resource);
-    if (!gr)
-        return NULL;
-    if (gr->type != type) {
-        pp_resource_release(resource);
-        return NULL;
+    struct pp_resource_generic_s *gr = NULL;
+    while (1) {
+        pthread_mutex_lock(&res_tbl_lock);
+        gr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
+        if (!gr || gr->type != type) {
+            gr = NULL;
+            break;
+        }
+        if (pthread_mutex_trylock(&gr->lock) == 0)
+            break;
+        pthread_mutex_unlock(&res_tbl_lock);
+        usleep(1);
     }
+
+    pthread_mutex_unlock(&res_tbl_lock);
     return gr;
 }
 
 void
 pp_resource_release(PP_Resource resource)
 {
-    // TODO: unlock mutex of particular resource handle
+    pthread_mutex_lock(&res_tbl_lock);
+    struct pp_resource_generic_s *gr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
+    if (gr) {
+        pthread_mutex_unlock(&gr->lock);
+    }
+    pthread_mutex_unlock(&res_tbl_lock);
 }
 
 enum pp_resource_type_e

@@ -105,6 +105,7 @@ ppb_browser_font_trusted_describe(PP_Resource font,
     metrics->x_height = metrics->height;    // TODO: find out actual x-height
 
     pango_font_metrics_unref(m);
+    pp_resource_release(font);
     return PP_TRUE;
 }
 

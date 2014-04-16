@@ -125,6 +125,7 @@ ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image_data,
         memcpy(&pt->src, src_rect, sizeof(*src_rect));
 
     g2d->task_list = g_list_append(g2d->task_list, pt);
+    pp_resource_release(graphics_2d);
 }
 
 void

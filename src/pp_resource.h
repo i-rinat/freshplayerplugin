@@ -111,9 +111,10 @@ struct pp_instance_s {
 };
 
 struct pp_resource_generic_s {
-    int         type;
-    int         ref_cnt;
-    PP_Instance instance;
+    int             type;
+    int             ref_cnt;
+    PP_Instance     instance;
+    pthread_mutex_t lock;
 };
 
 struct pp_url_loader_s {
@@ -249,7 +250,6 @@ struct pp_video_capture_s {
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
 void                    pp_resource_expunge(PP_Resource resource);
-void                   *pp_resource_acquire_any(PP_Resource resource);
 void                   *pp_resource_acquire(PP_Resource resource, enum pp_resource_type_e type);
 void                    pp_resource_release(PP_Resource resource);
 enum pp_resource_type_e pp_resource_get_type(PP_Resource resource);
