@@ -138,7 +138,7 @@ ppb_var_get_property(struct PP_Var object, struct PP_Var name, struct PP_Var *ex
 
     struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
     if (obj->klass->GetProperty)
-        return obj->klass->GetProperty(obj, name, exception);
+        return obj->klass->GetProperty(obj->data, name, exception);
     else
         return PP_MakeUndefined();
 }
