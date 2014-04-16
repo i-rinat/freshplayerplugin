@@ -58,26 +58,26 @@ generate_new_pp_instance_id(void)
 }
 
 NPError
-NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *argn[],
+NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
 {
     // TODO: mode parameter handling
     int k;
     struct pp_instance_s *pp_i;
-    trace_info("[NPP] {part} %s pluginType=%s instance=%p, mode=%d, argc=%d, saved=%p\n", __func__,
-               pluginType, instance, mode, argc, saved);
+    trace_info("[NPP] {part} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
+               pluginType, npp, mode, argc, saved);
 
-    tables_add_npp_instance(instance);
+    tables_add_npp_instance(npp);
 
     for (k = 0; k < argc; k ++)
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
     pp_i = calloc(sizeof(*pp_i), 1);
-    instance->pdata = pp_i;
+    npp->pdata = pp_i;
     if (!pp_i)
         return NPERR_OUT_OF_MEMORY_ERROR;
 
-    pp_i->npp = instance;
+    pp_i->npp = npp;
     pp_i->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
     if (!pp_i->ppp_instance_1_1)
         return NPERR_GENERIC_ERROR;
@@ -115,7 +115,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
     }
 
     // request windowless operation
-    npn.setvalue(instance, NPPVpluginWindowBool, (void*)0);
+    npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
 
     pp_i->ppp_instance_1_1->DidCreate(pp_i->pp_instance_id, pp_i->argc, pp_i->argn, pp_i->argv);
     pp_i->instance_loaded = 1;
@@ -124,25 +124,25 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char *
 }
 
 NPError
-NPP_Destroy(NPP instance, NPSavedData **save)
+NPP_Destroy(NPP npp, NPSavedData **save)
 {
-    trace_info("[NPP] {full} %s instance=%p, save=%p\n", __func__, instance, save);
-    struct pp_instance_s *pp_i = instance->pdata;
+    trace_info("[NPP] {full} %s npp=%p, save=%p\n", __func__, npp, save);
+    struct pp_instance_s *pp_i = npp->pdata;
     pp_i->ppp_instance_1_1->DidDestroy(pp_i->pp_instance_id);
-    tables_remove_npp_instance(instance);
+    tables_remove_npp_instance(npp);
     if (save)
         *save = NULL;
     return NPERR_NO_ERROR;
 }
 
 NPError
-NPP_SetWindow(NPP instance, NPWindow *window)
+NPP_SetWindow(NPP npp, NPWindow *window)
 {
     char *window_str = trace_np_window_as_string(window);
-    trace_info("[NPP] {part} %s instance=%p, window=%s\n", __func__, instance, window_str);
+    trace_info("[NPP] {part} %s npp=%p, window=%s\n", __func__, npp, window_str);
     free(window_str);
 
-    struct pp_instance_s *pp_i = instance->pdata;
+    struct pp_instance_s *pp_i = npp->pdata;
     pp_i->wnd = (Window)window->window;
     pp_i->x = window->x;
     pp_i->y = window->y;
@@ -168,10 +168,10 @@ NPP_SetWindow(NPP instance, NPWindow *window)
 }
 
 NPError
-NPP_NewStream(NPP instance, NPMIMEType type, NPStream *stream, NPBool seekable, uint16_t *stype)
+NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint16_t *stype)
 {
-    trace_info("[NPP] {part} %s instance=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
-               "end=%u, lastmodified=%u, .headers=%s}, seekable=%d\n", __func__, instance, type,
+    trace_info("[NPP] {part} %s npp=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
+               "end=%u, lastmodified=%u, .headers=%s}, seekable=%d\n", __func__, npp, type,
                stream->pdata, stream->ndata, stream->url, stream->end, stream->lastmodified,
                stream->headers, seekable);
 
@@ -195,10 +195,9 @@ NPP_NewStream(NPP instance, NPMIMEType type, NPStream *stream, NPBool seekable, 
 }
 
 NPError
-NPP_DestroyStream(NPP instance, NPStream *stream, NPReason reason)
+NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 {
-    trace_info("[NPP] {part} %s instance=%p, stream=%p, reason=%d\n", __func__,
-               instance, stream, reason);
+    trace_info("[NPP] {part} %s npp=%p, stream=%p, reason=%d\n", __func__, npp, stream, reason);
 
     PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
     if (!loader)
@@ -216,17 +215,17 @@ NPP_DestroyStream(NPP instance, NPStream *stream, NPReason reason)
 }
 
 int32_t
-NPP_WriteReady(NPP instance, NPStream *stream)
+NPP_WriteReady(NPP npp, NPStream *stream)
 {
-    trace_info("[NPP] {part} %s instance=%p, stream=%p\n", __func__, instance, stream);
+    trace_info("[NPP] {part} %s npp=%p, stream=%p\n", __func__, npp, stream);
     return 1024*1024;
 }
 
 int32_t
-NPP_Write(NPP instance, NPStream *stream, int32_t offset, int32_t len, void *buffer)
+NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 {
-    trace_info("[NPP] {part} %s instance=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
-               instance, stream, offset, len, buffer);
+    trace_info("[NPP] {part} %s npp=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
+               npp, stream, offset, len, buffer);
 
     PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
     if (!loader)
@@ -248,27 +247,25 @@ NPP_Write(NPP instance, NPStream *stream, int32_t offset, int32_t len, void *buf
 }
 
 void
-NPP_StreamAsFile(NPP instance, NPStream *stream, const char *fname)
+NPP_StreamAsFile(NPP npp, NPStream *stream, const char *fname)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, stream=%p, fname=%s\n", __func__,
-               instance, stream, fname);
+    trace_info("[NPP] {zilch} %s npp=%p, stream=%p, fname=%s\n", __func__, npp, stream, fname);
     return;
 }
 
 void
-NPP_Print(NPP instance, NPPrint *platformPrint)
+NPP_Print(NPP npp, NPPrint *platformPrint)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, platformPrint=%p\n", __func__,
-               instance, platformPrint);
+    trace_info("[NPP] {zilch} %s npp=%p, platformPrint=%p\n", __func__, npp, platformPrint);
     return;
 }
 
 static
 int16_t
-handle_graphics_expose_event(NPP instance, void *event)
+handle_graphics_expose_event(NPP npp, void *event)
 {
     XGraphicsExposeEvent *ev = event;
-    struct pp_instance_s *pp_i = instance->pdata;
+    struct pp_instance_s *pp_i = npp->pdata;
     struct pp_graphics2d_s *g2d = pp_resource_acquire(pp_i->graphics, PP_RESOURCE_GRAPHICS2D);
     if (!g2d)
         return 0;
@@ -312,10 +309,10 @@ x_state_mask_to_pp_inputevent_modifier(unsigned int state)
 
 static
 int16_t
-handle_enter_leave_event(NPP instance, void *event)
+handle_enter_leave_event(NPP npp, void *event)
 {
     XCrossingEvent *ev = event;
-    struct pp_instance_s *pp_i = instance->pdata;
+    struct pp_instance_s *pp_i = npp->pdata;
 
     // TODO: check if we want this event
     PP_Resource mouse_event;
@@ -336,10 +333,10 @@ handle_enter_leave_event(NPP instance, void *event)
 
 static
 int16_t
-handle_motion_event(NPP instance, void *event)
+handle_motion_event(NPP npp, void *event)
 {
     XMotionEvent *ev = event;
-    struct pp_instance_s *pp_i = instance->pdata;
+    struct pp_instance_s *pp_i = npp->pdata;
 
     // TODO: check if we want this event
     PP_Resource mouse_event;
@@ -359,10 +356,10 @@ handle_motion_event(NPP instance, void *event)
 
 static
 int16_t
-handle_button_press_release_event(NPP instance, void *event)
+handle_button_press_release_event(NPP npp, void *event)
 {
     XButtonEvent *ev = event;
-    struct pp_instance_s *pp_i = instance->pdata;
+    struct pp_instance_s *pp_i = npp->pdata;
 
     // TODO: check if we want this event
     PP_InputEvent_MouseButton mouse_button = PP_INPUTEVENT_MOUSEBUTTON_NONE;
@@ -402,27 +399,27 @@ handle_button_press_release_event(NPP instance, void *event)
 }
 
 int16_t
-NPP_HandleEvent(NPP instance, void *event)
+NPP_HandleEvent(NPP npp, void *event)
 {
     XAnyEvent *xaev = event;
-    trace_info("[NPP] {part} %s instance=%p, event={.type=%s, .serial=%lu, .send_event=%d, "
-               ".display=%p, .window=0x%x}\n", __func__, instance, reverse_xevent_type(xaev->type),
+    trace_info("[NPP] {part} %s npp=%p, event={.type=%s, .serial=%lu, .send_event=%d, "
+               ".display=%p, .window=0x%x}\n", __func__, npp, reverse_xevent_type(xaev->type),
                xaev->serial, xaev->send_event, xaev->display, (int32_t)xaev->window);
 
     switch (xaev->type) {
     case GraphicsExpose:
-        return handle_graphics_expose_event(instance, event);
+        return handle_graphics_expose_event(npp, event);
         break;
     case EnterNotify:
         // fall through
     case LeaveNotify:
-        return handle_enter_leave_event(instance, event);
+        return handle_enter_leave_event(npp, event);
     case MotionNotify:
-        return handle_motion_event(instance, event);
+        return handle_motion_event(npp, event);
     case ButtonPress:
         // fall through
     case ButtonRelease:
-        return handle_button_press_release_event(instance, event);
+        return handle_button_press_release_event(npp, event);
     default:
         trace_warning("%s, event %s not handled\n", __func__, reverse_xevent_type(xaev->type));
         break;
@@ -432,18 +429,18 @@ NPP_HandleEvent(NPP instance, void *event)
 }
 
 void
-NPP_URLNotify(NPP instance, const char *url, NPReason reason, void *notifyData)
+NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, url=%s, reason=%d, notifyData=%p\n", __func__,
-               instance, url, reason, notifyData);
+    trace_info("[NPP] {zilch} %s npp=%p, url=%s, reason=%d, notifyData=%p\n", __func__,
+               npp, url, reason, notifyData);
     return;
 }
 
 NPError
-NPP_GetValue(NPP instance, NPPVariable variable, void *value)
+NPP_GetValue(NPP npp, NPPVariable variable, void *value)
 {
-    trace_info("[NPP] {part} %s instance=%p, variable=%s\n", __func__,
-               instance, reverse_npp_variable(variable));
+    trace_info("[NPP] {part} %s npp=%p, variable=%s\n", __func__,
+               npp, reverse_npp_variable(variable));
     switch (variable) {
     case NPPVpluginNameString:
         trace_info("[NPP] {zilch} NPPVpluginNameString not implemented\n");
@@ -484,7 +481,7 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
     case NPPVpluginScriptableNPObject:
         trace_info("[NPP] {full} NPPVpluginScriptableNPObject\n");
         do {
-            struct pp_instance_s *pp_i = instance->pdata;
+            struct pp_instance_s *pp_i = npp->pdata;
             const struct PPP_Instance_Private_0_1 *ppp_instance_private =
                 ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
             if (!ppp_instance_private || !ppp_instance_private->GetInstanceObject) {
@@ -497,7 +494,7 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
             ppb_var_release(ppobj);
 
             *(void **)value = np_var.value.objectValue;
-            tables_add_npobj_npp_mapping(np_var.value.objectValue, instance);
+            tables_add_npobj_npp_mapping(np_var.value.objectValue, npp);
         } while (0);
         break;
     case NPPVformValue:
@@ -533,32 +530,32 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value)
 }
 
 NPError
-NPP_SetValue(NPP instance, NPNVariable variable, void *value)
+NPP_SetValue(NPP npp, NPNVariable variable, void *value)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, variable=%s, value=%p\n", __func__,
-               instance, reverse_npn_variable(variable), value);
+    trace_info("[NPP] {zilch} %s npp=%p, variable=%s, value=%p\n", __func__,
+               npp, reverse_npn_variable(variable), value);
     return NPERR_NO_ERROR;
 }
 
 NPBool
-NPP_GotFocus(NPP instance, NPFocusDirection direction)
+NPP_GotFocus(NPP npp, NPFocusDirection direction)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, direction=%d\n", __func__, instance, direction);
+    trace_info("[NPP] {zilch} %s npp=%p, direction=%d\n", __func__, npp, direction);
     return 1;
 }
 
 void
-NPP_LostFocus(NPP instance)
+NPP_LostFocus(NPP npp)
 {
-    trace_info("[NPP] {zilch} %s instance=%p\n", __func__, instance);
+    trace_info("[NPP] {zilch} %s npp=%p\n", __func__, npp);
     return;
 }
 
 void
-NPP_URLRedirectNotify(NPP instance, const char *url, int32_t status, void *notifyData)
+NPP_URLRedirectNotify(NPP npp, const char *url, int32_t status, void *notifyData)
 {
-    trace_info("[NPP] {zilch} %s instance=%p, url=%s, status=%d, notifyData=%p\n", __func__,
-               instance, url, status, notifyData);
+    trace_info("[NPP] {zilch} %s npp=%p, url=%s, status=%d, notifyData=%p\n", __func__,
+               npp, url, status, notifyData);
     return;
 }
 
@@ -578,8 +575,8 @@ NPP_GetSitesWithData(void)
 }
 
 void
-NPP_DidComposite(NPP instance)
+NPP_DidComposite(NPP npp)
 {
-    trace_info("[NPP] {zilch} %s instance=%p\n", __func__, instance);
+    trace_info("[NPP] {zilch} %s npp=%p\n", __func__, npp);
     return;
 }
