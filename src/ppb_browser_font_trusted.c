@@ -178,6 +178,7 @@ ppb_browser_font_trusted_measure_text(PP_Resource font,
         s = ppb_var_var_to_utf8(text->text, &len);
 
     // TODO: factor into rtl direction
+    pango_layout_set_font_description(layout, bf->font_desc);
     pango_layout_set_text(layout, s, len);
     int width, height;
     pango_layout_get_pixel_size(layout, &width, &height);
