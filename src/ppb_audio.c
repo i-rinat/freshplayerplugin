@@ -45,6 +45,7 @@ ppb_audio_create(PP_Instance instance, PP_Resource config,
 
     a->sample_rate = ac->sample_rate;
     a->sample_frame_count = ac->sample_frame_count;
+    pp_resource_release(config);
 
     snd_pcm_hw_params_t *hw_params;
     snd_pcm_sw_params_t *sw_params;
