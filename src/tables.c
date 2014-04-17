@@ -230,7 +230,6 @@ NPVariant
 pp_var_to_np_variant(struct PP_Var var)
 {
     NPVariant res;
-    const char *s;
     struct np_proxy_object_s *np_proxy_object;
     struct pp_var_object_s *ppobj;
 
@@ -248,8 +247,15 @@ pp_var_to_np_variant(struct PP_Var var)
         DOUBLE_TO_NPVARIANT(var.value.as_double, res);
         break;
     case PP_VARTYPE_STRING:
-        s = ppb_var_var_to_utf8(var, NULL);
-        STRINGZ_TO_NPVARIANT(s, res);
+        do {
+            const char *s1 = ppb_var_var_to_utf8(var, NULL);
+            uint32_t len = strlen(s1);
+            char *s2 = npn.memalloc(len + 1);
+            memcpy(s2, s1, len + 1);
+            res.type = NPVariantType_String;
+            res.value.stringValue.UTF8Length = len;
+            res.value.stringValue.UTF8Characters = s2;
+        } while (0);
         break;
     case PP_VARTYPE_OBJECT:
         ppobj = (void *)(size_t)var.value.as_id;
