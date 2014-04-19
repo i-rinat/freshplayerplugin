@@ -79,6 +79,12 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         if (ri->url)
             free(ri->url);
         ri->url = strdup(ppb_var_var_to_utf8(value, NULL));
+
+        // replace all ' ' with '+'
+        for (char *ptr = ri->url; *ptr != 0; ptr ++) {
+            if (*ptr == ' ')
+                *ptr = '+';
+        }
         break;
     case PP_URLREQUESTPROPERTY_METHOD:
         ENSURE_TYPE(PP_VARTYPE_STRING);
