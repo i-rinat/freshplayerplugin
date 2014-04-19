@@ -141,7 +141,28 @@ ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int
                                      PP_FileHandle *file)
 {
     char *abs_path = to_abs_path(pepper_data_dir, path);
-    int fd = open(abs_path, O_LARGEFILE, pp_mode_to_open_mode(mode));
+    int xmode = pp_mode_to_open_mode(mode);
+    if (xmode | O_CREAT) {
+        // create subdirectories recursively
+        char *last_slash = strrchr(abs_path, '/');
+        if (last_slash) {
+            *last_slash = '\0';
+            do {
+                char *ptr = strchr(abs_path, '/');
+                while (ptr) {
+                    *ptr = '\0';
+                    mkdir(abs_path, 0777);
+                    *ptr = '/';
+                    ptr = strchr(ptr + 1, '/');
+                }
+                mkdir(abs_path, 0777);
+            } while (0);
+
+            *last_slash = '/';
+        }
+    }
+
+    int fd = open(abs_path, O_LARGEFILE | xmode, 0666);
     free(abs_path);
     *file = fd;
     if (fd > 0)
