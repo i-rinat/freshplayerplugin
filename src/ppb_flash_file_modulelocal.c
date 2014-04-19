@@ -186,7 +186,21 @@ int32_t
 ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *path,
                                               PP_Bool recursive)
 {
-    return 0;
+    (void)instance;
+    if (recursive) {
+        trace_warning("%s, recursive not implemented\n", __func__);
+    }
+
+    char *abs_path = to_abs_path(pepper_data_dir, path);
+    int ret = unlink(abs_path);
+    free(abs_path);
+
+    if (ret < 0) {
+        // TODO: implement error mapping
+        return PP_ERROR_FAILED;
+    }
+
+    return PP_OK;
 }
 
 int32_t
@@ -358,7 +372,7 @@ int32_t
 trace_ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *path,
                                                     PP_Bool recursive)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, path=%s, recursive=%d\n",
+    trace_info("[PPB] {full} %s instance=%d, path=%s, recursive=%d\n",
                __func__+6, instance, path, recursive);
     return ppb_flash_file_modulelocal_delete_file_or_dir(instance, path, recursive);
 }
