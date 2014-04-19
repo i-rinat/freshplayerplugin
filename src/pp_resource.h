@@ -124,7 +124,11 @@ struct pp_url_loader_s {
     FILE       *fp;             ///< file used to store response
     size_t      read_pos;       ///< reading position
     char       *url;            ///< request URL
+    char       *redirect_url;   ///< value of the Location header if this is a redirection response
     int         loaded;         ///< if whole stream loaded already
+    int         http_code;
+    char       *status_line;
+    int32_t     total_size;
     char       *request_headers;
     PP_Bool     follow_redirects;
     PP_Bool     record_download_progress;

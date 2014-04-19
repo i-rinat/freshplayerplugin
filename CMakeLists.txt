@@ -30,6 +30,7 @@ add_definitions(${REQ_CFLAGS_OTHER})
 link_directories(${REQ_LIBRARY_DIRS})
 
 add_library(freshwrapper SHARED
+	src/header_parser.c
 	src/np_entry.c
 	src/np_functions.c
 	src/reverse_constant.c

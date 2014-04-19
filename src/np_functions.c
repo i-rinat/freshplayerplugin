@@ -41,6 +41,7 @@
 #include <ppapi/c/private/ppp_instance_private.h>
 #include "ppb_input_event.h"
 #include "ppb_var.h"
+#include "header_parser.h"
 
 
 static
@@ -187,7 +188,43 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
     if (ul) {
-        ul->headers = strdup(stream->headers ? stream->headers : "");
+        struct parsed_headers_s *ph = hp_parse_headers(stream->headers);
+        unsigned int headers_len = 0;
+
+        // handling redirection
+        if (ph->http_code >= 300 && ph->http_code <= 307 && hp_header_exists(ph, "Location")) {
+            if (ul->follow_redirects) {
+                const char *new_location = hp_get_header_value(ph, "Location");
+                trace_info("%s, redirecting to %s\n", __func__, new_location);
+                free(ul->url);
+                ul->url = strdup(new_location);
+                tables_push_url_pair(new_location, loader);
+                npn.geturl(npp, ul->url, NULL);
+
+                return NPERR_NO_ERROR;
+            } else {
+                ul->redirect_url = strdup(hp_get_header_value(ph, "Location"));
+            }
+        }
+
+        for (unsigned int k = 0; k < ph->cnt; k ++)
+            headers_len += strlen(ph->name[k]) + strlen(": ") + strlen(ph->value[k]) + strlen("\n");
+
+        // recostruct headers
+        ul->headers = malloc(headers_len + 1);
+        char *ptr = ul->headers;
+        for (unsigned int k = 0; k < ph->cnt; k ++) {
+            memcpy(ptr, ph->name[k], strlen(ph->name[k]));  ptr += strlen(ph->name[k]);
+            memcpy(ptr, ": ", strlen(": "));                ptr += strlen(": ");
+            memcpy(ptr, ph->value[k], strlen(ph->value[k]));ptr += strlen(ph->value[k]);
+            memcpy(ptr, "\n", strlen("\n"));                ptr += strlen("\n");
+        }
+        *ptr = 0;
+        ul->http_code = ph->http_code;
+        ul->total_size = stream->end;
+        ul->status_line = strdup(ph->status_line);
+
+        hp_free_parsed_headers(ph);
         pp_resource_release(loader);
     }
 

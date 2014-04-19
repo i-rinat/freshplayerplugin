@@ -50,18 +50,19 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
         var = PP_MakeString(ul->url);
         break;
     case PP_URLRESPONSEPROPERTY_REDIRECTURL:
-        assert(0);
+        var = PP_MakeString(ul->redirect_url);
         break;
     case PP_URLRESPONSEPROPERTY_REDIRECTMETHOD:
-        assert(0);
+        // redirection is believed to be always GET
+        // TODO: check whenever it may be HEAD
+        var = PP_MakeString("GET");
         break;
     case PP_URLRESPONSEPROPERTY_STATUSCODE:
-        // TODO: parse headers to get actual status code
         var.type = PP_VARTYPE_INT32;
-        var.value.as_int = 200;
+        var.value.as_int = ul->http_code;
         break;
     case PP_URLRESPONSEPROPERTY_STATUSLINE:
-        assert(0);
+        var = PP_MakeString(ul->status_line);
         break;
     case PP_URLRESPONSEPROPERTY_HEADERS:
         var = PP_MakeString(ul->headers);
