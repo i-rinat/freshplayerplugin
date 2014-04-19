@@ -194,28 +194,45 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
 
+    struct PP_Var result = PP_MakeString("");
     NPIdentifier location_id = npn.getstringidentifier("location");
     NPIdentifier href_id = npn.getstringidentifier("href");
-    NPObject *window_obj, *location_obj;
+    NPObject *np_window_obj, *np_location_obj;
     NPVariant location_var, href_var;
 
-    if (npn.getvalue(pp_i->npp, NPNVWindowNPObject, &window_obj) != NPERR_NO_ERROR)
-        return PP_MakeUndefined();
+    if (npn.getvalue(pp_i->npp, NPNVWindowNPObject, &np_window_obj) != NPERR_NO_ERROR)
+        goto err_1;
 
-    if (!npn.getproperty(pp_i->npp, window_obj, location_id, &location_var))
-        return PP_MakeUndefined();
+    if (!npn.getproperty(pp_i->npp, np_window_obj, location_id, &location_var))
+        goto err_2;
 
-    location_obj = location_var.value.objectValue;
-    if (!npn.getproperty(pp_i->npp, location_obj, href_id, &href_var))
-        return PP_MakeUndefined();
+    if (location_var.type != NPVariantType_Object)
+        goto err_3;
 
-    struct PP_Var result = np_variant_to_pp_var(href_var);
-    npn.releasevariantvalue(&location_var);
-    npn.releasevariantvalue(&href_var);
+    np_location_obj = location_var.value.objectValue;
+    if (!npn.getproperty(pp_i->npp, np_location_obj, href_id, &href_var))
+        goto err_3;
+
+
+    struct PP_Var var = np_variant_to_pp_var(href_var);
+    if (var.type != PP_VARTYPE_STRING) {
+        ppb_var_release(var);
+        goto err_4;
+    }
+
+    ppb_var_release(result);
+    result = var;
 
     if (components)
         parse_url_string(ppb_var_var_to_utf8(result, NULL), components);
 
+err_4:
+    npn.releasevariantvalue(&href_var);
+err_3:
+    npn.releasevariantvalue(&location_var);
+err_2:
+    npn.releaseobject(np_window_obj);
+err_1:
     return result;
 }
 
