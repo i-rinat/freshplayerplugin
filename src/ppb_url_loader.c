@@ -89,6 +89,19 @@ _url_loader_open_comt(void *user_data, int32_t result)
     free(triple);
 }
 
+FILE *
+open_temporary_file_stream(void)
+{
+    char *tmpfname;
+    // TODO: make temp path configurable
+    asprintf(&tmpfname, "/tmp/FreshStreamXXXXXX");
+    int fd = mkstemp(tmpfname);
+    unlink(tmpfname);
+    free(tmpfname);
+    FILE *fp = fdopen(fd, "wb+");
+    return fp;
+}
+
 int32_t
 ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback)
@@ -122,13 +135,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                                            ? strdup(ri->custom_content_transfer_encoding) : NULL;
     ul->custom_user_agent = ri->custom_user_agent ? strdup(ri->custom_user_agent) : NULL;
 
-    char *tmpfname;
-    // TODO: make temp path configurable
-    asprintf(&tmpfname, "/tmp/FreshStreamXXXXXX");
-    int fd = mkstemp(tmpfname);
-    unlink(tmpfname);
-    free(tmpfname);
-    ul->fp = fdopen(fd, "wb+");
+    ul->fp = open_temporary_file_stream();
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = triple};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
@@ -159,7 +166,52 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
 int32_t
 ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback callback)
 {
-    return 0;
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+
+    struct PP_Var rel_url = PP_MakeString(ul->redirect_url);
+    struct PP_Var full_url =
+        ppb_url_util_dev_resolve_relative_to_document(ul->_.instance, rel_url, NULL);
+    ppb_var_release(rel_url);
+
+    FREE_HELPER(ul, url);
+    FREE_HELPER(ul, redirect_url);
+    FREE_HELPER(ul, status_line);
+    FREE_HELPER(ul, headers);
+    FREE_HELPER(ul, request_headers);
+
+    fclose(ul->fp);
+    ul->fp = open_temporary_file_stream();
+
+    struct triple_s *triple = malloc(sizeof(*triple));
+    triple->url = strdup(ppb_var_var_to_utf8(full_url, NULL));
+    triple->loader = loader;
+    triple->instance = ul->_.instance;
+    ul->url = strdup(triple->url);
+    ul->read_pos = 0;
+
+    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = triple};
+    ppb_core_call_on_main_thread(0, mt_cb, 0);
+    ul->ccb = callback;
+
+    pp_resource_release(loader);
+
+    if (callback.func == NULL) {
+        int done = 0;
+        while (!done) {
+            ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+            if (ul) {
+                done = ul->loaded;
+                pp_resource_release(loader);
+            } else {
+                break;
+            }
+            printf("waitin'\n");
+            usleep(10000);
+        }
+        return PP_OK;
+    }
+
+    return PP_OK_COMPLETIONPENDING;
 }
 
 PP_Bool
@@ -276,7 +328,7 @@ static
 int32_t
 trace_ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s loader=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
+    trace_info("[PPB] {full} %s loader=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
                __func__+6, loader, callback.func, callback.user_data, callback.flags);
     return ppb_url_loader_follow_redirect(loader, callback);
 }
