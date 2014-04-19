@@ -221,7 +221,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         }
         *ptr = 0;
         ul->http_code = ph->http_code;
-        ul->total_size = stream->end;
+        ul->total_size = stream->end > 0 ? stream->end : -1;
         ul->status_line = strdup(ph->status_line);
 
         hp_free_parsed_headers(ph);
