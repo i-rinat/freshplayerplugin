@@ -36,7 +36,27 @@
 PP_Resource
 ppb_url_request_info_create(PP_Instance instance)
 {
-    return pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO, instance);
+    PP_Resource request_info = pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO, instance);
+    struct pp_url_request_info_s *ri =
+                            pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
+
+    ri->method = PP_METHOD_UNKNOWN;
+    ri->url = NULL;
+    ri->headers = NULL;
+    ri->stream_to_file = PP_FALSE;
+    ri->follow_redirects = PP_TRUE;
+    ri->record_download_progress = PP_FALSE;
+    ri->record_upload_progress = PP_FALSE;
+    ri->custom_referrer_url = NULL;
+    ri->allow_cross_origin_requests = PP_FALSE;
+    ri->allow_credentials = PP_FALSE;
+    ri->custom_content_transfer_encoding = NULL;
+    ri->prefetch_buffer_upper_threshold = -1;
+    ri->prefetch_buffer_lower_threshold = -1;
+    ri->custom_user_agent = NULL;
+
+    pp_resource_release(request_info);
+    return request_info;
 }
 
 void
