@@ -179,7 +179,21 @@ int32_t
 ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *path_from,
                                        const char *path_to)
 {
-    return 0;
+    (void)instance;
+    char *abs_path_from = to_abs_path(pepper_data_dir, path_from);
+    char *abs_path_to =   to_abs_path(pepper_data_dir, path_to);
+
+    int ret = rename(abs_path_from, abs_path_to);
+
+    free(abs_path_from);
+    free(abs_path_to);
+
+    if (ret < 0) {
+        // TODO: implement error mapping
+        return PP_ERROR_FAILED;
+    }
+
+    return PP_OK;
 }
 
 int32_t
@@ -362,7 +376,7 @@ int32_t
 trace_ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *path_from,
                                              const char *path_to)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, path_from=%s, path_to=%s\n",
+    trace_info("[PPB] {full} %s instance=%d, path_from=%s, path_to=%s\n",
                __func__+6, instance, path_from, path_to);
     return ppb_flash_file_modulelocal_rename_file(instance, path_from, path_to);
 }
