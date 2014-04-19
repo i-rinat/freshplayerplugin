@@ -45,67 +45,59 @@ static const char *pepper_data_dir = "/tmp/freshplayerplugin";
 /// resolve pp module local path to absolute one
 static
 char *
-to_abs_path(const char *s)
+to_abs_path(const char *root, const char *s)
 {
     char *rel_path = NULL;
-    UriParserStateA state;
-    UriUriA uri;
-    int len;
+    char *abs_path = NULL;
+    char *src, *dst;
+    int dot_cnt = 0;
 
     asprintf(&rel_path, "/%s", s);
-    state.uri = &uri;
-    if (uriParseUriA(&state, rel_path) != URI_SUCCESS)
-        goto err;
-    if (uriNormalizeSyntaxExA(&uri, URI_NORMALIZE_PATH) != URI_SUCCESS)
-        goto err;
+    src = dst = rel_path;
 
-    if (uriToStringCharsRequiredA(&uri, &len) != URI_SUCCESS)
-        goto err;
-
-    char *rel_path_norm = malloc(len + 1);
-    if (!rel_path_norm)
-        goto err;
-    if (uriToStringA(rel_path_norm, &uri, len + 1, NULL) != URI_SUCCESS)
-        goto err2;
-
-    char *next_slash = strchr(rel_path_norm+1, '/');
-    if (next_slash) {
-        char *module_path;
-        struct stat sb;
-        const int module_name_len = next_slash - rel_path_norm;
-        asprintf(&module_path, "%s%.*s", pepper_data_dir, module_name_len, rel_path_norm);
-        int ret = lstat(module_path, &sb);
-        if (ret < 0 && ENOENT == errno) {
-            // recursively create directories
-            char *ptr = module_path + 1;
-            while (*ptr != 0) {
-                if ('/' == *ptr) {
-                    *ptr = '\0';
-                    mkdir(module_path, 0777);
-                    *ptr = '/';
+    while (*src) {
+        switch (*src) {
+        case '\\':
+        case '/':
+            if (dot_cnt == 1 || dot_cnt == 2) {
+                for (int k = 0; k < dot_cnt; k ++) {
+                    while (dst > rel_path && *(dst - 1) != '/')
+                        dst --;
+                    if (dst > rel_path)
+                        dst --;
                 }
-                ptr ++;
             }
-            mkdir(module_path, 0777);
-        } else if (ret < 0) {
-            goto err2;
+            *dst++ = '/';
+            dot_cnt = 0;
+            break;
+        case '.':
+            *dst++ = '.';
+            dot_cnt++;
+            break;
+        default:
+            dot_cnt = 0;
+            *dst++ = *src;
+            break;
         }
-        free(module_path);
+        src++;
     }
 
-    char *result;
-    asprintf(&result, "%s%s", pepper_data_dir, rel_path_norm);
-    free(rel_path_norm);
-    free(rel_path);
-    uriFreeUriMembersA(&uri);
-    return result;
+    // treat ending with . or .. as imaginary slash
+    if (dot_cnt == 1 || dot_cnt == 2) {
+        for (int k = 0; k < dot_cnt; k ++) {
+            while (dst > rel_path && *(dst - 1) != '/')
+                dst --;
+            if (dst > rel_path)
+                dst --;
+        }
+        *dst++ = '/';
+    }
 
-err2:
-    free(rel_path_norm);
-err:
-    uriFreeUriMembersA(&uri);
+    int len = dst - rel_path;
+    asprintf(&abs_path, "%s%.*s", root, len, rel_path);
     free(rel_path);
-    return NULL;
+
+    return abs_path;
 }
 
 PP_Bool
@@ -148,7 +140,7 @@ int32_t
 ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
                                      PP_FileHandle *file)
 {
-    char *abs_path = to_abs_path(path);
+    char *abs_path = to_abs_path(pepper_data_dir, path);
     int fd = open(abs_path, O_LARGEFILE, pp_mode_to_open_mode(mode));
     free(abs_path);
     *file = fd;
@@ -179,9 +171,21 @@ ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *
 int32_t
 ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
 {
-    char *abs_path = to_abs_path(path);
-    int ret = mkdir(abs_path, 0777);
+    char *abs_path, *ptr;
+    int ret;
+
+    abs_path = to_abs_path(pepper_data_dir, path);
+    ptr = strchr(abs_path, '/');
+    while (ptr) {
+        *ptr = '\0';
+        mkdir(abs_path, 0755);
+        *ptr = '/';
+        ptr = strchr(ptr + 1, '/');
+    }
+
+    ret = mkdir(abs_path, 0755);
     free(abs_path);
+
     if (ret < 0) {
         switch (errno) {
         case EACCES: return PP_ERROR_NOACCESS;
@@ -199,7 +203,7 @@ ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
 {
     if (!info)
         return PP_ERROR_FAILED;
-    char *abs_path = to_abs_path(path);
+    char *abs_path = to_abs_path(pepper_data_dir, path);
     struct stat sb;
 
     int ret = lstat(abs_path, &sb);
@@ -232,7 +236,7 @@ ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const char *pa
                                             struct PP_DirContents_Dev **contents)
 {
     struct dirent **namelist;
-    char *abs_path = to_abs_path(path);
+    char *abs_path = to_abs_path(pepper_data_dir, path);
     int n = scandir(abs_path, &namelist, NULL, alphasort);
     *contents = NULL;
     if (n < 0)

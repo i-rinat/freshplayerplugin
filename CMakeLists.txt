@@ -94,3 +94,5 @@ target_link_libraries(freshwrapper
 	-ldl
 	${REQ_LIBRARIES}
 )
+
+add_subdirectory(tests)
