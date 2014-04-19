@@ -199,12 +199,12 @@ ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
     ptr = strchr(abs_path, '/');
     while (ptr) {
         *ptr = '\0';
-        mkdir(abs_path, 0755);
+        mkdir(abs_path, 0777);
         *ptr = '/';
         ptr = strchr(ptr + 1, '/');
     }
 
-    ret = mkdir(abs_path, 0755);
+    ret = mkdir(abs_path, 0777);
     free(abs_path);
 
     if (ret < 0) {
