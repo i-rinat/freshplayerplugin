@@ -36,6 +36,7 @@
 #include "ppb_input_event.h"
 #include "ppb_flash_font_file.h"
 #include "ppb_video_capture_dev.h"
+#include "ppb_audio_input_dev.h"
 
 
 #define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
@@ -110,6 +111,9 @@ pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
         break;
     case PP_RESOURCE_VIDEO_CAPTURE:
         ALLOC_HELPER(struct pp_video_capture_s);
+        break;
+    case PP_RESOURCE_AUDIO_INPUT:
+        ALLOC_HELPER(struct pp_audio_input_s);
         break;
     default:
         // fall through
@@ -242,6 +246,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_VIDEO_CAPTURE:
             ppb_video_capture_dev_destroy(ptr);
+            break;
+        case PP_RESOURCE_AUDIO_INPUT:
+            ppb_audio_input_dev_destroy(ptr);
             break;
         default:
             break;

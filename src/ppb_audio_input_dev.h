@@ -31,6 +31,9 @@
 PP_Resource
 ppb_audio_input_dev_create(PP_Instance instance);
 
+void
+ppb_audio_input_dev_destroy(void *ptr);
+
 PP_Bool
 ppb_audio_input_dev_is_audio_input(PP_Resource resource);
 

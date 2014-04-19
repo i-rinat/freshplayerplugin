@@ -23,20 +23,27 @@
  */
 
 #include "ppb_audio_input_dev.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include "pp_resource.h"
 #include "trace.h"
 
 
 PP_Resource
 ppb_audio_input_dev_create(PP_Instance instance)
 {
-    return 123006;
+    PP_Resource audio_input = pp_resource_allocate(PP_RESOURCE_AUDIO_INPUT, instance);
+    return audio_input;
+}
+
+void
+ppb_audio_input_dev_destroy(void *ptr)
+{
 }
 
 PP_Bool
 ppb_audio_input_dev_is_audio_input(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_AUDIO_INPUT;
 }
 
 int32_t
@@ -98,7 +105,7 @@ static
 PP_Resource
 trace_ppb_audio_input_dev_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_input_dev_create(instance);
 }
 
@@ -106,7 +113,7 @@ static
 PP_Bool
 trace_ppb_audio_input_dev_is_audio_input(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_input_dev_is_audio_input(resource);
 }
 
