@@ -46,7 +46,7 @@
 #include <cairo.h>
 #include <asoundlib.h>
 
-#define FREE_HELPER(st, field)  if (st->field) { free(st->field); st->field = NULL; }
+#define FREE_HELPER(st, field)  do { free(st->field); st->field = NULL; } while(0)
 
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,
@@ -125,6 +125,15 @@ struct pp_url_loader_s {
     size_t      read_pos;       ///< reading position
     char       *url;            ///< request URL
     int         loaded;         ///< if whole stream loaded already
+    char       *request_headers;
+    PP_Bool     follow_redirects;
+    PP_Bool     record_download_progress;
+    PP_Bool     record_upload_progress;
+    char       *custom_referrer_url;
+    PP_Bool     allow_cross_origin_requests;
+    PP_Bool     allow_credentials;
+    char       *custom_content_transfer_encoding;
+    char       *custom_user_agent;
     struct PP_CompletionCallback    ccb;
 };
 

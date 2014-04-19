@@ -58,6 +58,10 @@ ppb_url_loader_destroy(void *p)
     }
     FREE_HELPER(ul, headers);
     FREE_HELPER(ul, url);
+    FREE_HELPER(ul, request_headers);
+    FREE_HELPER(ul, custom_referrer_url);
+    FREE_HELPER(ul, custom_content_transfer_encoding);
+    FREE_HELPER(ul, custom_user_agent);
 }
 
 PP_Bool
@@ -107,6 +111,16 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
 
     ul->url = strdup(triple->url);
     ul->read_pos = 0;
+    ul->request_headers = ri->headers ? strdup(ri->headers) : NULL;
+    ul->follow_redirects = ri->follow_redirects;
+    ul->record_download_progress = ri->record_download_progress;
+    ul->record_upload_progress = ri->record_upload_progress;
+    ul->custom_referrer_url = ri->custom_referrer_url ? strdup(ri->custom_referrer_url) : NULL;
+    ul->allow_cross_origin_requests = ri->allow_cross_origin_requests;
+    ul->allow_credentials = ri->allow_credentials;
+    ul->custom_content_transfer_encoding = ri->custom_content_transfer_encoding
+                                           ? strdup(ri->custom_content_transfer_encoding) : NULL;
+    ul->custom_user_agent = ri->custom_user_agent ? strdup(ri->custom_user_agent) : NULL;
 
     char *tmpfname;
     // TODO: make temp path configurable
