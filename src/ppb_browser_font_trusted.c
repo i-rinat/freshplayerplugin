@@ -140,8 +140,10 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
         cairo_move_to(cr, 0, 0);
     pango_font_metrics_unref(m);
 
-    cairo_set_source_rgba(cr, (color & 0xffu) / 255.0, ((color >> 8) & 0xffu) / 255.0,
-                          ((color >> 16) & 0xffu) / 255.0, ((color >> 24) & 0xffu) / 255.0);
+    cairo_set_source_rgba(cr, ((color >> 16) & 0xffu) / 255.0,
+                              ((color >> 8) & 0xffu) / 255.0,
+                              ((color >> 0) & 0xffu) / 255.0,
+                              ((color >> 24) & 0xffu) / 255.0);
 
     PangoLayout *layout = pango_cairo_create_layout(cr);
     uint32_t len = 0;
