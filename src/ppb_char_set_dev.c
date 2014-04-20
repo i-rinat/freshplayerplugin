@@ -24,6 +24,8 @@
 
 #include "ppb_char_set_dev.h"
 #include <stdlib.h>
+#include <locale.h>
+#include <langinfo.h>
 #include "trace.h"
 #include "tables.h"
 
@@ -49,7 +51,8 @@ ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint
 struct PP_Var
 ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 {
-    return PP_MakeUndefined();
+    setlocale(LC_ALL, NULL);
+    return PP_MakeString(nl_langinfo(CODESET));
 }
 
 
@@ -82,7 +85,7 @@ static
 struct PP_Var
 trace_ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_char_set_dev_get_default_char_set(instance);
 }
 
