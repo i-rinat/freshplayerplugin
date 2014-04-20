@@ -29,8 +29,10 @@
 #include <ppapi/c/ppb_url_response_info.h>
 #include <ppapi/c/ppb_url_request_info.h>
 #include <ppapi/c/dev/ppb_text_input_dev.h>
+#include <ppapi/c/dev/ppb_char_set_dev.h>
 #include <ppapi/c/private/ppb_flash.h>
 #include <ppapi/c/ppb_image_data.h>
+
 
 const char *reverse_npp_variable(NPPVariable var);
 const char *reverse_npn_variable(NPNVariable var);
@@ -40,5 +42,6 @@ const char *reverse_pp_text_input_type(PP_TextInput_Type_Dev type);
 const char *reverse_pp_flash_setting(PP_FlashSetting setting);
 const char *reverse_pp_image_data_format(PP_ImageDataFormat fmt);
 const char *reverse_xevent_type(int type);
+const char *reverse_char_set_conversion_error(enum PP_CharSet_ConversionError e);
 
 #endif // FPP__REVERSE_CONSTANT_H

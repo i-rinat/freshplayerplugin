@@ -203,3 +203,15 @@ reverse_xevent_type(int type)
         return "UNKNOWNXEVENT";
     }
 }
+
+const char *
+reverse_char_set_conversion_error(enum PP_CharSet_ConversionError e)
+{
+    switch (e) {
+    CASE(PP_CHARSET_CONVERSIONERROR_FAIL);
+    CASE(PP_CHARSET_CONVERSIONERROR_SKIP);
+    CASE(PP_CHARSET_CONVERSIONERROR_SUBSTITUTE);
+    default:
+        return "UNKNOWNCHARSETCONVERSION_ERROR";
+    }
+}

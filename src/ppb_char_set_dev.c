@@ -28,6 +28,7 @@
 #include <langinfo.h>
 #include "trace.h"
 #include "tables.h"
+#include "reverse_constant.h"
 
 
 char *
@@ -64,7 +65,9 @@ trace_ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *u
                                          enum PP_CharSet_ConversionError on_error,
                                          uint32_t *output_length)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d, utf16=%p, utf16_len=%u, output_char_set=%s, "
+               "on_error=%s\n", __func__+6, instance, utf16, utf16_len, output_char_set,
+               reverse_char_set_conversion_error(on_error));
     return ppb_char_set_dev_utf16_to_char_set(instance, utf16, utf16_len, output_char_set,
                                               on_error, output_length);
 }
@@ -76,7 +79,9 @@ trace_ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input
                                          enum PP_CharSet_ConversionError on_error,
                                          uint32_t *output_length)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d, input=%.*s, input_len=%u, input_char_set=%s, "
+               "on_error=%s\n", __func__+6, instance, input_len, input, input_len, input_char_set,
+               reverse_char_set_conversion_error(on_error));
     return ppb_char_set_dev_char_set_to_utf16(instance, input, input_len, input_char_set,
                                               on_error, output_length);
 }
@@ -85,7 +90,7 @@ static
 struct PP_Var
 trace_ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_char_set_dev_get_default_char_set(instance);
 }
 
