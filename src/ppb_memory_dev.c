@@ -46,7 +46,7 @@ static
 void *
 trace_ppb_memory_dev_mem_alloc(uint32_t num_bytes)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s num_bytes=%u\n", __func__+6, num_bytes);
     return ppb_memory_dev_mem_alloc(num_bytes);
 }
 
@@ -54,7 +54,7 @@ static
 void
 trace_ppb_memory_dev_mem_free(void *ptr)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s ptr=%p\n", __func__+6, ptr);
     ppb_memory_dev_mem_free(ptr);
 }
 
