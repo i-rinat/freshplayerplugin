@@ -38,7 +38,7 @@ ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
 PP_Bool
 ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 {
-    return PP_TRUE;
+    return PP_FALSE;
 }
 
 PP_Bool
