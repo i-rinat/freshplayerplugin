@@ -182,6 +182,12 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     fclose(ul->fp);
     ul->fp = open_temporary_file_stream();
 
+    // abort further handling of the NPStream
+    if (ul->np_stream) {
+        ul->np_stream->pdata = NULL;
+        ul->np_stream = NULL;
+    }
+
     struct triple_s *triple = malloc(sizeof(*triple));
     triple->url = strdup(ppb_var_var_to_utf8(full_url, NULL));
     triple->loader = loader;

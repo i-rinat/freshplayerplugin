@@ -140,6 +140,7 @@ struct pp_url_loader_s {
     char       *custom_user_agent;
     struct PP_CompletionCallback    ccb;
     GList      *read_tasks;                         ///< list of url_loader_read_task_s
+    NPStream   *np_stream;
 };
 
 struct url_loader_read_task_s {

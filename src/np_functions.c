@@ -194,6 +194,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         struct parsed_headers_s *ph = hp_parse_headers(stream->headers);
         unsigned int headers_len = 0;
         ccb = ul->ccb;
+        ul->np_stream = stream;
 
         // handling redirection
         if (ph->http_code >= 300 && ph->http_code <= 307 && hp_header_exists(ph, "Location")) {
