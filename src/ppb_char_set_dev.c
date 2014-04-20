@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#define _GNU_SOURCE                 // asprintf
 #include "ppb_char_set_dev.h"
 #include "ppb_memory_dev.h"
 #include <stdlib.h>
@@ -39,7 +40,52 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
                                    enum PP_CharSet_ConversionError on_error,
                                    uint32_t *output_length)
 {
-    return NULL;
+    const uint32_t output_buffer_length = (utf16_len + 1) * 4 + 1;
+    char *output = ppb_memory_dev_mem_alloc(output_buffer_length);
+    char *inbuf = (char*)utf16;
+    char *outbuf = (char*)output;
+    size_t inbytesleft = utf16_len * 2;
+    size_t outbytesleft = output_buffer_length - 1;
+    iconv_t cd;
+    char *tmp;
+
+    switch (on_error) {
+    default:
+    case PP_CHARSET_CONVERSIONERROR_FAIL:
+
+        cd = iconv_open(output_char_set, "UTF16");
+        break;
+    case PP_CHARSET_CONVERSIONERROR_SKIP:
+        asprintf(&tmp, "%s//IGNORE", output_char_set);
+        cd = iconv_open(tmp, "UTF16");
+        free(tmp);
+        break;
+    case PP_CHARSET_CONVERSIONERROR_SUBSTITUTE:
+        asprintf(&tmp, "%s//TRANSLIT", output_char_set);
+        cd = iconv_open(tmp, "UTF16");
+        free(tmp);
+        break;
+    }
+
+    size_t ret = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+    if (ret == (size_t) -1) {
+        if (errno == E2BIG) {
+            trace_warning("%s, this should never happen\n", __func__);
+        } else {
+            if (on_error == PP_CHARSET_CONVERSIONERROR_FAIL) {
+                ppb_memory_dev_mem_free(output);
+                *output_length = 0;
+                iconv_close(cd);
+                return NULL;
+            }
+        }
+    }
+
+    *output_length = output_buffer_length - 1 - outbytesleft;
+    output[*output_length] = 0;
+    printf("result = %s\n", output);
+    iconv_close(cd);
+    return output;
 }
 
 uint16_t *
@@ -105,7 +151,7 @@ trace_ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *u
                                          enum PP_CharSet_ConversionError on_error,
                                          uint32_t *output_length)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, utf16=%p, utf16_len=%u, output_char_set=%s, "
+    trace_info("[PPB] {full} %s instance=%d, utf16=%p, utf16_len=%u, output_char_set=%s, "
                "on_error=%s\n", __func__+6, instance, utf16, utf16_len, output_char_set,
                reverse_char_set_conversion_error(on_error));
     return ppb_char_set_dev_utf16_to_char_set(instance, utf16, utf16_len, output_char_set,
