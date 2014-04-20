@@ -25,17 +25,19 @@
 #include "ppb_memory_dev.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 
 
 void *
 ppb_memory_dev_mem_alloc(uint32_t num_bytes)
 {
-    return NULL;
+    return npn.memalloc(num_bytes);
 }
 
 void
 ppb_memory_dev_mem_free(void *ptr)
 {
+    npn.memfree(ptr);
 }
 
 
@@ -44,7 +46,7 @@ static
 void *
 trace_ppb_memory_dev_mem_alloc(uint32_t num_bytes)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_memory_dev_mem_alloc(num_bytes);
 }
 
@@ -52,7 +54,7 @@ static
 void
 trace_ppb_memory_dev_mem_free(void *ptr)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     ppb_memory_dev_mem_free(ptr);
 }
 
