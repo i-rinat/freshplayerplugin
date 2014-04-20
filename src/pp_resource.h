@@ -139,6 +139,13 @@ struct pp_url_loader_s {
     char       *custom_content_transfer_encoding;
     char       *custom_user_agent;
     struct PP_CompletionCallback    ccb;
+    GList      *read_tasks;                         ///< list of url_loader_read_task_s
+};
+
+struct url_loader_read_task_s {
+    void                           *buffer;
+    int32_t                         bytes_to_read;
+    struct PP_CompletionCallback    ccb;
 };
 
 struct pp_url_request_info_s {

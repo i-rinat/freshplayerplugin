@@ -184,12 +184,16 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         return NPERR_NO_ERROR;
     }
 
+    struct PP_CompletionCallback ccb;
+    ccb.func = NULL;
+
     stream->pdata = (void*)(size_t)loader;
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
     if (ul) {
         struct parsed_headers_s *ph = hp_parse_headers(stream->headers);
         unsigned int headers_len = 0;
+        ccb = ul->ccb;
 
         // handling redirection
         if (ph->http_code >= 300 && ph->http_code <= 307 && hp_header_exists(ph, "Location")) {
@@ -201,7 +205,8 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
                 tables_push_url_pair(new_location, loader);
                 npn.geturl(npp, ul->url, NULL);
 
-                return NPERR_NO_ERROR;
+                pp_resource_release(loader);
+                goto quit;
             } else {
                 ul->redirect_url = strdup(hp_get_header_value(ph, "Location"));
             }
@@ -228,6 +233,10 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         pp_resource_release(loader);
     }
 
+quit:
+    if (ccb.func)
+        ccb.func(ccb.user_data, PP_OK);
+
     return NPERR_NO_ERROR;
 }
 
@@ -241,13 +250,29 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         return NPERR_NO_ERROR;
 
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
-    if (ul) {
-        ul->loaded = 1;
-        struct PP_CompletionCallback ccb = ul->ccb;
+    if (!ul)
+        return NPERR_NO_ERROR;
+
+    ul->loaded = 1;
+
+    // execute all remaining tasks in task list
+    while (ul && ul->read_tasks) {
+        GList *llink = g_list_first(ul->read_tasks);
+        struct url_loader_read_task_s *rt = llink->data;
+        ul->read_tasks = g_list_delete_link(ul->read_tasks, llink);
+
+        fseek(ul->fp, ul->read_pos, SEEK_SET);
+        int32_t read_bytes = fread(rt->buffer, 1, rt->bytes_to_read, ul->fp);
+        ul->read_pos += read_bytes;
+
         pp_resource_release(loader);
-        if (ccb.func)
-            ccb.func(ccb.user_data, PP_OK);
+        if (rt->ccb.func)
+            rt->ccb.func(rt->ccb.user_data, read_bytes);
+        free(rt);
+        ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
+
+    pp_resource_release(loader);
     return NPERR_NO_ERROR;
 }
 
@@ -274,13 +299,39 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
             return len;
     }
 
-    if (ul->fp) {
-        fseek(ul->fp, offset, SEEK_SET);
-        fwrite(buffer, len, 1, ul->fp);
+    if (!ul->fp || len <= 0) {
+        pp_resource_release(loader);
+        return len;
     }
 
-    pp_resource_release(loader);
-    return len;
+    fseek(ul->fp, offset, SEEK_SET);
+    fwrite(buffer, len, 1, ul->fp);
+
+    if (ul->read_tasks == NULL) {
+        pp_resource_release(loader);
+        return len;
+    }
+
+    GList *llink = g_list_first(ul->read_tasks);
+    struct url_loader_read_task_s *rt = llink->data;
+    ul->read_tasks = g_list_delete_link(ul->read_tasks, llink);
+
+    fseek(ul->fp, ul->read_pos, SEEK_SET);
+    int32_t read_bytes = fread(rt->buffer, 1, rt->bytes_to_read, ul->fp);
+    ul->read_pos += read_bytes;
+
+    if (read_bytes > 0) {
+        pp_resource_release(loader);
+        if (rt->ccb.func)
+            rt->ccb.func(rt->ccb.user_data, read_bytes);
+        free(rt);
+        return len;
+    } else {
+        // reschedule task
+        ul->read_tasks = g_list_prepend(ul->read_tasks, rt);
+        pp_resource_release(loader);
+        return len;
+    }
 }
 
 void

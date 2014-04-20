@@ -256,8 +256,6 @@ int32_t
 ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t bytes_to_read,
                                   struct PP_CompletionCallback callback)
 {
-    // TODO: maybe some locking?
-    // TODO: async reads, callback calls
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     int read_bytes = 0;
 
@@ -265,6 +263,18 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
         fseek(ul->fp, ul->read_pos, SEEK_SET);
         read_bytes = fread(buffer, 1, bytes_to_read, ul->fp);
         ul->read_pos += read_bytes;
+    }
+
+    if (read_bytes == 0) {
+        // no data ready, schedule read task
+        struct url_loader_read_task_s *rt = malloc(sizeof(*rt));
+        rt->buffer = buffer;
+        rt->bytes_to_read = bytes_to_read;
+        rt->ccb = callback;
+
+        ul->read_tasks = g_list_append(ul->read_tasks, rt);
+        pp_resource_release(loader);
+        return PP_OK_COMPLETIONPENDING;
     }
 
     pp_resource_release(loader);
