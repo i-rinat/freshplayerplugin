@@ -203,13 +203,13 @@ pp_resource_unref(PP_Resource resource)
 {
     PP_Resource parent = 0;
     int ref_cnt;
-    pthread_mutex_lock(&res_tbl_lock);
 
+    pthread_mutex_lock(&res_tbl_lock);
     struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
-    if (!ptr) {
-        pthread_mutex_unlock(&res_tbl_lock);
+    pthread_mutex_unlock(&res_tbl_lock);
+
+    if (!ptr)
         return;
-    }
 
     ref_cnt = --ptr->ref_cnt;
     if (ref_cnt <= 0) {
@@ -254,8 +254,6 @@ pp_resource_unref(PP_Resource resource)
             break;
         }
     }
-
-    pthread_mutex_unlock(&res_tbl_lock);
 
     if (ref_cnt <= 0) {
         pp_resource_expunge(resource);
