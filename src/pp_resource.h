@@ -120,27 +120,29 @@ struct pp_resource_generic_s {
 
 struct pp_url_loader_s {
     struct pp_resource_generic_s _;
-    char       *headers;        ///< response headers
-    FILE       *fp;             ///< file used to store response
-    size_t      read_pos;       ///< reading position
-    char       *url;            ///< request URL
-    char       *redirect_url;   ///< value of the Location header if this is a redirection response
-    int         loaded;         ///< if whole stream loaded already
-    int         http_code;
-    char       *status_line;
-    int32_t     total_size;
-    char       *request_headers;
-    PP_Bool     follow_redirects;
-    PP_Bool     record_download_progress;
-    PP_Bool     record_upload_progress;
-    char       *custom_referrer_url;
-    PP_Bool     allow_cross_origin_requests;
-    PP_Bool     allow_credentials;
-    char       *custom_content_transfer_encoding;
-    char       *custom_user_agent;
-    struct PP_CompletionCallback    ccb;
-    GList      *read_tasks;                         ///< list of url_loader_read_task_s
-    NPStream   *np_stream;
+    char                   *headers;        ///< response headers
+    FILE                   *fp;             ///< file used to store response
+    size_t                  read_pos;       ///< reading position
+    enum pp_request_method_e method;        ///< GET/POST
+    char                   *url;            ///< request URL
+    char                   *redirect_url;   ///< value of the Location header if this is
+                                            ///< a redirection response
+    int                     loaded;         ///< if whole stream loaded already
+    int                     http_code;      ///< HTTP response code
+    char                   *status_line;    ///< HTTP/1.1 200 OK
+    int32_t                 total_size;     ///< Content-Length value of -1 if absent
+    char                   *request_headers;
+    PP_Bool                 follow_redirects;   ///< handle redirections internally
+    PP_Bool                 record_download_progress;
+    PP_Bool                 record_upload_progress;
+    char                   *custom_referrer_url;
+    PP_Bool                 allow_cross_origin_requests;
+    PP_Bool                 allow_credentials;
+    char                   *custom_content_transfer_encoding;
+    char                   *custom_user_agent;
+    struct PP_CompletionCallback    ccb;    ///< callback to call on headers arrival
+    GList                  *read_tasks;     ///< list of url_loader_read_task_s
+    NPStream               *np_stream;      ///< associated NPStream
 };
 
 struct url_loader_read_task_s {

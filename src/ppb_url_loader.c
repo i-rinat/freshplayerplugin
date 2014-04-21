@@ -122,6 +122,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     triple->instance = ul->_.instance;
     ppb_var_release(full_url);
 
+    ul->method = ri->method;
     ul->url = strdup(triple->url);
     ul->read_pos = 0;
     ul->request_headers = ri->headers ? strdup(ri->headers) : NULL;
