@@ -7,6 +7,7 @@
 int
 main(void)
 {
+    // ===
     struct parsed_headers_s *ph = hp_parse_headers(
         "HTTP/1.1 200 OK\r\n"
         "Date: Sat, 19 Apr 2014 15:53:34 GMT\r\n"
@@ -32,6 +33,7 @@ main(void)
     assert(0 == strcmp(ph->status_line, "HTTP/1.1 200 OK"));
     hp_free_parsed_headers(ph);
 
+    // ===
     ph = hp_parse_headers(
         "HTTP/1.0 301 Moved Permanently\r\n"
         "Location: http://example.org\r\n"
@@ -41,6 +43,11 @@ main(void)
     assert(ph->http_code == 301);
     assert(0 == strcmp(hp_get_header_value(ph, "Location"), "http://example.org"));
     assert(0 == strcmp(ph->status_line, "HTTP/1.0 301 Moved Permanently"));
+    hp_free_parsed_headers(ph);
+
+    // ===
+    ph = hp_parse_headers(NULL);
+    assert(0 == ph->cnt);
     hp_free_parsed_headers(ph);
 
     printf("pass\n");

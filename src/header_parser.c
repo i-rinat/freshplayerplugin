@@ -32,11 +32,15 @@
 struct parsed_headers_s *
 hp_parse_headers(const char *headers)
 {
-    // TODO: implement me
-    struct parsed_headers_s *ph = malloc(sizeof(*ph));
+    struct parsed_headers_s *ph = calloc(1, sizeof(*ph));
     const char *delimiter = "\r\n";
     char *headers_copy, *saveptr, *part;
     int k;
+
+    if (headers == NULL) {
+        // all fields zeroed
+        return ph;
+    }
 
     // count headers, determine http code
     headers_copy = strdup(headers);
