@@ -25,7 +25,7 @@ pkg_check_modules(REQ
 	freetype2
 	REQUIRED)
 
-include_directories(include ${REQ_INCLUDE_DIRS})
+include_directories(3rdparty ${REQ_INCLUDE_DIRS})
 add_definitions(${REQ_CFLAGS_OTHER})
 link_directories(${REQ_LIBRARY_DIRS})
 
