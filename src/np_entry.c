@@ -23,8 +23,8 @@
  */
 
 #include <dlfcn.h>
-#include <npapi.h>
-#include <npfunctions.h>
+#include <npapi/npapi.h>
+#include <npapi/npfunctions.h>
 #include <string.h>
 #include <ppapi/c/ppb.h>
 #include <ppapi/c/pp_module.h>

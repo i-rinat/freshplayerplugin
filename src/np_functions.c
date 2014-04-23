@@ -24,7 +24,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <npapi.h>
+#include <npapi/npapi.h>
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>

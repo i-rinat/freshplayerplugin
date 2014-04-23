@@ -28,8 +28,8 @@
 #include <ppapi/c/pp_var.h>
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 #include "pp_resource.h"
-#include <npruntime.h>
-#include <npfunctions.h>
+#include <npapi/npruntime.h>
+#include <npapi/npfunctions.h>
 
 
 extern NPNetscapeFuncs npn;

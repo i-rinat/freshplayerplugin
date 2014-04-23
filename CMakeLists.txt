@@ -15,7 +15,6 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(REQ
 	alsa
 	glib-2.0
-	mozilla-plugin
 	x11
 	liburiparser
 	cairo
@@ -27,6 +26,7 @@ pkg_check_modules(REQ
 
 include_directories(3rdparty ${REQ_INCLUDE_DIRS})
 add_definitions(${REQ_CFLAGS_OTHER})
+add_definitions(-DXP_UNIX)
 link_directories(${REQ_LIBRARY_DIRS})
 
 add_library(freshwrapper SHARED

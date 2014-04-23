@@ -25,7 +25,7 @@
 #ifndef FPP__REVERSE_CONSTANT_H
 #define FPP__REVERSE_CONSTANT_H
 
-#include <npapi.h>
+#include <npapi/npapi.h>
 #include <ppapi/c/ppb_url_response_info.h>
 #include <ppapi/c/ppb_url_request_info.h>
 #include <ppapi/c/dev/ppb_text_input_dev.h>

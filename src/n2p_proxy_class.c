@@ -31,7 +31,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
-#include <npruntime.h>
+#include <npapi/npruntime.h>
 #include "ppb_var.h"
 
 

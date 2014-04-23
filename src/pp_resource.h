@@ -36,8 +36,8 @@
 
 #include <stddef.h>
 #include <X11/Xlib.h>
-#include <npapi.h>
-#include <npruntime.h>
+#include <npapi/npapi.h>
+#include <npapi/npruntime.h>
 #include <glib.h>
 #include <EGL/egl.h>
 #include <pango/pango.h>

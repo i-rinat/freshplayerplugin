@@ -28,7 +28,7 @@
 #include <ppapi/c/pp_var.h>
 #include <ppapi/c/pp_rect.h>
 #include <ppapi/c/pp_touch_point.h>
-#include <npapi.h>
+#include <npapi/npapi.h>
 
 
 void    trace_info(const char *fmt, ...) __attribute__((format (printf, 1, 2)));

@@ -25,8 +25,8 @@
 #ifndef FPP__P2N_PROXY_CLASS_H
 #define FPP__P2N_PROXY_CLASS_H
 
-#include <npapi.h>
-#include <npruntime.h>
+#include <npapi/npapi.h>
+#include <npapi/npruntime.h>
 
 
 extern struct NPClass p2n_proxy_class;
