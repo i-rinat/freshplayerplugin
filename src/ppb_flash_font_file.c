@@ -27,7 +27,8 @@
 #include "trace.h"
 #include "tables.h"
 #include "ppb_var.h"
-#include <tttables.h>
+#include <ft2build.h>
+#include FT_TRUETYPE_TABLES_H
 #include <arpa/inet.h>      // for htonl()
 
 
