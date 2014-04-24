@@ -234,7 +234,7 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
-    *total_bytes_to_be_received = ul->total_size;
+    *total_bytes_to_be_received = ul->response_size;
     *bytes_received = 0;
     if (ul->fp) {
         fseek(ul->fp, 0, SEEK_END);

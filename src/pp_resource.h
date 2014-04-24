@@ -108,7 +108,6 @@ struct pp_instance_s {
     PP_Resource     graphics;
     Display        *dpy;
     EGLDisplay      egl_dpy;
-
 };
 
 struct pp_resource_generic_s {
@@ -120,7 +119,9 @@ struct pp_resource_generic_s {
 
 struct pp_url_loader_s {
     struct pp_resource_generic_s _;
+    char                   *status_line;    ///< HTTP/1.1 200 OK
     char                   *headers;        ///< response headers
+    int                     http_code;      ///< HTTP response code
     FILE                   *fp;             ///< file used to store response
     size_t                  read_pos;       ///< reading position
     enum pp_request_method_e method;        ///< GET/POST
@@ -128,9 +129,8 @@ struct pp_url_loader_s {
     char                   *redirect_url;   ///< value of the Location header if this is
                                             ///< a redirection response
     int                     loaded;         ///< if whole stream loaded already
-    int                     http_code;      ///< HTTP response code
-    char                   *status_line;    ///< HTTP/1.1 200 OK
-    int32_t                 total_size;     ///< Content-Length value of -1 if absent
+    int32_t                 response_size;  ///< Content-Length value of -1 if absent
+
     char                   *request_headers;
     PP_Bool                 follow_redirects;   ///< handle redirections internally
     PP_Bool                 record_download_progress;
@@ -140,9 +140,9 @@ struct pp_url_loader_s {
     PP_Bool                 allow_credentials;
     char                   *custom_content_transfer_encoding;
     char                   *custom_user_agent;
-    struct PP_CompletionCallback    ccb;    ///< callback to call on headers arrival
     GList                  *read_tasks;     ///< list of url_loader_read_task_s
     NPStream               *np_stream;      ///< associated NPStream
+    struct PP_CompletionCallback    ccb;    ///< callback to call on headers arrival
 };
 
 struct url_loader_read_task_s {
