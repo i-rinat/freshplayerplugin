@@ -138,8 +138,10 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ul->custom_user_agent =                nullsafe_strdup(ri->custom_user_agent);
 
     ul->fp = open_temporary_file_stream();
+    ul->ccb = callback;
 
     ppb_var_release(full_url);
+    pp_resource_release(request_info);
 
     struct triple_s *triple = malloc(sizeof(*triple));
     triple->url = strdup(ul->url);
@@ -148,9 +150,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = triple};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
-    ul->ccb = callback;
 
-    pp_resource_release(request_info);
     pp_resource_release(loader);
 
     if (callback.func == NULL) {
@@ -188,8 +188,8 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     free_and_nullify(ul, headers);
     free_and_nullify(ul, request_headers);
 
-    fclose(ul->fp);
-    ul->fp = open_temporary_file_stream();
+    if (ul->fp)
+        fclose(ul->fp);
 
     // abort further handling of the NPStream
     if (ul->np_stream) {
@@ -197,16 +197,20 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
         ul->np_stream = NULL;
     }
 
+    ul->fp = open_temporary_file_stream();
+    ul->url = strdup(ppb_var_var_to_utf8(full_url, NULL));
+    ul->read_pos = 0;
+    ul->method = PP_METHOD_GET;
+    ul->ccb = callback;
+    ppb_var_release(full_url);
+
     struct triple_s *triple = malloc(sizeof(*triple));
-    triple->url = strdup(ppb_var_var_to_utf8(full_url, NULL));
+    triple->url = ul->url;
     triple->loader = loader;
     triple->instance = ul->_.instance;
-    ul->url = strdup(triple->url);
-    ul->read_pos = 0;
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = triple};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
-    ul->ccb = callback;
 
     pp_resource_release(loader);
 
