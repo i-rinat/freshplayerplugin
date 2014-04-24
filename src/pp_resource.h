@@ -46,7 +46,12 @@
 #include <cairo.h>
 #include <asoundlib.h>
 
-#define FREE_HELPER(st, field)  do { free(st->field); st->field = NULL; } while(0)
+
+#define free_and_nullify(obj, field)    \
+    do {                                \
+        free(obj->field);               \
+        obj->field = NULL;              \
+    } while (0)
 
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,

@@ -92,10 +92,7 @@ ppb_image_data_destroy(void *p)
         cairo_surface_destroy(id->cairo_surf);
         id->cairo_surf = NULL;
     }
-    if (id->data) {
-        free(id->data);
-        id->data = NULL;
-    }
+    free_and_nullify(id, data);
 }
 
 PP_Bool

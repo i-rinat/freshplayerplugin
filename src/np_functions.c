@@ -201,7 +201,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
             if (ul->follow_redirects) {
                 const char *new_location = hp_get_header_value(ph, "Location");
                 trace_info("%s, redirecting to %s\n", __func__, new_location);
-                free(ul->url);
+                free_and_nullify(ul, url);
                 ul->url = strdup(new_location);
                 tables_push_url_pair(new_location, loader);
                 npn.geturl(npp, ul->url, NULL);

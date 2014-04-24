@@ -66,12 +66,12 @@ ppb_url_request_info_destroy(void *p)
     if (!ri)
         return;
 
-    FREE_HELPER(ri, url);
-    FREE_HELPER(ri, headers);
-    FREE_HELPER(ri, custom_referrer_url);
-    FREE_HELPER(ri, custom_content_transfer_encoding);
-    FREE_HELPER(ri, custom_user_agent);
-    FREE_HELPER(ri, post_data);
+    free_and_nullify(ri, url);
+    free_and_nullify(ri, headers);
+    free_and_nullify(ri, custom_referrer_url);
+    free_and_nullify(ri, custom_content_transfer_encoding);
+    free_and_nullify(ri, custom_user_agent);
+    free_and_nullify(ri, post_data);
 }
 
 PP_Bool
@@ -97,8 +97,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
     switch (property) {
     case PP_URLREQUESTPROPERTY_URL:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        if (ri->url)
-            free(ri->url);
+        free_and_nullify(ri, url);
         ri->url = strdup(ppb_var_var_to_utf8(value, NULL));
 
         // replace all ' ' with '+'
@@ -121,8 +120,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         break;
     case PP_URLREQUESTPROPERTY_HEADERS:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        if (ri->headers)
-            free(ri->headers);
+        free_and_nullify(ri, headers);
         ri->headers = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_STREAMTOFILE:
@@ -143,8 +141,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMREFERRERURL:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        if (ri->custom_referrer_url)
-            free(ri->custom_referrer_url);
+        free_and_nullify(ri, custom_referrer_url);
         ri->custom_referrer_url = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_ALLOWCROSSORIGINREQUESTS:
@@ -157,8 +154,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMCONTENTTRANSFERENCODING:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        if (ri->custom_content_transfer_encoding)
-            free(ri->custom_content_transfer_encoding);
+        free_and_nullify(ri, custom_content_transfer_encoding);
         ri->custom_content_transfer_encoding = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_PREFETCHBUFFERUPPERTHRESHOLD:
@@ -171,8 +167,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMUSERAGENT:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        if (ri->custom_user_agent)
-            free(ri->custom_user_agent);
+        free_and_nullify(ri, custom_user_agent);
         ri->custom_user_agent = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     default:
@@ -191,7 +186,7 @@ ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, 
     struct pp_url_request_info_s *ri = pp_resource_acquire(request, PP_RESOURCE_URL_REQUEST_INFO);
     PP_Bool retval = PP_FALSE;
 
-    free(ri->post_data);
+    free_and_nullify(ri, post_data);
     ri->post_len = 0;
 
     ri->post_data = malloc(len);

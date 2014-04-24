@@ -56,12 +56,12 @@ ppb_url_loader_destroy(void *p)
         fclose(ul->fp);
         ul->fp = NULL;
     }
-    FREE_HELPER(ul, headers);
-    FREE_HELPER(ul, url);
-    FREE_HELPER(ul, request_headers);
-    FREE_HELPER(ul, custom_referrer_url);
-    FREE_HELPER(ul, custom_content_transfer_encoding);
-    FREE_HELPER(ul, custom_user_agent);
+    free_and_nullify(ul, headers);
+    free_and_nullify(ul, url);
+    free_and_nullify(ul, request_headers);
+    free_and_nullify(ul, custom_referrer_url);
+    free_and_nullify(ul, custom_content_transfer_encoding);
+    free_and_nullify(ul, custom_user_agent);
 }
 
 PP_Bool
@@ -174,11 +174,11 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
         ppb_url_util_dev_resolve_relative_to_document(ul->_.instance, rel_url, NULL);
     ppb_var_release(rel_url);
 
-    FREE_HELPER(ul, url);
-    FREE_HELPER(ul, redirect_url);
-    FREE_HELPER(ul, status_line);
-    FREE_HELPER(ul, headers);
-    FREE_HELPER(ul, request_headers);
+    free_and_nullify(ul, url);
+    free_and_nullify(ul, redirect_url);
+    free_and_nullify(ul, status_line);
+    free_and_nullify(ul, headers);
+    free_and_nullify(ul, request_headers);
 
     fclose(ul->fp);
     ul->fp = open_temporary_file_stream();
@@ -305,8 +305,8 @@ ppb_url_loader_close(PP_Resource loader)
         fclose(ul->fp);
         ul->fp = NULL;
     }
-    FREE_HELPER(ul, headers);
-    FREE_HELPER(ul, url);
+    free_and_nullify(ul, headers);
+    free_and_nullify(ul, url);
     pp_resource_release(loader);
     return;
 }
