@@ -77,7 +77,8 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
     int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
 
-    trace_info("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p\n", __func__, aNPNFuncs, aNPPFuncs);
+    trace_info("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p, browser API version = %u\n", __func__,
+               aNPNFuncs, aNPPFuncs, aNPNFuncs->version);
 
     memcpy(&npn, aNPNFuncs, sizeof(npn) < aNPNFuncs->size ? sizeof(npn) : aNPNFuncs->size);
 
