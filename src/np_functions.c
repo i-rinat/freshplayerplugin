@@ -40,6 +40,7 @@
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/c/private/ppp_instance_private.h>
 #include "ppb_input_event.h"
+#include "ppb_url_loader.h"
 #include "ppb_var.h"
 #include "header_parser.h"
 
@@ -168,6 +169,14 @@ NPP_SetWindow(NPP npp, NPWindow *window)
     return NPERR_NO_ERROR;
 }
 
+static
+void
+do_nothing(void *user_data, int32_t result)
+{
+    (void)user_data;
+    (void)result;
+}
+
 NPError
 NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint16_t *stype)
 {
@@ -197,19 +206,15 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         ul->np_stream = stream;
 
         // handling redirection
-        if (ph->http_code >= 300 && ph->http_code <= 307 && hp_header_exists(ph, "Location")) {
+        ul->redirect_url = nullsafe_strdup(hp_get_header_value(ph, "Location"));
+        if (ph->http_code >= 300 && ph->http_code <= 307 && ul->redirect_url) {
             if (ul->follow_redirects) {
-                const char *new_location = hp_get_header_value(ph, "Location");
-                trace_info("%s, redirecting to %s\n", __func__, new_location);
-                free_and_nullify(ul, url);
-                ul->url = strdup(new_location);
-                tables_push_url_pair(new_location, loader);
-                npn.geturl(npp, ul->url, NULL);
-
+                trace_info("       %s, redirecting to %s\n", __func__, ul->redirect_url);
                 pp_resource_release(loader);
+                ppb_url_loader_follow_redirect(loader, PP_MakeCompletionCallback(do_nothing, NULL));
+                // There is no need to fill response headers, status_line and other parameters
+                // since they are freed in follow_redirect anyway.
                 goto quit;
-            } else {
-                ul->redirect_url = strdup(hp_get_header_value(ph, "Location"));
             }
         }
 
