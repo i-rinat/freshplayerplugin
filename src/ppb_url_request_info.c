@@ -71,6 +71,7 @@ ppb_url_request_info_destroy(void *p)
     FREE_HELPER(ri, custom_referrer_url);
     FREE_HELPER(ri, custom_content_transfer_encoding);
     FREE_HELPER(ri, custom_user_agent);
+    FREE_HELPER(ri, post_data);
 }
 
 PP_Bool
@@ -187,7 +188,23 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
 PP_Bool
 ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, uint32_t len)
 {
-    return PP_TRUE;
+    struct pp_url_request_info_s *ri = pp_resource_acquire(request, PP_RESOURCE_URL_REQUEST_INFO);
+    PP_Bool retval = PP_FALSE;
+
+    free(ri->post_data);
+    ri->post_len = 0;
+
+    ri->post_data = malloc(len);
+    if (ri->post_data) {
+        memcpy(ri->post_data, data, len);
+        ri->post_len = len;
+        retval = PP_TRUE;
+    } else {
+        retval = PP_FALSE;
+    }
+
+    pp_resource_release(request);
+    return retval;
 }
 
 PP_Bool
@@ -232,7 +249,7 @@ static
 PP_Bool
 trace_ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, uint32_t len)
 {
-    trace_info("[PPB] {zilch} %s request=%d, data=%p, len=%u\n", __func__+6, request, data, len);
+    trace_info("[PPB] {full} %s request=%d, data=%p, len=%u\n", __func__+6, request, data, len);
     return ppb_url_request_info_append_data_to_body(request, data, len);
 }
 

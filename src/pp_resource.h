@@ -154,19 +154,21 @@ struct url_loader_read_task_s {
 struct pp_url_request_info_s {
     struct pp_resource_generic_s _;
     enum pp_request_method_e    method;
-    char       *url;
-    char       *headers;
-    PP_Bool     stream_to_file;
-    PP_Bool     follow_redirects;
-    PP_Bool     record_download_progress;
-    PP_Bool     record_upload_progress;
-    char       *custom_referrer_url;
-    PP_Bool     allow_cross_origin_requests;
-    PP_Bool     allow_credentials;
-    char       *custom_content_transfer_encoding;
-    int32_t     prefetch_buffer_upper_threshold;
-    int32_t     prefetch_buffer_lower_threshold;
-    char       *custom_user_agent;
+    char                       *url;
+    char                       *headers;
+    PP_Bool                     stream_to_file;
+    PP_Bool                     follow_redirects;
+    PP_Bool                     record_download_progress;
+    PP_Bool                     record_upload_progress;
+    char                       *custom_referrer_url;
+    PP_Bool                     allow_cross_origin_requests;
+    PP_Bool                     allow_credentials;
+    char                       *custom_content_transfer_encoding;
+    int32_t                     prefetch_buffer_upper_threshold;
+    int32_t                     prefetch_buffer_lower_threshold;
+    char                       *custom_user_agent;
+    size_t                      post_len;
+    void                       *post_data;
 };
 
 struct pp_url_response_info_s {
