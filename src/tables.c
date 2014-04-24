@@ -36,7 +36,7 @@ NPNetscapeFuncs npn;
 
 // URL/urlloader resource mapping
 struct url_pair_s {
-    const char *url;
+    char       *url;
     PP_Resource resource;
 };
 
@@ -132,7 +132,7 @@ void
 tables_push_url_pair(const char *url, PP_Resource resource)
 {
     struct url_pair_s *pair = malloc(sizeof(*pair));
-    pair->url = url;
+    pair->url = strdup(url);
     pair->resource = resource;
     url_pair_list = g_list_append(url_pair_list, pair);
 }
@@ -141,12 +141,14 @@ PP_Resource
 tables_pop_url_pair(const char *url)
 {
     GList *ptr = g_list_first(url_pair_list);
+
     while (ptr) {
         struct url_pair_s *pair = ptr->data;
 
         if (!strcmp(pair->url, url)) {
             PP_Resource ret = pair->resource;
             url_pair_list = g_list_delete_link(url_pair_list, ptr);
+            free(pair->url);
             return ret;
         }
         ptr = g_list_next(ptr);
