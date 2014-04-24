@@ -42,7 +42,15 @@
 PP_Resource
 ppb_url_loader_create(PP_Instance instance)
 {
-    return pp_resource_allocate(PP_RESOURCE_URL_LOADER, instance);
+    PP_Resource url_loader = pp_resource_allocate(PP_RESOURCE_URL_LOADER, instance);
+    struct pp_url_loader_s *ul = pp_resource_acquire(url_loader, PP_RESOURCE_URL_LOADER);
+
+    // all fields are zeroed by default
+    ul->response_size = -1;
+    ul->method = PP_METHOD_GET;
+
+    pp_resource_release(url_loader);
+    return url_loader;
 }
 
 void
