@@ -53,6 +53,9 @@
         obj->field = NULL;              \
     } while (0)
 
+#define nullsafe_strdup(s)       ((s) ? strdup(s) : NULL)
+
+
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,
     PP_RESOURCE_URL_LOADER,

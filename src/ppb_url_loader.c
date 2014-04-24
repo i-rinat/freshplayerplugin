@@ -123,28 +123,28 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
         ppb_url_util_dev_resolve_relative_to_document(ul->_.instance, rel_url, NULL);
     ppb_var_release(rel_url);
 
-    uint32_t len;
-    struct triple_s *triple = malloc(sizeof(*triple));
-    triple->url = strdup(ppb_var_var_to_utf8(full_url, &len));
-    triple->loader = loader;
-    triple->instance = ul->_.instance;
-    ppb_var_release(full_url);
-
-    ul->method = ri->method;
-    ul->url = strdup(triple->url);
-    ul->read_pos = 0;
-    ul->request_headers = ri->headers ? strdup(ri->headers) : NULL;
+    ul->url =              nullsafe_strdup(ppb_var_var_to_utf8(full_url, NULL));
+    ul->method =           ri->method;
+    ul->read_pos =         0;
+    ul->request_headers =  nullsafe_strdup(ri->headers);
     ul->follow_redirects = ri->follow_redirects;
-    ul->record_download_progress = ri->record_download_progress;
-    ul->record_upload_progress = ri->record_upload_progress;
-    ul->custom_referrer_url = ri->custom_referrer_url ? strdup(ri->custom_referrer_url) : NULL;
-    ul->allow_cross_origin_requests = ri->allow_cross_origin_requests;
-    ul->allow_credentials = ri->allow_credentials;
-    ul->custom_content_transfer_encoding = ri->custom_content_transfer_encoding
-                                           ? strdup(ri->custom_content_transfer_encoding) : NULL;
-    ul->custom_user_agent = ri->custom_user_agent ? strdup(ri->custom_user_agent) : NULL;
+
+    ul->record_download_progress =         ri->record_download_progress;
+    ul->record_upload_progress =           ri->record_upload_progress;
+    ul->custom_referrer_url =              nullsafe_strdup(ri->custom_referrer_url);
+    ul->allow_cross_origin_requests =      ri->allow_cross_origin_requests;
+    ul->allow_credentials =                ri->allow_credentials;
+    ul->custom_content_transfer_encoding = nullsafe_strdup(ri->custom_content_transfer_encoding);
+    ul->custom_user_agent =                nullsafe_strdup(ri->custom_user_agent);
 
     ul->fp = open_temporary_file_stream();
+
+    ppb_var_release(full_url);
+
+    struct triple_s *triple = malloc(sizeof(*triple));
+    triple->url = strdup(ul->url);
+    triple->loader = loader;
+    triple->instance = ul->_.instance;
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = triple};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
