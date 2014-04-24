@@ -165,6 +165,20 @@ open_temporary_file_stream(void)
     return fp;
 }
 
+/// trim new line characters from the end of the string
+char *
+trim_nl(char *s)
+{
+    if (!s)
+        return NULL;
+    size_t len = strlen(s);
+    while (len > 0 && s[len - 1] == '\n') {
+        s[len - 1] = 0;
+        len --;
+    }
+    return s;
+}
+
 int32_t
 ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback)
@@ -191,6 +205,13 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ul->allow_credentials =                ri->allow_credentials;
     ul->custom_content_transfer_encoding = nullsafe_strdup(ri->custom_content_transfer_encoding);
     ul->custom_user_agent =                nullsafe_strdup(ri->custom_user_agent);
+
+#define TRIM_NEWLINE(s)     s = trim_nl(s)
+
+    TRIM_NEWLINE(ul->request_headers);
+    TRIM_NEWLINE(ul->custom_referrer_url);
+    TRIM_NEWLINE(ul->custom_content_transfer_encoding);
+    TRIM_NEWLINE(ul->custom_user_agent);
 
     ul->post_len = ri->post_len;
     if (ri->post_len > 0) {
