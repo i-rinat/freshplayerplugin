@@ -78,23 +78,23 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
     return PP_RESOURCE_URL_LOADER == pp_resource_get_type(resource);
 }
 
-struct triple_s {
-        const char *url;
-        PP_Resource loader;
-        PP_Instance instance;
+struct comt_param_s {
+    const char *url;
+    PP_Resource loader;
+    PP_Instance instance;
 };
 
 static
 void
 _url_loader_open_comt(void *user_data, int32_t result)
 {
-    struct triple_s *triple = user_data;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(triple->instance);
+    struct comt_param_s *comt_params = user_data;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(comt_params->instance);
 
     // called on main thread
-    tables_push_url_pair(triple->url, triple->loader);
-    npn.geturl(pp_i->npp, triple->url, NULL);
-    free(triple);
+    tables_push_url_pair(comt_params->url, comt_params->loader);
+    npn.geturl(pp_i->npp, comt_params->url, NULL);
+    free(comt_params);
 }
 
 FILE *
@@ -143,12 +143,12 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ppb_var_release(full_url);
     pp_resource_release(request_info);
 
-    struct triple_s *triple = malloc(sizeof(*triple));
-    triple->url = strdup(ul->url);
-    triple->loader = loader;
-    triple->instance = ul->_.instance;
+    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
+    comt_params->url = strdup(ul->url);
+    comt_params->loader = loader;
+    comt_params->instance = ul->_.instance;
 
-    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = triple};
+    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = comt_params};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
 
     pp_resource_release(loader);
@@ -204,12 +204,12 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ul->ccb = callback;
     ppb_var_release(full_url);
 
-    struct triple_s *triple = malloc(sizeof(*triple));
-    triple->url = ul->url;
-    triple->loader = loader;
-    triple->instance = ul->_.instance;
+    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
+    comt_params->url = ul->url;
+    comt_params->loader = loader;
+    comt_params->instance = ul->_.instance;
 
-    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = triple};
+    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = comt_params};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
 
     pp_resource_release(loader);
