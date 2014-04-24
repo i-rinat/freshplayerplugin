@@ -32,6 +32,7 @@
 #include <stddef.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <inttypes.h>
 #include <string.h>
 #include <stdio.h>
 #include "trace.h"
@@ -79,9 +80,16 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
 }
 
 struct comt_param_s {
-    const char *url;
-    PP_Resource loader;
-    PP_Instance instance;
+    const char                 *url;
+    PP_Resource                 loader;
+    PP_Instance                 instance;
+    enum pp_request_method_e    method;
+    const char                 *request_headers;
+    const char                 *custom_referrer_url;
+    const char                 *custom_content_transfer_encoding;
+    const char                 *custom_user_agent;
+    const char                 *post_data;
+    size_t                      post_len;
 };
 
 static
@@ -93,7 +101,54 @@ _url_loader_open_comt(void *user_data, int32_t result)
 
     // called on main thread
     tables_push_url_pair(comt_params->url, comt_params->loader);
-    npn.geturl(pp_i->npp, comt_params->url, NULL);
+    if (comt_params->method == PP_METHOD_POST) {
+        // POST request
+        char   *tmpfname;
+        int     fd;
+        FILE   *fp;
+        int     need_newline = 0;
+
+        asprintf(&tmpfname, "/tmp/FreshPostBodyXXXXXX");    // TODO: make configurable
+        // TODO: error handling
+        fd = mkstemp(tmpfname);
+        fp = fdopen(fd, "wb+");
+
+        if (comt_params->request_headers) {
+            fprintf(fp, "%s\n", comt_params->request_headers);
+            need_newline = 1;
+        }
+        if (comt_params->custom_referrer_url) {
+            fprintf(fp, "Referrer: %s\n", comt_params->custom_referrer_url);
+            need_newline = 1;
+        }
+        if (comt_params->custom_content_transfer_encoding) {
+            fprintf(fp, "Content-Transfer-Encoding: %s\n",
+                    comt_params->custom_content_transfer_encoding);
+            need_newline = 1;
+        }
+        if (comt_params->custom_user_agent) {
+            fprintf(fp, "User-Agent: %s\n", comt_params->custom_user_agent);
+            need_newline = 1;
+        }
+        if (comt_params->post_len > 0) {
+            fprintf(fp, "Content-Length: %"PRIu64"\n", (uint64_t)comt_params->post_len);
+            need_newline = 1;
+        }
+
+        if (need_newline)
+            fprintf(fp, "\n");
+
+        fwrite(comt_params->post_data, 1, comt_params->post_len, fp);
+        fclose(fp);
+
+        npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
+                          strlen(tmpfname), tmpfname, true, NULL);
+        free(tmpfname);
+    } else {
+        // GET request
+        npn.geturl(pp_i->npp, comt_params->url, NULL);
+    }
+
     free(comt_params);
 }
 
@@ -137,6 +192,12 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ul->custom_content_transfer_encoding = nullsafe_strdup(ri->custom_content_transfer_encoding);
     ul->custom_user_agent =                nullsafe_strdup(ri->custom_user_agent);
 
+    ul->post_len = ri->post_len;
+    if (ri->post_len > 0) {
+        ul->post_data = malloc(ri->post_len);
+        memcpy(ul->post_data, ri->post_data, ri->post_len);
+    }
+
     ul->fp = open_temporary_file_stream();
     ul->ccb = callback;
 
@@ -144,9 +205,16 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     pp_resource_release(request_info);
 
     struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
-    comt_params->url = strdup(ul->url);
-    comt_params->loader = loader;
-    comt_params->instance = ul->_.instance;
+    comt_params->url =                              strdup(ul->url);
+    comt_params->loader =                           loader;
+    comt_params->instance =                         ul->_.instance;
+    comt_params->method =                           ul->method;
+    comt_params->request_headers =                  ul->request_headers;
+    comt_params->custom_referrer_url =              ul->custom_referrer_url;
+    comt_params->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
+    comt_params->custom_user_agent =                ul->custom_user_agent;
+    comt_params->post_len =                         ul->post_len;
+    comt_params->post_data =                        ul->post_data;
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = comt_params};
     ppb_core_call_on_main_thread(0, mt_cb, 0);
@@ -205,9 +273,16 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ppb_var_release(full_url);
 
     struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
-    comt_params->url = ul->url;
-    comt_params->loader = loader;
-    comt_params->instance = ul->_.instance;
+    comt_params->url =                              ul->url;
+    comt_params->loader =                           loader;
+    comt_params->instance =                         ul->_.instance;
+    comt_params->method =                           ul->method;
+    comt_params->request_headers =                  ul->request_headers;
+    comt_params->custom_referrer_url =              ul->custom_referrer_url;
+    comt_params->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
+    comt_params->custom_user_agent =                ul->custom_user_agent;
+    comt_params->post_len =                         0;
+    comt_params->post_data =                        NULL;
 
     struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = comt_params};
     ppb_core_call_on_main_thread(0, mt_cb, 0);

@@ -148,6 +148,8 @@ struct pp_url_loader_s {
     PP_Bool                 allow_credentials;
     char                   *custom_content_transfer_encoding;
     char                   *custom_user_agent;
+    char                   *post_data;
+    size_t                  post_len;
     GList                  *read_tasks;     ///< list of url_loader_read_task_s
     NPStream               *np_stream;      ///< associated NPStream
     struct PP_CompletionCallback    ccb;    ///< callback to call on headers arrival
