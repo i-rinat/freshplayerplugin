@@ -26,10 +26,36 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
+#include <pthread.h>
 #include "pp_resource.h"
+#include "ppb_core.h"
 #include "tables.h"
 #include "trace.h"
 
+
+struct comt_param_s {
+    PP_Instance         instance;
+    pthread_barrier_t  *barrier;
+    int                 wait;
+    int                 xtype;
+};
+
+void
+_set_cursor_comt(void *user_data, int32_t result)
+{
+    Window wnd;
+    struct comt_param_s *params = user_data;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance);
+    Cursor cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
+
+    if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) == NPERR_NO_ERROR) {
+        XDefineCursor(pp_i->dpy, wnd, cursor);
+        XFlush(pp_i->dpy);
+    }
+    if (params->wait)
+        pthread_barrier_wait(params->barrier);
+    free(params);
+}
 
 PP_Bool
 ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
@@ -172,13 +198,24 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
         break;
     }
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    Cursor cursor = XCreateFontCursor(pp_i->dpy, xtype);
-    Window wnd;
+    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
 
-    npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd);
-    XDefineCursor(pp_i->dpy, wnd, cursor);
-    XFlush(pp_i->dpy);
+    comt_params->instance = instance;
+    comt_params->xtype =    xtype;
+
+    if (ppb_core_is_main_thread()) {
+        comt_params->wait = 0;
+        _set_cursor_comt(comt_params, 0);
+    } else {
+        pthread_barrier_t barrier;
+
+        pthread_barrier_init(&barrier, NULL, 2);
+        comt_params->wait = 1;
+        comt_params->barrier = &barrier;
+        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_cursor_comt, comt_params),0);
+        pthread_barrier_wait(&barrier);
+        pthread_barrier_destroy(&barrier);
+    }
 
     return PP_TRUE;
 }
