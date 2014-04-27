@@ -42,7 +42,6 @@ struct url_pair_s {
 
 static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;
-static GList       *url_pair_list;
 static GHashTable  *npp_ht;
 static GHashTable  *npobj_to_npp_ht = NULL;     // NPObject-to-NPP mapping
 
@@ -58,7 +57,6 @@ constructor_tables(void)
     pp_to_np_ht =       g_hash_table_new(g_direct_hash, g_direct_equal);
     npp_ht =            g_hash_table_new(g_direct_hash, g_direct_equal);
     npobj_to_npp_ht =   g_hash_table_new(g_direct_hash, g_direct_equal);
-    url_pair_list = NULL;
 
     // pango
     pango_fm = pango_ft2_font_map_new();
@@ -74,7 +72,6 @@ destructor_tables(void)
     g_hash_table_unref(pp_to_np_ht);
     g_hash_table_unref(npp_ht);
     g_hash_table_unref(npobj_to_npp_ht);
-    g_list_free(url_pair_list);
 
     // pango
     g_object_unref(pango_ctx);
@@ -126,36 +123,6 @@ void
 tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i)
 {
     g_hash_table_replace(pp_to_np_ht, GINT_TO_POINTER(instance), pp_i);
-}
-
-void
-tables_push_url_pair(const char *url, PP_Resource resource)
-{
-    struct url_pair_s *pair = malloc(sizeof(*pair));
-    pair->url = strdup(url);
-    pair->resource = resource;
-    url_pair_list = g_list_append(url_pair_list, pair);
-}
-
-PP_Resource
-tables_pop_url_pair(const char *url)
-{
-    GList *ptr = g_list_first(url_pair_list);
-
-    while (ptr) {
-        struct url_pair_s *pair = ptr->data;
-
-        if (!strcmp(pair->url, url)) {
-            PP_Resource ret = pair->resource;
-            url_pair_list = g_list_delete_link(url_pair_list, ptr);
-            free(pair->url);
-            return ret;
-        }
-        ptr = g_list_next(ptr);
-    }
-
-    trace_warning("%s, no corresponding resource in tables for url=\"%s\"\n", __func__, url);
-    return 0;
 }
 
 struct PP_Var

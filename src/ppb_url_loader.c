@@ -100,7 +100,6 @@ _url_loader_open_comt(void *user_data, int32_t result)
     struct pp_instance_s *pp_i = tables_get_pp_instance(comt_params->instance);
 
     // called on main thread
-    tables_push_url_pair(comt_params->url, comt_params->loader);
     if (comt_params->method == PP_METHOD_POST) {
         // POST request
         char   *tmpfname;

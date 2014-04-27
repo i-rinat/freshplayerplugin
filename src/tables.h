@@ -36,8 +36,6 @@ extern NPNetscapeFuncs npn;
 
 int         tables_ref_var(struct PP_Var var);
 int         tables_unref_var(struct PP_Var var);
-void        tables_push_url_pair(const char *url, PP_Resource resource);
-PP_Resource tables_pop_url_pair(const char *url);
 
 struct pp_instance_s   *tables_get_pp_instance(PP_Instance instance);
 void                    tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i);
