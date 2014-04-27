@@ -181,11 +181,11 @@ NPError
 NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint16_t *stype)
 {
     trace_info("[NPP] {part} %s npp=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
-               "end=%u, lastmodified=%u, .headers=%s}, seekable=%d\n", __func__, npp, type,
-               stream->pdata, stream->ndata, stream->url, stream->end, stream->lastmodified,
-               stream->headers, seekable);
+               "end=%u, lastmodified=%u, .notifyData=%p, .headers=%s}, seekable=%d\n", __func__,
+               npp, type, stream->pdata, stream->ndata, stream->url, stream->end,
+               stream->lastmodified, stream->notifyData, stream->headers, seekable);
 
-    PP_Resource loader = tables_pop_url_pair(stream->url);
+    PP_Resource loader = (size_t)stream->notifyData;
     if (!loader) {
         // ignoring unrequested streams
         stream->pdata = NULL;
@@ -525,8 +525,9 @@ NPP_HandleEvent(NPP npp, void *event)
 void
 NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 {
-    trace_info("[NPP] {zilch} %s npp=%p, url=%s, reason=%d, notifyData=%p\n", __func__,
+    trace_info("[NPP] {full} %s npp=%p, url=%s, reason=%d, notifyData=%p\n", __func__,
                npp, url, reason, notifyData);
+    // This is no-op. We are handling request in NPP_NewStream function.
     return;
 }
 
@@ -648,8 +649,10 @@ NPP_LostFocus(NPP npp)
 void
 NPP_URLRedirectNotify(NPP npp, const char *url, int32_t status, void *notifyData)
 {
-    trace_info("[NPP] {zilch} %s npp=%p, url=%s, status=%d, notifyData=%p\n", __func__,
+    trace_info("[NPP] {full} %s npp=%p, url=%s, status=%d, notifyData=%p\n", __func__,
                npp, url, status, notifyData);
+    // We are handling redirects ourselves. Tell browser to stop.
+    npn.urlredirectresponse(npp, notifyData, false);
     return;
 }
 

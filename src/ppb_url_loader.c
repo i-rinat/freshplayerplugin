@@ -142,11 +142,11 @@ _url_loader_open_comt(void *user_data, int32_t result)
         fclose(fp);
 
         npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
-                          strlen(tmpfname), tmpfname, true, NULL);
+                          strlen(tmpfname), tmpfname, true, (void*)(size_t)comt_params->loader);
         free(tmpfname);
     } else {
         // GET request
-        npn.geturl(pp_i->npp, comt_params->url, NULL);
+        npn.geturlnotify(pp_i->npp, comt_params->url, NULL, (void*)(size_t)comt_params->loader);
     }
 
     free(comt_params);
