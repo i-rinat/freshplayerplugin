@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb.idl modified Thu Mar  1 14:49:34 2012. */
+/* From ppb.idl modified Fri Jan 24 16:19:56 2014. */
 
 #ifndef PPAPI_C_PPB_H_
 #define PPAPI_C_PPB_H_
@@ -33,7 +33,7 @@
  * <code>ppb.audio.h</code> or
  * <code>PPB_GRAPHICS_2D_INTERFACE</code> in <code>ppb_graphics_2d.h</code>.
  * Click
- * <a href="/native-client/{{pepperversion}}/pepperc/globals_defs"
+ * <a href="globals_defs.html"
  * title="macros">here</a> for a complete list of interface
  * names.
  *

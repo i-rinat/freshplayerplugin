@@ -25,10 +25,11 @@
 #ifndef FPP__PPB_FLASH_FILE_MODULELOCAL_H
 #define FPP__PPB_FLASH_FILE_MODULELOCAL_H
 
+#include <ppapi/c/dev/deprecated_bool.h>
 #include <ppapi/c/private/ppb_flash_file.h>
 
 
-PP_Bool
+bool
 ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance instance);
 
 void

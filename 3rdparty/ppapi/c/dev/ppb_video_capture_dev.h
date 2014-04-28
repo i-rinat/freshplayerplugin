@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From dev/ppb_video_capture_dev.idl modified Wed Dec 05 13:18:10 2012. */
+/* From dev/ppb_video_capture_dev.idl modified Thu Dec 12 15:36:11 2013. */
 
 #ifndef PPAPI_C_DEV_PPB_VIDEO_CAPTURE_DEV_H_
 #define PPAPI_C_DEV_PPB_VIDEO_CAPTURE_DEV_H_
@@ -18,7 +18,6 @@
 #include "ppapi/c/pp_resource.h"
 #include "ppapi/c/pp_stdint.h"
 
-#define PPB_VIDEOCAPTURE_DEV_INTERFACE_0_2 "PPB_VideoCapture(Dev);0.2"
 #define PPB_VIDEOCAPTURE_DEV_INTERFACE_0_3 "PPB_VideoCapture(Dev);0.3"
 #define PPB_VIDEOCAPTURE_DEV_INTERFACE PPB_VIDEOCAPTURE_DEV_INTERFACE_0_3
 
@@ -160,23 +159,6 @@ struct PPB_VideoCapture_Dev_0_3 {
 };
 
 typedef struct PPB_VideoCapture_Dev_0_3 PPB_VideoCapture_Dev;
-
-struct PPB_VideoCapture_Dev_0_2 {
-  PP_Resource (*Create)(PP_Instance instance);
-  PP_Bool (*IsVideoCapture)(PP_Resource video_capture);
-  int32_t (*EnumerateDevices)(PP_Resource video_capture,
-                              PP_Resource* devices,
-                              struct PP_CompletionCallback callback);
-  int32_t (*Open)(PP_Resource video_capture,
-                  PP_Resource device_ref,
-                  const struct PP_VideoCaptureDeviceInfo_Dev* requested_info,
-                  uint32_t buffer_count,
-                  struct PP_CompletionCallback callback);
-  int32_t (*StartCapture)(PP_Resource video_capture);
-  int32_t (*ReuseBuffer)(PP_Resource video_capture, uint32_t buffer);
-  int32_t (*StopCapture)(PP_Resource video_capture);
-  void (*Close)(PP_Resource video_capture);
-};
 /**
  * @}
  */

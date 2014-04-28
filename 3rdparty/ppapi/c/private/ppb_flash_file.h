@@ -32,7 +32,7 @@ struct PP_DirContents_Dev {
 // module-specific root.
 struct PPB_Flash_File_ModuleLocal_3_0 {
   // Deprecated. Returns true.
-  PP_Bool (*CreateThreadAdapterForInstance)(PP_Instance instance);
+  bool (*CreateThreadAdapterForInstance)(PP_Instance instance);
   // Deprecated. Does nothing.
   void (*ClearThreadAdapterForInstance)(PP_Instance instance);
 

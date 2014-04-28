@@ -25,6 +25,7 @@
 #ifndef FPP__PPB_FLASH_FILE_H
 #define FPP__PPB_FLASH_FILE_H
 
+#include <ppapi/c/dev/deprecated_bool.h>
 #include <ppapi/c/private/ppb_flash_file.h>
 
 

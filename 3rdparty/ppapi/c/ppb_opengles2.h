@@ -1,4 +1,4 @@
-// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Copyright (c) 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,23 +13,28 @@
 #include "ppapi/c/pp_resource.h"
 
 #ifndef __gl2_h_
-typedef unsigned int GLenum;
 typedef void GLvoid;
-typedef long int GLintptr;
 typedef int GLsizei;
-typedef long int GLsizeiptr;
+typedef unsigned short GLushort;
+typedef short GLshort;
+typedef unsigned char GLubyte;
+typedef unsigned int GLenum;
 typedef int GLint;
 typedef unsigned char GLboolean;
-typedef unsigned int GLuint;
 typedef unsigned int GLbitfield;
-typedef short GLshort;
 typedef float GLfloat;
 typedef float GLclampf;
 typedef signed char GLbyte;
-typedef unsigned char GLubyte;
+typedef unsigned int GLuint;
 typedef int GLfixed;
-typedef unsigned short GLushort;
 typedef int GLclampx;
+#ifdef _WIN64
+typedef long long int GLintptr;
+typedef long long int GLsizeiptr;
+#else
+typedef long int GLintptr;
+typedef long int GLsizeiptr;
+#endif  // _WIN64
 #endif  // __gl2_h_
 
 #define PPB_OPENGLES2_INTERFACE_1_0 "PPB_OpenGLES2;1.0"

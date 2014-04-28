@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From private/ppb_flash_clipboard.idl modified Thu Mar 28 10:23:59 2013. */
+/* From private/ppb_flash_clipboard.idl modified Thu Jan 23 10:16:39 2014. */
 
 #ifndef PPAPI_C_PRIVATE_PPB_FLASH_CLIPBOARD_H_
 #define PPAPI_C_PRIVATE_PPB_FLASH_CLIPBOARD_H_
@@ -16,7 +16,8 @@
 
 #define PPB_FLASH_CLIPBOARD_INTERFACE_4_0 "PPB_Flash_Clipboard;4.0"
 #define PPB_FLASH_CLIPBOARD_INTERFACE_5_0 "PPB_Flash_Clipboard;5.0"
-#define PPB_FLASH_CLIPBOARD_INTERFACE PPB_FLASH_CLIPBOARD_INTERFACE_5_0
+#define PPB_FLASH_CLIPBOARD_INTERFACE_5_1 "PPB_Flash_Clipboard;5.1"
+#define PPB_FLASH_CLIPBOARD_INTERFACE PPB_FLASH_CLIPBOARD_INTERFACE_5_1
 
 /**
  * @file
@@ -77,7 +78,7 @@ PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_Flash_Clipboard_Format, 4);
  * used by Pepper Flash to access the clipboard.
  *
  */
-struct PPB_Flash_Clipboard_5_0 {
+struct PPB_Flash_Clipboard_5_1 {
   /**
    * Registers a custom clipboard format. The format is identified by a
    * string. An id identifying the format will be returned if the format is
@@ -129,9 +130,18 @@ struct PPB_Flash_Clipboard_5_0 {
                        uint32_t data_item_count,
                        const uint32_t formats[],
                        const struct PP_Var data_items[]);
+  /**
+   * Gets a sequence number which uniquely identifies clipboard state. This can
+   * be used to version the data on the clipboard and determine whether it has
+   * changed. The sequence number will be placed in |sequence_number| and
+   * PP_TRUE returned if the sequence number was retrieved successfully.
+   */
+  PP_Bool (*GetSequenceNumber)(PP_Instance instance_id,
+                               PP_Flash_Clipboard_Type clipboard_type,
+                               uint64_t* sequence_number);
 };
 
-typedef struct PPB_Flash_Clipboard_5_0 PPB_Flash_Clipboard;
+typedef struct PPB_Flash_Clipboard_5_1 PPB_Flash_Clipboard;
 
 struct PPB_Flash_Clipboard_4_0 {
   PP_Bool (*IsFormatAvailable)(PP_Instance instance_id,
@@ -144,6 +154,22 @@ struct PPB_Flash_Clipboard_4_0 {
                        PP_Flash_Clipboard_Type clipboard_type,
                        uint32_t data_item_count,
                        const PP_Flash_Clipboard_Format formats[],
+                       const struct PP_Var data_items[]);
+};
+
+struct PPB_Flash_Clipboard_5_0 {
+  uint32_t (*RegisterCustomFormat)(PP_Instance instance_id,
+                                   const char* format_name);
+  PP_Bool (*IsFormatAvailable)(PP_Instance instance_id,
+                               PP_Flash_Clipboard_Type clipboard_type,
+                               uint32_t format);
+  struct PP_Var (*ReadData)(PP_Instance instance_id,
+                            PP_Flash_Clipboard_Type clipboard_type,
+                            uint32_t format);
+  int32_t (*WriteData)(PP_Instance instance_id,
+                       PP_Flash_Clipboard_Type clipboard_type,
+                       uint32_t data_item_count,
+                       const uint32_t formats[],
                        const struct PP_Var data_items[]);
 };
 /**

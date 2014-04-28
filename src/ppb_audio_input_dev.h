@@ -47,7 +47,7 @@ ppb_audio_input_dev_monitor_device_change(PP_Resource audio_input,
 
 int32_t
 ppb_audio_input_dev_open_0_3(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
-                         PPB_AudioInput_Callback_0_2 audio_input_callback, void *user_data,
+                         PPB_AudioInput_Callback_0_3 audio_input_callback, void *user_data,
                          struct PP_CompletionCallback callback);
 
 int32_t

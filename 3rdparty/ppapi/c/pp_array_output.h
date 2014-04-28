@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From pp_array_output.idl modified Thu Mar 28 11:07:53 2013. */
+/* From pp_array_output.idl modified Tue Oct 22 15:09:25 2013. */
 
 #ifndef PPAPI_C_PP_ARRAY_OUTPUT_H_
 #define PPAPI_C_PP_ARRAY_OUTPUT_H_
@@ -43,7 +43,10 @@
  * @param element_size The size of each element in bytes.
  *
  * @return Returns a pointer to the allocated memory. On failure, returns null.
- * You can also return null if the element_count is 0.
+ * You can also return null if the element_count is 0. When a non-null value is
+ * returned, the buffer must remain valid until after the callback runs. If used
+ * with a blocking callback, the buffer must remain valid until after the
+ * function returns. The plugin can then free any memory that it allocated.
  */
 
 
@@ -99,7 +102,7 @@ typedef void* (*PP_ArrayOutput_GetDataBuffer)(void* user_data,
  */
 struct PP_ArrayOutput {
   /**
-   * A pointer to the allocation function that the browser implements.
+   * A pointer to the allocation function that the browser will call.
    */
   PP_ArrayOutput_GetDataBuffer GetDataBuffer;
   /**

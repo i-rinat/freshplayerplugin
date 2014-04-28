@@ -100,7 +100,7 @@ to_abs_path(const char *root, const char *s)
     return abs_path;
 }
 
-PP_Bool
+bool
 ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance instance)
 {
     // Deprecated. Returns true.
@@ -347,7 +347,7 @@ ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHa
 
 // trace wrappers
 static
-PP_Bool
+bool
 trace_ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);

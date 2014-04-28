@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From dev/ppb_audio_input_dev.idl modified Fri May 10 16:06:35 2013. */
+/* From dev/ppb_audio_input_dev.idl modified Thu Dec 12 15:35:39 2013. */
 
 #ifndef PPAPI_C_DEV_PPB_AUDIO_INPUT_DEV_H_
 #define PPAPI_C_DEV_PPB_AUDIO_INPUT_DEV_H_
@@ -18,7 +18,6 @@
 #include "ppapi/c/pp_stdint.h"
 #include "ppapi/c/pp_time.h"
 
-#define PPB_AUDIO_INPUT_DEV_INTERFACE_0_2 "PPB_AudioInput(Dev);0.2"
 #define PPB_AUDIO_INPUT_DEV_INTERFACE_0_3 "PPB_AudioInput(Dev);0.3"
 #define PPB_AUDIO_INPUT_DEV_INTERFACE_0_4 "PPB_AudioInput(Dev);0.4"
 #define PPB_AUDIO_INPUT_DEV_INTERFACE PPB_AUDIO_INPUT_DEV_INTERFACE_0_4
@@ -50,7 +49,7 @@ typedef void (*PPB_AudioInput_Callback)(const void* sample_buffer,
                                         PP_TimeDelta latency,
                                         void* user_data);
 
-typedef void (*PPB_AudioInput_Callback_0_2)(const void* sample_buffer,
+typedef void (*PPB_AudioInput_Callback_0_3)(const void* sample_buffer,
                                             uint32_t buffer_size_in_bytes,
                                             void* user_data);
 /**
@@ -211,24 +210,6 @@ struct PPB_AudioInput_Dev_0_4 {
 
 typedef struct PPB_AudioInput_Dev_0_4 PPB_AudioInput_Dev;
 
-struct PPB_AudioInput_Dev_0_2 {
-  PP_Resource (*Create)(PP_Instance instance);
-  PP_Bool (*IsAudioInput)(PP_Resource resource);
-  int32_t (*EnumerateDevices)(PP_Resource audio_input,
-                              PP_Resource* devices,
-                              struct PP_CompletionCallback callback);
-  int32_t (*Open)(PP_Resource audio_input,
-                  PP_Resource device_ref,
-                  PP_Resource config,
-                  PPB_AudioInput_Callback_0_2 audio_input_callback,
-                  void* user_data,
-                  struct PP_CompletionCallback callback);
-  PP_Resource (*GetCurrentConfig)(PP_Resource audio_input);
-  PP_Bool (*StartCapture)(PP_Resource audio_input);
-  PP_Bool (*StopCapture)(PP_Resource audio_input);
-  void (*Close)(PP_Resource audio_input);
-};
-
 struct PPB_AudioInput_Dev_0_3 {
   PP_Resource (*Create)(PP_Instance instance);
   PP_Bool (*IsAudioInput)(PP_Resource resource);
@@ -241,7 +222,7 @@ struct PPB_AudioInput_Dev_0_3 {
   int32_t (*Open)(PP_Resource audio_input,
                   PP_Resource device_ref,
                   PP_Resource config,
-                  PPB_AudioInput_Callback_0_2 audio_input_callback,
+                  PPB_AudioInput_Callback_0_3 audio_input_callback,
                   void* user_data,
                   struct PP_CompletionCallback callback);
   PP_Resource (*GetCurrentConfig)(PP_Resource audio_input);

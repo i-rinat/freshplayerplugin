@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_audio_config.idl modified Thu Mar 28 10:07:11 2013. */
+/* From ppb_audio_config.idl modified Fri Jan 24 16:19:35 2014. */
 
 #ifndef PPAPI_C_PPB_AUDIO_CONFIG_H_
 #define PPAPI_C_PPB_AUDIO_CONFIG_H_
@@ -66,7 +66,7 @@ PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_AudioSampleRate, 4);
  * This interface only supports 16-bit stereo output.
  *
  * Refer to the
- * <a href="/native-client/{{pepperversion}}/devguide/coding/audio">Audio
+ * <a href="/native-client/devguide/coding/audio.html">Audio
  * </a> chapter in the Developer's Guide for information on using this
  * interface.
  */
