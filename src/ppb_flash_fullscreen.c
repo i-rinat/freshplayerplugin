@@ -38,9 +38,12 @@ ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
     return pp_i->is_fullscreen;
 }
 
-static void
-update_instance_view(PP_Instance instance)
+
+static
+void
+_update_instance_view_comt(void *p)
 {
+    PP_Instance instance = (size_t)p;
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
     struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
@@ -49,16 +52,13 @@ update_instance_view(PP_Instance instance)
     v->rect.size.width = pp_i->width;
     v->rect.size.height = pp_i->height;
     pp_resource_release(view);
-    fprintf(stderr, "%s, %d, %d\n", __func__, pp_i->width, pp_i->height);
 
     if (pp_i->instance_loaded)
         pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
-    fprintf(stderr, "==========\n");
 }
 
 struct thread_param_s {
     PP_Instance         instance;
-    pthread_barrier_t   quit_barrier;
     pthread_barrier_t   startup_barrier;
 };
 
@@ -86,8 +86,9 @@ fullscreen_window_thread(void *p)
 
     pthread_barrier_wait(&tp->startup_barrier);
     pthread_barrier_destroy(&tp->startup_barrier);
-    fprintf(stderr, "fs thread started\n");
-    //update_instance_view(tp->instance);
+
+    npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, (void*)(size_t)tp->instance);
+
     while (1) {
         XEvent ev;
         XNextEvent(dpy, &ev);
@@ -103,7 +104,6 @@ fullscreen_window_thread(void *p)
                 ev.xgraphicsexpose.display = dpy;
             } break;
         }
-        // fprintf(stderr, "event type = %s\n", reverse_xevent_type(ev.type));
         NPP_HandleEvent(pp_i->npp, &ev);
     }
 
@@ -111,7 +111,8 @@ quit_and_destroy_fs_wnd:
     pp_i->is_fullscreen = 0;
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
-    update_instance_view(tp->instance);
+
+    npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, (void*)(size_t)tp->instance);
     free(tp);
     return NULL;
 }
@@ -138,6 +139,7 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
         pthread_barrier_wait(&tparams->startup_barrier);
     } else {
         pp_i->is_fullscreen = 0;
+        // TODO: remember previous size
         pp_i->width = 400;
         pp_i->height = 300;
 
@@ -151,18 +153,6 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
         XSendEvent(pp_i->dpy, pp_i->fs_wnd, False, 0, (void *)&ev);
         XFlush(pp_i->dpy);
     }
-
-    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
-    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-    v->rect.point.x = 0;
-    v->rect.point.y = 0;
-    v->rect.size.width = pp_i->width;
-    v->rect.size.height = pp_i->height;
-    // ignoring clipRect, will use full rect instead
-    pp_resource_release(view);
-
-    if (pp_i->instance_loaded)
-        pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
 
     return PP_TRUE;
 }
