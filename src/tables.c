@@ -33,6 +33,7 @@
 
 
 NPNetscapeFuncs npn;
+pthread_t       np_main_thread;
 
 // URL/urlloader resource mapping
 struct url_pair_s {

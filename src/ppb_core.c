@@ -32,16 +32,6 @@
 #include "pp_resource.h"
 
 
-static pthread_t main_thread;
-
- __attribute__((constructor))
-static
-void
-ppb_core_constructor(void)
-{
-    main_thread = pthread_self();
-}
-
 void
 ppb_core_add_ref_resource(PP_Resource resource)
 {
@@ -104,7 +94,7 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
 PP_Bool
 ppb_core_is_main_thread(void)
 {
-    return pthread_equal(main_thread, pthread_self());
+    return pthread_equal(np_main_thread, pthread_self());
 }
 
 // trace wrappers

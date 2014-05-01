@@ -70,6 +70,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
                pluginType, npp, mode, argc, saved);
 
     tables_add_npp_instance(npp);
+    np_main_thread = pthread_self();
 
     for (k = 0; k < argc; k ++)
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
