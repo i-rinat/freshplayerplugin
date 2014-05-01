@@ -83,9 +83,7 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
 {
     struct comt_proxy_param_s *p = malloc(sizeof(*p));
 
-    p->callback.func = callback.func;
-    p->callback.user_data = callback.user_data;
-    p->callback.flags = callback.flags;
+    p->callback = callback;
     p->result_to_pass = result;
     npn.pluginthreadasynccall(tables_get_some_npp_instance(), comt_proxy, p);
     return;
