@@ -103,13 +103,8 @@ struct pp_instance_s {
     uint32_t        is_fullscreen;
     pthread_t       fs_thread;
     Window          fs_wnd;
-    uint32_t        x;
-    uint32_t        y;
     uint32_t        width;
     uint32_t        height;
-    NPRect          clip_rect;
-    void           *ws_info;
-    NPWindowType    window_type;
     int             argc;
     const char    **argn;
     const char    **argv;

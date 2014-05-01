@@ -32,8 +32,9 @@
 #include <npapi/npfunctions.h>
 
 
-extern NPNetscapeFuncs npn;
-extern pthread_t       np_main_thread;
+extern NPNetscapeFuncs  npn;
+extern pthread_t        np_main_thread;
+
 
 int         tables_ref_var(struct PP_Var var);
 int         tables_unref_var(struct PP_Var var);

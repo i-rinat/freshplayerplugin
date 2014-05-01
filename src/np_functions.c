@@ -146,26 +146,23 @@ NPP_SetWindow(NPP npp, NPWindow *window)
     free(window_str);
 
     struct pp_instance_s *pp_i = npp->pdata;
-    pp_i->wnd = (Window)window->window;
-    pp_i->x = window->x;
-    pp_i->y = window->y;
-    pp_i->width = window->width;
-    pp_i->height = window->height;
-    pp_i->clip_rect = window->clipRect;
-    pp_i->ws_info = window->ws_info;
-    pp_i->window_type = window->type;
 
-    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
-    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-    v->rect.point.x = window->x;
-    v->rect.point.y = window->y;
-    v->rect.size.width = window->width;
-    v->rect.size.height = window->height;
-    // ignoring clipRect, will use full rect instead
-    pp_resource_release(view);
+    if (pp_i && !pp_i->is_fullscreen) {
+        pp_i->wnd = (Window)window->window;
+        pp_i->width = window->width;
+        pp_i->height = window->height;
 
-    if (pp_i->instance_loaded)
-        pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
+        PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
+        struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+        v->rect.point.x = window->x;
+        v->rect.point.y = window->y;
+        v->rect.size.width = window->width;
+        v->rect.size.height = window->height;
+        pp_resource_release(view);
+
+        if (pp_i->instance_loaded)
+            pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
+    }
 
     return NPERR_NO_ERROR;
 }
