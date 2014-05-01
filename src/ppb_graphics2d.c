@@ -223,8 +223,20 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     NPRect npr = {.top = 0, .left = 0, .bottom = g2d->height, .right = g2d->width};
     pp_resource_release(graphics_2d);
-    npn.invalidaterect(pp_i->npp, &npr);
-    npn.forceredraw(pp_i->npp);
+    if (pp_i->is_fullscreen) {
+        XGraphicsExposeEvent ev = {
+            .type = GraphicsExpose,
+            .drawable = pp_i->fs_wnd,
+            .width = pp_i->width,
+            .height = pp_i->height
+        };
+
+        XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
+        XFlush(pp_i->dpy);
+    } else {
+        npn.invalidaterect(pp_i->npp, &npr);
+        npn.forceredraw(pp_i->npp);
+    }
 
     if (callback.flags != PP_COMPLETIONCALLBACK_FLAG_OPTIONAL) {
         trace_warning("%s, non-optional callback was skipped\n", __func__);

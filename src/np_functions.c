@@ -500,7 +500,16 @@ NPP_HandleEvent(NPP npp, void *event)
                ".display=%p, .window=0x%x}\n", __func__, npp, reverse_xevent_type(xaev->type),
                xaev->serial, xaev->send_event, xaev->display, (int32_t)xaev->window);
 
+    struct pp_instance_s *pp_i = npp->pdata;
+
+    if (pp_i && pp_i->is_fullscreen && pp_i->fs_wnd != xaev->window) {
+        return 0;
+    }
+
     switch (xaev->type) {
+    case Expose:
+        // its event have similar layout to GraphicsExpose, so let ge handler to do the work
+        // (fall though)
     case GraphicsExpose:
         return handle_graphics_expose_event(npp, event);
         break;
