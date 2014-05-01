@@ -24,6 +24,7 @@
 
 #include "ppb_instance_private.h"
 #include "ppb_var.h"
+#include "ppb_core.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
@@ -57,36 +58,82 @@ ppb_instance_private_get_owner_element_object(PP_Instance instance)
     return PP_MakeUndefined();
 }
 
-struct PP_Var
-ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
-                                    struct PP_Var *exception)
+struct execute_script_param_s {
+    pthread_barrier_t   barrier;
+    int                 should_wait;
+    struct PP_Var       script;
+    struct PP_Var       result;
+    NPP                 npp;
+};
+
+static
+void
+_execute_script_comt(void *p)
 {
+    struct execute_script_param_s *esp = p;
     NPError err;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     NPObject *np_window_obj;
     NPString  np_script;
     NPVariant np_result;
 
-    err = npn.getvalue(pp_i->npp, NPNVWindowNPObject, &np_window_obj);
+    err = npn.getvalue(esp->npp, NPNVWindowNPObject, &np_window_obj);
     if (err != NPERR_NO_ERROR) {
         trace_error("%s, NPN_GetValue failed with code %d\n", __func__, err);
-        return PP_MakeUndefined();
+        esp->result = PP_MakeUndefined();
+        goto quit;
     }
 
-    np_script.UTF8Characters = ppb_var_var_to_utf8(script, &np_script.UTF8Length);
-    if (!npn.evaluate(pp_i->npp, np_window_obj, &np_script, &np_result)) {
+    np_script.UTF8Characters = ppb_var_var_to_utf8(esp->script, &np_script.UTF8Length);
+    if (!npn.evaluate(esp->npp, np_window_obj, &np_script, &np_result)) {
         trace_error("%s, NPN_Evaluate failed\n", __func__);
-        return PP_MakeUndefined();
+        esp->result = PP_MakeUndefined();
+        goto quit;
     }
 
     // TODO: find out what exception is
-    struct PP_Var var = np_variant_to_pp_var(np_result);
+    esp->result = np_variant_to_pp_var(np_result);
     if (np_result.type == NPVariantType_Object)
-        tables_add_npobj_npp_mapping(np_result.value.objectValue, pp_i->npp);
+        tables_add_npobj_npp_mapping(np_result.value.objectValue, esp->npp);
     else
         npn.releasevariantvalue(&np_result);
+quit:
+    if (esp->should_wait)
+        pthread_barrier_wait(&esp->barrier);
+}
 
-    return var;
+struct PP_Var
+ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
+                                    struct PP_Var *exception)
+{
+    struct pp_instance_s *pp_i;
+
+    if (script.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return PP_MakeUndefined();
+    }
+
+    pp_i = tables_get_pp_instance(instance);
+
+    struct execute_script_param_s *esp = calloc(1, sizeof(*esp));
+    esp->script = script;
+    esp->npp = pp_i->npp;
+
+    if (ppb_core_is_main_thread()) {
+        esp->should_wait = 0;
+        //_execute_script_comt(esp, 0);
+        _execute_script_comt(esp);
+    } else {
+        esp->should_wait = 1;
+        pthread_barrier_init(&esp->barrier, NULL, 2);
+        npn.pluginthreadasynccall(esp->npp, _execute_script_comt, esp);
+        pthread_barrier_wait(&esp->barrier);
+        pthread_barrier_destroy(&esp->barrier);
+    }
+
+    struct PP_Var result = esp->result;
+    free(esp);
+
+    return result;
 }
 
 // trace wrappers
@@ -112,7 +159,7 @@ trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var sc
                                           struct PP_Var *exception)
 {
     char *s_script = trace_var_as_string(script);
-    trace_info("[PPB] {part} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
+    trace_info("[PPB] {full} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
     free(s_script);
     return ppb_instance_private_execute_script(instance, script, exception);
 }
