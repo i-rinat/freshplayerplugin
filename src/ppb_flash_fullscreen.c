@@ -29,6 +29,7 @@
 #include "pp_resource.h"
 #include <ppapi/c/ppp_instance.h>
 #include "reverse_constant.h"
+#include  <X11/Xatom.h>
 
 
 PP_Bool
@@ -80,6 +81,14 @@ fullscreen_window_thread(void *p)
                                        0, 0, pp_i->width, pp_i->height, 0, 0, 0x809080);
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
                                     ButtonReleaseMask | PointerMotionMask | ExposureMask);
+
+    // go fullscreen
+    Atom netwm_fullscreen_atom = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+    Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", True);
+    XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32,
+                    PropModeReplace, (unsigned char *)&netwm_fullscreen_atom, 1);
+
+    // show window
     XMapWindow(dpy, pp_i->fs_wnd);
     XSync(dpy, false);
     pp_i->is_fullscreen = 1;
