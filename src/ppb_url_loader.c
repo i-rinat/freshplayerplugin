@@ -94,7 +94,7 @@ struct comt_param_s {
 
 static
 void
-_url_loader_open_comt(void *user_data, int32_t result)
+_url_loader_open_comt(void *user_data)
 {
     struct comt_param_s *comt_params = user_data;
     struct pp_instance_s *pp_i = tables_get_pp_instance(comt_params->instance);
@@ -236,8 +236,8 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     comt_params->post_len =                         ul->post_len;
     comt_params->post_data =                        ul->post_data;
 
-    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = comt_params};
-    ppb_core_call_on_main_thread(0, mt_cb, 0);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(ul->_.instance);
+    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
 
     pp_resource_release(loader);
 
@@ -304,8 +304,8 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     comt_params->post_len =                         0;
     comt_params->post_data =                        NULL;
 
-    struct PP_CompletionCallback mt_cb = {.func = _url_loader_open_comt, .user_data = comt_params};
-    ppb_core_call_on_main_thread(0, mt_cb, 0);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(ul->_.instance);
+    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
 
     pp_resource_release(loader);
 

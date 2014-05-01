@@ -41,7 +41,7 @@ struct comt_param_s {
 };
 
 void
-_set_cursor_comt(void *user_data, int32_t result)
+_set_cursor_comt(void *user_data)
 {
     Window wnd;
     struct comt_param_s *params = user_data;
@@ -205,14 +205,17 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
 
     if (ppb_core_is_main_thread()) {
         comt_params->wait = 0;
-        _set_cursor_comt(comt_params, 0);
+        _set_cursor_comt(comt_params);
     } else {
+        struct pp_instance_s *pp_i;
         pthread_barrier_t barrier;
 
         pthread_barrier_init(&barrier, NULL, 2);
         comt_params->wait = 1;
         comt_params->barrier = &barrier;
-        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_cursor_comt, comt_params),0);
+
+        pp_i = tables_get_pp_instance(instance);
+        npn.pluginthreadasynccall(pp_i->npp, _set_cursor_comt, comt_params);
         pthread_barrier_wait(&barrier);
         pthread_barrier_destroy(&barrier);
     }
