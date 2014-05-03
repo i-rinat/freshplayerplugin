@@ -48,10 +48,16 @@ _set_cursor_comt(void *user_data)
     struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance);
     Cursor cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
 
-    if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) == NPERR_NO_ERROR) {
-        XDefineCursor(pp_i->dpy, wnd, cursor);
+    if (pp_i->is_fullscreen) {
+        XDefineCursor(pp_i->dpy, pp_i->fs_wnd, cursor);
         XFlush(pp_i->dpy);
+    } else {
+        if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) == NPERR_NO_ERROR) {
+            XDefineCursor(pp_i->dpy, wnd, cursor);
+            XFlush(pp_i->dpy);
+        }
     }
+
     if (params->wait)
         pthread_barrier_wait(params->barrier);
     free(params);
