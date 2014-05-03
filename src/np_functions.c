@@ -535,9 +535,12 @@ int16_t
 NPP_HandleEvent(NPP npp, void *event)
 {
     XAnyEvent *xaev = event;
-    trace_info("[NPP] {part} %s npp=%p, event={.type=%s, .serial=%lu, .send_event=%d, "
-               ".display=%p, .window=0x%x}\n", __func__, npp, reverse_xevent_type(xaev->type),
-               xaev->serial, xaev->send_event, xaev->display, (int32_t)xaev->window);
+
+#define TRACE_HELPER(implstatus)                                                    \
+    trace_info("[NPP] " implstatus " %s npp=%p, event={.type=%s, .serial=%lu, "   \
+               ".send_event=%d, .display=%p, .window=0x%x}\n", __func__, npp,       \
+               reverse_xevent_type(xaev->type), xaev->serial, xaev->send_event,     \
+               xaev->display, (uint32_t)xaev->window)
 
     struct pp_instance_s *pp_i = npp->pdata;
 
@@ -547,26 +550,32 @@ NPP_HandleEvent(NPP npp, void *event)
 
     switch (xaev->type) {
     case Expose:
+        TRACE_HELPER("{full}");
         // its event have similar layout to GraphicsExpose, so let ge handler to do the work
         return handle_graphics_expose_event(npp, event);
     case GraphicsExpose:
+        TRACE_HELPER("{full}");
         return handle_graphics_expose_event(npp, event);
     case EnterNotify:
+        TRACE_HELPER("{full}");
         return handle_enter_leave_event(npp, event);
     case LeaveNotify:
+        TRACE_HELPER("{full}");
         return handle_enter_leave_event(npp, event);
     case MotionNotify:
+        TRACE_HELPER("{full}");
         return handle_motion_event(npp, event);
     case ButtonPress:
+        TRACE_HELPER("{full}");
         return handle_button_press_release_event(npp, event);
     case ButtonRelease:
+        TRACE_HELPER("{full}");
         return handle_button_press_release_event(npp, event);
     default:
-        trace_warning("%s, event %s not handled\n", __func__, reverse_xevent_type(xaev->type));
-        break;
+        TRACE_HELPER("{zilch}");
+        return 0;
     }
-
-    return 0;
+#undef TRACE_HELPER
 }
 
 void
