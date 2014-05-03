@@ -198,31 +198,80 @@ ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp, uint
                              const struct PP_FloatPoint *wheel_delta,
                              const struct PP_FloatPoint *wheel_ticks, PP_Bool scroll_by_page)
 {
-    return 0;
+    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, instance);
+    struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return 0;
+    ie->event_class = PP_INPUTEVENT_CLASS_WHEEL;
+    ie->time_stamp = time_stamp;
+    ie->modifiers = modifiers;
+    ie->wheel_delta.x = wheel_delta ? wheel_delta->x : 0;
+    ie->wheel_delta.y = wheel_delta ? wheel_delta->y : 0;
+    ie->wheel_ticks.x = wheel_ticks ? wheel_ticks->x : 0;
+    ie->wheel_ticks.y = wheel_ticks ? wheel_ticks->y : 0;
+    ie->scroll_by_page = scroll_by_page;
+
+    pp_resource_release(input_event);
+    return input_event;
 }
 
 PP_Bool
 ppb_wheel_input_event_is_wheel_input_event(PP_Resource resource)
 {
-    return PP_TRUE;
+    struct pp_input_event_s *ie = pp_resource_acquire(resource, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_FALSE;
+    PP_Bool res = ie->event_class == PP_INPUTEVENT_CLASS_WHEEL;
+    pp_resource_release(resource);
+    return res;
 }
 
 struct PP_FloatPoint
 ppb_wheel_input_event_get_delta(PP_Resource wheel_event)
 {
-    return PP_MakeFloatPoint(0, 0);
+    struct pp_input_event_s *ie = pp_resource_acquire(wheel_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_MakeFloatPoint(0, 0);
+    if (ie->event_class != PP_INPUTEVENT_CLASS_WHEEL) {
+        pp_resource_release(wheel_event);
+        return PP_MakeFloatPoint(0, 0);
+    }
+
+    struct PP_FloatPoint ret = ie->wheel_delta;
+    pp_resource_release(wheel_event);
+    return ret;
 }
 
 struct PP_FloatPoint
 ppb_wheel_input_event_get_ticks(PP_Resource wheel_event)
 {
-    return PP_MakeFloatPoint(0, 0);
+    struct pp_input_event_s *ie = pp_resource_acquire(wheel_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_MakeFloatPoint(0, 0);
+    if (ie->event_class != PP_INPUTEVENT_CLASS_WHEEL) {
+        pp_resource_release(wheel_event);
+        return PP_MakeFloatPoint(0, 0);
+    }
+
+    struct PP_FloatPoint ret = ie->wheel_ticks;
+    pp_resource_release(wheel_event);
+    return ret;
 }
 
 PP_Bool
 ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event)
 {
-    return PP_FALSE;
+    struct pp_input_event_s *ie = pp_resource_acquire(wheel_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_FALSE;
+    if (ie->event_class != PP_INPUTEVENT_CLASS_WHEEL) {
+        pp_resource_release(wheel_event);
+        return PP_FALSE;
+    }
+
+    PP_Bool ret = ie->scroll_by_page;
+    pp_resource_release(wheel_event);
+    return ret;
 }
 
 PP_Resource
@@ -469,7 +518,7 @@ trace_ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp
 {
     char *s_wheel_delta = trace_float_point_as_string(wheel_delta);
     char *s_wheel_ticks = trace_float_point_as_string(wheel_ticks);
-    trace_info("[PPB] {zilch} %s instance=%d, time_stamp=%f, modifiers=0x%x, wheel_delta=%s, "
+    trace_info("[PPB] {full} %s instance=%d, time_stamp=%f, modifiers=0x%x, wheel_delta=%s, "
                "wheel_ticks=%s, scrool_by_page=%d\n", __func__+6, instance, time_stamp, modifiers,
                s_wheel_delta, s_wheel_ticks, scroll_by_page);
     free(s_wheel_delta);
@@ -482,7 +531,7 @@ static
 PP_Bool
 trace_ppb_wheel_input_event_is_wheel_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_wheel_input_event_is_wheel_input_event(resource);
 }
 
@@ -490,7 +539,7 @@ static
 struct PP_FloatPoint
 trace_ppb_wheel_input_event_get_delta(PP_Resource wheel_event)
 {
-    trace_info("[PPB] {zilch} %s wheel_event=%d\n", __func__+6, wheel_event);
+    trace_info("[PPB] {full} %s wheel_event=%d\n", __func__+6, wheel_event);
     return ppb_wheel_input_event_get_delta(wheel_event);
 }
 
@@ -498,7 +547,7 @@ static
 struct PP_FloatPoint
 trace_ppb_wheel_input_event_get_ticks(PP_Resource wheel_event)
 {
-    trace_info("[PPB] {zilch} %s wheel_event=%d\n", __func__+6, wheel_event);
+    trace_info("[PPB] {full} %s wheel_event=%d\n", __func__+6, wheel_event);
     return ppb_wheel_input_event_get_ticks(wheel_event);
 }
 
@@ -506,7 +555,7 @@ static
 PP_Bool
 trace_ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event)
 {
-    trace_info("[PPB] {zilch} %s wheel_event=%d\n", __func__+6, wheel_event);
+    trace_info("[PPB] {full} %s wheel_event=%d\n", __func__+6, wheel_event);
     return ppb_wheel_input_event_get_scroll_by_page(wheel_event);
 }
 

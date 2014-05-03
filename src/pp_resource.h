@@ -266,6 +266,9 @@ struct pp_input_event_s {
     struct PP_Point             mouse_position;
     int32_t                     click_count;
     struct PP_Point             mouse_movement;
+    struct PP_FloatPoint        wheel_delta;
+    struct PP_FloatPoint        wheel_ticks;
+    PP_Bool                     scroll_by_page;
 };
 
 struct pp_flash_font_file_s {
