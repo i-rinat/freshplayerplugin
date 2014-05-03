@@ -541,47 +541,48 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 NPError
 NPP_GetValue(NPP npp, NPPVariable variable, void *value)
 {
-    trace_info("[NPP] {part} %s npp=%p, variable=%s\n", __func__,
-               npp, reverse_npp_variable(variable));
+    const char *var_name = reverse_npp_variable(variable);
+
     switch (variable) {
     case NPPVpluginNameString:
-        trace_info("[NPP] {zilch} NPPVpluginNameString not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginDescriptionString:
-        trace_info("[NPP] {zilch} NPPVpluginDescriptionString not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginWindowBool:
-        trace_info("[NPP] {zilch} NPPVpluginWindowBool not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginTransparentBool:
-        trace_info("[NPP] {zilch} NPPVpluginTransparentBool not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVjavaClass:
-        trace_info("[NPP] {zilch} NPPVjavaClass not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginWindowSize:
-        trace_info("[NPP] {zilch} NPPVpluginWindowSize not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginTimerInterval:
-        trace_info("[NPP] {zilch} NPPVpluginTimerInterval not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginScriptableInstance:
-        trace_info("[NPP] {zilch} NPPVpluginScriptableInstance not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginScriptableIID:
-        trace_info("[NPP] {zilch} NPPVpluginScriptableIID not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVjavascriptPushCallerBool:
-        trace_info("[NPP] {zilch} NPPVjavascriptPushCallerBool not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginKeepLibraryInMemory:
-        trace_info("[NPP] {zilch} NPPVpluginKeepLibraryInMemory not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginNeedsXEmbed:
-        *(int *)value = 1;
+        trace_info("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        *(int *)value = 0;
         break;
     case NPPVpluginScriptableNPObject:
-        trace_info("[NPP] {full} NPPVpluginScriptableNPObject\n");
+        trace_info("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         do {
             struct pp_instance_s *pp_i = npp->pdata;
             const struct PPP_Instance_Private_0_1 *ppp_instance_private =
@@ -600,31 +601,32 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
         } while (0);
         break;
     case NPPVformValue:
-        trace_info("[NPP] {zilch} NPPVformValue not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginUrlRequestsDisplayedBool:
-        trace_info("[NPP] {zilch} NPPVpluginUrlRequestsDisplayedBool not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginWantsAllNetworkStreams:
+        trace_info("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         *(int *)value = 1;
         break;
     case NPPVpluginNativeAccessibleAtkPlugId:
-        trace_info("[NPP] {zilch} NPPVpluginNativeAccessibleAtkPlugId not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginCancelSrcStream:
-        trace_info("[NPP] {zilch} NPPVpluginCancelSrcStream not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVsupportsAdvancedKeyHandling:
-        trace_info("[NPP] {zilch} NPPVsupportsAdvancedKeyHandling not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginUsesDOMForCursorBool:
-        trace_info("[NPP] {zilch} NPPVpluginUsesDOMForCursorBool not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginDrawingModel:
-        trace_info("[NPP] {zilch} NPPVpluginDrawingModel not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     default:
-        trace_info("[NPP] {zilch} UNKNOWN not implemented\n");
+        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     }
 
