@@ -42,6 +42,7 @@
 #include "ppb_input_event.h"
 #include "ppb_url_loader.h"
 #include "ppb_var.h"
+#include "ppb_core.h"
 #include "header_parser.h"
 
 
@@ -470,14 +471,16 @@ handle_button_press_release_event(NPP npp, void *event)
 {
     XButtonEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
-    uint32_t event_class;
+    uint32_t event_class = 0;
     PP_Resource pp_event;
     PP_Bool ret;
     PP_InputEvent_MouseButton mouse_button = PP_INPUTEVENT_MOUSEBUTTON_NONE;
+    const float scroll_by_tick = 10.0;
 
     struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+    float wheel_x = 0.0, wheel_y = 0.0;
 
     switch (ev->button) {
     case 1:
@@ -493,15 +496,26 @@ handle_button_press_release_event(NPP npp, void *event)
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
         break;
 
-    case 4: // up
-    case 5: // down
-    case 6: // left
-    case 7: // right
-        // TODO: Handle wheel events. Firefox does not pass wheel event to windowless plugins.
-        //       Only windowed plugins can receive such events.
+    case 4: // wheel up
+        wheel_y = -1;
+        event_class = PP_INPUTEVENT_CLASS_WHEEL;
+        break;
+    case 5: // wheel down
+        wheel_y = 1;
+        event_class = PP_INPUTEVENT_CLASS_WHEEL;
+        break;
+    case 6: // wheel left
+        wheel_x = -1;
+        event_class = PP_INPUTEVENT_CLASS_WHEEL;
+        break;
+    case 7: // wheel right
+        wheel_x = 1;
         event_class = PP_INPUTEVENT_CLASS_WHEEL;
         break;
     }
+
+    // TODO: Firefox does not pass wheel event to windowless plugins.
+    //       Only windowed plugins can receive such events.
 
     if ((event_class & pp_i->event_mask) ||
         (event_class & pp_i->filtered_event_mask))
@@ -515,6 +529,13 @@ handle_button_press_release_event(NPP npp, void *event)
                                                     &mouse_position, 1, &zero_point);
         } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
             // TODO: implement
+            struct PP_FloatPoint wheel_delta = { .x = wheel_x * scroll_by_tick,
+                                                 .y = wheel_y * scroll_by_tick };
+            struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
+
+            pp_event = ppb_wheel_input_event_create(
+                            pp_i->pp_instance_id, ppb_core_get_time_ticks(), mod,
+                            &wheel_delta, &wheel_ticks, PP_FALSE);
         }
 
         if (pp_i->ppp_input_event)
@@ -525,10 +546,9 @@ handle_button_press_release_event(NPP npp, void *event)
             return 0;
 
         return 1;
-    } else {
-        // return false since we don't handle event
-        return 0;
     }
+
+    return 0;
 }
 
 int16_t
