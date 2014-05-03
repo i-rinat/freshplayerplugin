@@ -284,14 +284,14 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 int32_t
 NPP_WriteReady(NPP npp, NPStream *stream)
 {
-    trace_info("[NPP] {part} %s npp=%p, stream=%p\n", __func__, npp, stream);
+    trace_info("[NPP] {full} %s npp=%p, stream=%p\n", __func__, npp, stream);
     return 1024*1024;
 }
 
 int32_t
 NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 {
-    trace_info("[NPP] {part} %s npp=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
+    trace_info("[NPP] {full} %s npp=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
                npp, stream, offset, len, buffer);
 
     PP_Resource loader = (PP_Resource)(size_t)stream->pdata;

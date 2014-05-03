@@ -469,7 +469,7 @@ PP_Bool
 trace_ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received,
                                            int64_t *total_bytes_to_be_received)
 {
-    trace_info("[PPB] {part} %s loader=%d\n", __func__+6, loader);
+    trace_info("[PPB] {full} %s loader=%d\n", __func__+6, loader);
     return ppb_url_loader_get_download_progress(loader, bytes_received, total_bytes_to_be_received);
 }
 
@@ -486,7 +486,7 @@ int32_t
 trace_ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t bytes_to_read,
                                         struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {part} %s loader=%d, buffer=%p, bytes_to_read=%d, callback={.func=%p, "
+    trace_info("[PPB] {full} %s loader=%d, buffer=%p, bytes_to_read=%d, callback={.func=%p, "
                ".user_data=%p, .flags=%d}\n", __func__+6, loader, buffer, bytes_to_read,
                callback.func, callback.user_data, callback.flags);
     return ppb_url_loader_read_response_body(loader, buffer, bytes_to_read, callback);
