@@ -453,10 +453,11 @@ handle_button_press_release_event(NPP npp, void *event)
 {
     XButtonEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
-
-    // TODO: check if we want this event
+    uint32_t event_class;
+    PP_Resource pp_event;
+    PP_Bool ret;
     PP_InputEvent_MouseButton mouse_button = PP_INPUTEVENT_MOUSEBUTTON_NONE;
-    PP_Resource mouse_event;
+
     struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
@@ -464,31 +465,53 @@ handle_button_press_release_event(NPP npp, void *event)
     switch (ev->button) {
     case 1:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_LEFT;
+        event_class = PP_INPUTEVENT_CLASS_MOUSE;
         break;
     case 2:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_MIDDLE;
+        event_class = PP_INPUTEVENT_CLASS_MOUSE;
         break;
     case 3:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_RIGHT;
+        event_class = PP_INPUTEVENT_CLASS_MOUSE;
         break;
 
     case 4: // up
     case 5: // down
     case 6: // left
     case 7: // right
-        // TODO: wheel
+        // TODO: Handle wheel events. Firefox does not pass wheel event to windowless plugins.
+        //       Only windowed plugins can receive such events.
+        event_class = PP_INPUTEVENT_CLASS_WHEEL;
         break;
     }
 
-    PP_InputEvent_Type event_type = ev->type == ButtonPress ? PP_INPUTEVENT_TYPE_MOUSEDOWN
-                                                            : PP_INPUTEVENT_TYPE_MOUSEUP;
-    mouse_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
-                                               ev->time/1.0e6, mod, mouse_button,
-                                               &mouse_position, 1, &zero_point);
-    if (pp_i->ppp_input_event)
-        pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, mouse_event);
+    if ((event_class & pp_i->event_mask) ||
+        (event_class & pp_i->filtered_event_mask))
+    {
+        if (event_class == PP_INPUTEVENT_CLASS_MOUSE) {
+            PP_InputEvent_Type event_type;
+            event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
+                                                   : PP_INPUTEVENT_TYPE_MOUSEUP;
+            pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
+                                                    ev->time/1.0e6, mod, mouse_button,
+                                                    &mouse_position, 1, &zero_point);
+        } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
+            // TODO: implement
+        }
 
-    return 1;
+        if (pp_i->ppp_input_event)
+            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+
+        // return false only of handler returned PP_FALSE and event is filtered
+        if (ret == PP_FALSE && (pp_i->filtered_event_mask & event_class))
+            return 0;
+
+        return 1;
+    } else {
+        // return false since we don't handle event
+        return 0;
+    }
 }
 
 int16_t
