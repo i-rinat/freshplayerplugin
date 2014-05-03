@@ -93,7 +93,7 @@ static
 struct PP_Var
 trace_ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
-    trace_info("[PPB] {part} %s response=%d, property=%s\n", __func__+6, response,
+    trace_info("[PPB] {full} %s response=%d, property=%s\n", __func__+6, response,
                reverse_pp_url_response_property(property));
     return ppb_url_response_info_get_property(response, property);
 }

@@ -143,7 +143,7 @@ NPError
 NPP_SetWindow(NPP npp, NPWindow *window)
 {
     char *window_str = trace_np_window_as_string(window);
-    trace_info("[NPP] {part} %s npp=%p, window=%s\n", __func__, npp, window_str);
+    trace_info("[NPP] {full} %s npp=%p, window=%s\n", __func__, npp, window_str);
     free(window_str);
 
     struct pp_instance_s *pp_i = npp->pdata;
@@ -179,7 +179,7 @@ do_nothing(void *user_data, int32_t result)
 NPError
 NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint16_t *stype)
 {
-    trace_info("[NPP] {part} %s npp=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
+    trace_info("[NPP] {full} %s npp=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
                "end=%u, lastmodified=%u, .notifyData=%p, .headers=%s}, seekable=%d\n", __func__,
                npp, type, stream->pdata, stream->ndata, stream->url, stream->end,
                stream->lastmodified, stream->notifyData, stream->headers, seekable);
@@ -248,7 +248,7 @@ quit:
 NPError
 NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 {
-    trace_info("[NPP] {part} %s npp=%p, stream=%p, reason=%d\n", __func__, npp, stream, reason);
+    trace_info("[NPP] {full} %s npp=%p, stream=%p, reason=%d\n", __func__, npp, stream, reason);
 
     PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
     if (!loader)
