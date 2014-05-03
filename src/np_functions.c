@@ -472,7 +472,7 @@ handle_button_press_release_event(NPP npp, void *event)
     XButtonEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
     uint32_t event_class = 0;
-    PP_Resource pp_event;
+    PP_Resource pp_event = 0;
     PP_Bool ret;
     PP_InputEvent_MouseButton mouse_button = PP_INPUTEVENT_MOUSEBUTTON_NONE;
     const float scroll_by_tick = 10.0;
@@ -528,17 +528,18 @@ handle_button_press_release_event(NPP npp, void *event)
                                                     ev->time/1.0e6, mod, mouse_button,
                                                     &mouse_position, 1, &zero_point);
         } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
-            // TODO: implement
             struct PP_FloatPoint wheel_delta = { .x = wheel_x * scroll_by_tick,
                                                  .y = wheel_y * scroll_by_tick };
             struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
 
-            pp_event = ppb_wheel_input_event_create(
-                            pp_i->pp_instance_id, ppb_core_get_time_ticks(), mod,
-                            &wheel_delta, &wheel_ticks, PP_FALSE);
+            // pp_event = ppb_wheel_input_event_create(
+            //                 pp_i->pp_instance_id, ppb_core_get_time_ticks(), mod,
+            //                 &wheel_delta, &wheel_ticks, PP_FALSE);
+            // TODO: figure out why this doesn't work
+            return 0;
         }
 
-        if (pp_i->ppp_input_event)
+        if (pp_i->ppp_input_event && pp_event)
             ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
 
         // return false only of handler returned PP_FALSE and event is filtered
