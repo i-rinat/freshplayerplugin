@@ -536,6 +536,8 @@ handle_button_press_release_event(NPP npp, void *event)
             //                 pp_i->pp_instance_id, ppb_core_get_time_ticks(), mod,
             //                 &wheel_delta, &wheel_ticks, PP_FALSE);
             // TODO: figure out why this doesn't work
+            (void)wheel_delta;
+            (void)wheel_ticks;
             return 0;
         }
 
