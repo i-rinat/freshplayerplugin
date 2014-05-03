@@ -507,18 +507,17 @@ NPP_HandleEvent(NPP npp, void *event)
     switch (xaev->type) {
     case Expose:
         // its event have similar layout to GraphicsExpose, so let ge handler to do the work
-        // (fall though)
+        return handle_graphics_expose_event(npp, event);
     case GraphicsExpose:
         return handle_graphics_expose_event(npp, event);
-        break;
     case EnterNotify:
-        // fall through
+        return handle_enter_leave_event(npp, event);
     case LeaveNotify:
         return handle_enter_leave_event(npp, event);
     case MotionNotify:
         return handle_motion_event(npp, event);
     case ButtonPress:
-        // fall through
+        return handle_button_press_release_event(npp, event);
     case ButtonRelease:
         return handle_button_press_release_event(npp, event);
     default:
