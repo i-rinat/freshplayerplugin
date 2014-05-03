@@ -439,21 +439,29 @@ handle_motion_event(NPP npp, void *event)
 {
     XMotionEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
+    PP_Resource pp_event;
+    PP_Bool ret;
 
-    // TODO: check if we want this event
-    PP_Resource mouse_event;
-    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
-    struct PP_Point zero_point = {.x = 0, .y = 0};
-    unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+    if ((PP_INPUTEVENT_CLASS_MOUSE & pp_i->event_mask) ||
+        (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
+    {
+        struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+        struct PP_Point zero_point = {.x = 0, .y = 0};
+        unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
 
-    mouse_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
-                                               ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
-                                               &mouse_position, 0, &zero_point);
+        pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
+                                                ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
+                                                &mouse_position, 0, &zero_point);
+        if (pp_i->ppp_input_event)
+            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
 
-    if (pp_i->ppp_input_event)
-        pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, mouse_event);
+        if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
+            return 0;
 
-    return 1;
+        return 1;
+    }
+
+    return 0;
 }
 
 static
