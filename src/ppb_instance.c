@@ -59,7 +59,12 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 PP_Bool
 ppb_instance_is_full_frame(PP_Instance instance)
 {
-    return PP_FALSE;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+
+    if (pp_i->is_fullframe)
+        return PP_TRUE;
+    else
+        return PP_FALSE;
 }
 
 // trace wrappers
@@ -75,7 +80,7 @@ static
 PP_Bool
 trace_ppb_instance_is_full_frame(PP_Instance instance)
 {
-    trace_info("[PPB] {fake} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_instance_is_full_frame(instance);
 }
 

@@ -100,6 +100,7 @@ struct pp_instance_s {
     Window          wnd;
     PP_Instance     pp_instance_id;
     NPP             npp;
+    uint32_t        is_fullframe;
     uint32_t        is_fullscreen;
     pthread_t       fs_thread;
     Window          fs_wnd;

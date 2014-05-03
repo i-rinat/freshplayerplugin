@@ -98,6 +98,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         }
     }
 
+    pp_i->is_fullframe = (mode == NP_FULL);
     pp_i->pp_instance_id = generate_new_pp_instance_id();
     tables_add_pp_instance(pp_i->pp_instance_id, pp_i);
     pp_i->dpy = XOpenDisplay(NULL);
