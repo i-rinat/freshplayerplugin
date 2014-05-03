@@ -344,8 +344,13 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
     *total_bytes_to_be_received = ul->response_size;
     *bytes_received = 0;
     if (ul->fp) {
-        fseek(ul->fp, 0, SEEK_END);
-        *bytes_received = ftell(ul->fp);
+        struct stat sb;
+        if (fstat(fileno(ul->fp), &sb) != 0) {
+            pp_resource_release(loader);
+            *bytes_received = -1;
+            return PP_FALSE;
+        }
+        *bytes_received = sb.st_size;
     }
 
     pp_resource_release(loader);
