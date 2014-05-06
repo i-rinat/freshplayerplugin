@@ -27,6 +27,7 @@
 #include <ppapi/c/pp_errors.h>
 #include "trace.h"
 #include "tables.h"
+#include "ppb_var.h"
 
 
 void
@@ -279,25 +280,64 @@ ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                 PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
                                 struct PP_Var character_text)
 {
-    return 0;
+    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, instance);
+    struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return 0;
+    ie->event_class = PP_INPUTEVENT_CLASS_KEYBOARD;
+    ie->type = type;
+    ie->time_stamp = time_stamp;
+    ie->modifiers = modifiers;
+    ie->key_code = key_code;
+    ie->character_text = character_text;
+    ppb_var_add_ref(character_text);
+
+    pp_resource_release(input_event);
+    return input_event;
 }
 
 PP_Bool
 ppb_keyboard_input_event_is_keyboard_input_event(PP_Resource resource)
 {
-    return PP_TRUE;
+    struct pp_input_event_s *ie = pp_resource_acquire(resource, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_FALSE;
+    PP_Bool res = ie->event_class == PP_INPUTEVENT_CLASS_KEYBOARD;
+    pp_resource_release(resource);
+    return res;
 }
 
 uint32_t
 ppb_keyboard_input_event_get_key_code(PP_Resource key_event)
 {
-    return 0;
+    struct pp_input_event_s *ie = pp_resource_acquire(key_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return 0;
+    if (ie->event_class != PP_INPUTEVENT_CLASS_KEYBOARD) {
+        pp_resource_release(key_event);
+        return 0;
+    }
+
+    uint32_t key_code = ie->key_code;
+    pp_resource_release(key_event);
+    return key_code;
 }
 
 struct PP_Var
 ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
 {
-    return PP_MakeUndefined();
+    struct pp_input_event_s *ie = pp_resource_acquire(character_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie)
+        return PP_MakeUndefined();
+    if (ie->event_class != PP_INPUTEVENT_CLASS_KEYBOARD) {
+        pp_resource_release(character_event);
+        return PP_MakeUndefined();
+    }
+
+    struct PP_Var character_text = ie->character_text;
+    ppb_var_add_ref(character_text);
+    pp_resource_release(character_event);
+    return character_text;
 }
 
 PP_Resource
@@ -566,7 +606,7 @@ trace_ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type t
                                       uint32_t key_code, struct PP_Var character_text)
 {
     char *s_character_text = trace_var_as_string(character_text);
-    trace_info("[PPB] {zilch} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
+    trace_info("[PPB] {full} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
                "key_code=%u, character_text=%s\n", __func__+6, instance, type, time_stamp,
                modifiers, key_code, s_character_text);
     free(s_character_text);
@@ -578,7 +618,7 @@ static
 PP_Bool
 trace_ppb_keyboard_input_event_is_keyboard_input_event(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_keyboard_input_event_is_keyboard_input_event(resource);
 }
 
@@ -586,7 +626,7 @@ static
 uint32_t
 trace_ppb_keyboard_input_event_get_key_code(PP_Resource key_event)
 {
-    trace_info("[PPB] {zilch} %s key_event=%d\n", __func__+6, key_event);
+    trace_info("[PPB] {full} %s key_event=%d\n", __func__+6, key_event);
     return ppb_keyboard_input_event_get_key_code(key_event);
 }
 
@@ -594,7 +634,7 @@ static
 struct PP_Var
 trace_ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
 {
-    trace_info("[PPB] {zilch} %s character_event=%d\n", __func__+6, character_event);
+    trace_info("[PPB] {full} %s character_event=%d\n", __func__+6, character_event);
     return ppb_keyboard_input_event_get_character_text(character_event);
 }
 

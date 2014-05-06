@@ -269,6 +269,8 @@ struct pp_input_event_s {
     struct PP_FloatPoint        wheel_delta;
     struct PP_FloatPoint        wheel_ticks;
     PP_Bool                     scroll_by_page;
+    uint32_t                    key_code;
+    struct PP_Var               character_text;
 };
 
 struct pp_flash_font_file_s {
