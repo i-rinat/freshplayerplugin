@@ -40,6 +40,7 @@ xkeycode_to_pp_keycode(int xkeycode)
         return VK_TAB;
     case XK_Clear:
         return VK_CLEAR;
+    case XK_Return:
     case XK_KP_Enter:
     case XK_ISO_Enter:
     case XK_3270_Enter:
