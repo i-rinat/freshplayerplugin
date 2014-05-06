@@ -44,6 +44,7 @@
 #include "ppb_var.h"
 #include "ppb_core.h"
 #include "header_parser.h"
+#include "keycodeconvert.h"
 
 
 static
@@ -555,6 +556,53 @@ handle_button_press_release_event(NPP npp, void *event)
 }
 
 int16_t
+handle_key_press_release_event(NPP npp, void *event)
+{
+    XKeyEvent            *ev = event;
+    struct pp_instance_s *pp_i = npp->pdata;
+    PP_Resource           pp_event;
+    PP_InputEvent_Type    event_type;
+    PP_Bool               ret = PP_TRUE;
+
+    event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
+                                        : PP_INPUTEVENT_TYPE_KEYUP;
+    unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+
+    if ((PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->event_mask) ||
+        (PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->filtered_event_mask))
+    {
+        char           buffer[20];
+        KeySym         keysym;
+        XComposeStatus compose_status;
+        int charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
+        int pp_keycode = xkeycode_to_pp_keycode(keysym);
+
+        if (ev->type == KeyPress && charcount > 0) {
+            struct PP_Var character_text = PP_MakeStringN(buffer, charcount);
+            pp_event = ppb_keyboard_input_event_create(
+                            pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
+                            pp_keycode, character_text);
+            ppb_var_release(character_text);
+
+            if (pp_i->ppp_input_event && pp_event)
+                pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+        }
+
+        pp_event = ppb_keyboard_input_event_create(pp_i->pp_instance_id, event_type, ev->time/1.0e6,
+                                                   mod, pp_keycode, PP_MakeUndefined());
+        if (pp_i->ppp_input_event && pp_event)
+            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+
+        if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->filtered_event_mask))
+            return 0;
+
+        return 1;
+    }
+
+    return 0;
+}
+
+int16_t
 NPP_HandleEvent(NPP npp, void *event)
 {
     XAnyEvent *xaev = event;
@@ -594,6 +642,12 @@ NPP_HandleEvent(NPP npp, void *event)
     case ButtonRelease:
         TRACE_HELPER("{full}");
         return handle_button_press_release_event(npp, event);
+    case KeyPress:
+        TRACE_HELPER("{full}");
+        return handle_key_press_release_event(npp, event);
+    case KeyRelease:
+        TRACE_HELPER("{full}");
+        return handle_key_press_release_event(npp, event);
     default:
         TRACE_HELPER("{zilch}");
         return 0;
