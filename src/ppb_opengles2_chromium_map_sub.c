@@ -63,7 +63,8 @@ trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(PP_Resource co
                                                                   GLuint target, GLintptr offset,
                                                                   GLsizeiptr size, GLenum access)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s context=%d, target=%u, offset=%d, size=%u, access=%d\n",
+               __func__+6, context, target, (int)offset, (unsigned int)size, access);
     return ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(context, target, offset,
                                                                        size, access);
 }
@@ -73,7 +74,7 @@ void
 trace_ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(PP_Resource context,
                                                                     const void *mem)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s context=%d, mem=%p\n", __func__+6, context, mem);
     ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(context, mem);
 }
 
@@ -86,7 +87,9 @@ trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource c
                                                                    GLenum format, GLenum type,
                                                                    GLenum access)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s context=%d, target=%d, level=%d, xoffset=%d, yoffset=%d, "
+               "width=%u, height=%u, format=%d, type=%d, access=%d\n", __func__+6, context, target,
+               level, xoffset, yoffset, width, height, format, type, access);
     return ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(context, target, level,
                                         xoffset, yoffset, width, height, format, type, access);
 }
@@ -96,7 +99,7 @@ void
 trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
                                                                      const void *mem)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__);
+    trace_info("[PPB] {zilch} %s context=%d, mem=%p\n", __func__+6, context, mem);
     ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(context, mem);
 }
 
