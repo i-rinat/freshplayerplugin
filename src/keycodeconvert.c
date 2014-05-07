@@ -37,6 +37,7 @@ xkeycode_to_pp_keycode(int xkeycode)
     case XK_BackSpace:
         return VK_BACK;
     case XK_Tab:
+    case XK_ISO_Left_Tab:
         return VK_TAB;
     case XK_Clear:
         return VK_CLEAR;
