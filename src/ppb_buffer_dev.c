@@ -62,7 +62,8 @@ static
 PP_Resource
 trace_ppb_buffer_dev_create(PP_Instance instance, uint32_t size_in_bytes)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d, size_in_bytes=%u\n", __func__+6,
+               instance, size_in_bytes);
     return ppb_buffer_dev_create(instance, size_in_bytes);
 }
 
@@ -70,7 +71,7 @@ static
 PP_Bool
 trace_ppb_buffer_dev_is_buffer(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_buffer_dev_is_buffer(resource);
 }
 
@@ -78,7 +79,7 @@ static
 PP_Bool
 trace_ppb_buffer_dev_describe(PP_Resource resource, uint32_t *size_in_bytes)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_buffer_dev_describe(resource, size_in_bytes);
 }
 
@@ -86,7 +87,7 @@ static
 void *
 trace_ppb_buffer_dev_map(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_buffer_dev_map(resource);
 }
 
@@ -94,7 +95,7 @@ static
 void
 trace_ppb_buffer_dev_unmap(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     ppb_buffer_dev_unmap(resource);
 }
 
