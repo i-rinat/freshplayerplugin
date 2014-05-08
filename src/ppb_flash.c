@@ -260,7 +260,7 @@ static
 void
 trace_ppb_flash_set_instance_always_on_top(PP_Instance instance, PP_Bool on_top)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d, on_top=%d\n", __func__+6, instance, on_top);
     ppb_flash_set_instance_always_on_top(instance, on_top);
 }
 
@@ -380,7 +380,9 @@ int32_t
 trace_ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resource video_capture,
                                                 struct PP_ArrayOutput devices)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance=%d, video_capture=%d, "
+               "devices={.GetDataBuffer=%p, .user_data=%p}\n", __func__+6, instance, video_capture,
+               devices.GetDataBuffer, devices.user_data);
     return ppb_flash_enumerate_video_capture_devices(instance, video_capture, devices);
 }
 
