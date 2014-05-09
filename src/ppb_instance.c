@@ -36,6 +36,13 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
         trace_warning("%s, pp_i is NULL\n", __func__);
         return PP_FALSE;
     }
+
+    if (device == 0) {
+        // unbind
+        pp_i->graphics = 0;
+        return PP_TRUE;
+    }
+
     struct pp_graphics2d_s *g2d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS2D);
     struct pp_graphics3d_s *g3d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS3D);
 
