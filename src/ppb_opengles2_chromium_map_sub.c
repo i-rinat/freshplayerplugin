@@ -60,8 +60,8 @@ ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context
         return NULL;
     }
 
-    const uintptr_t bytes_per_pixel = (GL_RGB == format) ? 3 : 4;
-    void *res = malloc(width * height * bytes_per_pixel);
+    g3d->sub_map_bytes_per_pixel = (GL_RGB == format) ? 3 : 4;
+    void *res = malloc(width * height * g3d->sub_map_bytes_per_pixel);
     g3d->sub_map_xoffset = xoffset;
     g3d->sub_map_yoffset = yoffset;
     g3d->sub_map_width = width;
@@ -75,6 +75,25 @@ void
 ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
                                                                const void *mem)
 {
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
+    if (!g3d) {
+        trace_warning("%s, wrong context\n", __func__);
+        return;
+    }
+
+    XImage *xi = XCreateImage(g3d->dpy, DefaultVisual(g3d->dpy, 0), 24, ZPixmap, 0, (void *)mem,
+                              g3d->sub_map_width, g3d->sub_map_height,
+                              g3d->sub_map_bytes_per_pixel * 4,
+                              g3d->sub_map_width * g3d->sub_map_bytes_per_pixel);
+
+    XPutImage(g3d->dpy, g3d->pixmap, DefaultGC(g3d->dpy, 0), xi, 0, 0,
+              g3d->sub_map_xoffset, g3d->sub_map_yoffset,
+              g3d->sub_map_width, g3d->sub_map_height);
+    free(xi);
+    XSync(g3d->dpy, False);
+
+    pp_resource_release(context);
+    free((void *)mem);
 }
 
 // trace wrappers
@@ -120,7 +139,7 @@ void
 trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
                                                                      const void *mem)
 {
-    trace_info("[PPB] {zilch} %s context=%d, mem=%p\n", __func__+6, context, mem);
+    trace_info("[PPB] {full} %s context=%d, mem=%p\n", __func__+6, context, mem);
     ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(context, mem);
 }
 

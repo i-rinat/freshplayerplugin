@@ -201,6 +201,7 @@ struct pp_graphics3d_s {
     int32_t         sub_map_yoffset;
     int32_t         sub_map_width;
     int32_t         sub_map_height;
+    int32_t         sub_map_bytes_per_pixel;
 };
 
 struct pp_image_data_s {
