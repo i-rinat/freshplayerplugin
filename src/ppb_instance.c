@@ -37,7 +37,7 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
         return PP_FALSE;
     }
     struct pp_graphics2d_s *g2d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS2D);
-    struct pp_graphics2d_s *g3d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS3D);
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS3D);
 
     if (g2d) {
         g2d->instance = instance;
@@ -45,10 +45,9 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
         pp_resource_release(device);
         return PP_TRUE;
     } else if (g3d) {
-        // TODO: implement 3d graphics
-        trace_warning("%s, 3d graphics not supported\n", __func__);
+        pp_i->graphics = device;
         pp_resource_release(device);
-        return PP_FALSE;
+        return PP_TRUE;
     } else {
         trace_warning("%s, unsupported graphics resource %d on instance %d\n", __func__,
                       device, instance);

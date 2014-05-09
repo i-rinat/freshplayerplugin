@@ -34,7 +34,7 @@ void
 setup_ctx(PP_Resource context)
 {
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
-    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->egl_ctx);
+    glXMakeContextCurrent(g3d->dpy, g3d->glx_pixmap, g3d->glx_pixmap, g3d->glc);
     pp_resource_release(context);
 }
 
@@ -759,7 +759,24 @@ ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count, co
                            const GLint *length)
 {
     setup_ctx(context);
-    glShaderSource(shader, count, str, length);
+    const char *v100 = "#version 100\n";
+    const unsigned int v100_len = strlen(v100);
+
+    // prepend "#version 100" line to all shaders
+    // This enables shader compatibility mode introduced by GL_ARB_ES2_compatibility
+    char **str2 = malloc(count * sizeof(char *));
+    for (uintptr_t k = 0; k < count; k ++) {
+        size_t shader_len = strlen(str[k]);
+        str2[k] = malloc(shader_len + 1 + v100_len);
+        memcpy(str2[k], v100, v100_len); // first line
+        memcpy(str2[k] + v100_len, str[k], shader_len + 1); // shader source with trailing \0
+    }
+
+    glShaderSource(shader, count, (const char **)str2, length);
+
+    for (uintptr_t k = 0; k < count; k ++)
+        free(str2[k]);
+    free(str2);
 }
 
 void
@@ -1920,6 +1937,9 @@ trace_ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei cou
 {
     trace_info("[PPB] {full} %s context=%d, shader=%d, count=%d, str=%p, length=%p\n",
                __func__+6, context, shader, count, str, length);
+    for (size_t k = 0; k < count; k++) {
+        trace_info("             shader_source[%u] = \n%s\n", (unsigned)k, str[k]);
+    }
     ppb_opengles2_ShaderSource(context, shader, count, str, length);
 }
 

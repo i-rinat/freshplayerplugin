@@ -103,21 +103,10 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->is_fullframe = (mode == NP_FULL);
     pp_i->pp_instance_id = generate_new_pp_instance_id();
     tables_add_pp_instance(pp_i->pp_instance_id, pp_i);
+
     pp_i->dpy = XOpenDisplay(NULL);
     if (!pp_i->dpy) {
         trace_error("%s, can't open X Display\n", __func__);
-    }
-    pp_i->egl_dpy = eglGetDisplay(pp_i->dpy);
-    if (!pp_i->egl_dpy) {
-        trace_error("%s, can't open EGL display\n", __func__);
-    }
-
-    {
-        EGLint v_major, v_minor;
-        if (!eglInitialize(pp_i->egl_dpy, &v_major, &v_minor)) {
-            trace_error("%s, can't initialize EGL\n", __func__);
-        }
-        trace_info("EGL version %d.%d\n", v_major, v_minor);
     }
 
     // request windowless operation
@@ -362,18 +351,25 @@ handle_graphics_expose_event(NPP npp, void *event)
     XGraphicsExposeEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
     struct pp_graphics2d_s *g2d = pp_resource_acquire(pp_i->graphics, PP_RESOURCE_GRAPHICS2D);
-    if (!g2d)
-        return 0;
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(pp_i->graphics, PP_RESOURCE_GRAPHICS3D);
     Display *dpy = ev->display;
     Drawable drawable = ev->drawable;
     int screen = 0;
-    pthread_mutex_lock(&g2d->lock);
-    XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0, g2d->second_buffer,
-                              g2d->width, g2d->height, 32, g2d->stride);
 
-    XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g2d->width, g2d->height);
-    free(xi);
-    pthread_mutex_unlock(&g2d->lock);
+    if (g2d) {
+        pthread_mutex_lock(&g2d->lock);
+        XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
+                                  g2d->second_buffer, g2d->width, g2d->height, 32, g2d->stride);
+
+        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g2d->width, g2d->height);
+        free(xi);
+        pthread_mutex_unlock(&g2d->lock);
+    } else if (g3d) {
+        trace_error("%s NOT IMPLEMENTED\n", __func__);
+        // TODO: implement
+    } else {
+        return 0;
+    }
     pp_resource_release(pp_i->graphics);
 
     return 1;

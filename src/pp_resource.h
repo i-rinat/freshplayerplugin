@@ -39,7 +39,7 @@
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
 #include <glib.h>
-#include <EGL/egl.h>
+#include <GL/glx.h>
 #include <pango/pango.h>
 #include <pango/pangoft2.h>
 #include <pango/pangocairo.h>
@@ -114,7 +114,6 @@ struct pp_instance_s {
     pthread_t       pp_thread;
     PP_Resource     graphics;
     Display        *dpy;
-    EGLDisplay      egl_dpy;
 };
 
 struct pp_resource_generic_s {
@@ -192,10 +191,10 @@ struct pp_view_s {
 
 struct pp_graphics3d_s {
     struct pp_resource_generic_s _;
-    EGLDisplay      egl_dpy;
-    EGLContext      egl_ctx;
-    EGLConfig       egl_config;
-    EGLSurface      egl_surf;
+    GLXContext      glc;
+    Pixmap          pixmap;
+    GLXPixmap       glx_pixmap;
+    Display        *dpy;
     int32_t         width;
     int32_t         height;
 };
