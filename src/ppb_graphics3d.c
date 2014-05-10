@@ -154,6 +154,7 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
 
     g3d->glx_pixmap = glXCreatePixmap(pp_i->dpy, fb_configs[0], g3d->pixmap, NULL);
     g3d->dpy = pp_i->dpy;
+    g3d->sub_maps = g_hash_table_new(g_direct_hash, g_direct_equal);
 
     pp_resource_release(context);
     return context;
@@ -161,6 +162,13 @@ err:
     pp_resource_release(context);
     pp_resource_expunge(context);
     return 0;
+}
+
+void
+ppb_graphics3d_destroy(void *p)
+{
+    struct pp_graphics3d_s *g3d = p;
+    g_hash_table_destroy(g3d->sub_maps);
 }
 
 PP_Bool

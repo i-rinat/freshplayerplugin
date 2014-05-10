@@ -32,6 +32,13 @@
 
 static
 void
+_setup_glx_ctx(struct pp_graphics3d_s *g3d)
+{
+    glXMakeContextCurrent(g3d->dpy, g3d->glx_pixmap, g3d->glx_pixmap, g3d->glc);
+}
+
+static
+void
 setup_ctx(PP_Resource context)
 {
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
@@ -1114,6 +1121,17 @@ ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(PP_Resource contex
 {
 }
 
+struct tex_sub_mapping_param_s {
+    GLint           level;
+    GLint           xoffset;
+    GLint           yoffset;
+    GLsizei         width;
+    GLsizei         height;
+    GLenum          format;
+    GLenum          type;
+    GLenum          access;
+};
+
 void *
 ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context, GLenum target,
                                                              GLint level, GLint xoffset,
@@ -1132,14 +1150,22 @@ ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context
         return NULL;
     }
 
-    g3d->sub_map_bytes_per_pixel = (GL_RGB == format) ? 3 : 4;
-    void *res = malloc(width * height * g3d->sub_map_bytes_per_pixel);
-    g3d->sub_map_xoffset = xoffset;
-    g3d->sub_map_yoffset = yoffset;
-    g3d->sub_map_width = width;
-    g3d->sub_map_height = height;
-    pp_resource_release(context);
+    struct tex_sub_mapping_param_s *map_params = malloc(sizeof(*map_params));
+    map_params->level = level;
+    map_params->xoffset = xoffset;
+    map_params->yoffset = yoffset;
+    map_params->width = width;
+    map_params->height = height;
+    map_params->format = format;
+    map_params->type = type;
+    map_params->access = access;
 
+    int bytes_per_pixel = (GL_RGB == format) ? 3 : 4;
+    void *res = malloc(width * height * bytes_per_pixel);
+
+    g_hash_table_insert(g3d->sub_maps, res, map_params);
+
+    pp_resource_release(context);
     return res;
 }
 
@@ -1153,16 +1179,18 @@ ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource conte
         return;
     }
 
-    XImage *xi = XCreateImage(g3d->dpy, DefaultVisual(g3d->dpy, 0), 24, ZPixmap, 0, (void *)mem,
-                              g3d->sub_map_width, g3d->sub_map_height,
-                              g3d->sub_map_bytes_per_pixel * 4,
-                              g3d->sub_map_width * g3d->sub_map_bytes_per_pixel);
+    struct tex_sub_mapping_param_s *mp = g_hash_table_lookup(g3d->sub_maps, mem);
+    if (!mp) {
+        trace_error("%s, memory was not mapped\n", __func__);
+        pp_resource_release(context);
+        return;
+    }
 
-    XPutImage(g3d->dpy, g3d->pixmap, DefaultGC(g3d->dpy, 0), xi, 0, 0,
-              g3d->sub_map_xoffset, g3d->sub_map_yoffset,
-              g3d->sub_map_width, g3d->sub_map_height);
-    free(xi);
-    XSync(g3d->dpy, False);
+    g_hash_table_remove(g3d->sub_maps, mem);
+    _setup_glx_ctx(g3d);
+    glTexSubImage2D(GL_TEXTURE_2D, mp->level, mp->xoffset, mp->yoffset, mp->width, mp->height,
+                    mp->format, mp->type, mem);
+    free(mp);
 
     pp_resource_release(context);
     free((void *)mem);

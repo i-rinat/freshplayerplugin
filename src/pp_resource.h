@@ -197,11 +197,7 @@ struct pp_graphics3d_s {
     Display        *dpy;
     int32_t         width;
     int32_t         height;
-    int32_t         sub_map_xoffset;
-    int32_t         sub_map_yoffset;
-    int32_t         sub_map_width;
-    int32_t         sub_map_height;
-    int32_t         sub_map_bytes_per_pixel;
+    GHashTable     *sub_maps;
     struct PP_CompletionCallback    ccb;
 };
 
