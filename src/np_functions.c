@@ -364,13 +364,19 @@ handle_graphics_expose_event(NPP npp, void *event)
         XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g2d->width, g2d->height);
         free(xi);
         pthread_mutex_unlock(&g2d->lock);
+        pp_resource_release(pp_i->graphics);
     } else if (g3d) {
-        trace_error("%s NOT IMPLEMENTED\n", __func__);
-        // TODO: implement
+        XImage *xi = XGetImage(dpy, g3d->pixmap, 0, 0, g3d->width, g3d->height, XAllPlanes(),
+                               ZPixmap);
+        if (!xi)
+            trace_error("%s, XGetImage returned NULL\n", __func__);
+        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g3d->width, g3d->height);
+        XDestroyImage(xi);
+        XSync(dpy, False);
+        pp_resource_release(pp_i->graphics);
     } else {
         return 0;
     }
-    pp_resource_release(pp_i->graphics);
 
     return 1;
 }

@@ -30,6 +30,7 @@
 #include "pp_resource.h"
 #include "tables.h"
 #include <ppapi/c/pp_errors.h>
+#include "ppb_core.h"
 
 
 int32_t
@@ -192,16 +193,23 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     return 0;
 }
 
+void
+_swap_buffers_comt(void *p)
+{
+    struct PP_CompletionCallback *ccb = p;
+
+    if (ccb->func)
+        ccb->func(ccb->user_data, PP_OK);
+
+    free(p);
+}
+
 int32_t
 ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d)
         return PP_ERROR_BADRESOURCE;
-    if (g3d->in_progress) {
-        pp_resource_release(context);
-        return PP_ERROR_INPROGRESS;
-    }
 
     struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->_.instance);
 
@@ -211,18 +219,18 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         return PP_OK;
     }
 
-    g3d->in_progress = 1;
     g3d->ccb = callback;
 
     NPRect npr = {.top = 0, .left = 0, .bottom = g3d->height, .right = g3d->width};
     npn.invalidaterect(pp_i->npp, &npr);
     npn.forceredraw(pp_i->npp);
-
     pp_resource_release(context);
-    if (callback.func == NULL)
-        return PP_OK;
 
-    return PP_OK_COMPLETIONPENDING;
+    struct PP_CompletionCallback *ccb = malloc(sizeof(*ccb));
+    *ccb = callback;
+    npn.pluginthreadasynccall(pp_i->npp, _swap_buffers_comt, ccb);
+
+    return PP_OK;
 }
 
 
