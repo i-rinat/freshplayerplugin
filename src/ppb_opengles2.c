@@ -27,6 +27,7 @@
 #include <stddef.h>
 #include "trace.h"
 #include "pp_resource.h"
+#include "reverse_constant.h"
 
 
 static
@@ -1245,7 +1246,8 @@ static
 void
 trace_ppb_opengles2_ActiveTexture(PP_Resource context, GLenum texture)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, texture=%u(%s)\n", __func__+6, context,
+               texture, reverse_gl_enum(texture));
     ppb_opengles2_ActiveTexture(context, texture);
 }
 
@@ -1272,7 +1274,8 @@ static
 void
 trace_ppb_opengles2_BindBuffer(PP_Resource context, GLenum target, GLuint buffer)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), buffer=%u\n", __func__+6, context,
+               target, reverse_gl_enum(target), buffer);
     ppb_opengles2_BindBuffer(context, target, buffer);
 }
 
@@ -1280,7 +1283,8 @@ static
 void
 trace_ppb_opengles2_BindFramebuffer(PP_Resource context, GLenum target, GLuint framebuffer)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), framebuffer=%u\n", __func__+6, context,
+               target, reverse_gl_enum(target), framebuffer);
     ppb_opengles2_BindFramebuffer(context, target, framebuffer);
 }
 
@@ -1288,7 +1292,8 @@ static
 void
 trace_ppb_opengles2_BindRenderbuffer(PP_Resource context, GLenum target, GLuint renderbuffer)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), renderbuffer=%u\n", __func__+6, context,
+               target, reverse_gl_enum(target), renderbuffer);
     ppb_opengles2_BindRenderbuffer(context, target, renderbuffer);
 }
 
@@ -1296,8 +1301,8 @@ static
 void
 trace_ppb_opengles2_BindTexture(PP_Resource context, GLenum target, GLuint texture)
 {
-    trace_info("[PPB] {full} %s context=%d, target=0x%x, texture=%d\n", __func__+6, context,
-               target, texture);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), texture=%u\n", __func__+6, context,
+               target, reverse_gl_enum(target), texture);
     ppb_opengles2_BindTexture(context, target, texture);
 }
 
@@ -1306,7 +1311,8 @@ void
 trace_ppb_opengles2_BlendColor(PP_Resource context, GLclampf red, GLclampf green, GLclampf blue,
                                GLclampf alpha)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, red=%f, green=%f, blue=%f, alpha=%f\n", __func__+6,
+               context, red, green, blue, alpha);
     ppb_opengles2_BlendColor(context, red, green, blue, alpha);
 }
 
@@ -1314,7 +1320,8 @@ static
 void
 trace_ppb_opengles2_BlendEquation(PP_Resource context, GLenum mode)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, mode=%u(%s)\n", __func__+6, context, mode,
+               reverse_gl_enum(mode));
     ppb_opengles2_BlendEquation(context, mode);
 }
 
@@ -1322,7 +1329,8 @@ static
 void
 trace_ppb_opengles2_BlendEquationSeparate(PP_Resource context, GLenum modeRGB, GLenum modeAlpha)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, modeRGB=%u(%s), modeAlpha=%u(%s)\n", __func__+6,
+               context, modeRGB, reverse_gl_enum(modeRGB), modeAlpha, reverse_gl_enum(modeAlpha));
     ppb_opengles2_BlendEquationSeparate(context, modeRGB, modeAlpha);
 }
 
@@ -1330,7 +1338,8 @@ static
 void
 trace_ppb_opengles2_BlendFunc(PP_Resource context, GLenum sfactor, GLenum dfactor)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, sfactor=%u(%s), dfactor=%u(%s)\n", __func__+6,
+               context, sfactor, reverse_gl_enum(sfactor), dfactor, reverse_gl_enum(dfactor));
     ppb_opengles2_BlendFunc(context, sfactor, dfactor);
 }
 
@@ -1339,7 +1348,10 @@ void
 trace_ppb_opengles2_BlendFuncSeparate(PP_Resource context, GLenum srcRGB, GLenum dstRGB,
                                       GLenum srcAlpha, GLenum dstAlpha)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, srcRGB=%u(%s), dstRGB=%u(%s), srcAlpha=%u(%s), "
+               "dstAlpha=%u(%s)\n", __func__+6, context, srcRGB, reverse_gl_enum(srcRGB),
+               dstRGB, reverse_gl_enum(dstRGB), srcAlpha, reverse_gl_enum(srcAlpha), dstAlpha,
+               reverse_gl_enum(dstAlpha));
     ppb_opengles2_BlendFuncSeparate(context, srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
@@ -1348,7 +1360,9 @@ void
 trace_ppb_opengles2_BufferData(PP_Resource context, GLenum target, GLsizeiptr size,
                                const void *data, GLenum usage)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), size=%ld, data=%p, usage=%u(%s)\n",
+               __func__+6, context, target, reverse_gl_enum(target), (long int)size, data,
+               usage, reverse_gl_enum(usage));
     ppb_opengles2_BufferData(context, target, size, data, usage);
 }
 
@@ -1357,7 +1371,9 @@ void
 trace_ppb_opengles2_BufferSubData(PP_Resource context, GLenum target, GLintptr offset,
                                   GLsizeiptr size, const void *data)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), offset=%ld, size=%ld, data=%p\n",
+               __func__+6, context, target, reverse_gl_enum(target), (long)offset, (long)size,
+               data);
     ppb_opengles2_BufferSubData(context, target, offset, size, data);
 }
 
@@ -1365,7 +1381,8 @@ static
 GLenum
 trace_ppb_opengles2_CheckFramebufferStatus(PP_Resource context, GLenum target)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s)\n", __func__+6, context, target,
+               reverse_gl_enum(target));
     return ppb_opengles2_CheckFramebufferStatus(context, target);
 }
 
@@ -1373,7 +1390,7 @@ static
 void
 trace_ppb_opengles2_Clear(PP_Resource context, GLbitfield mask)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, mask=0x%x\n", __func__+6, context, mask);
     ppb_opengles2_Clear(context, mask);
 }
 
@@ -1382,7 +1399,8 @@ void
 trace_ppb_opengles2_ClearColor(PP_Resource context, GLclampf red, GLclampf green, GLclampf blue,
                                GLclampf alpha)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, red=%f, green=%f, blue=%f, alpha=%f\n", __func__+6,
+               context, red, green, blue, alpha);
     ppb_opengles2_ClearColor(context, red, green, blue, alpha);
 }
 
@@ -1390,7 +1408,7 @@ static
 void
 trace_ppb_opengles2_ClearDepthf(PP_Resource context, GLclampf depth)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, depth=%f\n", __func__+6, context, depth);
     ppb_opengles2_ClearDepthf(context, depth);
 }
 
@@ -1398,7 +1416,7 @@ static
 void
 trace_ppb_opengles2_ClearStencil(PP_Resource context, GLint s)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, s=%d\n", __func__+6, context, s);
     ppb_opengles2_ClearStencil(context, s);
 }
 
@@ -1407,7 +1425,8 @@ void
 trace_ppb_opengles2_ColorMask(PP_Resource context, GLboolean red, GLboolean green, GLboolean blue,
                               GLboolean alpha)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, red=%d, green=%d, blue=%d, alpha=%d\n", __func__+6,
+               context, red, green, blue, alpha);
     ppb_opengles2_ColorMask(context, red, green, blue, alpha);
 }
 
@@ -1425,7 +1444,10 @@ trace_ppb_opengles2_CompressedTexImage2D(PP_Resource context, GLenum target, GLi
                                          GLenum internalformat, GLsizei width, GLsizei height,
                                          GLint border, GLsizei imageSize, const void *data)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), level=%d, internalformat=%u(%s), "
+               "width=%d, height=%d, border=%d, imageSize=%d, data=%p\n", __func__+6, context,
+               target, reverse_gl_enum(target), level, internalformat,
+               reverse_gl_enum(internalformat), width, height, border, imageSize, data);
     ppb_opengles2_CompressedTexImage2D(context, target, level, internalformat, width, height,
                                        border, imageSize, data);
 }
@@ -1437,7 +1459,10 @@ trace_ppb_opengles2_CompressedTexSubImage2D(PP_Resource context, GLenum target, 
                                             GLsizei height, GLenum format, GLsizei imageSize,
                                             const void *data)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), level=%d, xoffset=%d, yoffset=%d, "
+               "width=%d, height=%d, format=%u(%s), imageSize=%d, data=%p\n", __func__+6,
+               context, target, reverse_gl_enum(target), level, xoffset, yoffset,
+               width, height, format, reverse_gl_enum(format), imageSize, data);
     ppb_opengles2_CompressedTexSubImage2D(context, target, level, xoffset, yoffset, width, height,
                                           format, imageSize, data);
 }
@@ -1448,7 +1473,10 @@ trace_ppb_opengles2_CopyTexImage2D(PP_Resource context, GLenum target, GLint lev
                                    GLenum internalformat, GLint x, GLint y, GLsizei width,
                                    GLsizei height, GLint border)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), level=%d, internalformat=%u(%s), x=%d, "
+               "y=%d, width=%d, height=%d, border=%d\n", __func__+6, context, target,
+               reverse_gl_enum(target), level, internalformat, reverse_gl_enum(internalformat),
+               x, y, width, height, border);
     ppb_opengles2_CopyTexImage2D(context, target, level, internalformat, x, y, width, height,
                                  border);
 }
@@ -1459,7 +1487,9 @@ trace_ppb_opengles2_CopyTexSubImage2D(PP_Resource context, GLenum target, GLint 
                                       GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width,
                                       GLsizei height)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), level=%d, xoffset=%d, yoffset=%d, "
+               "x=%d, y=%d, width=%d, height=%d\n", __func__+6, context, target,
+               reverse_gl_enum(target), level, xoffset, yoffset, x, y, width, height);
     ppb_opengles2_CopyTexSubImage2D(context, target, level, xoffset, yoffset, x, y, width, height);
 }
 
@@ -1475,7 +1505,8 @@ static
 GLuint
 trace_ppb_opengles2_CreateShader(PP_Resource context, GLenum type)
 {
-    trace_info("[PPB] {full} %s context=%d type=0x%x\n", __func__+6, context, type);
+    trace_info("[PPB] {full} %s context=%d type=%u(%s)\n", __func__+6, context, type,
+               reverse_gl_enum(type));
     return ppb_opengles2_CreateShader(context, type);
 }
 
@@ -1483,7 +1514,8 @@ static
 void
 trace_ppb_opengles2_CullFace(PP_Resource context, GLenum mode)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, mode=%u(%s)\n", __func__+6, context, mode,
+               reverse_gl_enum(mode));
     ppb_opengles2_CullFace(context, mode);
 }
 
@@ -1491,7 +1523,8 @@ static
 void
 trace_ppb_opengles2_DeleteBuffers(PP_Resource context, GLsizei n, const GLuint *buffers)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d, buffers=%p\n", __func__+6, context,
+               n, buffers);
     ppb_opengles2_DeleteBuffers(context, n, buffers);
 }
 
@@ -1499,7 +1532,8 @@ static
 void
 trace_ppb_opengles2_DeleteFramebuffers(PP_Resource context, GLsizei n, const GLuint *framebuffers)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d, framebuffers=%p\n", __func__+6, context,
+               n, framebuffers);
     ppb_opengles2_DeleteFramebuffers(context, n, framebuffers);
 }
 
@@ -1507,7 +1541,7 @@ static
 void
 trace_ppb_opengles2_DeleteProgram(PP_Resource context, GLuint program)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u\n", __func__+6, context, program);
     ppb_opengles2_DeleteProgram(context, program);
 }
 
@@ -1515,7 +1549,8 @@ static
 void
 trace_ppb_opengles2_DeleteRenderbuffers(PP_Resource context, GLsizei n, const GLuint *renderbuffers)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d, renderbuffers=%p\n", __func__+6, context,
+               n, renderbuffers);
     ppb_opengles2_DeleteRenderbuffers(context, n, renderbuffers);
 }
 
@@ -1523,7 +1558,7 @@ static
 void
 trace_ppb_opengles2_DeleteShader(PP_Resource context, GLuint shader)
 {
-    trace_info("[PPB] {full} %s context=%d, shader=%d\n", __func__+6, context, shader);
+    trace_info("[PPB] {full} %s context=%d, shader=%u\n", __func__+6, context, shader);
     ppb_opengles2_DeleteShader(context, shader);
 }
 
@@ -1531,7 +1566,7 @@ static
 void
 trace_ppb_opengles2_DeleteTextures(PP_Resource context, GLsizei n, const GLuint *textures)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d, textures=%p\n", __func__+6, context, n, textures);
     ppb_opengles2_DeleteTextures(context, n, textures);
 }
 
@@ -1539,7 +1574,8 @@ static
 void
 trace_ppb_opengles2_DepthFunc(PP_Resource context, GLenum func)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, func=%u(%s)\n", __func__+6, context, func,
+               reverse_gl_enum(func));
     ppb_opengles2_DepthFunc(context, func);
 }
 
@@ -1547,7 +1583,7 @@ static
 void
 trace_ppb_opengles2_DepthMask(PP_Resource context, GLboolean flag)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, flag=%d\n", __func__+6, context, flag);
     ppb_opengles2_DepthMask(context, flag);
 }
 
@@ -1555,7 +1591,7 @@ static
 void
 trace_ppb_opengles2_DepthRangef(PP_Resource context, GLclampf zNear, GLclampf zFar)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, zNear=%f, zFar=%f\n", __func__+6, context, zNear, zFar);
     ppb_opengles2_DepthRangef(context, zNear, zFar);
 }
 
@@ -1563,7 +1599,8 @@ static
 void
 trace_ppb_opengles2_DetachShader(PP_Resource context, GLuint program, GLuint shader)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u, shader=%u\n", __func__+6, context,
+               program, shader);
     ppb_opengles2_DetachShader(context, program, shader);
 }
 
@@ -1571,7 +1608,8 @@ static
 void
 trace_ppb_opengles2_Disable(PP_Resource context, GLenum cap)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, cap=%u(%s)\n", __func__+6, context,
+               cap, reverse_gl_enum(cap));
     ppb_opengles2_Disable(context, cap);
 }
 
@@ -1579,7 +1617,7 @@ static
 void
 trace_ppb_opengles2_DisableVertexAttribArray(PP_Resource context, GLuint index)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, index=%u\n", __func__+6, context, index);
     ppb_opengles2_DisableVertexAttribArray(context, index);
 }
 
@@ -1587,7 +1625,8 @@ static
 void
 trace_ppb_opengles2_DrawArrays(PP_Resource context, GLenum mode, GLint first, GLsizei count)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, mode=%u(%s), first=%d, count=%d\n", __func__+6,
+               context, mode, reverse_gl_enum(mode), first, count);
     ppb_opengles2_DrawArrays(context, mode, first, count);
 }
 
@@ -1596,7 +1635,9 @@ void
 trace_ppb_opengles2_DrawElements(PP_Resource context, GLenum mode, GLsizei count, GLenum type,
                                  const void *indices)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, mode=%u(%s), count=%d, type=%u(%s), indices=%p\n",
+               __func__+6, context, mode, reverse_gl_enum(mode), count, type,
+               reverse_gl_enum(type), indices);
     ppb_opengles2_DrawElements(context, mode, count, type, indices);
 }
 
@@ -1604,7 +1645,8 @@ static
 void
 trace_ppb_opengles2_Enable(PP_Resource context, GLenum cap)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, cap=%u(%s)\n", __func__+6, context,
+               cap, reverse_gl_enum(cap));
     ppb_opengles2_Enable(context, cap);
 }
 
@@ -1612,7 +1654,7 @@ static
 void
 trace_ppb_opengles2_EnableVertexAttribArray(PP_Resource context, GLuint index)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, index=%u\n", __func__+6, context, index);
     ppb_opengles2_EnableVertexAttribArray(context, index);
 }
 
@@ -1637,7 +1679,10 @@ void
 trace_ppb_opengles2_FramebufferRenderbuffer(PP_Resource context, GLenum target, GLenum attachment,
                                             GLenum renderbuffertarget, GLuint renderbuffer)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), attachment=%u(%s), renderbuffertarget="
+               "%u(%s), renderbuffer=%u\n", __func__+6, context, target, reverse_gl_enum(target),
+               attachment, reverse_gl_enum(attachment), renderbuffertarget,
+               reverse_gl_enum(renderbuffertarget), renderbuffer);
     ppb_opengles2_FramebufferRenderbuffer(context, target, attachment, renderbuffertarget,
                                           renderbuffer);
 }
@@ -1647,7 +1692,10 @@ void
 trace_ppb_opengles2_FramebufferTexture2D(PP_Resource context, GLenum target, GLenum attachment,
                                          GLenum textarget, GLuint texture, GLint level)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), attachment=%u(%s), textarget=%u(%s), "
+               "texture=%u, level=%d\n", __func__+6, context, target, reverse_gl_enum(target),
+               attachment, reverse_gl_enum(attachment), textarget, reverse_gl_enum(textarget),
+               texture, level);
     ppb_opengles2_FramebufferTexture2D(context, target, attachment, textarget, texture, level);
 }
 
@@ -1655,7 +1703,8 @@ static
 void
 trace_ppb_opengles2_FrontFace(PP_Resource context, GLenum mode)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, mode=%u(%s)\n", __func__+6, context,
+               mode, reverse_gl_enum(mode));
     ppb_opengles2_FrontFace(context, mode);
 }
 
@@ -1663,7 +1712,7 @@ static
 void
 trace_ppb_opengles2_GenBuffers(PP_Resource context, GLsizei n, GLuint *buffers)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d, buffers=%p\n", __func__+6, context, n, buffers);
     ppb_opengles2_GenBuffers(context, n, buffers);
 }
 
@@ -1671,7 +1720,8 @@ static
 void
 trace_ppb_opengles2_GenerateMipmap(PP_Resource context, GLenum target)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s)\n", __func__+6, context, target,
+               reverse_gl_enum(target));
     ppb_opengles2_GenerateMipmap(context, target);
 }
 
@@ -1679,7 +1729,8 @@ static
 void
 trace_ppb_opengles2_GenFramebuffers(PP_Resource context, GLsizei n, GLuint *framebuffers)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d, framebuffers=%p\n", __func__+6, context,
+               n, framebuffers);
     ppb_opengles2_GenFramebuffers(context, n, framebuffers);
 }
 
@@ -1687,7 +1738,8 @@ static
 void
 trace_ppb_opengles2_GenRenderbuffers(PP_Resource context, GLsizei n, GLuint *renderbuffers)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d, renderbuffers=%p\n", __func__+6, context,
+               n, renderbuffers);
     ppb_opengles2_GenRenderbuffers(context, n, renderbuffers);
 }
 
@@ -1695,7 +1747,7 @@ static
 void
 trace_ppb_opengles2_GenTextures(PP_Resource context, GLsizei n, GLuint *textures)
 {
-    trace_info("[PPB] {full} %s context=%d, n=%d\n", __func__+6, context, n);
+    trace_info("[PPB] {full} %s context=%d, n=%d, textures=%p\n", __func__+6, context, n, textures);
     ppb_opengles2_GenTextures(context, n, textures);
 }
 
@@ -1705,7 +1757,8 @@ trace_ppb_opengles2_GetActiveAttrib(PP_Resource context, GLuint program, GLuint 
                                     GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type,
                                     char *name)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u, index=%u, bufsize=%d\n", __func__+6,
+               context, program, index, bufsize);
     ppb_opengles2_GetActiveAttrib(context, program, index, bufsize, length, size, type, name);
 }
 
@@ -1715,7 +1768,8 @@ trace_ppb_opengles2_GetActiveUniform(PP_Resource context, GLuint program, GLuint
                                      GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type,
                                      char *name)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u, index=%u, bufsize=%d\n", __func__+6,
+               context, program, index, bufsize);
     ppb_opengles2_GetActiveUniform(context, program, index, bufsize, length, size, type, name);
 }
 
@@ -1724,7 +1778,8 @@ void
 trace_ppb_opengles2_GetAttachedShaders(PP_Resource context, GLuint program, GLsizei maxcount,
                                        GLsizei *count, GLuint *shaders)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u, maxcount=%d\n", __func__+6, context,
+               program, maxcount);
     ppb_opengles2_GetAttachedShaders(context, program, maxcount, count, shaders);
 }
 
@@ -1732,7 +1787,8 @@ static
 GLint
 trace_ppb_opengles2_GetAttribLocation(PP_Resource context, GLuint program, const char *name)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u, name=%s\n", __func__+6, context,
+               program, name);
     return ppb_opengles2_GetAttribLocation(context, program, name);
 }
 
@@ -1740,7 +1796,8 @@ static
 void
 trace_ppb_opengles2_GetBooleanv(PP_Resource context, GLenum pname, GLboolean *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, pname=%u(%s)\n", __func__+6, context,
+               pname, reverse_gl_enum(pname));
     ppb_opengles2_GetBooleanv(context, pname, params);
 }
 
@@ -1749,7 +1806,8 @@ void
 trace_ppb_opengles2_GetBufferParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                          GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), pname=%u(%s)\n", __func__+6, context,
+               target, reverse_gl_enum(target), pname, reverse_gl_enum(pname));
     ppb_opengles2_GetBufferParameteriv(context, target, pname, params);
 }
 
@@ -1765,7 +1823,8 @@ static
 void
 trace_ppb_opengles2_GetFloatv(PP_Resource context, GLenum pname, GLfloat *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, pname=%u(%s)\n", __func__+6, context,
+               pname, reverse_gl_enum(pname));
     ppb_opengles2_GetFloatv(context, pname, params);
 }
 
@@ -1775,7 +1834,9 @@ trace_ppb_opengles2_GetFramebufferAttachmentParameteriv(PP_Resource context, GLe
                                                         GLenum attachment, GLenum pname,
                                                         GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), attachment=%u(%s), pname=%u(%s)\n",
+               __func__+6, context, target, reverse_gl_enum(target), attachment,
+               reverse_gl_enum(attachment), pname, reverse_gl_enum(pname));
     ppb_opengles2_GetFramebufferAttachmentParameteriv(context, target, attachment, pname, params);
 }
 
@@ -1783,7 +1844,8 @@ static
 void
 trace_ppb_opengles2_GetIntegerv(PP_Resource context, GLenum pname, GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d, pname=0x%x\n", __func__+6, context, pname);
+    trace_info("[PPB] {full} %s context=%d, pname=%u(%s)\n", __func__+6, context,
+               pname, reverse_gl_enum(pname));
     ppb_opengles2_GetIntegerv(context, pname, params);
 }
 
@@ -1791,17 +1853,18 @@ static
 void
 trace_ppb_opengles2_GetProgramiv(PP_Resource context, GLuint program, GLenum pname, GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d, program=%d, pname=0x%x\n", __func__+6, context,
-               program, pname);
+    trace_info("[PPB] {full} %s context=%d, program=%u, pname=%u(%s)\n", __func__+6, context,
+               program, pname, reverse_gl_enum(pname));
     ppb_opengles2_GetProgramiv(context, program, pname, params);
 }
 
 static
 void
 trace_ppb_opengles2_GetProgramInfoLog(PP_Resource context, GLuint program, GLsizei bufsize,
-                                GLsizei *length, char *infolog)
+                                      GLsizei *length, char *infolog)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u, bufsize=%d\n", __func__+6, context,
+               program, bufsize);
     ppb_opengles2_GetProgramInfoLog(context, program, bufsize, length, infolog);
 }
 
@@ -1810,7 +1873,8 @@ void
 trace_ppb_opengles2_GetRenderbufferParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                                GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), pname=%u(%s)\n", __func__+6, context,
+               target, reverse_gl_enum(target), pname, reverse_gl_enum(pname));
     ppb_opengles2_GetRenderbufferParameteriv(context, target, pname, params);
 }
 
@@ -1818,8 +1882,8 @@ static
 void
 trace_ppb_opengles2_GetShaderiv(PP_Resource context, GLuint shader, GLenum pname, GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d, shader=%d, pname=0x%x\n", __func__+6, context,
-               shader, pname);
+    trace_info("[PPB] {full} %s context=%d, shader=%u, pname=%u(%s)\n", __func__+6, context,
+               shader, pname, reverse_gl_enum(pname));
     ppb_opengles2_GetShaderiv(context, shader, pname, params);
 }
 
@@ -1828,7 +1892,8 @@ void
 trace_ppb_opengles2_GetShaderInfoLog(PP_Resource context, GLuint shader, GLsizei bufsize,
                                      GLsizei *length, char *infolog)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, shader=%u, bufsize=%d\n", __func__+6, context,
+               shader, bufsize);
     ppb_opengles2_GetShaderInfoLog(context, shader, bufsize, length, infolog);
 }
 
@@ -1837,7 +1902,9 @@ void
 trace_ppb_opengles2_GetShaderPrecisionFormat(PP_Resource context, GLenum shadertype,
                                              GLenum precisiontype, GLint *range, GLint *precision)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, shadertype=%u(%s), precisiontype=%u(%s)\n", __func__+6,
+               context, shadertype, reverse_gl_enum(shadertype), precisiontype,
+               reverse_gl_enum(precisiontype));
     ppb_opengles2_GetShaderPrecisionFormat(context, shadertype, precisiontype, range, precision);
 }
 
@@ -1846,7 +1913,8 @@ void
 trace_ppb_opengles2_GetShaderSource(PP_Resource context, GLuint shader, GLsizei bufsize,
                                     GLsizei *length, char *source)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, shader=%u, bufsize=%d\n", __func__+6, context,
+               shader, bufsize);
     ppb_opengles2_GetShaderSource(context, shader, bufsize, length, source);
 }
 
@@ -1854,7 +1922,8 @@ static
 const GLubyte*
 trace_ppb_opengles2_GetString(PP_Resource context, GLenum name)
 {
-    trace_info("[PPB] {full} %s context=%d name=0x%x\n", __func__+6, context, name);
+    trace_info("[PPB] {full} %s context=%d name=%u(%s)\n", __func__+6, context,
+               name, reverse_gl_enum(name));
     return ppb_opengles2_GetString(context, name);
 }
 
@@ -1863,7 +1932,8 @@ void
 trace_ppb_opengles2_GetTexParameterfv(PP_Resource context, GLenum target, GLenum pname,
                                       GLfloat *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), pname=%u(%s)\n", __func__+6, context,
+               target, reverse_gl_enum(target), pname, reverse_gl_enum(pname));
     ppb_opengles2_GetTexParameterfv(context, target, pname, params);
 }
 
@@ -1872,7 +1942,8 @@ void
 trace_ppb_opengles2_GetTexParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                       GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), pname=%u(%s)\n", __func__+6, context,
+               target, reverse_gl_enum(target), pname, reverse_gl_enum(pname));
     ppb_opengles2_GetTexParameteriv(context, target, pname, params);
 }
 
@@ -1881,7 +1952,8 @@ void
 trace_ppb_opengles2_GetUniformfv(PP_Resource context, GLuint program, GLint location,
                                  GLfloat *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u, location=%d\n", __func__+6, context,
+               program, location);
     ppb_opengles2_GetUniformfv(context, program, location, params);
 }
 
@@ -1889,7 +1961,8 @@ static
 void
 trace_ppb_opengles2_GetUniformiv(PP_Resource context, GLuint program, GLint location, GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u, location=%d\n", __func__+6, context,
+               program, location);
     ppb_opengles2_GetUniformiv(context, program, location, params);
 }
 
@@ -1897,7 +1970,7 @@ static
 GLint
 trace_ppb_opengles2_GetUniformLocation(PP_Resource context, GLuint program, const char *name)
 {
-    trace_info("[PPB] {full} %s context=%d, program=%d, name=%s\n", __func__+6, context,
+    trace_info("[PPB] {full} %s context=%d, program=%u, name=%s\n", __func__+6, context,
                program, name);
     return ppb_opengles2_GetUniformLocation(context, program, name);
 }
@@ -1907,7 +1980,8 @@ void
 trace_ppb_opengles2_GetVertexAttribfv(PP_Resource context, GLuint index, GLenum pname,
                                       GLfloat *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, index=%u, pname=%u(%s)\n", __func__+6, context,
+               index, pname, reverse_gl_enum(pname));
     ppb_opengles2_GetVertexAttribfv(context, index, pname, params);
 }
 
@@ -1916,7 +1990,8 @@ void
 trace_ppb_opengles2_GetVertexAttribiv(PP_Resource context, GLuint index, GLenum pname,
                                       GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, index=%u, pname=%u(%s)\n", __func__+6, context,
+               index, pname, reverse_gl_enum(pname));
     ppb_opengles2_GetVertexAttribiv(context, index, pname, params);
 }
 
@@ -1925,7 +2000,8 @@ void
 trace_ppb_opengles2_GetVertexAttribPointerv(PP_Resource context, GLuint index, GLenum pname,
                                             void **pointer)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, index=%u, pname=%u(%s)\n", __func__+6, context,
+               index, pname, reverse_gl_enum(pname));
     ppb_opengles2_GetVertexAttribPointerv(context, index, pname, pointer);
 }
 
@@ -1933,7 +2009,8 @@ static
 void
 trace_ppb_opengles2_Hint(PP_Resource context, GLenum target, GLenum mode)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), mode=%u(%s)\n", __func__+6, context,
+               target, reverse_gl_enum(target), mode, reverse_gl_enum(mode));
     ppb_opengles2_Hint(context, target, mode);
 }
 
@@ -1941,7 +2018,7 @@ static
 GLboolean
 trace_ppb_opengles2_IsBuffer(PP_Resource context, GLuint buffer)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, buffer=%u\n", __func__+6, context, buffer);
     return ppb_opengles2_IsBuffer(context, buffer);
 }
 
@@ -1949,7 +2026,8 @@ static
 GLboolean
 trace_ppb_opengles2_IsEnabled(PP_Resource context, GLenum cap)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, cap=%u(%s)\n", __func__+6, context,
+               cap, reverse_gl_enum(cap));
     return ppb_opengles2_IsEnabled(context, cap);
 }
 
@@ -1957,7 +2035,7 @@ static
 GLboolean
 trace_ppb_opengles2_IsFramebuffer(PP_Resource context, GLuint framebuffer)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, framebuffer=%u\n", __func__+6, context, framebuffer);
     return ppb_opengles2_IsFramebuffer(context, framebuffer);
 }
 
@@ -1965,7 +2043,7 @@ static
 GLboolean
 trace_ppb_opengles2_IsProgram(PP_Resource context, GLuint program)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u\n", __func__+6, context, program);
     return ppb_opengles2_IsProgram(context, program);
 }
 
@@ -1973,7 +2051,7 @@ static
 GLboolean
 trace_ppb_opengles2_IsRenderbuffer(PP_Resource context, GLuint renderbuffer)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, renderbuffer=%u\n", __func__+6, context, renderbuffer);
     return ppb_opengles2_IsRenderbuffer(context, renderbuffer);
 }
 
@@ -1981,7 +2059,7 @@ static
 GLboolean
 trace_ppb_opengles2_IsShader(PP_Resource context, GLuint shader)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, shader=%u\n", __func__+6, context, shader);
     return ppb_opengles2_IsShader(context, shader);
 }
 
@@ -1989,7 +2067,7 @@ static
 GLboolean
 trace_ppb_opengles2_IsTexture(PP_Resource context, GLuint texture)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, texture=%u\n", __func__+6, context, texture);
     return ppb_opengles2_IsTexture(context, texture);
 }
 
@@ -1997,7 +2075,7 @@ static
 void
 trace_ppb_opengles2_LineWidth(PP_Resource context, GLfloat width)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, width=%f\n", __func__+6, context, width);
     ppb_opengles2_LineWidth(context, width);
 }
 
@@ -2005,7 +2083,7 @@ static
 void
 trace_ppb_opengles2_LinkProgram(PP_Resource context, GLuint program)
 {
-    trace_info("[PPB] {full} %s context=%d, program=%d\n", __func__+6, context, program);
+    trace_info("[PPB] {full} %s context=%d, program=%u\n", __func__+6, context, program);
     ppb_opengles2_LinkProgram(context, program);
 }
 
@@ -2013,7 +2091,8 @@ static
 void
 trace_ppb_opengles2_PixelStorei(PP_Resource context, GLenum pname, GLint param)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, pname=%u(%s), param=%d\n", __func__+6, context,
+               pname, reverse_gl_enum(pname), param);
     ppb_opengles2_PixelStorei(context, pname, param);
 }
 
@@ -2021,7 +2100,8 @@ static
 void
 trace_ppb_opengles2_PolygonOffset(PP_Resource context, GLfloat factor, GLfloat units)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, factor=%f, units=%f\n", __func__+6, context,
+               factor, units);
     ppb_opengles2_PolygonOffset(context, factor, units);
 }
 
@@ -2030,7 +2110,9 @@ void
 trace_ppb_opengles2_ReadPixels(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height,
                                GLenum format, GLenum type, void *pixels)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, x=%d, y=%d, width=%d, height=%d, format=%u(%s), "
+               "type=%u(%s), pixels=%p\n", __func__+6, context, x, y, width, height, format,
+               reverse_gl_enum(format), type, reverse_gl_enum(type), pixels);
     ppb_opengles2_ReadPixels(context, x, y, width, height, format, type, pixels);
 }
 
@@ -2047,7 +2129,9 @@ void
 trace_ppb_opengles2_RenderbufferStorage(PP_Resource context, GLenum target, GLenum internalformat,
                                         GLsizei width, GLsizei height)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), internalformat=%u(%s), width=%d, "
+               "height=%d\n", __func__+6, context, target, reverse_gl_enum(target),
+               internalformat, reverse_gl_enum(internalformat), width, height);
     ppb_opengles2_RenderbufferStorage(context, target, internalformat, width, height);
 }
 
@@ -2055,7 +2139,8 @@ static
 void
 trace_ppb_opengles2_SampleCoverage(PP_Resource context, GLclampf value, GLboolean invert)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, value=%f, invert=%d\n", __func__+6, context,
+               value, invert);
     ppb_opengles2_SampleCoverage(context, value, invert);
 }
 
@@ -2063,7 +2148,8 @@ static
 void
 trace_ppb_opengles2_Scissor(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, x=%d, y=%d, width=%d, height=%d\n", __func__+6,
+               context, x, y, width, height);
     ppb_opengles2_Scissor(context, x, y, width, height);
 }
 
@@ -2072,7 +2158,9 @@ void
 trace_ppb_opengles2_ShaderBinary(PP_Resource context, GLsizei n, const GLuint *shaders,
                                  GLenum binaryformat, const void *binary, GLsizei length)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, n=%d, shaders=%p, binaryformat=%u(%s), binary=%p, "
+               "length=%d\n", __func__+6, context, n, shaders, binaryformat,
+               reverse_gl_enum(binaryformat), binary, length);
     ppb_opengles2_ShaderBinary(context, n, shaders, binaryformat, binary, length);
 }
 
@@ -2081,7 +2169,7 @@ void
 trace_ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count,
                                  const char **str, const GLint *length)
 {
-    trace_info("[PPB] {full} %s context=%d, shader=%d, count=%d, str=%p, length=%p\n",
+    trace_info("[PPB] {full} %s context=%d, shader=%u, count=%d, str=%p, length=%p\n",
                __func__+6, context, shader, count, str, length);
     for (size_t k = 0; k < count; k++) {
         trace_info("             shader_source[%u] = \n%s\n", (unsigned)k, str[k]);
@@ -2093,7 +2181,8 @@ static
 void
 trace_ppb_opengles2_StencilFunc(PP_Resource context, GLenum func, GLint ref, GLuint mask)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, func=%u(%s), ref=%d, mask=0x%x\n", __func__+6, context,
+               func, reverse_gl_enum(func), ref, mask);
     ppb_opengles2_StencilFunc(context, func, ref, mask);
 }
 
@@ -2102,7 +2191,9 @@ void
 trace_ppb_opengles2_StencilFuncSeparate(PP_Resource context, GLenum face, GLenum func, GLint ref,
                                         GLuint mask)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, face=%u(%s), func=%u(%s), ref=%d, mask=0x%x\n",
+               __func__+6, context, face, reverse_gl_enum(face), func, reverse_gl_enum(func),
+               ref, mask);
     ppb_opengles2_StencilFuncSeparate(context, face, func, ref, mask);
 }
 
@@ -2110,7 +2201,7 @@ static
 void
 trace_ppb_opengles2_StencilMask(PP_Resource context, GLuint mask)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, mask=0x%x\n", __func__+6, context, mask);
     ppb_opengles2_StencilMask(context, mask);
 }
 
@@ -2118,7 +2209,8 @@ static
 void
 trace_ppb_opengles2_StencilMaskSeparate(PP_Resource context, GLenum face, GLuint mask)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, face=%u(%s), mask=0x%x\n", __func__+6, context,
+               face, reverse_gl_enum(face), mask);
     ppb_opengles2_StencilMaskSeparate(context, face, mask);
 }
 
@@ -2126,7 +2218,9 @@ static
 void
 trace_ppb_opengles2_StencilOp(PP_Resource context, GLenum fail, GLenum zfail, GLenum zpass)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, fail=%u(%s), zfail=%u(%s), zpass=%u(%s)\n", __func__+6,
+               context, fail, reverse_gl_enum(fail), zfail, reverse_gl_enum(zfail),
+               zpass, reverse_gl_enum(zpass));
     ppb_opengles2_StencilOp(context, fail, zfail, zpass);
 }
 
@@ -2135,7 +2229,9 @@ void
 trace_ppb_opengles2_StencilOpSeparate(PP_Resource context, GLenum face, GLenum fail, GLenum zfail,
                                       GLenum zpass)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, face=%u(%s), fail=%u(%s), zfail=%u(%s), zpass=%u(%s)\n",
+               __func__+6, context, face, reverse_gl_enum(face), fail, reverse_gl_enum(fail),
+               zfail, reverse_gl_enum(zfail), zpass, reverse_gl_enum(zpass));
     ppb_opengles2_StencilOpSeparate(context, face, fail, zfail, zpass);
 }
 
@@ -2145,9 +2241,11 @@ trace_ppb_opengles2_TexImage2D(PP_Resource context, GLenum target, GLint level,
                                GLint internalformat, GLsizei width, GLsizei height, GLint border,
                                GLenum format, GLenum type, const void *pixels)
 {
-    trace_info("[PPB] {full} %s context=%d, target=0x%x, level=%d, internalformat=0x%x, width=%d, "
-               "height=%d, border=%d, format=0x%x, type=0x%x\n", __func__+6, context, target,
-               level, internalformat, width, height, border, format, type);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), level=%d, internalformat=%u(%s), "
+               "width=%d, height=%d, border=%d, format=%u(%s), type=%u(%s), pixels=%p\n",
+               __func__+6, context, target, reverse_gl_enum(target), level, internalformat,
+               reverse_gl_enum(internalformat), width, height, border, format,
+               reverse_gl_enum(format), type, reverse_gl_enum(format), pixels);
     ppb_opengles2_TexImage2D(context, target, level, internalformat, width, height, border, format,
                              type, pixels);
 }
@@ -2156,7 +2254,8 @@ static
 void
 trace_ppb_opengles2_TexParameterf(PP_Resource context, GLenum target, GLenum pname, GLfloat param)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), pname=%u(%s), param=%f\n", __func__+6,
+               context, target, reverse_gl_enum(target), pname, reverse_gl_enum(pname), param);
     ppb_opengles2_TexParameterf(context, target, pname, param);
 }
 
@@ -2165,7 +2264,8 @@ void
 trace_ppb_opengles2_TexParameterfv(PP_Resource context, GLenum target, GLenum pname,
                                    const GLfloat *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), pname=%u(%s), params=%p\n", __func__+6,
+               context, target, reverse_gl_enum(target), pname, reverse_gl_enum(pname), params);
     ppb_opengles2_TexParameterfv(context, target, pname, params);
 }
 
@@ -2173,7 +2273,8 @@ static
 void
 trace_ppb_opengles2_TexParameteri(PP_Resource context, GLenum target, GLenum pname, GLint param)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), pname=%u(%s), param=%d\n", __func__+6,
+               context, target, reverse_gl_enum(target), pname, reverse_gl_enum(pname), param);
     ppb_opengles2_TexParameteri(context, target, pname, param);
 }
 
@@ -2182,7 +2283,8 @@ void
 trace_ppb_opengles2_TexParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                    const GLint *params)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), pname=%u(%s), params=%p\n", __func__+6,
+               context, target, reverse_gl_enum(target), pname, reverse_gl_enum(pname), params);
     ppb_opengles2_TexParameteriv(context, target, pname, params);
 }
 
@@ -2192,7 +2294,10 @@ trace_ppb_opengles2_TexSubImage2D(PP_Resource context, GLenum target, GLint leve
                                   GLint yoffset, GLsizei width, GLsizei height, GLenum format,
                                   GLenum type, const void *pixels)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), level=%d, xoffset=%d, yoffset=%d, "
+               "width=%d, height=%d, format=%u(%s), type=%u(%s), pixels=%p\n", __func__+6,
+               context, target, reverse_gl_enum(target), level, xoffset, yoffset,
+               width, height, format, reverse_gl_enum(format), type, reverse_gl_enum(type), pixels);
     ppb_opengles2_TexSubImage2D(context, target, level, xoffset, yoffset, width, height, format,
                                 type, pixels);
 }
@@ -2201,7 +2306,7 @@ static
 void
 trace_ppb_opengles2_Uniform1f(PP_Resource context, GLint location, GLfloat x)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, x=%f\n", __func__+6, context, location, x);
     ppb_opengles2_Uniform1f(context, location, x);
 }
 
@@ -2209,7 +2314,8 @@ static
 void
 trace_ppb_opengles2_Uniform1fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, v=%p\n", __func__+6, context,
+               location, count, v);
     ppb_opengles2_Uniform1fv(context, location, count, v);
 }
 
@@ -2225,7 +2331,8 @@ static
 void
 trace_ppb_opengles2_Uniform1iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, v=%p\n", __func__+6, context,
+               location, count, v);
     ppb_opengles2_Uniform1iv(context, location, count, v);
 }
 
@@ -2233,7 +2340,8 @@ static
 void
 trace_ppb_opengles2_Uniform2f(PP_Resource context, GLint location, GLfloat x, GLfloat y)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, x=%f, y=%f\n", __func__+6, context,
+               location, x, y);
     ppb_opengles2_Uniform2f(context, location, x, y);
 }
 
@@ -2241,7 +2349,8 @@ static
 void
 trace_ppb_opengles2_Uniform2fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, v=%p\n", __func__+6, context,
+               location, count, v);
     ppb_opengles2_Uniform2fv(context, location, count, v);
 }
 
@@ -2249,7 +2358,8 @@ static
 void
 trace_ppb_opengles2_Uniform2i(PP_Resource context, GLint location, GLint x, GLint y)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, x=%d, y=%d\n", __func__+6, context,
+               location, x, y);
     ppb_opengles2_Uniform2i(context, location, x, y);
 }
 
@@ -2257,7 +2367,8 @@ static
 void
 trace_ppb_opengles2_Uniform2iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, v=%p\n", __func__+6, context,
+               location, count, v);
     ppb_opengles2_Uniform2iv(context, location, count, v);
 }
 
@@ -2265,7 +2376,8 @@ static
 void
 trace_ppb_opengles2_Uniform3f(PP_Resource context, GLint location, GLfloat x, GLfloat y, GLfloat z)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, x=%f, y=%f, z=%f\n", __func__+6, context,
+               location, x, y, z);
     ppb_opengles2_Uniform3f(context, location, x, y, z);
 }
 
@@ -2273,7 +2385,8 @@ static
 void
 trace_ppb_opengles2_Uniform3fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, v=%p\n", __func__+6, context,
+               location, count, v);
     ppb_opengles2_Uniform3fv(context, location, count, v);
 }
 
@@ -2281,7 +2394,8 @@ static
 void
 trace_ppb_opengles2_Uniform3i(PP_Resource context, GLint location, GLint x, GLint y, GLint z)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, x=%d, y=%d, z=%d\n", __func__+6, context,
+               location, x, y, z);
     ppb_opengles2_Uniform3i(context, location, x, y, z);
 }
 
@@ -2289,7 +2403,8 @@ static
 void
 trace_ppb_opengles2_Uniform3iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, v=%p\n", __func__+6, context,
+               location, count, v);
     ppb_opengles2_Uniform3iv(context, location, count, v);
 }
 
@@ -2298,7 +2413,8 @@ void
 trace_ppb_opengles2_Uniform4f(PP_Resource context, GLint location, GLfloat x, GLfloat y, GLfloat z,
                               GLfloat w)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, x=%f, y=%f, z=%f, w=%f\n", __func__+6,
+               context, location, x, y, z, w);
     ppb_opengles2_Uniform4f(context, location, x, y, z, w);
 }
 
@@ -2306,7 +2422,8 @@ static
 void
 trace_ppb_opengles2_Uniform4fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, v=%p\n", __func__+6, context,
+               location, count, v);
     ppb_opengles2_Uniform4fv(context, location, count, v);
 }
 
@@ -2315,7 +2432,8 @@ void
 trace_ppb_opengles2_Uniform4i(PP_Resource context, GLint location, GLint x, GLint y, GLint z,
                               GLint w)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, x=%d, y=%d, z=%d, w=%d\n", __func__+6,
+               context, location, x, y, z, w);
     ppb_opengles2_Uniform4i(context, location, x, y, z, w);
 }
 
@@ -2323,7 +2441,8 @@ static
 void
 trace_ppb_opengles2_Uniform4iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, v=%p\n", __func__+6, context,
+               location, count, v);
     ppb_opengles2_Uniform4iv(context, location, count, v);
 }
 
@@ -2332,7 +2451,8 @@ void
 trace_ppb_opengles2_UniformMatrix2fv(PP_Resource context, GLint location, GLsizei count,
                                      GLboolean transpose, const GLfloat *value)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, transpose=%d, value=%p\n",
+               __func__+6, context, location, count, transpose, value);
     ppb_opengles2_UniformMatrix2fv(context, location, count, transpose, value);
 }
 
@@ -2341,7 +2461,8 @@ void
 trace_ppb_opengles2_UniformMatrix3fv(PP_Resource context, GLint location, GLsizei count,
                                      GLboolean transpose, const GLfloat *value)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, transpose=%d, value=%p\n",
+               __func__+6, context, location, count, transpose, value);
     ppb_opengles2_UniformMatrix3fv(context, location, count, transpose, value);
 }
 
@@ -2350,7 +2471,8 @@ void
 trace_ppb_opengles2_UniformMatrix4fv(PP_Resource context, GLint location, GLsizei count,
                                      GLboolean transpose, const GLfloat *value)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, location=%d, count=%d, transpose=%d, value=%p\n",
+               __func__+6, context, location, count, transpose, value);
     ppb_opengles2_UniformMatrix4fv(context, location, count, transpose, value);
 }
 
@@ -2358,7 +2480,7 @@ static
 void
 trace_ppb_opengles2_UseProgram(PP_Resource context, GLuint program)
 {
-    trace_info("[PPB] {full} %s context=%d, program=%d\n", __func__+6, context, program);
+    trace_info("[PPB] {full} %s context=%d, program=%u\n", __func__+6, context, program);
     ppb_opengles2_UseProgram(context, program);
 }
 
@@ -2366,7 +2488,7 @@ static
 void
 trace_ppb_opengles2_ValidateProgram(PP_Resource context, GLuint program)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, program=%u\n", __func__+6, context, program);
     ppb_opengles2_ValidateProgram(context, program);
 }
 
@@ -2374,7 +2496,7 @@ static
 void
 trace_ppb_opengles2_VertexAttrib1f(PP_Resource context, GLuint indx, GLfloat x)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, x=%f\n", __func__+6, context, indx, x);
     ppb_opengles2_VertexAttrib1f(context, indx, x);
 }
 
@@ -2382,7 +2504,8 @@ static
 void
 trace_ppb_opengles2_VertexAttrib1fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, values=%p\n", __func__+6, context,
+               indx, values);
     ppb_opengles2_VertexAttrib1fv(context, indx, values);
 }
 
@@ -2390,7 +2513,8 @@ static
 void
 trace_ppb_opengles2_VertexAttrib2f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, x=%f, y=%f\n", __func__+6, context,
+               indx, x, y);
     ppb_opengles2_VertexAttrib2f(context, indx, x, y);
 }
 
@@ -2398,7 +2522,8 @@ static
 void
 trace_ppb_opengles2_VertexAttrib2fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, values=%p\n", __func__+6, context, indx,
+               values);
     ppb_opengles2_VertexAttrib2fv(context, indx, values);
 }
 
@@ -2407,7 +2532,8 @@ void
 trace_ppb_opengles2_VertexAttrib3f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y,
                                    GLfloat z)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, x=%f, y=%f, z=%f\n", __func__+6, context,
+               indx, x, y, z);
     ppb_opengles2_VertexAttrib3f(context, indx, x, y, z);
 }
 
@@ -2415,7 +2541,8 @@ static
 void
 trace_ppb_opengles2_VertexAttrib3fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, values=%p\n", __func__+6, context,
+               indx, values);
     ppb_opengles2_VertexAttrib3fv(context, indx, values);
 }
 
@@ -2424,7 +2551,8 @@ void
 trace_ppb_opengles2_VertexAttrib4f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y,
                                    GLfloat z, GLfloat w)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, x=%f, y=%f, z=%f, w=%f\n", __func__+6,
+               context, indx, x, y, z, w);
     ppb_opengles2_VertexAttrib4f(context, indx, x, y, z, w);
 }
 
@@ -2432,7 +2560,8 @@ static
 void
 trace_ppb_opengles2_VertexAttrib4fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, values=%p\n", __func__+6, context,
+               indx, values);
     ppb_opengles2_VertexAttrib4fv(context, indx, values);
 }
 
@@ -2441,7 +2570,9 @@ void
 trace_ppb_opengles2_VertexAttribPointer(PP_Resource context, GLuint indx, GLint size, GLenum type,
                                         GLboolean normalized, GLsizei stride, const void *ptr)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, indx=%u, size=%d, type=%u(%s), normalized=%d, "
+               "stride=%d, ptr=%p\n", __func__+6, context, indx, size, type, reverse_gl_enum(type),
+               normalized, stride, ptr);
     ppb_opengles2_VertexAttribPointer(context, indx, size, type, normalized, stride, ptr);
 }
 
@@ -2449,7 +2580,8 @@ static
 void
 trace_ppb_opengles2_Viewport(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    trace_info("[PPB] {full} %s context=%d\n", __func__+6, context);
+    trace_info("[PPB] {full} %s context=%d, x=%d, y=%d, width=%d, height=%d\n", __func__+6,
+               context, x, y, width, height);
     ppb_opengles2_Viewport(context, x, y, width, height);
 }
 
@@ -2458,7 +2590,7 @@ GLboolean
 trace_ppb_opengles2_chromium_enable_feature_enable_feature_chromium(PP_Resource context,
                                                                     const char *feature)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s feature=%s\n", __func__+6, feature);
     return ppb_opengles2_chromium_enable_feature_enable_feature_chromium(context, feature);
 }
 
@@ -2468,8 +2600,9 @@ trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(PP_Resource co
                                                                   GLuint target, GLintptr offset,
                                                                   GLsizeiptr size, GLenum access)
 {
-    trace_info("[PPB] {zilch} %s context=%d, target=%u, offset=%d, size=%u, access=%d\n",
-               __func__+6, context, target, (int)offset, (unsigned int)size, access);
+    trace_info("[PPB] {zilch} %s context=%d, target=%u, offset=%ld, size=%lu, access=%u(%s)\n",
+               __func__+6, context, target, (long)offset, (unsigned long)size, access,
+               reverse_gl_enum(access));
     return ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(context, target, offset,
                                                                        size, access);
 }
@@ -2492,9 +2625,11 @@ trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource c
                                                                    GLenum format, GLenum type,
                                                                    GLenum access)
 {
-    trace_info("[PPB] {full} %s context=%d, target=%d, level=%d, xoffset=%d, yoffset=%d, "
-               "width=%u, height=%u, format=%d, type=%d, access=%d\n", __func__+6, context, target,
-               level, xoffset, yoffset, width, height, format, type, access);
+    trace_info("[PPB] {full} %s context=%d, target=%u(%s), level=%d, xoffset=%d, yoffset=%d, "
+               "width=%d, height=%d, format=%u(%s), type=%u(%s), access=%u(%s)\n", __func__+6,
+               context, target, reverse_gl_enum(target), level, xoffset, yoffset, width, height,
+               format, reverse_gl_enum(format), type, reverse_gl_enum(type), access,
+               reverse_gl_enum(access));
     return ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(context, target, level,
                                         xoffset, yoffset, width, height, format, type, access);
 }
@@ -2516,7 +2651,10 @@ trace_ppb_opengles2_framebuffer_blit_blit_framebuffer_ext(PP_Resource context, G
                                                           GLint dstY1, GLbitfield mask,
                                                           GLenum filter)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, srcX0=%d, srcY0=%d, srcX1=%d, srcY1=%d, dstX0=%d, "
+               "dstY0=%d, dstX1=%d, dstY1=%d, mask=0x%x, filter=%u(%s)\n", __func__+6, context,
+               srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter,
+               reverse_gl_enum(filter));
     return ppb_opengles2_framebuffer_blit_blit_framebuffer_ext(context, srcX0, srcY0, srcX1, srcY1,
                                                                dstX0, dstY0, dstX1, dstY1, mask,
                                                                filter);
@@ -2528,7 +2666,9 @@ trace_ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext
                     (PP_Resource context, GLenum target, GLsizei samples, GLenum internalformat,
                      GLsizei width, GLsizei height)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, target=%u(%s), samples=%d, internalformat=%u(%s), "
+               "width=%d, height=%d\n", __func__+6, context, target, reverse_gl_enum(target),
+               samples, internalformat, reverse_gl_enum(internalformat), width, height);
     ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext(context, target,
                                                         samples, internalformat, width, height);
 }
@@ -2539,7 +2679,8 @@ trace_ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle(PP_Resource con
                                                                  GLint first, GLsizei count,
                                                                  GLsizei primcount)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, mode=%u(%s), first=%d, count=%d, primcount=%d\n",
+               __func__+6, context, mode, reverse_gl_enum(mode), first, count, primcount);
     ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle(context, mode, first, count,
                                                                primcount);
 }
@@ -2552,7 +2693,9 @@ trace_ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(PP_Resource c
                                                                    const void *indices,
                                                                    GLsizei primcount)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, mode=%u(%s), count=%d, type=%u(%s), indices=%p, "
+               "primcount=%d\n", __func__+6, context, mode, reverse_gl_enum(mode), count, type,
+               reverse_gl_enum(type), indices, primcount);
     ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(context, mode, count, type,
                                                                  indices, primcount);
 }
@@ -2562,7 +2705,8 @@ void
 trace_ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle(PP_Resource context, GLuint index,
                                                                  GLuint divisor)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s countext=%d, index=%u, divisor=%u\n", __func__+6, context,
+               index, divisor);
     ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle(context, index, divisor);
 }
 
@@ -2570,7 +2714,7 @@ static
 void
 trace_ppb_opengles2_query_gen_queries_ext(PP_Resource context, GLsizei n, GLuint *queries)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, n=%d, queries=%p\n", __func__+6, context, n, queries);
     ppb_opengles2_query_gen_queries_ext(context, n, queries);
 }
 
@@ -2578,7 +2722,7 @@ static
 void
 trace_ppb_opengles2_query_delete_queries_ext(PP_Resource context, GLsizei n, const GLuint *queries)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, n=%d, queries=%p\n", __func__+6, context, n, queries);
     ppb_opengles2_query_delete_queries_ext(context, n, queries);
 }
 
@@ -2586,7 +2730,7 @@ static
 GLboolean
 trace_ppb_opengles2_query_is_query_ext(PP_Resource context, GLuint id)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, id=%u\n", __func__+6, context, id);
     return ppb_opengles2_query_is_query_ext(context, id);
 }
 
@@ -2594,7 +2738,8 @@ static
 void
 trace_ppb_opengles2_query_begin_query_ext(PP_Resource context, GLenum target, GLuint id)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, target=%u(%s), id=%u\n", __func__+6, context, target,
+               reverse_gl_enum(target), id);
     ppb_opengles2_query_begin_query_ext(context, target, id);
 }
 
@@ -2602,7 +2747,8 @@ static
 void
 trace_ppb_opengles2_query_end_query_ext(PP_Resource context, GLenum target)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, target=%u(%s)\n", __func__+6, context, target,
+               reverse_gl_enum(target));
     ppb_opengles2_query_end_query_ext(context, target);
 }
 
@@ -2611,7 +2757,8 @@ void
 trace_ppb_opengles2_query_get_queryiv_ext(PP_Resource context, GLenum target, GLenum pname,
                                           GLint *params)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, target=%u(%s), pname=%u(%s), params=%p\n", __func__+6,
+               context, target, reverse_gl_enum(target), pname, reverse_gl_enum(pname), params);
     ppb_opengles2_query_get_queryiv_ext(context, target, pname, params);
 }
 
@@ -2620,7 +2767,8 @@ void
 trace_ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id, GLenum pname,
                                                   GLuint *params)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s context=%d, id=%u, pname=%u(%s), params=%p\n", __func__+6,
+               context, id, pname, reverse_gl_enum(pname), params);
     ppb_opengles2_query_get_query_objectuiv_ext(context, id, pname, params);
 }
 
