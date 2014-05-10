@@ -1093,6 +1093,152 @@ ppb_opengles2_Viewport(PP_Resource context, GLint x, GLint y, GLsizei width, GLs
     glViewport(x, y, width, height);
 }
 
+GLboolean
+ppb_opengles2_chromium_enable_feature_enable_feature_chromium(PP_Resource context,
+                                                              const char *feature)
+{
+    return PP_FALSE;
+}
+
+void *
+ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(PP_Resource context, GLuint target,
+                                                            GLintptr offset, GLsizeiptr size,
+                                                            GLenum access)
+{
+    return NULL;
+}
+
+void
+ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(PP_Resource context, const void *mem)
+{
+}
+
+void *
+ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context, GLenum target,
+                                                             GLint level, GLint xoffset,
+                                                             GLint yoffset, GLsizei width,
+                                                             GLsizei height, GLenum format,
+                                                             GLenum type, GLenum access)
+{
+    if (target != GL_TEXTURE_2D || level != 0 || access != GL_WRITE_ONLY) {
+        trace_warning("%s, wrong arguments\n", __func__);
+        return NULL;
+    }
+
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
+    if (!g3d) {
+        trace_warning("%s, wrong context\n", __func__);
+        return NULL;
+    }
+
+    g3d->sub_map_bytes_per_pixel = (GL_RGB == format) ? 3 : 4;
+    void *res = malloc(width * height * g3d->sub_map_bytes_per_pixel);
+    g3d->sub_map_xoffset = xoffset;
+    g3d->sub_map_yoffset = yoffset;
+    g3d->sub_map_width = width;
+    g3d->sub_map_height = height;
+    pp_resource_release(context);
+
+    return res;
+}
+
+void
+ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
+                                                               const void *mem)
+{
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
+    if (!g3d) {
+        trace_warning("%s, wrong context\n", __func__);
+        return;
+    }
+
+    XImage *xi = XCreateImage(g3d->dpy, DefaultVisual(g3d->dpy, 0), 24, ZPixmap, 0, (void *)mem,
+                              g3d->sub_map_width, g3d->sub_map_height,
+                              g3d->sub_map_bytes_per_pixel * 4,
+                              g3d->sub_map_width * g3d->sub_map_bytes_per_pixel);
+
+    XPutImage(g3d->dpy, g3d->pixmap, DefaultGC(g3d->dpy, 0), xi, 0, 0,
+              g3d->sub_map_xoffset, g3d->sub_map_yoffset,
+              g3d->sub_map_width, g3d->sub_map_height);
+    free(xi);
+    XSync(g3d->dpy, False);
+
+    pp_resource_release(context);
+    free((void *)mem);
+}
+
+void
+ppb_opengles2_framebuffer_blit_blit_framebuffer_ext(PP_Resource context, GLint srcX0, GLint srcY0,
+                                                    GLint srcX1, GLint srcY1, GLint dstX0,
+                                                    GLint dstY0, GLint dstX1, GLint dstY1,
+                                                    GLbitfield mask, GLenum filter)
+{
+}
+
+void
+ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext
+                    (PP_Resource context, GLenum target, GLsizei samples, GLenum internalformat,
+                     GLsizei width, GLsizei height)
+{
+}
+
+void
+ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle(PP_Resource context, GLenum mode,
+                                                           GLint first, GLsizei count,
+                                                           GLsizei primcount)
+{
+}
+
+void
+ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(PP_Resource context, GLenum mode,
+                                                             GLsizei count, GLenum type,
+                                                             const void *indices, GLsizei primcount)
+{
+}
+
+void
+ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle(PP_Resource context, GLuint index,
+                                                           GLuint divisor)
+{
+}
+
+void
+ppb_opengles2_query_gen_queries_ext(PP_Resource context, GLsizei n, GLuint *queries)
+{
+}
+
+void
+ppb_opengles2_query_delete_queries_ext(PP_Resource context, GLsizei n, const GLuint *queries)
+{
+}
+
+GLboolean
+ppb_opengles2_query_is_query_ext(PP_Resource context, GLuint id)
+{
+    return PP_TRUE;
+}
+
+void
+ppb_opengles2_query_begin_query_ext(PP_Resource context, GLenum target, GLuint id)
+{
+}
+
+void
+ppb_opengles2_query_end_query_ext(PP_Resource context, GLenum target)
+{
+}
+
+void
+ppb_opengles2_query_get_queryiv_ext(PP_Resource context, GLenum target, GLenum pname, GLint *params)
+{
+}
+
+void
+ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id, GLenum pname,
+                                            GLuint *params)
+{
+}
+
 
 // trace wrappers
 static
@@ -2307,6 +2453,177 @@ trace_ppb_opengles2_Viewport(PP_Resource context, GLint x, GLint y, GLsizei widt
     ppb_opengles2_Viewport(context, x, y, width, height);
 }
 
+static
+GLboolean
+trace_ppb_opengles2_chromium_enable_feature_enable_feature_chromium(PP_Resource context,
+                                                                    const char *feature)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_opengles2_chromium_enable_feature_enable_feature_chromium(context, feature);
+}
+
+static
+void *
+trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(PP_Resource context,
+                                                                  GLuint target, GLintptr offset,
+                                                                  GLsizeiptr size, GLenum access)
+{
+    trace_info("[PPB] {zilch} %s context=%d, target=%u, offset=%d, size=%u, access=%d\n",
+               __func__+6, context, target, (int)offset, (unsigned int)size, access);
+    return ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(context, target, offset,
+                                                                       size, access);
+}
+
+static
+void
+trace_ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(PP_Resource context,
+                                                                    const void *mem)
+{
+    trace_info("[PPB] {zilch} %s context=%d, mem=%p\n", __func__+6, context, mem);
+    ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(context, mem);
+}
+
+static
+void *
+trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context,
+                                                                   GLenum target, GLint level,
+                                                                   GLint xoffset, GLint yoffset,
+                                                                   GLsizei width, GLsizei height,
+                                                                   GLenum format, GLenum type,
+                                                                   GLenum access)
+{
+    trace_info("[PPB] {full} %s context=%d, target=%d, level=%d, xoffset=%d, yoffset=%d, "
+               "width=%u, height=%u, format=%d, type=%d, access=%d\n", __func__+6, context, target,
+               level, xoffset, yoffset, width, height, format, type, access);
+    return ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(context, target, level,
+                                        xoffset, yoffset, width, height, format, type, access);
+}
+
+static
+void
+trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
+                                                                     const void *mem)
+{
+    trace_info("[PPB] {full} %s context=%d, mem=%p\n", __func__+6, context, mem);
+    ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(context, mem);
+}
+
+static
+void
+trace_ppb_opengles2_framebuffer_blit_blit_framebuffer_ext(PP_Resource context, GLint srcX0,
+                                                          GLint srcY0, GLint srcX1, GLint srcY1,
+                                                          GLint dstX0, GLint dstY0, GLint dstX1,
+                                                          GLint dstY1, GLbitfield mask,
+                                                          GLenum filter)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_opengles2_framebuffer_blit_blit_framebuffer_ext(context, srcX0, srcY0, srcX1, srcY1,
+                                                               dstX0, dstY0, dstX1, dstY1, mask,
+                                                               filter);
+}
+
+static
+void
+trace_ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext
+                    (PP_Resource context, GLenum target, GLsizei samples, GLenum internalformat,
+                     GLsizei width, GLsizei height)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext(context, target,
+                                                        samples, internalformat, width, height);
+}
+
+static
+void
+trace_ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle(PP_Resource context, GLenum mode,
+                                                                 GLint first, GLsizei count,
+                                                                 GLsizei primcount)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle(context, mode, first, count,
+                                                               primcount);
+}
+
+
+static
+void
+trace_ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(PP_Resource context, GLenum mode,
+                                                                   GLsizei count, GLenum type,
+                                                                   const void *indices,
+                                                                   GLsizei primcount)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(context, mode, count, type,
+                                                                 indices, primcount);
+}
+
+static
+void
+trace_ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle(PP_Resource context, GLuint index,
+                                                                 GLuint divisor)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle(context, index, divisor);
+}
+
+static
+void
+trace_ppb_opengles2_query_gen_queries_ext(PP_Resource context, GLsizei n, GLuint *queries)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_query_gen_queries_ext(context, n, queries);
+}
+
+static
+void
+trace_ppb_opengles2_query_delete_queries_ext(PP_Resource context, GLsizei n, const GLuint *queries)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_query_delete_queries_ext(context, n, queries);
+}
+
+static
+GLboolean
+trace_ppb_opengles2_query_is_query_ext(PP_Resource context, GLuint id)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_opengles2_query_is_query_ext(context, id);
+}
+
+static
+void
+trace_ppb_opengles2_query_begin_query_ext(PP_Resource context, GLenum target, GLuint id)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_query_begin_query_ext(context, target, id);
+}
+
+static
+void
+trace_ppb_opengles2_query_end_query_ext(PP_Resource context, GLenum target)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_query_end_query_ext(context, target);
+}
+
+static
+void
+trace_ppb_opengles2_query_get_queryiv_ext(PP_Resource context, GLenum target, GLenum pname,
+                                          GLint *params)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_query_get_queryiv_ext(context, target, pname, params);
+}
+
+static
+void
+trace_ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id, GLenum pname,
+                                                  GLuint *params)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    ppb_opengles2_query_get_query_objectuiv_ext(context, id, pname, params);
+}
+
 
 const struct PPB_OpenGLES2 ppb_opengles2_interface_1_0 = {
     .ActiveTexture =            trace_ppb_opengles2_ActiveTexture,
@@ -2451,4 +2768,41 @@ const struct PPB_OpenGLES2 ppb_opengles2_interface_1_0 = {
     .VertexAttrib4fv =          trace_ppb_opengles2_VertexAttrib4fv,
     .VertexAttribPointer =      trace_ppb_opengles2_VertexAttribPointer,
     .Viewport =                 trace_ppb_opengles2_Viewport,
+};
+
+const struct PPB_OpenGLES2ChromiumEnableFeature ppb_opengles2_chromium_enable_feature_interface_1_0 = {
+    .EnableFeatureCHROMIUM = trace_ppb_opengles2_chromium_enable_feature_enable_feature_chromium,
+};
+
+const struct PPB_OpenGLES2ChromiumMapSub ppb_opengles2_chromium_map_sub_interface_1_0 = {
+    .MapBufferSubDataCHROMIUM =   trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium,
+    .UnmapBufferSubDataCHROMIUM = trace_ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium,
+    .MapTexSubImage2DCHROMIUM =   trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium,
+    .UnmapTexSubImage2DCHROMIUM = trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium,
+};
+
+const struct PPB_OpenGLES2FramebufferBlit ppb_opengles2_framebuffer_blit_interface_1_0 = {
+    .BlitFramebufferEXT = trace_ppb_opengles2_framebuffer_blit_blit_framebuffer_ext,
+};
+
+const struct PPB_OpenGLES2FramebufferMultisample ppb_opengles2_framebuffer_multisample_interface_1_0 = {
+    .RenderbufferStorageMultisampleEXT =
+                trace_ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext,
+};
+
+const struct PPB_OpenGLES2InstancedArrays ppb_opengles2_instanced_arrays_interface_1_0 = {
+    .DrawArraysInstancedANGLE = trace_ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle,
+    .DrawElementsInstancedANGLE =trace_ppb_opengles2_instanced_arrays_draw_elements_instanced_angle,
+    .VertexAttribDivisorANGLE = trace_ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle,
+
+};
+
+const struct PPB_OpenGLES2Query ppb_opengles2_query_interface_1_0 = {
+    .GenQueriesEXT =        trace_ppb_opengles2_query_gen_queries_ext,
+    .DeleteQueriesEXT =     trace_ppb_opengles2_query_delete_queries_ext,
+    .IsQueryEXT =           trace_ppb_opengles2_query_is_query_ext,
+    .BeginQueryEXT =        trace_ppb_opengles2_query_begin_query_ext,
+    .EndQueryEXT =          trace_ppb_opengles2_query_end_query_ext,
+    .GetQueryivEXT =        trace_ppb_opengles2_query_get_queryiv_ext,
+    .GetQueryObjectuivEXT = trace_ppb_opengles2_query_get_query_objectuiv_ext,
 };
