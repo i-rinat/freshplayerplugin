@@ -43,5 +43,6 @@ const char *reverse_pp_flash_setting(PP_FlashSetting setting);
 const char *reverse_pp_image_data_format(PP_ImageDataFormat fmt);
 const char *reverse_xevent_type(int type);
 const char *reverse_char_set_conversion_error(enum PP_CharSet_ConversionError e);
+const char *reverse_gl_enum(unsigned int e);
 
 #endif // FPP__REVERSE_CONSTANT_H
