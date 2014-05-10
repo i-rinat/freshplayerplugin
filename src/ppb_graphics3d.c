@@ -29,6 +29,7 @@
 #include "trace.h"
 #include "pp_resource.h"
 #include "tables.h"
+#include <ppapi/c/pp_errors.h>
 
 
 int32_t
@@ -59,8 +60,14 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
     attrib_len ++;
 
-    int *fb_attribute_list = calloc(attrib_len, sizeof(int));
+    int *fb_attribute_list = calloc(attrib_len + 3 * 2, sizeof(int));
     int done = 0, k1 = 0, k2 = 0;
+    fb_attribute_list[k2++] = GLX_DRAWABLE_TYPE;
+    fb_attribute_list[k2++] = GLX_PIXMAP_BIT;
+    fb_attribute_list[k2++] = GLX_RENDER_TYPE;
+    fb_attribute_list[k2++] = GLX_RGBA_BIT;
+    fb_attribute_list[k2++] = GLX_DOUBLEBUFFER;
+    fb_attribute_list[k2++] = GL_TRUE;
     while (!done) {
         switch (attrib_list[k1]) {
         case PP_GRAPHICS3DATTRIB_HEIGHT:
@@ -143,6 +150,7 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
 
     g3d->pixmap = XCreatePixmap(pp_i->dpy, DefaultRootWindow(pp_i->dpy), g3d->width, g3d->height,
                                 DefaultDepth(pp_i->dpy, 0));
+
     g3d->glx_pixmap = glXCreatePixmap(pp_i->dpy, fb_configs[0], g3d->pixmap, NULL);
     g3d->dpy = pp_i->dpy;
 
@@ -187,7 +195,34 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 int32_t
 ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
-    return 0;
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
+    if (!g3d)
+        return PP_ERROR_BADRESOURCE;
+    if (g3d->in_progress) {
+        pp_resource_release(context);
+        return PP_ERROR_INPROGRESS;
+    }
+
+    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->_.instance);
+
+    if (pp_i->graphics != context) {
+        // Other context bound, do nothing.
+        pp_resource_release(context);
+        return PP_OK;
+    }
+
+    g3d->in_progress = 1;
+    g3d->ccb = callback;
+
+    NPRect npr = {.top = 0, .left = 0, .bottom = g3d->height, .right = g3d->width};
+    npn.invalidaterect(pp_i->npp, &npr);
+    npn.forceredraw(pp_i->npp);
+
+    pp_resource_release(context);
+    if (callback.func == NULL)
+        return PP_OK;
+
+    return PP_OK_COMPLETIONPENDING;
 }
 
 
@@ -255,7 +290,7 @@ static
 int32_t
 trace_ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s context=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
+    trace_info("[PPB] {full} %s context=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
                __func__+6, context, callback.func, callback.user_data, callback.flags);
     return ppb_graphics3d_swap_buffers(context, callback);
 }

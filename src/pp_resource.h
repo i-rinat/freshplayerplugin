@@ -202,6 +202,8 @@ struct pp_graphics3d_s {
     int32_t         sub_map_width;
     int32_t         sub_map_height;
     int32_t         sub_map_bytes_per_pixel;
+    struct PP_CompletionCallback    ccb;
+    unsigned int                    in_progress;
 };
 
 struct pp_image_data_s {
