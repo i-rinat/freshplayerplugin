@@ -63,6 +63,7 @@ ppb_core_get_time_ticks(void)
 struct comt_proxy_param_s {
     struct PP_CompletionCallback    callback;
     int32_t                         result_to_pass;
+    int32_t                         delay_in_milliseconds;
 };
 
 static
@@ -77,15 +78,31 @@ comt_proxy(void *param)
     free(p);
 }
 
+static
+void *
+comt_delay_thread(void *param)
+{
+    struct comt_proxy_param_s *p = param;
+    usleep(1000 * p->delay_in_milliseconds);
+    npn.pluginthreadasynccall(tables_get_some_npp_instance(), comt_proxy, p);
+    return NULL;
+}
+
 void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result)
 {
     struct comt_proxy_param_s *p = malloc(sizeof(*p));
+    pthread_t delay_thread;
 
     p->callback = callback;
     p->result_to_pass = result;
-    npn.pluginthreadasynccall(tables_get_some_npp_instance(), comt_proxy, p);
+    p->delay_in_milliseconds = delay_in_milliseconds;
+
+    if (delay_in_milliseconds <= 0)
+        npn.pluginthreadasynccall(tables_get_some_npp_instance(), comt_proxy, p);
+    else
+        pthread_create(&delay_thread, NULL, comt_delay_thread, p);
     return;
 }
 
