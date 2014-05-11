@@ -138,8 +138,9 @@ ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_us
 double
 ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 {
+    time_t timep = t;
     struct tm lt = {0};
-    localtime_r((const time_t*)&t, &lt);
+    localtime_r(&timep, &lt);
     return lt.tm_gmtoff;
 }
 
