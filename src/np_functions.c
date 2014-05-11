@@ -550,6 +550,20 @@ handle_button_press_release_event(NPP npp, void *event)
             pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
                                                     ev->time/1.0e6, mod, mouse_button,
                                                     &mouse_position, 1, &zero_point);
+            if (pp_i->ppp_input_event)
+                ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+
+            // context menu event
+            if (ev->type == ButtonPress && ev->button == 3) {
+                pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id,
+                                                        PP_INPUTEVENT_TYPE_CONTEXTMENU,
+                                                        ev->time/1.0e6, mod, mouse_button,
+                                                        &mouse_position, 1, &zero_point);
+                // return value's ignored since it's an artificial event
+                if (pp_i->ppp_input_event)
+                    pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+            }
+
         } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
             const float scroll_by_tick = 10.0;
             struct PP_FloatPoint wheel_delta = { .x = wheel_x * scroll_by_tick,
@@ -565,8 +579,7 @@ handle_button_press_release_event(NPP npp, void *event)
             return 0;
         }
 
-        if (pp_i->ppp_input_event && pp_event)
-            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+
 
         // return false only of handler returned PP_FALSE and event is filtered
         if (ret == PP_FALSE && (pp_i->filtered_event_mask & event_class))
