@@ -143,7 +143,8 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         goto err;
     }
 
-    g3d->glc = glXCreateNewContext(pp_i->dpy, fb_configs[0], GLX_RGBA_TYPE, NULL, True);
+    g3d->fb_config = fb_configs[0];
+    g3d->glc = glXCreateNewContext(pp_i->dpy, g3d->fb_config, GLX_RGBA_TYPE, NULL, True);
     if (!g3d->glc) {
         trace_warning("%s, glXCreateNewContext returned NULL\n", __func__);
         goto err;
@@ -198,7 +199,25 @@ ppb_graphics3d_get_error(PP_Resource context)
 int32_t
 ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height)
 {
-    return 0;
+    if (width < 0 || height < 0)
+        return PP_ERROR_BADARGUMENT;
+
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
+    if (!g3d)
+        return PP_ERROR_BADRESOURCE;
+
+    g3d->width = width;
+    g3d->height = height;
+
+    glXDestroyPixmap(g3d->dpy, g3d->glx_pixmap);
+    XFreePixmap(g3d->dpy, g3d->pixmap);
+
+    g3d->pixmap = XCreatePixmap(g3d->dpy, DefaultRootWindow(g3d->dpy), g3d->width, g3d->height,
+                                DefaultDepth(g3d->dpy, 0));
+    g3d->glx_pixmap = glXCreatePixmap(g3d->dpy, g3d->fb_config, g3d->pixmap, NULL);
+
+    pp_resource_release(context);
+    return PP_OK;
 }
 
 void
@@ -297,7 +316,7 @@ static
 int32_t
 trace_ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height)
 {
-    trace_info("[PPB] {zilch} %s context=%d, width=%d, height=%d\n", __func__+6, context,
+    trace_info("[PPB] {full} %s context=%d, width=%d, height=%d\n", __func__+6, context,
                width, height);
     return ppb_graphics3d_resize_buffers(context, width, height);
 }

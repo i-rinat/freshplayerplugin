@@ -192,6 +192,7 @@ struct pp_view_s {
 struct pp_graphics3d_s {
     struct pp_resource_generic_s _;
     GLXContext      glc;
+    GLXFBConfig     fb_config;
     Pixmap          pixmap;
     GLXPixmap       glx_pixmap;
     Display        *dpy;
