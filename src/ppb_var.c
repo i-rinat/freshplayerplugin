@@ -235,7 +235,7 @@ ppb_var_create_object(PP_Instance instance, const struct PPP_Class_Deprecated *o
                       void *object_data)
 {
     (void)instance;
-    struct PP_Var var;
+    struct PP_Var var = { 0 };
     struct pp_var_object_s *obj;
 
     obj = malloc(sizeof(*obj));
@@ -254,7 +254,7 @@ ppb_var_create_object_with_module_deprecated(PP_Module module,
                                              void *object_data)
 {
     (void)module;
-    struct PP_Var var;
+    struct PP_Var var = { 0 };
     struct pp_var_object_s *obj;
 
     obj = malloc(sizeof(*obj));

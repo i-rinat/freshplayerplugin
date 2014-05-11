@@ -48,8 +48,8 @@ hp_parse_headers(const char *headers)
     ph->http_code = 200;
     part = strtok_r(headers_copy, delimiter, &saveptr);
     if (part) {
-        int major, minor, code, ret;
-        ret = sscanf(part, "HTTP/%d.%d %d ", &major, &minor, &code);
+        int major = 0, minor = 0, code = 0, ret;
+        ret = sscanf(part, "HTTP/%6d.%6d %6d", &major, &minor, &code);
         if (ret >= 3) {
             ph->http_code = code;
         }

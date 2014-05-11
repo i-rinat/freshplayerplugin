@@ -410,17 +410,18 @@ handle_enter_leave_event(NPP npp, void *event)
 {
     XCrossingEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
-    PP_Resource pp_event;
-    PP_Bool ret;
+
 
     if ((PP_INPUTEVENT_CLASS_MOUSE & pp_i->event_mask) ||
         (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
     {
+        PP_Bool ret = PP_FALSE;
         struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
         struct PP_Point zero_point = {.x = 0, .y = 0};
         unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
         PP_InputEvent_Type event_type = (ev->type == EnterNotify) ? PP_INPUTEVENT_TYPE_MOUSEENTER
                                                                   : PP_INPUTEVENT_TYPE_MOUSELEAVE;
+        PP_Resource pp_event;
 
         pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
                                                 ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
@@ -443,15 +444,15 @@ handle_motion_event(NPP npp, void *event)
 {
     XMotionEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
-    PP_Resource pp_event;
-    PP_Bool ret;
 
     if ((PP_INPUTEVENT_CLASS_MOUSE & pp_i->event_mask) ||
         (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
     {
+        PP_Bool ret = PP_FALSE;
         struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
         struct PP_Point zero_point = {.x = 0, .y = 0};
         unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+        PP_Resource pp_event;
 
         pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
                                                 ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
@@ -475,10 +476,7 @@ handle_button_press_release_event(NPP npp, void *event)
     XButtonEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
     uint32_t event_class = 0;
-    PP_Resource pp_event = 0;
-    PP_Bool ret;
     PP_InputEvent_MouseButton mouse_button = PP_INPUTEVENT_MOUSEBUTTON_NONE;
-    const float scroll_by_tick = 10.0;
 
     struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
     struct PP_Point zero_point = {.x = 0, .y = 0};
@@ -523,14 +521,19 @@ handle_button_press_release_event(NPP npp, void *event)
     if ((event_class & pp_i->event_mask) ||
         (event_class & pp_i->filtered_event_mask))
     {
+        PP_Bool ret = PP_FALSE;
+        PP_Resource pp_event = 0;
+
         if (event_class == PP_INPUTEVENT_CLASS_MOUSE) {
             PP_InputEvent_Type event_type;
+
             event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
                                                    : PP_INPUTEVENT_TYPE_MOUSEUP;
             pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
                                                     ev->time/1.0e6, mod, mouse_button,
                                                     &mouse_position, 1, &zero_point);
         } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
+            const float scroll_by_tick = 10.0;
             struct PP_FloatPoint wheel_delta = { .x = wheel_x * scroll_by_tick,
                                                  .y = wheel_y * scroll_by_tick };
             struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
@@ -562,9 +565,7 @@ handle_key_press_release_event(NPP npp, void *event)
 {
     XKeyEvent            *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
-    PP_Resource           pp_event;
     PP_InputEvent_Type    event_type;
-    PP_Bool               ret = PP_TRUE;
 
     event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
                                         : PP_INPUTEVENT_TYPE_KEYUP;
@@ -573,11 +574,16 @@ handle_key_press_release_event(NPP npp, void *event)
     if ((PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->event_mask) ||
         (PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->filtered_event_mask))
     {
+        PP_Bool        ret = PP_FALSE;
         char           buffer[20];
         KeySym         keysym;
         XComposeStatus compose_status;
-        int charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
-        int pp_keycode = xkeycode_to_pp_keycode(keysym);
+        int            charcount;
+        int            pp_keycode;
+        PP_Resource    pp_event;
+
+        charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
+        pp_keycode = xkeycode_to_pp_keycode(keysym);
 
         if (ev->type == KeyPress && charcount > 0) {
             struct PP_Var character_text = PP_MakeStringN(buffer, charcount);

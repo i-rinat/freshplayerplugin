@@ -35,12 +35,6 @@
 NPNetscapeFuncs npn;
 pthread_t       np_main_thread;
 
-// URL/urlloader resource mapping
-struct url_pair_s {
-    char       *url;
-    PP_Resource resource;
-};
-
 static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;
 static GHashTable  *npp_ht;
@@ -145,7 +139,7 @@ PP_MakeStringN(const char *s, unsigned int len)
     memcpy(ptr + sizeof(uint32_t), s, len);
     ptr[len + sizeof(uint32_t)] = 0;
 
-    struct PP_Var var;
+    struct PP_Var var = { 0 };
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (size_t)(void *)ptr;
     tables_ref_var(var);
@@ -156,7 +150,7 @@ PP_MakeStringN(const char *s, unsigned int len)
 struct PP_Var
 PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj)
 {
-    struct PP_Var var;
+    struct PP_Var var = { 0 };
     struct pp_var_object_s *obj;
 
     obj = malloc(sizeof(*obj));
@@ -200,7 +194,6 @@ NPVariant
 pp_var_to_np_variant(struct PP_Var var)
 {
     NPVariant res;
-    struct np_proxy_object_s *np_proxy_object;
     struct pp_var_object_s *ppobj;
 
     switch (var.type) {
@@ -235,8 +228,8 @@ pp_var_to_np_variant(struct PP_Var var)
             res.value.objectValue = ppobj->data;
             npn.retainobject(res.value.objectValue);
         } else {
+            struct np_proxy_object_s *np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
             res.type = NPVariantType_Object;
-            np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
             np_proxy_object->npobj.referenceCount = 1;
             np_proxy_object->npobj._class = &p2n_proxy_class;
             np_proxy_object->ppobj = var;
