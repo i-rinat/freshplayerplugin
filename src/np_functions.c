@@ -388,18 +388,33 @@ x_state_mask_to_pp_inputevent_modifier(unsigned int state)
     unsigned int mod = 0;
 
     // TODO: refine this
-    if (state & ShiftMask)      mod |= PP_INPUTEVENT_MODIFIER_SHIFTKEY;
-    if (state & LockMask)       mod |= PP_INPUTEVENT_MODIFIER_CAPSLOCKKEY;
-    if (state & ControlMask)    mod |= PP_INPUTEVENT_MODIFIER_CONTROLKEY;
-    if (state & Mod1Mask)       mod |= PP_INPUTEVENT_MODIFIER_ALTKEY;
-    if (state & Mod2Mask)       mod |= PP_INPUTEVENT_MODIFIER_NUMLOCKKEY;
-    if (state & Mod4Mask)       mod |= PP_INPUTEVENT_MODIFIER_METAKEY;
+    if (state & ShiftMask) {
+        mod |= PP_INPUTEVENT_MODIFIER_SHIFTKEY;
+        mod |= PP_INPUTEVENT_MODIFIER_ISLEFT;
+    }
 
-    if (state & Button1Mask)    mod |= PP_INPUTEVENT_MODIFIER_LEFTBUTTONDOWN;
-    if (state & Button2Mask)    mod |= PP_INPUTEVENT_MODIFIER_MIDDLEBUTTONDOWN;
-    if (state & Button3Mask)    mod |= PP_INPUTEVENT_MODIFIER_RIGHTBUTTONDOWN;
+    if (state & LockMask) {
+        mod |= PP_INPUTEVENT_MODIFIER_CAPSLOCKKEY;
+    }
 
-    mod |= PP_INPUTEVENT_MODIFIER_ISLEFT;
+    if (state & ControlMask) {
+        mod |= PP_INPUTEVENT_MODIFIER_CONTROLKEY;
+        mod |= PP_INPUTEVENT_MODIFIER_ISLEFT;
+    }
+
+    if (state & Mod1Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_ALTKEY;
+        mod |= PP_INPUTEVENT_MODIFIER_ISLEFT;
+    }
+
+    if (state & Mod2Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_NUMLOCKKEY;
+    }
+
+    if (state & Mod4Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_METAKEY;
+        mod |= PP_INPUTEVENT_MODIFIER_ISLEFT;
+    }
 
     return mod;
 }
@@ -487,14 +502,17 @@ handle_button_press_release_event(NPP npp, void *event)
     case 1:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_LEFT;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
+        mod |= PP_INPUTEVENT_MODIFIER_LEFTBUTTONDOWN;
         break;
     case 2:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_MIDDLE;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
+        mod |= PP_INPUTEVENT_MODIFIER_MIDDLEBUTTONDOWN;
         break;
     case 3:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_RIGHT;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
+        mod |= PP_INPUTEVENT_MODIFIER_RIGHTBUTTONDOWN;
         break;
 
     case 4: // wheel up
