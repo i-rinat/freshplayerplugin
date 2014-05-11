@@ -198,7 +198,6 @@ struct pp_graphics3d_s {
     int32_t         width;
     int32_t         height;
     GHashTable     *sub_maps;
-    struct PP_CompletionCallback    ccb;
 };
 
 struct pp_image_data_s {

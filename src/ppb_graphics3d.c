@@ -227,7 +227,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         return PP_OK;
     }
 
-    g3d->ccb = callback;
+    glXSwapBuffers(g3d->dpy, g3d->glx_pixmap);
 
     NPRect npr = {.top = 0, .left = 0, .bottom = g3d->height, .right = g3d->width};
     npn.invalidaterect(pp_i->npp, &npr);
