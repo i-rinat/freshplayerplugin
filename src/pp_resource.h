@@ -76,6 +76,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_VIDEO_CAPTURE,
     PP_RESOURCE_AUDIO_INPUT,
     PP_RESOURCE_FLASH_MENU,
+    PP_RESOURCE_FLASH_MESSAGE_LOOP,
 };
 
 enum pp_request_method_e {
@@ -298,6 +299,10 @@ struct pp_audio_input_s {
 struct pp_flash_menu_s {
     struct pp_resource_generic_s _;
     GtkWidget              *menu;
+};
+
+struct pp_flash_message_loop_s {
+    struct pp_resource_generic_s _;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
