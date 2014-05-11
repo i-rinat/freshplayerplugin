@@ -24,6 +24,7 @@ pkg_check_modules(REQ
 	pangocairo
 	pangoft2
 	freetype2
+	gtk+-2.0
 	REQUIRED)
 
 include_directories(3rdparty ${REQ_INCLUDE_DIRS})

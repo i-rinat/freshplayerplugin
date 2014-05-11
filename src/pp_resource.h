@@ -45,6 +45,7 @@
 #include <pango/pangocairo.h>
 #include <cairo.h>
 #include <asoundlib.h>
+#include <gtk/gtk.h>
 
 
 #define free_and_nullify(obj, field)    \
@@ -74,6 +75,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_PRINTING,
     PP_RESOURCE_VIDEO_CAPTURE,
     PP_RESOURCE_AUDIO_INPUT,
+    PP_RESOURCE_FLASH_MENU,
 };
 
 enum pp_request_method_e {
@@ -291,6 +293,11 @@ struct pp_video_capture_s {
 
 struct pp_audio_input_s {
     struct pp_resource_generic_s _;
+};
+
+struct pp_flash_menu_s {
+    struct pp_resource_generic_s _;
+    GtkWidget              *menu;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);

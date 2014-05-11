@@ -36,6 +36,7 @@
 #include "ppb_audio.h"
 #include "ppb_input_event.h"
 #include "ppb_flash_font_file.h"
+#include "ppb_flash_menu.h"
 #include "ppb_video_capture_dev.h"
 #include "ppb_audio_input_dev.h"
 
@@ -116,6 +117,9 @@ pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
         break;
     case PP_RESOURCE_AUDIO_INPUT:
         ALLOC_HELPER(struct pp_audio_input_s);
+        break;
+    case PP_RESOURCE_FLASH_MENU:
+        ALLOC_HELPER(struct pp_flash_menu_s);
         break;
     default:
         // fall through
@@ -254,6 +258,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_AUDIO_INPUT:
             ppb_audio_input_dev_destroy(ptr);
+            break;
+        case PP_RESOURCE_FLASH_MENU:
+            ppb_flash_menu_destroy(ptr);
             break;
         default:
             break;
