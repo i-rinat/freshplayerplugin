@@ -24,6 +24,8 @@
 
 #include "ppb_audio_input_dev.h"
 #include <stdlib.h>
+#include <ppapi/c/pp_errors.h>
+#include "ppb_core.h"
 #include "pp_resource.h"
 #include "trace.h"
 
@@ -50,7 +52,9 @@ int32_t
 ppb_audio_input_dev_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput output,
                                       struct PP_CompletionCallback callback)
 {
-    return 0;
+    output.GetDataBuffer(output.user_data, 0, 4);
+    ppb_core_call_on_main_thread(0, callback, PP_OK);
+    return PP_OK;
 }
 
 int32_t
@@ -97,6 +101,7 @@ ppb_audio_input_dev_stop_capture(PP_Resource audio_input)
 void
 ppb_audio_input_dev_close(PP_Resource audio_input)
 {
+    ppb_core_release_resource(audio_input);
     return;
 }
 
@@ -122,7 +127,7 @@ int32_t
 trace_ppb_audio_input_dev_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput output,
                                             struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {fake} %s\n", __func__+6);
     return ppb_audio_input_dev_enumerate_devices(audio_input, output, callback);
 }
 
@@ -187,7 +192,7 @@ static
 void
 trace_ppb_audio_input_dev_close(PP_Resource audio_input)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     ppb_audio_input_dev_close(audio_input);
 }
 
