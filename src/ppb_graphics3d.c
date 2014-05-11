@@ -67,8 +67,6 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     fb_attribute_list[k2++] = GLX_PIXMAP_BIT;
     fb_attribute_list[k2++] = GLX_RENDER_TYPE;
     fb_attribute_list[k2++] = GLX_RGBA_BIT;
-    fb_attribute_list[k2++] = GLX_DOUBLEBUFFER;
-    fb_attribute_list[k2++] = GL_TRUE;
     while (!done) {
         switch (attrib_list[k1]) {
         case PP_GRAPHICS3DATTRIB_HEIGHT:
@@ -246,11 +244,21 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         return PP_OK;
     }
 
-    glXSwapBuffers(g3d->dpy, g3d->glx_pixmap);
+    if (pp_i->is_fullscreen) {
+        XGraphicsExposeEvent ev = {
+            .type = GraphicsExpose,
+            .drawable = pp_i->fs_wnd,
+            .width = pp_i->width,
+            .height = pp_i->height
+        };
 
-    NPRect npr = {.top = 0, .left = 0, .bottom = g3d->height, .right = g3d->width};
-    npn.invalidaterect(pp_i->npp, &npr);
-    npn.forceredraw(pp_i->npp);
+        XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
+        XFlush(pp_i->dpy);
+    } else {
+        NPRect npr = {.top = 0, .left = 0, .bottom = g3d->height, .right = g3d->width};
+        npn.invalidaterect(pp_i->npp, &npr);
+        npn.forceredraw(pp_i->npp);
+    }
     pp_resource_release(context);
 
     struct PP_CompletionCallback *ccb = malloc(sizeof(*ccb));
