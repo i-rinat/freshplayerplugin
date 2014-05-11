@@ -64,6 +64,7 @@
 #include <ppapi/c/private/ppb_flash_fullscreen.h>
 #include <ppapi/c/private/ppb_flash.h>
 #include <ppapi/c/private/ppb_flash_menu.h>
+#include <ppapi/c/private/ppb_flash_message_loop.h>
 #include <ppapi/c/private/ppb_instance_private.h>
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
 #include <ppapi/c/private/ppb_udp_socket_private.h>
@@ -94,6 +95,7 @@ extern const struct PPB_FlashFullscreen_1_0         ppb_flash_fullscreen_interfa
 extern const struct PPB_Flash_12_6                  ppb_flash_interface_12_6;
 extern const struct PPB_Flash_13_0                  ppb_flash_interface_13_0;
 extern const struct PPB_Flash_Menu_0_2              ppb_flash_menu_interface_0_2;
+extern const struct PPB_Flash_MessageLoop_0_1       ppb_flash_message_loop_interface_0_1;
 extern const struct PPB_Font_Dev_0_6                ppb_font_dev_interface_0_6;
 extern const struct PPB_Graphics2D_1_0              ppb_graphics2d_interface_1_0;
 extern const struct PPB_Graphics2D_1_1              ppb_graphics2d_interface_1_1;
@@ -173,6 +175,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_FLASH_INTERFACE_12_6,               ppb_flash_interface_12_6)
     ELSEIFBLOCK(PPB_FLASH_INTERFACE_13_0,               ppb_flash_interface_13_0)
     ELSEIFBLOCK(PPB_FLASH_MENU_INTERFACE_0_2,           ppb_flash_menu_interface_0_2)
+    ELSEIFBLOCK(PPB_FLASH_MESSAGELOOP_INTERFACE_0_1,    ppb_flash_message_loop_interface_0_1)
     ELSEIFBLOCK(PPB_FONT_DEV_INTERFACE_0_6,             ppb_font_dev_interface_0_6)
     ELSEIFBLOCK(PPB_GRAPHICS_2D_INTERFACE_1_0,          ppb_graphics2d_interface_1_0)
     ELSEIFBLOCK(PPB_GRAPHICS_2D_INTERFACE_1_1,          ppb_graphics2d_interface_1_1)
