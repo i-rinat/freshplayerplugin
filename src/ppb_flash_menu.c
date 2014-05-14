@@ -51,7 +51,7 @@ menu_item_activated(GtkMenuItem *mi, gpointer user_data)
 // called when menu is closed
 static
 void
-menu_closed(GtkWidget *object, gboolean user_data)
+menu_selection_done(GtkMenuShell *object, gboolean user_data)
 {
     int32_t code = popup_menu_canceled ? PP_ERROR_USERCANCEL : PP_OK;
 
@@ -113,8 +113,8 @@ ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_
     // recursively construct menu
     fm->menu = convert_menu(menu_data);
 
-    // we need notification on menu destroy
-    g_signal_connect(G_OBJECT(fm->menu), "destroy", G_CALLBACK(menu_closed), NULL);
+    // we need notification on menu close
+    g_signal_connect(fm->menu, "selection-done", G_CALLBACK(menu_selection_done), NULL);
 
     pp_resource_release(flash_menu);
     return flash_menu;
