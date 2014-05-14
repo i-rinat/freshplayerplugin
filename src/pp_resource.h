@@ -303,6 +303,7 @@ struct pp_flash_menu_s {
 
 struct pp_flash_message_loop_s {
     struct pp_resource_generic_s _;
+    GMainLoop              *loop;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);

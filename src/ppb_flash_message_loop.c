@@ -13,7 +13,7 @@ ppb_flash_message_loop_create(PP_Instance instance)
     struct pp_flash_message_loop_s *fml =
                         pp_resource_acquire(message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
 
-    (void)fml;
+    fml->loop = g_main_loop_new(NULL, FALSE);
 
     pp_resource_release(message_loop);
     return message_loop;
@@ -22,6 +22,8 @@ ppb_flash_message_loop_create(PP_Instance instance)
 void
 ppb_flash_message_loop_destroy(void *p)
 {
+    struct pp_flash_message_loop_s *fml = p;
+    g_main_loop_unref(fml->loop);
 }
 
 PP_Bool
@@ -33,12 +35,22 @@ ppb_flash_message_loop_is_flash_message_loop(PP_Resource resource)
 int32_t
 ppb_flash_message_loop_run(PP_Resource flash_message_loop)
 {
-    return 0;
+    struct pp_flash_message_loop_s *fml =
+                        pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
+    GMainLoop *loop = fml->loop;
+    pp_resource_release(flash_message_loop);
+    g_main_loop_run(loop);
+    return PP_OK;
 }
 
 void
 ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
 {
+    struct pp_flash_message_loop_s *fml =
+                        pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
+    GMainLoop *loop = fml->loop;
+    pp_resource_release(flash_message_loop);
+    g_main_loop_quit(loop);
 }
 
 
@@ -63,7 +75,7 @@ static
 int32_t
 trace_ppb_flash_message_loop_run(PP_Resource flash_message_loop)
 {
-    trace_info("[PPB] {zilch} %s flash_message_loop=%d\n", __func__+6, flash_message_loop);
+    trace_info("[PPB] {full} %s flash_message_loop=%d\n", __func__+6, flash_message_loop);
     return ppb_flash_message_loop_run(flash_message_loop);
 }
 
@@ -71,7 +83,7 @@ static
 void
 trace_ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
 {
-    trace_info("[PPB] {zilch} %s flash_message_loop=%d\n", __func__+6, flash_message_loop);
+    trace_info("[PPB] {full} %s flash_message_loop=%d\n", __func__+6, flash_message_loop);
     return ppb_flash_message_loop_quit(flash_message_loop);
 }
 
