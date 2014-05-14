@@ -554,7 +554,7 @@ handle_button_press_release_event(NPP npp, void *event)
                 ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
 
             // context menu event
-            if (ev->type == ButtonPress && ev->button == 3) {
+            if (ev->type == ButtonRelease && ev->button == 3) {
                 pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id,
                                                         PP_INPUTEVENT_TYPE_CONTEXTMENU,
                                                         ev->time/1.0e6, mod, mouse_button,
