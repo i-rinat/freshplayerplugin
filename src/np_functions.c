@@ -122,9 +122,9 @@ NPError
 NPP_Destroy(NPP npp, NPSavedData **save)
 {
     trace_info("[NPP] {full} %s npp=%p, save=%p\n", __func__, npp, save);
+    tables_remove_npp_instance(npp);
     struct pp_instance_s *pp_i = npp->pdata;
     pp_i->ppp_instance_1_1->DidDestroy(pp_i->pp_instance_id);
-    tables_remove_npp_instance(npp);
     if (save)
         *save = NULL;
     return NPERR_NO_ERROR;

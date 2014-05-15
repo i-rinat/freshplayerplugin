@@ -43,11 +43,14 @@ static GHashTable  *npobj_to_npp_ht = NULL;     // NPObject-to-NPP mapping
 static PangoContext *pango_ctx = NULL;
 static PangoFontMap *pango_fm = NULL;
 
+static pthread_mutex_t  lock;
+
 static
 void
 __attribute__((constructor))
 constructor_tables(void)
 {
+    // hash tables
     var_ht =            g_hash_table_new(g_direct_hash, g_direct_equal);
     pp_to_np_ht =       g_hash_table_new(g_direct_hash, g_direct_equal);
     npp_ht =            g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -56,6 +59,9 @@ constructor_tables(void)
     // pango
     pango_fm = pango_ft2_font_map_new();
     pango_ctx = pango_font_map_create_context(pango_fm);
+
+    // mutex
+    pthread_mutex_init(&lock, NULL);
 }
 
 static
@@ -63,6 +69,7 @@ void
 __attribute__((destructor))
 destructor_tables(void)
 {
+    // hash tables
     g_hash_table_unref(var_ht);
     g_hash_table_unref(pp_to_np_ht);
     g_hash_table_unref(npp_ht);
@@ -73,11 +80,15 @@ destructor_tables(void)
     g_object_unref(pango_fm);
     pango_ctx = NULL;
     pango_fm = NULL;
+
+    // mutex
+    pthread_mutex_destroy(&lock);
 }
 
 int
 tables_ref_var(struct PP_Var var)
 {
+    pthread_mutex_lock(&lock);
     void *key = (void*)(size_t)var.value.as_id;
     int ref_cnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, key));
 
@@ -89,12 +100,14 @@ tables_ref_var(struct PP_Var var)
         g_hash_table_insert(var_ht, key, GINT_TO_POINTER(1));
     }
 
+    pthread_mutex_unlock(&lock);
     return ref_cnt;
 }
 
 int
 tables_unref_var(struct PP_Var var)
 {
+    pthread_mutex_lock(&lock);
     void *key = (void*)(size_t)var.value.as_id;
     int ref_cnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, key));
 
@@ -105,19 +118,26 @@ tables_unref_var(struct PP_Var var)
         ref_cnt = 0;
         g_hash_table_remove(var_ht, key);
     }
+
+    pthread_mutex_unlock(&lock);
     return ref_cnt;
 }
 
 struct pp_instance_s *
 tables_get_pp_instance(PP_Instance instance)
 {
-    return g_hash_table_lookup(pp_to_np_ht, GINT_TO_POINTER(instance));
+    pthread_mutex_lock(&lock);
+    struct pp_instance_s *pp_i = g_hash_table_lookup(pp_to_np_ht, GINT_TO_POINTER(instance));
+    pthread_mutex_unlock(&lock);
+    return pp_i;
 }
 
 void
 tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i)
 {
+    pthread_mutex_lock(&lock);
     g_hash_table_replace(pp_to_np_ht, GINT_TO_POINTER(instance), pp_i);
+    pthread_mutex_unlock(&lock);
 }
 
 struct PP_Var
@@ -254,13 +274,17 @@ pp_var_to_np_variant(struct PP_Var var)
 void
 tables_add_npp_instance(NPP npp)
 {
+    pthread_mutex_lock(&lock);
     g_hash_table_insert(npp_ht, (gpointer)npp, GINT_TO_POINTER(1));
+    pthread_mutex_unlock(&lock);
 }
 
 void
 tables_remove_npp_instance(NPP npp)
 {
+    pthread_mutex_lock(&lock);
     g_hash_table_remove(npp_ht, (gpointer)npp);
+    pthread_mutex_unlock(&lock);
 }
 
 NPP
@@ -269,10 +293,15 @@ tables_get_some_npp_instance(void)
     gpointer key, val;
     GHashTableIter iter;
 
+    pthread_mutex_lock(&lock);
     g_hash_table_iter_init(&iter, npp_ht);
-    g_hash_table_iter_next(&iter, &key, &val);
+    gboolean have_key = g_hash_table_iter_next(&iter, &key, &val);
+    pthread_mutex_unlock(&lock);
 
-    return key;
+    if (have_key)
+        return key;
+
+    return NULL;
 }
 
 PangoContext *
@@ -328,17 +357,24 @@ pp_font_desc_to_pango_font_desc(const struct PP_BrowserFont_Trusted_Description 
 void
 tables_add_npobj_npp_mapping(NPObject *npobj, NPP npp)
 {
+    pthread_mutex_lock(&lock);
     g_hash_table_insert(npobj_to_npp_ht, npobj, npp);
+    pthread_mutex_unlock(&lock);
 }
 
 NPP
 tables_get_npobj_npp_mapping(NPObject *npobj)
 {
-    return g_hash_table_lookup(npobj_to_npp_ht, npobj);
+    pthread_mutex_lock(&lock);
+    NPP npp = g_hash_table_lookup(npobj_to_npp_ht, npobj);
+    pthread_mutex_unlock(&lock);
+    return npp;
 }
 
 void
 tables_remove_npobj_npp_mapping(NPObject *npobj)
 {
+    pthread_mutex_lock(&lock);
     g_hash_table_remove(npobj_to_npp_ht, npobj);
+    pthread_mutex_unlock(&lock);
 }

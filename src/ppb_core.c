@@ -84,7 +84,9 @@ comt_delay_thread(void *param)
 {
     struct comt_proxy_param_s *p = param;
     usleep(1000 * p->delay_in_milliseconds);
-    npn.pluginthreadasynccall(tables_get_some_npp_instance(), comt_proxy, p);
+    NPP npp = tables_get_some_npp_instance();
+    if (npp)
+        npn.pluginthreadasynccall(npp, comt_proxy, p);
     return NULL;
 }
 
@@ -99,10 +101,13 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
     p->result_to_pass = result;
     p->delay_in_milliseconds = delay_in_milliseconds;
 
-    if (delay_in_milliseconds <= 0)
-        npn.pluginthreadasynccall(tables_get_some_npp_instance(), comt_proxy, p);
-    else
+    if (delay_in_milliseconds <= 0) {
+        NPP npp = tables_get_some_npp_instance();
+        if (npp)
+            npn.pluginthreadasynccall(npp, comt_proxy, p);
+    } else {
         pthread_create(&delay_thread, NULL, comt_delay_thread, p);
+    }
     return;
 }
 
