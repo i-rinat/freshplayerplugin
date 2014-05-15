@@ -37,6 +37,8 @@ ppb_flash_message_loop_run(PP_Resource flash_message_loop)
 {
     struct pp_flash_message_loop_s *fml =
                         pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
+    if (!fml)
+        return PP_ERROR_BADRESOURCE;
     GMainLoop *loop = fml->loop;
     pp_resource_release(flash_message_loop);
     g_main_loop_run(loop);
