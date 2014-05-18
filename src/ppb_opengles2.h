@@ -25,6 +25,13 @@
 #ifndef FPP__PPB_OPENGLES2_H
 #define FPP__PPB_OPENGLES2_H
 
+#ifndef __gl2_h_
+#define __gl2_h_ 1
+#endif
+
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glext.h>
 #include <ppapi/c/ppb_opengles2.h>
 
 

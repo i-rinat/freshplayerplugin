@@ -23,7 +23,6 @@
  */
 
 #include "ppb_opengles2.h"
-#include <GLES2/gl2.h>
 #include <stddef.h>
 #include "trace.h"
 #include "pp_resource.h"
