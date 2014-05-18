@@ -70,7 +70,7 @@ convert_menu(const struct PP_Flash_Menu *pp_menu)
 
     for (uintptr_t k = 0; k < pp_menu->count; k ++) {
         const struct PP_Flash_MenuItem pp_mi = pp_menu->items[k];
-        GtkWidget *mi;
+        GtkWidget *mi = NULL;
 
         switch (pp_mi.type) {
         case PP_FLASH_MENUITEM_TYPE_NORMAL:
@@ -88,8 +88,10 @@ convert_menu(const struct PP_Flash_Menu *pp_menu)
             break;
         }
 
-        gtk_widget_set_sensitive(mi, pp_mi.enabled != PP_FALSE);
+        if (!mi)
+            continue;
 
+        gtk_widget_set_sensitive(mi, pp_mi.enabled != PP_FALSE);
         gtk_widget_show(mi);
         gtk_menu_append(GTK_MENU(menu), mi);
 
