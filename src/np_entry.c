@@ -106,7 +106,7 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 
     void *h = dlopen(PPFP_PATH, RTLD_LAZY);
     if (!h) {
-        trace_info("can't open " PPFP_PATH "\n");
+        trace_error("%s, can't open " PPFP_PATH "\n", __func__);
         return NPERR_GENERIC_ERROR;
     }
 
@@ -114,14 +114,14 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     ppp_get_interface = dlsym(h, "PPP_GetInterface");
 
     if (!ppp_initialize_module || !ppp_get_interface) {
-        trace_info("one of required PPP_* is missing\n");
+        trace_error("%s, one of required PPP_* is missing\n", __func__);
         return NPERR_GENERIC_ERROR;
     }
 
     // TODO: make module ids distinct
     int res = ppp_initialize_module(42, ppb_get_interface);
     if (0 != res) {
-        trace_info("PPP_InitializeModule returned %d\n", res);
+        trace_error("%s, PPP_InitializeModule returned %d\n", __func__, res);
         return NPERR_GENERIC_ERROR;
     }
 
