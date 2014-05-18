@@ -497,8 +497,16 @@ handle_button_press_release_event(NPP npp, void *event)
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
     float wheel_x = 0.0, wheel_y = 0.0;
+    int ev_button = ev->button;
 
-    switch (ev->button) {
+    if (quirks.switch_buttons_2_3) {
+        if (ev_button == 2)
+            ev_button = 3;
+        else if (ev_button == 3)
+            ev_button = 2;
+    }
+
+    switch (ev_button) {
     case 1:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_LEFT;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
@@ -539,7 +547,7 @@ handle_button_press_release_event(NPP npp, void *event)
     if ((event_class & pp_i->event_mask) ||
         (event_class & pp_i->filtered_event_mask))
     {
-        PP_Bool ret = PP_FALSE;
+        PP_Bool handled = PP_FALSE;
         PP_Resource pp_event = 0;
 
         if (event_class == PP_INPUTEVENT_CLASS_MOUSE) {
@@ -550,18 +558,23 @@ handle_button_press_release_event(NPP npp, void *event)
             pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
                                                     ev->time/1.0e6, mod, mouse_button,
                                                     &mouse_position, 1, &zero_point);
-            if (pp_i->ppp_input_event)
+            if (pp_i->ppp_input_event) {
+                PP_Bool ret;
                 ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+                handled = handled || ret;
+            }
 
             // context menu event
-            if (ev->type == ButtonRelease && ev->button == 3) {
+            if (ev->type == ButtonRelease && ev_button == 3) {
                 pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id,
                                                         PP_INPUTEVENT_TYPE_CONTEXTMENU,
                                                         ev->time/1.0e6, mod, mouse_button,
                                                         &mouse_position, 1, &zero_point);
-                // return value's ignored since it's an artificial event
-                if (pp_i->ppp_input_event)
-                    pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+                if (pp_i->ppp_input_event) {
+                    PP_Bool ret;
+                    ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+                    handled = handled || ret;
+                }
             }
 
         } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
@@ -579,10 +592,8 @@ handle_button_press_release_event(NPP npp, void *event)
             return 0;
         }
 
-
-
         // return false only of handler returned PP_FALSE and event is filtered
-        if (ret == PP_FALSE && (pp_i->filtered_event_mask & event_class))
+        if (!handled && (pp_i->filtered_event_mask & event_class))
             return 0;
 
         return 1;

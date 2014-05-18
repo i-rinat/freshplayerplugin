@@ -34,6 +34,7 @@
 
 NPNetscapeFuncs npn;
 pthread_t       np_main_thread;
+struct quirks_s quirks = { 0 };
 
 static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;

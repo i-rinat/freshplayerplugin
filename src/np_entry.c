@@ -71,6 +71,24 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
     return NPERR_NO_ERROR;
 }
 
+static
+void
+initialize_quirks(void)
+{
+    FILE *fp = fopen("/proc/self/cmdline", "r");
+    if (fp) {
+        char cmdline[2048];
+        size_t len = fread(cmdline, 1, sizeof(cmdline) - 1, fp);
+        cmdline[len] = 0;
+        if (strstr(cmdline, "operapluginwrapper")) {
+            // Opera calls right mouse button "2" instead of correct "3"
+            quirks.switch_buttons_2_3 = 1;
+        }
+
+        fclose(fp);
+    }
+}
+
 __attribute__((visibility("default")))
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
@@ -117,6 +135,8 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
         trace_error("%s, one of required PPP_* is missing\n", __func__);
         return NPERR_GENERIC_ERROR;
     }
+
+    initialize_quirks();
 
     // TODO: make module ids distinct
     int res = ppp_initialize_module(42, ppb_get_interface);

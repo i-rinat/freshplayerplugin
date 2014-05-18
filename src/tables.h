@@ -34,6 +34,9 @@
 
 extern NPNetscapeFuncs  npn;
 extern pthread_t        np_main_thread;
+extern struct quirks_s {
+    int                 switch_buttons_2_3;
+} quirks;
 
 
 int         tables_ref_var(struct PP_Var var);
