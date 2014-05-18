@@ -238,7 +238,7 @@ ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
     if (ret < 0) {
         switch (errno) {
         case EACCES: return PP_ERROR_NOACCESS;
-        case EEXIST: return PP_ERROR_FILEEXISTS;
+        case EEXIST: return PP_OK;
         default:     return PP_ERROR_FAILED;
         }
     }
