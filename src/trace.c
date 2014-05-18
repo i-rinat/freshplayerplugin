@@ -32,6 +32,7 @@
 #include "pp_resource.h"
 
 
+#ifndef NDEBUG
 void
 trace_info(const char *fmt, ...)
 {
@@ -42,6 +43,7 @@ trace_info(const char *fmt, ...)
     vfprintf(stdout, fmt, args);
     va_end(args);
 }
+#endif
 
 void
 trace_warning(const char *fmt, ...)

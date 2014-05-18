@@ -31,7 +31,12 @@
 #include <npapi/npapi.h>
 
 
+#ifndef NDEBUG
 void    trace_info(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
+#else
+static inline void __attribute__((format (printf, 1, 2))) trace_info(const char *fmt, ...) { };
+#endif
+
 void    trace_warning(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 void    trace_error(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 char   *trace_var_as_string(struct PP_Var var);
