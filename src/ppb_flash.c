@@ -170,6 +170,33 @@ ppb_flash_update_activity(PP_Instance instance)
 }
 
 struct PP_Var
+get_flashsetting_language(void)
+{
+    char *lang = getenv("LANG");
+    if (!lang)
+        return PP_MakeString("en-US");
+
+    // make a working copy
+    lang = strdup(lang);
+
+    // cut character encoding if exists
+    char *ptr = strchr(lang, '.');
+    if (ptr)
+        *ptr = 0;
+
+    // replace _ by
+    ptr = strchr(lang, '_');
+    if (ptr)
+        *ptr = '-';
+
+    fprintf(stderr, "Language = %s\n", lang);
+    struct PP_Var res = PP_MakeString(lang);
+    free(lang);
+    return res;
+}
+
+
+struct PP_Var
 ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
     struct PP_Var var = PP_MakeUndefined();
@@ -189,8 +216,7 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
         var.value.as_bool = PP_FALSE; // TODO: reenable 3d
         break;
     case PP_FLASHSETTING_LANGUAGE:
-        // TODO: detect language
-        var = PP_MakeString("ru-RU");
+        var = get_flashsetting_language();
         break;
     case PP_FLASHSETTING_NUMCORES:
         // TODO: check number of cores
