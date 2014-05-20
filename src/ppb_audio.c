@@ -78,6 +78,11 @@ ppb_audio_create(PP_Instance instance, PP_Resource config,
     res = snd_pcm_hw_params_set_channels(a->ph, hw_params, 2);
     ERR_CHECK(res, snd_pcm_hw_params_set_channels, goto err);
 
+    unsigned int buffer_time = 2 * (long long)a->sample_frame_count * 1000 * 1000 / a->sample_rate;
+    int dir;
+    res = snd_pcm_hw_params_set_buffer_time_near(a->ph, hw_params, &buffer_time, &dir);
+    ERR_CHECK(res, snd_pcm_hw_params_set_buffer_time_near, goto err);
+
     res = snd_pcm_hw_params(a->ph, hw_params);
     ERR_CHECK(res, snd_pcm_hw_params, goto err);
 
