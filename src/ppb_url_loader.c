@@ -90,6 +90,9 @@ struct comt_param_s {
     const char                 *custom_user_agent;
     const char                 *post_data;
     size_t                      post_len;
+    pthread_barrier_t           barrier;
+    size_t                      should_wait;
+    int                         retval;
 };
 
 static
@@ -140,15 +143,18 @@ _url_loader_open_comt(void *user_data)
         fwrite(comt_params->post_data, 1, comt_params->post_len, fp);
         fclose(fp);
 
-        npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
-                          strlen(tmpfname), tmpfname, true, (void*)(size_t)comt_params->loader);
+        comt_params->retval = npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
+                                                strlen(tmpfname), tmpfname, true,
+                                                (void*)(size_t)comt_params->loader);
         free(tmpfname);
     } else {
         // GET request
-        npn.geturlnotify(pp_i->npp, comt_params->url, NULL, (void*)(size_t)comt_params->loader);
+        comt_params->retval = npn.geturlnotify(pp_i->npp, comt_params->url, NULL,
+                                               (void*)(size_t)comt_params->loader);
     }
 
-    free(comt_params);
+    if (comt_params->should_wait)
+        pthread_barrier_wait(&comt_params->barrier);
 }
 
 FILE *
@@ -237,9 +243,23 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     comt_params->post_data =                        ul->post_data;
 
     struct pp_instance_s *pp_i = tables_get_pp_instance(ul->_.instance);
-    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
+    if (ppb_core_is_main_thread()) {
+        comt_params->should_wait = 0;
+        _url_loader_open_comt(comt_params);
+    } else {
+        comt_params->should_wait = 1;
+        pthread_barrier_init(&comt_params->barrier, NULL, 2);
+        npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
+        pthread_barrier_wait(&comt_params->barrier);
+        pthread_barrier_destroy(&comt_params->barrier);
+    }
 
+    int retval = comt_params->retval;
     pp_resource_release(loader);
+    free(comt_params);
+
+    if (retval != NPERR_NO_ERROR)
+        return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
         int done = 0;
@@ -305,9 +325,23 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     comt_params->post_data =                        NULL;
 
     struct pp_instance_s *pp_i = tables_get_pp_instance(ul->_.instance);
-    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
+    if (ppb_core_is_main_thread()) {
+        comt_params->should_wait = 0;
+        _url_loader_open_comt(comt_params);
+    } else {
+        comt_params->should_wait = 1;
+        pthread_barrier_init(&comt_params->barrier, NULL, 2);
+        npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
+        pthread_barrier_wait(&comt_params->barrier);
+        pthread_barrier_destroy(&comt_params->barrier);
+    }
 
+    int retval = comt_params->retval;
     pp_resource_release(loader);
+    free(comt_params);
+
+    if (retval != NPERR_NO_ERROR)
+        return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
         int done = 0;
