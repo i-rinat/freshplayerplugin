@@ -189,7 +189,6 @@ get_flashsetting_language(void)
     if (ptr)
         *ptr = '-';
 
-    fprintf(stderr, "Language = %s\n", lang);
     struct PP_Var res = PP_MakeString(lang);
     free(lang);
     return res;
