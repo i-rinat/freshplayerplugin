@@ -198,6 +198,7 @@ get_flashsetting_language(void)
 struct PP_Var
 ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     struct PP_Var var = PP_MakeUndefined();
 
     switch (setting) {
@@ -206,9 +207,13 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
         var.value.as_bool = PP_FALSE; // TODO: reenable 3d
         break;
     case PP_FLASHSETTING_INCOGNITO:
-        // TODO: incognito?
         var.type = PP_VARTYPE_BOOL;
         var.value.as_bool = PP_FALSE;
+
+        NPBool private;
+        if (npn.getvalue(pp_i->npp, NPNVprivateModeBool, &private) == NPERR_NO_ERROR) {
+            var.value.as_bool = private ? PP_TRUE : PP_FALSE;
+        }
         break;
     case PP_FLASHSETTING_STAGE3DENABLED:
         var.type = PP_VARTYPE_BOOL;
