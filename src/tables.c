@@ -37,6 +37,7 @@ pthread_t       np_main_thread;
 struct config_s config = {
     .audio_buffer_min_ms = 20,
     .audio_buffer_max_ms = 500,
+    .xinerama_screen     = 0,
     .quirks = {
         .switch_buttons_2_3 = 0,
     },

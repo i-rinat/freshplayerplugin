@@ -37,6 +37,7 @@ extern pthread_t        np_main_thread;
 extern struct config_s {
     int     audio_buffer_min_ms;
     int     audio_buffer_max_ms;
+    int     xinerama_screen;
     struct {
         int   switch_buttons_2_3;
     } quirks;

@@ -144,6 +144,9 @@ read_config(void)
         config.audio_buffer_max_ms = intval;
     }
 
+    if (config_lookup_int(&cfg, "xinerama_screen", &intval))
+        config.xinerama_screen = intval;
+
 quit:
     config_destroy(&cfg);
     free(local_config);

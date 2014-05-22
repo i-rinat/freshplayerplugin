@@ -115,12 +115,13 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     XineramaScreenInfo *xsi = XineramaQueryScreens(pp_i->dpy, &screen_count);
     XWindowAttributes xw_attrs;
     if (xsi) {
-        for (int k = 0; k < screen_count; k++) {
-            fprintf(stderr, "screen %d: %dx%d+%d+%d\n", xsi[k].screen_number, xsi[k].width,
-                    xsi[k].height, xsi[k].x_org, xsi[k].y_org);
-        }
-        pp_i->fs_width =  xsi[0].width;
-        pp_i->fs_height = xsi[0].height;
+        int screen = config.xinerama_screen;
+        if (screen < 0)
+            screen = 0;
+        if (screen > screen_count - 1)
+            screen = screen_count - 1;
+        pp_i->fs_width =  xsi[screen].width;
+        pp_i->fs_height = xsi[screen].height;
         XFree(xsi);
     } else if (XGetWindowAttributes(pp_i->dpy, DefaultRootWindow(pp_i->dpy), &xw_attrs)) {
         pp_i->fs_width =  xw_attrs.width;
