@@ -21,6 +21,7 @@ pkg_check_modules(REQ
 	xinerama
 	gl
 	liburiparser
+	libconfig
 	cairo
 	pango
 	pangocairo

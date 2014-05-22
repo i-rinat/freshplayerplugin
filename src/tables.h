@@ -34,10 +34,13 @@
 
 extern NPNetscapeFuncs  npn;
 extern pthread_t        np_main_thread;
-extern struct quirks_s {
-    int                 switch_buttons_2_3;
-} quirks;
-
+extern struct config_s {
+    int     audio_buffer_min_ms;
+    int     audio_buffer_max_ms;
+    struct {
+        int   switch_buttons_2_3;
+    } quirks;
+} config;
 
 int         tables_ref_var(struct PP_Var var);
 int         tables_unref_var(struct PP_Var var);

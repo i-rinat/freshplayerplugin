@@ -22,18 +22,22 @@
  * SOFTWARE.
  */
 
+#define _GNU_SOURCE             // asprintf
 #include <dlfcn.h>
 #include <npapi/npapi.h>
 #include <npapi/npfunctions.h>
 #include <string.h>
 #include <ppapi/c/ppb.h>
 #include <ppapi/c/pp_module.h>
+#include <libconfig.h>
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
 
 #define PPFP_PATH "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
+
+const char *config_file_name = "freshwrapper.conf";
 
 
 __attribute__((visibility("default")))
@@ -82,11 +86,70 @@ initialize_quirks(void)
         cmdline[len] = 0;
         if (strstr(cmdline, "operapluginwrapper")) {
             // Opera calls right mouse button "2" instead of correct "3"
-            quirks.switch_buttons_2_3 = 1;
+            config.quirks.switch_buttons_2_3 = 1;
         }
 
         fclose(fp);
     }
+}
+
+static
+char *
+get_local_config_path(void)
+{
+    char       *res = NULL;
+    const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+
+    if (xdg_config_home) {
+        asprintf(&res, "%s/%s", xdg_config_home, config_file_name);
+    } else {
+        const char *home = getenv("HOME");
+        asprintf(&res, "%s/.config/%s", home ? home : "", config_file_name);
+    }
+
+    return res;
+}
+
+static
+char *
+get_global_config_path(void)
+{
+    char *res = NULL;
+    asprintf(&res, "/etc/%s", config_file_name);
+    return res;
+}
+
+static
+void
+read_config(void)
+{
+    config_t    cfg;
+    char       *local_config = get_local_config_path();
+    char       *global_config = get_global_config_path();
+
+    config_init(&cfg);
+
+    if (!config_read_file(&cfg, local_config)) {
+        if (!config_read_file(&cfg, global_config)) {
+            goto quit;
+        }
+    }
+
+    int intval;
+    if (config_lookup_int(&cfg, "audio_buffer_min_ms", &intval)) {
+        config.audio_buffer_min_ms = intval;
+    }
+
+    if (config_lookup_int(&cfg, "audio_buffer_max_ms", &intval)) {
+        config.audio_buffer_max_ms = intval;
+    }
+
+quit:
+    config_destroy(&cfg);
+    free(local_config);
+    free(global_config);
+
+    initialize_quirks();
 }
 
 __attribute__((visibility("default")))
@@ -136,7 +199,7 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
         return NPERR_GENERIC_ERROR;
     }
 
-    initialize_quirks();
+    read_config();
 
     // TODO: make module ids distinct
     int res = ppp_initialize_module(42, ppb_get_interface);

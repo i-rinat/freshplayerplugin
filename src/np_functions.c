@@ -520,7 +520,7 @@ handle_button_press_release_event(NPP npp, void *event)
     float wheel_x = 0.0, wheel_y = 0.0;
     int ev_button = ev->button;
 
-    if (quirks.switch_buttons_2_3) {
+    if (config.quirks.switch_buttons_2_3) {
         if (ev_button == 2)
             ev_button = 3;
         else if (ev_button == 3)

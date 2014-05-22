@@ -34,7 +34,13 @@
 
 NPNetscapeFuncs npn;
 pthread_t       np_main_thread;
-struct quirks_s quirks = { 0 };
+struct config_s config = {
+    .audio_buffer_min_ms = 20,
+    .audio_buffer_max_ms = 500,
+    .quirks = {
+        .switch_buttons_2_3 = 0,
+    },
+};
 
 static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;
