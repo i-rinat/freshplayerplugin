@@ -27,11 +27,12 @@
 #include "ppb_audio.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 
 
 PP_Resource
-ppb_audio_create(PP_Instance instance, PP_Resource config,
+ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
                  PPB_Audio_Callback_1_0 audio_callback, void *user_data)
 {
     PP_Resource audio = pp_resource_allocate(PP_RESOURCE_AUDIO, instance);
@@ -39,13 +40,13 @@ ppb_audio_create(PP_Instance instance, PP_Resource config,
     if (!a)
         return 0;
 
-    struct pp_audio_config_s *ac = pp_resource_acquire(config, PP_RESOURCE_AUDIO_CONFIG);
+    struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
     if (!ac)
         goto err;
 
     a->sample_rate = ac->sample_rate;
     a->sample_frame_count = ac->sample_frame_count;
-    pp_resource_release(config);
+    pp_resource_release(audio_config);
 
     snd_pcm_hw_params_t *hw_params;
     snd_pcm_sw_params_t *sw_params;
@@ -79,6 +80,13 @@ ppb_audio_create(PP_Instance instance, PP_Resource config,
     ERR_CHECK(res, snd_pcm_hw_params_set_channels, goto err);
 
     unsigned int buffer_time = 2 * (long long)a->sample_frame_count * 1000 * 1000 / a->sample_rate;
+
+    if (buffer_time < 1000 * config.audio_buffer_min_ms)
+        buffer_time = 1000 * config.audio_buffer_min_ms;
+
+    if (buffer_time > 1000 * config.audio_buffer_max_ms)
+        buffer_time = 1000 * config.audio_buffer_max_ms;
+
     int dir;
     res = snd_pcm_hw_params_set_buffer_time_near(a->ph, hw_params, &buffer_time, &dir);
     ERR_CHECK(res, snd_pcm_hw_params_set_buffer_time_near, goto err);
@@ -228,11 +236,11 @@ ppb_audio_stop_playback(PP_Resource audio)
 // trace wrappers
 static
 PP_Resource
-trace_ppb_audio_create(PP_Instance instance, PP_Resource config,
+trace_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
                        PPB_Audio_Callback_1_0 audio_callback, void *user_data)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
-    return ppb_audio_create(instance, config, audio_callback, user_data);
+    return ppb_audio_create(instance, audio_config, audio_callback, user_data);
 }
 
 static
