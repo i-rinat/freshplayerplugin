@@ -23,13 +23,14 @@
  */
 
 #include "ppb_flash_fullscreen.h"
+#include "ppb_core.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
 #include <ppapi/c/ppp_instance.h>
 #include "reverse_constant.h"
-#include  <X11/Xatom.h>
+#include <X11/Xatom.h>
 
 
 PP_Bool
@@ -50,8 +51,13 @@ _update_instance_view_comt(void *p)
     struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
     v->rect.point.x = 0;
     v->rect.point.y = 0;
-    v->rect.size.width = pp_i->width;
-    v->rect.size.height = pp_i->height;
+    if (pp_i->is_fullscreen) {
+        v->rect.size.width = pp_i->fs_width;
+        v->rect.size.height = pp_i->fs_height;
+    } else {
+        v->rect.size.width = pp_i->width;
+        v->rect.size.height = pp_i->height;
+    }
     pp_resource_release(view);
 
     if (pp_i->instance_loaded)
@@ -70,15 +76,9 @@ fullscreen_window_thread(void *p)
     struct thread_param_s *tp = p;
     Display *dpy = XOpenDisplay(NULL);
     struct pp_instance_s *pp_i = tables_get_pp_instance(tp->instance);
-    XWindowAttributes xw_attrs;
-
-    if (XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &xw_attrs)) {
-        pp_i->width = xw_attrs.width;
-        pp_i->height = xw_attrs.height;
-    }
 
     pp_i->fs_wnd = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy),
-                                       0, 0, pp_i->width, pp_i->height, 0, 0, 0x809080);
+                                       0, 0, pp_i->fs_width, pp_i->fs_height, 0, 0, 0x809080);
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
                                     ButtonReleaseMask | PointerMotionMask | ExposureMask);
 
@@ -166,19 +166,23 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
     return PP_TRUE;
 }
 
+struct get_fs_param_s {
+    PP_Instance         instance;
+    struct PP_Size     *size;
+    pthread_barrier_t   barrier;
+    int                 should_wait;
+    int                 retval;
+};
+
 PP_Bool
 ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    XWindowAttributes xw_attrs;
 
-    if (XGetWindowAttributes(pp_i->dpy, DefaultRootWindow(pp_i->dpy), &xw_attrs)) {
-        size->width = xw_attrs.width;
-        size->height = xw_attrs.height;
-        return PP_TRUE;
-    }
+    size->width = pp_i->fs_width;
+    size->height = pp_i->fs_height;
 
-    return PP_FALSE;
+    return PP_TRUE;
 }
 
 // trace wrappers

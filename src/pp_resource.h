@@ -107,6 +107,8 @@ struct pp_instance_s {
     uint32_t        is_fullscreen;
     pthread_t       fs_thread;
     Window          fs_wnd;
+    uint32_t        fs_width;
+    uint32_t        fs_height;
     uint32_t        width;
     uint32_t        height;
     int             argc;

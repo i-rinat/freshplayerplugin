@@ -18,6 +18,7 @@ pkg_check_modules(REQ
 	alsa
 	glib-2.0
 	x11
+	xinerama
 	gl
 	liburiparser
 	cairo

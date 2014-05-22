@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
+#include <X11/extensions/Xinerama.h>
 #include <pthread.h>
 #include "trace.h"
 #include "reverse_constant.h"
@@ -107,6 +108,26 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->dpy = XOpenDisplay(NULL);
     if (!pp_i->dpy) {
         trace_error("%s, can't open X Display\n", __func__);
+    }
+
+    // get fullscreen resolution
+    int screen_count;
+    XineramaScreenInfo *xsi = XineramaQueryScreens(pp_i->dpy, &screen_count);
+    XWindowAttributes xw_attrs;
+    if (xsi) {
+        for (int k = 0; k < screen_count; k++) {
+            fprintf(stderr, "screen %d: %dx%d+%d+%d\n", xsi[k].screen_number, xsi[k].width,
+                    xsi[k].height, xsi[k].x_org, xsi[k].y_org);
+        }
+        pp_i->fs_width =  xsi[0].width;
+        pp_i->fs_height = xsi[0].height;
+        XFree(xsi);
+    } else if (XGetWindowAttributes(pp_i->dpy, DefaultRootWindow(pp_i->dpy), &xw_attrs)) {
+        pp_i->fs_width =  xw_attrs.width;
+        pp_i->fs_height = xw_attrs.height;
+    } else {
+        pp_i->fs_width = 100;
+        pp_i->fs_height = 100;
     }
 
     // request windowless operation
