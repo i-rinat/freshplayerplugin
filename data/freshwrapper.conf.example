@@ -1,0 +1,13 @@
+# Audio buffer is used to continuously provide sound adapter with data.
+# Values too low may lead to buffer underruns and stuttering.  Values
+# too high will lead to noticeable latency. Usually plugin selects size
+# on its own, but you may override bounds here
+
+# lower bound for audio buffer size, in milliseconds
+audio_buffer_min_ms = 20
+
+# higher bound of audio buffer size, in milliseconds
+audio_buffer_max_ms = 500
+
+# Xinerama screen used to acquire fullscreen window geometry
+xinerama_screen = 0
