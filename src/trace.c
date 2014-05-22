@@ -32,32 +32,40 @@
 #include "pp_resource.h"
 
 
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
+
 #ifndef NDEBUG
 void
 trace_info(const char *fmt, ...)
 {
+    pthread_mutex_lock(&lock);
     va_list args;
-    fprintf(stdout, "[fresh] ");
-//    fprintf(stdout, "[fresh %5d] ", (int)syscall(__NR_gettid));
+//    fprintf(stdout, "[fresh] ");
+    fprintf(stdout, "[fresh %5d] ", (int)syscall(__NR_gettid));
     va_start(args, fmt);
     vfprintf(stdout, fmt, args);
     va_end(args);
+    pthread_mutex_unlock(&lock);
 }
 #endif
 
 void
 trace_warning(const char *fmt, ...)
 {
+    pthread_mutex_lock(&lock);
     va_list args;
     fprintf(stdout, "[fresh] [warning] ");
     va_start(args, fmt);
     vfprintf(stdout, fmt, args);
     va_end(args);
+    pthread_mutex_unlock(&lock);
 }
 
 void
 trace_error(const char *fmt, ...)
 {
+    pthread_mutex_lock(&lock);
     va_list args;
     fprintf(stderr, "[fresh] [error] ");
     va_start(args, fmt);
@@ -68,6 +76,7 @@ trace_error(const char *fmt, ...)
     va_start(args, fmt);
     vfprintf(stdout, fmt, args);
     va_end(args);
+    pthread_mutex_unlock(&lock);
 }
 
 char *
