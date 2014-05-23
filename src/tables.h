@@ -38,6 +38,8 @@ extern struct config_s {
     int     audio_buffer_min_ms;
     int     audio_buffer_max_ms;
     int     xinerama_screen;
+    char   *plugin_path;
+    char   *flash_command_line;
     struct {
         int   switch_buttons_2_3;
     } quirks;

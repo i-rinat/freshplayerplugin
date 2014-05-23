@@ -147,8 +147,7 @@ ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 struct PP_Var
 ppb_flash_get_command_line_args(PP_Module module)
 {
-    // TODO: make configurable
-    return PP_MakeString("enable_hw_video_decode=1,enable_stagevideo_auto=1");
+    return PP_MakeString(config.flash_command_line);
 }
 
 void
