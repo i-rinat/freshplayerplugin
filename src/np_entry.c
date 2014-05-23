@@ -35,8 +35,6 @@
 #include "reverse_constant.h"
 #include "pp_interface.h"
 
-#define PPFP_PATH "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
-
 const char *config_file_name = "freshwrapper.conf";
 
 
@@ -144,8 +142,18 @@ read_config(void)
         config.audio_buffer_max_ms = intval;
     }
 
-    if (config_lookup_int(&cfg, "xinerama_screen", &intval))
+    if (config_lookup_int(&cfg, "xinerama_screen", &intval)) {
         config.xinerama_screen = intval;
+    }
+
+    const char *stringval;
+    if (config_lookup_string(&cfg, "plugin_path", &stringval)) {
+        config.plugin_path = strdup(stringval);
+    }
+
+    if (config_lookup_string(&cfg, "flash_command_line", &stringval)) {
+        config.flash_command_line = strdup(stringval);
+    }
 
 quit:
     config_destroy(&cfg);
@@ -188,9 +196,11 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     aNPPFuncs->getsiteswithdata = NPP_GetSitesWithData;
     aNPPFuncs->didComposite = NPP_DidComposite;
 
-    void *h = dlopen(PPFP_PATH, RTLD_LAZY);
+    read_config();
+
+    void *h = dlopen(config.plugin_path, RTLD_LAZY);
     if (!h) {
-        trace_error("%s, can't open " PPFP_PATH "\n", __func__);
+        trace_error("%s, can't open %s\n", __func__, config.plugin_path);
         return NPERR_GENERIC_ERROR;
     }
 
@@ -201,8 +211,6 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
         trace_error("%s, one of required PPP_* is missing\n", __func__);
         return NPERR_GENERIC_ERROR;
     }
-
-    read_config();
 
     // TODO: make module ids distinct
     int res = ppp_initialize_module(42, ppb_get_interface);
