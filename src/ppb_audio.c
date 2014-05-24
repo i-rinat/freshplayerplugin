@@ -81,13 +81,13 @@ ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
 
     unsigned int buffer_time = 2 * (long long)a->sample_frame_count * 1000 * 1000 / a->sample_rate;
 
-    if (buffer_time < 1000 * config.audio_buffer_min_ms)
+    if ((int)buffer_time < 1000 * config.audio_buffer_min_ms)
         buffer_time = 1000 * config.audio_buffer_min_ms;
 
-    if (buffer_time > 1000 * config.audio_buffer_max_ms)
+    if ((int)buffer_time > 1000 * config.audio_buffer_max_ms)
         buffer_time = 1000 * config.audio_buffer_max_ms;
 
-    int dir;
+    int dir = 1;
     res = snd_pcm_hw_params_set_buffer_time_near(a->ph, hw_params, &buffer_time, &dir);
     ERR_CHECK(res, snd_pcm_hw_params_set_buffer_time_near, goto err);
 
@@ -188,7 +188,7 @@ audio_player_thread(void *p)
         snd_pcm_wait(a->ph, 1000);
         int frame_count = snd_pcm_avail_update(a->ph);
         if (frame_count > 0) {
-            if (frame_count > a->sample_frame_count)
+            if (frame_count > (int)a->sample_frame_count)
                 frame_count = a->sample_frame_count;
 
             a->callback(a->audio_buffer, frame_count * 2 * sizeof(int16_t), a->user_data);

@@ -31,7 +31,7 @@
 
 
 static int32_t                     *popup_menu_result = NULL;
-static struct PP_CompletionCallback popup_menu_ccb = { 0 };
+static struct PP_CompletionCallback popup_menu_ccb = { };
 static int                          popup_menu_sentinel = 0;
 static int                          popup_menu_canceled = 0;
 

@@ -772,7 +772,7 @@ ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count, co
     // prepend "#version 100" line to all shaders
     // This enables shader compatibility mode introduced by GL_ARB_ES2_compatibility
     char **str2 = malloc(count * sizeof(char *));
-    for (uintptr_t k = 0; k < count; k ++) {
+    for (intptr_t k = 0; k < count; k ++) {
         size_t shader_len = strlen(str[k]);
         str2[k] = malloc(shader_len + 1 + v100_len);
         memcpy(str2[k], v100, v100_len); // first line
@@ -781,7 +781,7 @@ ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count, co
 
     glShaderSource(shader, count, (const char **)str2, length);
 
-    for (uintptr_t k = 0; k < count; k ++)
+    for (intptr_t k = 0; k < count; k ++)
         free(str2[k]);
     free(str2);
 }
@@ -2198,7 +2198,7 @@ trace_ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei cou
 {
     trace_info("[PPB] {full} %s context=%d, shader=%u, count=%d, str=%p, length=%p\n",
                __func__+6, context, shader, count, str, length);
-    for (size_t k = 0; k < count; k++) {
+    for (intptr_t k = 0; k < count; k++) {
         trace_info("             shader_source[%u] = \n%s\n", (unsigned)k, str[k]);
     }
     ppb_opengles2_ShaderSource(context, shader, count, str, length);

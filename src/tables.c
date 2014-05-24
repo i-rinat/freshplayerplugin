@@ -169,7 +169,7 @@ PP_MakeStringN(const char *s, unsigned int len)
     memcpy(ptr + sizeof(uint32_t), s, len);
     ptr[len + sizeof(uint32_t)] = 0;
 
-    struct PP_Var var = { 0 };
+    struct PP_Var var = { };
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (size_t)(void *)ptr;
     tables_ref_var(var);
@@ -180,7 +180,7 @@ PP_MakeStringN(const char *s, unsigned int len)
 struct PP_Var
 PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj)
 {
-    struct PP_Var var = { 0 };
+    struct PP_Var var = { };
     struct pp_var_object_s *obj;
 
     obj = malloc(sizeof(*obj));
