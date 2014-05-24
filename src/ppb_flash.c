@@ -132,6 +132,11 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
 int32_t
 ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
+    struct pp_url_request_info_s *ri =
+                            pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(ri->_.instance);
+    npn.geturl(pp_i->npp, ri->url, target);
+    pp_resource_release(request_info);
     return 0;
 }
 
@@ -338,7 +343,7 @@ static
 int32_t
 trace_ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
-    trace_info("[PPB] {zilch} %s request_info=%d, target=%s, from_user_action=%d\n", __func__+6,
+    trace_info("[PPB] {full} %s request_info=%d, target=%s, from_user_action=%d\n", __func__+6,
                request_info, target, from_user_action);
     return ppb_flash_navigate(request_info, target, from_user_action);
 }
