@@ -26,6 +26,7 @@
 #include <pthread.h>
 #include "ppb_audio.h"
 #include <stdlib.h>
+#include <glib.h>
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
@@ -79,17 +80,20 @@ ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
     res = snd_pcm_hw_params_set_channels(a->ph, hw_params, 2);
     ERR_CHECK(res, snd_pcm_hw_params_set_channels, goto err);
 
+    int dir = 1;
     unsigned int buffer_time = 2 * (long long)a->sample_frame_count * 1000 * 1000 / a->sample_rate;
 
-    if ((int)buffer_time < 1000 * config.audio_buffer_min_ms)
-        buffer_time = 1000 * config.audio_buffer_min_ms;
-
-    if ((int)buffer_time > 1000 * config.audio_buffer_max_ms)
-        buffer_time = 1000 * config.audio_buffer_max_ms;
-
-    int dir = 1;
+    buffer_time = CLAMP(buffer_time,
+                        1000 * config.audio_buffer_min_ms,
+                        1000 * config.audio_buffer_max_ms);
     res = snd_pcm_hw_params_set_buffer_time_near(a->ph, hw_params, &buffer_time, &dir);
     ERR_CHECK(res, snd_pcm_hw_params_set_buffer_time_near, goto err);
+
+    snd_pcm_uframes_t period_size = a->sample_frame_count / 4;
+    dir = 1;
+    res = snd_pcm_hw_params_set_period_size_near(a->ph, hw_params, &period_size, &dir);
+    ERR_CHECK(res, snd_pcm_hw_params_set_period_size_near, goto err);
+    a->period_size = period_size;
 
     res = snd_pcm_hw_params(a->ph, hw_params);
     ERR_CHECK(res, snd_pcm_hw_params, goto err);
@@ -142,7 +146,7 @@ ppb_audio_destroy(void *p)
     if (a->playing) {
         a->shutdown = 1;
         while (a->playing)
-            pthread_yield();
+            usleep(10);
     }
     snd_pcm_close(a->ph);
     free_and_nullify(a, audio_buffer);
@@ -180,6 +184,7 @@ void *
 audio_player_thread(void *p)
 {
     struct pp_audio_s *a = p;
+    int error_cnt = 0;
 
     a->playing = 1;
     while (1) {
@@ -192,14 +197,21 @@ audio_player_thread(void *p)
                 frame_count = a->sample_frame_count;
 
             a->callback(a->audio_buffer, frame_count * 2 * sizeof(int16_t), a->user_data);
-            snd_pcm_writei(a->ph, a->audio_buffer, frame_count);
+            snd_pcm_sframes_t written = snd_pcm_writei(a->ph, a->audio_buffer, frame_count);
+            if (written < 0) {
+                snd_pcm_recover(a->ph, written, 1);
+                error_cnt++;
+                if (error_cnt >= 5)
+                    trace_error("%s, too many buffer underruns\n", __func__);
+            } else {
+                error_cnt = 0;
+            }
         }
     }
 
     a->playing = 0;
     return NULL;
 }
-
 
 PP_Bool
 ppb_audio_start_playback(PP_Resource audio)
@@ -227,8 +239,10 @@ ppb_audio_stop_playback(PP_Resource audio)
     if (a->playing) {
         a->shutdown = 1;
         while (a->playing)
-            pthread_yield();
+            usleep(10);
     }
+
+    pp_resource_release(audio);
     return PP_TRUE;
 }
 
@@ -239,7 +253,8 @@ PP_Resource
 trace_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
                        PPB_Audio_Callback_1_0 audio_callback, void *user_data)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s instance=%d, audio_config=%d, audio_callback=%p, user_data=%p\n",
+               __func__+6, instance, audio_config, audio_callback, user_data);
     return ppb_audio_create(instance, audio_config, audio_callback, user_data);
 }
 
@@ -247,7 +262,7 @@ static
 PP_Bool
 trace_ppb_audio_is_audio(PP_Resource resource)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_audio_is_audio(resource);
 }
 
@@ -255,7 +270,7 @@ static
 PP_Resource
 trace_ppb_audio_get_current_config(PP_Resource audio)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s audio=%d\n", __func__+6, audio);
     return ppb_audio_get_current_config(audio);
 }
 
@@ -263,7 +278,7 @@ static
 PP_Bool
 trace_ppb_audio_start_playback(PP_Resource audio)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s audio=%d\n", __func__+6, audio);
     return ppb_audio_start_playback(audio);
 }
 
@@ -271,7 +286,7 @@ static
 PP_Bool
 trace_ppb_audio_stop_playback(PP_Resource audio)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s audio=%d\n", __func__+6, audio);
     return ppb_audio_stop_playback(audio);
 }
 

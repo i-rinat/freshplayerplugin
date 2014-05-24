@@ -254,6 +254,7 @@ struct pp_audio_s {
     struct pp_resource_generic_s _;
     uint32_t                sample_rate;
     uint32_t                sample_frame_count;
+    uint32_t                period_size;
     snd_pcm_t              *ph;
     void                   *audio_buffer;
     pthread_t               thread;
