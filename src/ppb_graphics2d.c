@@ -53,11 +53,17 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     }
 
     g2d->is_always_opaque = is_always_opaque;
-    g2d->width = size->width;
+    g2d->scale = 1.0;
+    g2d->width =  size->width;
     g2d->height = size->height;
     g2d->stride = 4 * size->width;
+
+    g2d->scaled_width =  g2d->width;
+    g2d->scaled_height = g2d->height;
+    g2d->scaled_stride = g2d->stride;
+
     g2d->data = calloc(g2d->stride * g2d->height, 1);
-    g2d->second_buffer = calloc(g2d->stride * g2d->height, 1);
+    g2d->second_buffer = calloc(g2d->scaled_stride * g2d->scaled_height, 1);
     if (!g2d->data || !g2d->second_buffer) {
         trace_warning("%s, can't allocate memory\n", __func__);
         free_and_nullify(g2d, data);
@@ -69,7 +75,6 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     g2d->cairo_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->data,
                             CAIRO_FORMAT_ARGB32, g2d->width, g2d->height, g2d->stride);
     g2d->task_list = NULL;
-    pthread_mutex_init(&g2d->lock, NULL);
 
     pp_resource_release(graphics_2d);
     return graphics_2d;
@@ -87,7 +92,6 @@ ppb_graphics2d_destroy(void *p)
         cairo_surface_destroy(g2d->cairo_surf);
         g2d->cairo_surf = NULL;
     }
-    pthread_mutex_destroy(&g2d->lock);
 }
 
 PP_Bool
@@ -217,9 +221,18 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         free(pt);
     }
 
-    pthread_mutex_lock(&g2d->lock);
-    memcpy(g2d->second_buffer, g2d->data, g2d->stride * g2d->height);
-    pthread_mutex_unlock(&g2d->lock);
+    // scale image
+    {
+        cairo_surface_t *surf;
+        surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
+                CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
+        cairo_t *cr = cairo_create(surf);
+        cairo_scale(cr, g2d->scale, g2d->scale);
+        cairo_set_source_surface(cr, g2d->cairo_surf, 0, 0);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+        cairo_surface_destroy(surf);
+    }
 
     NPRect npr = {.top = 0, .left = 0, .bottom = g2d->height, .right = g2d->width};
     pp_resource_release(graphics_2d);
@@ -247,13 +260,33 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 PP_Bool
 ppb_graphics2d_set_scale(PP_Resource resource, float scale)
 {
-    return PP_TRUE;
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(resource, PP_RESOURCE_GRAPHICS2D);
+    if (!g2d)
+        return PP_ERROR_BADRESOURCE;
+
+    g2d->scale = scale;
+    g2d->scaled_width = g2d->width * scale + 0.5;
+    g2d->scaled_height = g2d->height * scale + 0.5;
+    g2d->scaled_stride = 4 * g2d->scaled_width;
+
+    free(g2d->second_buffer);
+    g2d->second_buffer = calloc(g2d->scaled_stride * g2d->scaled_height, 1);
+    PP_Bool ret = !!g2d->second_buffer;
+
+    pp_resource_release(resource);
+    return ret;
 }
 
 float
 ppb_graphics2d_get_scale(PP_Resource resource)
 {
-    return 1.0f;
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(resource, PP_RESOURCE_GRAPHICS2D);
+    if (!g2d)
+        return PP_ERROR_BADRESOURCE;
+
+    float scale = g2d->scale;
+    pp_resource_release(resource);
+    return scale;
 }
 
 // trace wrappers
@@ -338,7 +371,7 @@ static
 PP_Bool
 trace_ppb_graphics2d_set_scale(PP_Resource resource, float scale)
 {
-    trace_info("[PPB] {zilch} %s resource=%d, scale=%f\n", __func__+6, resource, scale);
+    trace_info("[PPB] {full} %s resource=%d, scale=%f\n", __func__+6, resource, scale);
     return ppb_graphics2d_set_scale(resource, scale);
 }
 
@@ -346,6 +379,7 @@ static
 float
 trace_ppb_graphics2d_get_scale(PP_Resource resource)
 {
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_graphics2d_get_scale(resource);
 }
 

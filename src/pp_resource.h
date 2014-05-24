@@ -224,9 +224,12 @@ struct pp_graphics2d_s {
     int32_t             width;
     int32_t             height;
     int32_t             stride;
+    double              scale;
+    int32_t             scaled_width;
+    int32_t             scaled_height;
+    int32_t             scaled_stride;
     char               *data;
     char               *second_buffer;
-    pthread_mutex_t     lock;
     cairo_surface_t    *cairo_surf;
     GList              *task_list;
 };

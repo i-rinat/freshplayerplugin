@@ -381,13 +381,13 @@ handle_graphics_expose_event(NPP npp, void *event)
     int screen = 0;
 
     if (g2d) {
-        pthread_mutex_lock(&g2d->lock);
         XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
-                                  g2d->second_buffer, g2d->width, g2d->height, 32, g2d->stride);
+                                  g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
+                                  g2d->scaled_stride);
 
-        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g2d->width, g2d->height);
+        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0,
+                  g2d->scaled_width, g2d->scaled_height);
         free(xi);
-        pthread_mutex_unlock(&g2d->lock);
         pp_resource_release(pp_i->graphics);
     } else if (g3d) {
         XImage *xi = XGetImage(dpy, g3d->pixmap, 0, 0, g3d->width, g3d->height, XAllPlanes(),
