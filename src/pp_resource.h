@@ -77,6 +77,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_AUDIO_INPUT,
     PP_RESOURCE_FLASH_MENU,
     PP_RESOURCE_FLASH_MESSAGE_LOOP,
+    PP_RESOURCE_TYPES_COUNT,
 };
 
 enum pp_request_method_e {

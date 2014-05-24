@@ -42,6 +42,7 @@ struct config_s config = {
     .flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .quirks = {
         .switch_buttons_2_3 = 0,
+        .dump_resource_histogram = 0,
     },
 };
 

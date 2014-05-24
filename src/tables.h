@@ -42,6 +42,7 @@ extern struct config_s {
     char   *flash_command_line;
     struct {
         int   switch_buttons_2_3;
+        int   dump_resource_histogram;
     } quirks;
 } config;
 

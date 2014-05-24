@@ -23,6 +23,8 @@
  */
 
 #include "pp_resource.h"
+#include "tables.h"
+#include "trace.h"
 #include <glib.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -208,6 +210,19 @@ pp_resource_ref(PP_Resource resource)
     pthread_mutex_unlock(&res_tbl_lock);
 }
 
+static
+void
+_count_resources(gpointer key, gpointer value, gpointer user_data)
+{
+    int *counts = user_data;
+    struct pp_resource_generic_s *r = value;
+
+    if (0 <= r->type && r->type < PP_RESOURCE_TYPES_COUNT)
+        counts[r->type] ++;
+    else
+        counts[PP_RESOURCE_TYPES_COUNT] ++;
+}
+
 void
 pp_resource_unref(PP_Resource resource)
 {
@@ -278,5 +293,31 @@ pp_resource_unref(PP_Resource resource)
         pp_resource_expunge(resource);
         if (parent)
             pp_resource_unref(parent);
+    }
+
+    if (config.quirks.dump_resource_histogram) {
+        time_t current_time = time(NULL);
+        static uintptr_t throttling = 0;
+
+        if (current_time % 5 == 0) {
+            if (!throttling) {
+                int counts[PP_RESOURCE_TYPES_COUNT + 1] = {};
+
+                throttling = 1;
+                pthread_mutex_lock(&res_tbl_lock);
+                g_hash_table_foreach(res_tbl, _count_resources, counts);
+                pthread_mutex_unlock(&res_tbl_lock);
+
+                trace_error("-- %10lu ------------\n", (unsigned long)current_time);
+                for (int k = 0; k < PP_RESOURCE_TYPES_COUNT; k ++)
+                    trace_error("counts[%2d] = %d\n", k, counts[k]);
+                if (counts[PP_RESOURCE_TYPES_COUNT] > 0)
+                    trace_error("%d unknown resources (should never happen)\n",
+                                counts[PP_RESOURCE_TYPES_COUNT]);
+                trace_error("==========================\n");
+            }
+        } else {
+            throttling = 0;
+        }
     }
 }
