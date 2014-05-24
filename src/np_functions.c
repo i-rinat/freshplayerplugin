@@ -166,16 +166,18 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         pp_i->width = window->width;
         pp_i->height = window->height;
 
-        PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
-        struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-        v->rect.point.x = window->x;
-        v->rect.point.y = window->y;
-        v->rect.size.width = window->width;
-        v->rect.size.height = window->height;
-        pp_resource_release(view);
+        if (pp_i->instance_loaded) {
+            PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
+            struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+            v->rect.point.x = window->x;
+            v->rect.point.y = window->y;
+            v->rect.size.width = window->width;
+            v->rect.size.height = window->height;
+            pp_resource_release(view);
 
-        if (pp_i->instance_loaded)
             pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
+            ppb_core_release_resource(view);
+        }
     }
 
     return NPERR_NO_ERROR;

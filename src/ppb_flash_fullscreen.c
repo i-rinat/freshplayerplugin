@@ -47,21 +47,24 @@ _update_instance_view_comt(void *p)
 {
     PP_Instance instance = (size_t)p;
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
-    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-    v->rect.point.x = 0;
-    v->rect.point.y = 0;
-    if (pp_i->is_fullscreen) {
-        v->rect.size.width = pp_i->fs_width;
-        v->rect.size.height = pp_i->fs_height;
-    } else {
-        v->rect.size.width = pp_i->width;
-        v->rect.size.height = pp_i->height;
-    }
-    pp_resource_release(view);
 
-    if (pp_i->instance_loaded)
+    if (pp_i->instance_loaded) {
+        PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
+        struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+        v->rect.point.x = 0;
+        v->rect.point.y = 0;
+        if (pp_i->is_fullscreen) {
+            v->rect.size.width = pp_i->fs_width;
+            v->rect.size.height = pp_i->fs_height;
+        } else {
+            v->rect.size.width = pp_i->width;
+            v->rect.size.height = pp_i->height;
+        }
+        pp_resource_release(view);
+
         pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
+        ppb_core_release_resource(view);
+    }
 }
 
 struct thread_param_s {
