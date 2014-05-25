@@ -30,7 +30,11 @@
 #include "tables.h"
 #include "reverse_constant.h"
 #include "ppb_var.h"
+#include "ppb_url_loader.h"
+#include "ppb_core.h"
+#include "pp_resource.h"
 #include <ppapi/c/dev/ppb_font_dev.h>
+#include <ppapi/c/pp_errors.h>
 
 
 void
@@ -129,10 +133,35 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
     return PP_MakeUndefined();
 }
 
+static
+void
+nop_callback(void *user_data, int32_t result)
+{
+    (void)user_data;
+    (void)result;
+    // do nothing
+}
+
 int32_t
 ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
-    return 0;
+
+    struct pp_url_request_info_s *ri =
+        pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
+    if (!ri)
+        return PP_ERROR_BADRESOURCE;
+    PP_Instance instance = ri->_.instance;
+    pp_resource_release(request_info);
+
+    PP_Resource url_loader = ppb_url_loader_create(instance);
+    int32_t result = ppb_url_loader_open_target(url_loader, request_info,
+                                                PP_MakeCompletionCallback(nop_callback, NULL),
+                                                target);
+    ppb_core_release_resource(url_loader);
+    if (result != PP_OK && result != PP_OK_COMPLETIONPENDING)
+        return result;
+
+    return PP_OK;
 }
 
 double
@@ -338,7 +367,7 @@ static
 int32_t
 trace_ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
-    trace_info("[PPB] {zilch} %s request_info=%d, target=%s, from_user_action=%d\n", __func__+6,
+    trace_info("[PPB] {full} %s request_info=%d, target=%s, from_user_action=%d\n", __func__+6,
                request_info, target, from_user_action);
     return ppb_flash_navigate(request_info, target, from_user_action);
 }
