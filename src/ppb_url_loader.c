@@ -153,6 +153,7 @@ _url_loader_open_comt(void *user_data)
                                                     strlen(tmpfname), tmpfname, true,
                                                     (void*)(size_t)comt_params->loader);
         }
+        unlink(tmpfname);
         free(tmpfname);
     } else {
         // GET request
