@@ -42,6 +42,10 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback);
 
 int32_t
+ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
+                           struct PP_CompletionCallback callback, const char *target);
+
+int32_t
 ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback callback);
 
 PP_Bool

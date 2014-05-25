@@ -71,6 +71,7 @@ ppb_url_loader_destroy(void *p)
     free_and_nullify(ul, custom_referrer_url);
     free_and_nullify(ul, custom_content_transfer_encoding);
     free_and_nullify(ul, custom_user_agent);
+    free_and_nullify(ul, target);
 }
 
 PP_Bool
@@ -88,6 +89,7 @@ struct comt_param_s {
     const char                 *custom_referrer_url;
     const char                 *custom_content_transfer_encoding;
     const char                 *custom_user_agent;
+    const char                 *target;
     const char                 *post_data;
     size_t                      post_len;
     pthread_barrier_t           barrier;
@@ -143,14 +145,23 @@ _url_loader_open_comt(void *user_data)
         fwrite(comt_params->post_data, 1, comt_params->post_len, fp);
         fclose(fp);
 
-        comt_params->retval = npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
-                                                strlen(tmpfname), tmpfname, true,
-                                                (void*)(size_t)comt_params->loader);
+        if (comt_params->target) {
+            comt_params->retval = npn.posturl(pp_i->npp, comt_params->url, comt_params->target,
+                                              strlen(tmpfname), tmpfname, true);
+        } else {
+            comt_params->retval = npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
+                                                    strlen(tmpfname), tmpfname, true,
+                                                    (void*)(size_t)comt_params->loader);
+        }
         free(tmpfname);
     } else {
         // GET request
-        comt_params->retval = npn.geturlnotify(pp_i->npp, comt_params->url, NULL,
-                                               (void*)(size_t)comt_params->loader);
+        if (comt_params->target) {
+            comt_params->retval = npn.geturl(pp_i->npp, comt_params->url, comt_params->target);
+        } else {
+            comt_params->retval = npn.geturlnotify(pp_i->npp, comt_params->url, NULL,
+                                                   (void*)(size_t)comt_params->loader);
+        }
     }
 
     if (comt_params->should_wait)
@@ -188,6 +199,13 @@ int32_t
 ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback)
 {
+    return ppb_url_loader_open_target(loader, request_info, callback, NULL);
+}
+
+int32_t
+ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
+                           struct PP_CompletionCallback callback, const char *target)
+{
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     struct pp_url_request_info_s *ri = pp_resource_acquire(request_info,
                                                            PP_RESOURCE_URL_REQUEST_INFO);
@@ -210,6 +228,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ul->allow_credentials =                ri->allow_credentials;
     ul->custom_content_transfer_encoding = nullsafe_strdup(ri->custom_content_transfer_encoding);
     ul->custom_user_agent =                nullsafe_strdup(ri->custom_user_agent);
+    ul->target =                           nullsafe_strdup(target);
 
 #define TRIM_NEWLINE(s)     s = trim_nl(s)
 
@@ -239,6 +258,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     comt_params->custom_referrer_url =              ul->custom_referrer_url;
     comt_params->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
     comt_params->custom_user_agent =                ul->custom_user_agent;
+    comt_params->target =                           ul->target;
     comt_params->post_len =                         ul->post_len;
     comt_params->post_data =                        ul->post_data;
 
@@ -321,6 +341,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     comt_params->custom_referrer_url =              ul->custom_referrer_url;
     comt_params->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
     comt_params->custom_user_agent =                ul->custom_user_agent;
+    comt_params->target =                           NULL;
     comt_params->post_len =                         0;
     comt_params->post_data =                        NULL;
 

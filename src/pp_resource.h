@@ -152,6 +152,7 @@ struct pp_url_loader_s {
     PP_Bool                 allow_credentials;
     char                   *custom_content_transfer_encoding;
     char                   *custom_user_agent;
+    char                   *target;
     char                   *post_data;
     size_t                  post_len;
     GList                  *read_tasks;     ///< list of url_loader_read_task_s
