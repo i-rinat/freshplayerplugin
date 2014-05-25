@@ -42,6 +42,7 @@ __attribute__((visibility("default")))
 const char *
 NP_GetMIMEDescription(void)
 {
+    trace_info("[NP] %s\n", __func__);
     // TODO: get MIME info from manifest or plugin itself
     return "application/x-shockwave-flash:swf:Shockwave Flash";
 }
@@ -50,6 +51,7 @@ __attribute__((visibility("default")))
 char *
 NP_GetPluginVersion(void)
 {
+    trace_info("[NP] %s\n", __func__);
     // TODO: get version from manifest
     return (char*)"13.1.2.3";
 }
@@ -65,7 +67,7 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
         *(const char **)value = "Shockwave Flash";
         break;
     case NPPVpluginDescriptionString:
-        *(const char **)value = "Shockwave Flash 13.1.2.3 (actual version unknown) (FreshPlayerPlugin)";
+        *(const char **)value = "Shockwave Flash (FreshPlayerPlugin) 13.1 r2";
         break;
     default:
         trace_info("    not implemented variable %d\n", variable);
