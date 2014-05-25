@@ -67,7 +67,7 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
         *(const char **)value = "Shockwave Flash";
         break;
     case NPPVpluginDescriptionString:
-        *(const char **)value = "Shockwave Flash (FreshPlayerPlugin) 13.1 r2";
+        *(const char **)value = "Shockwave Flash 13.1 r2";
         break;
     default:
         trace_info("    not implemented variable %d\n", variable);
