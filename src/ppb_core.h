@@ -26,6 +26,7 @@
 #define FPP__PPB_CORE_H
 
 #include <ppapi/c/ppb_core.h>
+#include <ppapi/c/pp_instance.h>
 
 
 void
@@ -43,6 +44,10 @@ ppb_core_get_time_ticks(void);
 void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result);
+
+void
+ppb_core_call_on_main_thread_now(PP_Instance instance, struct PP_CompletionCallback callback,
+                                 int32_t result);
 
 PP_Bool
 ppb_core_is_main_thread(void);

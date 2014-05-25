@@ -176,6 +176,20 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
     return;
 }
 
+void
+ppb_core_call_on_main_thread_now(PP_Instance instance, struct PP_CompletionCallback callback,
+                                 int32_t result)
+{
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    struct comt_task_s *task = malloc(sizeof(*task));
+
+    task->callback = callback;
+    task->result_to_pass = result;
+    task->terminate = 0;
+
+    npn.pluginthreadasynccall(pp_i->npp, comt_proxy, task);
+}
+
 PP_Bool
 ppb_core_is_main_thread(void)
 {
