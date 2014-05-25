@@ -251,9 +251,11 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         npn.forceredraw(pp_i->npp);
     }
 
-    if (callback.flags != PP_COMPLETIONCALLBACK_FLAG_OPTIONAL) {
-        trace_warning("%s, non-optional callback was skipped\n", __func__);
+    if (callback.func) {
+        ppb_core_call_on_main_thread_now(pp_i->pp_instance_id, callback, PP_OK);
+        return PP_OK_COMPLETIONPENDING;
     }
+
     return PP_OK;
 }
 
