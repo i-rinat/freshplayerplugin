@@ -206,6 +206,8 @@ pp_resource_ref(PP_Resource resource)
     struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
     if (ptr) {
         ptr->ref_cnt ++;
+    } else {
+        trace_warning("%s, no such resource %d\n", __func__, resource);
     }
     pthread_mutex_unlock(&res_tbl_lock);
 }
