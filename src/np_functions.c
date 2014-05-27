@@ -554,17 +554,14 @@ handle_button_press_release_event(NPP npp, void *event)
     case 1:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_LEFT;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
-        mod |= PP_INPUTEVENT_MODIFIER_LEFTBUTTONDOWN;
         break;
     case 2:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_MIDDLE;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
-        mod |= PP_INPUTEVENT_MODIFIER_MIDDLEBUTTONDOWN;
         break;
     case 3:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_RIGHT;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
-        mod |= PP_INPUTEVENT_MODIFIER_RIGHTBUTTONDOWN;
         break;
 
     case 4: // wheel up
