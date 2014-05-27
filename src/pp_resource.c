@@ -227,16 +227,17 @@ void
 pp_resource_unref(PP_Resource resource)
 {
     PP_Resource parent = 0;
-    int ref_cnt;
+    int ref_cnt = 0;
 
     pthread_mutex_lock(&res_tbl_lock);
     struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
+    if (ptr)
+        ref_cnt = --ptr->ref_cnt;
     pthread_mutex_unlock(&res_tbl_lock);
 
     if (!ptr)
         return;
 
-    ref_cnt = --ptr->ref_cnt;
     if (ref_cnt <= 0) {
         switch (ptr->type) {
         case PP_RESOURCE_URL_LOADER:
