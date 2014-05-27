@@ -440,6 +440,18 @@ x_state_mask_to_pp_inputevent_modifier(unsigned int state)
         mod |= PP_INPUTEVENT_MODIFIER_ISLEFT;
     }
 
+    if (state & Button1Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_LEFTBUTTONDOWN;
+    }
+
+    if (state & Button2Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_MIDDLEBUTTONDOWN;
+    }
+
+    if (state & Button3Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_RIGHTBUTTONDOWN;
+    }
+
     return mod;
 }
 
