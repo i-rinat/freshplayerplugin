@@ -318,7 +318,7 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         pp_resource_release(loader);
         if (rt->ccb.func)
             rt->ccb.func(rt->ccb.user_data, read_bytes);
-        free(rt);
+        g_slice_free(struct url_loader_read_task_s, rt);
         ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
 
@@ -374,7 +374,7 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
         pp_resource_release(loader);
         if (rt->ccb.func)
             rt->ccb.func(rt->ccb.user_data, read_bytes);
-        free(rt);
+        g_slice_free(struct url_loader_read_task_s, rt);
         return len;
     } else {
         // reschedule task

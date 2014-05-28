@@ -113,7 +113,7 @@ ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image_data,
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
     if (!g2d)
         return;
-    struct g2d_paint_task_s *pt = malloc(sizeof(*pt));
+    struct g2d_paint_task_s *pt = g_slice_alloc(sizeof(*pt));
 
     pt->type = gpt_paint_id;
     pp_resource_ref(image_data);
@@ -145,7 +145,7 @@ ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
     if (!g2d)
         return;
 
-    struct g2d_paint_task_s *pt = malloc(sizeof(*pt));
+    struct g2d_paint_task_s *pt = g_slice_alloc(sizeof(*pt));
 
     pt->type = gpt_replace_contents;
     pp_resource_ref(image_data);
@@ -218,7 +218,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
             pp_resource_unref(pt->image_data);
             break;
         }
-        free(pt);
+        g_slice_free(struct g2d_paint_task_s, pt);
     }
 
     // scale image

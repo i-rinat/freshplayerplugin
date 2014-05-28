@@ -79,7 +79,7 @@ comt_proxy(void *param)
     if (p->callback.func) {
         p->callback.func(p->callback.user_data, p->result_to_pass);
     }
-    free(p);
+    g_slice_free(struct comt_task_s, p);
 }
 
 gint
@@ -145,7 +145,7 @@ void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result)
 {
-    struct comt_task_s *task = malloc(sizeof(*task));
+    struct comt_task_s *task = g_slice_alloc(sizeof(*task));
 
     task->callback = callback;
     task->result_to_pass = result;
@@ -181,7 +181,7 @@ ppb_core_call_on_main_thread_now(PP_Instance instance, struct PP_CompletionCallb
                                  int32_t result)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    struct comt_task_s *task = malloc(sizeof(*task));
+    struct comt_task_s *task = g_slice_alloc(sizeof(*task));
 
     task->callback = callback;
     task->result_to_pass = result;

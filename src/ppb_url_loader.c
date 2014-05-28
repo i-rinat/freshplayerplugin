@@ -250,7 +250,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     ppb_var_release(full_url);
     pp_resource_release(request_info);
 
-    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
+    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
     comt_params->url =                              strdup(ul->url);
     comt_params->loader =                           loader;
     comt_params->instance =                         ul->_.instance;
@@ -277,7 +277,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
 
     int retval = comt_params->retval;
     pp_resource_release(loader);
-    free(comt_params);
+    g_slice_free(struct comt_param_s, comt_params);
 
     if (retval != NPERR_NO_ERROR)
         return PP_ERROR_FAILED;
@@ -333,7 +333,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ul->ccb = callback;
     ppb_var_release(full_url);
 
-    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
+    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
     comt_params->url =                              ul->url;
     comt_params->loader =                           loader;
     comt_params->instance =                         ul->_.instance;
@@ -360,7 +360,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
 
     int retval = comt_params->retval;
     pp_resource_release(loader);
-    free(comt_params);
+    g_slice_free(struct comt_param_s, comt_params);
 
     if (retval != NPERR_NO_ERROR)
         return PP_ERROR_FAILED;
@@ -442,7 +442,7 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
 
     if (read_bytes == 0) {
         // no data ready, schedule read task
-        struct url_loader_read_task_s *rt = malloc(sizeof(*rt));
+        struct url_loader_read_task_s *rt = g_slice_alloc(sizeof(*rt));
         rt->buffer = buffer;
         rt->bytes_to_read = bytes_to_read;
         rt->ccb = callback;

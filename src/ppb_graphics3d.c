@@ -226,7 +226,7 @@ _swap_buffers_comt(void *p)
     if (ccb->func)
         ccb->func(ccb->user_data, PP_OK);
 
-    free(p);
+    g_slice_free(struct PP_CompletionCallback, ccb);
 }
 
 int32_t
@@ -261,7 +261,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     }
     pp_resource_release(context);
 
-    struct PP_CompletionCallback *ccb = malloc(sizeof(*ccb));
+    struct PP_CompletionCallback *ccb = g_slice_alloc(sizeof(*ccb));
     *ccb = callback;
     npn.pluginthreadasynccall(pp_i->npp, _swap_buffers_comt, ccb);
 

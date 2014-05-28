@@ -64,7 +64,7 @@ _set_cursor_comt(void *user_data)
 
     if (params->wait)
         pthread_barrier_wait(params->barrier);
-    free(params);
+    g_slice_free(struct comt_param_s, params);
 }
 
 PP_Bool
@@ -208,7 +208,7 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
         break;
     }
 
-    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
+    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
 
     comt_params->instance = instance;
     comt_params->xtype =    xtype;

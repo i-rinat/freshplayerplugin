@@ -151,7 +151,7 @@ quit_and_destroy_fs_wnd:
     XCloseDisplay(dpy);
 
     npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, (void*)(size_t)tp->instance);
-    free(tp);
+    g_slice_free(struct thread_param_s, tp);
     return NULL;
 }
 
@@ -167,7 +167,7 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
     npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &browser_wnd);
 
     if (fullscreen) {
-        struct thread_param_s *tparams = malloc(sizeof(*tparams));
+        struct thread_param_s *tparams = g_slice_alloc(sizeof(*tparams));
         tparams->instance = instance;
 
         pthread_barrier_init(&tparams->startup_barrier, NULL, 2);

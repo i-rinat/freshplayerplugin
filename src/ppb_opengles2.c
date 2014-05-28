@@ -1149,7 +1149,7 @@ ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context
         return NULL;
     }
 
-    struct tex_sub_mapping_param_s *map_params = malloc(sizeof(*map_params));
+    struct tex_sub_mapping_param_s *map_params = g_slice_alloc(sizeof(*map_params));
     map_params->level = level;
     map_params->xoffset = xoffset;
     map_params->yoffset = yoffset;
@@ -1189,7 +1189,7 @@ ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource conte
     _setup_glx_ctx(g3d);
     glTexSubImage2D(GL_TEXTURE_2D, mp->level, mp->xoffset, mp->yoffset, mp->width, mp->height,
                     mp->format, mp->type, mem);
-    free(mp);
+    g_slice_free(struct tex_sub_mapping_param_s, mp);
 
     pp_resource_release(context);
     free((void *)mem);
