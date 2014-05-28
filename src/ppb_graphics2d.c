@@ -244,8 +244,10 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
             .height = pp_i->height
         };
 
+        pthread_mutex_lock(&pp_i->lock);
         XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
         XFlush(pp_i->dpy);
+        pthread_mutex_unlock(&pp_i->lock);
     } else {
         npn.invalidaterect(pp_i->npp, &npr);
         npn.forceredraw(pp_i->npp);

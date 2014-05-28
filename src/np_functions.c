@@ -105,6 +105,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->pp_instance_id = generate_new_pp_instance_id();
     tables_add_pp_instance(pp_i->pp_instance_id, pp_i);
 
+    pthread_mutex_init(&pp_i->lock, NULL);
     pp_i->dpy = XOpenDisplay(NULL);
     if (!pp_i->dpy) {
         trace_error("%s, can't open X Display\n", __func__);
@@ -112,6 +113,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     // get fullscreen resolution
     int screen_count;
+    pthread_mutex_lock(&pp_i->lock);
     XineramaScreenInfo *xsi = XineramaQueryScreens(pp_i->dpy, &screen_count);
     XWindowAttributes xw_attrs;
     if (xsi) {
@@ -130,6 +132,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pp_i->fs_width = 100;
         pp_i->fs_height = 100;
     }
+    pthread_mutex_unlock(&pp_i->lock);
 
     // request windowless operation
     npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
@@ -381,22 +384,25 @@ handle_graphics_expose_event(NPP npp, void *event)
     int screen = 0;
 
     if (g2d) {
+        pthread_mutex_lock(&pp_i->lock);
         XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
                                   g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
                                   g2d->scaled_stride);
 
         XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0,
                   g2d->scaled_width, g2d->scaled_height);
-        free(xi);
+        XFree(xi);
+        pthread_mutex_unlock(&pp_i->lock);
         pp_resource_release(pp_i->graphics);
     } else if (g3d) {
+        pthread_mutex_lock(&pp_i->lock);
         XImage *xi = XGetImage(dpy, g3d->pixmap, 0, 0, g3d->width, g3d->height, XAllPlanes(),
                                ZPixmap);
         if (!xi)
             trace_error("%s, XGetImage returned NULL\n", __func__);
         XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g3d->width, g3d->height);
         XDestroyImage(xi);
-        XSync(dpy, False);
+        pthread_mutex_unlock(&pp_i->lock);
         pp_resource_release(pp_i->graphics);
     } else {
         return 0;

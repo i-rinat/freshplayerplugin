@@ -67,6 +67,20 @@ _update_instance_view_comt(void *p)
     }
 }
 
+struct handle_event_comt_param_s {
+    NPP         npp;
+    XEvent      ev;
+};
+
+static
+void
+_handle_event_comt(void *p)
+{
+    struct handle_event_comt_param_s *params = p;
+    NPP_HandleEvent(params->npp, &params->ev);
+    g_slice_free(struct handle_event_comt_param_s, params);
+}
+
 struct thread_param_s {
     PP_Instance         instance;
     pthread_barrier_t   startup_barrier;
@@ -93,7 +107,7 @@ fullscreen_window_thread(void *p)
 
     // show window
     XMapWindow(dpy, pp_i->fs_wnd);
-    XSync(dpy, false);
+    XSync(dpy, False);
     pp_i->is_fullscreen = 1;
 
     pthread_barrier_wait(&tp->startup_barrier);
@@ -111,12 +125,13 @@ fullscreen_window_thread(void *p)
                     goto quit_and_destroy_fs_wnd;
                 }
             } break;
-            case GraphicsExpose: {
-                // replace display handle
-                ev.xgraphicsexpose.display = dpy;
-            } break;
         }
-        NPP_HandleEvent(pp_i->npp, &ev);
+        ev.xany.display = pp_i->dpy;
+
+        struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
+        params->npp = pp_i->npp;
+        params->ev =  ev;
+        npn.pluginthreadasynccall(pp_i->npp, _handle_event_comt, params);
     }
 
 quit_and_destroy_fs_wnd:
@@ -150,11 +165,8 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 
         pthread_barrier_wait(&tparams->startup_barrier);
     } else {
+        pthread_mutex_lock(&pp_i->lock);
         pp_i->is_fullscreen = 0;
-        // TODO: remember previous size
-        pp_i->width = 400;
-        pp_i->height = 300;
-
         XKeyEvent ev = {
             .type = KeyPress,
             .display = pp_i->dpy,
@@ -164,6 +176,7 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 
         XSendEvent(pp_i->dpy, pp_i->fs_wnd, False, 0, (void *)&ev);
         XFlush(pp_i->dpy);
+        pthread_mutex_unlock(&pp_i->lock);
     }
 
     return PP_TRUE;

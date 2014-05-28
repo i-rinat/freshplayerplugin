@@ -120,6 +120,7 @@ struct pp_instance_s {
     pthread_t       pp_thread;
     PP_Resource     graphics;
     Display        *dpy;
+    pthread_mutex_t lock;
 };
 
 struct pp_resource_generic_s {

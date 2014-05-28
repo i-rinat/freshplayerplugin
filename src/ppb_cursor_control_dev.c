@@ -44,10 +44,13 @@ void
 _set_cursor_comt(void *user_data)
 {
     Window wnd;
+    Cursor cursor;
     struct comt_param_s *params = user_data;
     struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance);
-    Cursor cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
 
+
+    pthread_mutex_lock(&pp_i->lock);
+    cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
     if (pp_i->is_fullscreen) {
         XDefineCursor(pp_i->dpy, pp_i->fs_wnd, cursor);
         XFlush(pp_i->dpy);
@@ -57,6 +60,7 @@ _set_cursor_comt(void *user_data)
             XFlush(pp_i->dpy);
         }
     }
+    pthread_mutex_unlock(&pp_i->lock);
 
     if (params->wait)
         pthread_barrier_wait(params->barrier);
