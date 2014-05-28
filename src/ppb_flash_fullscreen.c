@@ -33,6 +33,19 @@
 #include <X11/Xatom.h>
 
 
+static volatile gint events_inflight = 0;
+
+struct handle_event_comt_param_s {
+    NPP         npp;
+    XEvent      ev;
+};
+
+struct thread_param_s {
+    PP_Instance         instance;
+    pthread_barrier_t   startup_barrier;
+};
+
+
 PP_Bool
 ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
 {
@@ -67,11 +80,6 @@ _update_instance_view_comt(void *p)
     }
 }
 
-struct handle_event_comt_param_s {
-    NPP         npp;
-    XEvent      ev;
-};
-
 static
 void
 _handle_event_comt(void *p)
@@ -79,12 +87,8 @@ _handle_event_comt(void *p)
     struct handle_event_comt_param_s *params = p;
     NPP_HandleEvent(params->npp, &params->ev);
     g_slice_free(struct handle_event_comt_param_s, params);
+    g_atomic_int_add(&events_inflight, -1);
 }
-
-struct thread_param_s {
-    PP_Instance         instance;
-    pthread_barrier_t   startup_barrier;
-};
 
 static
 void *
@@ -131,10 +135,17 @@ fullscreen_window_thread(void *p)
         struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
         params->npp = pp_i->npp;
         params->ev =  ev;
+        g_atomic_int_add(&events_inflight, 1);
         npn.pluginthreadasynccall(pp_i->npp, _handle_event_comt, params);
     }
 
 quit_and_destroy_fs_wnd:
+
+    // wait for all events to be processed
+    while (g_atomic_int_get(&events_inflight)) {
+        usleep(10);
+    }
+
     pp_i->is_fullscreen = 0;
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
