@@ -212,6 +212,8 @@ ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
     return PP_TRUE;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Bool
@@ -236,10 +238,11 @@ trace_ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size 
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_flash_fullscreen_get_screen_size(instance, size);
 }
+#endif // NDEBUG
 
 
 const struct PPB_FlashFullscreen_1_0 ppb_flash_fullscreen_interface_1_0 = {
-    .IsFullscreen =     trace_ppb_flash_fullscreen_is_fullscreen,
-    .SetFullscreen =    trace_ppb_flash_fullscreen_set_fullscreen,
-    .GetScreenSize =    trace_ppb_flash_fullscreen_get_screen_size,
+    .IsFullscreen =     TWRAP(ppb_flash_fullscreen_is_fullscreen),
+    .SetFullscreen =    TWRAP(ppb_flash_fullscreen_set_fullscreen),
+    .GetScreenSize =    TWRAP(ppb_flash_fullscreen_get_screen_size),
 };

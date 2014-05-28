@@ -139,6 +139,8 @@ ppb_image_data_unmap(PP_Resource image_data)
     pp_resource_release(image_data);
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_ImageDataFormat
@@ -199,14 +201,15 @@ trace_ppb_image_data_unmap(PP_Resource image_data)
     trace_info("[PPB] {full} %s image_data=%d\n", __func__+6, image_data);
     ppb_image_data_unmap(image_data);
 }
+#endif // NDEBUG
 
 
 const struct PPB_ImageData_1_0 ppb_image_data_interface_1_0 = {
-    .GetNativeImageDataFormat = trace_ppb_image_data_get_native_image_data_format,
-    .IsImageDataFormatSupported = trace_ppb_image_data_is_image_data_format_supported,
-    .Create =                   trace_ppb_image_data_create,
-    .IsImageData =              trace_ppb_image_data_is_image_data,
-    .Describe =                 trace_ppb_image_data_describe,
-    .Map =                      trace_ppb_image_data_map,
-    .Unmap =                    trace_ppb_image_data_unmap,
+    .GetNativeImageDataFormat =     TWRAP(ppb_image_data_get_native_image_data_format),
+    .IsImageDataFormatSupported =   TWRAP(ppb_image_data_is_image_data_format_supported),
+    .Create =                       TWRAP(ppb_image_data_create),
+    .IsImageData =                  TWRAP(ppb_image_data_is_image_data),
+    .Describe =                     TWRAP(ppb_image_data_describe),
+    .Map =                          TWRAP(ppb_image_data_map),
+    .Unmap =                        TWRAP(ppb_image_data_unmap),
 };

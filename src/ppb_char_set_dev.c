@@ -143,6 +143,7 @@ ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 char *
@@ -179,9 +180,11 @@ trace_ppb_char_set_dev_get_default_char_set(PP_Instance instance)
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_char_set_dev_get_default_char_set(instance);
 }
+#endif // NDEBUG
+
 
 const struct PPB_CharSet_Dev_0_4 ppb_char_set_dev_interface_0_4 = {
-    .UTF16ToCharSet =       trace_ppb_char_set_dev_utf16_to_char_set,
-    .CharSetToUTF16 =       trace_ppb_char_set_dev_char_set_to_utf16,
-    .GetDefaultCharSet =    trace_ppb_char_set_dev_get_default_char_set,
+    .UTF16ToCharSet =       TWRAP(ppb_char_set_dev_utf16_to_char_set),
+    .CharSetToUTF16 =       TWRAP(ppb_char_set_dev_char_set_to_utf16),
+    .GetDefaultCharSet =    TWRAP(ppb_char_set_dev_get_default_char_set),
 };

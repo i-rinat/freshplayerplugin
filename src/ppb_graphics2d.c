@@ -293,6 +293,8 @@ ppb_graphics2d_get_scale(PP_Resource resource)
     return scale;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -386,26 +388,27 @@ trace_ppb_graphics2d_get_scale(PP_Resource resource)
     trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_graphics2d_get_scale(resource);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Graphics2D_1_0 ppb_graphics2d_interface_1_0 = {
-    .Create =           trace_ppb_graphics2d_create,
-    .IsGraphics2D =     trace_ppb_graphics2d_is_graphics2d,
-    .Describe =         trace_ppb_graphics2d_describe,
-    .PaintImageData =   trace_ppb_graphics2d_paint_image_data,
-    .Scroll =           trace_ppb_graphics2d_scroll,
-    .ReplaceContents =  trace_ppb_graphics2d_replace_contents,
-    .Flush =            trace_ppb_graphics2d_flush,
+    .Create =           TWRAP(ppb_graphics2d_create),
+    .IsGraphics2D =     TWRAP(ppb_graphics2d_is_graphics2d),
+    .Describe =         TWRAP(ppb_graphics2d_describe),
+    .PaintImageData =   TWRAP(ppb_graphics2d_paint_image_data),
+    .Scroll =           TWRAP(ppb_graphics2d_scroll),
+    .ReplaceContents =  TWRAP(ppb_graphics2d_replace_contents),
+    .Flush =            TWRAP(ppb_graphics2d_flush),
 };
 
 const struct PPB_Graphics2D_1_1 ppb_graphics2d_interface_1_1 = {
-    .Create =           trace_ppb_graphics2d_create,
-    .IsGraphics2D =     trace_ppb_graphics2d_is_graphics2d,
-    .Describe =         trace_ppb_graphics2d_describe,
-    .PaintImageData =   trace_ppb_graphics2d_paint_image_data,
-    .Scroll =           trace_ppb_graphics2d_scroll,
-    .ReplaceContents =  trace_ppb_graphics2d_replace_contents,
-    .Flush =            trace_ppb_graphics2d_flush,
-    .SetScale =         trace_ppb_graphics2d_set_scale,
-    .GetScale =         trace_ppb_graphics2d_get_scale,
+    .Create =           TWRAP(ppb_graphics2d_create),
+    .IsGraphics2D =     TWRAP(ppb_graphics2d_is_graphics2d),
+    .Describe =         TWRAP(ppb_graphics2d_describe),
+    .PaintImageData =   TWRAP(ppb_graphics2d_paint_image_data),
+    .Scroll =           TWRAP(ppb_graphics2d_scroll),
+    .ReplaceContents =  TWRAP(ppb_graphics2d_replace_contents),
+    .Flush =            TWRAP(ppb_graphics2d_flush),
+    .SetScale =         TWRAP(ppb_graphics2d_set_scale),
+    .GetScale =         TWRAP(ppb_graphics2d_get_scale),
 };

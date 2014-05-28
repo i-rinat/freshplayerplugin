@@ -43,6 +43,7 @@ ppb_printing_dev_get_default_print_settings(PP_Resource resource,
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -62,8 +63,10 @@ trace_ppb_printing_dev_get_default_print_settings(PP_Resource resource,
                __func__+6, resource, callback.func, callback.user_data, callback.flags);
     return ppb_printing_dev_get_default_print_settings(resource, print_settings, callback);
 }
+#endif // NDEBUG
+
 
 const struct PPB_Printing_Dev_0_7 ppb_printing_dev_0_7 = {
-    .Create =                   trace_ppb_printing_dev_create,
-    .GetDefaultPrintSettings =  trace_ppb_printing_dev_get_default_print_settings,
+    .Create =                   TWRAP(ppb_printing_dev_create),
+    .GetDefaultPrintSettings =  TWRAP(ppb_printing_dev_get_default_print_settings),
 };

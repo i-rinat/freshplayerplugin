@@ -479,6 +479,8 @@ ppb_url_loader_close(PP_Resource loader)
     return;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -570,17 +572,18 @@ trace_ppb_url_loader_close(PP_Resource loader)
     trace_info("[PPB] {full} %s loader=%d\n", __func__+6, loader);
     ppb_url_loader_close(loader);
 }
+#endif // NDEBUG
 
 
 const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
-    .Create =               trace_ppb_url_loader_create,
-    .IsURLLoader =          trace_ppb_url_loader_is_url_loader,
-    .Open =                 trace_ppb_url_loader_open,
-    .FollowRedirect =       trace_ppb_url_loader_follow_redirect,
-    .GetUploadProgress =    trace_ppb_url_loader_get_upload_progress,
-    .GetDownloadProgress =  trace_ppb_url_loader_get_download_progress,
-    .GetResponseInfo =      trace_ppb_url_loader_get_response_info,
-    .ReadResponseBody =     trace_ppb_url_loader_read_response_body,
-    .FinishStreamingToFile = trace_ppb_url_loader_finish_streaming_to_file,
-    .Close =                trace_ppb_url_loader_close,
+    .Create =                   TWRAP(ppb_url_loader_create),
+    .IsURLLoader =              TWRAP(ppb_url_loader_is_url_loader),
+    .Open =                     TWRAP(ppb_url_loader_open),
+    .FollowRedirect =           TWRAP(ppb_url_loader_follow_redirect),
+    .GetUploadProgress =        TWRAP(ppb_url_loader_get_upload_progress),
+    .GetDownloadProgress =      TWRAP(ppb_url_loader_get_download_progress),
+    .GetResponseInfo =          TWRAP(ppb_url_loader_get_response_info),
+    .ReadResponseBody =         TWRAP(ppb_url_loader_read_response_body),
+    .FinishStreamingToFile =    TWRAP(ppb_url_loader_finish_streaming_to_file),
+    .Close =                    TWRAP(ppb_url_loader_close),
 };

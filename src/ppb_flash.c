@@ -314,6 +314,7 @@ ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 void
@@ -485,39 +486,40 @@ trace_ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
                reverse_pp_flash_setting(setting));
     return ppb_flash_get_setting_int(instance, setting);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
-    .SetInstanceAlwaysOnTop = trace_ppb_flash_set_instance_always_on_top,
-    .DrawGlyphs =           trace_ppb_flash_draw_glyphs,
-    .GetProxyForURL =       trace_ppb_flash_get_proxy_for_url,
-    .Navigate =             trace_ppb_flash_navigate,
-    .GetLocalTimeZoneOffset = trace_ppb_flash_get_local_time_zone_offset,
-    .GetCommandLineArgs =   trace_ppb_flash_get_command_line_args,
-    .PreloadFontWin =       trace_ppb_flash_preload_font_win,
-    .IsRectTopmost =        trace_ppb_flash_is_rect_topmost,
-    .UpdateActivity =       trace_ppb_flash_update_activity,
-    .GetSetting =           trace_ppb_flash_get_setting,
-    .SetCrashData =         trace_ppb_flash_set_crash_data,
-    .EnumerateVideoCaptureDevices = trace_ppb_flash_enumerate_video_capture_devices
+    .SetInstanceAlwaysOnTop =       TWRAP(ppb_flash_set_instance_always_on_top),
+    .DrawGlyphs =                   TWRAP(ppb_flash_draw_glyphs),
+    .GetProxyForURL =               TWRAP(ppb_flash_get_proxy_for_url),
+    .Navigate =                     TWRAP(ppb_flash_navigate),
+    .GetLocalTimeZoneOffset =       TWRAP(ppb_flash_get_local_time_zone_offset),
+    .GetCommandLineArgs =           TWRAP(ppb_flash_get_command_line_args),
+    .PreloadFontWin =               TWRAP(ppb_flash_preload_font_win),
+    .IsRectTopmost =                TWRAP(ppb_flash_is_rect_topmost),
+    .UpdateActivity =               TWRAP(ppb_flash_update_activity),
+    .GetSetting =                   TWRAP(ppb_flash_get_setting),
+    .SetCrashData =                 TWRAP(ppb_flash_set_crash_data),
+    .EnumerateVideoCaptureDevices = TWRAP(ppb_flash_enumerate_video_capture_devices),
 };
 
 const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
-    .SetInstanceAlwaysOnTop = trace_ppb_flash_set_instance_always_on_top,
-    .DrawGlyphs =           trace_ppb_flash_draw_glyphs,
-    .GetProxyForURL =       trace_ppb_flash_get_proxy_for_url,
-    .Navigate =             trace_ppb_flash_navigate,
-    .RunMessageLoop =       trace_ppb_flash_run_message_loop,
-    .QuitMessageLoop =      trace_ppb_flash_quit_message_loop,
-    .GetLocalTimeZoneOffset = trace_ppb_flash_get_local_time_zone_offset,
-    .GetCommandLineArgs =   trace_ppb_flash_get_command_line_args,
-    .PreloadFontWin =       trace_ppb_flash_preload_font_win,
-    .IsRectTopmost =        trace_ppb_flash_is_rect_topmost,
-    .InvokePrinting =       trace_ppb_flash_invoke_printing,
-    .UpdateActivity =       trace_ppb_flash_update_activity,
-    .GetDeviceID =          trace_ppb_flash_get_device_id,
-    .GetSettingInt =        trace_ppb_flash_get_setting_int,
-    .GetSetting =           trace_ppb_flash_get_setting,
-    .SetCrashData =         trace_ppb_flash_set_crash_data,
-    .EnumerateVideoCaptureDevices = trace_ppb_flash_enumerate_video_capture_devices,
+    .SetInstanceAlwaysOnTop =       TWRAP(ppb_flash_set_instance_always_on_top),
+    .DrawGlyphs =                   TWRAP(ppb_flash_draw_glyphs),
+    .GetProxyForURL =               TWRAP(ppb_flash_get_proxy_for_url),
+    .Navigate =                     TWRAP(ppb_flash_navigate),
+    .RunMessageLoop =               TWRAP(ppb_flash_run_message_loop),
+    .QuitMessageLoop =              TWRAP(ppb_flash_quit_message_loop),
+    .GetLocalTimeZoneOffset =       TWRAP(ppb_flash_get_local_time_zone_offset),
+    .GetCommandLineArgs =           TWRAP(ppb_flash_get_command_line_args),
+    .PreloadFontWin =               TWRAP(ppb_flash_preload_font_win),
+    .IsRectTopmost =                TWRAP(ppb_flash_is_rect_topmost),
+    .InvokePrinting =               TWRAP(ppb_flash_invoke_printing),
+    .UpdateActivity =               TWRAP(ppb_flash_update_activity),
+    .GetDeviceID =                  TWRAP(ppb_flash_get_device_id),
+    .GetSettingInt =                TWRAP(ppb_flash_get_setting_int),
+    .GetSetting =                   TWRAP(ppb_flash_get_setting),
+    .SetCrashData =                 TWRAP(ppb_flash_set_crash_data),
+    .EnumerateVideoCaptureDevices = TWRAP(ppb_flash_enumerate_video_capture_devices),
 };

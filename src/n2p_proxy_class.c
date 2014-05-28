@@ -177,6 +177,7 @@ n2p_deallocate(void *object)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 bool
@@ -268,16 +269,17 @@ trace_n2p_deallocate(void *object)
     trace_info("[CLS] {full} %s object=%p\n", __func__+6, object);
     n2p_deallocate(object);
 }
+#endif // NDEBUG
 
 
 const struct PPP_Class_Deprecated n2p_proxy_class = {
-    .HasProperty =          trace_n2p_has_property,
-    .HasMethod =            trace_n2p_has_method,
-    .GetProperty =          trace_n2p_get_property,
-    .GetAllPropertyNames =  trace_n2p_get_all_property_names,
-    .SetProperty =          trace_n2p_set_property,
-    .RemoveProperty =       trace_n2p_remove_property,
-    .Call =                 trace_n2p_call,
-    .Construct =            trace_n2p_construct,
-    .Deallocate =           trace_n2p_deallocate,
+    .HasProperty =          TWRAP(n2p_has_property),
+    .HasMethod =            TWRAP(n2p_has_method),
+    .GetProperty =          TWRAP(n2p_get_property),
+    .GetAllPropertyNames =  TWRAP(n2p_get_all_property_names),
+    .SetProperty =          TWRAP(n2p_set_property),
+    .RemoveProperty =       TWRAP(n2p_remove_property),
+    .Call =                 TWRAP(n2p_call),
+    .Construct =            TWRAP(n2p_construct),
+    .Deallocate =           TWRAP(n2p_deallocate),
 };

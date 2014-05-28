@@ -205,6 +205,7 @@ ppb_browser_font_trusted_pixel_offset_for_character(PP_Resource font,
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 struct PP_Var
@@ -305,15 +306,16 @@ trace_ppb_browser_font_trusted_pixel_offset_for_character(PP_Resource font,
     free(s_text_text);
     return ppb_browser_font_trusted_pixel_offset_for_character(font, text, char_offset);
 }
+#endif // NDEBUG
 
 
 const struct PPB_BrowserFont_Trusted_1_0 ppb_browser_font_trusted_interface_1_0 = {
-    .GetFontFamilies =          trace_ppb_browser_font_trusted_get_font_families,
-    .Create =                   trace_ppb_browser_font_trusted_create,
-    .IsFont =                   trace_ppb_browser_font_trusted_is_font,
-    .Describe =                 trace_ppb_browser_font_trusted_describe,
-    .DrawTextAt =               trace_ppb_browser_font_trusted_draw_text_at,
-    .MeasureText =              trace_ppb_browser_font_trusted_measure_text,
-    .CharacterOffsetForPixel =  trace_ppb_browser_font_trusted_character_offset_for_pixel,
-    .PixelOffsetForCharacter =  trace_ppb_browser_font_trusted_pixel_offset_for_character,
+    .GetFontFamilies =          TWRAP(ppb_browser_font_trusted_get_font_families),
+    .Create =                   TWRAP(ppb_browser_font_trusted_create),
+    .IsFont =                   TWRAP(ppb_browser_font_trusted_is_font),
+    .Describe =                 TWRAP(ppb_browser_font_trusted_describe),
+    .DrawTextAt =               TWRAP(ppb_browser_font_trusted_draw_text_at),
+    .MeasureText =              TWRAP(ppb_browser_font_trusted_measure_text),
+    .CharacterOffsetForPixel =  TWRAP(ppb_browser_font_trusted_character_offset_for_pixel),
+    .PixelOffsetForCharacter =  TWRAP(ppb_browser_font_trusted_pixel_offset_for_character),
 };

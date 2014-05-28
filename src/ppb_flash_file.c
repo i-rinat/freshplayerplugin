@@ -40,6 +40,7 @@ ppb_flash_file_file_ref_query_file(PP_Resource file_ref_id, struct PP_FileInfo *
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 int32_t
@@ -56,9 +57,10 @@ trace_ppb_flash_file_file_ref_query_file(PP_Resource file_ref_id, struct PP_File
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_flash_file_file_ref_query_file(file_ref_id, info);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Flash_File_FileRef ppb_flash_file_file_ref_interface_2_0 = {
-    .OpenFile =     trace_ppb_flash_file_file_ref_open_file,
-    .QueryFile =    trace_ppb_flash_file_file_ref_query_file,
+    .OpenFile =     TWRAP(ppb_flash_file_file_ref_open_file),
+    .QueryFile =    TWRAP(ppb_flash_file_file_ref_query_file),
 };

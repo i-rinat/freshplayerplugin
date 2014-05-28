@@ -59,6 +59,7 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 uint32_t
@@ -105,11 +106,12 @@ trace_ppb_flash_clipboard_write_data(PP_Instance instance_id,
     return ppb_flash_clipboard_write_data(instance_id, clipboard_type, data_item_count, formats,
                                           data_items);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
-    .RegisterCustomFormat = trace_ppb_flash_clipboard_register_custom_format,
-    .IsFormatAvailable =    trace_ppb_flash_clipboard_is_format_available,
-    .ReadData =             trace_ppb_flash_clipboard_read_data,
-    .WriteData =            trace_ppb_flash_clipboard_write_data,
+    .RegisterCustomFormat = TWRAP(ppb_flash_clipboard_register_custom_format),
+    .IsFormatAvailable =    TWRAP(ppb_flash_clipboard_is_format_available),
+    .ReadData =             TWRAP(ppb_flash_clipboard_read_data),
+    .WriteData =            TWRAP(ppb_flash_clipboard_write_data),
 };

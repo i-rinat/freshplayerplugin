@@ -211,6 +211,7 @@ ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource file_r
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -260,12 +261,13 @@ trace_ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource 
     return ppb_url_request_info_append_file_to_body(request, file_ref, start_offset,
                                                     number_of_bytes, expected_last_modified_time);
 }
+#endif // NDEBUG
 
 
 const struct PPB_URLRequestInfo_1_0 ppb_url_request_info_interface_1_0 = {
-    .Create =           trace_ppb_url_request_info_create,
-    .IsURLRequestInfo = trace_ppb_url_request_info_is_url_request_info,
-    .SetProperty =      trace_ppb_url_request_info_set_property,
-    .AppendDataToBody = trace_ppb_url_request_info_append_data_to_body,
-    .AppendFileToBody = trace_ppb_url_request_info_append_file_to_body,
+    .Create =           TWRAP(ppb_url_request_info_create),
+    .IsURLRequestInfo = TWRAP(ppb_url_request_info_is_url_request_info),
+    .SetProperty =      TWRAP(ppb_url_request_info_set_property),
+    .AppendDataToBody = TWRAP(ppb_url_request_info_append_data_to_body),
+    .AppendFileToBody = TWRAP(ppb_url_request_info_append_file_to_body),
 };

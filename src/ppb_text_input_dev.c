@@ -61,6 +61,8 @@ ppb_text_input_dev_interface_selection_changed(PP_Instance instance)
     return;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 void
@@ -112,12 +114,13 @@ trace_ppb_text_input_dev_interface_selection_changed(PP_Instance instance)
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     ppb_text_input_dev_interface_selection_changed(instance);
 }
+#endif // NDEBUG
 
 
 const struct PPB_TextInput_Dev_0_2 ppb_text_input_dev_interface_0_2 = {
-    .SetTextInputType =         trace_ppb_text_input_dev_interface_set_text_input_type,
-    .UpdateCaretPosition =      trace_ppb_text_input_dev_interface_update_caret_position,
-    .CancelCompositionText =    trace_ppb_text_input_dev_interface_cancel_composition_text,
-    .UpdateSurroundingText =    trace_ppb_text_input_dev_interface_update_surrounding_text,
-    .SelectionChanged =         trace_ppb_text_input_dev_interface_selection_changed,
+    .SetTextInputType =         TWRAP(ppb_text_input_dev_interface_set_text_input_type),
+    .UpdateCaretPosition =      TWRAP(ppb_text_input_dev_interface_update_caret_position),
+    .CancelCompositionText =    TWRAP(ppb_text_input_dev_interface_cancel_composition_text),
+    .UpdateSurroundingText =    TWRAP(ppb_text_input_dev_interface_update_surrounding_text),
+    .SelectionChanged =         TWRAP(ppb_text_input_dev_interface_selection_changed),
 };

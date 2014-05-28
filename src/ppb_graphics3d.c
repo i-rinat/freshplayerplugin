@@ -269,6 +269,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 int32_t
@@ -337,15 +338,16 @@ trace_ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallb
                __func__+6, context, callback.func, callback.user_data, callback.flags);
     return ppb_graphics3d_swap_buffers(context, callback);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Graphics3D_1_0 ppb_graphics3d_interface_1_0 = {
-    .GetAttribMaxValue =    trace_ppb_graphics3d_get_attrib_max_value,
-    .Create =               trace_ppb_graphics3d_create,
-    .IsGraphics3D =         trace_ppb_graphics3d_is_graphics3d,
-    .GetAttribs =           trace_ppb_graphics3d_get_attribs,
-    .SetAttribs =           trace_ppb_graphics3d_set_attribs,
-    .GetError =             trace_ppb_graphics3d_get_error,
-    .ResizeBuffers =        trace_ppb_graphics3d_resize_buffers,
-    .SwapBuffers =          trace_ppb_graphics3d_swap_buffers,
+    .GetAttribMaxValue =    TWRAP(ppb_graphics3d_get_attrib_max_value),
+    .Create =               TWRAP(ppb_graphics3d_create),
+    .IsGraphics3D =         TWRAP(ppb_graphics3d_is_graphics3d),
+    .GetAttribs =           TWRAP(ppb_graphics3d_get_attribs),
+    .SetAttribs =           TWRAP(ppb_graphics3d_set_attribs),
+    .GetError =             TWRAP(ppb_graphics3d_get_error),
+    .ResizeBuffers =        TWRAP(ppb_graphics3d_resize_buffers),
+    .SwapBuffers =          TWRAP(ppb_graphics3d_swap_buffers),
 };

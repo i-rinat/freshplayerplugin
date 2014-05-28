@@ -268,6 +268,7 @@ ppb_var_create_object_with_module_deprecated(PP_Module module,
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 void
@@ -436,36 +437,37 @@ trace_ppb_var_create_object_with_module_deprecated(PP_Module module,
     return ppb_var_create_object_with_module_deprecated(module, object_class,
                                                                    object_data);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Var_1_1 ppb_var_interface_1_1 = {
-    .AddRef =       trace_ppb_var_add_ref,
-    .Release =      trace_ppb_var_release,
-    .VarFromUtf8 =  trace_ppb_var_var_from_utf8_1_1,
-    .VarToUtf8 =    trace_ppb_var_var_to_utf8
+    .AddRef =       TWRAP(ppb_var_add_ref),
+    .Release =      TWRAP(ppb_var_release),
+    .VarFromUtf8 =  TWRAP(ppb_var_var_from_utf8_1_1),
+    .VarToUtf8 =    TWRAP(ppb_var_var_to_utf8),
 };
 
 const struct PPB_Var_1_0 ppb_var_interface_1_0 = {
-    .AddRef =       trace_ppb_var_add_ref,
-    .Release =      trace_ppb_var_release,
-    .VarFromUtf8 =  trace_ppb_var_var_from_utf8_1_0,
-    .VarToUtf8 =    trace_ppb_var_var_to_utf8,
+    .AddRef =       TWRAP(ppb_var_add_ref),
+    .Release =      TWRAP(ppb_var_release),
+    .VarFromUtf8 =  TWRAP(ppb_var_var_from_utf8_1_0),
+    .VarToUtf8 =    TWRAP(ppb_var_var_to_utf8),
 };
 
 const struct PPB_Var_Deprecated ppb_var_deprecated_interface_0_3 = {
-    .AddRef =               trace_ppb_var_add_ref,
-    .Release =              trace_ppb_var_release,
-    .VarFromUtf8 =          trace_ppb_var_var_from_utf8_1_0,
-    .VarToUtf8 =            trace_ppb_var_var_to_utf8,
-    .HasProperty =          trace_ppb_var_has_property,
-    .HasMethod =            trace_ppb_var_has_method,
-    .GetProperty =          trace_ppb_var_get_property,
-    .GetAllPropertyNames =  trace_ppb_var_get_all_property_names,
-    .SetProperty =          trace_ppb_var_set_property,
-    .RemoveProperty =       trace_ppb_var_remove_property,
-    .Call =                 trace_ppb_var_call,
-    .Construct =            trace_ppb_var_construct,
-    .IsInstanceOf =         trace_ppb_var_is_instance_of,
-    .CreateObject =         trace_ppb_var_create_object,
-    .CreateObjectWithModuleDeprecated = trace_ppb_var_create_object_with_module_deprecated,
+    .AddRef =               TWRAP(ppb_var_add_ref),
+    .Release =              TWRAP(ppb_var_release),
+    .VarFromUtf8 =          TWRAP(ppb_var_var_from_utf8_1_0),
+    .VarToUtf8 =            TWRAP(ppb_var_var_to_utf8),
+    .HasProperty =          TWRAP(ppb_var_has_property),
+    .HasMethod =            TWRAP(ppb_var_has_method),
+    .GetProperty =          TWRAP(ppb_var_get_property),
+    .GetAllPropertyNames =  TWRAP(ppb_var_get_all_property_names),
+    .SetProperty =          TWRAP(ppb_var_set_property),
+    .RemoveProperty =       TWRAP(ppb_var_remove_property),
+    .Call =                 TWRAP(ppb_var_call),
+    .Construct =            TWRAP(ppb_var_construct),
+    .IsInstanceOf =         TWRAP(ppb_var_is_instance_of),
+    .CreateObject =         TWRAP(ppb_var_create_object),
+    .CreateObjectWithModuleDeprecated = TWRAP(ppb_var_create_object_with_module_deprecated),
 };

@@ -247,6 +247,7 @@ ppb_audio_stop_playback(PP_Resource audio)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -289,11 +290,13 @@ trace_ppb_audio_stop_playback(PP_Resource audio)
     trace_info("[PPB] {full} %s audio=%d\n", __func__+6, audio);
     return ppb_audio_stop_playback(audio);
 }
+#endif // NDEBUG
+
 
 const struct PPB_Audio_1_0 ppb_audio_interface_1_0 = {
-    .Create =           trace_ppb_audio_create,
-    .IsAudio =          trace_ppb_audio_is_audio,
-    .GetCurrentConfig = trace_ppb_audio_get_current_config,
-    .StartPlayback =    trace_ppb_audio_start_playback,
-    .StopPlayback =     trace_ppb_audio_stop_playback,
+    .Create =           TWRAP(ppb_audio_create),
+    .IsAudio =          TWRAP(ppb_audio_is_audio),
+    .GetCurrentConfig = TWRAP(ppb_audio_get_current_config),
+    .StartPlayback =    TWRAP(ppb_audio_start_playback),
+    .StopPlayback =     TWRAP(ppb_audio_stop_playback),
 };

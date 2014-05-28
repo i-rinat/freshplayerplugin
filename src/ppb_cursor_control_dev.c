@@ -258,6 +258,7 @@ ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Bool
@@ -302,11 +303,13 @@ trace_ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance)
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_cursor_control_dev_can_lock_cursor(instance);
 }
+#endif // NDEBUG
+
 
 const struct PPB_CursorControl_Dev_0_4 ppb_cursor_control_dev_interface_0_4 = {
-    .SetCursor =        trace_ppb_cursor_control_dev_set_cursor,
-    .LockCursor =       trace_ppb_cursor_control_dev_lock_cursor,
-    .UnlockCursor =     trace_ppb_cursor_control_dev_unlock_cursor,
-    .HasCursorLock =    trace_ppb_cursor_control_dev_has_cursor_lock,
-    .CanLockCursor =    trace_ppb_cursor_control_dev_can_lock_cursor,
+    .SetCursor =        TWRAP(ppb_cursor_control_dev_set_cursor),
+    .LockCursor =       TWRAP(ppb_cursor_control_dev_lock_cursor),
+    .UnlockCursor =     TWRAP(ppb_cursor_control_dev_unlock_cursor),
+    .HasCursorLock =    TWRAP(ppb_cursor_control_dev_has_cursor_lock),
+    .CanLockCursor =    TWRAP(ppb_cursor_control_dev_can_lock_cursor),
 };

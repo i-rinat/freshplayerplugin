@@ -115,6 +115,7 @@ ppb_tcp_socket_private_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Pri
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -232,35 +233,36 @@ trace_ppb_tcp_socket_private_set_option(PP_Resource tcp_socket, PP_TCPSocketOpti
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_tcp_socket_private_set_option(tcp_socket, name, value, callback);
 }
+#endif // NDEBUG
 
 
 const struct PPB_TCPSocket_Private_0_5 ppb_tcp_socket_private_interface_0_5 = {
-    .Create =                       trace_ppb_tcp_socket_private_create,
-    .IsTCPSocket =                  trace_ppb_tcp_socket_private_is_tcp_socket,
-    .Connect =                      trace_ppb_tcp_socket_private_connect,
-    .ConnectWithNetAddress =        trace_ppb_tcp_socket_private_connect_with_net_address,
-    .GetLocalAddress =              trace_ppb_tcp_socket_private_get_local_address,
-    .GetRemoteAddress =             trace_ppb_tcp_socket_private_get_remote_address,
-    .SSLHandshake =                 trace_ppb_tcp_socket_private_ssl_handshake,
-    .GetServerCertificate =         trace_ppb_tcp_socket_private_get_server_certificate,
-    .AddChainBuildingCertificate =  trace_ppb_tcp_socket_private_add_chain_building_certificate,
-    .Read =                         trace_ppb_tcp_socket_private_read,
-    .Write =                        trace_ppb_tcp_socket_private_write,
-    .Disconnect =                   trace_ppb_tcp_socket_private_disconnect,
-    .SetOption =                    trace_ppb_tcp_socket_private_set_option,
+    .Create =                       TWRAP(ppb_tcp_socket_private_create),
+    .IsTCPSocket =                  TWRAP(ppb_tcp_socket_private_is_tcp_socket),
+    .Connect =                      TWRAP(ppb_tcp_socket_private_connect),
+    .ConnectWithNetAddress =        TWRAP(ppb_tcp_socket_private_connect_with_net_address),
+    .GetLocalAddress =              TWRAP(ppb_tcp_socket_private_get_local_address),
+    .GetRemoteAddress =             TWRAP(ppb_tcp_socket_private_get_remote_address),
+    .SSLHandshake =                 TWRAP(ppb_tcp_socket_private_ssl_handshake),
+    .GetServerCertificate =         TWRAP(ppb_tcp_socket_private_get_server_certificate),
+    .AddChainBuildingCertificate =  TWRAP(ppb_tcp_socket_private_add_chain_building_certificate),
+    .Read =                         TWRAP(ppb_tcp_socket_private_read),
+    .Write =                        TWRAP(ppb_tcp_socket_private_write),
+    .Disconnect =                   TWRAP(ppb_tcp_socket_private_disconnect),
+    .SetOption =                    TWRAP(ppb_tcp_socket_private_set_option),
 };
 
 const struct PPB_TCPSocket_Private_0_4 ppb_tcp_socket_private_interface_0_4 = {
-    .Create =                       trace_ppb_tcp_socket_private_create,
-    .IsTCPSocket =                  trace_ppb_tcp_socket_private_is_tcp_socket,
-    .Connect =                      trace_ppb_tcp_socket_private_connect,
-    .ConnectWithNetAddress =        trace_ppb_tcp_socket_private_connect_with_net_address,
-    .GetLocalAddress =              trace_ppb_tcp_socket_private_get_local_address,
-    .GetRemoteAddress =             trace_ppb_tcp_socket_private_get_remote_address,
-    .SSLHandshake =                 trace_ppb_tcp_socket_private_ssl_handshake,
-    .GetServerCertificate =         trace_ppb_tcp_socket_private_get_server_certificate,
-    .AddChainBuildingCertificate =  trace_ppb_tcp_socket_private_add_chain_building_certificate,
-    .Read =                         trace_ppb_tcp_socket_private_read,
-    .Write =                        trace_ppb_tcp_socket_private_write,
-    .Disconnect =                   trace_ppb_tcp_socket_private_disconnect,
+    .Create =                       TWRAP(ppb_tcp_socket_private_create),
+    .IsTCPSocket =                  TWRAP(ppb_tcp_socket_private_is_tcp_socket),
+    .Connect =                      TWRAP(ppb_tcp_socket_private_connect),
+    .ConnectWithNetAddress =        TWRAP(ppb_tcp_socket_private_connect_with_net_address),
+    .GetLocalAddress =              TWRAP(ppb_tcp_socket_private_get_local_address),
+    .GetRemoteAddress =             TWRAP(ppb_tcp_socket_private_get_remote_address),
+    .SSLHandshake =                 TWRAP(ppb_tcp_socket_private_ssl_handshake),
+    .GetServerCertificate =         TWRAP(ppb_tcp_socket_private_get_server_certificate),
+    .AddChainBuildingCertificate =  TWRAP(ppb_tcp_socket_private_add_chain_building_certificate),
+    .Read =                         TWRAP(ppb_tcp_socket_private_read),
+    .Write =                        TWRAP(ppb_tcp_socket_private_write),
+    .Disconnect =                   TWRAP(ppb_tcp_socket_private_disconnect),
 };

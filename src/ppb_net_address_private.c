@@ -99,6 +99,7 @@ ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uint32_t 
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Bool
@@ -195,18 +196,19 @@ trace_ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uin
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_net_address_private_create_from_ipv6_address(ip, scope_id, port, addr_out);
 }
+#endif // NDEBUG
 
 
 const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = {
-    .AreEqual =         trace_ppb_net_address_private_are_equal,
-    .AreHostsEqual =    trace_ppb_net_address_private_are_hosts_equal,
-    .Describe =         trace_ppb_net_address_private_describe,
-    .ReplacePort =      trace_ppb_net_address_private_replace_port,
-    .GetAnyAddress =    trace_ppb_net_address_private_get_any_address,
-    .GetFamily =        trace_ppb_net_address_private_get_family,
-    .GetPort =          trace_ppb_net_address_private_get_port,
-    .GetAddress =       trace_ppb_net_address_private_get_address,
-    .GetScopeID =       trace_ppb_net_address_private_get_scope_id,
-    .CreateFromIPv4Address = trace_ppb_net_address_private_create_from_ipv4_address,
-    .CreateFromIPv6Address = trace_ppb_net_address_private_create_from_ipv6_address,
+    .AreEqual =         TWRAP(ppb_net_address_private_are_equal),
+    .AreHostsEqual =    TWRAP(ppb_net_address_private_are_hosts_equal),
+    .Describe =         TWRAP(ppb_net_address_private_describe),
+    .ReplacePort =      TWRAP(ppb_net_address_private_replace_port),
+    .GetAnyAddress =    TWRAP(ppb_net_address_private_get_any_address),
+    .GetFamily =        TWRAP(ppb_net_address_private_get_family),
+    .GetPort =          TWRAP(ppb_net_address_private_get_port),
+    .GetAddress =       TWRAP(ppb_net_address_private_get_address),
+    .GetScopeID =       TWRAP(ppb_net_address_private_get_scope_id),
+    .CreateFromIPv4Address = TWRAP(ppb_net_address_private_create_from_ipv4_address),
+    .CreateFromIPv6Address = TWRAP(ppb_net_address_private_create_from_ipv6_address),
 };

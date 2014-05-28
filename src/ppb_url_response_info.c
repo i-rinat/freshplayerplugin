@@ -80,6 +80,8 @@ ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
     return 123003;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Bool
@@ -105,10 +107,11 @@ trace_ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
     trace_info("[PPB] {zilch} %s response=%d\n", __func__+6, response);
     return ppb_url_response_info_get_body_as_file_ref(response);
 }
+#endif // NDEBUG
 
 
 const struct PPB_URLResponseInfo_1_0 ppb_url_response_info_interface_1_0 = {
-    .IsURLResponseInfo =    trace_ppb_url_response_info_is_url_response_info,
-    .GetProperty =          trace_ppb_url_response_info_get_property,
-    .GetBodyAsFileRef =     trace_ppb_url_response_info_get_body_as_file_ref,
+    .IsURLResponseInfo =    TWRAP(ppb_url_response_info_is_url_response_info),
+    .GetProperty =          TWRAP(ppb_url_response_info_get_property),
+    .GetBodyAsFileRef =     TWRAP(ppb_url_response_info_get_body_as_file_ref),
 };

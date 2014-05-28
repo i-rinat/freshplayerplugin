@@ -196,6 +196,8 @@ ppb_core_is_main_thread(void)
     return pthread_equal(np_main_thread, pthread_self());
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 void
@@ -247,13 +249,14 @@ trace_ppb_core_is_main_thread(void)
     trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_core_is_main_thread();
 }
+#endif // NDEBUG
 
 
 const struct PPB_Core_1_0 ppb_core_interface_1_0 = {
-    .AddRefResource =   trace_ppb_core_add_ref_resource,
-    .ReleaseResource =  trace_ppb_core_release_resource,
-    .GetTime =          trace_ppb_core_get_time,
-    .GetTimeTicks =     trace_ppb_core_get_time_ticks,
-    .CallOnMainThread = trace_ppb_core_call_on_main_thread,
-    .IsMainThread =     trace_ppb_core_is_main_thread
+    .AddRefResource =   TWRAP(ppb_core_add_ref_resource),
+    .ReleaseResource =  TWRAP(ppb_core_release_resource),
+    .GetTime =          TWRAP(ppb_core_get_time),
+    .GetTimeTicks =     TWRAP(ppb_core_get_time_ticks),
+    .CallOnMainThread = TWRAP(ppb_core_call_on_main_thread),
+    .IsMainThread =     TWRAP(ppb_core_is_main_thread),
 };

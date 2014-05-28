@@ -105,6 +105,8 @@ ppb_audio_input_dev_close(PP_Resource audio_input)
     return;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -195,28 +197,29 @@ trace_ppb_audio_input_dev_close(PP_Resource audio_input)
     trace_info("[PPB] {full} %s\n", __func__+6);
     ppb_audio_input_dev_close(audio_input);
 }
+#endif // NDEBUG
 
 
 const struct PPB_AudioInput_Dev_0_3 ppb_audio_input_dev_interface_0_3 = {
-    .Create =           trace_ppb_audio_input_dev_create,
-    .IsAudioInput =     trace_ppb_audio_input_dev_is_audio_input,
-    .EnumerateDevices = trace_ppb_audio_input_dev_enumerate_devices,
-    .MonitorDeviceChange = trace_ppb_audio_input_dev_monitor_device_change,
-    .Open =             trace_ppb_audio_input_dev_open_0_3,
-    .GetCurrentConfig = trace_ppb_audio_input_dev_get_current_config,
-    .StartCapture =     trace_ppb_audio_input_dev_start_capture,
-    .StopCapture =      trace_ppb_audio_input_dev_stop_capture,
-    .Close =            trace_ppb_audio_input_dev_close
+    .Create =               TWRAP(ppb_audio_input_dev_create),
+    .IsAudioInput =         TWRAP(ppb_audio_input_dev_is_audio_input),
+    .EnumerateDevices =     TWRAP(ppb_audio_input_dev_enumerate_devices),
+    .MonitorDeviceChange =  TWRAP(ppb_audio_input_dev_monitor_device_change),
+    .Open =                 TWRAP(ppb_audio_input_dev_open_0_3),
+    .GetCurrentConfig =     TWRAP(ppb_audio_input_dev_get_current_config),
+    .StartCapture =         TWRAP(ppb_audio_input_dev_start_capture),
+    .StopCapture =          TWRAP(ppb_audio_input_dev_stop_capture),
+    .Close =                TWRAP(ppb_audio_input_dev_close),
 };
 
 const struct PPB_AudioInput_Dev_0_4 ppb_audio_input_dev_interface_0_4 = {
-    .Create =           trace_ppb_audio_input_dev_create,
-    .IsAudioInput =     trace_ppb_audio_input_dev_is_audio_input,
-    .EnumerateDevices = trace_ppb_audio_input_dev_enumerate_devices,
-    .MonitorDeviceChange = trace_ppb_audio_input_dev_monitor_device_change,
-    .Open =             trace_ppb_audio_input_dev_open,
-    .GetCurrentConfig = trace_ppb_audio_input_dev_get_current_config,
-    .StartCapture =     trace_ppb_audio_input_dev_start_capture,
-    .StopCapture =      trace_ppb_audio_input_dev_stop_capture,
-    .Close =            trace_ppb_audio_input_dev_close
+    .Create =               TWRAP(ppb_audio_input_dev_create),
+    .IsAudioInput =         TWRAP(ppb_audio_input_dev_is_audio_input),
+    .EnumerateDevices =     TWRAP(ppb_audio_input_dev_enumerate_devices),
+    .MonitorDeviceChange =  TWRAP(ppb_audio_input_dev_monitor_device_change),
+    .Open =                 TWRAP(ppb_audio_input_dev_open),
+    .GetCurrentConfig =     TWRAP(ppb_audio_input_dev_get_current_config),
+    .StartCapture =         TWRAP(ppb_audio_input_dev_start_capture),
+    .StopCapture =          TWRAP(ppb_audio_input_dev_stop_capture),
+    .Close =                TWRAP(ppb_audio_input_dev_close),
 };

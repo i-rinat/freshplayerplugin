@@ -256,6 +256,8 @@ ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
     return PP_MakeUndefined();
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 struct PP_Var
@@ -335,27 +337,28 @@ trace_ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_url_util_dev_get_plugin_referrer_url(instance, components);
 }
+#endif // NDEBUG
 
 
 const struct PPB_URLUtil_Dev_0_6 ppb_url_util_dev_interface_0_6 = {
-    .Canonicalize =             trace_ppb_url_util_dev_canonicalize,
-    .ResolveRelativeToURL =     trace_ppb_url_util_dev_resolve_relative_to_url,
-    .ResolveRelativeToDocument = trace_ppb_url_util_dev_resolve_relative_to_document,
-    .IsSameSecurityOrigin =     trace_ppb_url_util_dev_is_same_security_origin,
-    .DocumentCanRequest =       trace_ppb_url_util_dev_document_can_request,
-    .DocumentCanAccessDocument = trace_ppb_url_util_dev_document_can_access_document,
-    .GetDocumentURL =           trace_ppb_url_util_dev_get_document_url,
-    .GetPluginInstanceURL =     trace_ppb_url_util_dev_get_plugin_instance_url
+    .Canonicalize =                 TWRAP(ppb_url_util_dev_canonicalize),
+    .ResolveRelativeToURL =         TWRAP(ppb_url_util_dev_resolve_relative_to_url),
+    .ResolveRelativeToDocument =    TWRAP(ppb_url_util_dev_resolve_relative_to_document),
+    .IsSameSecurityOrigin =         TWRAP(ppb_url_util_dev_is_same_security_origin),
+    .DocumentCanRequest =           TWRAP(ppb_url_util_dev_document_can_request),
+    .DocumentCanAccessDocument =    TWRAP(ppb_url_util_dev_document_can_access_document),
+    .GetDocumentURL =               TWRAP(ppb_url_util_dev_get_document_url),
+    .GetPluginInstanceURL =         TWRAP(ppb_url_util_dev_get_plugin_instance_url),
 };
 
 const struct PPB_URLUtil_Dev_0_7 ppb_url_util_dev_interface_0_7 = {
-    .Canonicalize =             trace_ppb_url_util_dev_canonicalize,
-    .ResolveRelativeToURL =     trace_ppb_url_util_dev_resolve_relative_to_url,
-    .ResolveRelativeToDocument = trace_ppb_url_util_dev_resolve_relative_to_document,
-    .IsSameSecurityOrigin =     trace_ppb_url_util_dev_is_same_security_origin,
-    .DocumentCanRequest =       trace_ppb_url_util_dev_document_can_request,
-    .DocumentCanAccessDocument = trace_ppb_url_util_dev_document_can_access_document,
-    .GetDocumentURL =           trace_ppb_url_util_dev_get_document_url,
-    .GetPluginInstanceURL =     trace_ppb_url_util_dev_get_plugin_instance_url,
-    .GetPluginReferrerURL =     trace_ppb_url_util_dev_get_plugin_referrer_url,
+    .Canonicalize =                 TWRAP(ppb_url_util_dev_canonicalize),
+    .ResolveRelativeToURL =         TWRAP(ppb_url_util_dev_resolve_relative_to_url),
+    .ResolveRelativeToDocument =    TWRAP(ppb_url_util_dev_resolve_relative_to_document),
+    .IsSameSecurityOrigin =         TWRAP(ppb_url_util_dev_is_same_security_origin),
+    .DocumentCanRequest =           TWRAP(ppb_url_util_dev_document_can_request),
+    .DocumentCanAccessDocument =    TWRAP(ppb_url_util_dev_document_can_access_document),
+    .GetDocumentURL =               TWRAP(ppb_url_util_dev_get_document_url),
+    .GetPluginInstanceURL =         TWRAP(ppb_url_util_dev_get_plugin_instance_url),
+    .GetPluginReferrerURL =         TWRAP(ppb_url_util_dev_get_plugin_referrer_url),
 };

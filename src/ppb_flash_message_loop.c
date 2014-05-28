@@ -56,6 +56,7 @@ ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -88,10 +89,12 @@ trace_ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
     trace_info("[PPB] {full} %s flash_message_loop=%d\n", __func__+6, flash_message_loop);
     return ppb_flash_message_loop_quit(flash_message_loop);
 }
+#endif // NDEBUG
+
 
 const struct PPB_Flash_MessageLoop_0_1 ppb_flash_message_loop_interface_0_1 = {
-    .Create =               trace_ppb_flash_message_loop_create,
-    .IsFlashMessageLoop =   trace_ppb_flash_message_loop_is_flash_message_loop,
-    .Run =                  trace_ppb_flash_message_loop_run,
-    .Quit =                 trace_ppb_flash_message_loop_quit,
+    .Create =               TWRAP(ppb_flash_message_loop_create),
+    .IsFlashMessageLoop =   TWRAP(ppb_flash_message_loop_is_flash_message_loop),
+    .Run =                  TWRAP(ppb_flash_message_loop_run),
+    .Quit =                 TWRAP(ppb_flash_message_loop_quit),
 };

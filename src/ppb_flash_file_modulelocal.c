@@ -345,6 +345,8 @@ ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHa
     return PP_OK;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 bool
@@ -433,19 +435,20 @@ trace_ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_flash_file_modulelocal_create_temporary_file(instance, file);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Flash_File_ModuleLocal_3_0 ppb_flash_file_modulelocal_interface_3_0 = {
     .CreateThreadAdapterForInstance =
-                                trace_ppb_flash_file_modulelocal_create_thread_adapter_for_instance,
+                            TWRAP(ppb_flash_file_modulelocal_create_thread_adapter_for_instance),
     .ClearThreadAdapterForInstance =
-                                trace_ppb_flash_file_modulelocal_clear_thread_adapter_for_instance,
-    .OpenFile =                 trace_ppb_flash_file_modulelocal_open_file,
-    .RenameFile =               trace_ppb_flash_file_modulelocal_rename_file,
-    .DeleteFileOrDir =          trace_ppb_flash_file_modulelocal_delete_file_or_dir,
-    .CreateDir =                trace_ppb_flash_file_modulelocal_create_dir,
-    .QueryFile =                trace_ppb_flash_file_modulelocal_query_file,
-    .GetDirContents =           trace_ppb_flash_file_modulelocal_get_dir_contents,
-    .FreeDirContents =          trace_ppb_flash_file_modulelocal_free_dir_contents,
-    .CreateTemporaryFile =      trace_ppb_flash_file_modulelocal_create_temporary_file
+                            TWRAP(ppb_flash_file_modulelocal_clear_thread_adapter_for_instance),
+    .OpenFile =             TWRAP(ppb_flash_file_modulelocal_open_file),
+    .RenameFile =           TWRAP(ppb_flash_file_modulelocal_rename_file),
+    .DeleteFileOrDir =      TWRAP(ppb_flash_file_modulelocal_delete_file_or_dir),
+    .CreateDir =            TWRAP(ppb_flash_file_modulelocal_create_dir),
+    .QueryFile =            TWRAP(ppb_flash_file_modulelocal_query_file),
+    .GetDirContents =       TWRAP(ppb_flash_file_modulelocal_get_dir_contents),
+    .FreeDirContents =      TWRAP(ppb_flash_file_modulelocal_free_dir_contents),
+    .CreateTemporaryFile =  TWRAP(ppb_flash_file_modulelocal_create_temporary_file),
 };
