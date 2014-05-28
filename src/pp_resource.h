@@ -315,6 +315,30 @@ struct pp_flash_message_loop_s {
     GMainLoop              *loop;
 };
 
+union pp_largest_u {
+    struct pp_var_object_s          s01;
+    struct pp_instance_s            s02;
+    struct pp_resource_generic_s    s03;
+    struct pp_url_loader_s          s04;
+    struct pp_url_request_info_s    s05;
+    struct pp_url_response_info_s   s06;
+    struct pp_view_s                s07;
+    struct pp_graphics3d_s          s08;
+    struct pp_image_data_s          s09;
+    struct pp_graphics2d_s          s10;
+    struct pp_network_monitor_s     s11;
+    struct pp_browser_font_s        s12;
+    struct pp_audio_config_s        s13;
+    struct pp_audio_s               s14;
+    struct pp_input_event_s         s15;
+    struct pp_flash_font_file_s     s16;
+    struct pp_printing_s            s17;
+    struct pp_video_capture_s       s18;
+    struct pp_audio_input_s         s19;
+    struct pp_flash_menu_s          s20;
+    struct pp_flash_message_loop_s  s21;
+};
+
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
 void                    pp_resource_expunge(PP_Resource resource);
 void                   *pp_resource_acquire(PP_Resource resource, enum pp_resource_type_e type);

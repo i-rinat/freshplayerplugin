@@ -62,83 +62,17 @@ pp_resource_constructor(void)
 PP_Resource
 pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
 {
-    void *ptr;
-
-#define ALLOC_HELPER(typename)                              \
-    ptr = calloc(sizeof(typename), 1);                      \
-    ((typename *)ptr)->_.type = type;                       \
-    ((typename *)ptr)->_.ref_cnt = 1;                       \
-    pthread_mutex_init(&((typename *)ptr)->_.lock, NULL);   \
-    ((typename *)ptr)->_.instance = instance;
+    struct pp_resource_generic_s *res = g_slice_alloc0(sizeof(union pp_largest_u));
+    res->type = type;
+    res->ref_cnt = 1;
+    pthread_mutex_init(&res->lock, NULL);
+    res->instance = instance;
 
     pthread_mutex_lock(&res_tbl_lock);
-    switch (type) {
-    case PP_RESOURCE_URL_LOADER:
-        ALLOC_HELPER(struct pp_url_loader_s);
-        break;
-    case PP_RESOURCE_URL_REQUEST_INFO:
-        ALLOC_HELPER(struct pp_url_request_info_s);
-        break;
-    case PP_RESOURCE_URL_RESPONSE_INFO:
-        ALLOC_HELPER(struct pp_url_response_info_s);
-        break;
-    case PP_RESOURCE_VIEW:
-        ALLOC_HELPER(struct pp_view_s);
-        break;
-    case PP_RESOURCE_GRAPHICS3D:
-        ALLOC_HELPER(struct pp_graphics3d_s);
-        break;
-    case PP_RESOURCE_IMAGE_DATA:
-        ALLOC_HELPER(struct pp_image_data_s);
-        break;
-    case PP_RESOURCE_GRAPHICS2D:
-        ALLOC_HELPER(struct pp_graphics2d_s);
-        break;
-    case PP_RESOURCE_NETWORK_MONITOR:
-        ALLOC_HELPER(struct pp_network_monitor_s);
-        break;
-    case PP_RESOURCE_BROWSER_FONT:
-        ALLOC_HELPER(struct pp_browser_font_s);
-        break;
-    case PP_RESOURCE_AUDIO_CONFIG:
-        ALLOC_HELPER(struct pp_audio_config_s);
-        break;
-    case PP_RESOURCE_AUDIO:
-        ALLOC_HELPER(struct pp_audio_s);
-        break;
-    case PP_RESOURCE_INPUT_EVENT:
-        ALLOC_HELPER(struct pp_input_event_s);
-        break;
-    case PP_RESOURCE_FLASH_FONT_FILE:
-        ALLOC_HELPER(struct pp_flash_font_file_s);
-        break;
-    case PP_RESOURCE_PRINTING:
-        ALLOC_HELPER(struct pp_printing_s);
-        break;
-    case PP_RESOURCE_VIDEO_CAPTURE:
-        ALLOC_HELPER(struct pp_video_capture_s);
-        break;
-    case PP_RESOURCE_AUDIO_INPUT:
-        ALLOC_HELPER(struct pp_audio_input_s);
-        break;
-    case PP_RESOURCE_FLASH_MENU:
-        ALLOC_HELPER(struct pp_flash_menu_s);
-        break;
-    case PP_RESOURCE_FLASH_MESSAGE_LOOP:
-        ALLOC_HELPER(struct pp_flash_message_loop_s);
-        break;
-    default:
-        // fall through
-    case PP_RESOURCE_UNKNOWN:
-        ptr = calloc(sizeof(struct pp_resource_generic_s), 1);
-        ((struct pp_resource_generic_s *)ptr)->type = type;
-        break;
-    }
-
     int handle = res_tbl_next ++;
-    g_hash_table_insert(res_tbl, GINT_TO_POINTER(handle), ptr);
-
+    g_hash_table_insert(res_tbl, GINT_TO_POINTER(handle), res);
     pthread_mutex_unlock(&res_tbl_lock);
+
     return handle;
 }
 
@@ -148,7 +82,7 @@ pp_resource_expunge(PP_Resource resource)
     pthread_mutex_lock(&res_tbl_lock);
     void *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
     if (ptr) {
-        free(ptr);
+        g_slice_free(union pp_largest_u, ptr);
         g_hash_table_remove(res_tbl, GINT_TO_POINTER(resource));
     }
     pthread_mutex_unlock(&res_tbl_lock);
