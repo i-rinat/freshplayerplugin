@@ -42,6 +42,7 @@
 #include <ppapi/c/private/ppp_instance_private.h>
 #include "ppb_input_event.h"
 #include "ppb_url_loader.h"
+#include "ppb_url_request_info.h"
 #include "ppb_var.h"
 #include "ppb_core.h"
 #include "header_parser.h"
@@ -60,6 +61,14 @@ generate_new_pp_instance_id(void)
     pthread_mutex_unlock(&m);
 
     return result;
+}
+
+static
+void
+empty_completion_callback(void *user_data, int32_t result)
+{
+    (void)user_data;
+    (void)result;
 }
 
 NPError
@@ -139,6 +148,24 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     pp_i->ppp_instance_1_1->DidCreate(pp_i->pp_instance_id, pp_i->argc, pp_i->argn, pp_i->argv);
     pp_i->instance_loaded = 1;
+
+    if (mode == NP_FULL) {
+        PP_Resource request_info = ppb_url_request_info_create(pp_i->pp_instance_id);
+        PP_Resource url_loader = ppb_url_loader_create(pp_i->pp_instance_id);
+
+        struct PP_Var s_url = PP_MakeString(pp_i->instance_url);
+        struct PP_Var s_method = PP_MakeString("GET");
+
+        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL, s_url);
+        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_METHOD, s_method);
+        ppb_url_loader_open(url_loader, request_info,
+                            PP_MakeCompletionCallback(empty_completion_callback, NULL));
+        ppb_var_release(s_url);
+        ppb_var_release(s_method);
+        ppb_core_release_resource(request_info);
+
+        pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->pp_instance_id, url_loader);
+    }
 
     return NPERR_NO_ERROR;
 }
