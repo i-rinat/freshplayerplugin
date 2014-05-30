@@ -93,7 +93,7 @@ convert_menu(const struct PP_Flash_Menu *pp_menu)
 
         gtk_widget_set_sensitive(mi, pp_mi.enabled != PP_FALSE);
         gtk_widget_show(mi);
-        gtk_menu_append(GTK_MENU(menu), mi);
+        gtk_menu_shell_append(GTK_MENU_SHELL(menu), mi);
 
         if (pp_mi.type == PP_FLASH_MENUITEM_TYPE_SUBMENU)
             gtk_menu_item_set_submenu(GTK_MENU_ITEM(mi), convert_menu(pp_mi.submenu));
