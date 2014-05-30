@@ -20,6 +20,7 @@ pkg_check_modules(REQ
 	x11
 	xinerama
 	gl
+	glu
 	liburiparser
 	libconfig
 	cairo
