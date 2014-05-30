@@ -185,7 +185,7 @@ trace_n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exceptio
 {
     char *s_name = trace_var_as_string(name);
     trace_info("[CLS] {full} %s object=%p, name=%s\n", __func__+6, object, s_name);
-    free(s_name);
+    g_free(s_name);
     return n2p_has_property(object, name, exception);
 }
 
@@ -195,7 +195,7 @@ trace_n2p_has_method(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     char *s_name = trace_var_as_string(name);
     trace_info("[CLS] {zilch} %s object=%p, name=%s\n", __func__+6, object, s_name);
-    free(s_name);
+    g_free(s_name);
     return n2p_has_method(object, name, exception);
 }
 
@@ -205,7 +205,7 @@ trace_n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exceptio
 {
     char *s_name = trace_var_as_string(name);
     trace_info("[CLS] {full} %s object=%p, name=%s\n", __func__+6, object, s_name);
-    free(s_name);
+    g_free(s_name);
     return n2p_get_property(object, name, exception);
 }
 
@@ -227,8 +227,8 @@ trace_n2p_set_property(void *object, struct PP_Var name, struct PP_Var value,
     char *s_value = trace_var_as_string(value);
     trace_info("[CLS] {zilch} %s object=%p, name=%s, value=%s\n", __func__+6, object,
                s_name, s_value);
-    free(s_name);
-    free(s_value);
+    g_free(s_name);
+    g_free(s_value);
     n2p_set_property(object, name, value, exception);
 }
 
@@ -238,7 +238,7 @@ trace_n2p_remove_property(void *object, struct PP_Var name, struct PP_Var *excep
 {
     char *s_name = trace_var_as_string(name);
     trace_info("[CLS] {zilch} %s object=%p, name=%s\n", __func__+6, object, s_name);
-    free(s_name);
+    g_free(s_name);
     n2p_remove_property(object, name, exception);
 }
 
@@ -250,7 +250,7 @@ trace_n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP
     char *s_method_name = trace_var_as_string(method_name);
     trace_info("[CLS] {full} %s object=%p, method_name=%s, argc=%u, argv=%p\n", __func__+6,
                object, s_method_name, argc, argv);
-    free(s_method_name);
+    g_free(s_method_name);
     return n2p_call(object, method_name, argc, argv, exception);
 }
 

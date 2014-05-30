@@ -189,7 +189,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
 {
     char *window_str = trace_np_window_as_string(window);
     trace_info("[NPP] {full} %s npp=%p, window=%s\n", __func__, npp, window_str);
-    free(window_str);
+    g_free(window_str);
 
     struct pp_instance_s *pp_i = npp->pdata;
 

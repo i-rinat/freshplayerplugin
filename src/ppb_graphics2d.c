@@ -304,7 +304,7 @@ trace_ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size,
     char *s_size = trace_size_as_string(size);
     trace_info("[PPB] {full} %s instance=%d, size=%s, is_always_opaque=%d\n", __func__+6,
                instance, s_size, is_always_opaque);
-    free(s_size);
+    g_free(s_size);
     return ppb_graphics2d_create(instance, size, is_always_opaque);
 }
 
@@ -323,7 +323,7 @@ trace_ppb_graphics2d_describe(PP_Resource graphics_2d, struct PP_Size *size,
 {
     char *s_size = trace_size_as_string(size);
     trace_info("[PPB] {zilch} %s graphics_2d=%d, size=%s\n", __func__+6, graphics_2d, s_size);
-    free(s_size);
+    g_free(s_size);
     return ppb_graphics2d_describe(graphics_2d, size, is_always_opaque);
 }
 
@@ -336,8 +336,8 @@ trace_ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image
     char *s_src_rect = trace_rect_as_string(src_rect);
     trace_info("[PPB] {full} %s graphics_2d=%d, image_data=%d, top_left=%s, src_rect=%s\n",
                __func__+6, graphics_2d, image_data, s_top_left, s_src_rect);
-    free(s_top_left);
-    free(s_src_rect);
+    g_free(s_top_left);
+    g_free(s_src_rect);
     ppb_graphics2d_paint_image_data(graphics_2d, image_data, top_left, src_rect);
 }
 
@@ -350,8 +350,8 @@ trace_ppb_graphics2d_scroll(PP_Resource graphics_2d, const struct PP_Rect *clip_
     char *s_amount = trace_point_as_string(amount);
     trace_info("[PPB] {zilch} %s graphics_2d=%d, clip_rect=%s, amount=%s\n", __func__+6,
                graphics_2d, s_clip_rect, s_amount);
-    free(s_clip_rect);
-    free(s_amount);
+    g_free(s_clip_rect);
+    g_free(s_amount);
     ppb_graphics2d_scroll(graphics_2d, clip_rect, amount);
 }
 

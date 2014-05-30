@@ -333,8 +333,8 @@ trace_ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
                             PP_Bool allow_subpixel_aa, uint32_t glyph_count,
                             const uint16_t glyph_indices[], const struct PP_Point glyph_advances[])
 {
-    char *position_str = trace_point_as_string(position);
-    char *clip_str = trace_rect_as_string(clip);
+    char *s_position = trace_point_as_string(position);
+    char *s_clip = trace_rect_as_string(clip);
     char *s_face = trace_var_as_string(font_desc->face);
     trace_info("[PPB] {full} %s instance=%d, pp_image_data=%d, font_desc={.face=%s, .family=%d, "
                ".size=%u, .weight=%d, .italic=%u, .small_caps=%u, .letter_spacing=%d, "
@@ -343,14 +343,14 @@ trace_ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
                "glyph_advances=%p\n", __func__+6, instance, pp_image_data, s_face,
                font_desc->family, font_desc->size, font_desc->weight, font_desc->italic,
                font_desc->small_caps, font_desc->letter_spacing, font_desc->word_spacing,
-               color, position_str, clip_str,
+               color, s_position, s_clip,
                transformation[0][0], transformation[0][1], transformation[0][2],
                transformation[1][0], transformation[1][1], transformation[1][2],
                transformation[2][0], transformation[2][1], transformation[2][2],
                allow_subpixel_aa, glyph_count, glyph_indices, glyph_advances);
-    free(position_str);
-    free(clip_str);
-    free(s_face);
+    g_free(s_position);
+    g_free(s_clip);
+    g_free(s_face);
     return ppb_flash_draw_glyphs(instance, pp_image_data, font_desc, color, position, clip,
                                  transformation, allow_subpixel_aa, glyph_count, glyph_indices,
                                  glyph_advances);
@@ -403,7 +403,7 @@ trace_ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect
 {
     char *rect_str = trace_rect_as_string(rect);
     trace_info("[PPB] {zilch} %s instance=%d, rect=%s\n", __func__+6, instance, rect_str);
-    free(rect_str);
+    g_free(rect_str);
     return ppb_flash_is_rect_topmost(instance, rect);
 }
 
@@ -431,7 +431,7 @@ trace_ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struc
     char *value_str = trace_var_as_string(value);
     trace_info("[PPB] {fake} %s instance=%d, key=%d, value=%s\n", __func__+6, instance, key,
                value_str);
-    free(value_str);
+    g_free(value_str);
     return ppb_flash_set_crash_data(instance, key, value);
 }
 

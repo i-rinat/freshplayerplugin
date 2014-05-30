@@ -162,7 +162,7 @@ trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var sc
 {
     char *s_script = trace_var_as_string(script);
     trace_info("[PPB] {full} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
-    free(s_script);
+    g_free(s_script);
     return ppb_instance_private_execute_script(instance, script, exception);
 }
 #endif // NDEBUG

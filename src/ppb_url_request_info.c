@@ -237,7 +237,7 @@ trace_ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProper
     char *value_str = trace_var_as_string(value);
     trace_info("[PPB] {full} %s request=%d, property=%s, value=%s\n", __func__+6, request,
                reverse_pp_url_request_property(property), value_str);
-    free(value_str);
+    g_free(value_str);
     return ppb_url_request_info_set_property(request, property, value);
 }
 

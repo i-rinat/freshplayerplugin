@@ -166,7 +166,7 @@ trace_ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
     char *s_size = trace_size_as_string(size);
     trace_info("[PPB] {full} %s instance=%d, format=%s, size=%s, init_to_zero=%d\n", __func__+6,
                instance, reverse_pp_image_data_format(format), s_size, init_to_zero);
-    free(s_size);
+    g_free(s_size);
     return ppb_image_data_create(instance, format, size, init_to_zero);
 }
 

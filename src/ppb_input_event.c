@@ -505,8 +505,8 @@ trace_ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type
                "mouse_button=%d, mouse_position=%s, click_count=%d, mouse_movement=%s\n",
                __func__+6, instance, type, time_stamp, modifiers, mouse_button, s_mouse_position,
                click_count, s_mouse_movement);
-    free(s_mouse_position);
-    free(s_mouse_movement);
+    g_free(s_mouse_position);
+    g_free(s_mouse_movement);
     return ppb_mouse_input_event_create(instance, type, time_stamp, modifiers, mouse_button,
                                         mouse_position, click_count, mouse_movement);
 }
@@ -562,8 +562,8 @@ trace_ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp
     trace_info("[PPB] {full} %s instance=%d, time_stamp=%f, modifiers=0x%x, wheel_delta=%s, "
                "wheel_ticks=%s, scrool_by_page=%d\n", __func__+6, instance, time_stamp, modifiers,
                s_wheel_delta, s_wheel_ticks, scroll_by_page);
-    free(s_wheel_delta);
-    free(s_wheel_ticks);
+    g_free(s_wheel_delta);
+    g_free(s_wheel_ticks);
     return ppb_wheel_input_event_create(instance, time_stamp, modifiers, wheel_delta, wheel_ticks,
                                         scroll_by_page);
 }
@@ -610,7 +610,7 @@ trace_ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type t
     trace_info("[PPB] {full} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
                "key_code=%u, character_text=%s\n", __func__+6, instance, type, time_stamp,
                modifiers, key_code, s_character_text);
-    free(s_character_text);
+    g_free(s_character_text);
     return ppb_keyboard_input_event_create(instance, type, time_stamp, modifiers, key_code,
                                            character_text);
 }
@@ -657,7 +657,7 @@ trace_ppb_touch_input_event_add_touch_point(PP_Resource touch_event, PP_TouchLis
     char *s_point = trace_touch_point_as_string(point);
     trace_info("[PPB] {zilch} %s touch_event=%d, list=%d, point=%s\n", __func__+6, touch_event,
                list, s_point);
-    free(s_point);
+    g_free(s_point);
     return ppb_touch_input_event_add_touch_point(touch_event, list, point);
 }
 
@@ -710,7 +710,7 @@ trace_ppb_ime_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                "segment_offsets=%p, target_segment=%d, selection_start=%u, selection_end=%u\n",
                __func__+6, instance, type, time_stamp, s_text, segment_number, segment_offsets,
                target_segment, selection_start, selection_end);
-    free(s_text);
+    g_free(s_text);
     return ppb_ime_input_event_create(instance, type, time_stamp, text, segment_number,
                                       segment_offsets, target_segment, selection_start,
                                       selection_end);

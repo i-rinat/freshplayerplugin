@@ -24,6 +24,7 @@
 
 #include "ppb_text_input_dev.h"
 #include <stdlib.h>
+#include <glib.h>
 #include "trace.h"
 #include "reverse_constant.h"
 
@@ -84,8 +85,8 @@ trace_ppb_text_input_dev_interface_update_caret_position(PP_Instance instance,
     char *bounding_box_str = trace_rect_as_string(bounding_box);
     trace_info("[PPB] {zilch} %s instance=%d, caret=%s, bounding_box=%s\n", __func__+6, instance,
                caret_str, bounding_box_str);
-    free(caret_str);
-    free(bounding_box_str);
+    g_free(caret_str);
+    g_free(bounding_box_str);
     ppb_text_input_dev_interface_update_caret_position(instance, caret, bounding_box);
 }
 

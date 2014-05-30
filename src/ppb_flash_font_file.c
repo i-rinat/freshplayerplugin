@@ -112,7 +112,7 @@ trace_ppb_flash_font_file_create(PP_Instance instance,
                ".charset=%d\n", __func__+6, instance, s_face, description->family,
                description->size, description->weight, description->italic, description->small_caps,
                description->letter_spacing, description->word_spacing, charset);
-    free(s_face);
+    g_free(s_face);
     return ppb_flash_font_file_create(instance, description, charset);
 }
 
