@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#define _XOPEN_SOURCE   500
-#define _GNU_SOURCE
+#define _XOPEN_SOURCE   600
 #include "ppb_url_loader.h"
 #include "ppb_core.h"
 #include "ppb_url_util_dev.h"
@@ -112,7 +111,7 @@ _url_loader_open_comt(void *user_data)
         FILE   *fp;
         int     need_newline = 0;
 
-        asprintf(&tmpfname, "/tmp/FreshPostBodyXXXXXX");    // TODO: make configurable
+        tmpfname = g_strdup_printf("/tmp/FreshPostBodyXXXXXX");    // TODO: make configurable
         // TODO: error handling
         fd = mkstemp(tmpfname);
         fp = fdopen(fd, "wb+");
@@ -154,7 +153,7 @@ _url_loader_open_comt(void *user_data)
                                                     (void*)(size_t)comt_params->loader);
         }
         unlink(tmpfname);
-        free(tmpfname);
+        g_free(tmpfname);
     } else {
         // GET request
         if (comt_params->target) {
@@ -174,10 +173,10 @@ open_temporary_file_stream(void)
 {
     char *tmpfname;
     // TODO: make temp path configurable
-    asprintf(&tmpfname, "/tmp/FreshStreamXXXXXX");
+    tmpfname = g_strdup_printf("/tmp/FreshStreamXXXXXX");
     int fd = mkstemp(tmpfname);
     unlink(tmpfname);
-    free(tmpfname);
+    g_free(tmpfname);
     FILE *fp = fdopen(fd, "wb+");
     return fp;
 }

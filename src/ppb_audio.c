@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE
 #include <pthread.h>
 #include "ppb_audio.h"
 #include <stdlib.h>

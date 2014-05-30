@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE             // asprintf
 #include <dlfcn.h>
 #include <npapi/npapi.h>
 #include <npapi/npfunctions.h>
@@ -101,10 +100,10 @@ get_local_config_path(void)
     const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 
     if (xdg_config_home) {
-        asprintf(&res, "%s/%s", xdg_config_home, config_file_name);
+        res = g_strdup_printf("%s/%s", xdg_config_home, config_file_name);
     } else {
         const char *home = getenv("HOME");
-        asprintf(&res, "%s/.config/%s", home ? home : "", config_file_name);
+        res = g_strdup_printf("%s/.config/%s", home ? home : "", config_file_name);
     }
 
     return res;
@@ -114,9 +113,7 @@ static
 char *
 get_global_config_path(void)
 {
-    char *res = NULL;
-    asprintf(&res, "/etc/%s", config_file_name);
-    return res;
+    return g_strdup_printf("/etc/%s", config_file_name);
 }
 
 static
@@ -159,8 +156,8 @@ read_config(void)
 
 quit:
     config_destroy(&cfg);
-    free(local_config);
-    free(global_config);
+    g_free(local_config);
+    g_free(global_config);
 
     initialize_quirks();
 }

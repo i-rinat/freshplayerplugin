@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <glib.h>
 #include "trace.h"
 
 
@@ -52,7 +53,7 @@ to_abs_path(const char *root, const char *s)
     char *src, *dst;
     int dot_cnt = 0;
 
-    asprintf(&rel_path, "/%s", s);
+    rel_path = g_strdup_printf("/%s", s);
     src = dst = rel_path;
 
     while (*src) {
@@ -94,8 +95,8 @@ to_abs_path(const char *root, const char *s)
     }
 
     int len = dst - rel_path;
-    asprintf(&abs_path, "%s%.*s", root, len, rel_path);
-    free(rel_path);
+    abs_path = g_strdup_printf("%s%.*s", root, len, rel_path);
+    g_free(rel_path);
 
     return abs_path;
 }
@@ -163,7 +164,7 @@ ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int
     }
 
     int fd = open(abs_path, O_LARGEFILE | xmode, 0666);
-    free(abs_path);
+    g_free(abs_path);
     *file = fd;
     if (fd > 0)
         return PP_OK;
@@ -185,8 +186,8 @@ ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *path_fr
 
     int ret = rename(abs_path_from, abs_path_to);
 
-    free(abs_path_from);
-    free(abs_path_to);
+    g_free(abs_path_from);
+    g_free(abs_path_to);
 
     if (ret < 0) {
         // TODO: implement error mapping
@@ -207,7 +208,7 @@ ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *
 
     char *abs_path = to_abs_path(pepper_data_dir, path);
     int ret = unlink(abs_path);
-    free(abs_path);
+    g_free(abs_path);
 
     if (ret < 0) {
         // TODO: implement error mapping
@@ -233,7 +234,7 @@ ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
     }
 
     ret = mkdir(abs_path, 0777);
-    free(abs_path);
+    g_free(abs_path);
 
     if (ret < 0) {
         switch (errno) {
@@ -256,7 +257,7 @@ ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
     struct stat sb;
 
     int ret = lstat(abs_path, &sb);
-    free(abs_path);
+    g_free(abs_path);
     if (ret < 0) {
         switch (errno) {
             case ENOENT: return PP_ERROR_FILENOTFOUND;
@@ -303,20 +304,20 @@ ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const char *pa
         char *fname;
         struct stat sb;
         (*contents)->entries[k].name = strdup(namelist[k]->d_name);
-        asprintf(&fname, "%s/%s", abs_path, namelist[k]->d_name);
+        fname = g_strdup_printf("%s/%s", abs_path, namelist[k]->d_name);
         lstat(fname, &sb);
-        free(fname);
+        g_free(fname);
         (*contents)->entries[k].is_dir = S_ISDIR(sb.st_mode);
         free(namelist[k]);
     }
 
     free(namelist);
-    free(abs_path);
+    g_free(abs_path);
     return PP_OK;
 err2:
     free(*contents);
 err:
-    free(abs_path);
+    g_free(abs_path);
     return PP_ERROR_FAILED;
 }
 
@@ -336,10 +337,10 @@ ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHa
     (void)instance;
     char *tmpfname;
     // TODO: find a good directory for temporary files
-    asprintf(&tmpfname, "/tmp/FreshTempXXXXXX");
+    tmpfname = g_strdup_printf("/tmp/FreshTempXXXXXX");
     *file = mkstemp(tmpfname);
     unlink(tmpfname);
-    free(tmpfname);
+    g_free(tmpfname);
     if (*file < 0)
         return PP_ERROR_FAILED;
     return PP_OK;

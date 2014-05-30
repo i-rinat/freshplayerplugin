@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE
 #include "ppb_flash.h"
 #include <stddef.h>
 #include <stdlib.h>

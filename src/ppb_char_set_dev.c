@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE                 // asprintf
 #include "ppb_char_set_dev.h"
 #include "ppb_memory_dev.h"
 #include <stdlib.h>
@@ -56,14 +55,14 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
         cd = iconv_open(output_char_set, "UTF16");
         break;
     case PP_CHARSET_CONVERSIONERROR_SKIP:
-        asprintf(&tmp, "%s//IGNORE", output_char_set);
+        tmp = g_strdup_printf("%s//IGNORE", output_char_set);
         cd = iconv_open(tmp, "UTF16");
-        free(tmp);
+        g_free(tmp);
         break;
     case PP_CHARSET_CONVERSIONERROR_SUBSTITUTE:
-        asprintf(&tmp, "%s//TRANSLIT", output_char_set);
+        tmp = g_strdup_printf("%s//TRANSLIT", output_char_set);
         cd = iconv_open(tmp, "UTF16");
-        free(tmp);
+        g_free(tmp);
         break;
     }
 
