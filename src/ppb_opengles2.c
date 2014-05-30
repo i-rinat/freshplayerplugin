@@ -33,7 +33,7 @@ static
 void
 _setup_glx_ctx(struct pp_graphics3d_s *g3d)
 {
-    glXMakeContextCurrent(g3d->dpy, g3d->glx_pixmap, g3d->glx_pixmap, g3d->glc);
+    glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->rendering_glc);
 }
 
 static
@@ -41,7 +41,7 @@ void
 setup_ctx(PP_Resource context)
 {
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
-    glXMakeContextCurrent(g3d->dpy, g3d->glx_pixmap, g3d->glx_pixmap, g3d->glc);
+    glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->rendering_glc);
     pp_resource_release(context);
 }
 

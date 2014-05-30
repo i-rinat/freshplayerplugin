@@ -80,7 +80,7 @@ static
 PP_Bool
 trace_ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
-    trace_info("[PPB] {part} %s instance=%d, device=%d\n", __func__+6, instance, device);
+    trace_info("[PPB] {full} %s instance=%d, device=%d\n", __func__+6, instance, device);
     return ppb_instance_bind_graphics(instance, device);
 }
 

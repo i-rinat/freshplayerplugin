@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#define GL_GLEXT_PROTOTYPES
 #include <assert.h>
 #include <inttypes.h>
 #include <npapi/npapi.h>
@@ -29,6 +30,7 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
+#include <GL/gl.h>
 #include <pthread.h>
 #include "trace.h"
 #include "reverse_constant.h"
@@ -423,12 +425,50 @@ handle_graphics_expose_event(NPP npp, void *event)
         pp_resource_release(pp_i->graphics);
     } else if (g3d) {
         pthread_mutex_lock(&pp_i->lock);
-        XImage *xi = XGetImage(dpy, g3d->pixmap, 0, 0, g3d->width, g3d->height, XAllPlanes(),
-                               ZPixmap);
-        if (!xi)
-            trace_error("%s, XGetImage returned NULL\n", __func__);
-        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g3d->width, g3d->height);
-        XDestroyImage(xi);
+
+        if (pp_i->is_fullscreen) {
+            glXMakeCurrent(pp_i->dpy, drawable, g3d->presentation_glc);
+        } else {
+            glXMakeCurrent(pp_i->dpy, g3d->glx_pixmap, g3d->presentation_glc);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glViewport(0, 0, g3d->width, g3d->height);
+        glOrtho(0, g3d->width, 0, g3d->height, -1.0, 1.0);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+        glMatrixMode(GL_TEXTURE);
+        glLoadIdentity();
+
+        glEnable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+        glBindTexture(GL_TEXTURE_2D, g3d->tex_id);
+
+        glColor4f(1, 1, 1, 1);
+        glBegin(GL_QUADS);
+            glTexCoord2i(0, 0); glVertex2i(0, 0);
+            glTexCoord2i(1, 0); glVertex2i(g3d->width, 0);
+            glTexCoord2i(1, 1); glVertex2i(g3d->width, g3d->height);
+            glTexCoord2i(0, 1); glVertex2i(0, g3d->height);
+        glEnd();
+
+        glFinish();
+
+        if (pp_i->is_fullscreen) {
+            glXSwapBuffers(dpy, drawable);
+        } else {
+            XCopyArea(dpy, g3d->pixmap, drawable, DefaultGC(dpy, screen),
+                      0, 0,
+                      g3d->width, g3d->height,
+                      0, 0);
+            XFlush(dpy);
+        }
+
         pthread_mutex_unlock(&pp_i->lock);
         pp_resource_release(pp_i->graphics);
     } else {

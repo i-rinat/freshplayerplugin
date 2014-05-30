@@ -199,10 +199,13 @@ struct pp_view_s {
 
 struct pp_graphics3d_s {
     struct pp_resource_generic_s _;
-    GLXContext      glc;
+    GLXContext      rendering_glc;
+    GLXContext      presentation_glc;
     GLXFBConfig     fb_config;
     Pixmap          pixmap;
     GLXPixmap       glx_pixmap;
+    GLuint          tex_id;
+    GLuint          fbo_id;
     Display        *dpy;
     int32_t         width;
     int32_t         height;
