@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE
+#define _FILE_OFFSET_BITS  64
 #include "ppb_flash_file_modulelocal.h"
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/c/pp_file_info.h>
@@ -163,7 +163,7 @@ ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int
         }
     }
 
-    int fd = open(abs_path, O_LARGEFILE | xmode, 0666);
+    int fd = open(abs_path, xmode, 0666);
     g_free(abs_path);
     *file = fd;
     if (fd > 0)
