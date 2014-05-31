@@ -277,17 +277,6 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     return PP_OK;
 }
 
-void
-_swap_buffers_comt(void *p)
-{
-    struct PP_CompletionCallback *ccb = p;
-
-    if (ccb->func)
-        ccb->func(ccb->user_data, PP_OK);
-
-    g_slice_free(struct PP_CompletionCallback, ccb);
-}
-
 int32_t
 ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
@@ -320,9 +309,10 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     }
     pp_resource_release(context);
 
-    struct PP_CompletionCallback *ccb = g_slice_alloc(sizeof(*ccb));
-    *ccb = callback;
-    npn.pluginthreadasynccall(pp_i->npp, _swap_buffers_comt, ccb);
+    if (callback.func) {
+        ppb_core_call_on_main_thread_now(pp_i->pp_instance_id, callback, PP_OK);
+        return PP_OK_COMPLETIONPENDING;
+    }
 
     return PP_OK;
 }
