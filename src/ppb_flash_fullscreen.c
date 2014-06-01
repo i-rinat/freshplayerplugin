@@ -105,9 +105,25 @@ fullscreen_window_thread(void *p)
 
     // go fullscreen
     Atom netwm_fullscreen_atom = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
-    Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", True);
-    XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32,
-                    PropModeReplace, (unsigned char *)&netwm_fullscreen_atom, 1);
+    XChangeProperty(dpy, pp_i->fs_wnd,
+                    XInternAtom(dpy, "_NET_WM_STATE", False),
+                    XA_ATOM,
+                    32, PropModeReplace,
+                    (unsigned char *)&netwm_fullscreen_atom, 1);
+
+    // give window a name
+    const char *fs_window_name = "freshwrapper fullscreen window";
+    XChangeProperty(dpy, pp_i->fs_wnd,
+                    XInternAtom(dpy, "WM_NAME", False),
+                    XInternAtom(dpy, "STRING", False),
+                    8, PropModeReplace,
+                    (unsigned char *)fs_window_name, strlen(fs_window_name));
+
+    XChangeProperty(dpy, pp_i->fs_wnd,
+                    XInternAtom(dpy, "_NET_WM_NAME", False),
+                    XInternAtom(dpy, "UTF8_STRING", False),
+                    8, PropModeReplace,
+                    (unsigned char *)fs_window_name, strlen(fs_window_name));
 
     // show window
     XMapWindow(dpy, pp_i->fs_wnd);
