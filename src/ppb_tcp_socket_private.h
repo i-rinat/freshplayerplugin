@@ -31,6 +31,9 @@
 PP_Resource
 ppb_tcp_socket_private_create(PP_Instance instance);
 
+void
+ppb_tcp_socket_private_destroy(void *ptr);
+
 PP_Bool
 ppb_tcp_socket_private_is_tcp_socket(PP_Resource resource);
 

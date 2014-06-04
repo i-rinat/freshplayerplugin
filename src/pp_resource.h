@@ -77,7 +77,9 @@ enum pp_resource_type_e {
     PP_RESOURCE_AUDIO_INPUT,
     PP_RESOURCE_FLASH_MENU,
     PP_RESOURCE_FLASH_MESSAGE_LOOP,
-    PP_RESOURCE_TYPES_COUNT,
+    PP_RESOURCE_TCP_SOCKET,
+
+    PP_RESOURCE_TYPES_COUNT,        // must be the last item in the list
 };
 
 enum pp_request_method_e {
@@ -318,6 +320,12 @@ struct pp_flash_message_loop_s {
     GMainLoop              *loop;
 };
 
+struct pp_tcp_socket_s {
+    struct pp_resource_generic_s _;
+    int             sock;
+    unsigned int    is_connected;
+};
+
 union pp_largest_u {
     struct pp_var_object_s          s01;
     struct pp_instance_s            s02;
@@ -340,6 +348,7 @@ union pp_largest_u {
     struct pp_audio_input_s         s19;
     struct pp_flash_menu_s          s20;
     struct pp_flash_message_loop_s  s21;
+    struct pp_tcp_socket_s          s22;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);

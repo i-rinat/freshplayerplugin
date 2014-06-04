@@ -42,6 +42,7 @@
 #include "ppb_video_capture_dev.h"
 #include "ppb_audio_input_dev.h"
 #include "ppb_flash_message_loop.h"
+#include "ppb_tcp_socket_private.h"
 
 
 #define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
@@ -220,6 +221,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_FLASH_MESSAGE_LOOP:
             ppb_flash_message_loop_destroy(ptr);
+            break;
+        case PP_RESOURCE_TCP_SOCKET:
+            ppb_tcp_socket_private_destroy(ptr);
             break;
         default:
             break;
