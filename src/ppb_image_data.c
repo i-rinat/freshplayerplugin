@@ -24,7 +24,7 @@
 
 #include "ppb_image_data.h"
 #include "ppb_core.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #include "trace.h"
 #include "pp_resource.h"

@@ -34,7 +34,7 @@
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
 
-#include <stddef.h>
+#include <stdlib.h>
 #include <X11/Xlib.h>
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>

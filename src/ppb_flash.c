@@ -23,7 +23,6 @@
  */
 
 #include "ppb_flash.h"
-#include <stddef.h>
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"

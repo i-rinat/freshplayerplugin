@@ -23,7 +23,7 @@
  */
 
 #include "ppb_instance.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"

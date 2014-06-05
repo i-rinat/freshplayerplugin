@@ -23,7 +23,7 @@
  */
 
 #include "ppb_opengles2.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"

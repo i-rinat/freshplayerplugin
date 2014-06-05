@@ -23,7 +23,7 @@
  */
 
 #include "ppb_url_loader_trusted.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
 
 

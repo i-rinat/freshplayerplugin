@@ -24,7 +24,7 @@
 
 #include <assert.h>
 #include "ppb_core.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
 #include "trace.h"

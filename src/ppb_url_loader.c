@@ -28,7 +28,7 @@
 #include "ppb_url_util_dev.h"
 #include "ppb_var.h"
 #include <ppapi/c/pp_errors.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <inttypes.h>

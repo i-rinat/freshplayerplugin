@@ -23,7 +23,7 @@
  */
 
 #include "ppb_audio_config.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
 #include "pp_resource.h"
 

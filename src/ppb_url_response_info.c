@@ -24,7 +24,7 @@
 
 #include <assert.h>
 #include "ppb_url_response_info.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #include "trace.h"
 #include "tables.h"

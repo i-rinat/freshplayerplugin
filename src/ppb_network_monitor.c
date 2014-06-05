@@ -24,7 +24,7 @@
 
 #include "ppb_network_monitor.h"
 #include <ppapi/c/pp_errors.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include "pp_resource.h"
 #include "trace.h"
 
