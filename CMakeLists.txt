@@ -10,6 +10,9 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG -g3")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g3")
 
+# request pthreads
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+
 add_definitions(-Werror=implicit-function-declaration)
 
 find_package(PkgConfig REQUIRED)
@@ -98,7 +101,7 @@ add_library(freshwrapper SHARED
 )
 
 target_link_libraries(freshwrapper
-	-ldl
+	dl
 	${REQ_LIBRARIES}
 )
 
