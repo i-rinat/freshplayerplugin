@@ -243,7 +243,8 @@ handle_tcp_read_stage1(struct async_network_task_s *task)
         return;
     }
 
-    event_base_once(event_b, ts->sock, EV_READ, handle_tcp_read_stage2, task, NULL);
+    struct timeval timeout = {.tv_sec = 15};
+    event_base_once(event_b, ts->sock, EV_READ, handle_tcp_read_stage2, task, &timeout);
     pp_resource_release(task->resource);
 }
 
@@ -278,7 +279,8 @@ handle_tcp_write_stage1(struct async_network_task_s *task)
         return;
     }
 
-    event_base_once(event_b, ts->sock, EV_WRITE, handle_tcp_write_stage2, task, NULL);
+    struct timeval timeout = {.tv_sec = 15};
+    event_base_once(event_b, ts->sock, EV_WRITE, handle_tcp_write_stage2, task, &timeout);
     pp_resource_release(task->resource);
 }
 
