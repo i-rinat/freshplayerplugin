@@ -109,6 +109,11 @@ ppb_tcp_socket_private_get_local_address(PP_Resource tcp_socket,
     if (!ts)
         return PP_FALSE;
 
+    if (!ts->is_connected) {
+        pp_resource_release(tcp_socket);
+        return PP_FALSE;
+    }
+
     socklen_t len = sizeof(local_addr->data);
     int ret = getsockname(ts->sock, (struct sockaddr *)local_addr->data, &len);
     local_addr->size = len;
@@ -124,6 +129,11 @@ ppb_tcp_socket_private_get_remote_address(PP_Resource tcp_socket,
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts)
         return PP_FALSE;
+
+    if (!ts->is_connected) {
+        pp_resource_release(tcp_socket);
+        return PP_FALSE;
+    }
 
     socklen_t len = sizeof(remote_addr->data);
     int ret = getpeername(ts->sock, (struct sockaddr *)remote_addr->data, &len);
