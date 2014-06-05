@@ -62,8 +62,11 @@ get_pp_errno(void)
         return PP_ERROR_CONNECTION_TIMEDOUT;
     case ENOTCONN:
         return PP_ERROR_CONNECTION_CLOSED;
+    case EAGAIN:
+    case EBADF:
+        return PP_ERROR_FAILED;
     default:
-        fprintf(stderr, "%s, no conversion for %d\n", __func__, errno);
+        trace_error("%s, no conversion for %d\n", __func__, errno);
     }
     return retval;
 }
