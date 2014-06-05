@@ -24,10 +24,11 @@
 
 #include "ppb_crypto_dev.h"
 #include <fcntl.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 #include "trace.h"
 
 
@@ -40,6 +41,7 @@ __attribute__((constructor))
 constructor_ppb_crypto_dev(void)
 {
     rand_fd = open("/dev/urandom", O_RDONLY);
+    srand(time(NULL) + 42);
 }
 
 static
@@ -53,7 +55,12 @@ destructor_ppb_crypto_dev(void)
 void
 ppb_crypto_dev_get_random_bytes(char *buffer, uint32_t num_bytes)
 {
-    read(rand_fd, buffer, num_bytes);
+    ssize_t bytes_read = read(rand_fd, buffer, num_bytes);
+    if (bytes_read < num_bytes) {
+        // can't read from file, falling back to rand()
+        for (uint32_t k = 0; k < num_bytes; k ++)
+            buffer[k] = ((uint32_t)rand() >> 1) & 0xffu;
+    }
 }
 
 
