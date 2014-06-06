@@ -129,6 +129,7 @@ struct pp_resource_generic_s {
     int             type;
     int             ref_cnt;
     PP_Instance     instance;
+    PP_Resource     self_id;
     pthread_mutex_t lock;
 };
 

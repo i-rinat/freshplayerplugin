@@ -70,11 +70,11 @@ pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
     res->instance = instance;
 
     pthread_mutex_lock(&res_tbl_lock);
-    int handle = res_tbl_next ++;
-    g_hash_table_insert(res_tbl, GINT_TO_POINTER(handle), res);
+    res->self_id = res_tbl_next ++;
+    g_hash_table_insert(res_tbl, GINT_TO_POINTER(res->self_id), res);
     pthread_mutex_unlock(&res_tbl_lock);
 
-    return handle;
+    return res->self_id;
 }
 
 void
