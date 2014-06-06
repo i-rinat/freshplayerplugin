@@ -76,14 +76,16 @@ ppb_tcp_socket_private_connect(PP_Resource tcp_socket, const char *host, uint16_
         trace_error("%s, wrong resource %d\n", __func__, tcp_socket);
         return PP_ERROR_BADRESOURCE;
     }
-    pp_resource_release(tcp_socket);
     struct async_network_task_s *task = async_network_task_create();
 
     task->type = ASYNC_NETWORK_TCP_CONNECT;
     task->resource = tcp_socket;
+    task->instance = ts->_.instance;
+    task->sock = ts->sock;
     task->host = nullsafe_strdup(host);
     task->port = port;
     task->callback = callback;
+    pp_resource_release(tcp_socket);
 
     async_network_task_push(task);
     return PP_OK_COMPLETIONPENDING;
@@ -99,13 +101,15 @@ ppb_tcp_socket_private_connect_with_net_address(PP_Resource tcp_socket,
         trace_error("%s, wrong resource %d\n", __func__, tcp_socket);
         return PP_ERROR_BADRESOURCE;
     }
-    pp_resource_release(tcp_socket);
     struct async_network_task_s *task = async_network_task_create();
 
     task->type = ASYNC_NETWORK_TCP_CONNECT_WITH_NETADDRESS;
+    task->instance = ts->_.instance;
     task->resource = tcp_socket;
+    task->sock = ts->sock;
     task->netaddr = *addr;
     task->callback = callback;
+    pp_resource_release(tcp_socket);
 
     async_network_task_push(task);
     return PP_OK_COMPLETIONPENDING;
@@ -192,14 +196,15 @@ ppb_tcp_socket_private_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_
     if (bytes_to_read > 1024 * 1024)
         bytes_to_read = 1024 * 1024;
 
-    pp_resource_release(tcp_socket);
     struct async_network_task_s *task = async_network_task_create();
 
     task->type = ASYNC_NETWORK_TCP_READ;
     task->resource = tcp_socket;
+    task->instance = ts->_.instance;
     task->buffer = buffer;
     task->bufsize = bytes_to_read;
     task->callback = callback;
+    pp_resource_release(tcp_socket);
 
     async_network_task_push(task);
     return PP_OK_COMPLETIONPENDING;
@@ -224,14 +229,15 @@ ppb_tcp_socket_private_write(PP_Resource tcp_socket, const char *buffer, int32_t
     if (bytes_to_write > 1024 * 1024)
         bytes_to_write = 1024 * 1024;
 
-    pp_resource_release(tcp_socket);
     struct async_network_task_s *task = async_network_task_create();
 
     task->type = ASYNC_NETWORK_TCP_WRITE;
     task->resource = tcp_socket;
+    task->instance = ts->_.instance;
     task->buffer = (char *)buffer;
     task->bufsize = bytes_to_write;
     task->callback = callback;
+    pp_resource_release(tcp_socket);
 
     async_network_task_push(task);
     return PP_OK_COMPLETIONPENDING;

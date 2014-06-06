@@ -135,7 +135,6 @@ handle_tcp_connect_stage3(int sock, short event_flags, void *arg)
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts)
         return;
-    PP_Instance instance = ts->_.instance;
     int32_t retval;
     char buf[200];
     socklen_t len = sizeof(buf);
@@ -148,7 +147,7 @@ handle_tcp_connect_stage3(int sock, short event_flags, void *arg)
         retval = get_pp_errno();
     }
 
-    ppb_core_call_on_main_thread_now(instance, task->callback, retval);
+    ppb_core_call_on_main_thread_now(task->instance, task->callback, retval);
     pp_resource_release(task->resource);
     task_destroy(task);
 }
@@ -158,21 +157,15 @@ void
 handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addresses, void *arg)
 {
     struct async_network_task_s *task = arg;
-    struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
-    if (!ts) {
-        task_destroy(task);
-        return;
-    }
-    PP_Instance instance = ts->_.instance;
 
     if (result != DNS_ERR_NONE || count < 1) {
-        ppb_core_call_on_main_thread_now(instance, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
-        pp_resource_release(task->resource);
+        ppb_core_call_on_main_thread_now(task->instance, task->callback,
+                                         PP_ERROR_NAME_NOT_RESOLVED);
         task_destroy(task);
         return;
     }
 
-    evutil_make_socket_nonblocking(ts->sock);
+    evutil_make_socket_nonblocking(task->sock);
 
     int res = -1;
     if (type == DNS_IPv4_A) {
@@ -180,43 +173,33 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
         sai.sin_family = AF_INET;
         sai.sin_addr.s_addr = *(uint32_t *)addresses;   // use first address
         sai.sin_port = htons(task->port);
-        res = connect(ts->sock, (struct sockaddr *)&sai, sizeof(sai));
+        res = connect(task->sock, (struct sockaddr *)&sai, sizeof(sai));
     } else if (type == DNS_IPv6_AAAA) {
         struct sockaddr_in6 sai;
         sai.sin6_family = AF_INET6;
         // use first address
         memcpy(&sai.sin6_addr, addresses, sizeof(sai.sin6_addr));
         sai.sin6_port = htons(task->port);
-        res = connect(ts->sock, (struct sockaddr *)&sai, sizeof(sai));
+        res = connect(task->sock, (struct sockaddr *)&sai, sizeof(sai));
     } else {
         trace_error("%s wrong evdns type\n", __func__);
     }
 
     if (res != 0 && errno != EINPROGRESS) {
-        ppb_core_call_on_main_thread_now(instance, task->callback, get_pp_errno());
-        pp_resource_release(task->resource);
+        ppb_core_call_on_main_thread_now(task->instance, task->callback, get_pp_errno());
         task_destroy(task);
         return;
     }
 
-    struct event *ev = event_new(event_b, ts->sock, EV_WRITE, handle_tcp_connect_stage3, task);
+    struct event *ev = event_new(event_b, task->sock, EV_WRITE, handle_tcp_connect_stage3, task);
     add_event_mapping(task, ev);
     event_add(ev, NULL);
-    pp_resource_release(task->resource);
 }
 
 static
 void
 handle_tcp_connect_stage1(struct async_network_task_s *task)
 {
-    struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
-    if (!ts) {
-        free(task->host);
-        task_destroy(task);
-        return;
-    }
-    PP_Instance instance = ts->_.instance;
-
     struct evdns_request *req;
     req = evdns_base_resolve_ipv4(evdns_b, task->host, DNS_QUERY_NO_SEARCH,
                                   handle_tcp_connect_stage2, task);
@@ -224,27 +207,17 @@ handle_tcp_connect_stage1(struct async_network_task_s *task)
     // TODO: what about ipv6?
 
     if (!req) {
-        ppb_core_call_on_main_thread_now(instance, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
-        pp_resource_release(task->resource);
+        ppb_core_call_on_main_thread_now(task->instance, task->callback,
+                                         PP_ERROR_NAME_NOT_RESOLVED);
         task_destroy(task);
         return;
     }
-
-    pp_resource_release(task->resource);
 }
 
 static
 void
 handle_tcp_connect_with_net_address(struct async_network_task_s *task)
 {
-    struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
-    if (!ts) {
-        task_destroy(task);
-        return;
-    }
-    PP_Instance instance = ts->_.instance;
-    pp_resource_release(task->resource);
-
     if (task->netaddr.size == sizeof(struct sockaddr_in)) {
         struct sockaddr_in *sai = (void *)task->netaddr.data;
         task->port = ntohs(sai->sin_port);
@@ -254,7 +227,8 @@ handle_tcp_connect_with_net_address(struct async_network_task_s *task)
         task->port = ntohs(sai->sin6_port);
         handle_tcp_connect_stage2(DNS_ERR_NONE, DNS_IPv6_AAAA, 1, 3600, &sai->sin6_addr, task);
     } else {
-        ppb_core_call_on_main_thread_now(instance, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
+        ppb_core_call_on_main_thread_now(task->instance, task->callback,
+                                         PP_ERROR_NAME_NOT_RESOLVED);
         task_destroy(task);
     }
 }
@@ -264,19 +238,12 @@ void
 handle_tcp_read_stage2(int sock, short event_flags, void *arg)
 {
     struct async_network_task_s *task = arg;
-    struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
-    if (!ts) {
-        task_destroy(task);
-        return;
-    }
-    PP_Instance instance = ts->_.instance;
 
     int32_t retval = recv(sock, task->buffer, task->bufsize, 0);
     if (retval < 0)
         retval = get_pp_errno();
 
-    ppb_core_call_on_main_thread_now(instance, task->callback, retval);
-    pp_resource_release(task->resource);
+    ppb_core_call_on_main_thread_now(task->instance, task->callback, retval);
     task_destroy(task);
 }
 
@@ -301,19 +268,13 @@ void
 handle_tcp_write_stage2(int sock, short event_flags, void *arg)
 {
     struct async_network_task_s *task = arg;
-    struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
-    if (!ts) {
-        task_destroy(task);
-        return;
-    }
-    PP_Instance instance = ts->_.instance;
 
     int32_t retval = send(sock, task->buffer, task->bufsize, 0);
     if (retval < 0)
         retval = get_pp_errno();
 
-    ppb_core_call_on_main_thread_now(instance, task->callback, retval);
-    pp_resource_release(task->resource);
+    ppb_core_call_on_main_thread_now(task->instance, task->callback, retval);
+
     task_destroy(task);
 }
 
