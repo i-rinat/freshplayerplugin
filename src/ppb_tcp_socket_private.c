@@ -47,8 +47,18 @@ void
 ppb_tcp_socket_private_destroy(void *ptr)
 {
     struct pp_tcp_socket_s *ts = ptr;
-    ts->is_connected = 0;
-    close(ts->sock);
+    if (!ts->destroyed) {
+        struct async_network_task_s *task = async_network_task_create();
+
+        ts->destroyed = 1;
+        ts->is_connected = 0;
+
+        task->type = ASYNC_NETWORK_TCP_DISCONNECT;
+        task->resource = ts->_.self_id;
+        task->instance = ts->_.instance;
+        task->sock = ts->sock;
+        async_network_task_push(task);
+    }
 }
 
 PP_Bool
@@ -233,8 +243,7 @@ ppb_tcp_socket_private_disconnect(PP_Resource tcp_socket)
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts)
         return;
-    ts->is_connected = 0;
-    close(ts->sock);
+    ppb_tcp_socket_private_destroy(ts);
     pp_resource_release(tcp_socket);
 }
 

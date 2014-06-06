@@ -34,6 +34,7 @@
 enum async_network_task_type_e {
     ASYNC_NETWORK_TCP_CONNECT,
     ASYNC_NETWORK_TCP_CONNECT_WITH_NETADDRESS,
+    ASYNC_NETWORK_TCP_DISCONNECT,
     ASYNC_NETWORK_TCP_READ,
     ASYNC_NETWORK_TCP_WRITE,
 };
@@ -48,6 +49,8 @@ struct async_network_task_s {
     struct PP_NetAddress_Private    netaddr;
     char                           *buffer;
     int32_t                         bufsize;
+    void                           *event;
+    int                             sock;
 };
 
 void

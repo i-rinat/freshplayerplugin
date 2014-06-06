@@ -41,7 +41,26 @@
 
 static struct event_base *event_b = NULL;
 static struct evdns_base *evdns_b = NULL;
+static GHashTable        *events_ht = NULL;
+static pthread_mutex_t    lock;
 
+static
+void
+__attribute__((constructor))
+async_network_constructor(void)
+{
+    events_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+    pthread_mutex_init(&lock, NULL);
+}
+
+static
+void
+__attribute__((destructor))
+async_network_destructor(void)
+{
+    g_hash_table_unref(events_ht);
+    pthread_mutex_destroy(&lock);
+}
 
 static
 int32_t
@@ -62,6 +81,8 @@ get_pp_errno(void)
         return PP_ERROR_CONNECTION_TIMEDOUT;
     case ENOTCONN:
         return PP_ERROR_CONNECTION_CLOSED;
+    case ECONNRESET:
+        return PP_ERROR_CONNECTION_RESET;
     case EAGAIN:
     case EBADF:
         return PP_ERROR_FAILED;
@@ -69,6 +90,16 @@ get_pp_errno(void)
         trace_error("%s, no conversion for %d\n", __func__, errno);
     }
     return retval;
+}
+
+static
+void
+add_event_mapping(struct async_network_task_s *task, struct event *ev)
+{
+    pthread_mutex_lock(&lock);
+    task->event = ev;
+    g_hash_table_add(events_ht, task);
+    pthread_mutex_unlock(&lock);
 }
 
 struct async_network_task_s *
@@ -81,7 +112,19 @@ static
 void
 _task_destroy(struct async_network_task_s *task)
 {
+    if (task->event) {
+        g_hash_table_remove(events_ht, task);
+    }
     g_slice_free(struct async_network_task_s, task);
+}
+
+static
+void
+task_destroy(struct async_network_task_s *task)
+{
+    pthread_mutex_lock(&lock);
+    _task_destroy(task);
+    pthread_mutex_unlock(&lock);
 }
 
 static
@@ -107,7 +150,7 @@ handle_tcp_connect_stage3(int sock, short event_flags, void *arg)
 
     ppb_core_call_on_main_thread_now(instance, task->callback, retval);
     pp_resource_release(task->resource);
-    _task_destroy(task);
+    task_destroy(task);
 }
 
 static
@@ -117,7 +160,7 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
     struct async_network_task_s *task = arg;
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
     PP_Instance instance = ts->_.instance;
@@ -125,7 +168,7 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
     if (result != DNS_ERR_NONE || count < 1) {
         ppb_core_call_on_main_thread_now(instance, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
         pp_resource_release(task->resource);
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
 
@@ -152,12 +195,13 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
     if (res != 0 && errno != EINPROGRESS) {
         ppb_core_call_on_main_thread_now(instance, task->callback, get_pp_errno());
         pp_resource_release(task->resource);
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
 
-    struct timeval timeout = {.tv_sec = 15};
-    event_base_once(event_b, ts->sock, EV_WRITE, handle_tcp_connect_stage3, task, &timeout);
+    struct event *ev = event_new(event_b, ts->sock, EV_WRITE, handle_tcp_connect_stage3, task);
+    add_event_mapping(task, ev);
+    event_add(ev, NULL);
     pp_resource_release(task->resource);
 }
 
@@ -168,7 +212,7 @@ handle_tcp_connect_stage1(struct async_network_task_s *task)
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
         free(task->host);
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
     PP_Instance instance = ts->_.instance;
@@ -182,7 +226,7 @@ handle_tcp_connect_stage1(struct async_network_task_s *task)
     if (!req) {
         ppb_core_call_on_main_thread_now(instance, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
         pp_resource_release(task->resource);
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
 
@@ -195,7 +239,7 @@ handle_tcp_connect_with_net_address(struct async_network_task_s *task)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
     PP_Instance instance = ts->_.instance;
@@ -211,7 +255,7 @@ handle_tcp_connect_with_net_address(struct async_network_task_s *task)
         handle_tcp_connect_stage2(DNS_ERR_NONE, DNS_IPv6_AAAA, 1, 3600, &sai->sin6_addr, task);
     } else {
         ppb_core_call_on_main_thread_now(instance, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
-        _task_destroy(task);
+        task_destroy(task);
     }
 }
 
@@ -222,7 +266,7 @@ handle_tcp_read_stage2(int sock, short event_flags, void *arg)
     struct async_network_task_s *task = arg;
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
     PP_Instance instance = ts->_.instance;
@@ -233,7 +277,7 @@ handle_tcp_read_stage2(int sock, short event_flags, void *arg)
 
     ppb_core_call_on_main_thread_now(instance, task->callback, retval);
     pp_resource_release(task->resource);
-    _task_destroy(task);
+    task_destroy(task);
 }
 
 static
@@ -242,12 +286,13 @@ handle_tcp_read_stage1(struct async_network_task_s *task)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
 
-    struct timeval timeout = {.tv_sec = 15};
-    event_base_once(event_b, ts->sock, EV_READ, handle_tcp_read_stage2, task, &timeout);
+    struct event *ev = event_new(event_b, ts->sock, EV_READ, handle_tcp_read_stage2, task);
+    add_event_mapping(task, ev);
+    event_add(ev, NULL);
     pp_resource_release(task->resource);
 }
 
@@ -258,7 +303,7 @@ handle_tcp_write_stage2(int sock, short event_flags, void *arg)
     struct async_network_task_s *task = arg;
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
     PP_Instance instance = ts->_.instance;
@@ -269,7 +314,7 @@ handle_tcp_write_stage2(int sock, short event_flags, void *arg)
 
     ppb_core_call_on_main_thread_now(instance, task->callback, retval);
     pp_resource_release(task->resource);
-    _task_destroy(task);
+    task_destroy(task);
 }
 
 static
@@ -278,13 +323,48 @@ handle_tcp_write_stage1(struct async_network_task_s *task)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        _task_destroy(task);
+        task_destroy(task);
         return;
     }
 
-    struct timeval timeout = {.tv_sec = 15};
-    event_base_once(event_b, ts->sock, EV_WRITE, handle_tcp_write_stage2, task, &timeout);
+    struct event *ev = event_new(event_b, ts->sock, EV_WRITE, handle_tcp_write_stage2, task);
+    add_event_mapping(task, ev);
+    event_add(ev, NULL);
     pp_resource_release(task->resource);
+}
+
+static
+void
+handle_tcp_disconnect_stage2(int sock, short event_flags, void *arg)
+{
+    struct async_network_task_s *task = arg;
+    GHashTableIter iter;
+    gpointer key, val;
+
+    pthread_mutex_lock(&lock);
+    g_hash_table_iter_init(&iter, events_ht);
+    while (g_hash_table_iter_next(&iter, &key, &val)) {
+        struct async_network_task_s *cur = key;
+        if (cur->resource == task->resource) {
+            g_hash_table_iter_remove(&iter);
+            event_free(cur->event);
+            ppb_core_call_on_main_thread_now(task->instance, cur->callback, PP_ERROR_ABORTED);
+            _task_destroy(cur);
+        }
+    }
+    pthread_mutex_unlock(&lock);
+
+    close(task->sock);
+    task_destroy(task);
+}
+
+static
+void
+handle_tcp_disconnect_stage1(struct async_network_task_s *task)
+{
+    struct event *ev = evtimer_new(event_b, handle_tcp_disconnect_stage2, task);
+    struct timeval timeout = {.tv_sec = 0};
+    evtimer_add(ev, &timeout);
 }
 
 static
@@ -316,6 +396,9 @@ async_network_task_push(struct async_network_task_s *task)
         break;
     case ASYNC_NETWORK_TCP_CONNECT_WITH_NETADDRESS:
         handle_tcp_connect_with_net_address(task);
+        break;
+    case ASYNC_NETWORK_TCP_DISCONNECT:
+        handle_tcp_disconnect_stage1(task);
         break;
     case ASYNC_NETWORK_TCP_READ:
         handle_tcp_read_stage1(task);

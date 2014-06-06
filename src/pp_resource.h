@@ -325,6 +325,7 @@ struct pp_tcp_socket_s {
     struct pp_resource_generic_s _;
     int             sock;
     unsigned int    is_connected;
+    unsigned int    destroyed;
 };
 
 union pp_largest_u {
