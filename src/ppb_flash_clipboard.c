@@ -26,6 +26,10 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
+#include "ppb_var.h"
+
+#include <gtk/gtk.h>
+#include <ppapi/c/pp_errors.h>
 
 
 uint32_t
@@ -45,7 +49,10 @@ struct PP_Var
 ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type clipboard_type,
                               uint32_t format)
 {
-    return PP_MakeUndefined();
+    GtkClipboard* clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+    const char* content = gtk_clipboard_wait_for_text(clipboard);
+    uint32_t len = sizeof(content);
+    return ppb_var_var_from_utf8_1_1(content, len);
 }
 
 int32_t
