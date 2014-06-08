@@ -175,6 +175,7 @@ struct pp_url_request_info_s {
     enum pp_request_method_e    method;
     char                       *url;
     char                       *headers;
+    unsigned int                is_immediate_javascript; // data in url is javascript line
     PP_Bool                     stream_to_file;
     PP_Bool                     follow_redirects;
     PP_Bool                     record_download_progress;

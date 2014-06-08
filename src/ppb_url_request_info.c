@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <ctype.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
@@ -80,11 +81,64 @@ ppb_url_request_info_is_url_request_info(PP_Resource resource)
     return PP_RESOURCE_URL_REQUEST_INFO == pp_resource_get_type(resource);
 }
 
+/** apply heuristics to url to make standard-complaint */
+static
+char *
+escape_unescaped_characters(const char *in)
+{
+    const char *tohex = "0123456789abcdef";
+    size_t len = strlen(in);
+    char *res = malloc(len * 3 + 1); // each character can be tripled: "0" -> "%30"
+    char *dptr = res;
+    const char *sptr = in;
+
+    // copy string as is till query
+    while (len > 0 && *sptr != '?') {
+        *dptr++ = *sptr++;
+        len --;
+    }
+
+    if (len == 0)
+        goto add_terminating_null;
+
+    *dptr++ = *sptr++;  // copy '?'
+    len --;
+
+    while (len > 0) {
+        unsigned char c = *sptr++;
+        if (isdigit(c) || isalpha(c) || c == '-' || c == '.' || c == '_'
+            || c == '&' || c == '=' || c == '%')
+        {
+            *dptr++ = c;
+        } else if (c == ' ') {
+            *dptr++ = '+';
+        } else {
+            *dptr++ = '%';
+            *dptr++ = tohex[c >> 4];
+            *dptr++ = tohex[c & 0x0f];
+        }
+        len --;
+    }
+
+add_terminating_null:
+    *dptr = 0;
+    return res;
+}
+
+static
+const char *
+ltrim(const char *s)
+{
+    while (*s && isspace(*s))
+        s++;
+    return s;
+}
+
 PP_Bool
 ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty property,
                                   struct PP_Var value)
 {
-    const char *tmp;
+    const char *tmp, *tmp2;
     PP_Bool retval = PP_TRUE;
     struct pp_url_request_info_s *ri = pp_resource_acquire(request, PP_RESOURCE_URL_REQUEST_INFO);
     if (!ri) {
@@ -98,12 +152,18 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
     case PP_URLREQUESTPROPERTY_URL:
         ENSURE_TYPE(PP_VARTYPE_STRING);
         free_and_nullify(ri, url);
-        ri->url = strdup(ppb_var_var_to_utf8(value, NULL));
-
-        // replace all ' ' with '+'
-        for (char *ptr = ri->url; *ptr != 0; ptr ++) {
-            if (*ptr == ' ')
-                *ptr = '+';
+        tmp = ppb_var_var_to_utf8(value, NULL);
+        tmp2 = ltrim(tmp);
+        if (strlen(tmp2) > strlen("javascript:") &&
+            strncasecmp(tmp2, "javascript:", strlen("javascript:")) == 0)
+        {
+            // leave as is
+            ri->url = strdup(tmp2);
+            ri->is_immediate_javascript = 1;
+        } else {
+            // some clients pass incorrect URIs. Try to correct them
+            ri->url = escape_unescaped_characters(tmp);
+            ri->is_immediate_javascript = 0;
         }
         break;
     case PP_URLREQUESTPROPERTY_METHOD:
