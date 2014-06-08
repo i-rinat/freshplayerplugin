@@ -35,7 +35,7 @@
         trace_error("%s, bad context", __func__);                                       \
         escape_statement;                                                               \
     }                                                                                   \
-    glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->rendering_glc)
+    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc)
 
 #define EPILOGUE()                                                                      \
     pp_resource_release(context)
@@ -873,24 +873,7 @@ ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count, co
                            const GLint *length)
 {
     PROLOGUE(g3d, return);
-    const char *v100 = "#version 100\n";
-    const unsigned int v100_len = strlen(v100);
-
-    // prepend "#version 100" line to all shaders
-    // This enables shader compatibility mode introduced by GL_ARB_ES2_compatibility
-    char **str2 = malloc(count * sizeof(char *));
-    for (intptr_t k = 0; k < count; k ++) {
-        size_t shader_len = strlen(str[k]);
-        str2[k] = malloc(shader_len + 1 + v100_len);
-        memcpy(str2[k], v100, v100_len); // first line
-        memcpy(str2[k] + v100_len, str[k], shader_len + 1); // shader source with trailing \0
-    }
-
-    glShaderSource(shader, count, (const char **)str2, length);
-
-    for (intptr_t k = 0; k < count; k ++)
-        free(str2[k]);
-    free(str2);
+    glShaderSource(shader, count, str, length);
     EPILOGUE();
 }
 
@@ -1289,7 +1272,7 @@ ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context
                                                              GLsizei height, GLenum format,
                                                              GLenum type, GLenum access)
 {
-    if (target != GL_TEXTURE_2D || level != 0 || access != GL_WRITE_ONLY) {
+    if (target != GL_TEXTURE_2D || level != 0 || access != GL_WRITE_ONLY_OES) {
         trace_warning("%s, wrong arguments\n", __func__);
         return NULL;
     }

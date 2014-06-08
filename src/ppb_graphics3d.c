@@ -22,13 +22,12 @@
  * SOFTWARE.
  */
 
-#define GL_GLEXT_PROTOTYPES
 #include <assert.h>
 #include "ppb_graphics3d.h"
 #include <stdlib.h>
-#include <GL/glx.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "tables.h"
@@ -64,12 +63,12 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
     attrib_len ++;
 
-    int *fb_attribute_list = calloc(attrib_len + 3 * 2, sizeof(int));
+    EGLint *egl_attribute_list = calloc(attrib_len + 3 * 2, sizeof(EGLint));
     int done = 0, k1 = 0, k2 = 0;
-    fb_attribute_list[k2++] = GLX_DRAWABLE_TYPE;
-    fb_attribute_list[k2++] = GLX_PIXMAP_BIT;
-    fb_attribute_list[k2++] = GLX_RENDER_TYPE;
-    fb_attribute_list[k2++] = GLX_RGBA_BIT;
+    egl_attribute_list[k2++] = EGL_SURFACE_TYPE;
+    egl_attribute_list[k2++] = EGL_PIXMAP_BIT | EGL_WINDOW_BIT;
+    egl_attribute_list[k2++] = EGL_RENDERABLE_TYPE;
+    egl_attribute_list[k2++] = EGL_OPENGL_ES2_BIT;
 
     while (!done) {
         switch (attrib_list[k1]) {
@@ -87,47 +86,47 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_NONE:
-            fb_attribute_list[k2++] = None;
+            egl_attribute_list[k2++] = EGL_NONE;
             done = 1;
             break;
         case PP_GRAPHICS3DATTRIB_ALPHA_SIZE:
-            fb_attribute_list[k2++] = GLX_ALPHA_SIZE;
-            fb_attribute_list[k2++] = attrib_list[k1 + 1];
+            egl_attribute_list[k2++] = EGL_ALPHA_SIZE;
+            egl_attribute_list[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_BLUE_SIZE:
-            fb_attribute_list[k2++] = GLX_BLUE_SIZE;
-            fb_attribute_list[k2++] = attrib_list[k1 + 1];
+            egl_attribute_list[k2++] = EGL_BLUE_SIZE;
+            egl_attribute_list[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_GREEN_SIZE:
-            fb_attribute_list[k2++] = GLX_GREEN_SIZE;
-            fb_attribute_list[k2++] = attrib_list[k1 + 1];
+            egl_attribute_list[k2++] = EGL_GREEN_SIZE;
+            egl_attribute_list[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_RED_SIZE:
-            fb_attribute_list[k2++] = GLX_RED_SIZE;
-            fb_attribute_list[k2++] = attrib_list[k1 + 1];
+            egl_attribute_list[k2++] = EGL_RED_SIZE;
+            egl_attribute_list[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_DEPTH_SIZE:
-            fb_attribute_list[k2++] = GLX_DEPTH_SIZE;
-            fb_attribute_list[k2++] = attrib_list[k1 + 1];
+            egl_attribute_list[k2++] = EGL_DEPTH_SIZE;
+            egl_attribute_list[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_STENCIL_SIZE:
-            fb_attribute_list[k2++] = GLX_STENCIL_SIZE;
-            fb_attribute_list[k2++] = attrib_list[k1 + 1];
+            egl_attribute_list[k2++] = EGL_STENCIL_SIZE;
+            egl_attribute_list[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_SAMPLES:
-            fb_attribute_list[k2++] = GLX_SAMPLES;
-            fb_attribute_list[k2++] = attrib_list[k1 + 1];
+            egl_attribute_list[k2++] = EGL_SAMPLES;
+            egl_attribute_list[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS:
-            fb_attribute_list[k2++] = GLX_SAMPLE_BUFFERS;
-            fb_attribute_list[k2++] = attrib_list[k1 + 1];
+            egl_attribute_list[k2++] = EGL_SAMPLE_BUFFERS;
+            egl_attribute_list[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         default:
@@ -140,57 +139,39 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
 
     pthread_mutex_lock(&pp_i->lock);
     int nconfigs = 0;
-    GLXFBConfig *fb_configs = glXChooseFBConfig(pp_i->dpy, 0, fb_attribute_list, &nconfigs);
-    if (!fb_configs || nconfigs == 0) {
-        trace_error("%s, glXChooseFBConfig returned NULL\n", __func__);
+    EGLBoolean ret = eglChooseConfig(pp_i->egl_dpy, egl_attribute_list,
+                                     &g3d->egl_config, 1, &nconfigs);
+    free(egl_attribute_list);
+    if (!ret) {
+        trace_error("%s, eglChooseConfig returned FALSE\n", __func__);
         goto err;
     }
 
-    g3d->fb_config = fb_configs[0];
-    g3d->rendering_glc = glXCreateNewContext(pp_i->dpy, g3d->fb_config, GLX_RGBA_TYPE, NULL, True);
-    if (!g3d->rendering_glc) {
-        trace_error("%s, glXCreateNewContext returned NULL\n", __func__);
+    if (nconfigs != 1) {
+        trace_error("%s, eglChooseConfig returned %d configs, expected 1\n", __func__, nconfigs);
         goto err;
     }
 
-    // rendering context will be used by ppb_opengles2. Its state can be changed by client
-    // code so we need "clean" context for presentation purposes only
-    g3d->presentation_glc = glXCreateNewContext(pp_i->dpy, g3d->fb_config, GLX_RGBA_TYPE,
-                                                g3d->rendering_glc, True);
-    if (!g3d->presentation_glc) {
-        trace_error("%s, glXCreateNewContext returned NULL\n", __func__);
+    EGLint ctxattr[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+    g3d->glc = eglCreateContext(pp_i->egl_dpy, g3d->egl_config, EGL_NO_CONTEXT, ctxattr);
+    if (g3d->glc == EGL_NO_CONTEXT) {
+        trace_error("%s, eglCreateContext returned EGL_NO_CONTEXT\n", __func__);
         goto err;
     }
 
     g3d->pixmap = XCreatePixmap(pp_i->dpy, DefaultRootWindow(pp_i->dpy), g3d->width, g3d->height,
                                 DefaultDepth(pp_i->dpy, 0));
-
-    g3d->glx_pixmap = glXCreatePixmap(pp_i->dpy, fb_configs[0], g3d->pixmap, NULL);
-    g3d->dpy = pp_i->dpy;
-
-    Bool ret = glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->rendering_glc);
-    if (!ret) {
-        trace_error("%s, glXMakeCurrent failed\n", __func__);
+    g3d->egl_surf = eglCreatePixmapSurface(pp_i->egl_dpy, g3d->egl_config, g3d->pixmap, NULL);
+    if (g3d->egl_surf == EGL_NO_SURFACE) {
+        trace_error("%s, failed to create EGL pixmap surface\n", __func__);
         goto err;
     }
+    g3d->egl_dpy = pp_i->egl_dpy;
+    g3d->dpy = pp_i->dpy;
 
-    // create framebuffer object backed by texture
-    glGenTextures(1, &g3d->tex_id);
-    glBindTexture(GL_TEXTURE_2D, g3d->tex_id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g3d->width, g3d->height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
-                 NULL);
-
-    glGenFramebuffers(1, &g3d->fbo_id);
-    glBindFramebuffer(GL_FRAMEBUFFER, g3d->fbo_id);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, g3d->tex_id, 0);
-    GLenum gl_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (GL_FRAMEBUFFER_COMPLETE != gl_status) {
-        trace_error("%s, framebuffer not ready, %d, %s\n", __func__, gl_status,
-                    gluErrorString(gl_status));
+    ret = eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    if (!ret) {
+        trace_error("%s, eglMakeCurrent failed\n", __func__);
         goto err;
     }
 
@@ -210,19 +191,21 @@ void
 ppb_graphics3d_destroy(void *p)
 {
     struct pp_graphics3d_s *g3d = p;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->_.instance);
     g_hash_table_destroy(g3d->sub_maps);
 
-    glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->rendering_glc);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDeleteFramebuffers(1, &g3d->fbo_id);
-    glDeleteTextures(1, &g3d->tex_id);
+    pthread_mutex_lock(&pp_i->lock);
 
-    glXDestroyPixmap(g3d->dpy, g3d->glx_pixmap);
+    // bringing egl_surf to current thread releases it from any others
+    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    // free it here, to be able to destroy X Pixmap
+    eglMakeCurrent(g3d->egl_dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    eglDestroySurface(g3d->egl_dpy, g3d->egl_surf);
     XFreePixmap(g3d->dpy, g3d->pixmap);
 
-    // TODO: restore previous context
-    glXDestroyContext(g3d->dpy, g3d->rendering_glc);
-    glXDestroyContext(g3d->dpy, g3d->presentation_glc);
+    eglDestroyContext(g3d->egl_dpy, g3d->glc);
+    pthread_mutex_unlock(&pp_i->lock);
 }
 
 PP_Bool
@@ -258,21 +241,30 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d)
         return PP_ERROR_BADRESOURCE;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->_.instance);
 
     g3d->width = width;
     g3d->height = height;
 
-    glXDestroyPixmap(g3d->dpy, g3d->glx_pixmap);
-    XFreePixmap(g3d->dpy, g3d->pixmap);
+    pthread_mutex_lock(&pp_i->lock);
+
+    EGLSurface old_surf = g3d->egl_surf;
+    Pixmap old_pixmap = g3d->pixmap;
+    // release possibly bound to other thread g3d->egl_surf and bind it to current
+    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
 
     g3d->pixmap = XCreatePixmap(g3d->dpy, DefaultRootWindow(g3d->dpy), g3d->width, g3d->height,
                                 DefaultDepth(g3d->dpy, 0));
-    g3d->glx_pixmap = glXCreatePixmap(g3d->dpy, g3d->fb_config, g3d->pixmap, NULL);
+    g3d->egl_surf = eglCreatePixmapSurface(g3d->egl_dpy, g3d->egl_config, g3d->pixmap, NULL);
 
-    glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->presentation_glc);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g3d->width, g3d->height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
-                 NULL);
+    // make new g3d->egl_surf current to current thread to release old_surf
+    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
 
+    // destroy old egl surface and x pixmap
+    eglDestroySurface(g3d->egl_dpy, old_surf);
+    XFreePixmap(g3d->dpy, old_pixmap);
+
+    pthread_mutex_unlock(&pp_i->lock);
     pp_resource_release(context);
     return PP_OK;
 }
@@ -300,8 +292,10 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
             .height = pp_i->height
         };
 
+        pthread_mutex_lock(&pp_i->lock);
         XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
         XFlush(pp_i->dpy);
+        pthread_mutex_unlock(&pp_i->lock);
     } else {
         NPRect npr = {.top = 0, .left = 0, .bottom = g3d->height, .right = g3d->width};
         npn.invalidaterect(pp_i->npp, &npr);

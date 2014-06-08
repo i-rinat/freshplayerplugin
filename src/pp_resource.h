@@ -39,7 +39,8 @@
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
 #include <glib.h>
-#include <GL/glx.h>
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
 #include <pango/pango.h>
 #include <pango/pangoft2.h>
 #include <pango/pangocairo.h>
@@ -122,6 +123,7 @@ struct pp_instance_s {
     pthread_t       pp_thread;
     PP_Resource     graphics;
     Display        *dpy;
+    EGLDisplay      egl_dpy;
     pthread_mutex_t lock;
 };
 
@@ -203,14 +205,12 @@ struct pp_view_s {
 
 struct pp_graphics3d_s {
     struct pp_resource_generic_s _;
-    GLXContext      rendering_glc;
-    GLXContext      presentation_glc;
-    GLXFBConfig     fb_config;
+    EGLContext      glc;
+    EGLConfig       egl_config;
     Pixmap          pixmap;
-    GLXPixmap       glx_pixmap;
-    GLuint          tex_id;
-    GLuint          fbo_id;
+    EGLSurface      egl_surf;
     Display        *dpy;
+    EGLDisplay      egl_dpy;
     int32_t         width;
     int32_t         height;
     GHashTable     *sub_maps;

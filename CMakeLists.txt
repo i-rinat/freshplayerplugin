@@ -22,8 +22,8 @@ pkg_check_modules(REQ
 	glib-2.0
 	x11
 	xinerama
-	gl
-	glu
+	egl
+	glesv2
 	liburiparser
 	libconfig
 	libevent
