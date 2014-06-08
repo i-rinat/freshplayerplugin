@@ -60,7 +60,14 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
                                uint32_t data_item_count, const uint32_t formats[],
                                const struct PP_Var data_items[])
 {
-    return -1;
+    GtkClipboard* clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+    uint32_t len = 0;
+    for (int k = 0; k < data_item_count; k++) {
+        const char *content = ppb_var_var_to_utf8(data_items[k], &len);
+        gtk_clipboard_set_text(clipboard, content, len);
+    }
+
+    return PP_OK;
 }
 
 
