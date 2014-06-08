@@ -41,7 +41,7 @@ add_definitions(${REQ_CFLAGS_OTHER})
 add_definitions(-DXP_UNIX)
 link_directories(${REQ_LIBRARY_DIRS})
 
-add_library(freshwrapper SHARED
+add_library(freshwrapper-obj OBJECT
 	src/async_network.c
 	src/header_parser.c
 	src/keycodeconvert.c
@@ -99,6 +99,9 @@ add_library(freshwrapper SHARED
 	src/ppb_video_capture_dev.c
 	src/ppb_view.c
 )
+
+add_library(freshwrapper SHARED $<TARGET_OBJECTS:freshwrapper-obj>)
+add_library(freshwrapper-static STATIC $<TARGET_OBJECTS:freshwrapper-obj>)
 
 target_link_libraries(freshwrapper
 	dl

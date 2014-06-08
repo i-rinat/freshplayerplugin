@@ -44,7 +44,7 @@ Early alpha. Some video players work, with both video and audio.
 Install
 =======
 
-Project is using cmake build system. Make build subdirectory, go
+Project is using cmake (>=2.8.8) build system. Make build subdirectory, go
 there, call `cmake ..`, then `make`. Put generated
 `libfreshwrapper.so` into broswer plugins directory. Note, path to
 PepperFlash is hardcoded, it should be at
