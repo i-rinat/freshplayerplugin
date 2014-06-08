@@ -106,6 +106,7 @@ ppb_file_ref_read_directory_entries(PP_Resource file_ref, struct PP_ArrayOutput 
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -207,32 +208,33 @@ trace_ppb_file_ref_read_directory_entries(PP_Resource file_ref, struct PP_ArrayO
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_file_ref_read_directory_entries(file_ref, output, callback);
 }
+#endif // NDEBUG
 
 
 const struct PPB_FileRef_1_1 ppb_file_ref_interface_1_1 = {
-    .Create =               trace_ppb_file_ref_create,
-    .IsFileRef =            trace_ppb_file_ref_is_file_ref,
-    .GetFileSystemType =    trace_ppb_file_ref_get_file_system_type,
-    .GetName =              trace_ppb_file_ref_get_name,
-    .GetPath =              trace_ppb_file_ref_get_path,
-    .GetParent =            trace_ppb_file_ref_get_parent,
-    .MakeDirectory =        trace_ppb_file_ref_make_directory,
-    .Touch =                trace_ppb_file_ref_touch,
-    .Delete =               trace_ppb_file_ref_delete,
-    .Rename =               trace_ppb_file_ref_rename,
-    .Query =                trace_ppb_file_ref_query,
-    .ReadDirectoryEntries = trace_ppb_file_ref_read_directory_entries,
+    .Create =               TWRAP(ppb_file_ref_create),
+    .IsFileRef =            TWRAP(ppb_file_ref_is_file_ref),
+    .GetFileSystemType =    TWRAP(ppb_file_ref_get_file_system_type),
+    .GetName =              TWRAP(ppb_file_ref_get_name),
+    .GetPath =              TWRAP(ppb_file_ref_get_path),
+    .GetParent =            TWRAP(ppb_file_ref_get_parent),
+    .MakeDirectory =        TWRAP(ppb_file_ref_make_directory),
+    .Touch =                TWRAP(ppb_file_ref_touch),
+    .Delete =               TWRAP(ppb_file_ref_delete),
+    .Rename =               TWRAP(ppb_file_ref_rename),
+    .Query =                TWRAP(ppb_file_ref_query),
+    .ReadDirectoryEntries = TWRAP(ppb_file_ref_read_directory_entries),
 };
 
 const struct PPB_FileRef_1_0 ppb_file_ref_interface_1_0 = {
-    .Create =               trace_ppb_file_ref_create,
-    .IsFileRef =            trace_ppb_file_ref_is_file_ref,
-    .GetFileSystemType =    trace_ppb_file_ref_get_file_system_type,
-    .GetName =              trace_ppb_file_ref_get_name,
-    .GetPath =              trace_ppb_file_ref_get_path,
-    .GetParent =            trace_ppb_file_ref_get_parent,
-    .MakeDirectory =        trace_ppb_file_ref_make_directory,
-    .Touch =                trace_ppb_file_ref_touch,
-    .Delete =               trace_ppb_file_ref_delete,
-    .Rename =               trace_ppb_file_ref_rename,
+    .Create =               TWRAP(ppb_file_ref_create),
+    .IsFileRef =            TWRAP(ppb_file_ref_is_file_ref),
+    .GetFileSystemType =    TWRAP(ppb_file_ref_get_file_system_type),
+    .GetName =              TWRAP(ppb_file_ref_get_name),
+    .GetPath =              TWRAP(ppb_file_ref_get_path),
+    .GetParent =            TWRAP(ppb_file_ref_get_parent),
+    .MakeDirectory =        TWRAP(ppb_file_ref_make_directory),
+    .Touch =                TWRAP(ppb_file_ref_touch),
+    .Delete =               TWRAP(ppb_file_ref_delete),
+    .Rename =               TWRAP(ppb_file_ref_rename),
 };

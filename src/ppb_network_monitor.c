@@ -24,7 +24,7 @@
 
 #include "ppb_network_monitor.h"
 #include <ppapi/c/pp_errors.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include "pp_resource.h"
 #include "trace.h"
 
@@ -48,6 +48,8 @@ ppb_network_monitor_is_network_monitor(PP_Resource resource)
     return pp_resource_get_type(resource) == PP_RESOURCE_NETWORK_MONITOR;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -74,10 +76,11 @@ trace_ppb_network_monitor_is_network_monitor(PP_Resource resource)
     trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_network_monitor_is_network_monitor(resource);
 }
+#endif // NDEBUG
 
 
 const struct PPB_NetworkMonitor_1_0 ppb_network_monitor_interface_1_0 = {
-    .Create =               trace_ppb_network_monitor_create,
-    .UpdateNetworkList =    trace_ppb_network_monitor_update_network_list,
-    .IsNetworkMonitor =     trace_ppb_network_monitor_is_network_monitor,
+    .Create =               TWRAP(ppb_network_monitor_create),
+    .UpdateNetworkList =    TWRAP(ppb_network_monitor_update_network_list),
+    .IsNetworkMonitor =     TWRAP(ppb_network_monitor_is_network_monitor),
 };

@@ -47,6 +47,8 @@ ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
     return 0;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -73,9 +75,11 @@ trace_ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput outpu
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_file_chooser_dev_show(chooser, output, callback);
 }
+#endif // NDEBUG
+
 
 const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
-    .Create =           trace_ppb_file_chooser_dev_create,
-    .IsFileChooser =    trace_ppb_file_chooser_dev_is_file_chooser,
-    .Show =             trace_ppb_file_chooser_dev_show,
+    .Create =           TWRAP(ppb_file_chooser_dev_create),
+    .IsFileChooser =    TWRAP(ppb_file_chooser_dev_is_file_chooser),
+    .Show =             TWRAP(ppb_file_chooser_dev_show),
 };

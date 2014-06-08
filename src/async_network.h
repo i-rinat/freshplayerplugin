@@ -22,34 +22,41 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_CORE_H
-#define FPP__PPB_CORE_H
+#ifndef FPP__ASYNC_NETWORK_H
+#define FPP__ASYNC_NETWORK_H
 
-#include <ppapi/c/ppb_core.h>
+#include <ppapi/c/pp_completion_callback.h>
+#include <ppapi/c/pp_resource.h>
 #include <ppapi/c/pp_instance.h>
+#include <ppapi/c/private/ppb_net_address_private.h>
 
+
+enum async_network_task_type_e {
+    ASYNC_NETWORK_TCP_CONNECT,
+    ASYNC_NETWORK_TCP_CONNECT_WITH_NETADDRESS,
+    ASYNC_NETWORK_TCP_DISCONNECT,
+    ASYNC_NETWORK_TCP_READ,
+    ASYNC_NETWORK_TCP_WRITE,
+};
+
+struct async_network_task_s {
+    enum async_network_task_type_e  type;
+    struct PP_CompletionCallback    callback;
+    PP_Resource                     resource;
+    PP_Instance                     instance;
+    char                           *host;
+    uint16_t                        port;
+    struct PP_NetAddress_Private    netaddr;
+    char                           *buffer;
+    int32_t                         bufsize;
+    void                           *event;
+    int                             sock;
+};
 
 void
-ppb_core_add_ref_resource(PP_Resource resource);
+async_network_task_push(struct async_network_task_s *task);
 
-void
-ppb_core_release_resource(PP_Resource resource);
+struct async_network_task_s *
+async_network_task_create(void);
 
-PP_Time
-ppb_core_get_time(void);
-
-PP_TimeTicks
-ppb_core_get_time_ticks(void);
-
-void
-ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
-                             int32_t result);
-
-void
-ppb_core_call_on_main_thread_now(PP_Instance instance, struct PP_CompletionCallback callback,
-                                 int32_t result);
-
-PP_Bool
-ppb_core_is_main_thread(void);
-
-#endif // FPP__PPB_CORE_H
+#endif // FPP__ASYNC_NETWORK_H

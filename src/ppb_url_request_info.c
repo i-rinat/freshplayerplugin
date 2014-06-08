@@ -211,6 +211,7 @@ ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource file_r
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -236,7 +237,7 @@ trace_ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProper
     char *value_str = trace_var_as_string(value);
     trace_info("[PPB] {full} %s request=%d, property=%s, value=%s\n", __func__+6, request,
                reverse_pp_url_request_property(property), value_str);
-    free(value_str);
+    g_free(value_str);
     return ppb_url_request_info_set_property(request, property, value);
 }
 
@@ -260,12 +261,13 @@ trace_ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource 
     return ppb_url_request_info_append_file_to_body(request, file_ref, start_offset,
                                                     number_of_bytes, expected_last_modified_time);
 }
+#endif // NDEBUG
 
 
 const struct PPB_URLRequestInfo_1_0 ppb_url_request_info_interface_1_0 = {
-    .Create =           trace_ppb_url_request_info_create,
-    .IsURLRequestInfo = trace_ppb_url_request_info_is_url_request_info,
-    .SetProperty =      trace_ppb_url_request_info_set_property,
-    .AppendDataToBody = trace_ppb_url_request_info_append_data_to_body,
-    .AppendFileToBody = trace_ppb_url_request_info_append_file_to_body,
+    .Create =           TWRAP(ppb_url_request_info_create),
+    .IsURLRequestInfo = TWRAP(ppb_url_request_info_is_url_request_info),
+    .SetProperty =      TWRAP(ppb_url_request_info_set_property),
+    .AppendDataToBody = TWRAP(ppb_url_request_info_append_data_to_body),
+    .AppendFileToBody = TWRAP(ppb_url_request_info_append_file_to_body),
 };

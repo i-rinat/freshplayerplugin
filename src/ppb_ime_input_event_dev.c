@@ -72,6 +72,7 @@ ppb_ime_input_event_dev_get_selection(PP_Resource ime_event, uint32_t *start, ui
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -134,14 +135,15 @@ trace_ppb_ime_input_event_dev_get_selection(PP_Resource ime_event, uint32_t *sta
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     ppb_ime_input_event_dev_get_selection(ime_event, start, end);
 }
+#endif // NDEBUG
 
 
 const struct PPB_IMEInputEvent_Dev_0_2 ppb_ime_input_event_dev_interface_0_2 = {
-    .Create =           trace_ppb_ime_input_event_dev_create,
-    .IsIMEInputEvent =  trace_ppb_ime_input_event_dev_is_ime_input_event,
-    .GetText =          trace_ppb_ime_input_event_dev_get_text,
-    .GetSegmentNumber = trace_ppb_ime_input_event_dev_get_segment_number,
-    .GetSegmentOffset = trace_ppb_ime_input_event_dev_get_segment_offset,
-    .GetTargetSegment = trace_ppb_ime_input_event_dev_get_target_segment,
-    .GetSelection =     trace_ppb_ime_input_event_dev_get_selection,
+    .Create =           TWRAP(ppb_ime_input_event_dev_create),
+    .IsIMEInputEvent =  TWRAP(ppb_ime_input_event_dev_is_ime_input_event),
+    .GetText =          TWRAP(ppb_ime_input_event_dev_get_text),
+    .GetSegmentNumber = TWRAP(ppb_ime_input_event_dev_get_segment_number),
+    .GetSegmentOffset = TWRAP(ppb_ime_input_event_dev_get_segment_offset),
+    .GetTargetSegment = TWRAP(ppb_ime_input_event_dev_get_target_segment),
+    .GetSelection =     TWRAP(ppb_ime_input_event_dev_get_selection),
 };

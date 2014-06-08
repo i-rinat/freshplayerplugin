@@ -87,6 +87,7 @@ ppb_udp_socket_private_close(PP_Resource udp_socket)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -167,16 +168,17 @@ trace_ppb_udp_socket_private_close(PP_Resource udp_socket)
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_udp_socket_private_close(udp_socket);
 }
+#endif // NDEBUG
 
 
 const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
-    .Create =               trace_ppb_udp_socket_private_create,
-    .IsUDPSocket =          trace_ppb_udp_socket_private_is_udp_socket,
-    .SetSocketFeature =     trace_ppb_udp_socket_private_set_socket_feature,
-    .Bind =                 trace_ppb_udp_socket_private_bind,
-    .GetBoundAddress =      trace_ppb_udp_socket_private_get_bound_address,
-    .RecvFrom =             trace_ppb_udp_socket_private_recv_from,
-    .GetRecvFromAddress =   trace_ppb_udp_socket_private_get_recv_from_address,
-    .SendTo =               trace_ppb_udp_socket_private_send_to,
-    .Close =                trace_ppb_udp_socket_private_close,
+    .Create =               TWRAP(ppb_udp_socket_private_create),
+    .IsUDPSocket =          TWRAP(ppb_udp_socket_private_is_udp_socket),
+    .SetSocketFeature =     TWRAP(ppb_udp_socket_private_set_socket_feature),
+    .Bind =                 TWRAP(ppb_udp_socket_private_bind),
+    .GetBoundAddress =      TWRAP(ppb_udp_socket_private_get_bound_address),
+    .RecvFrom =             TWRAP(ppb_udp_socket_private_recv_from),
+    .GetRecvFromAddress =   TWRAP(ppb_udp_socket_private_get_recv_from_address),
+    .SendTo =               TWRAP(ppb_udp_socket_private_send_to),
+    .Close =                TWRAP(ppb_udp_socket_private_close),
 };

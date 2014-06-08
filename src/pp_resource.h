@@ -34,7 +34,7 @@
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
 
-#include <stddef.h>
+#include <stdlib.h>
 #include <X11/Xlib.h>
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
@@ -77,6 +77,9 @@ enum pp_resource_type_e {
     PP_RESOURCE_AUDIO_INPUT,
     PP_RESOURCE_FLASH_MENU,
     PP_RESOURCE_FLASH_MESSAGE_LOOP,
+    PP_RESOURCE_TCP_SOCKET,
+
+    PP_RESOURCE_TYPES_COUNT,        // must be the last item in the list
 };
 
 enum pp_request_method_e {
@@ -107,6 +110,8 @@ struct pp_instance_s {
     uint32_t        is_fullscreen;
     pthread_t       fs_thread;
     Window          fs_wnd;
+    uint32_t        fs_width;
+    uint32_t        fs_height;
     uint32_t        width;
     uint32_t        height;
     int             argc;
@@ -117,12 +122,14 @@ struct pp_instance_s {
     pthread_t       pp_thread;
     PP_Resource     graphics;
     Display        *dpy;
+    pthread_mutex_t lock;
 };
 
 struct pp_resource_generic_s {
     int             type;
     int             ref_cnt;
     PP_Instance     instance;
+    PP_Resource     self_id;
     pthread_mutex_t lock;
 };
 
@@ -149,6 +156,7 @@ struct pp_url_loader_s {
     PP_Bool                 allow_credentials;
     char                   *custom_content_transfer_encoding;
     char                   *custom_user_agent;
+    char                   *target;
     char                   *post_data;
     size_t                  post_len;
     GList                  *read_tasks;     ///< list of url_loader_read_task_s
@@ -194,10 +202,13 @@ struct pp_view_s {
 
 struct pp_graphics3d_s {
     struct pp_resource_generic_s _;
-    GLXContext      glc;
+    GLXContext      rendering_glc;
+    GLXContext      presentation_glc;
     GLXFBConfig     fb_config;
     Pixmap          pixmap;
     GLXPixmap       glx_pixmap;
+    GLuint          tex_id;
+    GLuint          fbo_id;
     Display        *dpy;
     int32_t         width;
     int32_t         height;
@@ -221,9 +232,12 @@ struct pp_graphics2d_s {
     int32_t             width;
     int32_t             height;
     int32_t             stride;
+    double              scale;
+    int32_t             scaled_width;
+    int32_t             scaled_height;
+    int32_t             scaled_stride;
     char               *data;
     char               *second_buffer;
-    pthread_mutex_t     lock;
     cairo_surface_t    *cairo_surf;
     GList              *task_list;
 };
@@ -251,6 +265,7 @@ struct pp_audio_s {
     struct pp_resource_generic_s _;
     uint32_t                sample_rate;
     uint32_t                sample_frame_count;
+    uint32_t                period_size;
     snd_pcm_t              *ph;
     void                   *audio_buffer;
     pthread_t               thread;
@@ -304,6 +319,38 @@ struct pp_flash_menu_s {
 struct pp_flash_message_loop_s {
     struct pp_resource_generic_s _;
     GMainLoop              *loop;
+};
+
+struct pp_tcp_socket_s {
+    struct pp_resource_generic_s _;
+    int             sock;
+    unsigned int    is_connected;
+    unsigned int    destroyed;
+};
+
+union pp_largest_u {
+    struct pp_var_object_s          s01;
+    struct pp_instance_s            s02;
+    struct pp_resource_generic_s    s03;
+    struct pp_url_loader_s          s04;
+    struct pp_url_request_info_s    s05;
+    struct pp_url_response_info_s   s06;
+    struct pp_view_s                s07;
+    struct pp_graphics3d_s          s08;
+    struct pp_image_data_s          s09;
+    struct pp_graphics2d_s          s10;
+    struct pp_network_monitor_s     s11;
+    struct pp_browser_font_s        s12;
+    struct pp_audio_config_s        s13;
+    struct pp_audio_s               s14;
+    struct pp_input_event_s         s15;
+    struct pp_flash_font_file_s     s16;
+    struct pp_printing_s            s17;
+    struct pp_video_capture_s       s18;
+    struct pp_audio_input_s         s19;
+    struct pp_flash_menu_s          s20;
+    struct pp_flash_message_loop_s  s21;
+    struct pp_tcp_socket_s          s22;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);

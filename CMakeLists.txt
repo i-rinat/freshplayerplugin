@@ -10,6 +10,9 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG -g3")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g3")
 
+# request pthreads
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+
 add_definitions(-Werror=implicit-function-declaration)
 
 find_package(PkgConfig REQUIRED)
@@ -18,8 +21,13 @@ pkg_check_modules(REQ
 	alsa
 	glib-2.0
 	x11
+	xinerama
 	gl
+	glu
 	liburiparser
+	libconfig
+	libevent
+	libevent_pthreads
 	cairo
 	pango
 	pangocairo
@@ -34,6 +42,7 @@ add_definitions(-DXP_UNIX)
 link_directories(${REQ_LIBRARY_DIRS})
 
 add_library(freshwrapper SHARED
+	src/async_network.c
 	src/header_parser.c
 	src/keycodeconvert.c
 	src/np_entry.c
@@ -92,7 +101,7 @@ add_library(freshwrapper SHARED
 )
 
 target_link_libraries(freshwrapper
-	-ldl
+	dl
 	${REQ_LIBRARIES}
 )
 

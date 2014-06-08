@@ -31,6 +31,8 @@
 #include <gtk/gtk.h>
 #include <ppapi/c/pp_errors.h>
 
+#include "pp_resource.h"
+#include "reverse_constant.h"
 
 uint32_t
 ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const char *format_name)
@@ -71,12 +73,14 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 uint32_t
 trace_ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const char *format_name)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance_id=%d, format_name=%s\n", __func__+6, instance_id,
+               format_name);
     return ppb_flash_clipboard_register_custom_format(instance_id, format_name);
 }
 
@@ -86,7 +90,9 @@ trace_ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
                                               PP_Flash_Clipboard_Type clipboard_type,
                                               uint32_t format)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance_id=%d, clipboard_type=%s, format=%s(%u)\n", __func__+6,
+               instance_id, reverse_clipboard_type(clipboard_type),
+               reverse_clipboard_format(format), format);
     return ppb_flash_clipboard_is_format_available(instance_id, clipboard_type, format);
 }
 
@@ -95,7 +101,9 @@ struct PP_Var
 trace_ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type clipboard_type,
                                     uint32_t format)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance_id=%d, clipboard_type=%s, format=%s(%u)\n", __func__+6,
+               instance_id, reverse_clipboard_type(clipboard_type),
+               reverse_clipboard_format(format), format);
     return ppb_flash_clipboard_read_data(instance_id, clipboard_type, format);
 }
 
@@ -106,15 +114,18 @@ trace_ppb_flash_clipboard_write_data(PP_Instance instance_id,
                                      uint32_t data_item_count, const uint32_t formats[],
                                      const struct PP_Var data_items[])
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s instance_id=%d, clipboard_type=%s, data_item_count=%u, "
+               "formats[]=%p, data_items[]=%p\n", __func__+6, instance_id,
+               reverse_clipboard_type(clipboard_type), data_item_count, formats, data_items);
     return ppb_flash_clipboard_write_data(instance_id, clipboard_type, data_item_count, formats,
                                           data_items);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
-    .RegisterCustomFormat = trace_ppb_flash_clipboard_register_custom_format,
-    .IsFormatAvailable =    trace_ppb_flash_clipboard_is_format_available,
-    .ReadData =             trace_ppb_flash_clipboard_read_data,
-    .WriteData =            trace_ppb_flash_clipboard_write_data,
+    .RegisterCustomFormat = TWRAP(ppb_flash_clipboard_register_custom_format),
+    .IsFormatAvailable =    TWRAP(ppb_flash_clipboard_is_format_available),
+    .ReadData =             TWRAP(ppb_flash_clipboard_read_data),
+    .WriteData =            TWRAP(ppb_flash_clipboard_write_data),
 };

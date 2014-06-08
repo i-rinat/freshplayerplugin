@@ -93,6 +93,7 @@ ppb_view_get_css_scale(PP_Resource resource)
     return 1.0;
 }
 
+#ifndef NDEBUG
 // trace wrappers
 PP_Bool
 trace_ppb_view_is_view(PP_Resource resource)
@@ -149,28 +150,30 @@ trace_ppb_view_get_css_scale(PP_Resource resource)
     trace_info("[PPB] {part} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_css_scale(resource);
 }
+#endif // NDEBUG
+
 
 const struct PPB_View_Dev_0_1 ppb_view_dev_interface_0_1 = {
-    .GetDeviceScale =   trace_ppb_view_get_device_scale,
-    .GetCSSScale =      trace_ppb_view_get_css_scale,
+    .GetDeviceScale =   TWRAP(ppb_view_get_device_scale),
+    .GetCSSScale =      TWRAP(ppb_view_get_css_scale),
 };
 
 const struct PPB_View_1_0 ppb_view_interface_1_0 = {
-    .IsView =           trace_ppb_view_is_view,
-    .GetRect =          trace_ppb_view_get_rect,
-    .IsFullscreen =     trace_ppb_view_is_fullscreen,
-    .IsVisible =        trace_ppb_view_is_visible,
-    .IsPageVisible =    trace_ppb_view_is_page_visible,
-    .GetClipRect =      trace_ppb_view_get_clip_rect,
+    .IsView =           TWRAP(ppb_view_is_view),
+    .GetRect =          TWRAP(ppb_view_get_rect),
+    .IsFullscreen =     TWRAP(ppb_view_is_fullscreen),
+    .IsVisible =        TWRAP(ppb_view_is_visible),
+    .IsPageVisible =    TWRAP(ppb_view_is_page_visible),
+    .GetClipRect =      TWRAP(ppb_view_get_clip_rect),
 };
 
 const struct PPB_View_1_1 ppb_view_interface_1_1 = {
-    .IsView =           trace_ppb_view_is_view,
-    .GetRect =          trace_ppb_view_get_rect,
-    .IsFullscreen =     trace_ppb_view_is_fullscreen,
-    .IsVisible =        trace_ppb_view_is_visible,
-    .IsPageVisible =    trace_ppb_view_is_page_visible,
-    .GetClipRect =      trace_ppb_view_get_clip_rect,
-    .GetDeviceScale =   trace_ppb_view_get_device_scale,
-    .GetCSSScale =      trace_ppb_view_get_css_scale,
+    .IsView =           TWRAP(ppb_view_is_view),
+    .GetRect =          TWRAP(ppb_view_get_rect),
+    .IsFullscreen =     TWRAP(ppb_view_is_fullscreen),
+    .IsVisible =        TWRAP(ppb_view_is_visible),
+    .IsPageVisible =    TWRAP(ppb_view_is_page_visible),
+    .GetClipRect =      TWRAP(ppb_view_get_clip_rect),
+    .GetDeviceScale =   TWRAP(ppb_view_get_device_scale),
+    .GetCSSScale =      TWRAP(ppb_view_get_css_scale),
 };

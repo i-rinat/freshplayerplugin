@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE                 // asprintf
 #include "ppb_char_set_dev.h"
 #include "ppb_memory_dev.h"
 #include <stdlib.h>
@@ -56,14 +55,14 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
         cd = iconv_open(output_char_set, "UTF16");
         break;
     case PP_CHARSET_CONVERSIONERROR_SKIP:
-        asprintf(&tmp, "%s//IGNORE", output_char_set);
+        tmp = g_strdup_printf("%s//IGNORE", output_char_set);
         cd = iconv_open(tmp, "UTF16");
-        free(tmp);
+        g_free(tmp);
         break;
     case PP_CHARSET_CONVERSIONERROR_SUBSTITUTE:
-        asprintf(&tmp, "%s//TRANSLIT", output_char_set);
+        tmp = g_strdup_printf("%s//TRANSLIT", output_char_set);
         cd = iconv_open(tmp, "UTF16");
-        free(tmp);
+        g_free(tmp);
         break;
     }
 
@@ -143,6 +142,7 @@ ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 char *
@@ -179,9 +179,11 @@ trace_ppb_char_set_dev_get_default_char_set(PP_Instance instance)
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_char_set_dev_get_default_char_set(instance);
 }
+#endif // NDEBUG
+
 
 const struct PPB_CharSet_Dev_0_4 ppb_char_set_dev_interface_0_4 = {
-    .UTF16ToCharSet =       trace_ppb_char_set_dev_utf16_to_char_set,
-    .CharSetToUTF16 =       trace_ppb_char_set_dev_char_set_to_utf16,
-    .GetDefaultCharSet =    trace_ppb_char_set_dev_get_default_char_set,
+    .UTF16ToCharSet =       TWRAP(ppb_char_set_dev_utf16_to_char_set),
+    .CharSetToUTF16 =       TWRAP(ppb_char_set_dev_char_set_to_utf16),
+    .GetDefaultCharSet =    TWRAP(ppb_char_set_dev_get_default_char_set),
 };

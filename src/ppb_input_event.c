@@ -424,6 +424,7 @@ ppb_ime_input_event_get_selection(PP_Resource ime_event, uint32_t *start, uint32
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 int32_t
@@ -504,8 +505,8 @@ trace_ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type
                "mouse_button=%d, mouse_position=%s, click_count=%d, mouse_movement=%s\n",
                __func__+6, instance, type, time_stamp, modifiers, mouse_button, s_mouse_position,
                click_count, s_mouse_movement);
-    free(s_mouse_position);
-    free(s_mouse_movement);
+    g_free(s_mouse_position);
+    g_free(s_mouse_movement);
     return ppb_mouse_input_event_create(instance, type, time_stamp, modifiers, mouse_button,
                                         mouse_position, click_count, mouse_movement);
 }
@@ -561,8 +562,8 @@ trace_ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp
     trace_info("[PPB] {full} %s instance=%d, time_stamp=%f, modifiers=0x%x, wheel_delta=%s, "
                "wheel_ticks=%s, scrool_by_page=%d\n", __func__+6, instance, time_stamp, modifiers,
                s_wheel_delta, s_wheel_ticks, scroll_by_page);
-    free(s_wheel_delta);
-    free(s_wheel_ticks);
+    g_free(s_wheel_delta);
+    g_free(s_wheel_ticks);
     return ppb_wheel_input_event_create(instance, time_stamp, modifiers, wheel_delta, wheel_ticks,
                                         scroll_by_page);
 }
@@ -609,7 +610,7 @@ trace_ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type t
     trace_info("[PPB] {full} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
                "key_code=%u, character_text=%s\n", __func__+6, instance, type, time_stamp,
                modifiers, key_code, s_character_text);
-    free(s_character_text);
+    g_free(s_character_text);
     return ppb_keyboard_input_event_create(instance, type, time_stamp, modifiers, key_code,
                                            character_text);
 }
@@ -656,7 +657,7 @@ trace_ppb_touch_input_event_add_touch_point(PP_Resource touch_event, PP_TouchLis
     char *s_point = trace_touch_point_as_string(point);
     trace_info("[PPB] {zilch} %s touch_event=%d, list=%d, point=%s\n", __func__+6, touch_event,
                list, s_point);
-    free(s_point);
+    g_free(s_point);
     return ppb_touch_input_event_add_touch_point(touch_event, list, point);
 }
 
@@ -709,7 +710,7 @@ trace_ppb_ime_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                "segment_offsets=%p, target_segment=%d, selection_start=%u, selection_end=%u\n",
                __func__+6, instance, type, time_stamp, s_text, segment_number, segment_offsets,
                target_segment, selection_start, selection_end);
-    free(s_text);
+    g_free(s_text);
     return ppb_ime_input_event_create(instance, type, time_stamp, text, segment_number,
                                       segment_offsets, target_segment, selection_start,
                                       selection_end);
@@ -762,57 +763,58 @@ trace_ppb_ime_input_event_get_selection(PP_Resource ime_event, uint32_t *start, 
     trace_info("[PPB] {zilch} %s ime_event=%d\n", __func__+6, ime_event);
     return ppb_ime_input_event_get_selection(ime_event, start, end);
 }
+#endif // NDEBUG
 
 
 const struct PPB_InputEvent_1_0 ppb_input_event_interface_1_0 = {
-    .RequestInputEvents =           trace_ppb_input_event_request_input_events,
-    .RequestFilteringInputEvents =  trace_ppb_input_event_request_filtering_input_events,
-    .ClearInputEventRequest =       trace_ppb_input_event_clear_input_event_request,
-    .IsInputEvent =                 trace_ppb_input_event_is_input_event,
-    .GetType =                      trace_ppb_input_event_get_type,
-    .GetTimeStamp =                 trace_ppb_input_event_get_time_stamp,
-    .GetModifiers =                 trace_ppb_input_event_get_modifiers
+    .RequestInputEvents =           TWRAP(ppb_input_event_request_input_events),
+    .RequestFilteringInputEvents =  TWRAP(ppb_input_event_request_filtering_input_events),
+    .ClearInputEventRequest =       TWRAP(ppb_input_event_clear_input_event_request),
+    .IsInputEvent =                 TWRAP(ppb_input_event_is_input_event),
+    .GetType =                      TWRAP(ppb_input_event_get_type),
+    .GetTimeStamp =                 TWRAP(ppb_input_event_get_time_stamp),
+    .GetModifiers =                 TWRAP(ppb_input_event_get_modifiers),
 };
 
 const struct PPB_MouseInputEvent_1_1 ppb_mouse_input_event_interface_1_1 = {
-    .Create =               trace_ppb_mouse_input_event_create,
-    .IsMouseInputEvent =    trace_ppb_mouse_input_event_is_mouse_input_event,
-    .GetButton =            trace_ppb_mouse_input_event_get_button,
-    .GetPosition =          trace_ppb_mouse_input_event_get_position,
-    .GetClickCount =        trace_ppb_mouse_input_event_get_click_count,
-    .GetMovement =          trace_ppb_mouse_input_event_get_movement,
+    .Create =               TWRAP(ppb_mouse_input_event_create),
+    .IsMouseInputEvent =    TWRAP(ppb_mouse_input_event_is_mouse_input_event),
+    .GetButton =            TWRAP(ppb_mouse_input_event_get_button),
+    .GetPosition =          TWRAP(ppb_mouse_input_event_get_position),
+    .GetClickCount =        TWRAP(ppb_mouse_input_event_get_click_count),
+    .GetMovement =          TWRAP(ppb_mouse_input_event_get_movement),
 };
 
 const struct PPB_WheelInputEvent_1_0 ppb_wheel_input_event_interface_1_0 = {
-    .Create =               trace_ppb_wheel_input_event_create,
-    .IsWheelInputEvent =    trace_ppb_wheel_input_event_is_wheel_input_event,
-    .GetDelta =             trace_ppb_wheel_input_event_get_delta,
-    .GetTicks =             trace_ppb_wheel_input_event_get_ticks,
-    .GetScrollByPage =      trace_ppb_wheel_input_event_get_scroll_by_page,
+    .Create =               TWRAP(ppb_wheel_input_event_create),
+    .IsWheelInputEvent =    TWRAP(ppb_wheel_input_event_is_wheel_input_event),
+    .GetDelta =             TWRAP(ppb_wheel_input_event_get_delta),
+    .GetTicks =             TWRAP(ppb_wheel_input_event_get_ticks),
+    .GetScrollByPage =      TWRAP(ppb_wheel_input_event_get_scroll_by_page),
 };
 
 const struct PPB_KeyboardInputEvent_1_0 ppb_keyboard_input_event_interface_1_0 = {
-    .Create =               trace_ppb_keyboard_input_event_create,
-    .IsKeyboardInputEvent = trace_ppb_keyboard_input_event_is_keyboard_input_event,
-    .GetKeyCode =           trace_ppb_keyboard_input_event_get_key_code,
-    .GetCharacterText =     trace_ppb_keyboard_input_event_get_character_text,
+    .Create =               TWRAP(ppb_keyboard_input_event_create),
+    .IsKeyboardInputEvent = TWRAP(ppb_keyboard_input_event_is_keyboard_input_event),
+    .GetKeyCode =           TWRAP(ppb_keyboard_input_event_get_key_code),
+    .GetCharacterText =     TWRAP(ppb_keyboard_input_event_get_character_text),
 };
 
 const struct PPB_TouchInputEvent_1_0 ppb_touch_input_event_interface_1_0 = {
-    .Create =           trace_ppb_touch_input_event_create,
-    .AddTouchPoint =    trace_ppb_touch_input_event_add_touch_point,
-    .IsTouchInputEvent = trace_ppb_touch_input_event_is_touch_input_event,
-    .GetTouchCount =    trace_ppb_touch_input_event_get_touch_count,
-    .GetTouchByIndex =  trace_ppb_touch_input_event_get_touch_by_index,
-    .GetTouchById =     trace_ppb_touch_input_event_get_touch_by_id,
+    .Create =               TWRAP(ppb_touch_input_event_create),
+    .AddTouchPoint =        TWRAP(ppb_touch_input_event_add_touch_point),
+    .IsTouchInputEvent =    TWRAP(ppb_touch_input_event_is_touch_input_event),
+    .GetTouchCount =        TWRAP(ppb_touch_input_event_get_touch_count),
+    .GetTouchByIndex =      TWRAP(ppb_touch_input_event_get_touch_by_index),
+    .GetTouchById =         TWRAP(ppb_touch_input_event_get_touch_by_id),
 };
 
 const struct PPB_IMEInputEvent_1_0 ppb_ime_input_event_interface_1_0 = {
-    .Create =           trace_ppb_ime_input_event_create,
-    .IsIMEInputEvent =  trace_ppb_ime_input_event_is_ime_input_event,
-    .GetText =          trace_ppb_ime_input_event_get_text,
-    .GetSegmentNumber = trace_ppb_ime_input_event_get_segment_number,
-    .GetSegmentOffset = trace_ppb_ime_input_event_get_segment_offset,
-    .GetTargetSegment = trace_ppb_ime_input_event_get_target_segment,
-    .GetSelection =     trace_ppb_ime_input_event_get_selection,
+    .Create =           TWRAP(ppb_ime_input_event_create),
+    .IsIMEInputEvent =  TWRAP(ppb_ime_input_event_is_ime_input_event),
+    .GetText =          TWRAP(ppb_ime_input_event_get_text),
+    .GetSegmentNumber = TWRAP(ppb_ime_input_event_get_segment_number),
+    .GetSegmentOffset = TWRAP(ppb_ime_input_event_get_segment_offset),
+    .GetTargetSegment = TWRAP(ppb_ime_input_event_get_target_segment),
+    .GetSelection =     TWRAP(ppb_ime_input_event_get_selection),
 };

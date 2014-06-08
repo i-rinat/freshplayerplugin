@@ -31,7 +31,7 @@
 
 
 static int32_t                     *popup_menu_result = NULL;
-static struct PP_CompletionCallback popup_menu_ccb = { 0 };
+static struct PP_CompletionCallback popup_menu_ccb = { };
 static int                          popup_menu_sentinel = 0;
 static int                          popup_menu_canceled = 0;
 
@@ -93,7 +93,7 @@ convert_menu(const struct PP_Flash_Menu *pp_menu)
 
         gtk_widget_set_sensitive(mi, pp_mi.enabled != PP_FALSE);
         gtk_widget_show(mi);
-        gtk_menu_append(GTK_MENU(menu), mi);
+        gtk_menu_shell_append(GTK_MENU_SHELL(menu), mi);
 
         if (pp_mi.type == PP_FLASH_MENUITEM_TYPE_SUBMENU)
             gtk_menu_item_set_submenu(GTK_MENU_ITEM(mi), convert_menu(pp_mi.submenu));
@@ -161,6 +161,7 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -186,9 +187,11 @@ trace_ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location,
     trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_flash_menu_show(menu_id, location, selected_id, callback);
 }
+#endif // NDEBUG
+
 
 const struct PPB_Flash_Menu_0_2 ppb_flash_menu_interface_0_2 = {
-    .Create =       trace_ppb_flash_menu_create,
-    .IsFlashMenu =  trace_ppb_flash_menu_is_flash_menu,
-    .Show =         trace_ppb_flash_menu_show,
+    .Create =       TWRAP(ppb_flash_menu_create),
+    .IsFlashMenu =  TWRAP(ppb_flash_menu_is_flash_menu),
+    .Show =         TWRAP(ppb_flash_menu_show),
 };

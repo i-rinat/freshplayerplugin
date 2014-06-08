@@ -22,12 +22,15 @@
  * SOFTWARE.
  */
 
+#define GL_GLEXT_PROTOTYPES
 #include <assert.h>
 #include <inttypes.h>
 #include <npapi/npapi.h>
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
+#include <X11/extensions/Xinerama.h>
+#include <GL/gl.h>
 #include <pthread.h>
 #include "trace.h"
 #include "reverse_constant.h"
@@ -41,6 +44,7 @@
 #include <ppapi/c/private/ppp_instance_private.h>
 #include "ppb_input_event.h"
 #include "ppb_url_loader.h"
+#include "ppb_url_request_info.h"
 #include "ppb_var.h"
 #include "ppb_core.h"
 #include "header_parser.h"
@@ -59,6 +63,14 @@ generate_new_pp_instance_id(void)
     pthread_mutex_unlock(&m);
 
     return result;
+}
+
+static
+void
+empty_completion_callback(void *user_data, int32_t result)
+{
+    (void)user_data;
+    (void)result;
 }
 
 NPError
@@ -104,16 +116,58 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->pp_instance_id = generate_new_pp_instance_id();
     tables_add_pp_instance(pp_i->pp_instance_id, pp_i);
 
+    pthread_mutex_init(&pp_i->lock, NULL);
     pp_i->dpy = XOpenDisplay(NULL);
     if (!pp_i->dpy) {
         trace_error("%s, can't open X Display\n", __func__);
     }
+
+    // get fullscreen resolution
+    int screen_count;
+    pthread_mutex_lock(&pp_i->lock);
+    XineramaScreenInfo *xsi = XineramaQueryScreens(pp_i->dpy, &screen_count);
+    XWindowAttributes xw_attrs;
+    if (xsi) {
+        int screen = config.xinerama_screen;
+        if (screen < 0)
+            screen = 0;
+        if (screen > screen_count - 1)
+            screen = screen_count - 1;
+        pp_i->fs_width =  xsi[screen].width;
+        pp_i->fs_height = xsi[screen].height;
+        XFree(xsi);
+    } else if (XGetWindowAttributes(pp_i->dpy, DefaultRootWindow(pp_i->dpy), &xw_attrs)) {
+        pp_i->fs_width =  xw_attrs.width;
+        pp_i->fs_height = xw_attrs.height;
+    } else {
+        pp_i->fs_width = 100;
+        pp_i->fs_height = 100;
+    }
+    pthread_mutex_unlock(&pp_i->lock);
 
     // request windowless operation
     npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
 
     pp_i->ppp_instance_1_1->DidCreate(pp_i->pp_instance_id, pp_i->argc, pp_i->argn, pp_i->argv);
     pp_i->instance_loaded = 1;
+
+    if (mode == NP_FULL) {
+        PP_Resource request_info = ppb_url_request_info_create(pp_i->pp_instance_id);
+        PP_Resource url_loader = ppb_url_loader_create(pp_i->pp_instance_id);
+
+        struct PP_Var s_url = PP_MakeString(pp_i->instance_url);
+        struct PP_Var s_method = PP_MakeString("GET");
+
+        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL, s_url);
+        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_METHOD, s_method);
+        ppb_url_loader_open(url_loader, request_info,
+                            PP_MakeCompletionCallback(empty_completion_callback, NULL));
+        ppb_var_release(s_url);
+        ppb_var_release(s_method);
+        ppb_core_release_resource(request_info);
+
+        pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->pp_instance_id, url_loader);
+    }
 
     return NPERR_NO_ERROR;
 }
@@ -135,7 +189,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
 {
     char *window_str = trace_np_window_as_string(window);
     trace_info("[NPP] {full} %s npp=%p, window=%s\n", __func__, npp, window_str);
-    free(window_str);
+    g_free(window_str);
 
     struct pp_instance_s *pp_i = npp->pdata;
 
@@ -144,16 +198,18 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         pp_i->width = window->width;
         pp_i->height = window->height;
 
-        PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
-        struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-        v->rect.point.x = window->x;
-        v->rect.point.y = window->y;
-        v->rect.size.width = window->width;
-        v->rect.size.height = window->height;
-        pp_resource_release(view);
+        if (pp_i->instance_loaded) {
+            PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
+            struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+            v->rect.point.x = window->x;
+            v->rect.point.y = window->y;
+            v->rect.size.width = window->width;
+            v->rect.size.height = window->height;
+            pp_resource_release(view);
 
-        if (pp_i->instance_loaded)
             pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
+            ppb_core_release_resource(view);
+        }
     }
 
     return NPERR_NO_ERROR;
@@ -264,7 +320,7 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         pp_resource_release(loader);
         if (rt->ccb.func)
             rt->ccb.func(rt->ccb.user_data, read_bytes);
-        free(rt);
+        g_slice_free(struct url_loader_read_task_s, rt);
         ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
 
@@ -320,7 +376,7 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
         pp_resource_release(loader);
         if (rt->ccb.func)
             rt->ccb.func(rt->ccb.user_data, read_bytes);
-        free(rt);
+        g_slice_free(struct url_loader_read_task_s, rt);
         return len;
     } else {
         // reschedule task
@@ -357,22 +413,63 @@ handle_graphics_expose_event(NPP npp, void *event)
     int screen = 0;
 
     if (g2d) {
-        pthread_mutex_lock(&g2d->lock);
+        pthread_mutex_lock(&pp_i->lock);
         XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
-                                  g2d->second_buffer, g2d->width, g2d->height, 32, g2d->stride);
+                                  g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
+                                  g2d->scaled_stride);
 
-        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g2d->width, g2d->height);
-        free(xi);
-        pthread_mutex_unlock(&g2d->lock);
+        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0,
+                  g2d->scaled_width, g2d->scaled_height);
+        XFree(xi);
+        pthread_mutex_unlock(&pp_i->lock);
         pp_resource_release(pp_i->graphics);
     } else if (g3d) {
-        XImage *xi = XGetImage(dpy, g3d->pixmap, 0, 0, g3d->width, g3d->height, XAllPlanes(),
-                               ZPixmap);
-        if (!xi)
-            trace_error("%s, XGetImage returned NULL\n", __func__);
-        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0, g3d->width, g3d->height);
-        XDestroyImage(xi);
-        XSync(dpy, False);
+        pthread_mutex_lock(&pp_i->lock);
+
+        if (pp_i->is_fullscreen) {
+            glXMakeCurrent(pp_i->dpy, drawable, g3d->presentation_glc);
+        } else {
+            glXMakeCurrent(pp_i->dpy, g3d->glx_pixmap, g3d->presentation_glc);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glViewport(0, 0, g3d->width, g3d->height);
+        glOrtho(0, g3d->width, 0, g3d->height, -1.0, 1.0);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+        glMatrixMode(GL_TEXTURE);
+        glLoadIdentity();
+
+        glEnable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+        glBindTexture(GL_TEXTURE_2D, g3d->tex_id);
+
+        glColor4f(1, 1, 1, 1);
+        glBegin(GL_QUADS);
+            glTexCoord2i(0, 0); glVertex2i(0, 0);
+            glTexCoord2i(1, 0); glVertex2i(g3d->width, 0);
+            glTexCoord2i(1, 1); glVertex2i(g3d->width, g3d->height);
+            glTexCoord2i(0, 1); glVertex2i(0, g3d->height);
+        glEnd();
+
+        glFinish();
+
+        if (pp_i->is_fullscreen) {
+            glXSwapBuffers(dpy, drawable);
+        } else {
+            XCopyArea(dpy, g3d->pixmap, drawable, DefaultGC(dpy, screen),
+                      0, 0,
+                      g3d->width, g3d->height,
+                      0, 0);
+            XFlush(dpy);
+        }
+
+        pthread_mutex_unlock(&pp_i->lock);
         pp_resource_release(pp_i->graphics);
     } else {
         return 0;
@@ -416,6 +513,18 @@ x_state_mask_to_pp_inputevent_modifier(unsigned int state)
         mod |= PP_INPUTEVENT_MODIFIER_ISLEFT;
     }
 
+    if (state & Button1Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_LEFTBUTTONDOWN;
+    }
+
+    if (state & Button2Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_MIDDLEBUTTONDOWN;
+    }
+
+    if (state & Button3Mask) {
+        mod |= PP_INPUTEVENT_MODIFIER_RIGHTBUTTONDOWN;
+    }
+
     return mod;
 }
 
@@ -426,31 +535,32 @@ handle_enter_leave_event(NPP npp, void *event)
     XCrossingEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
 
+    // quit if plugin doesn't handle input events
+    if (!pp_i->ppp_input_event)
+        return 0;
 
-    if ((PP_INPUTEVENT_CLASS_MOUSE & pp_i->event_mask) ||
-        (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
-    {
-        PP_Bool ret = PP_FALSE;
-        struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
-        struct PP_Point zero_point = {.x = 0, .y = 0};
-        unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
-        PP_InputEvent_Type event_type = (ev->type == EnterNotify) ? PP_INPUTEVENT_TYPE_MOUSEENTER
-                                                                  : PP_INPUTEVENT_TYPE_MOUSELEAVE;
-        PP_Resource pp_event;
+    const uint32_t combined_mask = pp_i->event_mask | pp_i->filtered_event_mask;
+    if (!(PP_INPUTEVENT_CLASS_MOUSE & combined_mask))
+        return 0;
 
-        pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
-                                                ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
-                                                &mouse_position, 0, &zero_point);
-        if (pp_i->ppp_input_event)
-            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+    struct PP_Point zero_point = {.x = 0, .y = 0};
+    unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+    PP_InputEvent_Type event_type = (ev->type == EnterNotify) ? PP_INPUTEVENT_TYPE_MOUSEENTER
+                                                              : PP_INPUTEVENT_TYPE_MOUSELEAVE;
+    PP_Resource pp_event;
+    pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
+                                            ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
+                                            &mouse_position, 0, &zero_point);
+    PP_Bool ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+    ppb_core_release_resource(pp_event);
 
-        if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
-            return 0;
+    // return false only if handler returns PP_FALSE and event is filtered
+    if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
+        return 0;
 
-        return 1;
-    }
-
-    return 0;
+    // for non-filtered events return values are ignored
+    return 1;
 }
 
 static
@@ -460,28 +570,31 @@ handle_motion_event(NPP npp, void *event)
     XMotionEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
 
-    if ((PP_INPUTEVENT_CLASS_MOUSE & pp_i->event_mask) ||
-        (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
-    {
-        PP_Bool ret = PP_FALSE;
-        struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
-        struct PP_Point zero_point = {.x = 0, .y = 0};
-        unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
-        PP_Resource pp_event;
+    // quit if plugin doesn't handle input events
+    if (!pp_i->ppp_input_event)
+        return 0;
 
-        pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
-                                                ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
-                                                &mouse_position, 0, &zero_point);
-        if (pp_i->ppp_input_event)
-            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+    const uint32_t combined_mask = pp_i->event_mask | pp_i->filtered_event_mask;
+    if (!(PP_INPUTEVENT_CLASS_MOUSE & combined_mask))
+        return 0;
 
-        if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
-            return 0;
+    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+    struct PP_Point zero_point = {.x = 0, .y = 0};
+    unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+    PP_Resource pp_event;
 
-        return 1;
-    }
+    pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
+                                            ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
+                                            &mouse_position, 0, &zero_point);
+    PP_Bool ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+    ppb_core_release_resource(pp_event);
 
-    return 0;
+    // return false only if handler returns PP_FALSE and event is filtered
+    if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
+        return 0;
+
+    // for non-filtered events return values are ignored
+    return 1;
 }
 
 static
@@ -493,13 +606,17 @@ handle_button_press_release_event(NPP npp, void *event)
     uint32_t event_class = 0;
     PP_InputEvent_MouseButton mouse_button = PP_INPUTEVENT_MOUSEBUTTON_NONE;
 
+    // quit if plugin doesn't handle input events
+    if (!pp_i->ppp_input_event)
+        return 0;
+
     struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
     float wheel_x = 0.0, wheel_y = 0.0;
     int ev_button = ev->button;
 
-    if (quirks.switch_buttons_2_3) {
+    if (config.quirks.switch_buttons_2_3) {
         if (ev_button == 2)
             ev_button = 3;
         else if (ev_button == 3)
@@ -510,17 +627,14 @@ handle_button_press_release_event(NPP npp, void *event)
     case 1:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_LEFT;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
-        mod |= PP_INPUTEVENT_MODIFIER_LEFTBUTTONDOWN;
         break;
     case 2:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_MIDDLE;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
-        mod |= PP_INPUTEVENT_MODIFIER_MIDDLEBUTTONDOWN;
         break;
     case 3:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_RIGHT;
         event_class = PP_INPUTEVENT_CLASS_MOUSE;
-        mod |= PP_INPUTEVENT_MODIFIER_RIGHTBUTTONDOWN;
         break;
 
     case 4: // wheel up
@@ -544,62 +658,58 @@ handle_button_press_release_event(NPP npp, void *event)
     // TODO: Firefox does not pass wheel event to windowless plugins.
     //       Only windowed plugins can receive such events.
 
-    if ((event_class & pp_i->event_mask) ||
-        (event_class & pp_i->filtered_event_mask))
-    {
-        PP_Bool handled = PP_FALSE;
-        PP_Resource pp_event = 0;
 
-        if (event_class == PP_INPUTEVENT_CLASS_MOUSE) {
-            PP_InputEvent_Type event_type;
+    const uint32_t combined_mask = pp_i->event_mask | pp_i->filtered_event_mask;
+    if (!(event_class & combined_mask))
+        return 0;
 
-            event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
-                                                   : PP_INPUTEVENT_TYPE_MOUSEUP;
-            pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
+    PP_Bool handled = PP_FALSE;
+
+    if (event_class == PP_INPUTEVENT_CLASS_MOUSE) {
+        PP_Resource         pp_event;
+        PP_InputEvent_Type  event_type;
+        PP_Bool             ret;
+
+        event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
+                                               : PP_INPUTEVENT_TYPE_MOUSEUP;
+        pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
+                                                ev->time/1.0e6, mod, mouse_button,
+                                                &mouse_position, 1, &zero_point);
+
+        ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+        handled = handled || ret;
+        ppb_core_release_resource(pp_event);
+
+        // context menu event
+        if (ev->type == ButtonRelease && ev_button == 3) {
+            pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id,
+                                                    PP_INPUTEVENT_TYPE_CONTEXTMENU,
                                                     ev->time/1.0e6, mod, mouse_button,
                                                     &mouse_position, 1, &zero_point);
-            if (pp_i->ppp_input_event) {
-                PP_Bool ret;
-                ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
-                handled = handled || ret;
-            }
-
-            // context menu event
-            if (ev->type == ButtonRelease && ev_button == 3) {
-                pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id,
-                                                        PP_INPUTEVENT_TYPE_CONTEXTMENU,
-                                                        ev->time/1.0e6, mod, mouse_button,
-                                                        &mouse_position, 1, &zero_point);
-                if (pp_i->ppp_input_event) {
-                    PP_Bool ret;
-                    ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
-                    handled = handled || ret;
-                }
-            }
-
-        } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
-            const float scroll_by_tick = 10.0;
-            struct PP_FloatPoint wheel_delta = { .x = wheel_x * scroll_by_tick,
-                                                 .y = wheel_y * scroll_by_tick };
-            struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
-
-            // pp_event = ppb_wheel_input_event_create(
-            //                 pp_i->pp_instance_id, ppb_core_get_time_ticks(), mod,
-            //                 &wheel_delta, &wheel_ticks, PP_FALSE);
-            // TODO: figure out why this doesn't work
-            (void)wheel_delta;
-            (void)wheel_ticks;
-            return 0;
+            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+            handled = handled || ret;
+            ppb_core_release_resource(pp_event);
         }
+    } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
+        const float scroll_by_tick = 10.0;
+        struct PP_FloatPoint wheel_delta = { .x = wheel_x * scroll_by_tick,
+                                             .y = wheel_y * scroll_by_tick };
+        struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
 
-        // return false only of handler returned PP_FALSE and event is filtered
-        if (!handled && (pp_i->filtered_event_mask & event_class))
-            return 0;
-
-        return 1;
+        // pp_event = ppb_wheel_input_event_create(
+        //                 pp_i->pp_instance_id, ppb_core_get_time_ticks(), mod,
+        //                 &wheel_delta, &wheel_ticks, PP_FALSE);
+        (void)wheel_delta;
+        (void)wheel_ticks;
+        return 0;
     }
 
-    return 0;
+    // return false only if handler returns PP_FALSE and event is filtered
+    if (!handled && (pp_i->filtered_event_mask & event_class))
+        return 0;
+
+    // for non-filtered events return values are ignored
+    return 1;
 }
 
 int16_t
@@ -609,47 +719,51 @@ handle_key_press_release_event(NPP npp, void *event)
     struct pp_instance_s *pp_i = npp->pdata;
     PP_InputEvent_Type    event_type;
 
+    // quit if plugin doesn't handle input events
+    if (!pp_i->ppp_input_event)
+        return 0;
+
     event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
                                         : PP_INPUTEVENT_TYPE_KEYUP;
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
 
-    if ((PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->event_mask) ||
-        (PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->filtered_event_mask))
-    {
-        PP_Bool        ret = PP_FALSE;
-        char           buffer[20];
-        KeySym         keysym;
-        XComposeStatus compose_status;
-        int            charcount;
-        int            pp_keycode;
-        PP_Resource    pp_event;
+    const uint32_t combined_mask = pp_i->event_mask | pp_i->filtered_event_mask;
+    if (!(PP_INPUTEVENT_CLASS_KEYBOARD & combined_mask))
+        return 0;
 
-        charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
-        pp_keycode = xkeycode_to_pp_keycode(keysym);
+    PP_Bool        ret = PP_FALSE;
+    char           buffer[20];
+    KeySym         keysym;
+    XComposeStatus compose_status;
+    int            charcount;
+    int            pp_keycode;
+    PP_Resource    pp_event;
 
-        if (ev->type == KeyPress && charcount > 0) {
-            struct PP_Var character_text = PP_MakeStringN(buffer, charcount);
-            pp_event = ppb_keyboard_input_event_create(
-                            pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
-                            pp_keycode, character_text);
-            ppb_var_release(character_text);
+    charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
+    pp_keycode = xkeycode_to_pp_keycode(keysym);
 
-            if (pp_i->ppp_input_event && pp_event)
-                pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
-        }
+    if (ev->type == KeyPress && charcount > 0) {
+        struct PP_Var character_text = PP_MakeStringN(buffer, charcount);
+        pp_event = ppb_keyboard_input_event_create(
+                        pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
+                        pp_keycode, character_text);
+        ppb_var_release(character_text);
 
-        pp_event = ppb_keyboard_input_event_create(pp_i->pp_instance_id, event_type, ev->time/1.0e6,
-                                                   mod, pp_keycode, PP_MakeUndefined());
-        if (pp_i->ppp_input_event && pp_event)
-            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
-
-        if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->filtered_event_mask))
-            return 0;
-
-        return 1;
+        pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+        ppb_core_release_resource(pp_event);
     }
 
-    return 0;
+    pp_event = ppb_keyboard_input_event_create(pp_i->pp_instance_id, event_type, ev->time/1.0e6,
+                                               mod, pp_keycode, PP_MakeUndefined());
+    ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+    ppb_core_release_resource(pp_event);
+
+    // return false only if handler returns PP_FALSE and event is filtered
+    if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->filtered_event_mask))
+        return 0;
+
+    // for non-filtered events return values are ignored
+    return 1;
 }
 
 int16_t

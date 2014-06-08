@@ -22,10 +22,13 @@
  * SOFTWARE.
  */
 
+#define GL_GLEXT_PROTOTYPES
 #include <assert.h>
 #include "ppb_graphics3d.h"
 #include <stdlib.h>
 #include <GL/glx.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "tables.h"
@@ -44,14 +47,14 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
-        trace_warning("%s, wrong instance\n", __func__);
+        trace_error("%s, wrong instance\n", __func__);
         return 0;
     }
 
     PP_Resource context = pp_resource_allocate(PP_RESOURCE_GRAPHICS3D, instance);
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d) {
-        trace_warning("%s, can't create context\n", __func__);
+        trace_error("%s, can't create context\n", __func__);
         return 0;
     }
 
@@ -67,6 +70,7 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     fb_attribute_list[k2++] = GLX_PIXMAP_BIT;
     fb_attribute_list[k2++] = GLX_RENDER_TYPE;
     fb_attribute_list[k2++] = GLX_RGBA_BIT;
+
     while (!done) {
         switch (attrib_list[k1]) {
         case PP_GRAPHICS3DATTRIB_HEIGHT:
@@ -128,23 +132,33 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
             break;
         default:
             // skip unknown attribute
-            trace_warning("%s, unknown attribute 0x%x\n", __func__, attrib_list[k1]);
+            trace_error("%s, unknown attribute 0x%x\n", __func__, attrib_list[k1]);
             k1 += 1;
             break;
         }
     }
 
+    pthread_mutex_lock(&pp_i->lock);
     int nconfigs = 0;
     GLXFBConfig *fb_configs = glXChooseFBConfig(pp_i->dpy, 0, fb_attribute_list, &nconfigs);
     if (!fb_configs || nconfigs == 0) {
-        trace_warning("%s, glXChooseFBConfig returned NULL\n", __func__);
+        trace_error("%s, glXChooseFBConfig returned NULL\n", __func__);
         goto err;
     }
 
     g3d->fb_config = fb_configs[0];
-    g3d->glc = glXCreateNewContext(pp_i->dpy, g3d->fb_config, GLX_RGBA_TYPE, NULL, True);
-    if (!g3d->glc) {
-        trace_warning("%s, glXCreateNewContext returned NULL\n", __func__);
+    g3d->rendering_glc = glXCreateNewContext(pp_i->dpy, g3d->fb_config, GLX_RGBA_TYPE, NULL, True);
+    if (!g3d->rendering_glc) {
+        trace_error("%s, glXCreateNewContext returned NULL\n", __func__);
+        goto err;
+    }
+
+    // rendering context will be used by ppb_opengles2. Its state can be changed by client
+    // code so we need "clean" context for presentation purposes only
+    g3d->presentation_glc = glXCreateNewContext(pp_i->dpy, g3d->fb_config, GLX_RGBA_TYPE,
+                                                g3d->rendering_glc, True);
+    if (!g3d->presentation_glc) {
+        trace_error("%s, glXCreateNewContext returned NULL\n", __func__);
         goto err;
     }
 
@@ -153,11 +167,40 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
 
     g3d->glx_pixmap = glXCreatePixmap(pp_i->dpy, fb_configs[0], g3d->pixmap, NULL);
     g3d->dpy = pp_i->dpy;
+
+    Bool ret = glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->rendering_glc);
+    if (!ret) {
+        trace_error("%s, glXMakeCurrent failed\n", __func__);
+        goto err;
+    }
+
+    // create framebuffer object backed by texture
+    glGenTextures(1, &g3d->tex_id);
+    glBindTexture(GL_TEXTURE_2D, g3d->tex_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g3d->width, g3d->height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+                 NULL);
+
+    glGenFramebuffers(1, &g3d->fbo_id);
+    glBindFramebuffer(GL_FRAMEBUFFER, g3d->fbo_id);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, g3d->tex_id, 0);
+    GLenum gl_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (GL_FRAMEBUFFER_COMPLETE != gl_status) {
+        trace_error("%s, framebuffer not ready, %d, %s\n", __func__, gl_status,
+                    gluErrorString(gl_status));
+        goto err;
+    }
+
     g3d->sub_maps = g_hash_table_new(g_direct_hash, g_direct_equal);
+    pthread_mutex_unlock(&pp_i->lock);
 
     pp_resource_release(context);
     return context;
 err:
+    pthread_mutex_unlock(&pp_i->lock);
     pp_resource_release(context);
     pp_resource_expunge(context);
     return 0;
@@ -168,6 +211,18 @@ ppb_graphics3d_destroy(void *p)
 {
     struct pp_graphics3d_s *g3d = p;
     g_hash_table_destroy(g3d->sub_maps);
+
+    glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->rendering_glc);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &g3d->fbo_id);
+    glDeleteTextures(1, &g3d->tex_id);
+
+    glXDestroyPixmap(g3d->dpy, g3d->glx_pixmap);
+    XFreePixmap(g3d->dpy, g3d->pixmap);
+
+    // TODO: restore previous context
+    glXDestroyContext(g3d->dpy, g3d->rendering_glc);
+    glXDestroyContext(g3d->dpy, g3d->presentation_glc);
 }
 
 PP_Bool
@@ -214,19 +269,12 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
                                 DefaultDepth(g3d->dpy, 0));
     g3d->glx_pixmap = glXCreatePixmap(g3d->dpy, g3d->fb_config, g3d->pixmap, NULL);
 
+    glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->presentation_glc);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g3d->width, g3d->height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+                 NULL);
+
     pp_resource_release(context);
     return PP_OK;
-}
-
-void
-_swap_buffers_comt(void *p)
-{
-    struct PP_CompletionCallback *ccb = p;
-
-    if (ccb->func)
-        ccb->func(ccb->user_data, PP_OK);
-
-    free(p);
 }
 
 int32_t
@@ -261,14 +309,16 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     }
     pp_resource_release(context);
 
-    struct PP_CompletionCallback *ccb = malloc(sizeof(*ccb));
-    *ccb = callback;
-    npn.pluginthreadasynccall(pp_i->npp, _swap_buffers_comt, ccb);
+    if (callback.func) {
+        ppb_core_call_on_main_thread_now(pp_i->pp_instance_id, callback, PP_OK);
+        return PP_OK_COMPLETIONPENDING;
+    }
 
     return PP_OK;
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 int32_t
@@ -337,15 +387,16 @@ trace_ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallb
                __func__+6, context, callback.func, callback.user_data, callback.flags);
     return ppb_graphics3d_swap_buffers(context, callback);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Graphics3D_1_0 ppb_graphics3d_interface_1_0 = {
-    .GetAttribMaxValue =    trace_ppb_graphics3d_get_attrib_max_value,
-    .Create =               trace_ppb_graphics3d_create,
-    .IsGraphics3D =         trace_ppb_graphics3d_is_graphics3d,
-    .GetAttribs =           trace_ppb_graphics3d_get_attribs,
-    .SetAttribs =           trace_ppb_graphics3d_set_attribs,
-    .GetError =             trace_ppb_graphics3d_get_error,
-    .ResizeBuffers =        trace_ppb_graphics3d_resize_buffers,
-    .SwapBuffers =          trace_ppb_graphics3d_swap_buffers,
+    .GetAttribMaxValue =    TWRAP(ppb_graphics3d_get_attrib_max_value),
+    .Create =               TWRAP(ppb_graphics3d_create),
+    .IsGraphics3D =         TWRAP(ppb_graphics3d_is_graphics3d),
+    .GetAttribs =           TWRAP(ppb_graphics3d_get_attribs),
+    .SetAttribs =           TWRAP(ppb_graphics3d_set_attribs),
+    .GetError =             TWRAP(ppb_graphics3d_get_error),
+    .ResizeBuffers =        TWRAP(ppb_graphics3d_resize_buffers),
+    .SwapBuffers =          TWRAP(ppb_graphics3d_swap_buffers),
 };

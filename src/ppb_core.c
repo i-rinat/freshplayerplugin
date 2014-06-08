@@ -24,7 +24,7 @@
 
 #include <assert.h>
 #include "ppb_core.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
 #include "trace.h"
@@ -79,7 +79,7 @@ comt_proxy(void *param)
     if (p->callback.func) {
         p->callback.func(p->callback.user_data, p->result_to_pass);
     }
-    free(p);
+    g_slice_free(struct comt_task_s, p);
 }
 
 gint
@@ -145,7 +145,7 @@ void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result)
 {
-    struct comt_task_s *task = malloc(sizeof(*task));
+    struct comt_task_s *task = g_slice_alloc(sizeof(*task));
 
     task->callback = callback;
     task->result_to_pass = result;
@@ -176,12 +176,28 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
     return;
 }
 
+void
+ppb_core_call_on_main_thread_now(PP_Instance instance, struct PP_CompletionCallback callback,
+                                 int32_t result)
+{
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    struct comt_task_s *task = g_slice_alloc(sizeof(*task));
+
+    task->callback = callback;
+    task->result_to_pass = result;
+    task->terminate = 0;
+
+    npn.pluginthreadasynccall(pp_i->npp, comt_proxy, task);
+}
+
 PP_Bool
 ppb_core_is_main_thread(void)
 {
     return pthread_equal(np_main_thread, pthread_self());
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 void
@@ -233,13 +249,14 @@ trace_ppb_core_is_main_thread(void)
     trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_core_is_main_thread();
 }
+#endif // NDEBUG
 
 
 const struct PPB_Core_1_0 ppb_core_interface_1_0 = {
-    .AddRefResource =   trace_ppb_core_add_ref_resource,
-    .ReleaseResource =  trace_ppb_core_release_resource,
-    .GetTime =          trace_ppb_core_get_time,
-    .GetTimeTicks =     trace_ppb_core_get_time_ticks,
-    .CallOnMainThread = trace_ppb_core_call_on_main_thread,
-    .IsMainThread =     trace_ppb_core_is_main_thread
+    .AddRefResource =   TWRAP(ppb_core_add_ref_resource),
+    .ReleaseResource =  TWRAP(ppb_core_release_resource),
+    .GetTime =          TWRAP(ppb_core_get_time),
+    .GetTimeTicks =     TWRAP(ppb_core_get_time_ticks),
+    .CallOnMainThread = TWRAP(ppb_core_call_on_main_thread),
+    .IsMainThread =     TWRAP(ppb_core_is_main_thread),
 };

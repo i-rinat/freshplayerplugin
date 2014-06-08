@@ -44,10 +44,13 @@ void
 _set_cursor_comt(void *user_data)
 {
     Window wnd;
+    Cursor cursor;
     struct comt_param_s *params = user_data;
     struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance);
-    Cursor cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
 
+
+    pthread_mutex_lock(&pp_i->lock);
+    cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
     if (pp_i->is_fullscreen) {
         XDefineCursor(pp_i->dpy, pp_i->fs_wnd, cursor);
         XFlush(pp_i->dpy);
@@ -57,10 +60,11 @@ _set_cursor_comt(void *user_data)
             XFlush(pp_i->dpy);
         }
     }
+    pthread_mutex_unlock(&pp_i->lock);
 
     if (params->wait)
         pthread_barrier_wait(params->barrier);
-    free(params);
+    g_slice_free(struct comt_param_s, params);
 }
 
 PP_Bool
@@ -204,7 +208,7 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
         break;
     }
 
-    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
+    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
 
     comt_params->instance = instance;
     comt_params->xtype =    xtype;
@@ -254,6 +258,7 @@ ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Bool
@@ -263,7 +268,7 @@ trace_ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType
     char *s_hot_spot = trace_point_as_string(hot_spot);
     trace_info("[PPB] {full} %s instance=%d, type=%d, custom_image=%d, hot_spot=%s\n", __func__+6,
                instance, type, custom_image, s_hot_spot);
-    free(s_hot_spot);
+    g_free(s_hot_spot);
     return ppb_cursor_control_dev_set_cursor(instance, type, custom_image, hot_spot);
 }
 
@@ -298,11 +303,13 @@ trace_ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance)
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_cursor_control_dev_can_lock_cursor(instance);
 }
+#endif // NDEBUG
+
 
 const struct PPB_CursorControl_Dev_0_4 ppb_cursor_control_dev_interface_0_4 = {
-    .SetCursor =        trace_ppb_cursor_control_dev_set_cursor,
-    .LockCursor =       trace_ppb_cursor_control_dev_lock_cursor,
-    .UnlockCursor =     trace_ppb_cursor_control_dev_unlock_cursor,
-    .HasCursorLock =    trace_ppb_cursor_control_dev_has_cursor_lock,
-    .CanLockCursor =    trace_ppb_cursor_control_dev_can_lock_cursor,
+    .SetCursor =        TWRAP(ppb_cursor_control_dev_set_cursor),
+    .LockCursor =       TWRAP(ppb_cursor_control_dev_lock_cursor),
+    .UnlockCursor =     TWRAP(ppb_cursor_control_dev_unlock_cursor),
+    .HasCursorLock =    TWRAP(ppb_cursor_control_dev_has_cursor_lock),
+    .CanLockCursor =    TWRAP(ppb_cursor_control_dev_can_lock_cursor),
 };

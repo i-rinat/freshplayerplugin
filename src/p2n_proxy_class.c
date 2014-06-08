@@ -206,6 +206,7 @@ p2n_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVaria
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 NPObject *
 trace_p2n_allocate(NPP npp, NPClass *aClass)
@@ -299,20 +300,22 @@ trace_p2n_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, N
     trace_info("[CLS] {full} %s\n", __func__+6);
     return p2n_construct(npobj, args, argCount, result);
 }
+#endif // NDEBUG
+
 
 // can't be const due to npapi restrictions
 struct NPClass p2n_proxy_class = {
     .structVersion =    NP_CLASS_STRUCT_VERSION,
-    .allocate =         trace_p2n_allocate,
-    .deallocate =       trace_p2n_deallocate,
-    .invalidate =       trace_p2n_invalidate,
-    .hasMethod =        trace_p2n_has_method,
-    .invoke =           trace_p2n_invoke,
-    .invokeDefault =    trace_p2n_invoke_default,
-    .hasProperty =      trace_p2n_has_property,
-    .getProperty =      trace_p2n_get_property,
-    .setProperty =      trace_p2n_set_property,
-    .removeProperty =   trace_p2n_remove_property,
-    .enumerate =        trace_p2n_enumerate,
-    .construct =        trace_p2n_construct,
+    .allocate =         TWRAP(p2n_allocate),
+    .deallocate =       TWRAP(p2n_deallocate),
+    .invalidate =       TWRAP(p2n_invalidate),
+    .hasMethod =        TWRAP(p2n_has_method),
+    .invoke =           TWRAP(p2n_invoke),
+    .invokeDefault =    TWRAP(p2n_invoke_default),
+    .hasProperty =      TWRAP(p2n_has_property),
+    .getProperty =      TWRAP(p2n_get_property),
+    .setProperty =      TWRAP(p2n_set_property),
+    .removeProperty =   TWRAP(p2n_remove_property),
+    .enumerate =        TWRAP(p2n_enumerate),
+    .construct =        TWRAP(p2n_construct),
 };

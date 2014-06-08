@@ -22,15 +22,17 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE
 #include "ppb_flash.h"
-#include <stddef.h>
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
 #include "ppb_var.h"
+#include "ppb_url_loader.h"
+#include "ppb_core.h"
+#include "pp_resource.h"
 #include <ppapi/c/dev/ppb_font_dev.h>
+#include <ppapi/c/pp_errors.h>
 
 
 void
@@ -129,17 +131,42 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
     return PP_MakeUndefined();
 }
 
+static
+void
+nop_callback(void *user_data, int32_t result)
+{
+    (void)user_data;
+    (void)result;
+    // do nothing
+}
+
 int32_t
 ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
-    return 0;
+
+    struct pp_url_request_info_s *ri =
+        pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
+    if (!ri)
+        return PP_ERROR_BADRESOURCE;
+    PP_Instance instance = ri->_.instance;
+    pp_resource_release(request_info);
+
+    PP_Resource url_loader = ppb_url_loader_create(instance);
+    int32_t result = ppb_url_loader_open_target(url_loader, request_info,
+                                                PP_MakeCompletionCallback(nop_callback, NULL),
+                                                target);
+    ppb_core_release_resource(url_loader);
+    if (result != PP_OK && result != PP_OK_COMPLETIONPENDING)
+        return result;
+
+    return PP_OK;
 }
 
 double
 ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 {
     time_t timep = t;
-    struct tm lt = {0};
+    struct tm lt = { };
     localtime_r(&timep, &lt);
     return lt.tm_gmtoff;
 }
@@ -147,8 +174,7 @@ ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 struct PP_Var
 ppb_flash_get_command_line_args(PP_Module module)
 {
-    // TODO: make configurable
-    return PP_MakeString("enable_hw_video_decode=1,enable_stagevideo_auto=1");
+    return PP_MakeString(config.flash_command_line);
 }
 
 void
@@ -189,7 +215,6 @@ get_flashsetting_language(void)
     if (ptr)
         *ptr = '-';
 
-    fprintf(stderr, "Language = %s\n", lang);
     struct PP_Var res = PP_MakeString(lang);
     free(lang);
     return res;
@@ -199,21 +224,26 @@ get_flashsetting_language(void)
 struct PP_Var
 ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     struct PP_Var var = PP_MakeUndefined();
 
     switch (setting) {
     case PP_FLASHSETTING_3DENABLED:
         var.type = PP_VARTYPE_BOOL;
-        var.value.as_bool = PP_FALSE; // TODO: reenable 3d
+        var.value.as_bool = PP_FALSE; // TODO: turn on
         break;
     case PP_FLASHSETTING_INCOGNITO:
-        // TODO: incognito?
         var.type = PP_VARTYPE_BOOL;
         var.value.as_bool = PP_FALSE;
+
+        NPBool private;
+        if (npn.getvalue(pp_i->npp, NPNVprivateModeBool, &private) == NPERR_NO_ERROR) {
+            var.value.as_bool = private ? PP_TRUE : PP_FALSE;
+        }
         break;
     case PP_FLASHSETTING_STAGE3DENABLED:
         var.type = PP_VARTYPE_BOOL;
-        var.value.as_bool = PP_FALSE; // TODO: reenable 3d
+        var.value.as_bool = PP_FALSE; // TODO: turn on
         break;
     case PP_FLASHSETTING_LANGUAGE:
         var = get_flashsetting_language();
@@ -282,6 +312,7 @@ ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 void
@@ -300,8 +331,8 @@ trace_ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
                             PP_Bool allow_subpixel_aa, uint32_t glyph_count,
                             const uint16_t glyph_indices[], const struct PP_Point glyph_advances[])
 {
-    char *position_str = trace_point_as_string(position);
-    char *clip_str = trace_rect_as_string(clip);
+    char *s_position = trace_point_as_string(position);
+    char *s_clip = trace_rect_as_string(clip);
     char *s_face = trace_var_as_string(font_desc->face);
     trace_info("[PPB] {full} %s instance=%d, pp_image_data=%d, font_desc={.face=%s, .family=%d, "
                ".size=%u, .weight=%d, .italic=%u, .small_caps=%u, .letter_spacing=%d, "
@@ -310,14 +341,14 @@ trace_ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
                "glyph_advances=%p\n", __func__+6, instance, pp_image_data, s_face,
                font_desc->family, font_desc->size, font_desc->weight, font_desc->italic,
                font_desc->small_caps, font_desc->letter_spacing, font_desc->word_spacing,
-               color, position_str, clip_str,
+               color, s_position, s_clip,
                transformation[0][0], transformation[0][1], transformation[0][2],
                transformation[1][0], transformation[1][1], transformation[1][2],
                transformation[2][0], transformation[2][1], transformation[2][2],
                allow_subpixel_aa, glyph_count, glyph_indices, glyph_advances);
-    free(position_str);
-    free(clip_str);
-    free(s_face);
+    g_free(s_position);
+    g_free(s_clip);
+    g_free(s_face);
     return ppb_flash_draw_glyphs(instance, pp_image_data, font_desc, color, position, clip,
                                  transformation, allow_subpixel_aa, glyph_count, glyph_indices,
                                  glyph_advances);
@@ -335,7 +366,7 @@ static
 int32_t
 trace_ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
-    trace_info("[PPB] {zilch} %s request_info=%d, target=%s, from_user_action=%d\n", __func__+6,
+    trace_info("[PPB] {full} %s request_info=%d, target=%s, from_user_action=%d\n", __func__+6,
                request_info, target, from_user_action);
     return ppb_flash_navigate(request_info, target, from_user_action);
 }
@@ -370,7 +401,7 @@ trace_ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect
 {
     char *rect_str = trace_rect_as_string(rect);
     trace_info("[PPB] {zilch} %s instance=%d, rect=%s\n", __func__+6, instance, rect_str);
-    free(rect_str);
+    g_free(rect_str);
     return ppb_flash_is_rect_topmost(instance, rect);
 }
 
@@ -398,7 +429,7 @@ trace_ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struc
     char *value_str = trace_var_as_string(value);
     trace_info("[PPB] {fake} %s instance=%d, key=%d, value=%s\n", __func__+6, instance, key,
                value_str);
-    free(value_str);
+    g_free(value_str);
     return ppb_flash_set_crash_data(instance, key, value);
 }
 
@@ -453,39 +484,40 @@ trace_ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
                reverse_pp_flash_setting(setting));
     return ppb_flash_get_setting_int(instance, setting);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
-    .SetInstanceAlwaysOnTop = trace_ppb_flash_set_instance_always_on_top,
-    .DrawGlyphs =           trace_ppb_flash_draw_glyphs,
-    .GetProxyForURL =       trace_ppb_flash_get_proxy_for_url,
-    .Navigate =             trace_ppb_flash_navigate,
-    .GetLocalTimeZoneOffset = trace_ppb_flash_get_local_time_zone_offset,
-    .GetCommandLineArgs =   trace_ppb_flash_get_command_line_args,
-    .PreloadFontWin =       trace_ppb_flash_preload_font_win,
-    .IsRectTopmost =        trace_ppb_flash_is_rect_topmost,
-    .UpdateActivity =       trace_ppb_flash_update_activity,
-    .GetSetting =           trace_ppb_flash_get_setting,
-    .SetCrashData =         trace_ppb_flash_set_crash_data,
-    .EnumerateVideoCaptureDevices = trace_ppb_flash_enumerate_video_capture_devices
+    .SetInstanceAlwaysOnTop =       TWRAP(ppb_flash_set_instance_always_on_top),
+    .DrawGlyphs =                   TWRAP(ppb_flash_draw_glyphs),
+    .GetProxyForURL =               TWRAP(ppb_flash_get_proxy_for_url),
+    .Navigate =                     TWRAP(ppb_flash_navigate),
+    .GetLocalTimeZoneOffset =       TWRAP(ppb_flash_get_local_time_zone_offset),
+    .GetCommandLineArgs =           TWRAP(ppb_flash_get_command_line_args),
+    .PreloadFontWin =               TWRAP(ppb_flash_preload_font_win),
+    .IsRectTopmost =                TWRAP(ppb_flash_is_rect_topmost),
+    .UpdateActivity =               TWRAP(ppb_flash_update_activity),
+    .GetSetting =                   TWRAP(ppb_flash_get_setting),
+    .SetCrashData =                 TWRAP(ppb_flash_set_crash_data),
+    .EnumerateVideoCaptureDevices = TWRAP(ppb_flash_enumerate_video_capture_devices),
 };
 
 const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
-    .SetInstanceAlwaysOnTop = trace_ppb_flash_set_instance_always_on_top,
-    .DrawGlyphs =           trace_ppb_flash_draw_glyphs,
-    .GetProxyForURL =       trace_ppb_flash_get_proxy_for_url,
-    .Navigate =             trace_ppb_flash_navigate,
-    .RunMessageLoop =       trace_ppb_flash_run_message_loop,
-    .QuitMessageLoop =      trace_ppb_flash_quit_message_loop,
-    .GetLocalTimeZoneOffset = trace_ppb_flash_get_local_time_zone_offset,
-    .GetCommandLineArgs =   trace_ppb_flash_get_command_line_args,
-    .PreloadFontWin =       trace_ppb_flash_preload_font_win,
-    .IsRectTopmost =        trace_ppb_flash_is_rect_topmost,
-    .InvokePrinting =       trace_ppb_flash_invoke_printing,
-    .UpdateActivity =       trace_ppb_flash_update_activity,
-    .GetDeviceID =          trace_ppb_flash_get_device_id,
-    .GetSettingInt =        trace_ppb_flash_get_setting_int,
-    .GetSetting =           trace_ppb_flash_get_setting,
-    .SetCrashData =         trace_ppb_flash_set_crash_data,
-    .EnumerateVideoCaptureDevices = trace_ppb_flash_enumerate_video_capture_devices,
+    .SetInstanceAlwaysOnTop =       TWRAP(ppb_flash_set_instance_always_on_top),
+    .DrawGlyphs =                   TWRAP(ppb_flash_draw_glyphs),
+    .GetProxyForURL =               TWRAP(ppb_flash_get_proxy_for_url),
+    .Navigate =                     TWRAP(ppb_flash_navigate),
+    .RunMessageLoop =               TWRAP(ppb_flash_run_message_loop),
+    .QuitMessageLoop =              TWRAP(ppb_flash_quit_message_loop),
+    .GetLocalTimeZoneOffset =       TWRAP(ppb_flash_get_local_time_zone_offset),
+    .GetCommandLineArgs =           TWRAP(ppb_flash_get_command_line_args),
+    .PreloadFontWin =               TWRAP(ppb_flash_preload_font_win),
+    .IsRectTopmost =                TWRAP(ppb_flash_is_rect_topmost),
+    .InvokePrinting =               TWRAP(ppb_flash_invoke_printing),
+    .UpdateActivity =               TWRAP(ppb_flash_update_activity),
+    .GetDeviceID =                  TWRAP(ppb_flash_get_device_id),
+    .GetSettingInt =                TWRAP(ppb_flash_get_setting_int),
+    .GetSetting =                   TWRAP(ppb_flash_get_setting),
+    .SetCrashData =                 TWRAP(ppb_flash_set_crash_data),
+    .EnumerateVideoCaptureDevices = TWRAP(ppb_flash_enumerate_video_capture_devices),
 };

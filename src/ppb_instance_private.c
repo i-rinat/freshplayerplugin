@@ -136,6 +136,8 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     return result;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 struct PP_Var
@@ -160,13 +162,14 @@ trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var sc
 {
     char *s_script = trace_var_as_string(script);
     trace_info("[PPB] {full} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
-    free(s_script);
+    g_free(s_script);
     return ppb_instance_private_execute_script(instance, script, exception);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Instance_Private_0_1 ppb_instance_private_interface_0_1 = {
-    .GetWindowObject =          trace_ppb_instance_private_get_window_object,
-    .GetOwnerElementObject =    trace_ppb_instance_private_get_owner_element_object,
-    .ExecuteScript =            trace_ppb_instance_private_execute_script,
+    .GetWindowObject =          TWRAP(ppb_instance_private_get_window_object),
+    .GetOwnerElementObject =    TWRAP(ppb_instance_private_get_owner_element_object),
+    .ExecuteScript =            TWRAP(ppb_instance_private_execute_script),
 };

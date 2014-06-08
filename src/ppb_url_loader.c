@@ -22,14 +22,13 @@
  * SOFTWARE.
  */
 
-#define _XOPEN_SOURCE   500
-#define _GNU_SOURCE
+#define _XOPEN_SOURCE   600
 #include "ppb_url_loader.h"
 #include "ppb_core.h"
 #include "ppb_url_util_dev.h"
 #include "ppb_var.h"
 #include <ppapi/c/pp_errors.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <inttypes.h>
@@ -71,6 +70,7 @@ ppb_url_loader_destroy(void *p)
     free_and_nullify(ul, custom_referrer_url);
     free_and_nullify(ul, custom_content_transfer_encoding);
     free_and_nullify(ul, custom_user_agent);
+    free_and_nullify(ul, target);
 }
 
 PP_Bool
@@ -88,8 +88,12 @@ struct comt_param_s {
     const char                 *custom_referrer_url;
     const char                 *custom_content_transfer_encoding;
     const char                 *custom_user_agent;
+    const char                 *target;
     const char                 *post_data;
     size_t                      post_len;
+    pthread_barrier_t           barrier;
+    size_t                      should_wait;
+    int                         retval;
 };
 
 static
@@ -107,7 +111,7 @@ _url_loader_open_comt(void *user_data)
         FILE   *fp;
         int     need_newline = 0;
 
-        asprintf(&tmpfname, "/tmp/FreshPostBodyXXXXXX");    // TODO: make configurable
+        tmpfname = g_strdup_printf("/tmp/FreshPostBodyXXXXXX");    // TODO: make configurable
         // TODO: error handling
         fd = mkstemp(tmpfname);
         fp = fdopen(fd, "wb+");
@@ -140,15 +144,28 @@ _url_loader_open_comt(void *user_data)
         fwrite(comt_params->post_data, 1, comt_params->post_len, fp);
         fclose(fp);
 
-        npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
-                          strlen(tmpfname), tmpfname, true, (void*)(size_t)comt_params->loader);
-        free(tmpfname);
+        if (comt_params->target) {
+            comt_params->retval = npn.posturl(pp_i->npp, comt_params->url, comt_params->target,
+                                              strlen(tmpfname), tmpfname, true);
+        } else {
+            comt_params->retval = npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
+                                                    strlen(tmpfname), tmpfname, true,
+                                                    (void*)(size_t)comt_params->loader);
+        }
+        unlink(tmpfname);
+        g_free(tmpfname);
     } else {
         // GET request
-        npn.geturlnotify(pp_i->npp, comt_params->url, NULL, (void*)(size_t)comt_params->loader);
+        if (comt_params->target) {
+            comt_params->retval = npn.geturl(pp_i->npp, comt_params->url, comt_params->target);
+        } else {
+            comt_params->retval = npn.geturlnotify(pp_i->npp, comt_params->url, NULL,
+                                                   (void*)(size_t)comt_params->loader);
+        }
     }
 
-    free(comt_params);
+    if (comt_params->should_wait)
+        pthread_barrier_wait(&comt_params->barrier);
 }
 
 FILE *
@@ -156,10 +173,10 @@ open_temporary_file_stream(void)
 {
     char *tmpfname;
     // TODO: make temp path configurable
-    asprintf(&tmpfname, "/tmp/FreshStreamXXXXXX");
+    tmpfname = g_strdup_printf("/tmp/FreshStreamXXXXXX");
     int fd = mkstemp(tmpfname);
     unlink(tmpfname);
-    free(tmpfname);
+    g_free(tmpfname);
     FILE *fp = fdopen(fd, "wb+");
     return fp;
 }
@@ -181,6 +198,13 @@ trim_nl(char *s)
 int32_t
 ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
                     struct PP_CompletionCallback callback)
+{
+    return ppb_url_loader_open_target(loader, request_info, callback, NULL);
+}
+
+int32_t
+ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
+                           struct PP_CompletionCallback callback, const char *target)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     struct pp_url_request_info_s *ri = pp_resource_acquire(request_info,
@@ -204,6 +228,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ul->allow_credentials =                ri->allow_credentials;
     ul->custom_content_transfer_encoding = nullsafe_strdup(ri->custom_content_transfer_encoding);
     ul->custom_user_agent =                nullsafe_strdup(ri->custom_user_agent);
+    ul->target =                           nullsafe_strdup(target);
 
 #define TRIM_NEWLINE(s)     s = trim_nl(s)
 
@@ -224,7 +249,7 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     ppb_var_release(full_url);
     pp_resource_release(request_info);
 
-    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
+    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
     comt_params->url =                              strdup(ul->url);
     comt_params->loader =                           loader;
     comt_params->instance =                         ul->_.instance;
@@ -233,13 +258,28 @@ ppb_url_loader_open(PP_Resource loader, PP_Resource request_info,
     comt_params->custom_referrer_url =              ul->custom_referrer_url;
     comt_params->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
     comt_params->custom_user_agent =                ul->custom_user_agent;
+    comt_params->target =                           ul->target;
     comt_params->post_len =                         ul->post_len;
     comt_params->post_data =                        ul->post_data;
 
     struct pp_instance_s *pp_i = tables_get_pp_instance(ul->_.instance);
-    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
+    if (ppb_core_is_main_thread()) {
+        comt_params->should_wait = 0;
+        _url_loader_open_comt(comt_params);
+    } else {
+        comt_params->should_wait = 1;
+        pthread_barrier_init(&comt_params->barrier, NULL, 2);
+        npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
+        pthread_barrier_wait(&comt_params->barrier);
+        pthread_barrier_destroy(&comt_params->barrier);
+    }
 
+    int retval = comt_params->retval;
     pp_resource_release(loader);
+    g_slice_free(struct comt_param_s, comt_params);
+
+    if (retval != NPERR_NO_ERROR)
+        return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
         int done = 0;
@@ -292,7 +332,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ul->ccb = callback;
     ppb_var_release(full_url);
 
-    struct comt_param_s *comt_params = malloc(sizeof(*comt_params));
+    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
     comt_params->url =                              ul->url;
     comt_params->loader =                           loader;
     comt_params->instance =                         ul->_.instance;
@@ -301,13 +341,28 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     comt_params->custom_referrer_url =              ul->custom_referrer_url;
     comt_params->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
     comt_params->custom_user_agent =                ul->custom_user_agent;
+    comt_params->target =                           NULL;
     comt_params->post_len =                         0;
     comt_params->post_data =                        NULL;
 
     struct pp_instance_s *pp_i = tables_get_pp_instance(ul->_.instance);
-    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
+    if (ppb_core_is_main_thread()) {
+        comt_params->should_wait = 0;
+        _url_loader_open_comt(comt_params);
+    } else {
+        comt_params->should_wait = 1;
+        pthread_barrier_init(&comt_params->barrier, NULL, 2);
+        npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
+        pthread_barrier_wait(&comt_params->barrier);
+        pthread_barrier_destroy(&comt_params->barrier);
+    }
 
+    int retval = comt_params->retval;
     pp_resource_release(loader);
+    g_slice_free(struct comt_param_s, comt_params);
+
+    if (retval != NPERR_NO_ERROR)
+        return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
         int done = 0;
@@ -386,7 +441,7 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
 
     if (read_bytes == 0) {
         // no data ready, schedule read task
-        struct url_loader_read_task_s *rt = malloc(sizeof(*rt));
+        struct url_loader_read_task_s *rt = g_slice_alloc(sizeof(*rt));
         rt->buffer = buffer;
         rt->bytes_to_read = bytes_to_read;
         rt->ccb = callback;
@@ -423,6 +478,8 @@ ppb_url_loader_close(PP_Resource loader)
     return;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -514,17 +571,18 @@ trace_ppb_url_loader_close(PP_Resource loader)
     trace_info("[PPB] {full} %s loader=%d\n", __func__+6, loader);
     ppb_url_loader_close(loader);
 }
+#endif // NDEBUG
 
 
 const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
-    .Create =               trace_ppb_url_loader_create,
-    .IsURLLoader =          trace_ppb_url_loader_is_url_loader,
-    .Open =                 trace_ppb_url_loader_open,
-    .FollowRedirect =       trace_ppb_url_loader_follow_redirect,
-    .GetUploadProgress =    trace_ppb_url_loader_get_upload_progress,
-    .GetDownloadProgress =  trace_ppb_url_loader_get_download_progress,
-    .GetResponseInfo =      trace_ppb_url_loader_get_response_info,
-    .ReadResponseBody =     trace_ppb_url_loader_read_response_body,
-    .FinishStreamingToFile = trace_ppb_url_loader_finish_streaming_to_file,
-    .Close =                trace_ppb_url_loader_close,
+    .Create =                   TWRAP(ppb_url_loader_create),
+    .IsURLLoader =              TWRAP(ppb_url_loader_is_url_loader),
+    .Open =                     TWRAP(ppb_url_loader_open),
+    .FollowRedirect =           TWRAP(ppb_url_loader_follow_redirect),
+    .GetUploadProgress =        TWRAP(ppb_url_loader_get_upload_progress),
+    .GetDownloadProgress =      TWRAP(ppb_url_loader_get_download_progress),
+    .GetResponseInfo =          TWRAP(ppb_url_loader_get_response_info),
+    .ReadResponseBody =         TWRAP(ppb_url_loader_read_response_body),
+    .FinishStreamingToFile =    TWRAP(ppb_url_loader_finish_streaming_to_file),
+    .Close =                    TWRAP(ppb_url_loader_close),
 };

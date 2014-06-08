@@ -107,6 +107,7 @@ ppb_font_dev_pixel_offset_for_character(PP_Resource font, const struct PP_TextRu
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 struct PP_Var
@@ -178,14 +179,16 @@ trace_ppb_font_dev_pixel_offset_for_character(PP_Resource font, const struct PP_
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_font_dev_pixel_offset_for_character(font, text, char_offset);
 }
+#endif // NDEBUG
+
 
 const struct PPB_Font_Dev_0_6 ppb_font_dev_interface_0_6 = {
-    .GetFontFamilies =          trace_ppb_font_dev_get_font_families,
-    .Create =                   trace_ppb_font_dev_create,
-    .IsFont =                   trace_ppb_font_dev_is_font,
-    .Describe =                 trace_ppb_font_dev_describe,
-    .DrawTextAt =               trace_ppb_font_dev_draw_text_at,
-    .MeasureText =              trace_ppb_font_dev_measure_text,
-    .CharacterOffsetForPixel =  trace_ppb_font_dev_character_offset_for_pixel,
-    .PixelOffsetForCharacter =  trace_ppb_font_dev_pixel_offset_for_character,
+    .GetFontFamilies =          TWRAP(ppb_font_dev_get_font_families),
+    .Create =                   TWRAP(ppb_font_dev_create),
+    .IsFont =                   TWRAP(ppb_font_dev_is_font),
+    .Describe =                 TWRAP(ppb_font_dev_describe),
+    .DrawTextAt =               TWRAP(ppb_font_dev_draw_text_at),
+    .MeasureText =              TWRAP(ppb_font_dev_measure_text),
+    .CharacterOffsetForPixel =  TWRAP(ppb_font_dev_character_offset_for_pixel),
+    .PixelOffsetForCharacter =  TWRAP(ppb_font_dev_pixel_offset_for_character),
 };

@@ -235,7 +235,7 @@ ppb_var_create_object(PP_Instance instance, const struct PPP_Class_Deprecated *o
                       void *object_data)
 {
     (void)instance;
-    struct PP_Var var = { 0 };
+    struct PP_Var var = { };
     struct pp_var_object_s *obj;
 
     obj = malloc(sizeof(*obj));
@@ -254,7 +254,7 @@ ppb_var_create_object_with_module_deprecated(PP_Module module,
                                              void *object_data)
 {
     (void)module;
-    struct PP_Var var = { 0 };
+    struct PP_Var var = { };
     struct pp_var_object_s *obj;
 
     obj = malloc(sizeof(*obj));
@@ -268,6 +268,7 @@ ppb_var_create_object_with_module_deprecated(PP_Module module,
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 void
@@ -275,7 +276,7 @@ trace_ppb_var_add_ref(struct PP_Var var)
 {
     char *var_str = trace_var_as_string(var);
     trace_info("[PPB] {full} %s var=%s\n", __func__+6, var_str);
-    free(var_str);
+    g_free(var_str);
     ppb_var_add_ref(var);
 }
 
@@ -285,7 +286,7 @@ trace_ppb_var_release(struct PP_Var var)
 {
     char *var_str = trace_var_as_string(var);
     trace_info("[PPB] {full} %s var=%s\n", __func__+6, var_str);
-    free(var_str);
+    g_free(var_str);
     ppb_var_release(var);
 }
 
@@ -311,7 +312,7 @@ trace_ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
 {
     char *var_str = trace_var_as_string(var);
     trace_info("[PPB] {full} %s var=%s\n", __func__+6, var_str);
-    free(var_str);
+    g_free(var_str);
     return ppb_var_var_to_utf8(var, len);
 }
 
@@ -321,8 +322,8 @@ trace_ppb_var_has_property(struct PP_Var object, struct PP_Var name, struct PP_V
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
     trace_info("[PPB] {full} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
-    free(s_name);
-    free(s_object);
+    g_free(s_name);
+    g_free(s_object);
     return ppb_var_has_property(object, name, exception);
 }
 
@@ -332,8 +333,8 @@ trace_ppb_var_has_method(struct PP_Var object, struct PP_Var name, struct PP_Var
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
     trace_info("[PPB] {full} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
-    free(s_name);
-    free(s_object);
+    g_free(s_name);
+    g_free(s_object);
     return ppb_var_has_method(object, name, exception);
 }
 
@@ -343,8 +344,8 @@ trace_ppb_var_get_property(struct PP_Var object, struct PP_Var name, struct PP_V
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
     trace_info("[PPB] {full} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
-    free(s_name);
-    free(s_object);
+    g_free(s_name);
+    g_free(s_object);
     return ppb_var_get_property(object, name, exception);
 }
 
@@ -354,7 +355,7 @@ trace_ppb_var_get_all_property_names(struct PP_Var object, uint32_t *property_co
 {
     char *s_object = trace_var_as_string(object);
     trace_info("[PPB] {full} %s object=%s\n", __func__+6, s_object);
-    free(s_object);
+    g_free(s_object);
     ppb_var_get_all_property_names(object, property_count, properties, exception);
 }
 
@@ -367,9 +368,9 @@ trace_ppb_var_set_property(struct PP_Var object, struct PP_Var name, struct PP_V
     char *s_value = trace_var_as_string(value);
     trace_info("[PPB] {full} %s object=%s, name=%s, value=%s\n", __func__+6, s_object, s_name,
                s_value);
-    free(s_object);
-    free(s_name);
-    free(s_value);
+    g_free(s_object);
+    g_free(s_name);
+    g_free(s_value);
     ppb_var_set_property(object, name, value, exception);
 }
 
@@ -379,8 +380,8 @@ trace_ppb_var_remove_property(struct PP_Var object, struct PP_Var name, struct P
     char *s_object = trace_var_as_string(object);
     char *s_name = trace_var_as_string(name);
     trace_info("[PPB] {full} %s object=%s, name=%s\n", __func__+6, s_object, s_name);
-    free(s_object);
-    free(s_name);
+    g_free(s_object);
+    g_free(s_name);
     ppb_var_remove_property(object, name, exception);
 }
 
@@ -392,8 +393,8 @@ trace_ppb_var_call(struct PP_Var object, struct PP_Var method_name, uint32_t arg
     char *s_method_name = trace_var_as_string(method_name);
     trace_info("[PPB] {full} %s object=%s, method_name=%s, argc=%u, argv=TODO\n", __func__+6,
                s_object, s_method_name, argc);
-    free(s_object);
-    free(s_method_name);
+    g_free(s_object);
+    g_free(s_method_name);
     return ppb_var_call(object, method_name, argc, argv, exception);
 }
 
@@ -403,7 +404,7 @@ trace_ppb_var_construct(struct PP_Var object, uint32_t argc, struct PP_Var *argv
 {
     char *s_object = trace_var_as_string(object);
     trace_info("[PPB] {full} %s object=%s, argc=%u, argv=TODO\n", __func__+6, s_object, argc);
-    free(s_object);
+    g_free(s_object);
     return ppb_var_construct(object, argc, argv, exception);
 }
 
@@ -413,7 +414,7 @@ trace_ppb_var_is_instance_of(struct PP_Var var, const struct PPP_Class_Deprecate
 {
     char *s_var = trace_var_as_string(var);
     trace_info("[PPB] {full} %s var=%s, object_class=%p\n", __func__+6, s_var, object_class);
-    free(s_var);
+    g_free(s_var);
     return ppb_var_is_instance_of(var, object_class, object_data);
 }
 
@@ -436,36 +437,37 @@ trace_ppb_var_create_object_with_module_deprecated(PP_Module module,
     return ppb_var_create_object_with_module_deprecated(module, object_class,
                                                                    object_data);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Var_1_1 ppb_var_interface_1_1 = {
-    .AddRef =       trace_ppb_var_add_ref,
-    .Release =      trace_ppb_var_release,
-    .VarFromUtf8 =  trace_ppb_var_var_from_utf8_1_1,
-    .VarToUtf8 =    trace_ppb_var_var_to_utf8
+    .AddRef =       TWRAP(ppb_var_add_ref),
+    .Release =      TWRAP(ppb_var_release),
+    .VarFromUtf8 =  TWRAP(ppb_var_var_from_utf8_1_1),
+    .VarToUtf8 =    TWRAP(ppb_var_var_to_utf8),
 };
 
 const struct PPB_Var_1_0 ppb_var_interface_1_0 = {
-    .AddRef =       trace_ppb_var_add_ref,
-    .Release =      trace_ppb_var_release,
-    .VarFromUtf8 =  trace_ppb_var_var_from_utf8_1_0,
-    .VarToUtf8 =    trace_ppb_var_var_to_utf8,
+    .AddRef =       TWRAP(ppb_var_add_ref),
+    .Release =      TWRAP(ppb_var_release),
+    .VarFromUtf8 =  TWRAP(ppb_var_var_from_utf8_1_0),
+    .VarToUtf8 =    TWRAP(ppb_var_var_to_utf8),
 };
 
 const struct PPB_Var_Deprecated ppb_var_deprecated_interface_0_3 = {
-    .AddRef =               trace_ppb_var_add_ref,
-    .Release =              trace_ppb_var_release,
-    .VarFromUtf8 =          trace_ppb_var_var_from_utf8_1_0,
-    .VarToUtf8 =            trace_ppb_var_var_to_utf8,
-    .HasProperty =          trace_ppb_var_has_property,
-    .HasMethod =            trace_ppb_var_has_method,
-    .GetProperty =          trace_ppb_var_get_property,
-    .GetAllPropertyNames =  trace_ppb_var_get_all_property_names,
-    .SetProperty =          trace_ppb_var_set_property,
-    .RemoveProperty =       trace_ppb_var_remove_property,
-    .Call =                 trace_ppb_var_call,
-    .Construct =            trace_ppb_var_construct,
-    .IsInstanceOf =         trace_ppb_var_is_instance_of,
-    .CreateObject =         trace_ppb_var_create_object,
-    .CreateObjectWithModuleDeprecated = trace_ppb_var_create_object_with_module_deprecated,
+    .AddRef =               TWRAP(ppb_var_add_ref),
+    .Release =              TWRAP(ppb_var_release),
+    .VarFromUtf8 =          TWRAP(ppb_var_var_from_utf8_1_0),
+    .VarToUtf8 =            TWRAP(ppb_var_var_to_utf8),
+    .HasProperty =          TWRAP(ppb_var_has_property),
+    .HasMethod =            TWRAP(ppb_var_has_method),
+    .GetProperty =          TWRAP(ppb_var_get_property),
+    .GetAllPropertyNames =  TWRAP(ppb_var_get_all_property_names),
+    .SetProperty =          TWRAP(ppb_var_set_property),
+    .RemoveProperty =       TWRAP(ppb_var_remove_property),
+    .Call =                 TWRAP(ppb_var_call),
+    .Construct =            TWRAP(ppb_var_construct),
+    .IsInstanceOf =         TWRAP(ppb_var_is_instance_of),
+    .CreateObject =         TWRAP(ppb_var_create_object),
+    .CreateObjectWithModuleDeprecated = TWRAP(ppb_var_create_object_with_module_deprecated),
 };

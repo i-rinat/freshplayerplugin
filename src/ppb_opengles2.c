@@ -23,180 +23,197 @@
  */
 
 #include "ppb_opengles2.h"
-#include <stddef.h>
+#include <stdlib.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
 
 
-static
-void
-_setup_glx_ctx(struct pp_graphics3d_s *g3d)
-{
-    glXMakeContextCurrent(g3d->dpy, g3d->glx_pixmap, g3d->glx_pixmap, g3d->glc);
-}
+#define PROLOGUE(g3d, escape_statement)                                                 \
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D); \
+    if (!g3d) {                                                                         \
+        trace_error("%s, bad context", __func__);                                       \
+        escape_statement;                                                               \
+    }                                                                                   \
+    glXMakeCurrent(g3d->dpy, g3d->glx_pixmap, g3d->rendering_glc)
 
-static
-void
-setup_ctx(PP_Resource context)
-{
-    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
-    glXMakeContextCurrent(g3d->dpy, g3d->glx_pixmap, g3d->glx_pixmap, g3d->glc);
-    pp_resource_release(context);
-}
+#define EPILOGUE()                                                                      \
+    pp_resource_release(context)
 
 void
 ppb_opengles2_ActiveTexture(PP_Resource context, GLenum texture)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glActiveTexture(texture);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_AttachShader(PP_Resource context, GLuint program, GLuint shader)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glAttachShader(program, shader);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BindAttribLocation(PP_Resource context, GLuint program, GLuint index,
                                  const char *name)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBindAttribLocation(program, index, name);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BindBuffer(PP_Resource context, GLenum target, GLuint buffer)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBindBuffer(target, buffer);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BindFramebuffer(PP_Resource context, GLenum target, GLuint framebuffer)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBindFramebuffer(target, framebuffer);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BindRenderbuffer(PP_Resource context, GLenum target, GLuint renderbuffer)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBindRenderbuffer(target, renderbuffer);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BindTexture(PP_Resource context, GLenum target, GLuint texture)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBindTexture(target, texture);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BlendColor(PP_Resource context, GLclampf red, GLclampf green, GLclampf blue,
                          GLclampf alpha)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBlendColor(red, green, blue, alpha);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BlendEquation(PP_Resource context, GLenum mode)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBlendEquation(mode);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BlendEquationSeparate(PP_Resource context, GLenum modeRGB, GLenum modeAlpha)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBlendEquationSeparate(modeRGB, modeAlpha);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BlendFunc(PP_Resource context, GLenum sfactor, GLenum dfactor)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBlendFunc(sfactor, dfactor);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BlendFuncSeparate(PP_Resource context, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha,
                                 GLenum dstAlpha)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BufferData(PP_Resource context, GLenum target, GLsizeiptr size, const void *data,
                          GLenum usage)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBufferData(target, size, data, usage);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_BufferSubData(PP_Resource context, GLenum target, GLintptr offset, GLsizeiptr size,
                             const void *data)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glBufferSubData(target, offset, size, data);
+    EPILOGUE();
 }
 
 GLenum
 ppb_opengles2_CheckFramebufferStatus(PP_Resource context, GLenum target)
 {
-    setup_ctx(context);
-    return glCheckFramebufferStatus(target);
+    PROLOGUE(g3d, return GL_FRAMEBUFFER_UNSUPPORTED);
+    GLenum res = glCheckFramebufferStatus(target);
+    EPILOGUE();
+    return res;
 }
 
 void
 ppb_opengles2_Clear(PP_Resource context, GLbitfield mask)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glClear(mask);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ClearColor(PP_Resource context, GLclampf red, GLclampf green, GLclampf blue,
                          GLclampf alpha)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glClearColor(red, green, blue, alpha);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ClearDepthf(PP_Resource context, GLclampf depth)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glClearDepthf(depth);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ClearStencil(PP_Resource context, GLint s)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glClearStencil(s);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ColorMask(PP_Resource context, GLboolean red, GLboolean green, GLboolean blue,
                         GLboolean alpha)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glColorMask(red, green, blue, alpha);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_CompileShader(PP_Resource context, GLuint shader)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glCompileShader(shader);
+    EPILOGUE();
 }
 
 void
@@ -204,8 +221,9 @@ ppb_opengles2_CompressedTexImage2D(PP_Resource context, GLenum target, GLint lev
                                    GLenum internalformat, GLsizei width, GLsizei height,
                                    GLint border, GLsizei imageSize, const void *data)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+    EPILOGUE();
 }
 
 void
@@ -213,566 +231,655 @@ ppb_opengles2_CompressedTexSubImage2D(PP_Resource context, GLenum target, GLint 
                                       GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
                                       GLenum format, GLsizei imageSize, const void *data)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize,
                               data);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_CopyTexImage2D(PP_Resource context, GLenum target, GLint level, GLenum internalformat,
                              GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_CopyTexSubImage2D(PP_Resource context, GLenum target, GLint level, GLint xoffset,
                                 GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
+    EPILOGUE();
 }
 
 GLuint
 ppb_opengles2_CreateProgram(PP_Resource context)
 {
-    setup_ctx(context);
-    return glCreateProgram();
+    PROLOGUE(g3d, return 0);
+    GLuint res = glCreateProgram();
+    EPILOGUE();
+    return res;
 }
 
 GLuint
 ppb_opengles2_CreateShader(PP_Resource context, GLenum type)
 {
-    setup_ctx(context);
-    return glCreateShader(type);
+    PROLOGUE(g3d, return 0);
+    GLuint res = glCreateShader(type);
+    EPILOGUE();
+    return res;
 }
 
 void
 ppb_opengles2_CullFace(PP_Resource context, GLenum mode)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glCullFace(mode);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DeleteBuffers(PP_Resource context, GLsizei n, const GLuint *buffers)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDeleteBuffers(n, buffers);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DeleteFramebuffers(PP_Resource context, GLsizei n, const GLuint *framebuffers)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDeleteFramebuffers(n, framebuffers);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DeleteProgram(PP_Resource context, GLuint program)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDeleteProgram(program);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DeleteRenderbuffers(PP_Resource context, GLsizei n, const GLuint *renderbuffers)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDeleteRenderbuffers(n, renderbuffers);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DeleteShader(PP_Resource context, GLuint shader)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDeleteShader(shader);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DeleteTextures(PP_Resource context, GLsizei n, const GLuint *textures)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDeleteTextures(n, textures);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DepthFunc(PP_Resource context, GLenum func)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDepthFunc(func);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DepthMask(PP_Resource context, GLboolean flag)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDepthMask(flag);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DepthRangef(PP_Resource context, GLclampf zNear, GLclampf zFar)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDepthRangef(zNear, zFar);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DetachShader(PP_Resource context, GLuint program, GLuint shader)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDetachShader(program, shader);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Disable(PP_Resource context, GLenum cap)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDisable(cap);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DisableVertexAttribArray(PP_Resource context, GLuint index)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDisableVertexAttribArray(index);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DrawArrays(PP_Resource context, GLenum mode, GLint first, GLsizei count)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDrawArrays(mode, first, count);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_DrawElements(PP_Resource context, GLenum mode, GLsizei count, GLenum type,
                            const void *indices)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glDrawElements(mode, count, type, indices);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Enable(PP_Resource context, GLenum cap)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glEnable(cap);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_EnableVertexAttribArray(PP_Resource context, GLuint index)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glEnableVertexAttribArray(index);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Finish(PP_Resource context)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glFinish();
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Flush(PP_Resource context)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glFlush();
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_FramebufferRenderbuffer(PP_Resource context, GLenum target, GLenum attachment,
                                       GLenum renderbuffertarget, GLuint renderbuffer)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_FramebufferTexture2D(PP_Resource context, GLenum target, GLenum attachment,
                                    GLenum textarget, GLuint texture, GLint level)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glFramebufferTexture2D(target, attachment, textarget, texture, level);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_FrontFace(PP_Resource context, GLenum mode)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glFrontFace(mode);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GenBuffers(PP_Resource context, GLsizei n, GLuint *buffers)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGenBuffers(n, buffers);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GenerateMipmap(PP_Resource context, GLenum target)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGenerateMipmap(target);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GenFramebuffers(PP_Resource context, GLsizei n, GLuint *framebuffers)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGenFramebuffers(n, framebuffers);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GenRenderbuffers(PP_Resource context, GLsizei n, GLuint *renderbuffers)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGenRenderbuffers(n, renderbuffers);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GenTextures(PP_Resource context, GLsizei n, GLuint *textures)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGenTextures(n, textures);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetActiveAttrib(PP_Resource context, GLuint program, GLuint index, GLsizei bufsize,
                               GLsizei *length, GLint *size, GLenum *type, char *name)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetActiveAttrib(program, index, bufsize, length, size, type, name);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetActiveUniform(PP_Resource context, GLuint program, GLuint index, GLsizei bufsize,
                                GLsizei *length, GLint *size, GLenum *type, char *name)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetActiveUniform(program, index, bufsize, length, size, type, name);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetAttachedShaders(PP_Resource context, GLuint program, GLsizei maxcount,
                                  GLsizei *count, GLuint *shaders)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetAttachedShaders(program, maxcount, count, shaders);
+    EPILOGUE();
 }
 
 GLint
 ppb_opengles2_GetAttribLocation(PP_Resource context, GLuint program, const char *name)
 {
-    setup_ctx(context);
-    return glGetAttribLocation(program, name);
+    PROLOGUE(g3d, return 0);
+    GLint res = glGetAttribLocation(program, name);
+    EPILOGUE();
+    return res;
 }
 
 void
 ppb_opengles2_GetBooleanv(PP_Resource context, GLenum pname, GLboolean *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetBooleanv(pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetBufferParameteriv(PP_Resource context, GLenum target, GLenum pname, GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetBufferParameteriv(target, pname, params);
+    EPILOGUE();
 }
 
 GLenum
 ppb_opengles2_GetError(PP_Resource context)
 {
-    setup_ctx(context);
-    return glGetError();
+    PROLOGUE(g3d, return GL_NO_ERROR);
+    GLenum res = glGetError();
+    EPILOGUE();
+    return res;
 }
 
 void
 ppb_opengles2_GetFloatv(PP_Resource context, GLenum pname, GLfloat *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetFloatv(pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetFramebufferAttachmentParameteriv(PP_Resource context, GLenum target,
                                                   GLenum attachment, GLenum pname, GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetIntegerv(PP_Resource context, GLenum pname, GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetIntegerv(pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetProgramiv(PP_Resource context, GLuint program, GLenum pname, GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetProgramiv(program, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetProgramInfoLog(PP_Resource context, GLuint program, GLsizei bufsize,
                                 GLsizei *length, char *infolog)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetProgramInfoLog(program, bufsize, length, infolog);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetRenderbufferParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                          GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetRenderbufferParameteriv(target, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetShaderiv(PP_Resource context, GLuint shader, GLenum pname, GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetShaderiv(shader, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetShaderInfoLog(PP_Resource context, GLuint shader, GLsizei bufsize, GLsizei *length,
                                char *infolog)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetShaderInfoLog(shader, bufsize, length, infolog);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetShaderPrecisionFormat(PP_Resource context, GLenum shadertype, GLenum precisiontype,
                                        GLint *range, GLint *precision)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetShaderSource(PP_Resource context, GLuint shader, GLsizei bufsize, GLsizei *length,
                               char *source)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetShaderSource(shader, bufsize, length, source);
+    EPILOGUE();
 }
 
 const GLubyte *
 ppb_opengles2_GetString(PP_Resource context, GLenum name)
 {
-    setup_ctx(context);
-    return glGetString(name);
+    PROLOGUE(g3d, return (const GLubyte *)"");
+    const GLubyte *res = glGetString(name);
+    EPILOGUE();
+    return res;
 }
 
 void
 ppb_opengles2_GetTexParameterfv(PP_Resource context, GLenum target, GLenum pname, GLfloat *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetTexParameterfv(target, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetTexParameteriv(PP_Resource context, GLenum target, GLenum pname, GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetTexParameteriv(target, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetUniformfv(PP_Resource context, GLuint program, GLint location, GLfloat *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetUniformfv(program, location, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetUniformiv(PP_Resource context, GLuint program, GLint location, GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetUniformiv(program, location, params);
+    EPILOGUE();
 }
 
 GLint
 ppb_opengles2_GetUniformLocation(PP_Resource context, GLuint program, const char *name)
 {
-    setup_ctx(context);
-    return glGetUniformLocation(program, name);
+    PROLOGUE(g3d, return 0);
+    GLint res = glGetUniformLocation(program, name);
+    EPILOGUE();
+    return res;
 }
 
 void
 ppb_opengles2_GetVertexAttribfv(PP_Resource context, GLuint index, GLenum pname, GLfloat *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetVertexAttribfv(index, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetVertexAttribiv(PP_Resource context, GLuint index, GLenum pname, GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetVertexAttribiv(index, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_GetVertexAttribPointerv(PP_Resource context, GLuint index, GLenum pname,
                                       void **pointer)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glGetVertexAttribPointerv(index, pname, pointer);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Hint(PP_Resource context, GLenum target, GLenum mode)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glHint(target, mode);
+    EPILOGUE();
 }
 
 GLboolean
 ppb_opengles2_IsBuffer(PP_Resource context, GLuint buffer)
 {
-    setup_ctx(context);
-    return glIsBuffer(buffer);
+    PROLOGUE(g3d, return GL_FALSE);
+    GLboolean res = glIsBuffer(buffer);
+    EPILOGUE();
+    return res;
 }
 
 GLboolean
 ppb_opengles2_IsEnabled(PP_Resource context, GLenum cap)
 {
-    setup_ctx(context);
-    return glIsEnabled(cap);
+    PROLOGUE(g3d, return GL_FALSE);
+    GLboolean res = glIsEnabled(cap);
+    EPILOGUE();
+    return res;
 }
 
 GLboolean
 ppb_opengles2_IsFramebuffer(PP_Resource context, GLuint framebuffer)
 {
-    setup_ctx(context);
-    return glIsFramebuffer(framebuffer);
+    PROLOGUE(g3d, return GL_FALSE);
+    GLboolean res = glIsFramebuffer(framebuffer);
+    EPILOGUE();
+    return res;
 }
 
 GLboolean
 ppb_opengles2_IsProgram(PP_Resource context, GLuint program)
 {
-    setup_ctx(context);
-    return glIsProgram(program);
+    PROLOGUE(g3d, return GL_FALSE);
+    GLboolean res = glIsProgram(program);
+    EPILOGUE();
+    return res;
 }
 
 GLboolean
 ppb_opengles2_IsRenderbuffer(PP_Resource context, GLuint renderbuffer)
 {
-    setup_ctx(context);
-    return glIsRenderbuffer(renderbuffer);
+    PROLOGUE(g3d, return GL_FALSE);
+    GLboolean res = glIsRenderbuffer(renderbuffer);
+    EPILOGUE();
+    return res;
 }
 
 GLboolean
 ppb_opengles2_IsShader(PP_Resource context, GLuint shader)
 {
-    setup_ctx(context);
-    return glIsShader(shader);
+    PROLOGUE(g3d, return GL_FALSE);
+    GLboolean res = glIsShader(shader);
+    EPILOGUE();
+    return res;
 }
 
 GLboolean
 ppb_opengles2_IsTexture(PP_Resource context, GLuint texture)
 {
-    setup_ctx(context);
-    return glIsTexture(texture);
+    PROLOGUE(g3d, return GL_FALSE);
+    GLboolean res = glIsTexture(texture);
+    EPILOGUE();
+    return res;
 }
 
 void
 ppb_opengles2_LineWidth(PP_Resource context, GLfloat width)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glLineWidth(width);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_LinkProgram(PP_Resource context, GLuint program)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glLinkProgram(program);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_PixelStorei(PP_Resource context, GLenum pname, GLint param)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glPixelStorei(pname, param);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_PolygonOffset(PP_Resource context, GLfloat factor, GLfloat units)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glPolygonOffset(factor, units);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ReadPixels(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height,
                          GLenum format, GLenum type, void *pixels)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glReadPixels(x, y, width, height, format, type, pixels);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ReleaseShaderCompiler(PP_Resource context)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glReleaseShaderCompiler();
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_RenderbufferStorage(PP_Resource context, GLenum target, GLenum internalformat,
                                   GLsizei width, GLsizei height)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glRenderbufferStorage(target, internalformat, width, height);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_SampleCoverage(PP_Resource context, GLclampf value, GLboolean invert)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glSampleCoverage(value, invert);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Scissor(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glScissor(x, y, width, height);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ShaderBinary(PP_Resource context, GLsizei n, const GLuint *shaders,
                            GLenum binaryformat, const void *binary, GLsizei length)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glShaderBinary(n, shaders, binaryformat, binary, length);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count, const char **str,
                            const GLint *length)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     const char *v100 = "#version 100\n";
     const unsigned int v100_len = strlen(v100);
 
     // prepend "#version 100" line to all shaders
     // This enables shader compatibility mode introduced by GL_ARB_ES2_compatibility
     char **str2 = malloc(count * sizeof(char *));
-    for (uintptr_t k = 0; k < count; k ++) {
+    for (intptr_t k = 0; k < count; k ++) {
         size_t shader_len = strlen(str[k]);
         str2[k] = malloc(shader_len + 1 + v100_len);
         memcpy(str2[k], v100, v100_len); // first line
@@ -781,53 +888,60 @@ ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count, co
 
     glShaderSource(shader, count, (const char **)str2, length);
 
-    for (uintptr_t k = 0; k < count; k ++)
+    for (intptr_t k = 0; k < count; k ++)
         free(str2[k]);
     free(str2);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_StencilFunc(PP_Resource context, GLenum func, GLint ref, GLuint mask)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glStencilFunc(func, ref, mask);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_StencilFuncSeparate(PP_Resource context, GLenum face, GLenum func, GLint ref,
                                   GLuint mask)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glStencilFuncSeparate(face, func, ref, mask);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_StencilMask(PP_Resource context, GLuint mask)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glStencilMask(mask);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_StencilMaskSeparate(PP_Resource context, GLenum face, GLuint mask)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glStencilMaskSeparate(face, mask);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_StencilOp(PP_Resource context, GLenum fail, GLenum zfail, GLenum zpass)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glStencilOp(fail, zfail, zpass);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_StencilOpSeparate(PP_Resource context, GLenum face, GLenum fail, GLenum zfail,
                                 GLenum zpass)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glStencilOpSeparate(face, fail, zfail, zpass);
+    EPILOGUE();
 }
 
 void
@@ -835,37 +949,42 @@ ppb_opengles2_TexImage2D(PP_Resource context, GLenum target, GLint level, GLint 
                          GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type,
                          const void *pixels)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_TexParameterf(PP_Resource context, GLenum target, GLenum pname, GLfloat param)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glTexParameterf(target, pname, param);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_TexParameterfv(PP_Resource context, GLenum target, GLenum pname,
                              const GLfloat *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glTexParameterfv(target, pname, params);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_TexParameteri(PP_Resource context, GLenum target, GLenum pname, GLint param)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glTexParameteri(target, pname, param);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_TexParameteriv(PP_Resource context, GLenum target, GLenum pname, const GLint *params)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glTexParameteriv(target, pname, params);
+    EPILOGUE();
 }
 
 void
@@ -873,231 +992,263 @@ ppb_opengles2_TexSubImage2D(PP_Resource context, GLenum target, GLint level, GLi
                             GLint yoffset, GLsizei width, GLsizei height, GLenum format,
                             GLenum type, const void *pixels)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform1f(PP_Resource context, GLint location, GLfloat x)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform1f(location, x);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform1fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform1fv(location, count, v);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform1i(PP_Resource context, GLint location, GLint x)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform1i(location, x);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform1iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform1iv(location, count, v);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform2f(PP_Resource context, GLint location, GLfloat x, GLfloat y)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform2f(location, x, y);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform2fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform2fv(location, count, v);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform2i(PP_Resource context, GLint location, GLint x, GLint y)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform2i(location, x, y);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform2iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform2iv(location, count, v);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform3f(PP_Resource context, GLint location, GLfloat x, GLfloat y, GLfloat z)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform3f(location, x, y, z);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform3fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform3fv(location, count, v);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform3i(PP_Resource context, GLint location, GLint x, GLint y, GLint z)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform3i(location, x, y, z);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform3iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform3iv(location, count, v);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform4f(PP_Resource context, GLint location, GLfloat x, GLfloat y, GLfloat z,
                         GLfloat w)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform4f(location, x, y, z, w);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform4fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform4fv(location, count, v);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform4i(PP_Resource context, GLint location, GLint x, GLint y, GLint z, GLint w)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform4i(location, x, y, z, w);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Uniform4iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniform4iv(location, count, v);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_UniformMatrix2fv(PP_Resource context, GLint location, GLsizei count,
                                GLboolean transpose, const GLfloat *value)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniformMatrix2fv(location, count, transpose, value);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_UniformMatrix3fv(PP_Resource context, GLint location, GLsizei count,
                                GLboolean transpose, const GLfloat *value)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniformMatrix3fv(location, count, transpose, value);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_UniformMatrix4fv(PP_Resource context, GLint location, GLsizei count,
                                GLboolean transpose, const GLfloat *value)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUniformMatrix4fv(location, count, transpose, value);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_UseProgram(PP_Resource context, GLuint program)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glUseProgram(program);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_ValidateProgram(PP_Resource context, GLuint program)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glValidateProgram(program);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttrib1f(PP_Resource context, GLuint indx, GLfloat x)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttrib1f(indx, x);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttrib1fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttrib1fv(indx, values);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttrib2f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttrib2f(indx, x, y);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttrib2fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttrib2fv(indx, values);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttrib3f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y, GLfloat z)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttrib3f(indx, x, y, z);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttrib3fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttrib3fv(indx, values);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttrib4f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y, GLfloat z,
                              GLfloat w)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttrib4f(indx, x, y, z, w);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttrib4fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttrib4fv(indx, values);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_VertexAttribPointer(PP_Resource context, GLuint indx, GLint size, GLenum type,
                                   GLboolean normalized, GLsizei stride, const void *ptr)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glVertexAttribPointer(indx, size, type, normalized, stride, ptr);
+    EPILOGUE();
 }
 
 void
 ppb_opengles2_Viewport(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    setup_ctx(context);
+    PROLOGUE(g3d, return);
     glViewport(x, y, width, height);
+    EPILOGUE();
 }
 
 GLboolean
@@ -1149,7 +1300,7 @@ ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context
         return NULL;
     }
 
-    struct tex_sub_mapping_param_s *map_params = malloc(sizeof(*map_params));
+    struct tex_sub_mapping_param_s *map_params = g_slice_alloc(sizeof(*map_params));
     map_params->level = level;
     map_params->xoffset = xoffset;
     map_params->yoffset = yoffset;
@@ -1172,27 +1323,21 @@ void
 ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
                                                                const void *mem)
 {
-    struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
-    if (!g3d) {
-        trace_warning("%s, wrong context\n", __func__);
-        return;
-    }
-
+    PROLOGUE(g3d, return);
     struct tex_sub_mapping_param_s *mp = g_hash_table_lookup(g3d->sub_maps, mem);
     if (!mp) {
         trace_error("%s, memory was not mapped\n", __func__);
-        pp_resource_release(context);
-        return;
+        goto err;
     }
 
     g_hash_table_remove(g3d->sub_maps, mem);
-    _setup_glx_ctx(g3d);
     glTexSubImage2D(GL_TEXTURE_2D, mp->level, mp->xoffset, mp->yoffset, mp->width, mp->height,
                     mp->format, mp->type, mem);
-    free(mp);
-
-    pp_resource_release(context);
+    g_slice_free(struct tex_sub_mapping_param_s, mp);
     free((void *)mem);
+
+err:
+    EPILOGUE();
 }
 
 void
@@ -1268,6 +1413,7 @@ ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id, GLen
 }
 
 
+#ifndef NDEBUG
 // trace wrappers
 static
 void
@@ -2198,7 +2344,7 @@ trace_ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei cou
 {
     trace_info("[PPB] {full} %s context=%d, shader=%u, count=%d, str=%p, length=%p\n",
                __func__+6, context, shader, count, str, length);
-    for (size_t k = 0; k < count; k++) {
+    for (intptr_t k = 0; k < count; k++) {
         trace_info("             shader_source[%u] = \n%s\n", (unsigned)k, str[k]);
     }
     ppb_opengles2_ShaderSource(context, shader, count, str, length);
@@ -2798,186 +2944,187 @@ trace_ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id
                context, id, pname, reverse_gl_enum(pname), params);
     ppb_opengles2_query_get_query_objectuiv_ext(context, id, pname, params);
 }
+#endif // NDEBUG
 
 
 const struct PPB_OpenGLES2 ppb_opengles2_interface_1_0 = {
-    .ActiveTexture =            trace_ppb_opengles2_ActiveTexture,
-    .AttachShader =             trace_ppb_opengles2_AttachShader,
-    .BindAttribLocation =       trace_ppb_opengles2_BindAttribLocation,
-    .BindBuffer =               trace_ppb_opengles2_BindBuffer,
-    .BindFramebuffer =          trace_ppb_opengles2_BindFramebuffer,
-    .BindRenderbuffer =         trace_ppb_opengles2_BindRenderbuffer,
-    .BindTexture =              trace_ppb_opengles2_BindTexture,
-    .BlendColor =               trace_ppb_opengles2_BlendColor,
-    .BlendEquation =            trace_ppb_opengles2_BlendEquation,
-    .BlendEquationSeparate =    trace_ppb_opengles2_BlendEquationSeparate,
-    .BlendFunc =                trace_ppb_opengles2_BlendFunc,
-    .BlendFuncSeparate =        trace_ppb_opengles2_BlendFuncSeparate,
-    .BufferData =               trace_ppb_opengles2_BufferData,
-    .BufferSubData =            trace_ppb_opengles2_BufferSubData,
-    .CheckFramebufferStatus =   trace_ppb_opengles2_CheckFramebufferStatus,
-    .Clear =                    trace_ppb_opengles2_Clear,
-    .ClearColor =               trace_ppb_opengles2_ClearColor,
-    .ClearDepthf =              trace_ppb_opengles2_ClearDepthf,
-    .ClearStencil =             trace_ppb_opengles2_ClearStencil,
-    .ColorMask =                trace_ppb_opengles2_ColorMask,
-    .CompileShader =            trace_ppb_opengles2_CompileShader,
-    .CompressedTexImage2D =     trace_ppb_opengles2_CompressedTexImage2D,
-    .CompressedTexSubImage2D =  trace_ppb_opengles2_CompressedTexSubImage2D,
-    .CopyTexImage2D =           trace_ppb_opengles2_CopyTexImage2D,
-    .CopyTexSubImage2D =        trace_ppb_opengles2_CopyTexSubImage2D,
-    .CreateProgram =            trace_ppb_opengles2_CreateProgram,
-    .CreateShader =             trace_ppb_opengles2_CreateShader,
-    .CullFace =                 trace_ppb_opengles2_CullFace,
-    .DeleteBuffers =            trace_ppb_opengles2_DeleteBuffers,
-    .DeleteFramebuffers =       trace_ppb_opengles2_DeleteFramebuffers,
-    .DeleteProgram =            trace_ppb_opengles2_DeleteProgram,
-    .DeleteRenderbuffers =      trace_ppb_opengles2_DeleteRenderbuffers,
-    .DeleteShader =             trace_ppb_opengles2_DeleteShader,
-    .DeleteTextures =           trace_ppb_opengles2_DeleteTextures,
-    .DepthFunc =                trace_ppb_opengles2_DepthFunc,
-    .DepthMask =                trace_ppb_opengles2_DepthMask,
-    .DepthRangef =              trace_ppb_opengles2_DepthRangef,
-    .DetachShader =             trace_ppb_opengles2_DetachShader,
-    .Disable =                  trace_ppb_opengles2_Disable,
-    .DisableVertexAttribArray = trace_ppb_opengles2_DisableVertexAttribArray,
-    .DrawArrays =               trace_ppb_opengles2_DrawArrays,
-    .DrawElements =             trace_ppb_opengles2_DrawElements,
-    .Enable =                   trace_ppb_opengles2_Enable,
-    .EnableVertexAttribArray =  trace_ppb_opengles2_EnableVertexAttribArray,
-    .Finish =                   trace_ppb_opengles2_Finish,
-    .Flush =                    trace_ppb_opengles2_Flush,
-    .FramebufferRenderbuffer =  trace_ppb_opengles2_FramebufferRenderbuffer,
-    .FramebufferTexture2D =     trace_ppb_opengles2_FramebufferTexture2D,
-    .FrontFace =                trace_ppb_opengles2_FrontFace,
-    .GenBuffers =               trace_ppb_opengles2_GenBuffers,
-    .GenerateMipmap =           trace_ppb_opengles2_GenerateMipmap,
-    .GenFramebuffers =          trace_ppb_opengles2_GenFramebuffers,
-    .GenRenderbuffers =         trace_ppb_opengles2_GenRenderbuffers,
-    .GenTextures =              trace_ppb_opengles2_GenTextures,
-    .GetActiveAttrib =          trace_ppb_opengles2_GetActiveAttrib,
-    .GetActiveUniform =         trace_ppb_opengles2_GetActiveUniform,
-    .GetAttachedShaders =       trace_ppb_opengles2_GetAttachedShaders,
-    .GetAttribLocation =        trace_ppb_opengles2_GetAttribLocation,
-    .GetBooleanv =              trace_ppb_opengles2_GetBooleanv,
-    .GetBufferParameteriv =     trace_ppb_opengles2_GetBufferParameteriv,
-    .GetError =                 trace_ppb_opengles2_GetError,
-    .GetFloatv =                trace_ppb_opengles2_GetFloatv,
-    .GetFramebufferAttachmentParameteriv = trace_ppb_opengles2_GetFramebufferAttachmentParameteriv,
-    .GetIntegerv =              trace_ppb_opengles2_GetIntegerv,
-    .GetProgramiv =             trace_ppb_opengles2_GetProgramiv,
-    .GetProgramInfoLog =        trace_ppb_opengles2_GetProgramInfoLog,
-    .GetRenderbufferParameteriv = trace_ppb_opengles2_GetRenderbufferParameteriv,
-    .GetShaderiv =              trace_ppb_opengles2_GetShaderiv,
-    .GetShaderInfoLog =         trace_ppb_opengles2_GetShaderInfoLog,
-    .GetShaderPrecisionFormat = trace_ppb_opengles2_GetShaderPrecisionFormat,
-    .GetShaderSource =          trace_ppb_opengles2_GetShaderSource,
-    .GetString =                trace_ppb_opengles2_GetString,
-    .GetTexParameterfv =        trace_ppb_opengles2_GetTexParameterfv,
-    .GetTexParameteriv =        trace_ppb_opengles2_GetTexParameteriv,
-    .GetUniformfv =             trace_ppb_opengles2_GetUniformfv,
-    .GetUniformiv =             trace_ppb_opengles2_GetUniformiv,
-    .GetUniformLocation =       trace_ppb_opengles2_GetUniformLocation,
-    .GetVertexAttribfv =        trace_ppb_opengles2_GetVertexAttribfv,
-    .GetVertexAttribiv =        trace_ppb_opengles2_GetVertexAttribiv,
-    .GetVertexAttribPointerv =  trace_ppb_opengles2_GetVertexAttribPointerv,
-    .Hint =                     trace_ppb_opengles2_Hint,
-    .IsBuffer =                 trace_ppb_opengles2_IsBuffer,
-    .IsEnabled =                trace_ppb_opengles2_IsEnabled,
-    .IsFramebuffer =            trace_ppb_opengles2_IsFramebuffer,
-    .IsProgram =                trace_ppb_opengles2_IsProgram,
-    .IsRenderbuffer =           trace_ppb_opengles2_IsRenderbuffer,
-    .IsShader =                 trace_ppb_opengles2_IsShader,
-    .IsTexture =                trace_ppb_opengles2_IsTexture,
-    .LineWidth =                trace_ppb_opengles2_LineWidth,
-    .LinkProgram =              trace_ppb_opengles2_LinkProgram,
-    .PixelStorei =              trace_ppb_opengles2_PixelStorei,
-    .PolygonOffset =            trace_ppb_opengles2_PolygonOffset,
-    .ReadPixels =               trace_ppb_opengles2_ReadPixels,
-    .ReleaseShaderCompiler =    trace_ppb_opengles2_ReleaseShaderCompiler,
-    .RenderbufferStorage =      trace_ppb_opengles2_RenderbufferStorage,
-    .SampleCoverage =           trace_ppb_opengles2_SampleCoverage,
-    .Scissor =                  trace_ppb_opengles2_Scissor,
-    .ShaderBinary =             trace_ppb_opengles2_ShaderBinary,
-    .ShaderSource =             trace_ppb_opengles2_ShaderSource,
-    .StencilFunc =              trace_ppb_opengles2_StencilFunc,
-    .StencilFuncSeparate =      trace_ppb_opengles2_StencilFuncSeparate,
-    .StencilMask =              trace_ppb_opengles2_StencilMask,
-    .StencilMaskSeparate =      trace_ppb_opengles2_StencilMaskSeparate,
-    .StencilOp =                trace_ppb_opengles2_StencilOp,
-    .StencilOpSeparate =        trace_ppb_opengles2_StencilOpSeparate,
-    .TexImage2D =               trace_ppb_opengles2_TexImage2D,
-    .TexParameterf =            trace_ppb_opengles2_TexParameterf,
-    .TexParameterfv =           trace_ppb_opengles2_TexParameterfv,
-    .TexParameteri =            trace_ppb_opengles2_TexParameteri,
-    .TexParameteriv =           trace_ppb_opengles2_TexParameteriv,
-    .TexSubImage2D =            trace_ppb_opengles2_TexSubImage2D,
-    .Uniform1f =                trace_ppb_opengles2_Uniform1f,
-    .Uniform1fv =               trace_ppb_opengles2_Uniform1fv,
-    .Uniform1i =                trace_ppb_opengles2_Uniform1i,
-    .Uniform1iv =               trace_ppb_opengles2_Uniform1iv,
-    .Uniform2f =                trace_ppb_opengles2_Uniform2f,
-    .Uniform2fv =               trace_ppb_opengles2_Uniform2fv,
-    .Uniform2i =                trace_ppb_opengles2_Uniform2i,
-    .Uniform2iv =               trace_ppb_opengles2_Uniform2iv,
-    .Uniform3f =                trace_ppb_opengles2_Uniform3f,
-    .Uniform3fv =               trace_ppb_opengles2_Uniform3fv,
-    .Uniform3i =                trace_ppb_opengles2_Uniform3i,
-    .Uniform3iv =               trace_ppb_opengles2_Uniform3iv,
-    .Uniform4f =                trace_ppb_opengles2_Uniform4f,
-    .Uniform4fv =               trace_ppb_opengles2_Uniform4fv,
-    .Uniform4i =                trace_ppb_opengles2_Uniform4i,
-    .Uniform4iv =               trace_ppb_opengles2_Uniform4iv,
-    .UniformMatrix2fv =         trace_ppb_opengles2_UniformMatrix2fv,
-    .UniformMatrix3fv =         trace_ppb_opengles2_UniformMatrix3fv,
-    .UniformMatrix4fv =         trace_ppb_opengles2_UniformMatrix4fv,
-    .UseProgram =               trace_ppb_opengles2_UseProgram,
-    .ValidateProgram =          trace_ppb_opengles2_ValidateProgram,
-    .VertexAttrib1f =           trace_ppb_opengles2_VertexAttrib1f,
-    .VertexAttrib1fv =          trace_ppb_opengles2_VertexAttrib1fv,
-    .VertexAttrib2f =           trace_ppb_opengles2_VertexAttrib2f,
-    .VertexAttrib2fv =          trace_ppb_opengles2_VertexAttrib2fv,
-    .VertexAttrib3f =           trace_ppb_opengles2_VertexAttrib3f,
-    .VertexAttrib3fv =          trace_ppb_opengles2_VertexAttrib3fv,
-    .VertexAttrib4f =           trace_ppb_opengles2_VertexAttrib4f,
-    .VertexAttrib4fv =          trace_ppb_opengles2_VertexAttrib4fv,
-    .VertexAttribPointer =      trace_ppb_opengles2_VertexAttribPointer,
-    .Viewport =                 trace_ppb_opengles2_Viewport,
+    .ActiveTexture =            TWRAP(ppb_opengles2_ActiveTexture),
+    .AttachShader =             TWRAP(ppb_opengles2_AttachShader),
+    .BindAttribLocation =       TWRAP(ppb_opengles2_BindAttribLocation),
+    .BindBuffer =               TWRAP(ppb_opengles2_BindBuffer),
+    .BindFramebuffer =          TWRAP(ppb_opengles2_BindFramebuffer),
+    .BindRenderbuffer =         TWRAP(ppb_opengles2_BindRenderbuffer),
+    .BindTexture =              TWRAP(ppb_opengles2_BindTexture),
+    .BlendColor =               TWRAP(ppb_opengles2_BlendColor),
+    .BlendEquation =            TWRAP(ppb_opengles2_BlendEquation),
+    .BlendEquationSeparate =    TWRAP(ppb_opengles2_BlendEquationSeparate),
+    .BlendFunc =                TWRAP(ppb_opengles2_BlendFunc),
+    .BlendFuncSeparate =        TWRAP(ppb_opengles2_BlendFuncSeparate),
+    .BufferData =               TWRAP(ppb_opengles2_BufferData),
+    .BufferSubData =            TWRAP(ppb_opengles2_BufferSubData),
+    .CheckFramebufferStatus =   TWRAP(ppb_opengles2_CheckFramebufferStatus),
+    .Clear =                    TWRAP(ppb_opengles2_Clear),
+    .ClearColor =               TWRAP(ppb_opengles2_ClearColor),
+    .ClearDepthf =              TWRAP(ppb_opengles2_ClearDepthf),
+    .ClearStencil =             TWRAP(ppb_opengles2_ClearStencil),
+    .ColorMask =                TWRAP(ppb_opengles2_ColorMask),
+    .CompileShader =            TWRAP(ppb_opengles2_CompileShader),
+    .CompressedTexImage2D =     TWRAP(ppb_opengles2_CompressedTexImage2D),
+    .CompressedTexSubImage2D =  TWRAP(ppb_opengles2_CompressedTexSubImage2D),
+    .CopyTexImage2D =           TWRAP(ppb_opengles2_CopyTexImage2D),
+    .CopyTexSubImage2D =        TWRAP(ppb_opengles2_CopyTexSubImage2D),
+    .CreateProgram =            TWRAP(ppb_opengles2_CreateProgram),
+    .CreateShader =             TWRAP(ppb_opengles2_CreateShader),
+    .CullFace =                 TWRAP(ppb_opengles2_CullFace),
+    .DeleteBuffers =            TWRAP(ppb_opengles2_DeleteBuffers),
+    .DeleteFramebuffers =       TWRAP(ppb_opengles2_DeleteFramebuffers),
+    .DeleteProgram =            TWRAP(ppb_opengles2_DeleteProgram),
+    .DeleteRenderbuffers =      TWRAP(ppb_opengles2_DeleteRenderbuffers),
+    .DeleteShader =             TWRAP(ppb_opengles2_DeleteShader),
+    .DeleteTextures =           TWRAP(ppb_opengles2_DeleteTextures),
+    .DepthFunc =                TWRAP(ppb_opengles2_DepthFunc),
+    .DepthMask =                TWRAP(ppb_opengles2_DepthMask),
+    .DepthRangef =              TWRAP(ppb_opengles2_DepthRangef),
+    .DetachShader =             TWRAP(ppb_opengles2_DetachShader),
+    .Disable =                  TWRAP(ppb_opengles2_Disable),
+    .DisableVertexAttribArray = TWRAP(ppb_opengles2_DisableVertexAttribArray),
+    .DrawArrays =               TWRAP(ppb_opengles2_DrawArrays),
+    .DrawElements =             TWRAP(ppb_opengles2_DrawElements),
+    .Enable =                   TWRAP(ppb_opengles2_Enable),
+    .EnableVertexAttribArray =  TWRAP(ppb_opengles2_EnableVertexAttribArray),
+    .Finish =                   TWRAP(ppb_opengles2_Finish),
+    .Flush =                    TWRAP(ppb_opengles2_Flush),
+    .FramebufferRenderbuffer =  TWRAP(ppb_opengles2_FramebufferRenderbuffer),
+    .FramebufferTexture2D =     TWRAP(ppb_opengles2_FramebufferTexture2D),
+    .FrontFace =                TWRAP(ppb_opengles2_FrontFace),
+    .GenBuffers =               TWRAP(ppb_opengles2_GenBuffers),
+    .GenerateMipmap =           TWRAP(ppb_opengles2_GenerateMipmap),
+    .GenFramebuffers =          TWRAP(ppb_opengles2_GenFramebuffers),
+    .GenRenderbuffers =         TWRAP(ppb_opengles2_GenRenderbuffers),
+    .GenTextures =              TWRAP(ppb_opengles2_GenTextures),
+    .GetActiveAttrib =          TWRAP(ppb_opengles2_GetActiveAttrib),
+    .GetActiveUniform =         TWRAP(ppb_opengles2_GetActiveUniform),
+    .GetAttachedShaders =       TWRAP(ppb_opengles2_GetAttachedShaders),
+    .GetAttribLocation =        TWRAP(ppb_opengles2_GetAttribLocation),
+    .GetBooleanv =              TWRAP(ppb_opengles2_GetBooleanv),
+    .GetBufferParameteriv =     TWRAP(ppb_opengles2_GetBufferParameteriv),
+    .GetError =                 TWRAP(ppb_opengles2_GetError),
+    .GetFloatv =                TWRAP(ppb_opengles2_GetFloatv),
+    .GetFramebufferAttachmentParameteriv = TWRAP(ppb_opengles2_GetFramebufferAttachmentParameteriv),
+    .GetIntegerv =              TWRAP(ppb_opengles2_GetIntegerv),
+    .GetProgramiv =             TWRAP(ppb_opengles2_GetProgramiv),
+    .GetProgramInfoLog =        TWRAP(ppb_opengles2_GetProgramInfoLog),
+    .GetRenderbufferParameteriv = TWRAP(ppb_opengles2_GetRenderbufferParameteriv),
+    .GetShaderiv =              TWRAP(ppb_opengles2_GetShaderiv),
+    .GetShaderInfoLog =         TWRAP(ppb_opengles2_GetShaderInfoLog),
+    .GetShaderPrecisionFormat = TWRAP(ppb_opengles2_GetShaderPrecisionFormat),
+    .GetShaderSource =          TWRAP(ppb_opengles2_GetShaderSource),
+    .GetString =                TWRAP(ppb_opengles2_GetString),
+    .GetTexParameterfv =        TWRAP(ppb_opengles2_GetTexParameterfv),
+    .GetTexParameteriv =        TWRAP(ppb_opengles2_GetTexParameteriv),
+    .GetUniformfv =             TWRAP(ppb_opengles2_GetUniformfv),
+    .GetUniformiv =             TWRAP(ppb_opengles2_GetUniformiv),
+    .GetUniformLocation =       TWRAP(ppb_opengles2_GetUniformLocation),
+    .GetVertexAttribfv =        TWRAP(ppb_opengles2_GetVertexAttribfv),
+    .GetVertexAttribiv =        TWRAP(ppb_opengles2_GetVertexAttribiv),
+    .GetVertexAttribPointerv =  TWRAP(ppb_opengles2_GetVertexAttribPointerv),
+    .Hint =                     TWRAP(ppb_opengles2_Hint),
+    .IsBuffer =                 TWRAP(ppb_opengles2_IsBuffer),
+    .IsEnabled =                TWRAP(ppb_opengles2_IsEnabled),
+    .IsFramebuffer =            TWRAP(ppb_opengles2_IsFramebuffer),
+    .IsProgram =                TWRAP(ppb_opengles2_IsProgram),
+    .IsRenderbuffer =           TWRAP(ppb_opengles2_IsRenderbuffer),
+    .IsShader =                 TWRAP(ppb_opengles2_IsShader),
+    .IsTexture =                TWRAP(ppb_opengles2_IsTexture),
+    .LineWidth =                TWRAP(ppb_opengles2_LineWidth),
+    .LinkProgram =              TWRAP(ppb_opengles2_LinkProgram),
+    .PixelStorei =              TWRAP(ppb_opengles2_PixelStorei),
+    .PolygonOffset =            TWRAP(ppb_opengles2_PolygonOffset),
+    .ReadPixels =               TWRAP(ppb_opengles2_ReadPixels),
+    .ReleaseShaderCompiler =    TWRAP(ppb_opengles2_ReleaseShaderCompiler),
+    .RenderbufferStorage =      TWRAP(ppb_opengles2_RenderbufferStorage),
+    .SampleCoverage =           TWRAP(ppb_opengles2_SampleCoverage),
+    .Scissor =                  TWRAP(ppb_opengles2_Scissor),
+    .ShaderBinary =             TWRAP(ppb_opengles2_ShaderBinary),
+    .ShaderSource =             TWRAP(ppb_opengles2_ShaderSource),
+    .StencilFunc =              TWRAP(ppb_opengles2_StencilFunc),
+    .StencilFuncSeparate =      TWRAP(ppb_opengles2_StencilFuncSeparate),
+    .StencilMask =              TWRAP(ppb_opengles2_StencilMask),
+    .StencilMaskSeparate =      TWRAP(ppb_opengles2_StencilMaskSeparate),
+    .StencilOp =                TWRAP(ppb_opengles2_StencilOp),
+    .StencilOpSeparate =        TWRAP(ppb_opengles2_StencilOpSeparate),
+    .TexImage2D =               TWRAP(ppb_opengles2_TexImage2D),
+    .TexParameterf =            TWRAP(ppb_opengles2_TexParameterf),
+    .TexParameterfv =           TWRAP(ppb_opengles2_TexParameterfv),
+    .TexParameteri =            TWRAP(ppb_opengles2_TexParameteri),
+    .TexParameteriv =           TWRAP(ppb_opengles2_TexParameteriv),
+    .TexSubImage2D =            TWRAP(ppb_opengles2_TexSubImage2D),
+    .Uniform1f =                TWRAP(ppb_opengles2_Uniform1f),
+    .Uniform1fv =               TWRAP(ppb_opengles2_Uniform1fv),
+    .Uniform1i =                TWRAP(ppb_opengles2_Uniform1i),
+    .Uniform1iv =               TWRAP(ppb_opengles2_Uniform1iv),
+    .Uniform2f =                TWRAP(ppb_opengles2_Uniform2f),
+    .Uniform2fv =               TWRAP(ppb_opengles2_Uniform2fv),
+    .Uniform2i =                TWRAP(ppb_opengles2_Uniform2i),
+    .Uniform2iv =               TWRAP(ppb_opengles2_Uniform2iv),
+    .Uniform3f =                TWRAP(ppb_opengles2_Uniform3f),
+    .Uniform3fv =               TWRAP(ppb_opengles2_Uniform3fv),
+    .Uniform3i =                TWRAP(ppb_opengles2_Uniform3i),
+    .Uniform3iv =               TWRAP(ppb_opengles2_Uniform3iv),
+    .Uniform4f =                TWRAP(ppb_opengles2_Uniform4f),
+    .Uniform4fv =               TWRAP(ppb_opengles2_Uniform4fv),
+    .Uniform4i =                TWRAP(ppb_opengles2_Uniform4i),
+    .Uniform4iv =               TWRAP(ppb_opengles2_Uniform4iv),
+    .UniformMatrix2fv =         TWRAP(ppb_opengles2_UniformMatrix2fv),
+    .UniformMatrix3fv =         TWRAP(ppb_opengles2_UniformMatrix3fv),
+    .UniformMatrix4fv =         TWRAP(ppb_opengles2_UniformMatrix4fv),
+    .UseProgram =               TWRAP(ppb_opengles2_UseProgram),
+    .ValidateProgram =          TWRAP(ppb_opengles2_ValidateProgram),
+    .VertexAttrib1f =           TWRAP(ppb_opengles2_VertexAttrib1f),
+    .VertexAttrib1fv =          TWRAP(ppb_opengles2_VertexAttrib1fv),
+    .VertexAttrib2f =           TWRAP(ppb_opengles2_VertexAttrib2f),
+    .VertexAttrib2fv =          TWRAP(ppb_opengles2_VertexAttrib2fv),
+    .VertexAttrib3f =           TWRAP(ppb_opengles2_VertexAttrib3f),
+    .VertexAttrib3fv =          TWRAP(ppb_opengles2_VertexAttrib3fv),
+    .VertexAttrib4f =           TWRAP(ppb_opengles2_VertexAttrib4f),
+    .VertexAttrib4fv =          TWRAP(ppb_opengles2_VertexAttrib4fv),
+    .VertexAttribPointer =      TWRAP(ppb_opengles2_VertexAttribPointer),
+    .Viewport =                 TWRAP(ppb_opengles2_Viewport),
 };
 
 const struct PPB_OpenGLES2ChromiumEnableFeature ppb_opengles2_chromium_enable_feature_interface_1_0 = {
-    .EnableFeatureCHROMIUM = trace_ppb_opengles2_chromium_enable_feature_enable_feature_chromium,
+    .EnableFeatureCHROMIUM = TWRAP(ppb_opengles2_chromium_enable_feature_enable_feature_chromium),
 };
 
 const struct PPB_OpenGLES2ChromiumMapSub ppb_opengles2_chromium_map_sub_interface_1_0 = {
-    .MapBufferSubDataCHROMIUM =   trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium,
-    .UnmapBufferSubDataCHROMIUM = trace_ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium,
-    .MapTexSubImage2DCHROMIUM =   trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium,
-    .UnmapTexSubImage2DCHROMIUM = trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium,
+    .MapBufferSubDataCHROMIUM =   TWRAP(ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium),
+    .UnmapBufferSubDataCHROMIUM = TWRAP(ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium),
+    .MapTexSubImage2DCHROMIUM =   TWRAP(ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium),
+    .UnmapTexSubImage2DCHROMIUM = TWRAP(ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium),
 };
 
 const struct PPB_OpenGLES2FramebufferBlit ppb_opengles2_framebuffer_blit_interface_1_0 = {
-    .BlitFramebufferEXT = trace_ppb_opengles2_framebuffer_blit_blit_framebuffer_ext,
+    .BlitFramebufferEXT = TWRAP(ppb_opengles2_framebuffer_blit_blit_framebuffer_ext),
 };
 
 const struct PPB_OpenGLES2FramebufferMultisample ppb_opengles2_framebuffer_multisample_interface_1_0 = {
     .RenderbufferStorageMultisampleEXT =
-                trace_ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext,
+                TWRAP(ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext),
 };
 
 const struct PPB_OpenGLES2InstancedArrays ppb_opengles2_instanced_arrays_interface_1_0 = {
-    .DrawArraysInstancedANGLE = trace_ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle,
-    .DrawElementsInstancedANGLE =trace_ppb_opengles2_instanced_arrays_draw_elements_instanced_angle,
-    .VertexAttribDivisorANGLE = trace_ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle,
+    .DrawArraysInstancedANGLE = TWRAP(ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle),
+    .DrawElementsInstancedANGLE =TWRAP(ppb_opengles2_instanced_arrays_draw_elements_instanced_angle),
+    .VertexAttribDivisorANGLE = TWRAP(ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle),
 
 };
 
 const struct PPB_OpenGLES2Query ppb_opengles2_query_interface_1_0 = {
-    .GenQueriesEXT =        trace_ppb_opengles2_query_gen_queries_ext,
-    .DeleteQueriesEXT =     trace_ppb_opengles2_query_delete_queries_ext,
-    .IsQueryEXT =           trace_ppb_opengles2_query_is_query_ext,
-    .BeginQueryEXT =        trace_ppb_opengles2_query_begin_query_ext,
-    .EndQueryEXT =          trace_ppb_opengles2_query_end_query_ext,
-    .GetQueryivEXT =        trace_ppb_opengles2_query_get_queryiv_ext,
-    .GetQueryObjectuivEXT = trace_ppb_opengles2_query_get_query_objectuiv_ext,
+    .GenQueriesEXT =        TWRAP(ppb_opengles2_query_gen_queries_ext),
+    .DeleteQueriesEXT =     TWRAP(ppb_opengles2_query_delete_queries_ext),
+    .IsQueryEXT =           TWRAP(ppb_opengles2_query_is_query_ext),
+    .BeginQueryEXT =        TWRAP(ppb_opengles2_query_begin_query_ext),
+    .EndQueryEXT =          TWRAP(ppb_opengles2_query_end_query_ext),
+    .GetQueryivEXT =        TWRAP(ppb_opengles2_query_get_queryiv_ext),
+    .GetQueryObjectuivEXT = TWRAP(ppb_opengles2_query_get_query_objectuiv_ext),
 };

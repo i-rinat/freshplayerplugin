@@ -1,8 +1,8 @@
 #undef NDEBUG
-#define _GNU_SOURCE
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <glib.h>
 #include <src/ppb_flash_file_modulelocal.c>
 
 static

@@ -933,3 +933,27 @@ reverse_gl_enum(unsigned int e)
         return "UNKNOWN_GL_ENUM";
     }
 }
+
+const char *
+reverse_clipboard_type(PP_Flash_Clipboard_Type ct)
+{
+    switch (ct) {
+    CASE(PP_FLASH_CLIPBOARD_TYPE_STANDARD);
+    CASE(PP_FLASH_CLIPBOARD_TYPE_SELECTION);
+    default:
+        return "UNKNOWNCLIPBOARDTYPE";
+    }
+}
+
+const char *
+reverse_clipboard_format(uint32_t cf)
+{
+    switch (cf) {
+    CASE(PP_FLASH_CLIPBOARD_FORMAT_INVALID);
+    CASE(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT);
+    CASE(PP_FLASH_CLIPBOARD_FORMAT_HTML);
+    CASE(PP_FLASH_CLIPBOARD_FORMAT_RTF);
+    default:
+        return "UNKNOWNCLIPBOARDFORMAT";
+    }
+}

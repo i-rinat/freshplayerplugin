@@ -53,11 +53,17 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     }
 
     g2d->is_always_opaque = is_always_opaque;
-    g2d->width = size->width;
+    g2d->scale = 1.0;
+    g2d->width =  size->width;
     g2d->height = size->height;
     g2d->stride = 4 * size->width;
+
+    g2d->scaled_width =  g2d->width;
+    g2d->scaled_height = g2d->height;
+    g2d->scaled_stride = g2d->stride;
+
     g2d->data = calloc(g2d->stride * g2d->height, 1);
-    g2d->second_buffer = calloc(g2d->stride * g2d->height, 1);
+    g2d->second_buffer = calloc(g2d->scaled_stride * g2d->scaled_height, 1);
     if (!g2d->data || !g2d->second_buffer) {
         trace_warning("%s, can't allocate memory\n", __func__);
         free_and_nullify(g2d, data);
@@ -69,7 +75,6 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     g2d->cairo_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->data,
                             CAIRO_FORMAT_ARGB32, g2d->width, g2d->height, g2d->stride);
     g2d->task_list = NULL;
-    pthread_mutex_init(&g2d->lock, NULL);
 
     pp_resource_release(graphics_2d);
     return graphics_2d;
@@ -87,7 +92,6 @@ ppb_graphics2d_destroy(void *p)
         cairo_surface_destroy(g2d->cairo_surf);
         g2d->cairo_surf = NULL;
     }
-    pthread_mutex_destroy(&g2d->lock);
 }
 
 PP_Bool
@@ -109,7 +113,7 @@ ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image_data,
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
     if (!g2d)
         return;
-    struct g2d_paint_task_s *pt = malloc(sizeof(*pt));
+    struct g2d_paint_task_s *pt = g_slice_alloc(sizeof(*pt));
 
     pt->type = gpt_paint_id;
     pp_resource_ref(image_data);
@@ -141,7 +145,7 @@ ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
     if (!g2d)
         return;
 
-    struct g2d_paint_task_s *pt = malloc(sizeof(*pt));
+    struct g2d_paint_task_s *pt = g_slice_alloc(sizeof(*pt));
 
     pt->type = gpt_replace_contents;
     pp_resource_ref(image_data);
@@ -214,12 +218,21 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
             pp_resource_unref(pt->image_data);
             break;
         }
-        free(pt);
+        g_slice_free(struct g2d_paint_task_s, pt);
     }
 
-    pthread_mutex_lock(&g2d->lock);
-    memcpy(g2d->second_buffer, g2d->data, g2d->stride * g2d->height);
-    pthread_mutex_unlock(&g2d->lock);
+    // scale image
+    {
+        cairo_surface_t *surf;
+        surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
+                CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
+        cairo_t *cr = cairo_create(surf);
+        cairo_scale(cr, g2d->scale, g2d->scale);
+        cairo_set_source_surface(cr, g2d->cairo_surf, 0, 0);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+        cairo_surface_destroy(surf);
+    }
 
     NPRect npr = {.top = 0, .left = 0, .bottom = g2d->height, .right = g2d->width};
     pp_resource_release(graphics_2d);
@@ -231,31 +244,57 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
             .height = pp_i->height
         };
 
+        pthread_mutex_lock(&pp_i->lock);
         XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
         XFlush(pp_i->dpy);
+        pthread_mutex_unlock(&pp_i->lock);
     } else {
         npn.invalidaterect(pp_i->npp, &npr);
         npn.forceredraw(pp_i->npp);
     }
 
-    if (callback.flags != PP_COMPLETIONCALLBACK_FLAG_OPTIONAL) {
-        trace_warning("%s, non-optional callback was skipped\n", __func__);
+    if (callback.func) {
+        ppb_core_call_on_main_thread_now(pp_i->pp_instance_id, callback, PP_OK);
+        return PP_OK_COMPLETIONPENDING;
     }
+
     return PP_OK;
 }
 
 PP_Bool
 ppb_graphics2d_set_scale(PP_Resource resource, float scale)
 {
-    return PP_TRUE;
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(resource, PP_RESOURCE_GRAPHICS2D);
+    if (!g2d)
+        return PP_ERROR_BADRESOURCE;
+
+    g2d->scale = scale;
+    g2d->scaled_width = g2d->width * scale + 0.5;
+    g2d->scaled_height = g2d->height * scale + 0.5;
+    g2d->scaled_stride = 4 * g2d->scaled_width;
+
+    free(g2d->second_buffer);
+    g2d->second_buffer = calloc(g2d->scaled_stride * g2d->scaled_height, 1);
+    PP_Bool ret = !!g2d->second_buffer;
+
+    pp_resource_release(resource);
+    return ret;
 }
 
 float
 ppb_graphics2d_get_scale(PP_Resource resource)
 {
-    return 1.0f;
+    struct pp_graphics2d_s *g2d = pp_resource_acquire(resource, PP_RESOURCE_GRAPHICS2D);
+    if (!g2d)
+        return PP_ERROR_BADRESOURCE;
+
+    float scale = g2d->scale;
+    pp_resource_release(resource);
+    return scale;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Resource
@@ -265,7 +304,7 @@ trace_ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size,
     char *s_size = trace_size_as_string(size);
     trace_info("[PPB] {full} %s instance=%d, size=%s, is_always_opaque=%d\n", __func__+6,
                instance, s_size, is_always_opaque);
-    free(s_size);
+    g_free(s_size);
     return ppb_graphics2d_create(instance, size, is_always_opaque);
 }
 
@@ -284,7 +323,7 @@ trace_ppb_graphics2d_describe(PP_Resource graphics_2d, struct PP_Size *size,
 {
     char *s_size = trace_size_as_string(size);
     trace_info("[PPB] {zilch} %s graphics_2d=%d, size=%s\n", __func__+6, graphics_2d, s_size);
-    free(s_size);
+    g_free(s_size);
     return ppb_graphics2d_describe(graphics_2d, size, is_always_opaque);
 }
 
@@ -297,8 +336,8 @@ trace_ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image
     char *s_src_rect = trace_rect_as_string(src_rect);
     trace_info("[PPB] {full} %s graphics_2d=%d, image_data=%d, top_left=%s, src_rect=%s\n",
                __func__+6, graphics_2d, image_data, s_top_left, s_src_rect);
-    free(s_top_left);
-    free(s_src_rect);
+    g_free(s_top_left);
+    g_free(s_src_rect);
     ppb_graphics2d_paint_image_data(graphics_2d, image_data, top_left, src_rect);
 }
 
@@ -311,8 +350,8 @@ trace_ppb_graphics2d_scroll(PP_Resource graphics_2d, const struct PP_Rect *clip_
     char *s_amount = trace_point_as_string(amount);
     trace_info("[PPB] {zilch} %s graphics_2d=%d, clip_rect=%s, amount=%s\n", __func__+6,
                graphics_2d, s_clip_rect, s_amount);
-    free(s_clip_rect);
-    free(s_amount);
+    g_free(s_clip_rect);
+    g_free(s_amount);
     ppb_graphics2d_scroll(graphics_2d, clip_rect, amount);
 }
 
@@ -338,7 +377,7 @@ static
 PP_Bool
 trace_ppb_graphics2d_set_scale(PP_Resource resource, float scale)
 {
-    trace_info("[PPB] {zilch} %s resource=%d, scale=%f\n", __func__+6, resource, scale);
+    trace_info("[PPB] {full} %s resource=%d, scale=%f\n", __func__+6, resource, scale);
     return ppb_graphics2d_set_scale(resource, scale);
 }
 
@@ -346,28 +385,30 @@ static
 float
 trace_ppb_graphics2d_get_scale(PP_Resource resource)
 {
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_graphics2d_get_scale(resource);
 }
+#endif // NDEBUG
 
 
 const struct PPB_Graphics2D_1_0 ppb_graphics2d_interface_1_0 = {
-    .Create =           trace_ppb_graphics2d_create,
-    .IsGraphics2D =     trace_ppb_graphics2d_is_graphics2d,
-    .Describe =         trace_ppb_graphics2d_describe,
-    .PaintImageData =   trace_ppb_graphics2d_paint_image_data,
-    .Scroll =           trace_ppb_graphics2d_scroll,
-    .ReplaceContents =  trace_ppb_graphics2d_replace_contents,
-    .Flush =            trace_ppb_graphics2d_flush,
+    .Create =           TWRAP(ppb_graphics2d_create),
+    .IsGraphics2D =     TWRAP(ppb_graphics2d_is_graphics2d),
+    .Describe =         TWRAP(ppb_graphics2d_describe),
+    .PaintImageData =   TWRAP(ppb_graphics2d_paint_image_data),
+    .Scroll =           TWRAP(ppb_graphics2d_scroll),
+    .ReplaceContents =  TWRAP(ppb_graphics2d_replace_contents),
+    .Flush =            TWRAP(ppb_graphics2d_flush),
 };
 
 const struct PPB_Graphics2D_1_1 ppb_graphics2d_interface_1_1 = {
-    .Create =           trace_ppb_graphics2d_create,
-    .IsGraphics2D =     trace_ppb_graphics2d_is_graphics2d,
-    .Describe =         trace_ppb_graphics2d_describe,
-    .PaintImageData =   trace_ppb_graphics2d_paint_image_data,
-    .Scroll =           trace_ppb_graphics2d_scroll,
-    .ReplaceContents =  trace_ppb_graphics2d_replace_contents,
-    .Flush =            trace_ppb_graphics2d_flush,
-    .SetScale =         trace_ppb_graphics2d_set_scale,
-    .GetScale =         trace_ppb_graphics2d_get_scale,
+    .Create =           TWRAP(ppb_graphics2d_create),
+    .IsGraphics2D =     TWRAP(ppb_graphics2d_is_graphics2d),
+    .Describe =         TWRAP(ppb_graphics2d_describe),
+    .PaintImageData =   TWRAP(ppb_graphics2d_paint_image_data),
+    .Scroll =           TWRAP(ppb_graphics2d_scroll),
+    .ReplaceContents =  TWRAP(ppb_graphics2d_replace_contents),
+    .Flush =            TWRAP(ppb_graphics2d_flush),
+    .SetScale =         TWRAP(ppb_graphics2d_set_scale),
+    .GetScale =         TWRAP(ppb_graphics2d_get_scale),
 };

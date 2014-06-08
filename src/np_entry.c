@@ -28,18 +28,20 @@
 #include <string.h>
 #include <ppapi/c/ppb.h>
 #include <ppapi/c/pp_module.h>
+#include <libconfig.h>
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
 
-#define PPFP_PATH "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
+const char *config_file_name = "freshwrapper.conf";
 
 
 __attribute__((visibility("default")))
 const char *
 NP_GetMIMEDescription(void)
 {
+    trace_info("[NP] %s\n", __func__);
     // TODO: get MIME info from manifest or plugin itself
     return "application/x-shockwave-flash:swf:Shockwave Flash";
 }
@@ -48,6 +50,7 @@ __attribute__((visibility("default")))
 char *
 NP_GetPluginVersion(void)
 {
+    trace_info("[NP] %s\n", __func__);
     // TODO: get version from manifest
     return (char*)"13.1.2.3";
 }
@@ -63,7 +66,7 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
         *(const char **)value = "Shockwave Flash";
         break;
     case NPPVpluginDescriptionString:
-        *(const char **)value = "Shockwave Flash 13.1.2.3 (actual version unknown) (FreshPlayerPlugin)";
+        *(const char **)value = "Shockwave Flash 13.1 r2";
         break;
     default:
         trace_info("    not implemented variable %d\n", variable);
@@ -82,11 +85,81 @@ initialize_quirks(void)
         cmdline[len] = 0;
         if (strstr(cmdline, "operapluginwrapper")) {
             // Opera calls right mouse button "2" instead of correct "3"
-            quirks.switch_buttons_2_3 = 1;
+            config.quirks.switch_buttons_2_3 = 1;
         }
 
         fclose(fp);
     }
+}
+
+static
+char *
+get_local_config_path(void)
+{
+    char       *res = NULL;
+    const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+
+    if (xdg_config_home) {
+        res = g_strdup_printf("%s/%s", xdg_config_home, config_file_name);
+    } else {
+        const char *home = getenv("HOME");
+        res = g_strdup_printf("%s/.config/%s", home ? home : "", config_file_name);
+    }
+
+    return res;
+}
+
+static
+char *
+get_global_config_path(void)
+{
+    return g_strdup_printf("/etc/%s", config_file_name);
+}
+
+static
+void
+read_config(void)
+{
+    config_t    cfg;
+    char       *local_config = get_local_config_path();
+    char       *global_config = get_global_config_path();
+
+    config_init(&cfg);
+
+    if (!config_read_file(&cfg, local_config)) {
+        if (!config_read_file(&cfg, global_config)) {
+            goto quit;
+        }
+    }
+
+    int intval;
+    if (config_lookup_int(&cfg, "audio_buffer_min_ms", &intval)) {
+        config.audio_buffer_min_ms = intval;
+    }
+
+    if (config_lookup_int(&cfg, "audio_buffer_max_ms", &intval)) {
+        config.audio_buffer_max_ms = intval;
+    }
+
+    if (config_lookup_int(&cfg, "xinerama_screen", &intval)) {
+        config.xinerama_screen = intval;
+    }
+
+    const char *stringval;
+    if (config_lookup_string(&cfg, "plugin_path", &stringval)) {
+        config.plugin_path = strdup(stringval);
+    }
+
+    if (config_lookup_string(&cfg, "flash_command_line", &stringval)) {
+        config.flash_command_line = strdup(stringval);
+    }
+
+quit:
+    config_destroy(&cfg);
+    g_free(local_config);
+    g_free(global_config);
+
+    initialize_quirks();
 }
 
 __attribute__((visibility("default")))
@@ -122,9 +195,11 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     aNPPFuncs->getsiteswithdata = NPP_GetSitesWithData;
     aNPPFuncs->didComposite = NPP_DidComposite;
 
-    void *h = dlopen(PPFP_PATH, RTLD_LAZY);
+    read_config();
+
+    void *h = dlopen(config.plugin_path, RTLD_LAZY);
     if (!h) {
-        trace_error("%s, can't open " PPFP_PATH "\n", __func__);
+        trace_error("%s, can't open %s\n", __func__, config.plugin_path);
         return NPERR_GENERIC_ERROR;
     }
 
@@ -135,8 +210,6 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
         trace_error("%s, one of required PPP_* is missing\n", __func__);
         return NPERR_GENERIC_ERROR;
     }
-
-    initialize_quirks();
 
     // TODO: make module ids distinct
     int res = ppp_initialize_module(42, ppb_get_interface);

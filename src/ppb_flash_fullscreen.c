@@ -23,13 +23,27 @@
  */
 
 #include "ppb_flash_fullscreen.h"
+#include "ppb_core.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
 #include <ppapi/c/ppp_instance.h>
 #include "reverse_constant.h"
-#include  <X11/Xatom.h>
+#include <X11/Xatom.h>
+
+
+static volatile gint events_inflight = 0;
+
+struct handle_event_comt_param_s {
+    NPP         npp;
+    XEvent      ev;
+};
+
+struct thread_param_s {
+    PP_Instance         instance;
+    pthread_barrier_t   startup_barrier;
+};
 
 
 PP_Bool
@@ -46,22 +60,35 @@ _update_instance_view_comt(void *p)
 {
     PP_Instance instance = (size_t)p;
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
-    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-    v->rect.point.x = 0;
-    v->rect.point.y = 0;
-    v->rect.size.width = pp_i->width;
-    v->rect.size.height = pp_i->height;
-    pp_resource_release(view);
 
-    if (pp_i->instance_loaded)
+    if (pp_i->instance_loaded) {
+        PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
+        struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+        v->rect.point.x = 0;
+        v->rect.point.y = 0;
+        if (pp_i->is_fullscreen) {
+            v->rect.size.width = pp_i->fs_width;
+            v->rect.size.height = pp_i->fs_height;
+        } else {
+            v->rect.size.width = pp_i->width;
+            v->rect.size.height = pp_i->height;
+        }
+        pp_resource_release(view);
+
         pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
+        ppb_core_release_resource(view);
+    }
 }
 
-struct thread_param_s {
-    PP_Instance         instance;
-    pthread_barrier_t   startup_barrier;
-};
+static
+void
+_handle_event_comt(void *p)
+{
+    struct handle_event_comt_param_s *params = p;
+    NPP_HandleEvent(params->npp, &params->ev);
+    g_slice_free(struct handle_event_comt_param_s, params);
+    g_atomic_int_add(&events_inflight, -1);
+}
 
 static
 void *
@@ -70,27 +97,37 @@ fullscreen_window_thread(void *p)
     struct thread_param_s *tp = p;
     Display *dpy = XOpenDisplay(NULL);
     struct pp_instance_s *pp_i = tables_get_pp_instance(tp->instance);
-    XWindowAttributes xw_attrs;
-
-    if (XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &xw_attrs)) {
-        pp_i->width = xw_attrs.width;
-        pp_i->height = xw_attrs.height;
-    }
 
     pp_i->fs_wnd = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy),
-                                       0, 0, pp_i->width, pp_i->height, 0, 0, 0x809080);
+                                       0, 0, pp_i->fs_width, pp_i->fs_height, 0, 0, 0x809080);
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
                                     ButtonReleaseMask | PointerMotionMask | ExposureMask);
 
     // go fullscreen
     Atom netwm_fullscreen_atom = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
-    Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", True);
-    XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32,
-                    PropModeReplace, (unsigned char *)&netwm_fullscreen_atom, 1);
+    XChangeProperty(dpy, pp_i->fs_wnd,
+                    XInternAtom(dpy, "_NET_WM_STATE", False),
+                    XA_ATOM,
+                    32, PropModeReplace,
+                    (unsigned char *)&netwm_fullscreen_atom, 1);
+
+    // give window a name
+    const char *fs_window_name = "freshwrapper fullscreen window";
+    XChangeProperty(dpy, pp_i->fs_wnd,
+                    XInternAtom(dpy, "WM_NAME", False),
+                    XInternAtom(dpy, "STRING", False),
+                    8, PropModeReplace,
+                    (unsigned char *)fs_window_name, strlen(fs_window_name));
+
+    XChangeProperty(dpy, pp_i->fs_wnd,
+                    XInternAtom(dpy, "_NET_WM_NAME", False),
+                    XInternAtom(dpy, "UTF8_STRING", False),
+                    8, PropModeReplace,
+                    (unsigned char *)fs_window_name, strlen(fs_window_name));
 
     // show window
     XMapWindow(dpy, pp_i->fs_wnd);
-    XSync(dpy, false);
+    XSync(dpy, False);
     pp_i->is_fullscreen = 1;
 
     pthread_barrier_wait(&tp->startup_barrier);
@@ -108,21 +145,29 @@ fullscreen_window_thread(void *p)
                     goto quit_and_destroy_fs_wnd;
                 }
             } break;
-            case GraphicsExpose: {
-                // replace display handle
-                ev.xgraphicsexpose.display = dpy;
-            } break;
         }
-        NPP_HandleEvent(pp_i->npp, &ev);
+        ev.xany.display = pp_i->dpy;
+
+        struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
+        params->npp = pp_i->npp;
+        params->ev =  ev;
+        g_atomic_int_add(&events_inflight, 1);
+        npn.pluginthreadasynccall(pp_i->npp, _handle_event_comt, params);
     }
 
 quit_and_destroy_fs_wnd:
+
+    // wait for all events to be processed
+    while (g_atomic_int_get(&events_inflight)) {
+        usleep(10);
+    }
+
     pp_i->is_fullscreen = 0;
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
 
     npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, (void*)(size_t)tp->instance);
-    free(tp);
+    g_slice_free(struct thread_param_s, tp);
     return NULL;
 }
 
@@ -138,7 +183,7 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
     npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &browser_wnd);
 
     if (fullscreen) {
-        struct thread_param_s *tparams = malloc(sizeof(*tparams));
+        struct thread_param_s *tparams = g_slice_alloc(sizeof(*tparams));
         tparams->instance = instance;
 
         pthread_barrier_init(&tparams->startup_barrier, NULL, 2);
@@ -147,11 +192,8 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 
         pthread_barrier_wait(&tparams->startup_barrier);
     } else {
+        pthread_mutex_lock(&pp_i->lock);
         pp_i->is_fullscreen = 0;
-        // TODO: remember previous size
-        pp_i->width = 400;
-        pp_i->height = 300;
-
         XKeyEvent ev = {
             .type = KeyPress,
             .display = pp_i->dpy,
@@ -161,26 +203,33 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 
         XSendEvent(pp_i->dpy, pp_i->fs_wnd, False, 0, (void *)&ev);
         XFlush(pp_i->dpy);
+        pthread_mutex_unlock(&pp_i->lock);
     }
 
     return PP_TRUE;
 }
 
+struct get_fs_param_s {
+    PP_Instance         instance;
+    struct PP_Size     *size;
+    pthread_barrier_t   barrier;
+    int                 should_wait;
+    int                 retval;
+};
+
 PP_Bool
 ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    XWindowAttributes xw_attrs;
 
-    if (XGetWindowAttributes(pp_i->dpy, DefaultRootWindow(pp_i->dpy), &xw_attrs)) {
-        size->width = xw_attrs.width;
-        size->height = xw_attrs.height;
-        return PP_TRUE;
-    }
+    size->width = pp_i->fs_width;
+    size->height = pp_i->fs_height;
 
-    return PP_FALSE;
+    return PP_TRUE;
 }
 
+
+#ifndef NDEBUG
 // trace wrappers
 static
 PP_Bool
@@ -205,10 +254,11 @@ trace_ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size 
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_flash_fullscreen_get_screen_size(instance, size);
 }
+#endif // NDEBUG
 
 
 const struct PPB_FlashFullscreen_1_0 ppb_flash_fullscreen_interface_1_0 = {
-    .IsFullscreen =     trace_ppb_flash_fullscreen_is_fullscreen,
-    .SetFullscreen =    trace_ppb_flash_fullscreen_set_fullscreen,
-    .GetScreenSize =    trace_ppb_flash_fullscreen_get_screen_size,
+    .IsFullscreen =     TWRAP(ppb_flash_fullscreen_is_fullscreen),
+    .SetFullscreen =    TWRAP(ppb_flash_fullscreen_set_fullscreen),
+    .GetScreenSize =    TWRAP(ppb_flash_fullscreen_get_screen_size),
 };

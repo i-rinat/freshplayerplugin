@@ -34,7 +34,17 @@
 
 NPNetscapeFuncs npn;
 pthread_t       np_main_thread;
-struct quirks_s quirks = { 0 };
+struct config_s config = {
+    .audio_buffer_min_ms = 20,
+    .audio_buffer_max_ms = 500,
+    .xinerama_screen     = 0,
+    .plugin_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so",
+    .flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1",
+    .quirks = {
+        .switch_buttons_2_3 = 0,
+        .dump_resource_histogram = 0,
+    },
+};
 
 static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;
@@ -160,7 +170,7 @@ PP_MakeStringN(const char *s, unsigned int len)
     memcpy(ptr + sizeof(uint32_t), s, len);
     ptr[len + sizeof(uint32_t)] = 0;
 
-    struct PP_Var var = { 0 };
+    struct PP_Var var = { };
     var.type = PP_VARTYPE_STRING;
     var.value.as_id = (size_t)(void *)ptr;
     tables_ref_var(var);
@@ -171,7 +181,7 @@ PP_MakeStringN(const char *s, unsigned int len)
 struct PP_Var
 PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj)
 {
-    struct PP_Var var = { 0 };
+    struct PP_Var var = { };
     struct pp_var_object_s *obj;
 
     obj = malloc(sizeof(*obj));
