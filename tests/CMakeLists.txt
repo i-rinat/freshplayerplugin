@@ -15,7 +15,7 @@ include_directories(..)
 
 foreach(item ${test_list})
     add_executable(${item} EXCLUDE_FROM_ALL ${item}.c ../src/trace.c)
-    target_link_libraries(${item} -ldl ${REQ_LIBRARIES} freshwrapper-static)
+    target_link_libraries(${item} freshwrapper-static dl ${REQ_LIBRARIES})
     add_test(${item} ${item})
     add_dependencies(check ${item})
 endforeach()
