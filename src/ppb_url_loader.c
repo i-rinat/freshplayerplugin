@@ -210,10 +210,15 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     struct pp_url_request_info_s *ri = pp_resource_acquire(request_info,
                                                            PP_RESOURCE_URL_REQUEST_INFO);
 
-    struct PP_Var rel_url = PP_MakeString(ri->url);
-    struct PP_Var full_url =
-        ppb_url_util_dev_resolve_relative_to_document(ul->_.instance, rel_url, NULL);
-    ppb_var_release(rel_url);
+    struct PP_Var full_url;
+
+    if (ri->is_immediate_javascript) {
+        full_url = PP_MakeString(ri->url);
+    } else {
+        struct PP_Var rel_url = PP_MakeString(ri->url);
+        full_url = ppb_url_util_dev_resolve_relative_to_document(ul->_.instance, rel_url, NULL);
+        ppb_var_release(rel_url);
+    }
 
     ul->url =              nullsafe_strdup(ppb_var_var_to_utf8(full_url, NULL));
     ul->method =           ri->method;

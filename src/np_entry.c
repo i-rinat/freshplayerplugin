@@ -171,6 +171,7 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     trace_info("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p, browser API version = %u\n", __func__,
                aNPNFuncs, aNPPFuncs, aNPNFuncs->version);
 
+    memset(&npn, 0, sizeof(npn));
     memcpy(&npn, aNPNFuncs, sizeof(npn) < aNPNFuncs->size ? sizeof(npn) : aNPNFuncs->size);
 
     aNPPFuncs->size = sizeof(NPPluginFuncs);
