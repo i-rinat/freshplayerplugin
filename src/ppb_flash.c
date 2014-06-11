@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
+#include "config.h"
 #include "reverse_constant.h"
 #include "ppb_var.h"
 #include "ppb_url_loader.h"

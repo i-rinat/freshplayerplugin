@@ -25,6 +25,7 @@
 #include "pp_resource.h"
 #include "tables.h"
 #include "trace.h"
+#include "config.h"
 #include <glib.h>
 #include <stdlib.h>
 #include <unistd.h>

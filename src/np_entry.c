@@ -28,13 +28,11 @@
 #include <string.h>
 #include <ppapi/c/ppb.h>
 #include <ppapi/c/pp_module.h>
-#include <libconfig.h>
 #include "trace.h"
 #include "tables.h"
+#include "config.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
-
-const char *config_file_name = "freshwrapper.conf";
 
 
 __attribute__((visibility("default")))
@@ -74,98 +72,6 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
     return NPERR_NO_ERROR;
 }
 
-static
-void
-initialize_quirks(void)
-{
-    FILE *fp = fopen("/proc/self/cmdline", "r");
-    if (fp) {
-        char cmdline[2048];
-        size_t len = fread(cmdline, 1, sizeof(cmdline) - 1, fp);
-        cmdline[len] = 0;
-        if (strstr(cmdline, "operapluginwrapper")) {
-            // Opera calls right mouse button "2" instead of correct "3"
-            config.quirks.switch_buttons_2_3 = 1;
-        }
-
-        fclose(fp);
-    }
-}
-
-static
-char *
-get_local_config_path(void)
-{
-    char       *res = NULL;
-    const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
-
-    if (xdg_config_home) {
-        res = g_strdup_printf("%s/%s", xdg_config_home, config_file_name);
-    } else {
-        const char *home = getenv("HOME");
-        res = g_strdup_printf("%s/.config/%s", home ? home : "", config_file_name);
-    }
-
-    return res;
-}
-
-static
-char *
-get_global_config_path(void)
-{
-    return g_strdup_printf("/etc/%s", config_file_name);
-}
-
-static
-void
-read_config(void)
-{
-    config_t    cfg;
-    char       *local_config = get_local_config_path();
-    char       *global_config = get_global_config_path();
-
-    config_init(&cfg);
-
-    if (!config_read_file(&cfg, local_config)) {
-        if (!config_read_file(&cfg, global_config)) {
-            goto quit;
-        }
-    }
-
-    int intval;
-    if (config_lookup_int(&cfg, "audio_buffer_min_ms", &intval)) {
-        config.audio_buffer_min_ms = intval;
-    }
-
-    if (config_lookup_int(&cfg, "audio_buffer_max_ms", &intval)) {
-        config.audio_buffer_max_ms = intval;
-    }
-
-    if (config_lookup_int(&cfg, "xinerama_screen", &intval)) {
-        config.xinerama_screen = intval;
-    }
-
-    const char *stringval;
-    if (config_lookup_string(&cfg, "plugin_path", &stringval)) {
-        config.plugin_path = strdup(stringval);
-    }
-
-    if (config_lookup_string(&cfg, "flash_command_line", &stringval)) {
-        config.flash_command_line = strdup(stringval);
-    }
-
-    if (config_lookup_int(&cfg, "exp_enable_3d", &intval)) {
-        config.exp_enable_3d = intval;
-    }
-
-quit:
-    config_destroy(&cfg);
-    g_free(local_config);
-    g_free(global_config);
-
-    initialize_quirks();
-}
-
 __attribute__((visibility("default")))
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
@@ -200,7 +106,7 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     aNPPFuncs->getsiteswithdata = NPP_GetSitesWithData;
     aNPPFuncs->didComposite = NPP_DidComposite;
 
-    read_config();
+    fpp_config_initialize();
 
     void *h = dlopen(config.plugin_path, RTLD_LAZY);
     if (!h) {
@@ -231,5 +137,6 @@ NPError
 NP_Shutdown(void)
 {
     trace_info("[NP] %s\n", __func__);
+    fpp_config_destroy();
     return NPERR_NO_ERROR;
 }

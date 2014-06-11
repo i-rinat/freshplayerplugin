@@ -28,6 +28,7 @@
 #include <glib.h>
 #include "trace.h"
 #include "tables.h"
+#include "config.h"
 #include "pp_resource.h"
 
 
