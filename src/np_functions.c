@@ -736,6 +736,20 @@ handle_key_press_release_event(NPP npp, void *event)
 }
 
 int16_t
+handle_focus_in_out_event(NPP npp, void *event)
+{
+    struct pp_instance_s *pp_i = npp->pdata;
+    XFocusChangeEvent *ev = event;
+
+    PP_Bool has_focus = (ev->type == FocusIn) ? PP_TRUE : PP_FALSE;
+
+    if (pp_i->ppp_instance_1_1 && pp_i->ppp_instance_1_1->DidChangeView)
+        pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, has_focus);
+
+    return 1;
+}
+
+int16_t
 NPP_HandleEvent(NPP npp, void *event)
 {
     XAnyEvent *xaev = event;
@@ -781,6 +795,12 @@ NPP_HandleEvent(NPP npp, void *event)
     case KeyRelease:
         TRACE_HELPER("{full}");
         return handle_key_press_release_event(npp, event);
+    case FocusIn:
+        TRACE_HELPER("{full}");
+        return handle_focus_in_out_event(npp, event);
+    case FocusOut:
+        TRACE_HELPER("{full}");
+        return handle_focus_in_out_event(npp, event);
     default:
         TRACE_HELPER("{zilch}");
         return 0;
