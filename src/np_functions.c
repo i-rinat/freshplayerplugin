@@ -666,7 +666,7 @@ handle_button_press_release_event(NPP npp, void *event)
         struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
 
         // pp_event = ppb_wheel_input_event_create(
-        //                 pp_i->pp_instance_id, ppb_core_get_time_ticks(), mod,
+        //                 pp_i->pp_instance_id, ev->time/1.0e6, mod,
         //                 &wheel_delta, &wheel_ticks, PP_FALSE);
         (void)wheel_delta;
         (void)wheel_ticks;
