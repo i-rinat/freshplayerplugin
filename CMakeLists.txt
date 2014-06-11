@@ -101,7 +101,6 @@ add_library(freshwrapper-obj OBJECT
 )
 
 add_library(freshwrapper SHARED $<TARGET_OBJECTS:freshwrapper-obj>)
-add_library(freshwrapper-static STATIC $<TARGET_OBJECTS:freshwrapper-obj>)
 
 target_link_libraries(freshwrapper
 	dl

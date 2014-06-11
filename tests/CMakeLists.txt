@@ -12,9 +12,11 @@ link_directories(${REQ_LIBRARY_DIRS})
 # simplify inclusion of .c sources
 include_directories(..)
 
+# build static version to ease debugging
+add_library(freshwrapper-static STATIC EXCLUDE_FROM_ALL $<TARGET_OBJECTS:freshwrapper-obj>)
 
 foreach(item ${test_list})
-    add_executable(${item} EXCLUDE_FROM_ALL ${item}.c ../src/trace.c)
+    add_executable(${item} EXCLUDE_FROM_ALL ${item}.c)
     target_link_libraries(${item} freshwrapper-static dl ${REQ_LIBRARIES})
     add_test(${item} ${item})
     add_dependencies(check ${item})
