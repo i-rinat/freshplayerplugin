@@ -154,6 +154,10 @@ read_config(void)
         config.flash_command_line = strdup(stringval);
     }
 
+    if (config_lookup_int(&cfg, "exp_enable_3d", &intval)) {
+        config.exp_enable_3d = intval;
+    }
+
 quit:
     config_destroy(&cfg);
     g_free(local_config);

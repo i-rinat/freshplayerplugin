@@ -1,3 +1,9 @@
+# Configuration options for FreshPlayerPlugin
+
+# This configuration file is optional. Wrapper will search for it first
+# in ~/.config/freshwrapper.conf, then in /etc/freshwrapper.conf.
+# If wrapper fails to find configuration, it will use default values
+
 # Audio buffer is used to continuously provide sound adapter with data.
 # Values too low may lead to buffer underruns and stuttering.  Values
 # too high will lead to noticeable latency. Usually plugin selects size
@@ -17,3 +23,6 @@ plugin_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
 
 # "Command-line" arguments for Flash
 flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1"
+
+# experimental: enable 3d and stage 3d
+exp_enable_3d = 0
