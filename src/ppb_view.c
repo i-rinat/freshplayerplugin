@@ -38,6 +38,8 @@ PP_Bool
 ppb_view_get_rect(PP_Resource resource, struct PP_Rect *rect)
 {
     struct pp_view_s *v = pp_resource_acquire(resource, PP_RESOURCE_VIEW);
+    if (!v)
+        return PP_FALSE;
     rect->point.x =     v->rect.point.x;
     rect->point.y =     v->rect.point.y;
     rect->size.width =  v->rect.size.width;
@@ -71,6 +73,8 @@ PP_Bool
 ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
 {
     struct pp_view_s *v = pp_resource_acquire(resource, PP_RESOURCE_VIEW);
+    if (!v)
+        return PP_FALSE;
     clip->point.x =     v->rect.point.x;
     clip->point.y =     v->rect.point.y;
     clip->size.width =  v->rect.size.width;
