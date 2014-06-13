@@ -52,16 +52,16 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
     default:
     case PP_CHARSET_CONVERSIONERROR_FAIL:
 
-        cd = iconv_open(output_char_set, "UTF16");
+        cd = iconv_open(output_char_set, "UTF16LE");
         break;
     case PP_CHARSET_CONVERSIONERROR_SKIP:
         tmp = g_strdup_printf("%s//IGNORE", output_char_set);
-        cd = iconv_open(tmp, "UTF16");
+        cd = iconv_open(tmp, "UTF16LE");
         g_free(tmp);
         break;
     case PP_CHARSET_CONVERSIONERROR_SUBSTITUTE:
         tmp = g_strdup_printf("%s//TRANSLIT", output_char_set);
-        cd = iconv_open(tmp, "UTF16");
+        cd = iconv_open(tmp, "UTF16LE");
         g_free(tmp);
         break;
     }
@@ -104,13 +104,13 @@ ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint
     switch (on_error) {
     default:
     case PP_CHARSET_CONVERSIONERROR_FAIL:
-        cd = iconv_open("UTF16", input_char_set);
+        cd = iconv_open("UTF16LE", input_char_set);
         break;
     case PP_CHARSET_CONVERSIONERROR_SKIP:
-        cd = iconv_open("UTF16//IGNORE", input_char_set);
+        cd = iconv_open("UTF16LE//IGNORE", input_char_set);
         break;
     case PP_CHARSET_CONVERSIONERROR_SUBSTITUTE:
-        cd = iconv_open("UTF16//TRANSLIT", input_char_set);
+        cd = iconv_open("UTF16LE//TRANSLIT", input_char_set);
         break;
     }
 
