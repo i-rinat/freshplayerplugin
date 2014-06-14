@@ -35,6 +35,7 @@ struct fpp_config_s {
     struct {
         int   switch_buttons_2_3;
         int   dump_resource_histogram;
+        int   plugin_missing;
     } quirks;
 };
 

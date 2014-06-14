@@ -30,6 +30,8 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
+#include <cairo.h>
+#include <cairo-xlib.h>
 #include <GLES2/gl2.h>
 #include <pthread.h>
 #include "trace.h"
@@ -78,7 +80,6 @@ NPError
 NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
 {
-    // TODO: mode parameter handling
     int k;
     struct pp_instance_s *pp_i;
     trace_info("[NPP] {part} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
@@ -89,6 +90,14 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     for (k = 0; k < argc; k ++)
         trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
+
+    // request windowless operation
+    npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
+
+    if (config.quirks.plugin_missing) {
+        trace_info("plugin missing, using placeholder\n");
+        return NPERR_NO_ERROR;
+    }
 
     pp_i = calloc(sizeof(*pp_i), 1);
     npp->pdata = pp_i;
@@ -151,9 +160,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     }
     pthread_mutex_unlock(&pp_i->lock);
 
-    // request windowless operation
-    npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
-
     pp_i->ppp_instance_1_1->DidCreate(pp_i->pp_instance_id, pp_i->argc, pp_i->argn, pp_i->argv);
     pp_i->instance_loaded = 1;
 
@@ -183,6 +189,10 @@ NPP_Destroy(NPP npp, NPSavedData **save)
 {
     trace_info("[NPP] {full} %s npp=%p, save=%p\n", __func__, npp, save);
     tables_remove_npp_instance(npp);
+
+    if (config.quirks.plugin_missing)
+        return NPERR_NO_ERROR;
+
     struct pp_instance_s *pp_i = npp->pdata;
     pp_i->ppp_instance_1_1->DidDestroy(pp_i->pp_instance_id);
     if (save)
@@ -193,6 +203,9 @@ NPP_Destroy(NPP npp, NPSavedData **save)
 NPError
 NPP_SetWindow(NPP npp, NPWindow *window)
 {
+    if (config.quirks.plugin_missing)
+        return NPERR_NO_ERROR;
+
     char *window_str = trace_np_window_as_string(window);
     trace_info("[NPP] {full} %s npp=%p, window=%s\n", __func__, npp, window_str);
     g_free(window_str);
@@ -236,6 +249,9 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
                "end=%u, lastmodified=%u, .notifyData=%p, .headers=%s}, seekable=%d\n", __func__,
                npp, type, stream->pdata, stream->ndata, stream->url, stream->end,
                stream->lastmodified, stream->notifyData, stream->headers, seekable);
+
+    if (config.quirks.plugin_missing)
+        return NPERR_NO_ERROR;
 
     PP_Resource loader = (size_t)stream->notifyData;
     if (!loader) {
@@ -302,6 +318,8 @@ NPError
 NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 {
     trace_info("[NPP] {full} %s npp=%p, stream=%p, reason=%d\n", __func__, npp, stream, reason);
+    if (config.quirks.plugin_missing)
+        return NPERR_NO_ERROR;
 
     PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
     if (!loader)
@@ -346,6 +364,8 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 {
     trace_info("[NPP] {full} %s npp=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
                npp, stream, offset, len, buffer);
+    if (config.quirks.plugin_missing)
+        return len;
 
     PP_Resource loader = (PP_Resource)(size_t)stream->pdata;
     if (!loader)
@@ -444,6 +464,65 @@ handle_graphics_expose_event(NPP npp, void *event)
         return 0;
     }
 
+    return 1;
+}
+
+/// diplay plugin placeholder and error message in it
+static
+int16_t
+handle_placeholder_graphics_expose_event(NPP npp, void *event)
+{
+    XGraphicsExposeEvent   *ev = event;
+    Display                *dpy = ev->display;
+    Drawable                drawable = ev->drawable;
+    int                     screen = 0;
+    unsigned int            width, height, border_width, depth;
+    Window                  root_wnd;
+    int                     x, y;
+
+    XGetGeometry(dpy, drawable, &root_wnd, &x, &y, &width, &height, &border_width, &depth);
+    cairo_surface_t *xlib_surf = cairo_xlib_surface_create(dpy, drawable,
+                                                           DefaultVisual(dpy, screen),
+                                                           width, height);
+    cairo_t *cr = cairo_create(xlib_surf);
+    double bg_color[3] = {0.35, 0.35, 0.3};
+    double fg_color[3] = {0.9, 0.9, 0.5};
+
+
+    // clear box
+    cairo_rectangle(cr, 0, 0, width, height);
+    cairo_set_source_rgb(cr, bg_color[0], bg_color[1], bg_color[2]);
+    cairo_fill(cr);
+
+    // draw crossed box
+    cairo_set_source_rgb(cr, fg_color[0], fg_color[1], fg_color[2]);
+    cairo_set_line_width(cr, 3);
+    cairo_rectangle(cr, 0, 0, width, height);
+    cairo_stroke(cr);
+    cairo_move_to(cr, 0, 0);        cairo_line_to(cr, width, height);
+    cairo_move_to(cr, 0, height);   cairo_line_to(cr, width, 0);
+    cairo_stroke(cr);
+
+    // show error text
+    cairo_text_extents_t extents;
+    gchar *txt = g_strdup_printf("Failed to load \"%s\"", config.plugin_path);
+    cairo_set_font_size(cr, 14);
+    cairo_move_to(cr, 10.0, 30.0);
+    cairo_text_extents(cr, txt, &extents);
+
+    // prepare background
+    cairo_rectangle(cr, 10.0, 30.0, extents.width + 6, extents.height + 6);
+    cairo_set_source_rgb(cr, bg_color[0], bg_color[1], bg_color[2]);
+    cairo_fill(cr);
+
+    // draw text itself
+    cairo_set_source_rgb(cr, fg_color[0], fg_color[1], fg_color[2]);
+    cairo_move_to(cr, 10.0 + 3, 30.0 + extents.height);
+    cairo_show_text(cr, txt);
+    g_free(txt);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(xlib_surf);
     return 1;
 }
 
@@ -753,14 +832,19 @@ int16_t
 NPP_HandleEvent(NPP npp, void *event)
 {
     XAnyEvent *xaev = event;
+    struct pp_instance_s *pp_i = npp->pdata;
+
+    if (config.quirks.plugin_missing) {
+        if (xaev->type == GraphicsExpose)
+            handle_placeholder_graphics_expose_event(npp, event);
+        return NPERR_NO_ERROR;
+    }
 
 #define TRACE_HELPER(implstatus)                                                    \
     trace_info("[NPP] " implstatus " %s npp=%p, event={.type=%s, .serial=%lu, "   \
                ".send_event=%d, .display=%p, .window=0x%x}\n", __func__, npp,       \
                reverse_xevent_type(xaev->type), xaev->serial, xaev->send_event,     \
                xaev->display, (uint32_t)xaev->window)
-
-    struct pp_instance_s *pp_i = npp->pdata;
 
     if (pp_i && pp_i->is_fullscreen && pp_i->fs_wnd != xaev->window) {
         return 0;
@@ -820,6 +904,9 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 NPError
 NPP_GetValue(NPP npp, NPPVariable variable, void *value)
 {
+    if (config.quirks.plugin_missing)
+        return NPERR_NO_ERROR;
+
     const char *var_name = reverse_npp_variable(variable);
 
     switch (variable) {

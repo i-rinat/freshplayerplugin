@@ -111,7 +111,8 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     void *h = dlopen(config.plugin_path, RTLD_LAZY);
     if (!h) {
         trace_error("%s, can't open %s\n", __func__, config.plugin_path);
-        return NPERR_GENERIC_ERROR;
+        config.quirks.plugin_missing = 1;
+        return NPERR_NO_ERROR;
     }
 
     ppp_initialize_module = dlsym(h, "PPP_InitializeModule");
