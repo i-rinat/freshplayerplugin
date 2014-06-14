@@ -51,7 +51,6 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
     switch (on_error) {
     default:
     case PP_CHARSET_CONVERSIONERROR_FAIL:
-
         cd = iconv_open(output_char_set, "UTF16LE");
         break;
     case PP_CHARSET_CONVERSIONERROR_SKIP:
@@ -82,7 +81,6 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
 
     *output_length = output_buffer_length - 1 - outbytesleft;
     output[*output_length] = 0;
-    printf("result = %s\n", output);
     iconv_close(cd);
     return output;
 }
@@ -137,7 +135,7 @@ ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint
 struct PP_Var
 ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 {
-    setlocale(LC_ALL, NULL);
+    setlocale(LC_ALL, "");
     return PP_MakeString(nl_langinfo(CODESET));
 }
 
