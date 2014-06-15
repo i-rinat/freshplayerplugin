@@ -41,6 +41,16 @@ Status
 
 Early alpha. Some video players work, with both video and audio.
 
+Prerequisites
+=============
+
+On Ubuntu-based Linuxes:
+
+``` sh
+sudo apt-get install cmake libevent-dev libegl1-mesa-dev \
+libgles2-mesa-dev liburiparser-dev libconfig-dev
+```
+
 Install
 =======
 
