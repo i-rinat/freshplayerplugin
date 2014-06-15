@@ -82,7 +82,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 {
     int k;
     struct pp_instance_s *pp_i;
-    trace_info("[NPP] {part} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
+    trace_info("[NPP] {full} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                pluginType, npp, mode, argc, saved);
 
     tables_add_npp_instance(npp);

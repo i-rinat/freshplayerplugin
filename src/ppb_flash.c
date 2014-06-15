@@ -418,7 +418,7 @@ static
 struct PP_Var
 trace_ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
-    trace_info("[PPB] {part} %s instance=%d, setting=%s\n", __func__+6, instance,
+    trace_info("[PPB] {full} %s instance=%d, setting=%s\n", __func__+6, instance,
                reverse_pp_flash_setting(setting));
     return ppb_flash_get_setting(instance, setting);
 }

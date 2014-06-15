@@ -327,7 +327,7 @@ PP_Resource
 trace_ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context,
                             const int32_t attrib_list[])
 {
-    trace_info("[PPB] {part} %s intance=%d, share_context=%d, attrib_list={TODO}\n", __func__+6,
+    trace_info("[PPB] {full} %s intance=%d, share_context=%d, attrib_list={TODO}\n", __func__+6,
                instance, share_context);
     return ppb_graphics3d_create(instance, share_context, attrib_list);
 }

@@ -116,7 +116,7 @@ trace_ppb_view_get_rect(PP_Resource resource, struct PP_Rect *rect)
 PP_Bool
 trace_ppb_view_is_fullscreen(PP_Resource resource)
 {
-    trace_info("[PPB] {part} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_view_is_fullscreen(resource);
 }
 
@@ -130,7 +130,7 @@ trace_ppb_view_is_visible(PP_Resource resource)
 PP_Bool
 trace_ppb_view_is_page_visible(PP_Resource resource)
 {
-    trace_info("[PPB] {part} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_view_is_page_visible(resource);
 }
 
@@ -144,14 +144,14 @@ trace_ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
 float
 trace_ppb_view_get_device_scale(PP_Resource resource)
 {
-    trace_info("[PPB] {part} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_device_scale(resource);
 }
 
 float
 trace_ppb_view_get_css_scale(PP_Resource resource)
 {
-    trace_info("[PPB] {part} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_css_scale(resource);
 }
 #endif // NDEBUG
