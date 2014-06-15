@@ -1396,9 +1396,8 @@ ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id, GLen
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ActiveTexture(PP_Resource context, GLenum texture)
 {
@@ -1407,7 +1406,7 @@ trace_ppb_opengles2_ActiveTexture(PP_Resource context, GLenum texture)
     ppb_opengles2_ActiveTexture(context, texture);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_AttachShader(PP_Resource context, GLuint program, GLuint shader)
 {
@@ -1416,7 +1415,7 @@ trace_ppb_opengles2_AttachShader(PP_Resource context, GLuint program, GLuint sha
     ppb_opengles2_AttachShader(context, program, shader);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BindAttribLocation(PP_Resource context, GLuint program, GLuint index,
                                        const char *name)
@@ -1426,7 +1425,7 @@ trace_ppb_opengles2_BindAttribLocation(PP_Resource context, GLuint program, GLui
     ppb_opengles2_BindAttribLocation(context, program, index, name);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BindBuffer(PP_Resource context, GLenum target, GLuint buffer)
 {
@@ -1435,7 +1434,7 @@ trace_ppb_opengles2_BindBuffer(PP_Resource context, GLenum target, GLuint buffer
     ppb_opengles2_BindBuffer(context, target, buffer);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BindFramebuffer(PP_Resource context, GLenum target, GLuint framebuffer)
 {
@@ -1444,7 +1443,7 @@ trace_ppb_opengles2_BindFramebuffer(PP_Resource context, GLenum target, GLuint f
     ppb_opengles2_BindFramebuffer(context, target, framebuffer);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BindRenderbuffer(PP_Resource context, GLenum target, GLuint renderbuffer)
 {
@@ -1453,7 +1452,7 @@ trace_ppb_opengles2_BindRenderbuffer(PP_Resource context, GLenum target, GLuint 
     ppb_opengles2_BindRenderbuffer(context, target, renderbuffer);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BindTexture(PP_Resource context, GLenum target, GLuint texture)
 {
@@ -1462,7 +1461,7 @@ trace_ppb_opengles2_BindTexture(PP_Resource context, GLenum target, GLuint textu
     ppb_opengles2_BindTexture(context, target, texture);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BlendColor(PP_Resource context, GLclampf red, GLclampf green, GLclampf blue,
                                GLclampf alpha)
@@ -1472,7 +1471,7 @@ trace_ppb_opengles2_BlendColor(PP_Resource context, GLclampf red, GLclampf green
     ppb_opengles2_BlendColor(context, red, green, blue, alpha);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BlendEquation(PP_Resource context, GLenum mode)
 {
@@ -1481,7 +1480,7 @@ trace_ppb_opengles2_BlendEquation(PP_Resource context, GLenum mode)
     ppb_opengles2_BlendEquation(context, mode);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BlendEquationSeparate(PP_Resource context, GLenum modeRGB, GLenum modeAlpha)
 {
@@ -1490,7 +1489,7 @@ trace_ppb_opengles2_BlendEquationSeparate(PP_Resource context, GLenum modeRGB, G
     ppb_opengles2_BlendEquationSeparate(context, modeRGB, modeAlpha);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BlendFunc(PP_Resource context, GLenum sfactor, GLenum dfactor)
 {
@@ -1499,7 +1498,7 @@ trace_ppb_opengles2_BlendFunc(PP_Resource context, GLenum sfactor, GLenum dfacto
     ppb_opengles2_BlendFunc(context, sfactor, dfactor);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BlendFuncSeparate(PP_Resource context, GLenum srcRGB, GLenum dstRGB,
                                       GLenum srcAlpha, GLenum dstAlpha)
@@ -1511,7 +1510,7 @@ trace_ppb_opengles2_BlendFuncSeparate(PP_Resource context, GLenum srcRGB, GLenum
     ppb_opengles2_BlendFuncSeparate(context, srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BufferData(PP_Resource context, GLenum target, GLsizeiptr size,
                                const void *data, GLenum usage)
@@ -1522,7 +1521,7 @@ trace_ppb_opengles2_BufferData(PP_Resource context, GLenum target, GLsizeiptr si
     ppb_opengles2_BufferData(context, target, size, data, usage);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_BufferSubData(PP_Resource context, GLenum target, GLintptr offset,
                                   GLsizeiptr size, const void *data)
@@ -1533,7 +1532,7 @@ trace_ppb_opengles2_BufferSubData(PP_Resource context, GLenum target, GLintptr o
     ppb_opengles2_BufferSubData(context, target, offset, size, data);
 }
 
-static
+TRACE_WRAPPER
 GLenum
 trace_ppb_opengles2_CheckFramebufferStatus(PP_Resource context, GLenum target)
 {
@@ -1542,7 +1541,7 @@ trace_ppb_opengles2_CheckFramebufferStatus(PP_Resource context, GLenum target)
     return ppb_opengles2_CheckFramebufferStatus(context, target);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Clear(PP_Resource context, GLbitfield mask)
 {
@@ -1550,7 +1549,7 @@ trace_ppb_opengles2_Clear(PP_Resource context, GLbitfield mask)
     ppb_opengles2_Clear(context, mask);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ClearColor(PP_Resource context, GLclampf red, GLclampf green, GLclampf blue,
                                GLclampf alpha)
@@ -1560,7 +1559,7 @@ trace_ppb_opengles2_ClearColor(PP_Resource context, GLclampf red, GLclampf green
     ppb_opengles2_ClearColor(context, red, green, blue, alpha);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ClearDepthf(PP_Resource context, GLclampf depth)
 {
@@ -1568,7 +1567,7 @@ trace_ppb_opengles2_ClearDepthf(PP_Resource context, GLclampf depth)
     ppb_opengles2_ClearDepthf(context, depth);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ClearStencil(PP_Resource context, GLint s)
 {
@@ -1576,7 +1575,7 @@ trace_ppb_opengles2_ClearStencil(PP_Resource context, GLint s)
     ppb_opengles2_ClearStencil(context, s);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ColorMask(PP_Resource context, GLboolean red, GLboolean green, GLboolean blue,
                               GLboolean alpha)
@@ -1586,7 +1585,7 @@ trace_ppb_opengles2_ColorMask(PP_Resource context, GLboolean red, GLboolean gree
     ppb_opengles2_ColorMask(context, red, green, blue, alpha);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_CompileShader(PP_Resource context, GLuint shader)
 {
@@ -1594,7 +1593,7 @@ trace_ppb_opengles2_CompileShader(PP_Resource context, GLuint shader)
     ppb_opengles2_CompileShader(context, shader);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_CompressedTexImage2D(PP_Resource context, GLenum target, GLint level,
                                          GLenum internalformat, GLsizei width, GLsizei height,
@@ -1608,7 +1607,7 @@ trace_ppb_opengles2_CompressedTexImage2D(PP_Resource context, GLenum target, GLi
                                        border, imageSize, data);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_CompressedTexSubImage2D(PP_Resource context, GLenum target, GLint level,
                                             GLint xoffset, GLint yoffset, GLsizei width,
@@ -1623,7 +1622,7 @@ trace_ppb_opengles2_CompressedTexSubImage2D(PP_Resource context, GLenum target, 
                                           format, imageSize, data);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_CopyTexImage2D(PP_Resource context, GLenum target, GLint level,
                                    GLenum internalformat, GLint x, GLint y, GLsizei width,
@@ -1637,7 +1636,7 @@ trace_ppb_opengles2_CopyTexImage2D(PP_Resource context, GLenum target, GLint lev
                                  border);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_CopyTexSubImage2D(PP_Resource context, GLenum target, GLint level,
                                       GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width,
@@ -1649,7 +1648,7 @@ trace_ppb_opengles2_CopyTexSubImage2D(PP_Resource context, GLenum target, GLint 
     ppb_opengles2_CopyTexSubImage2D(context, target, level, xoffset, yoffset, x, y, width, height);
 }
 
-static
+TRACE_WRAPPER
 GLuint
 trace_ppb_opengles2_CreateProgram(PP_Resource context)
 {
@@ -1657,7 +1656,7 @@ trace_ppb_opengles2_CreateProgram(PP_Resource context)
     return ppb_opengles2_CreateProgram(context);
 }
 
-static
+TRACE_WRAPPER
 GLuint
 trace_ppb_opengles2_CreateShader(PP_Resource context, GLenum type)
 {
@@ -1666,7 +1665,7 @@ trace_ppb_opengles2_CreateShader(PP_Resource context, GLenum type)
     return ppb_opengles2_CreateShader(context, type);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_CullFace(PP_Resource context, GLenum mode)
 {
@@ -1675,7 +1674,7 @@ trace_ppb_opengles2_CullFace(PP_Resource context, GLenum mode)
     ppb_opengles2_CullFace(context, mode);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DeleteBuffers(PP_Resource context, GLsizei n, const GLuint *buffers)
 {
@@ -1684,7 +1683,7 @@ trace_ppb_opengles2_DeleteBuffers(PP_Resource context, GLsizei n, const GLuint *
     ppb_opengles2_DeleteBuffers(context, n, buffers);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DeleteFramebuffers(PP_Resource context, GLsizei n, const GLuint *framebuffers)
 {
@@ -1693,7 +1692,7 @@ trace_ppb_opengles2_DeleteFramebuffers(PP_Resource context, GLsizei n, const GLu
     ppb_opengles2_DeleteFramebuffers(context, n, framebuffers);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DeleteProgram(PP_Resource context, GLuint program)
 {
@@ -1701,7 +1700,7 @@ trace_ppb_opengles2_DeleteProgram(PP_Resource context, GLuint program)
     ppb_opengles2_DeleteProgram(context, program);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DeleteRenderbuffers(PP_Resource context, GLsizei n, const GLuint *renderbuffers)
 {
@@ -1710,7 +1709,7 @@ trace_ppb_opengles2_DeleteRenderbuffers(PP_Resource context, GLsizei n, const GL
     ppb_opengles2_DeleteRenderbuffers(context, n, renderbuffers);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DeleteShader(PP_Resource context, GLuint shader)
 {
@@ -1718,7 +1717,7 @@ trace_ppb_opengles2_DeleteShader(PP_Resource context, GLuint shader)
     ppb_opengles2_DeleteShader(context, shader);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DeleteTextures(PP_Resource context, GLsizei n, const GLuint *textures)
 {
@@ -1726,7 +1725,7 @@ trace_ppb_opengles2_DeleteTextures(PP_Resource context, GLsizei n, const GLuint 
     ppb_opengles2_DeleteTextures(context, n, textures);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DepthFunc(PP_Resource context, GLenum func)
 {
@@ -1735,7 +1734,7 @@ trace_ppb_opengles2_DepthFunc(PP_Resource context, GLenum func)
     ppb_opengles2_DepthFunc(context, func);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DepthMask(PP_Resource context, GLboolean flag)
 {
@@ -1743,7 +1742,7 @@ trace_ppb_opengles2_DepthMask(PP_Resource context, GLboolean flag)
     ppb_opengles2_DepthMask(context, flag);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DepthRangef(PP_Resource context, GLclampf zNear, GLclampf zFar)
 {
@@ -1751,7 +1750,7 @@ trace_ppb_opengles2_DepthRangef(PP_Resource context, GLclampf zNear, GLclampf zF
     ppb_opengles2_DepthRangef(context, zNear, zFar);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DetachShader(PP_Resource context, GLuint program, GLuint shader)
 {
@@ -1760,7 +1759,7 @@ trace_ppb_opengles2_DetachShader(PP_Resource context, GLuint program, GLuint sha
     ppb_opengles2_DetachShader(context, program, shader);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Disable(PP_Resource context, GLenum cap)
 {
@@ -1769,7 +1768,7 @@ trace_ppb_opengles2_Disable(PP_Resource context, GLenum cap)
     ppb_opengles2_Disable(context, cap);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DisableVertexAttribArray(PP_Resource context, GLuint index)
 {
@@ -1777,7 +1776,7 @@ trace_ppb_opengles2_DisableVertexAttribArray(PP_Resource context, GLuint index)
     ppb_opengles2_DisableVertexAttribArray(context, index);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DrawArrays(PP_Resource context, GLenum mode, GLint first, GLsizei count)
 {
@@ -1786,7 +1785,7 @@ trace_ppb_opengles2_DrawArrays(PP_Resource context, GLenum mode, GLint first, GL
     ppb_opengles2_DrawArrays(context, mode, first, count);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_DrawElements(PP_Resource context, GLenum mode, GLsizei count, GLenum type,
                                  const void *indices)
@@ -1797,7 +1796,7 @@ trace_ppb_opengles2_DrawElements(PP_Resource context, GLenum mode, GLsizei count
     ppb_opengles2_DrawElements(context, mode, count, type, indices);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Enable(PP_Resource context, GLenum cap)
 {
@@ -1806,7 +1805,7 @@ trace_ppb_opengles2_Enable(PP_Resource context, GLenum cap)
     ppb_opengles2_Enable(context, cap);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_EnableVertexAttribArray(PP_Resource context, GLuint index)
 {
@@ -1814,7 +1813,7 @@ trace_ppb_opengles2_EnableVertexAttribArray(PP_Resource context, GLuint index)
     ppb_opengles2_EnableVertexAttribArray(context, index);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Finish(PP_Resource context)
 {
@@ -1822,7 +1821,7 @@ trace_ppb_opengles2_Finish(PP_Resource context)
     ppb_opengles2_Finish(context);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Flush(PP_Resource context)
 {
@@ -1830,7 +1829,7 @@ trace_ppb_opengles2_Flush(PP_Resource context)
     ppb_opengles2_Flush(context);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_FramebufferRenderbuffer(PP_Resource context, GLenum target, GLenum attachment,
                                             GLenum renderbuffertarget, GLuint renderbuffer)
@@ -1843,7 +1842,7 @@ trace_ppb_opengles2_FramebufferRenderbuffer(PP_Resource context, GLenum target, 
                                           renderbuffer);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_FramebufferTexture2D(PP_Resource context, GLenum target, GLenum attachment,
                                          GLenum textarget, GLuint texture, GLint level)
@@ -1855,7 +1854,7 @@ trace_ppb_opengles2_FramebufferTexture2D(PP_Resource context, GLenum target, GLe
     ppb_opengles2_FramebufferTexture2D(context, target, attachment, textarget, texture, level);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_FrontFace(PP_Resource context, GLenum mode)
 {
@@ -1864,7 +1863,7 @@ trace_ppb_opengles2_FrontFace(PP_Resource context, GLenum mode)
     ppb_opengles2_FrontFace(context, mode);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GenBuffers(PP_Resource context, GLsizei n, GLuint *buffers)
 {
@@ -1872,7 +1871,7 @@ trace_ppb_opengles2_GenBuffers(PP_Resource context, GLsizei n, GLuint *buffers)
     ppb_opengles2_GenBuffers(context, n, buffers);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GenerateMipmap(PP_Resource context, GLenum target)
 {
@@ -1881,7 +1880,7 @@ trace_ppb_opengles2_GenerateMipmap(PP_Resource context, GLenum target)
     ppb_opengles2_GenerateMipmap(context, target);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GenFramebuffers(PP_Resource context, GLsizei n, GLuint *framebuffers)
 {
@@ -1890,7 +1889,7 @@ trace_ppb_opengles2_GenFramebuffers(PP_Resource context, GLsizei n, GLuint *fram
     ppb_opengles2_GenFramebuffers(context, n, framebuffers);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GenRenderbuffers(PP_Resource context, GLsizei n, GLuint *renderbuffers)
 {
@@ -1899,7 +1898,7 @@ trace_ppb_opengles2_GenRenderbuffers(PP_Resource context, GLsizei n, GLuint *ren
     ppb_opengles2_GenRenderbuffers(context, n, renderbuffers);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GenTextures(PP_Resource context, GLsizei n, GLuint *textures)
 {
@@ -1907,7 +1906,7 @@ trace_ppb_opengles2_GenTextures(PP_Resource context, GLsizei n, GLuint *textures
     ppb_opengles2_GenTextures(context, n, textures);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetActiveAttrib(PP_Resource context, GLuint program, GLuint index,
                                     GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type,
@@ -1918,7 +1917,7 @@ trace_ppb_opengles2_GetActiveAttrib(PP_Resource context, GLuint program, GLuint 
     ppb_opengles2_GetActiveAttrib(context, program, index, bufsize, length, size, type, name);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetActiveUniform(PP_Resource context, GLuint program, GLuint index,
                                      GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type,
@@ -1929,7 +1928,7 @@ trace_ppb_opengles2_GetActiveUniform(PP_Resource context, GLuint program, GLuint
     ppb_opengles2_GetActiveUniform(context, program, index, bufsize, length, size, type, name);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetAttachedShaders(PP_Resource context, GLuint program, GLsizei maxcount,
                                        GLsizei *count, GLuint *shaders)
@@ -1939,7 +1938,7 @@ trace_ppb_opengles2_GetAttachedShaders(PP_Resource context, GLuint program, GLsi
     ppb_opengles2_GetAttachedShaders(context, program, maxcount, count, shaders);
 }
 
-static
+TRACE_WRAPPER
 GLint
 trace_ppb_opengles2_GetAttribLocation(PP_Resource context, GLuint program, const char *name)
 {
@@ -1948,7 +1947,7 @@ trace_ppb_opengles2_GetAttribLocation(PP_Resource context, GLuint program, const
     return ppb_opengles2_GetAttribLocation(context, program, name);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetBooleanv(PP_Resource context, GLenum pname, GLboolean *params)
 {
@@ -1957,7 +1956,7 @@ trace_ppb_opengles2_GetBooleanv(PP_Resource context, GLenum pname, GLboolean *pa
     ppb_opengles2_GetBooleanv(context, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetBufferParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                          GLint *params)
@@ -1967,7 +1966,7 @@ trace_ppb_opengles2_GetBufferParameteriv(PP_Resource context, GLenum target, GLe
     ppb_opengles2_GetBufferParameteriv(context, target, pname, params);
 }
 
-static
+TRACE_WRAPPER
 GLenum
 trace_ppb_opengles2_GetError(PP_Resource context)
 {
@@ -1975,7 +1974,7 @@ trace_ppb_opengles2_GetError(PP_Resource context)
     return ppb_opengles2_GetError(context);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetFloatv(PP_Resource context, GLenum pname, GLfloat *params)
 {
@@ -1984,7 +1983,7 @@ trace_ppb_opengles2_GetFloatv(PP_Resource context, GLenum pname, GLfloat *params
     ppb_opengles2_GetFloatv(context, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetFramebufferAttachmentParameteriv(PP_Resource context, GLenum target,
                                                         GLenum attachment, GLenum pname,
@@ -1996,7 +1995,7 @@ trace_ppb_opengles2_GetFramebufferAttachmentParameteriv(PP_Resource context, GLe
     ppb_opengles2_GetFramebufferAttachmentParameteriv(context, target, attachment, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetIntegerv(PP_Resource context, GLenum pname, GLint *params)
 {
@@ -2005,7 +2004,7 @@ trace_ppb_opengles2_GetIntegerv(PP_Resource context, GLenum pname, GLint *params
     ppb_opengles2_GetIntegerv(context, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetProgramiv(PP_Resource context, GLuint program, GLenum pname, GLint *params)
 {
@@ -2014,7 +2013,7 @@ trace_ppb_opengles2_GetProgramiv(PP_Resource context, GLuint program, GLenum pna
     ppb_opengles2_GetProgramiv(context, program, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetProgramInfoLog(PP_Resource context, GLuint program, GLsizei bufsize,
                                       GLsizei *length, char *infolog)
@@ -2024,7 +2023,7 @@ trace_ppb_opengles2_GetProgramInfoLog(PP_Resource context, GLuint program, GLsiz
     ppb_opengles2_GetProgramInfoLog(context, program, bufsize, length, infolog);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetRenderbufferParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                                GLint *params)
@@ -2034,7 +2033,7 @@ trace_ppb_opengles2_GetRenderbufferParameteriv(PP_Resource context, GLenum targe
     ppb_opengles2_GetRenderbufferParameteriv(context, target, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetShaderiv(PP_Resource context, GLuint shader, GLenum pname, GLint *params)
 {
@@ -2043,7 +2042,7 @@ trace_ppb_opengles2_GetShaderiv(PP_Resource context, GLuint shader, GLenum pname
     ppb_opengles2_GetShaderiv(context, shader, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetShaderInfoLog(PP_Resource context, GLuint shader, GLsizei bufsize,
                                      GLsizei *length, char *infolog)
@@ -2053,7 +2052,7 @@ trace_ppb_opengles2_GetShaderInfoLog(PP_Resource context, GLuint shader, GLsizei
     ppb_opengles2_GetShaderInfoLog(context, shader, bufsize, length, infolog);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetShaderPrecisionFormat(PP_Resource context, GLenum shadertype,
                                              GLenum precisiontype, GLint *range, GLint *precision)
@@ -2064,7 +2063,7 @@ trace_ppb_opengles2_GetShaderPrecisionFormat(PP_Resource context, GLenum shadert
     ppb_opengles2_GetShaderPrecisionFormat(context, shadertype, precisiontype, range, precision);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetShaderSource(PP_Resource context, GLuint shader, GLsizei bufsize,
                                     GLsizei *length, char *source)
@@ -2074,8 +2073,8 @@ trace_ppb_opengles2_GetShaderSource(PP_Resource context, GLuint shader, GLsizei 
     ppb_opengles2_GetShaderSource(context, shader, bufsize, length, source);
 }
 
-static
-const GLubyte*
+TRACE_WRAPPER
+const GLubyte *
 trace_ppb_opengles2_GetString(PP_Resource context, GLenum name)
 {
     trace_info("[PPB] {full} %s context=%d name=%u(%s)\n", __func__+6, context,
@@ -2083,7 +2082,7 @@ trace_ppb_opengles2_GetString(PP_Resource context, GLenum name)
     return ppb_opengles2_GetString(context, name);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetTexParameterfv(PP_Resource context, GLenum target, GLenum pname,
                                       GLfloat *params)
@@ -2093,7 +2092,7 @@ trace_ppb_opengles2_GetTexParameterfv(PP_Resource context, GLenum target, GLenum
     ppb_opengles2_GetTexParameterfv(context, target, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetTexParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                       GLint *params)
@@ -2103,7 +2102,7 @@ trace_ppb_opengles2_GetTexParameteriv(PP_Resource context, GLenum target, GLenum
     ppb_opengles2_GetTexParameteriv(context, target, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetUniformfv(PP_Resource context, GLuint program, GLint location,
                                  GLfloat *params)
@@ -2113,7 +2112,7 @@ trace_ppb_opengles2_GetUniformfv(PP_Resource context, GLuint program, GLint loca
     ppb_opengles2_GetUniformfv(context, program, location, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetUniformiv(PP_Resource context, GLuint program, GLint location, GLint *params)
 {
@@ -2122,7 +2121,7 @@ trace_ppb_opengles2_GetUniformiv(PP_Resource context, GLuint program, GLint loca
     ppb_opengles2_GetUniformiv(context, program, location, params);
 }
 
-static
+TRACE_WRAPPER
 GLint
 trace_ppb_opengles2_GetUniformLocation(PP_Resource context, GLuint program, const char *name)
 {
@@ -2131,7 +2130,7 @@ trace_ppb_opengles2_GetUniformLocation(PP_Resource context, GLuint program, cons
     return ppb_opengles2_GetUniformLocation(context, program, name);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetVertexAttribfv(PP_Resource context, GLuint index, GLenum pname,
                                       GLfloat *params)
@@ -2141,7 +2140,7 @@ trace_ppb_opengles2_GetVertexAttribfv(PP_Resource context, GLuint index, GLenum 
     ppb_opengles2_GetVertexAttribfv(context, index, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetVertexAttribiv(PP_Resource context, GLuint index, GLenum pname,
                                       GLint *params)
@@ -2151,7 +2150,7 @@ trace_ppb_opengles2_GetVertexAttribiv(PP_Resource context, GLuint index, GLenum 
     ppb_opengles2_GetVertexAttribiv(context, index, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_GetVertexAttribPointerv(PP_Resource context, GLuint index, GLenum pname,
                                             void **pointer)
@@ -2161,7 +2160,7 @@ trace_ppb_opengles2_GetVertexAttribPointerv(PP_Resource context, GLuint index, G
     ppb_opengles2_GetVertexAttribPointerv(context, index, pname, pointer);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Hint(PP_Resource context, GLenum target, GLenum mode)
 {
@@ -2170,7 +2169,7 @@ trace_ppb_opengles2_Hint(PP_Resource context, GLenum target, GLenum mode)
     ppb_opengles2_Hint(context, target, mode);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_IsBuffer(PP_Resource context, GLuint buffer)
 {
@@ -2178,7 +2177,7 @@ trace_ppb_opengles2_IsBuffer(PP_Resource context, GLuint buffer)
     return ppb_opengles2_IsBuffer(context, buffer);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_IsEnabled(PP_Resource context, GLenum cap)
 {
@@ -2187,7 +2186,7 @@ trace_ppb_opengles2_IsEnabled(PP_Resource context, GLenum cap)
     return ppb_opengles2_IsEnabled(context, cap);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_IsFramebuffer(PP_Resource context, GLuint framebuffer)
 {
@@ -2195,7 +2194,7 @@ trace_ppb_opengles2_IsFramebuffer(PP_Resource context, GLuint framebuffer)
     return ppb_opengles2_IsFramebuffer(context, framebuffer);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_IsProgram(PP_Resource context, GLuint program)
 {
@@ -2203,7 +2202,7 @@ trace_ppb_opengles2_IsProgram(PP_Resource context, GLuint program)
     return ppb_opengles2_IsProgram(context, program);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_IsRenderbuffer(PP_Resource context, GLuint renderbuffer)
 {
@@ -2211,7 +2210,7 @@ trace_ppb_opengles2_IsRenderbuffer(PP_Resource context, GLuint renderbuffer)
     return ppb_opengles2_IsRenderbuffer(context, renderbuffer);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_IsShader(PP_Resource context, GLuint shader)
 {
@@ -2219,7 +2218,7 @@ trace_ppb_opengles2_IsShader(PP_Resource context, GLuint shader)
     return ppb_opengles2_IsShader(context, shader);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_IsTexture(PP_Resource context, GLuint texture)
 {
@@ -2227,7 +2226,7 @@ trace_ppb_opengles2_IsTexture(PP_Resource context, GLuint texture)
     return ppb_opengles2_IsTexture(context, texture);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_LineWidth(PP_Resource context, GLfloat width)
 {
@@ -2235,7 +2234,7 @@ trace_ppb_opengles2_LineWidth(PP_Resource context, GLfloat width)
     ppb_opengles2_LineWidth(context, width);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_LinkProgram(PP_Resource context, GLuint program)
 {
@@ -2243,7 +2242,7 @@ trace_ppb_opengles2_LinkProgram(PP_Resource context, GLuint program)
     ppb_opengles2_LinkProgram(context, program);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_PixelStorei(PP_Resource context, GLenum pname, GLint param)
 {
@@ -2252,7 +2251,7 @@ trace_ppb_opengles2_PixelStorei(PP_Resource context, GLenum pname, GLint param)
     ppb_opengles2_PixelStorei(context, pname, param);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_PolygonOffset(PP_Resource context, GLfloat factor, GLfloat units)
 {
@@ -2261,7 +2260,7 @@ trace_ppb_opengles2_PolygonOffset(PP_Resource context, GLfloat factor, GLfloat u
     ppb_opengles2_PolygonOffset(context, factor, units);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ReadPixels(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height,
                                GLenum format, GLenum type, void *pixels)
@@ -2272,7 +2271,7 @@ trace_ppb_opengles2_ReadPixels(PP_Resource context, GLint x, GLint y, GLsizei wi
     ppb_opengles2_ReadPixels(context, x, y, width, height, format, type, pixels);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ReleaseShaderCompiler(PP_Resource context)
 {
@@ -2280,7 +2279,7 @@ trace_ppb_opengles2_ReleaseShaderCompiler(PP_Resource context)
     ppb_opengles2_ReleaseShaderCompiler(context);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_RenderbufferStorage(PP_Resource context, GLenum target, GLenum internalformat,
                                         GLsizei width, GLsizei height)
@@ -2291,7 +2290,7 @@ trace_ppb_opengles2_RenderbufferStorage(PP_Resource context, GLenum target, GLen
     ppb_opengles2_RenderbufferStorage(context, target, internalformat, width, height);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_SampleCoverage(PP_Resource context, GLclampf value, GLboolean invert)
 {
@@ -2300,7 +2299,7 @@ trace_ppb_opengles2_SampleCoverage(PP_Resource context, GLclampf value, GLboolea
     ppb_opengles2_SampleCoverage(context, value, invert);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Scissor(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height)
 {
@@ -2309,7 +2308,7 @@ trace_ppb_opengles2_Scissor(PP_Resource context, GLint x, GLint y, GLsizei width
     ppb_opengles2_Scissor(context, x, y, width, height);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ShaderBinary(PP_Resource context, GLsizei n, const GLuint *shaders,
                                  GLenum binaryformat, const void *binary, GLsizei length)
@@ -2320,7 +2319,7 @@ trace_ppb_opengles2_ShaderBinary(PP_Resource context, GLsizei n, const GLuint *s
     ppb_opengles2_ShaderBinary(context, n, shaders, binaryformat, binary, length);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei count,
                                  const char **str, const GLint *length)
@@ -2333,7 +2332,7 @@ trace_ppb_opengles2_ShaderSource(PP_Resource context, GLuint shader, GLsizei cou
     ppb_opengles2_ShaderSource(context, shader, count, str, length);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_StencilFunc(PP_Resource context, GLenum func, GLint ref, GLuint mask)
 {
@@ -2342,7 +2341,7 @@ trace_ppb_opengles2_StencilFunc(PP_Resource context, GLenum func, GLint ref, GLu
     ppb_opengles2_StencilFunc(context, func, ref, mask);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_StencilFuncSeparate(PP_Resource context, GLenum face, GLenum func, GLint ref,
                                         GLuint mask)
@@ -2353,7 +2352,7 @@ trace_ppb_opengles2_StencilFuncSeparate(PP_Resource context, GLenum face, GLenum
     ppb_opengles2_StencilFuncSeparate(context, face, func, ref, mask);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_StencilMask(PP_Resource context, GLuint mask)
 {
@@ -2361,7 +2360,7 @@ trace_ppb_opengles2_StencilMask(PP_Resource context, GLuint mask)
     ppb_opengles2_StencilMask(context, mask);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_StencilMaskSeparate(PP_Resource context, GLenum face, GLuint mask)
 {
@@ -2370,7 +2369,7 @@ trace_ppb_opengles2_StencilMaskSeparate(PP_Resource context, GLenum face, GLuint
     ppb_opengles2_StencilMaskSeparate(context, face, mask);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_StencilOp(PP_Resource context, GLenum fail, GLenum zfail, GLenum zpass)
 {
@@ -2380,7 +2379,7 @@ trace_ppb_opengles2_StencilOp(PP_Resource context, GLenum fail, GLenum zfail, GL
     ppb_opengles2_StencilOp(context, fail, zfail, zpass);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_StencilOpSeparate(PP_Resource context, GLenum face, GLenum fail, GLenum zfail,
                                       GLenum zpass)
@@ -2391,7 +2390,7 @@ trace_ppb_opengles2_StencilOpSeparate(PP_Resource context, GLenum face, GLenum f
     ppb_opengles2_StencilOpSeparate(context, face, fail, zfail, zpass);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_TexImage2D(PP_Resource context, GLenum target, GLint level,
                                GLint internalformat, GLsizei width, GLsizei height, GLint border,
@@ -2406,7 +2405,7 @@ trace_ppb_opengles2_TexImage2D(PP_Resource context, GLenum target, GLint level,
                              type, pixels);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_TexParameterf(PP_Resource context, GLenum target, GLenum pname, GLfloat param)
 {
@@ -2415,7 +2414,7 @@ trace_ppb_opengles2_TexParameterf(PP_Resource context, GLenum target, GLenum pna
     ppb_opengles2_TexParameterf(context, target, pname, param);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_TexParameterfv(PP_Resource context, GLenum target, GLenum pname,
                                    const GLfloat *params)
@@ -2425,7 +2424,7 @@ trace_ppb_opengles2_TexParameterfv(PP_Resource context, GLenum target, GLenum pn
     ppb_opengles2_TexParameterfv(context, target, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_TexParameteri(PP_Resource context, GLenum target, GLenum pname, GLint param)
 {
@@ -2434,7 +2433,7 @@ trace_ppb_opengles2_TexParameteri(PP_Resource context, GLenum target, GLenum pna
     ppb_opengles2_TexParameteri(context, target, pname, param);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_TexParameteriv(PP_Resource context, GLenum target, GLenum pname,
                                    const GLint *params)
@@ -2444,7 +2443,7 @@ trace_ppb_opengles2_TexParameteriv(PP_Resource context, GLenum target, GLenum pn
     ppb_opengles2_TexParameteriv(context, target, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_TexSubImage2D(PP_Resource context, GLenum target, GLint level, GLint xoffset,
                                   GLint yoffset, GLsizei width, GLsizei height, GLenum format,
@@ -2458,7 +2457,7 @@ trace_ppb_opengles2_TexSubImage2D(PP_Resource context, GLenum target, GLint leve
                                 type, pixels);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform1f(PP_Resource context, GLint location, GLfloat x)
 {
@@ -2466,7 +2465,7 @@ trace_ppb_opengles2_Uniform1f(PP_Resource context, GLint location, GLfloat x)
     ppb_opengles2_Uniform1f(context, location, x);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform1fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
@@ -2475,7 +2474,7 @@ trace_ppb_opengles2_Uniform1fv(PP_Resource context, GLint location, GLsizei coun
     ppb_opengles2_Uniform1fv(context, location, count, v);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform1i(PP_Resource context, GLint location, GLint x)
 {
@@ -2483,7 +2482,7 @@ trace_ppb_opengles2_Uniform1i(PP_Resource context, GLint location, GLint x)
     ppb_opengles2_Uniform1i(context, location, x);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform1iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
@@ -2492,7 +2491,7 @@ trace_ppb_opengles2_Uniform1iv(PP_Resource context, GLint location, GLsizei coun
     ppb_opengles2_Uniform1iv(context, location, count, v);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform2f(PP_Resource context, GLint location, GLfloat x, GLfloat y)
 {
@@ -2501,7 +2500,7 @@ trace_ppb_opengles2_Uniform2f(PP_Resource context, GLint location, GLfloat x, GL
     ppb_opengles2_Uniform2f(context, location, x, y);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform2fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
@@ -2510,7 +2509,7 @@ trace_ppb_opengles2_Uniform2fv(PP_Resource context, GLint location, GLsizei coun
     ppb_opengles2_Uniform2fv(context, location, count, v);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform2i(PP_Resource context, GLint location, GLint x, GLint y)
 {
@@ -2519,7 +2518,7 @@ trace_ppb_opengles2_Uniform2i(PP_Resource context, GLint location, GLint x, GLin
     ppb_opengles2_Uniform2i(context, location, x, y);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform2iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
@@ -2528,7 +2527,7 @@ trace_ppb_opengles2_Uniform2iv(PP_Resource context, GLint location, GLsizei coun
     ppb_opengles2_Uniform2iv(context, location, count, v);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform3f(PP_Resource context, GLint location, GLfloat x, GLfloat y, GLfloat z)
 {
@@ -2537,7 +2536,7 @@ trace_ppb_opengles2_Uniform3f(PP_Resource context, GLint location, GLfloat x, GL
     ppb_opengles2_Uniform3f(context, location, x, y, z);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform3fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
@@ -2546,7 +2545,7 @@ trace_ppb_opengles2_Uniform3fv(PP_Resource context, GLint location, GLsizei coun
     ppb_opengles2_Uniform3fv(context, location, count, v);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform3i(PP_Resource context, GLint location, GLint x, GLint y, GLint z)
 {
@@ -2555,7 +2554,7 @@ trace_ppb_opengles2_Uniform3i(PP_Resource context, GLint location, GLint x, GLin
     ppb_opengles2_Uniform3i(context, location, x, y, z);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform3iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
@@ -2564,7 +2563,7 @@ trace_ppb_opengles2_Uniform3iv(PP_Resource context, GLint location, GLsizei coun
     ppb_opengles2_Uniform3iv(context, location, count, v);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform4f(PP_Resource context, GLint location, GLfloat x, GLfloat y, GLfloat z,
                               GLfloat w)
@@ -2574,7 +2573,7 @@ trace_ppb_opengles2_Uniform4f(PP_Resource context, GLint location, GLfloat x, GL
     ppb_opengles2_Uniform4f(context, location, x, y, z, w);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform4fv(PP_Resource context, GLint location, GLsizei count, const GLfloat *v)
 {
@@ -2583,7 +2582,7 @@ trace_ppb_opengles2_Uniform4fv(PP_Resource context, GLint location, GLsizei coun
     ppb_opengles2_Uniform4fv(context, location, count, v);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform4i(PP_Resource context, GLint location, GLint x, GLint y, GLint z,
                               GLint w)
@@ -2593,7 +2592,7 @@ trace_ppb_opengles2_Uniform4i(PP_Resource context, GLint location, GLint x, GLin
     ppb_opengles2_Uniform4i(context, location, x, y, z, w);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Uniform4iv(PP_Resource context, GLint location, GLsizei count, const GLint *v)
 {
@@ -2602,7 +2601,7 @@ trace_ppb_opengles2_Uniform4iv(PP_Resource context, GLint location, GLsizei coun
     ppb_opengles2_Uniform4iv(context, location, count, v);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_UniformMatrix2fv(PP_Resource context, GLint location, GLsizei count,
                                      GLboolean transpose, const GLfloat *value)
@@ -2612,7 +2611,7 @@ trace_ppb_opengles2_UniformMatrix2fv(PP_Resource context, GLint location, GLsize
     ppb_opengles2_UniformMatrix2fv(context, location, count, transpose, value);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_UniformMatrix3fv(PP_Resource context, GLint location, GLsizei count,
                                      GLboolean transpose, const GLfloat *value)
@@ -2622,7 +2621,7 @@ trace_ppb_opengles2_UniformMatrix3fv(PP_Resource context, GLint location, GLsize
     ppb_opengles2_UniformMatrix3fv(context, location, count, transpose, value);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_UniformMatrix4fv(PP_Resource context, GLint location, GLsizei count,
                                      GLboolean transpose, const GLfloat *value)
@@ -2632,7 +2631,7 @@ trace_ppb_opengles2_UniformMatrix4fv(PP_Resource context, GLint location, GLsize
     ppb_opengles2_UniformMatrix4fv(context, location, count, transpose, value);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_UseProgram(PP_Resource context, GLuint program)
 {
@@ -2640,7 +2639,7 @@ trace_ppb_opengles2_UseProgram(PP_Resource context, GLuint program)
     ppb_opengles2_UseProgram(context, program);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_ValidateProgram(PP_Resource context, GLuint program)
 {
@@ -2648,7 +2647,7 @@ trace_ppb_opengles2_ValidateProgram(PP_Resource context, GLuint program)
     ppb_opengles2_ValidateProgram(context, program);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttrib1f(PP_Resource context, GLuint indx, GLfloat x)
 {
@@ -2656,7 +2655,7 @@ trace_ppb_opengles2_VertexAttrib1f(PP_Resource context, GLuint indx, GLfloat x)
     ppb_opengles2_VertexAttrib1f(context, indx, x);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttrib1fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
@@ -2665,7 +2664,7 @@ trace_ppb_opengles2_VertexAttrib1fv(PP_Resource context, GLuint indx, const GLfl
     ppb_opengles2_VertexAttrib1fv(context, indx, values);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttrib2f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y)
 {
@@ -2674,7 +2673,7 @@ trace_ppb_opengles2_VertexAttrib2f(PP_Resource context, GLuint indx, GLfloat x, 
     ppb_opengles2_VertexAttrib2f(context, indx, x, y);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttrib2fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
@@ -2683,7 +2682,7 @@ trace_ppb_opengles2_VertexAttrib2fv(PP_Resource context, GLuint indx, const GLfl
     ppb_opengles2_VertexAttrib2fv(context, indx, values);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttrib3f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y,
                                    GLfloat z)
@@ -2693,7 +2692,7 @@ trace_ppb_opengles2_VertexAttrib3f(PP_Resource context, GLuint indx, GLfloat x, 
     ppb_opengles2_VertexAttrib3f(context, indx, x, y, z);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttrib3fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
@@ -2702,7 +2701,7 @@ trace_ppb_opengles2_VertexAttrib3fv(PP_Resource context, GLuint indx, const GLfl
     ppb_opengles2_VertexAttrib3fv(context, indx, values);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttrib4f(PP_Resource context, GLuint indx, GLfloat x, GLfloat y,
                                    GLfloat z, GLfloat w)
@@ -2712,7 +2711,7 @@ trace_ppb_opengles2_VertexAttrib4f(PP_Resource context, GLuint indx, GLfloat x, 
     ppb_opengles2_VertexAttrib4f(context, indx, x, y, z, w);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttrib4fv(PP_Resource context, GLuint indx, const GLfloat *values)
 {
@@ -2721,7 +2720,7 @@ trace_ppb_opengles2_VertexAttrib4fv(PP_Resource context, GLuint indx, const GLfl
     ppb_opengles2_VertexAttrib4fv(context, indx, values);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_VertexAttribPointer(PP_Resource context, GLuint indx, GLint size, GLenum type,
                                         GLboolean normalized, GLsizei stride, const void *ptr)
@@ -2732,7 +2731,7 @@ trace_ppb_opengles2_VertexAttribPointer(PP_Resource context, GLuint indx, GLint 
     ppb_opengles2_VertexAttribPointer(context, indx, size, type, normalized, stride, ptr);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_Viewport(PP_Resource context, GLint x, GLint y, GLsizei width, GLsizei height)
 {
@@ -2741,7 +2740,7 @@ trace_ppb_opengles2_Viewport(PP_Resource context, GLint x, GLint y, GLsizei widt
     ppb_opengles2_Viewport(context, x, y, width, height);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_chromium_enable_feature_enable_feature_chromium(PP_Resource context,
                                                                     const char *feature)
@@ -2750,7 +2749,7 @@ trace_ppb_opengles2_chromium_enable_feature_enable_feature_chromium(PP_Resource 
     return ppb_opengles2_chromium_enable_feature_enable_feature_chromium(context, feature);
 }
 
-static
+TRACE_WRAPPER
 void *
 trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(PP_Resource context,
                                                                   GLuint target, GLintptr offset,
@@ -2763,7 +2762,7 @@ trace_ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium(PP_Resource co
                                                                        size, access);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(PP_Resource context,
                                                                     const void *mem)
@@ -2772,7 +2771,7 @@ trace_ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(PP_Resource 
     ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium(context, mem);
 }
 
-static
+TRACE_WRAPPER
 void *
 trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context,
                                                                    GLenum target, GLint level,
@@ -2790,7 +2789,7 @@ trace_ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource c
                                         xoffset, yoffset, width, height, format, type, access);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource context,
                                                                      const void *mem)
@@ -2799,7 +2798,7 @@ trace_ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(PP_Resource
     ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium(context, mem);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_framebuffer_blit_blit_framebuffer_ext(PP_Resource context, GLint srcX0,
                                                           GLint srcY0, GLint srcX1, GLint srcY1,
@@ -2816,7 +2815,7 @@ trace_ppb_opengles2_framebuffer_blit_blit_framebuffer_ext(PP_Resource context, G
                                                                filter);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext
                     (PP_Resource context, GLenum target, GLsizei samples, GLenum internalformat,
@@ -2829,7 +2828,7 @@ trace_ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext
                                                         samples, internalformat, width, height);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle(PP_Resource context, GLenum mode,
                                                                  GLint first, GLsizei count,
@@ -2842,7 +2841,7 @@ trace_ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle(PP_Resource con
 }
 
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(PP_Resource context, GLenum mode,
                                                                    GLsizei count, GLenum type,
@@ -2856,7 +2855,7 @@ trace_ppb_opengles2_instanced_arrays_draw_elements_instanced_angle(PP_Resource c
                                                                  indices, primcount);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle(PP_Resource context, GLuint index,
                                                                  GLuint divisor)
@@ -2866,7 +2865,7 @@ trace_ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle(PP_Resource con
     ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle(context, index, divisor);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_query_gen_queries_ext(PP_Resource context, GLsizei n, GLuint *queries)
 {
@@ -2874,7 +2873,7 @@ trace_ppb_opengles2_query_gen_queries_ext(PP_Resource context, GLsizei n, GLuint
     ppb_opengles2_query_gen_queries_ext(context, n, queries);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_query_delete_queries_ext(PP_Resource context, GLsizei n, const GLuint *queries)
 {
@@ -2882,7 +2881,7 @@ trace_ppb_opengles2_query_delete_queries_ext(PP_Resource context, GLsizei n, con
     ppb_opengles2_query_delete_queries_ext(context, n, queries);
 }
 
-static
+TRACE_WRAPPER
 GLboolean
 trace_ppb_opengles2_query_is_query_ext(PP_Resource context, GLuint id)
 {
@@ -2890,7 +2889,7 @@ trace_ppb_opengles2_query_is_query_ext(PP_Resource context, GLuint id)
     return ppb_opengles2_query_is_query_ext(context, id);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_query_begin_query_ext(PP_Resource context, GLenum target, GLuint id)
 {
@@ -2899,7 +2898,7 @@ trace_ppb_opengles2_query_begin_query_ext(PP_Resource context, GLenum target, GL
     ppb_opengles2_query_begin_query_ext(context, target, id);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_query_end_query_ext(PP_Resource context, GLenum target)
 {
@@ -2908,7 +2907,7 @@ trace_ppb_opengles2_query_end_query_ext(PP_Resource context, GLenum target)
     ppb_opengles2_query_end_query_ext(context, target);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_query_get_queryiv_ext(PP_Resource context, GLenum target, GLenum pname,
                                           GLint *params)
@@ -2918,7 +2917,7 @@ trace_ppb_opengles2_query_get_queryiv_ext(PP_Resource context, GLenum target, GL
     ppb_opengles2_query_get_queryiv_ext(context, target, pname, params);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id, GLenum pname,
                                                   GLuint *params)
@@ -2927,187 +2926,186 @@ trace_ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id
                context, id, pname, reverse_gl_enum(pname), params);
     ppb_opengles2_query_get_query_objectuiv_ext(context, id, pname, params);
 }
-#endif // NDEBUG
 
 
 const struct PPB_OpenGLES2 ppb_opengles2_interface_1_0 = {
-    .ActiveTexture =            TWRAP(ppb_opengles2_ActiveTexture),
-    .AttachShader =             TWRAP(ppb_opengles2_AttachShader),
-    .BindAttribLocation =       TWRAP(ppb_opengles2_BindAttribLocation),
-    .BindBuffer =               TWRAP(ppb_opengles2_BindBuffer),
-    .BindFramebuffer =          TWRAP(ppb_opengles2_BindFramebuffer),
-    .BindRenderbuffer =         TWRAP(ppb_opengles2_BindRenderbuffer),
-    .BindTexture =              TWRAP(ppb_opengles2_BindTexture),
-    .BlendColor =               TWRAP(ppb_opengles2_BlendColor),
-    .BlendEquation =            TWRAP(ppb_opengles2_BlendEquation),
-    .BlendEquationSeparate =    TWRAP(ppb_opengles2_BlendEquationSeparate),
-    .BlendFunc =                TWRAP(ppb_opengles2_BlendFunc),
-    .BlendFuncSeparate =        TWRAP(ppb_opengles2_BlendFuncSeparate),
-    .BufferData =               TWRAP(ppb_opengles2_BufferData),
-    .BufferSubData =            TWRAP(ppb_opengles2_BufferSubData),
-    .CheckFramebufferStatus =   TWRAP(ppb_opengles2_CheckFramebufferStatus),
-    .Clear =                    TWRAP(ppb_opengles2_Clear),
-    .ClearColor =               TWRAP(ppb_opengles2_ClearColor),
-    .ClearDepthf =              TWRAP(ppb_opengles2_ClearDepthf),
-    .ClearStencil =             TWRAP(ppb_opengles2_ClearStencil),
-    .ColorMask =                TWRAP(ppb_opengles2_ColorMask),
-    .CompileShader =            TWRAP(ppb_opengles2_CompileShader),
-    .CompressedTexImage2D =     TWRAP(ppb_opengles2_CompressedTexImage2D),
-    .CompressedTexSubImage2D =  TWRAP(ppb_opengles2_CompressedTexSubImage2D),
-    .CopyTexImage2D =           TWRAP(ppb_opengles2_CopyTexImage2D),
-    .CopyTexSubImage2D =        TWRAP(ppb_opengles2_CopyTexSubImage2D),
-    .CreateProgram =            TWRAP(ppb_opengles2_CreateProgram),
-    .CreateShader =             TWRAP(ppb_opengles2_CreateShader),
-    .CullFace =                 TWRAP(ppb_opengles2_CullFace),
-    .DeleteBuffers =            TWRAP(ppb_opengles2_DeleteBuffers),
-    .DeleteFramebuffers =       TWRAP(ppb_opengles2_DeleteFramebuffers),
-    .DeleteProgram =            TWRAP(ppb_opengles2_DeleteProgram),
-    .DeleteRenderbuffers =      TWRAP(ppb_opengles2_DeleteRenderbuffers),
-    .DeleteShader =             TWRAP(ppb_opengles2_DeleteShader),
-    .DeleteTextures =           TWRAP(ppb_opengles2_DeleteTextures),
-    .DepthFunc =                TWRAP(ppb_opengles2_DepthFunc),
-    .DepthMask =                TWRAP(ppb_opengles2_DepthMask),
-    .DepthRangef =              TWRAP(ppb_opengles2_DepthRangef),
-    .DetachShader =             TWRAP(ppb_opengles2_DetachShader),
-    .Disable =                  TWRAP(ppb_opengles2_Disable),
-    .DisableVertexAttribArray = TWRAP(ppb_opengles2_DisableVertexAttribArray),
-    .DrawArrays =               TWRAP(ppb_opengles2_DrawArrays),
-    .DrawElements =             TWRAP(ppb_opengles2_DrawElements),
-    .Enable =                   TWRAP(ppb_opengles2_Enable),
-    .EnableVertexAttribArray =  TWRAP(ppb_opengles2_EnableVertexAttribArray),
-    .Finish =                   TWRAP(ppb_opengles2_Finish),
-    .Flush =                    TWRAP(ppb_opengles2_Flush),
-    .FramebufferRenderbuffer =  TWRAP(ppb_opengles2_FramebufferRenderbuffer),
-    .FramebufferTexture2D =     TWRAP(ppb_opengles2_FramebufferTexture2D),
-    .FrontFace =                TWRAP(ppb_opengles2_FrontFace),
-    .GenBuffers =               TWRAP(ppb_opengles2_GenBuffers),
-    .GenerateMipmap =           TWRAP(ppb_opengles2_GenerateMipmap),
-    .GenFramebuffers =          TWRAP(ppb_opengles2_GenFramebuffers),
-    .GenRenderbuffers =         TWRAP(ppb_opengles2_GenRenderbuffers),
-    .GenTextures =              TWRAP(ppb_opengles2_GenTextures),
-    .GetActiveAttrib =          TWRAP(ppb_opengles2_GetActiveAttrib),
-    .GetActiveUniform =         TWRAP(ppb_opengles2_GetActiveUniform),
-    .GetAttachedShaders =       TWRAP(ppb_opengles2_GetAttachedShaders),
-    .GetAttribLocation =        TWRAP(ppb_opengles2_GetAttribLocation),
-    .GetBooleanv =              TWRAP(ppb_opengles2_GetBooleanv),
-    .GetBufferParameteriv =     TWRAP(ppb_opengles2_GetBufferParameteriv),
-    .GetError =                 TWRAP(ppb_opengles2_GetError),
-    .GetFloatv =                TWRAP(ppb_opengles2_GetFloatv),
-    .GetFramebufferAttachmentParameteriv = TWRAP(ppb_opengles2_GetFramebufferAttachmentParameteriv),
-    .GetIntegerv =              TWRAP(ppb_opengles2_GetIntegerv),
-    .GetProgramiv =             TWRAP(ppb_opengles2_GetProgramiv),
-    .GetProgramInfoLog =        TWRAP(ppb_opengles2_GetProgramInfoLog),
-    .GetRenderbufferParameteriv = TWRAP(ppb_opengles2_GetRenderbufferParameteriv),
-    .GetShaderiv =              TWRAP(ppb_opengles2_GetShaderiv),
-    .GetShaderInfoLog =         TWRAP(ppb_opengles2_GetShaderInfoLog),
-    .GetShaderPrecisionFormat = TWRAP(ppb_opengles2_GetShaderPrecisionFormat),
-    .GetShaderSource =          TWRAP(ppb_opengles2_GetShaderSource),
-    .GetString =                TWRAP(ppb_opengles2_GetString),
-    .GetTexParameterfv =        TWRAP(ppb_opengles2_GetTexParameterfv),
-    .GetTexParameteriv =        TWRAP(ppb_opengles2_GetTexParameteriv),
-    .GetUniformfv =             TWRAP(ppb_opengles2_GetUniformfv),
-    .GetUniformiv =             TWRAP(ppb_opengles2_GetUniformiv),
-    .GetUniformLocation =       TWRAP(ppb_opengles2_GetUniformLocation),
-    .GetVertexAttribfv =        TWRAP(ppb_opengles2_GetVertexAttribfv),
-    .GetVertexAttribiv =        TWRAP(ppb_opengles2_GetVertexAttribiv),
-    .GetVertexAttribPointerv =  TWRAP(ppb_opengles2_GetVertexAttribPointerv),
-    .Hint =                     TWRAP(ppb_opengles2_Hint),
-    .IsBuffer =                 TWRAP(ppb_opengles2_IsBuffer),
-    .IsEnabled =                TWRAP(ppb_opengles2_IsEnabled),
-    .IsFramebuffer =            TWRAP(ppb_opengles2_IsFramebuffer),
-    .IsProgram =                TWRAP(ppb_opengles2_IsProgram),
-    .IsRenderbuffer =           TWRAP(ppb_opengles2_IsRenderbuffer),
-    .IsShader =                 TWRAP(ppb_opengles2_IsShader),
-    .IsTexture =                TWRAP(ppb_opengles2_IsTexture),
-    .LineWidth =                TWRAP(ppb_opengles2_LineWidth),
-    .LinkProgram =              TWRAP(ppb_opengles2_LinkProgram),
-    .PixelStorei =              TWRAP(ppb_opengles2_PixelStorei),
-    .PolygonOffset =            TWRAP(ppb_opengles2_PolygonOffset),
-    .ReadPixels =               TWRAP(ppb_opengles2_ReadPixels),
-    .ReleaseShaderCompiler =    TWRAP(ppb_opengles2_ReleaseShaderCompiler),
-    .RenderbufferStorage =      TWRAP(ppb_opengles2_RenderbufferStorage),
-    .SampleCoverage =           TWRAP(ppb_opengles2_SampleCoverage),
-    .Scissor =                  TWRAP(ppb_opengles2_Scissor),
-    .ShaderBinary =             TWRAP(ppb_opengles2_ShaderBinary),
-    .ShaderSource =             TWRAP(ppb_opengles2_ShaderSource),
-    .StencilFunc =              TWRAP(ppb_opengles2_StencilFunc),
-    .StencilFuncSeparate =      TWRAP(ppb_opengles2_StencilFuncSeparate),
-    .StencilMask =              TWRAP(ppb_opengles2_StencilMask),
-    .StencilMaskSeparate =      TWRAP(ppb_opengles2_StencilMaskSeparate),
-    .StencilOp =                TWRAP(ppb_opengles2_StencilOp),
-    .StencilOpSeparate =        TWRAP(ppb_opengles2_StencilOpSeparate),
-    .TexImage2D =               TWRAP(ppb_opengles2_TexImage2D),
-    .TexParameterf =            TWRAP(ppb_opengles2_TexParameterf),
-    .TexParameterfv =           TWRAP(ppb_opengles2_TexParameterfv),
-    .TexParameteri =            TWRAP(ppb_opengles2_TexParameteri),
-    .TexParameteriv =           TWRAP(ppb_opengles2_TexParameteriv),
-    .TexSubImage2D =            TWRAP(ppb_opengles2_TexSubImage2D),
-    .Uniform1f =                TWRAP(ppb_opengles2_Uniform1f),
-    .Uniform1fv =               TWRAP(ppb_opengles2_Uniform1fv),
-    .Uniform1i =                TWRAP(ppb_opengles2_Uniform1i),
-    .Uniform1iv =               TWRAP(ppb_opengles2_Uniform1iv),
-    .Uniform2f =                TWRAP(ppb_opengles2_Uniform2f),
-    .Uniform2fv =               TWRAP(ppb_opengles2_Uniform2fv),
-    .Uniform2i =                TWRAP(ppb_opengles2_Uniform2i),
-    .Uniform2iv =               TWRAP(ppb_opengles2_Uniform2iv),
-    .Uniform3f =                TWRAP(ppb_opengles2_Uniform3f),
-    .Uniform3fv =               TWRAP(ppb_opengles2_Uniform3fv),
-    .Uniform3i =                TWRAP(ppb_opengles2_Uniform3i),
-    .Uniform3iv =               TWRAP(ppb_opengles2_Uniform3iv),
-    .Uniform4f =                TWRAP(ppb_opengles2_Uniform4f),
-    .Uniform4fv =               TWRAP(ppb_opengles2_Uniform4fv),
-    .Uniform4i =                TWRAP(ppb_opengles2_Uniform4i),
-    .Uniform4iv =               TWRAP(ppb_opengles2_Uniform4iv),
-    .UniformMatrix2fv =         TWRAP(ppb_opengles2_UniformMatrix2fv),
-    .UniformMatrix3fv =         TWRAP(ppb_opengles2_UniformMatrix3fv),
-    .UniformMatrix4fv =         TWRAP(ppb_opengles2_UniformMatrix4fv),
-    .UseProgram =               TWRAP(ppb_opengles2_UseProgram),
-    .ValidateProgram =          TWRAP(ppb_opengles2_ValidateProgram),
-    .VertexAttrib1f =           TWRAP(ppb_opengles2_VertexAttrib1f),
-    .VertexAttrib1fv =          TWRAP(ppb_opengles2_VertexAttrib1fv),
-    .VertexAttrib2f =           TWRAP(ppb_opengles2_VertexAttrib2f),
-    .VertexAttrib2fv =          TWRAP(ppb_opengles2_VertexAttrib2fv),
-    .VertexAttrib3f =           TWRAP(ppb_opengles2_VertexAttrib3f),
-    .VertexAttrib3fv =          TWRAP(ppb_opengles2_VertexAttrib3fv),
-    .VertexAttrib4f =           TWRAP(ppb_opengles2_VertexAttrib4f),
-    .VertexAttrib4fv =          TWRAP(ppb_opengles2_VertexAttrib4fv),
-    .VertexAttribPointer =      TWRAP(ppb_opengles2_VertexAttribPointer),
-    .Viewport =                 TWRAP(ppb_opengles2_Viewport),
+    .ActiveTexture =            TWRAPF(ppb_opengles2_ActiveTexture),
+    .AttachShader =             TWRAPF(ppb_opengles2_AttachShader),
+    .BindAttribLocation =       TWRAPF(ppb_opengles2_BindAttribLocation),
+    .BindBuffer =               TWRAPF(ppb_opengles2_BindBuffer),
+    .BindFramebuffer =          TWRAPF(ppb_opengles2_BindFramebuffer),
+    .BindRenderbuffer =         TWRAPF(ppb_opengles2_BindRenderbuffer),
+    .BindTexture =              TWRAPF(ppb_opengles2_BindTexture),
+    .BlendColor =               TWRAPF(ppb_opengles2_BlendColor),
+    .BlendEquation =            TWRAPF(ppb_opengles2_BlendEquation),
+    .BlendEquationSeparate =    TWRAPF(ppb_opengles2_BlendEquationSeparate),
+    .BlendFunc =                TWRAPF(ppb_opengles2_BlendFunc),
+    .BlendFuncSeparate =        TWRAPF(ppb_opengles2_BlendFuncSeparate),
+    .BufferData =               TWRAPF(ppb_opengles2_BufferData),
+    .BufferSubData =            TWRAPF(ppb_opengles2_BufferSubData),
+    .CheckFramebufferStatus =   TWRAPF(ppb_opengles2_CheckFramebufferStatus),
+    .Clear =                    TWRAPF(ppb_opengles2_Clear),
+    .ClearColor =               TWRAPF(ppb_opengles2_ClearColor),
+    .ClearDepthf =              TWRAPF(ppb_opengles2_ClearDepthf),
+    .ClearStencil =             TWRAPF(ppb_opengles2_ClearStencil),
+    .ColorMask =                TWRAPF(ppb_opengles2_ColorMask),
+    .CompileShader =            TWRAPF(ppb_opengles2_CompileShader),
+    .CompressedTexImage2D =     TWRAPF(ppb_opengles2_CompressedTexImage2D),
+    .CompressedTexSubImage2D =  TWRAPF(ppb_opengles2_CompressedTexSubImage2D),
+    .CopyTexImage2D =           TWRAPF(ppb_opengles2_CopyTexImage2D),
+    .CopyTexSubImage2D =        TWRAPF(ppb_opengles2_CopyTexSubImage2D),
+    .CreateProgram =            TWRAPF(ppb_opengles2_CreateProgram),
+    .CreateShader =             TWRAPF(ppb_opengles2_CreateShader),
+    .CullFace =                 TWRAPF(ppb_opengles2_CullFace),
+    .DeleteBuffers =            TWRAPF(ppb_opengles2_DeleteBuffers),
+    .DeleteFramebuffers =       TWRAPF(ppb_opengles2_DeleteFramebuffers),
+    .DeleteProgram =            TWRAPF(ppb_opengles2_DeleteProgram),
+    .DeleteRenderbuffers =      TWRAPF(ppb_opengles2_DeleteRenderbuffers),
+    .DeleteShader =             TWRAPF(ppb_opengles2_DeleteShader),
+    .DeleteTextures =           TWRAPF(ppb_opengles2_DeleteTextures),
+    .DepthFunc =                TWRAPF(ppb_opengles2_DepthFunc),
+    .DepthMask =                TWRAPF(ppb_opengles2_DepthMask),
+    .DepthRangef =              TWRAPF(ppb_opengles2_DepthRangef),
+    .DetachShader =             TWRAPF(ppb_opengles2_DetachShader),
+    .Disable =                  TWRAPF(ppb_opengles2_Disable),
+    .DisableVertexAttribArray = TWRAPF(ppb_opengles2_DisableVertexAttribArray),
+    .DrawArrays =               TWRAPF(ppb_opengles2_DrawArrays),
+    .DrawElements =             TWRAPF(ppb_opengles2_DrawElements),
+    .Enable =                   TWRAPF(ppb_opengles2_Enable),
+    .EnableVertexAttribArray =  TWRAPF(ppb_opengles2_EnableVertexAttribArray),
+    .Finish =                   TWRAPF(ppb_opengles2_Finish),
+    .Flush =                    TWRAPF(ppb_opengles2_Flush),
+    .FramebufferRenderbuffer =  TWRAPF(ppb_opengles2_FramebufferRenderbuffer),
+    .FramebufferTexture2D =     TWRAPF(ppb_opengles2_FramebufferTexture2D),
+    .FrontFace =                TWRAPF(ppb_opengles2_FrontFace),
+    .GenBuffers =               TWRAPF(ppb_opengles2_GenBuffers),
+    .GenerateMipmap =           TWRAPF(ppb_opengles2_GenerateMipmap),
+    .GenFramebuffers =          TWRAPF(ppb_opengles2_GenFramebuffers),
+    .GenRenderbuffers =         TWRAPF(ppb_opengles2_GenRenderbuffers),
+    .GenTextures =              TWRAPF(ppb_opengles2_GenTextures),
+    .GetActiveAttrib =          TWRAPF(ppb_opengles2_GetActiveAttrib),
+    .GetActiveUniform =         TWRAPF(ppb_opengles2_GetActiveUniform),
+    .GetAttachedShaders =       TWRAPF(ppb_opengles2_GetAttachedShaders),
+    .GetAttribLocation =        TWRAPF(ppb_opengles2_GetAttribLocation),
+    .GetBooleanv =              TWRAPF(ppb_opengles2_GetBooleanv),
+    .GetBufferParameteriv =     TWRAPF(ppb_opengles2_GetBufferParameteriv),
+    .GetError =                 TWRAPF(ppb_opengles2_GetError),
+    .GetFloatv =                TWRAPF(ppb_opengles2_GetFloatv),
+    .GetFramebufferAttachmentParameteriv = TWRAPF(ppb_opengles2_GetFramebufferAttachmentParameteriv),
+    .GetIntegerv =              TWRAPF(ppb_opengles2_GetIntegerv),
+    .GetProgramiv =             TWRAPF(ppb_opengles2_GetProgramiv),
+    .GetProgramInfoLog =        TWRAPF(ppb_opengles2_GetProgramInfoLog),
+    .GetRenderbufferParameteriv = TWRAPF(ppb_opengles2_GetRenderbufferParameteriv),
+    .GetShaderiv =              TWRAPF(ppb_opengles2_GetShaderiv),
+    .GetShaderInfoLog =         TWRAPF(ppb_opengles2_GetShaderInfoLog),
+    .GetShaderPrecisionFormat = TWRAPF(ppb_opengles2_GetShaderPrecisionFormat),
+    .GetShaderSource =          TWRAPF(ppb_opengles2_GetShaderSource),
+    .GetString =                TWRAPF(ppb_opengles2_GetString),
+    .GetTexParameterfv =        TWRAPF(ppb_opengles2_GetTexParameterfv),
+    .GetTexParameteriv =        TWRAPF(ppb_opengles2_GetTexParameteriv),
+    .GetUniformfv =             TWRAPF(ppb_opengles2_GetUniformfv),
+    .GetUniformiv =             TWRAPF(ppb_opengles2_GetUniformiv),
+    .GetUniformLocation =       TWRAPF(ppb_opengles2_GetUniformLocation),
+    .GetVertexAttribfv =        TWRAPF(ppb_opengles2_GetVertexAttribfv),
+    .GetVertexAttribiv =        TWRAPF(ppb_opengles2_GetVertexAttribiv),
+    .GetVertexAttribPointerv =  TWRAPF(ppb_opengles2_GetVertexAttribPointerv),
+    .Hint =                     TWRAPF(ppb_opengles2_Hint),
+    .IsBuffer =                 TWRAPF(ppb_opengles2_IsBuffer),
+    .IsEnabled =                TWRAPF(ppb_opengles2_IsEnabled),
+    .IsFramebuffer =            TWRAPF(ppb_opengles2_IsFramebuffer),
+    .IsProgram =                TWRAPF(ppb_opengles2_IsProgram),
+    .IsRenderbuffer =           TWRAPF(ppb_opengles2_IsRenderbuffer),
+    .IsShader =                 TWRAPF(ppb_opengles2_IsShader),
+    .IsTexture =                TWRAPF(ppb_opengles2_IsTexture),
+    .LineWidth =                TWRAPF(ppb_opengles2_LineWidth),
+    .LinkProgram =              TWRAPF(ppb_opengles2_LinkProgram),
+    .PixelStorei =              TWRAPF(ppb_opengles2_PixelStorei),
+    .PolygonOffset =            TWRAPF(ppb_opengles2_PolygonOffset),
+    .ReadPixels =               TWRAPF(ppb_opengles2_ReadPixels),
+    .ReleaseShaderCompiler =    TWRAPF(ppb_opengles2_ReleaseShaderCompiler),
+    .RenderbufferStorage =      TWRAPF(ppb_opengles2_RenderbufferStorage),
+    .SampleCoverage =           TWRAPF(ppb_opengles2_SampleCoverage),
+    .Scissor =                  TWRAPF(ppb_opengles2_Scissor),
+    .ShaderBinary =             TWRAPF(ppb_opengles2_ShaderBinary),
+    .ShaderSource =             TWRAPF(ppb_opengles2_ShaderSource),
+    .StencilFunc =              TWRAPF(ppb_opengles2_StencilFunc),
+    .StencilFuncSeparate =      TWRAPF(ppb_opengles2_StencilFuncSeparate),
+    .StencilMask =              TWRAPF(ppb_opengles2_StencilMask),
+    .StencilMaskSeparate =      TWRAPF(ppb_opengles2_StencilMaskSeparate),
+    .StencilOp =                TWRAPF(ppb_opengles2_StencilOp),
+    .StencilOpSeparate =        TWRAPF(ppb_opengles2_StencilOpSeparate),
+    .TexImage2D =               TWRAPF(ppb_opengles2_TexImage2D),
+    .TexParameterf =            TWRAPF(ppb_opengles2_TexParameterf),
+    .TexParameterfv =           TWRAPF(ppb_opengles2_TexParameterfv),
+    .TexParameteri =            TWRAPF(ppb_opengles2_TexParameteri),
+    .TexParameteriv =           TWRAPF(ppb_opengles2_TexParameteriv),
+    .TexSubImage2D =            TWRAPF(ppb_opengles2_TexSubImage2D),
+    .Uniform1f =                TWRAPF(ppb_opengles2_Uniform1f),
+    .Uniform1fv =               TWRAPF(ppb_opengles2_Uniform1fv),
+    .Uniform1i =                TWRAPF(ppb_opengles2_Uniform1i),
+    .Uniform1iv =               TWRAPF(ppb_opengles2_Uniform1iv),
+    .Uniform2f =                TWRAPF(ppb_opengles2_Uniform2f),
+    .Uniform2fv =               TWRAPF(ppb_opengles2_Uniform2fv),
+    .Uniform2i =                TWRAPF(ppb_opengles2_Uniform2i),
+    .Uniform2iv =               TWRAPF(ppb_opengles2_Uniform2iv),
+    .Uniform3f =                TWRAPF(ppb_opengles2_Uniform3f),
+    .Uniform3fv =               TWRAPF(ppb_opengles2_Uniform3fv),
+    .Uniform3i =                TWRAPF(ppb_opengles2_Uniform3i),
+    .Uniform3iv =               TWRAPF(ppb_opengles2_Uniform3iv),
+    .Uniform4f =                TWRAPF(ppb_opengles2_Uniform4f),
+    .Uniform4fv =               TWRAPF(ppb_opengles2_Uniform4fv),
+    .Uniform4i =                TWRAPF(ppb_opengles2_Uniform4i),
+    .Uniform4iv =               TWRAPF(ppb_opengles2_Uniform4iv),
+    .UniformMatrix2fv =         TWRAPF(ppb_opengles2_UniformMatrix2fv),
+    .UniformMatrix3fv =         TWRAPF(ppb_opengles2_UniformMatrix3fv),
+    .UniformMatrix4fv =         TWRAPF(ppb_opengles2_UniformMatrix4fv),
+    .UseProgram =               TWRAPF(ppb_opengles2_UseProgram),
+    .ValidateProgram =          TWRAPF(ppb_opengles2_ValidateProgram),
+    .VertexAttrib1f =           TWRAPF(ppb_opengles2_VertexAttrib1f),
+    .VertexAttrib1fv =          TWRAPF(ppb_opengles2_VertexAttrib1fv),
+    .VertexAttrib2f =           TWRAPF(ppb_opengles2_VertexAttrib2f),
+    .VertexAttrib2fv =          TWRAPF(ppb_opengles2_VertexAttrib2fv),
+    .VertexAttrib3f =           TWRAPF(ppb_opengles2_VertexAttrib3f),
+    .VertexAttrib3fv =          TWRAPF(ppb_opengles2_VertexAttrib3fv),
+    .VertexAttrib4f =           TWRAPF(ppb_opengles2_VertexAttrib4f),
+    .VertexAttrib4fv =          TWRAPF(ppb_opengles2_VertexAttrib4fv),
+    .VertexAttribPointer =      TWRAPF(ppb_opengles2_VertexAttribPointer),
+    .Viewport =                 TWRAPF(ppb_opengles2_Viewport),
 };
 
 const struct PPB_OpenGLES2ChromiumEnableFeature ppb_opengles2_chromium_enable_feature_interface_1_0 = {
-    .EnableFeatureCHROMIUM = TWRAP(ppb_opengles2_chromium_enable_feature_enable_feature_chromium),
+    .EnableFeatureCHROMIUM = TWRAPZ(ppb_opengles2_chromium_enable_feature_enable_feature_chromium),
 };
 
 const struct PPB_OpenGLES2ChromiumMapSub ppb_opengles2_chromium_map_sub_interface_1_0 = {
-    .MapBufferSubDataCHROMIUM =   TWRAP(ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium),
-    .UnmapBufferSubDataCHROMIUM = TWRAP(ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium),
-    .MapTexSubImage2DCHROMIUM =   TWRAP(ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium),
-    .UnmapTexSubImage2DCHROMIUM = TWRAP(ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium),
+    .MapBufferSubDataCHROMIUM =   TWRAPZ(ppb_opengles2_chromium_map_sub_map_buffer_sub_data_chromium),
+    .UnmapBufferSubDataCHROMIUM = TWRAPZ(ppb_opengles2_chromium_map_sub_unmap_buffer_sub_data_chromium),
+    .MapTexSubImage2DCHROMIUM =   TWRAPF(ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium),
+    .UnmapTexSubImage2DCHROMIUM = TWRAPF(ppb_opengles2_chromium_map_sub_unmap_tex_sub_image_2d_chromium),
 };
 
 const struct PPB_OpenGLES2FramebufferBlit ppb_opengles2_framebuffer_blit_interface_1_0 = {
-    .BlitFramebufferEXT = TWRAP(ppb_opengles2_framebuffer_blit_blit_framebuffer_ext),
+    .BlitFramebufferEXT = TWRAPZ(ppb_opengles2_framebuffer_blit_blit_framebuffer_ext),
 };
 
 const struct PPB_OpenGLES2FramebufferMultisample ppb_opengles2_framebuffer_multisample_interface_1_0 = {
     .RenderbufferStorageMultisampleEXT =
-                TWRAP(ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext),
+                TWRAPZ(ppb_opengles2_framebuffer_multisample_renderbuffer_storage_multisample_ext),
 };
 
 const struct PPB_OpenGLES2InstancedArrays ppb_opengles2_instanced_arrays_interface_1_0 = {
-    .DrawArraysInstancedANGLE = TWRAP(ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle),
-    .DrawElementsInstancedANGLE =TWRAP(ppb_opengles2_instanced_arrays_draw_elements_instanced_angle),
-    .VertexAttribDivisorANGLE = TWRAP(ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle),
+    .DrawArraysInstancedANGLE = TWRAPZ(ppb_opengles2_instanced_arrays_draw_arrays_instanced_angle),
+    .DrawElementsInstancedANGLE =TWRAPZ(ppb_opengles2_instanced_arrays_draw_elements_instanced_angle),
+    .VertexAttribDivisorANGLE = TWRAPZ(ppb_opengles2_instanced_arrays_vertex_attrib_divisor_angle),
 
 };
 
 const struct PPB_OpenGLES2Query ppb_opengles2_query_interface_1_0 = {
-    .GenQueriesEXT =        TWRAP(ppb_opengles2_query_gen_queries_ext),
-    .DeleteQueriesEXT =     TWRAP(ppb_opengles2_query_delete_queries_ext),
-    .IsQueryEXT =           TWRAP(ppb_opengles2_query_is_query_ext),
-    .BeginQueryEXT =        TWRAP(ppb_opengles2_query_begin_query_ext),
-    .EndQueryEXT =          TWRAP(ppb_opengles2_query_end_query_ext),
-    .GetQueryivEXT =        TWRAP(ppb_opengles2_query_get_queryiv_ext),
-    .GetQueryObjectuivEXT = TWRAP(ppb_opengles2_query_get_query_objectuiv_ext),
+    .GenQueriesEXT =        TWRAPZ(ppb_opengles2_query_gen_queries_ext),
+    .DeleteQueriesEXT =     TWRAPZ(ppb_opengles2_query_delete_queries_ext),
+    .IsQueryEXT =           TWRAPZ(ppb_opengles2_query_is_query_ext),
+    .BeginQueryEXT =        TWRAPZ(ppb_opengles2_query_begin_query_ext),
+    .EndQueryEXT =          TWRAPZ(ppb_opengles2_query_end_query_ext),
+    .GetQueryivEXT =        TWRAPZ(ppb_opengles2_query_get_queryiv_ext),
+    .GetQueryObjectuivEXT = TWRAPZ(ppb_opengles2_query_get_query_objectuiv_ext),
 };

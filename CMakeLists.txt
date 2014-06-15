@@ -15,6 +15,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
 
 add_definitions(-Werror=implicit-function-declaration)
 
+set(TRACE_ALL 0 CACHE BOOLEAN "Enable tracing implemented functions")
+if(${TRACE_ALL})
+	add_definitions(-DTRACE_ALL)
+endif()
+
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(REQ

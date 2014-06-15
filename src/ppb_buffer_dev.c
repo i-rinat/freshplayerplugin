@@ -57,9 +57,8 @@ ppb_buffer_dev_unmap(PP_Resource resource)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_buffer_dev_create(PP_Instance instance, uint32_t size_in_bytes)
 {
@@ -68,7 +67,7 @@ trace_ppb_buffer_dev_create(PP_Instance instance, uint32_t size_in_bytes)
     return ppb_buffer_dev_create(instance, size_in_bytes);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_buffer_dev_is_buffer(PP_Resource resource)
 {
@@ -76,7 +75,7 @@ trace_ppb_buffer_dev_is_buffer(PP_Resource resource)
     return ppb_buffer_dev_is_buffer(resource);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_buffer_dev_describe(PP_Resource resource, uint32_t *size_in_bytes)
 {
@@ -84,7 +83,7 @@ trace_ppb_buffer_dev_describe(PP_Resource resource, uint32_t *size_in_bytes)
     return ppb_buffer_dev_describe(resource, size_in_bytes);
 }
 
-static
+TRACE_WRAPPER
 void *
 trace_ppb_buffer_dev_map(PP_Resource resource)
 {
@@ -92,20 +91,19 @@ trace_ppb_buffer_dev_map(PP_Resource resource)
     return ppb_buffer_dev_map(resource);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_buffer_dev_unmap(PP_Resource resource)
 {
     trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     ppb_buffer_dev_unmap(resource);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Buffer_Dev_0_4 ppb_buffer_dev_interface_0_4 = {
-    .Create =   TWRAP(ppb_buffer_dev_create),
-    .IsBuffer = TWRAP(ppb_buffer_dev_is_buffer),
-    .Describe = TWRAP(ppb_buffer_dev_describe),
-    .Map =      TWRAP(ppb_buffer_dev_map),
-    .Unmap =    TWRAP(ppb_buffer_dev_unmap),
+    .Create =   TWRAPZ(ppb_buffer_dev_create),
+    .IsBuffer = TWRAPZ(ppb_buffer_dev_is_buffer),
+    .Describe = TWRAPZ(ppb_buffer_dev_describe),
+    .Map =      TWRAPZ(ppb_buffer_dev_map),
+    .Unmap =    TWRAPZ(ppb_buffer_dev_unmap),
 };

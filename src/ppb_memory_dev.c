@@ -41,9 +41,8 @@ ppb_memory_dev_mem_free(void *ptr)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 void *
 trace_ppb_memory_dev_mem_alloc(uint32_t num_bytes)
 {
@@ -51,17 +50,16 @@ trace_ppb_memory_dev_mem_alloc(uint32_t num_bytes)
     return ppb_memory_dev_mem_alloc(num_bytes);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_memory_dev_mem_free(void *ptr)
 {
     trace_info("[PPB] {full} %s ptr=%p\n", __func__+6, ptr);
     ppb_memory_dev_mem_free(ptr);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Memory_Dev_0_1 ppb_memory_dev_interface_0_1 = {
-    .MemAlloc = TWRAP(ppb_memory_dev_mem_alloc),
-    .MemFree =  TWRAP(ppb_memory_dev_mem_free),
+    .MemAlloc = TWRAPF(ppb_memory_dev_mem_alloc),
+    .MemFree =  TWRAPF(ppb_memory_dev_mem_free),
 };

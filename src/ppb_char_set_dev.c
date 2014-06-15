@@ -140,9 +140,8 @@ ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 char *
 trace_ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16,
                                          uint32_t utf16_len, const char *output_char_set,
@@ -156,7 +155,7 @@ trace_ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *u
                                               on_error, output_length);
 }
 
-static
+TRACE_WRAPPER
 uint16_t *
 trace_ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input,
                                          uint32_t input_len, const char *input_char_set,
@@ -170,18 +169,17 @@ trace_ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input
                                               on_error, output_length);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_char_set_dev_get_default_char_set(instance);
 }
-#endif // NDEBUG
 
 
 const struct PPB_CharSet_Dev_0_4 ppb_char_set_dev_interface_0_4 = {
-    .UTF16ToCharSet =       TWRAP(ppb_char_set_dev_utf16_to_char_set),
-    .CharSetToUTF16 =       TWRAP(ppb_char_set_dev_char_set_to_utf16),
-    .GetDefaultCharSet =    TWRAP(ppb_char_set_dev_get_default_char_set),
+    .UTF16ToCharSet =       TWRAPF(ppb_char_set_dev_utf16_to_char_set),
+    .CharSetToUTF16 =       TWRAPF(ppb_char_set_dev_char_set_to_utf16),
+    .GetDefaultCharSet =    TWRAPF(ppb_char_set_dev_get_default_char_set),
 };

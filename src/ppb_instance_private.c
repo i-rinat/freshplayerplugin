@@ -137,9 +137,8 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_instance_private_get_window_object(PP_Instance instance)
 {
@@ -147,7 +146,7 @@ trace_ppb_instance_private_get_window_object(PP_Instance instance)
     return ppb_instance_private_get_window_object(instance);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_instance_private_get_owner_element_object(PP_Instance instance)
 {
@@ -155,7 +154,7 @@ trace_ppb_instance_private_get_owner_element_object(PP_Instance instance)
     return ppb_instance_private_get_owner_element_object(instance);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
                                           struct PP_Var *exception)
@@ -165,11 +164,10 @@ trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var sc
     g_free(s_script);
     return ppb_instance_private_execute_script(instance, script, exception);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Instance_Private_0_1 ppb_instance_private_interface_0_1 = {
-    .GetWindowObject =          TWRAP(ppb_instance_private_get_window_object),
-    .GetOwnerElementObject =    TWRAP(ppb_instance_private_get_owner_element_object),
-    .ExecuteScript =            TWRAP(ppb_instance_private_execute_script),
+    .GetWindowObject =          TWRAPF(ppb_instance_private_get_window_object),
+    .GetOwnerElementObject =    TWRAPZ(ppb_instance_private_get_owner_element_object),
+    .ExecuteScript =            TWRAPF(ppb_instance_private_execute_script),
 };

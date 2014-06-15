@@ -98,9 +98,8 @@ ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_flash_font_file_create(PP_Instance instance,
                                  const struct PP_BrowserFont_Trusted_Description *description,
@@ -116,7 +115,7 @@ trace_ppb_flash_font_file_create(PP_Instance instance,
     return ppb_flash_font_file_create(instance, description, charset);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_font_file_is_flash_font_file(PP_Resource resource)
 {
@@ -124,7 +123,7 @@ trace_ppb_flash_font_file_is_flash_font_file(PP_Resource resource)
     return ppb_flash_font_file_is_flash_font_file(resource);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *output,
                                          uint32_t *output_length)
@@ -134,11 +133,10 @@ trace_ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, 
                output);
     return ppb_flash_font_file_get_font_table(font_file, table, output, output_length);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Flash_FontFile_0_1 ppb_flash_font_file_interface_0_1 = {
-    .Create =           TWRAP(ppb_flash_font_file_create),
-    .IsFlashFontFile =  TWRAP(ppb_flash_font_file_is_flash_font_file),
-    .GetFontTable =     TWRAP(ppb_flash_font_file_get_font_table),
+    .Create =           TWRAPF(ppb_flash_font_file_create),
+    .IsFlashFontFile =  TWRAPF(ppb_flash_font_file_is_flash_font_file),
+    .GetFontTable =     TWRAPF(ppb_flash_font_file_get_font_table),
 };

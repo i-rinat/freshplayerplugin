@@ -31,18 +31,29 @@
 #include <npapi/npapi.h>
 
 
+#define TRACE_WRAPPER       static __attribute__((unused))
+
+// trace non-implemeted or partially implemented function based on build type
 #ifndef NDEBUG
+// debug build have tracing enabled
+#define TWRAPZ(fname)       trace_##fname
+#else
+#define TWRAPZ(fname)       fname
+#endif
+
+// trace implemented function only if TRACE_ALL defined
+#ifdef TRACE_ALL
+#define TWRAPF(fname)       trace_##fname
+#define trace_info_f(...)   trace_info(__VA_ARGS__)
+#else
+#define TWRAPF(fname)       fname
+#define trace_info_f(...)
+#endif
+
+#define trace_info_z(...)   trace_info(__VA_ARGS__)
+
+
 void    trace_info(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
-#else
-static inline void __attribute__((format (printf, 1, 2))) trace_info(const char *fmt, ...) { };
-#endif
-
-#ifndef NDEBUG
-#define TWRAP(fname)    trace_##fname
-#else
-#define TWRAP(fname)    fname
-#endif
-
 void    trace_warning(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 void    trace_error(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 char   *trace_var_as_string(struct PP_Var var);

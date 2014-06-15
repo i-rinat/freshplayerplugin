@@ -206,8 +206,8 @@ p2n_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVaria
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
+TRACE_WRAPPER
 NPObject *
 trace_p2n_allocate(NPP npp, NPClass *aClass)
 {
@@ -215,6 +215,7 @@ trace_p2n_allocate(NPP npp, NPClass *aClass)
     return p2n_allocate(npp, aClass);
 }
 
+TRACE_WRAPPER
 void
 trace_p2n_deallocate(NPObject *npobj)
 {
@@ -222,6 +223,7 @@ trace_p2n_deallocate(NPObject *npobj)
     p2n_deallocate(npobj);
 }
 
+TRACE_WRAPPER
 void
 trace_p2n_invalidate(NPObject *npobj)
 {
@@ -229,6 +231,7 @@ trace_p2n_invalidate(NPObject *npobj)
     p2n_invalidate(npobj);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_has_method(NPObject *npobj, NPIdentifier name)
 {
@@ -238,6 +241,7 @@ trace_p2n_has_method(NPObject *npobj, NPIdentifier name)
     return p2n_has_method(npobj, name);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount,
                  NPVariant *result)
@@ -249,6 +253,7 @@ trace_p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint
     return p2n_invoke(npobj, name, args, argCount, result);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_invoke_default(NPObject *npobj, const NPVariant *args, uint32_t argCount,
                          NPVariant *result)
@@ -257,6 +262,7 @@ trace_p2n_invoke_default(NPObject *npobj, const NPVariant *args, uint32_t argCou
     return p2n_invoke_default(npobj, args, argCount, result);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_has_property(NPObject *npobj, NPIdentifier name)
 {
@@ -266,6 +272,7 @@ trace_p2n_has_property(NPObject *npobj, NPIdentifier name)
     return p2n_has_property(npobj, name);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
 {
@@ -273,6 +280,7 @@ trace_p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
     return p2n_get_property(npobj, name, result);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_set_property(NPObject *npobj, NPIdentifier name, const NPVariant *value)
 {
@@ -280,6 +288,7 @@ trace_p2n_set_property(NPObject *npobj, NPIdentifier name, const NPVariant *valu
     return p2n_set_property(npobj, name, value);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_remove_property(NPObject *npobj, NPIdentifier name)
 {
@@ -287,6 +296,7 @@ trace_p2n_remove_property(NPObject *npobj, NPIdentifier name)
     return p2n_remove_property(npobj, name);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
 {
@@ -294,28 +304,28 @@ trace_p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
     return p2n_enumerate(npobj, value, count);
 }
 
+TRACE_WRAPPER
 bool
 trace_p2n_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
     trace_info("[CLS] {full} %s\n", __func__+6);
     return p2n_construct(npobj, args, argCount, result);
 }
-#endif // NDEBUG
 
 
 // can't be const due to npapi restrictions
 struct NPClass p2n_proxy_class = {
     .structVersion =    NP_CLASS_STRUCT_VERSION,
-    .allocate =         TWRAP(p2n_allocate),
-    .deallocate =       TWRAP(p2n_deallocate),
-    .invalidate =       TWRAP(p2n_invalidate),
-    .hasMethod =        TWRAP(p2n_has_method),
-    .invoke =           TWRAP(p2n_invoke),
-    .invokeDefault =    TWRAP(p2n_invoke_default),
-    .hasProperty =      TWRAP(p2n_has_property),
-    .getProperty =      TWRAP(p2n_get_property),
-    .setProperty =      TWRAP(p2n_set_property),
-    .removeProperty =   TWRAP(p2n_remove_property),
-    .enumerate =        TWRAP(p2n_enumerate),
-    .construct =        TWRAP(p2n_construct),
+    .allocate =         TWRAPF(p2n_allocate),
+    .deallocate =       TWRAPF(p2n_deallocate),
+    .invalidate =       TWRAPZ(p2n_invalidate),
+    .hasMethod =        TWRAPF(p2n_has_method),
+    .invoke =           TWRAPF(p2n_invoke),
+    .invokeDefault =    TWRAPZ(p2n_invoke_default),
+    .hasProperty =      TWRAPF(p2n_has_property),
+    .getProperty =      TWRAPF(p2n_get_property),
+    .setProperty =      TWRAPZ(p2n_set_property),
+    .removeProperty =   TWRAPZ(p2n_remove_property),
+    .enumerate =        TWRAPZ(p2n_enumerate),
+    .construct =        TWRAPF(p2n_construct),
 };

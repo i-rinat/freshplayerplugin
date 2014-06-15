@@ -39,7 +39,7 @@ __attribute__((visibility("default")))
 const char *
 NP_GetMIMEDescription(void)
 {
-    trace_info("[NP] %s\n", __func__);
+    trace_info_f("[NP] %s\n", __func__);
     // TODO: get MIME info from manifest or plugin itself
     return "application/x-shockwave-flash:swf:Shockwave Flash";
 }
@@ -48,7 +48,7 @@ __attribute__((visibility("default")))
 char *
 NP_GetPluginVersion(void)
 {
-    trace_info("[NP] %s\n", __func__);
+    trace_info_f("[NP] %s\n", __func__);
     // TODO: get version from manifest
     return (char*)"13.1.2.3";
 }
@@ -57,8 +57,8 @@ __attribute__((visibility("default")))
 NPError
 NP_GetValue(void *instance, NPPVariable variable, void *value)
 {
-    trace_info("[NP] %s instance=%p, variable=%s, value=%p\n", __func__, instance,
-               reverse_npp_variable(variable), value);
+    trace_info_f("[NP] %s instance=%p, variable=%s, value=%p\n", __func__, instance,
+                 reverse_npp_variable(variable), value);
     switch (variable) {
     case NPPVpluginNameString:
         *(const char **)value = "Shockwave Flash";
@@ -67,7 +67,7 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
         *(const char **)value = "Shockwave Flash 13.1 r2";
         break;
     default:
-        trace_info("    not implemented variable %d\n", variable);
+        trace_info_z("    not implemented variable %d\n", variable);
     }
     return NPERR_NO_ERROR;
 }
@@ -78,8 +78,8 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
     int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
 
-    trace_info("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p, browser API version = %u\n", __func__,
-               aNPNFuncs, aNPPFuncs, aNPNFuncs->version);
+    trace_info_f("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p, browser API version = %u\n", __func__,
+                 aNPNFuncs, aNPPFuncs, aNPNFuncs->version);
 
     memset(&npn, 0, sizeof(npn));
     memcpy(&npn, aNPNFuncs, sizeof(npn) < aNPNFuncs->size ? sizeof(npn) : aNPNFuncs->size);
@@ -137,7 +137,7 @@ __attribute__((visibility("default")))
 NPError
 NP_Shutdown(void)
 {
-    trace_info("[NP] %s\n", __func__);
+    trace_info_f("[NP] %s\n", __func__);
     fpp_config_destroy();
     return NPERR_NO_ERROR;
 }

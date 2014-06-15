@@ -97,8 +97,9 @@ ppb_view_get_css_scale(PP_Resource resource)
     return 1.0;
 }
 
-#ifndef NDEBUG
+
 // trace wrappers
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_is_view(PP_Resource resource)
 {
@@ -106,6 +107,7 @@ trace_ppb_view_is_view(PP_Resource resource)
     return ppb_view_is_view(resource);
 }
 
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_get_rect(PP_Resource resource, struct PP_Rect *rect)
 {
@@ -113,6 +115,7 @@ trace_ppb_view_get_rect(PP_Resource resource, struct PP_Rect *rect)
     return ppb_view_get_rect(resource, rect);
 }
 
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_is_fullscreen(PP_Resource resource)
 {
@@ -120,6 +123,7 @@ trace_ppb_view_is_fullscreen(PP_Resource resource)
     return ppb_view_is_fullscreen(resource);
 }
 
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_is_visible(PP_Resource resource)
 {
@@ -127,6 +131,7 @@ trace_ppb_view_is_visible(PP_Resource resource)
     return ppb_view_is_visible(resource);
 }
 
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_is_page_visible(PP_Resource resource)
 {
@@ -134,6 +139,7 @@ trace_ppb_view_is_page_visible(PP_Resource resource)
     return ppb_view_is_page_visible(resource);
 }
 
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
 {
@@ -141,6 +147,7 @@ trace_ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
     return ppb_view_get_clip_rect(resource, clip);
 }
 
+TRACE_WRAPPER
 float
 trace_ppb_view_get_device_scale(PP_Resource resource)
 {
@@ -148,36 +155,36 @@ trace_ppb_view_get_device_scale(PP_Resource resource)
     return ppb_view_get_device_scale(resource);
 }
 
+TRACE_WRAPPER
 float
 trace_ppb_view_get_css_scale(PP_Resource resource)
 {
     trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_css_scale(resource);
 }
-#endif // NDEBUG
 
 
 const struct PPB_View_Dev_0_1 ppb_view_dev_interface_0_1 = {
-    .GetDeviceScale =   TWRAP(ppb_view_get_device_scale),
-    .GetCSSScale =      TWRAP(ppb_view_get_css_scale),
+    .GetDeviceScale =   TWRAPZ(ppb_view_get_device_scale),
+    .GetCSSScale =      TWRAPZ(ppb_view_get_css_scale),
 };
 
 const struct PPB_View_1_0 ppb_view_interface_1_0 = {
-    .IsView =           TWRAP(ppb_view_is_view),
-    .GetRect =          TWRAP(ppb_view_get_rect),
-    .IsFullscreen =     TWRAP(ppb_view_is_fullscreen),
-    .IsVisible =        TWRAP(ppb_view_is_visible),
-    .IsPageVisible =    TWRAP(ppb_view_is_page_visible),
-    .GetClipRect =      TWRAP(ppb_view_get_clip_rect),
+    .IsView =           TWRAPF(ppb_view_is_view),
+    .GetRect =          TWRAPF(ppb_view_get_rect),
+    .IsFullscreen =     TWRAPZ(ppb_view_is_fullscreen),
+    .IsVisible =        TWRAPZ(ppb_view_is_visible),
+    .IsPageVisible =    TWRAPZ(ppb_view_is_page_visible),
+    .GetClipRect =      TWRAPF(ppb_view_get_clip_rect),
 };
 
 const struct PPB_View_1_1 ppb_view_interface_1_1 = {
-    .IsView =           TWRAP(ppb_view_is_view),
-    .GetRect =          TWRAP(ppb_view_get_rect),
-    .IsFullscreen =     TWRAP(ppb_view_is_fullscreen),
-    .IsVisible =        TWRAP(ppb_view_is_visible),
-    .IsPageVisible =    TWRAP(ppb_view_is_page_visible),
-    .GetClipRect =      TWRAP(ppb_view_get_clip_rect),
-    .GetDeviceScale =   TWRAP(ppb_view_get_device_scale),
-    .GetCSSScale =      TWRAP(ppb_view_get_css_scale),
+    .IsView =           TWRAPF(ppb_view_is_view),
+    .GetRect =          TWRAPF(ppb_view_get_rect),
+    .IsFullscreen =     TWRAPZ(ppb_view_is_fullscreen),
+    .IsVisible =        TWRAPZ(ppb_view_is_visible),
+    .IsPageVisible =    TWRAPZ(ppb_view_is_page_visible),
+    .GetClipRect =      TWRAPF(ppb_view_get_clip_rect),
+    .GetDeviceScale =   TWRAPZ(ppb_view_get_device_scale),
+    .GetCSSScale =      TWRAPZ(ppb_view_get_css_scale),
 };

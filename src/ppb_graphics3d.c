@@ -312,9 +312,8 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t *value)
 {
@@ -322,7 +321,7 @@ trace_ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribut
     return ppb_graphics3d_get_attrib_max_value(instance, attribute, value);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context,
                             const int32_t attrib_list[])
@@ -332,7 +331,7 @@ trace_ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context,
     return ppb_graphics3d_create(instance, share_context, attrib_list);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_graphics3d_is_graphics3d(PP_Resource resource)
 {
@@ -340,7 +339,7 @@ trace_ppb_graphics3d_is_graphics3d(PP_Resource resource)
     return ppb_graphics3d_is_graphics3d(resource);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_graphics3d_get_attribs(PP_Resource context, int32_t attrib_list[])
 {
@@ -348,7 +347,7 @@ trace_ppb_graphics3d_get_attribs(PP_Resource context, int32_t attrib_list[])
     return ppb_graphics3d_get_attribs(context, attrib_list);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_graphics3d_set_attribs(PP_Resource context, const int32_t attrib_list[])
 {
@@ -356,7 +355,7 @@ trace_ppb_graphics3d_set_attribs(PP_Resource context, const int32_t attrib_list[
     return ppb_graphics3d_set_attribs(context, attrib_list);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_graphics3d_get_error(PP_Resource context)
 {
@@ -364,7 +363,7 @@ trace_ppb_graphics3d_get_error(PP_Resource context)
     return ppb_graphics3d_get_error(context);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height)
 {
@@ -373,7 +372,7 @@ trace_ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t 
     return ppb_graphics3d_resize_buffers(context, width, height);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
@@ -381,16 +380,15 @@ trace_ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallb
                __func__+6, context, callback.func, callback.user_data, callback.flags);
     return ppb_graphics3d_swap_buffers(context, callback);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Graphics3D_1_0 ppb_graphics3d_interface_1_0 = {
-    .GetAttribMaxValue =    TWRAP(ppb_graphics3d_get_attrib_max_value),
-    .Create =               TWRAP(ppb_graphics3d_create),
-    .IsGraphics3D =         TWRAP(ppb_graphics3d_is_graphics3d),
-    .GetAttribs =           TWRAP(ppb_graphics3d_get_attribs),
-    .SetAttribs =           TWRAP(ppb_graphics3d_set_attribs),
-    .GetError =             TWRAP(ppb_graphics3d_get_error),
-    .ResizeBuffers =        TWRAP(ppb_graphics3d_resize_buffers),
-    .SwapBuffers =          TWRAP(ppb_graphics3d_swap_buffers),
+    .GetAttribMaxValue =    TWRAPZ(ppb_graphics3d_get_attrib_max_value),
+    .Create =               TWRAPF(ppb_graphics3d_create),
+    .IsGraphics3D =         TWRAPF(ppb_graphics3d_is_graphics3d),
+    .GetAttribs =           TWRAPZ(ppb_graphics3d_get_attribs),
+    .SetAttribs =           TWRAPZ(ppb_graphics3d_set_attribs),
+    .GetError =             TWRAPZ(ppb_graphics3d_get_error),
+    .ResizeBuffers =        TWRAPF(ppb_graphics3d_resize_buffers),
+    .SwapBuffers =          TWRAPF(ppb_graphics3d_swap_buffers),
 };

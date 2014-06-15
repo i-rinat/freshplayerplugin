@@ -229,9 +229,8 @@ ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
 {
@@ -239,7 +238,7 @@ trace_ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
     return ppb_flash_fullscreen_is_fullscreen(instance);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 {
@@ -247,18 +246,17 @@ trace_ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscre
     return ppb_flash_fullscreen_set_fullscreen(instance, fullscreen);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_flash_fullscreen_get_screen_size(instance, size);
 }
-#endif // NDEBUG
 
 
 const struct PPB_FlashFullscreen_1_0 ppb_flash_fullscreen_interface_1_0 = {
-    .IsFullscreen =     TWRAP(ppb_flash_fullscreen_is_fullscreen),
-    .SetFullscreen =    TWRAP(ppb_flash_fullscreen_set_fullscreen),
-    .GetScreenSize =    TWRAP(ppb_flash_fullscreen_get_screen_size),
+    .IsFullscreen =     TWRAPF(ppb_flash_fullscreen_is_fullscreen),
+    .SetFullscreen =    TWRAPF(ppb_flash_fullscreen_set_fullscreen),
+    .GetScreenSize =    TWRAPF(ppb_flash_fullscreen_get_screen_size),
 };

@@ -82,20 +82,20 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 {
     int k;
     struct pp_instance_s *pp_i;
-    trace_info("[NPP] {full} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
-               pluginType, npp, mode, argc, saved);
+    trace_info_f("[NPP] {full} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
+                 pluginType, npp, mode, argc, saved);
 
     tables_add_npp_instance(npp);
     np_main_thread = pthread_self();
 
     for (k = 0; k < argc; k ++)
-        trace_info("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
+        trace_info_f("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
     // request windowless operation
     npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
 
     if (config.quirks.plugin_missing) {
-        trace_info("plugin missing, using placeholder\n");
+        trace_info_z("plugin missing, using placeholder\n");
         return NPERR_NO_ERROR;
     }
 
@@ -135,7 +135,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->egl_dpy = eglGetDisplay(pp_i->dpy);
     EGLint major, minor;
     eglInitialize(pp_i->egl_dpy, &major, &minor);
-    trace_info("EGL version %d.%d\n", major, minor);
+    trace_info_f("EGL version %d.%d\n", major, minor);
 
     // get fullscreen resolution
     int screen_count;
@@ -187,7 +187,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 NPError
 NPP_Destroy(NPP npp, NPSavedData **save)
 {
-    trace_info("[NPP] {full} %s npp=%p, save=%p\n", __func__, npp, save);
+    trace_info_f("[NPP] {full} %s npp=%p, save=%p\n", __func__, npp, save);
     tables_remove_npp_instance(npp);
 
     if (config.quirks.plugin_missing)
@@ -207,7 +207,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         return NPERR_NO_ERROR;
 
     char *window_str = trace_np_window_as_string(window);
-    trace_info("[NPP] {full} %s npp=%p, window=%s\n", __func__, npp, window_str);
+    trace_info_f("[NPP] {full} %s npp=%p, window=%s\n", __func__, npp, window_str);
     g_free(window_str);
 
     struct pp_instance_s *pp_i = npp->pdata;
@@ -245,10 +245,10 @@ do_nothing(void *user_data, int32_t result)
 NPError
 NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint16_t *stype)
 {
-    trace_info("[NPP] {full} %s npp=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
-               "end=%u, lastmodified=%u, .notifyData=%p, .headers=%s}, seekable=%d\n", __func__,
-               npp, type, stream->pdata, stream->ndata, stream->url, stream->end,
-               stream->lastmodified, stream->notifyData, stream->headers, seekable);
+    trace_info_f("[NPP] {full} %s npp=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
+                 "end=%u, lastmodified=%u, .notifyData=%p, .headers=%s}, seekable=%d\n", __func__,
+                 npp, type, stream->pdata, stream->ndata, stream->url, stream->end,
+                 stream->lastmodified, stream->notifyData, stream->headers, seekable);
 
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
@@ -257,7 +257,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
     if (!loader) {
         // ignoring unrequested streams
         stream->pdata = NULL;
-        trace_info("      ignoring unrequested stream\n");
+        trace_info_f("      ignoring unrequested stream\n");
         return NPERR_NO_ERROR;
     }
 
@@ -277,7 +277,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         ul->redirect_url = nullsafe_strdup(hp_get_header_value(ph, "Location"));
         if (ph->http_code >= 300 && ph->http_code <= 307 && ul->redirect_url) {
             if (ul->follow_redirects) {
-                trace_info("       %s, redirecting to %s\n", __func__, ul->redirect_url);
+                trace_info_f("       %s, redirecting to %s\n", __func__, ul->redirect_url);
                 pp_resource_release(loader);
                 ppb_url_loader_follow_redirect(loader, PP_MakeCompletionCallback(do_nothing, NULL));
                 // There is no need to fill response headers, status_line and other parameters
@@ -317,7 +317,7 @@ quit:
 NPError
 NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 {
-    trace_info("[NPP] {full} %s npp=%p, stream=%p, reason=%d\n", __func__, npp, stream, reason);
+    trace_info_f("[NPP] {full} %s npp=%p, stream=%p, reason=%d\n", __func__, npp, stream, reason);
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
 
@@ -355,14 +355,14 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 int32_t
 NPP_WriteReady(NPP npp, NPStream *stream)
 {
-    trace_info("[NPP] {full} %s npp=%p, stream=%p\n", __func__, npp, stream);
+    trace_info_f("[NPP] {full} %s npp=%p, stream=%p\n", __func__, npp, stream);
     return 1024*1024;
 }
 
 int32_t
 NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 {
-    trace_info("[NPP] {full} %s npp=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
+    trace_info_f("[NPP] {full} %s npp=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
                npp, stream, offset, len, buffer);
     if (config.quirks.plugin_missing)
         return len;
@@ -373,7 +373,7 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     if (!ul) {
-            trace_info("[NPP] %s, ignoring stream content\n", __func__);
+            trace_info_f("[NPP] %s, ignoring stream content\n", __func__);
             return len;
     }
 
@@ -415,14 +415,14 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 void
 NPP_StreamAsFile(NPP npp, NPStream *stream, const char *fname)
 {
-    trace_info("[NPP] {zilch} %s npp=%p, stream=%p, fname=%s\n", __func__, npp, stream, fname);
+    trace_info_z("[NPP] {zilch} %s npp=%p, stream=%p, fname=%s\n", __func__, npp, stream, fname);
     return;
 }
 
 void
 NPP_Print(NPP npp, NPPrint *platformPrint)
 {
-    trace_info("[NPP] {zilch} %s npp=%p, platformPrint=%p\n", __func__, npp, platformPrint);
+    trace_info_z("[NPP] {zilch} %s npp=%p, platformPrint=%p\n", __func__, npp, platformPrint);
     return;
 }
 
@@ -840,10 +840,10 @@ NPP_HandleEvent(NPP npp, void *event)
         return NPERR_NO_ERROR;
     }
 
-#define TRACE_HELPER(implstatus)                                                    \
-    trace_info("[NPP] " implstatus " %s npp=%p, event={.type=%s, .serial=%lu, "   \
-               ".send_event=%d, .display=%p, .window=0x%x}\n", __func__, npp,       \
-               reverse_xevent_type(xaev->type), xaev->serial, xaev->send_event,     \
+#define TRACE_HELPER(implstatus, f)                                                     \
+    trace_info_##f("[NPP] " implstatus " %s npp=%p, event={.type=%s, .serial=%lu, "     \
+               ".send_event=%d, .display=%p, .window=0x%x}\n", __func__, npp,           \
+               reverse_xevent_type(xaev->type), xaev->serial, xaev->send_event,         \
                xaev->display, (uint32_t)xaev->window)
 
     if (pp_i && pp_i->is_fullscreen && pp_i->fs_wnd != xaev->window) {
@@ -852,41 +852,41 @@ NPP_HandleEvent(NPP npp, void *event)
 
     switch (xaev->type) {
     case Expose:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         // its event have similar layout to GraphicsExpose, so let ge handler to do the work
         return handle_graphics_expose_event(npp, event);
     case GraphicsExpose:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_graphics_expose_event(npp, event);
     case EnterNotify:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_enter_leave_event(npp, event);
     case LeaveNotify:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_enter_leave_event(npp, event);
     case MotionNotify:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_motion_event(npp, event);
     case ButtonPress:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_button_press_release_event(npp, event);
     case ButtonRelease:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_button_press_release_event(npp, event);
     case KeyPress:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_key_press_release_event(npp, event);
     case KeyRelease:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_key_press_release_event(npp, event);
     case FocusIn:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_focus_in_out_event(npp, event);
     case FocusOut:
-        TRACE_HELPER("{full}");
+        TRACE_HELPER("{full}", f);
         return handle_focus_in_out_event(npp, event);
     default:
-        TRACE_HELPER("{zilch}");
+        TRACE_HELPER("{zilch}", z);
         return 0;
     }
 #undef TRACE_HELPER
@@ -895,8 +895,8 @@ NPP_HandleEvent(NPP npp, void *event)
 void
 NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 {
-    trace_info("[NPP] {full} %s npp=%p, url=%s, reason=%d, notifyData=%p\n", __func__,
-               npp, url, reason, notifyData);
+    trace_info_f("[NPP] {full} %s npp=%p, url=%s, reason=%d, notifyData=%p\n", __func__,
+                 npp, url, reason, notifyData);
     // This is no-op. We are handling request in NPP_NewStream function.
     return;
 }
@@ -911,44 +911,44 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
 
     switch (variable) {
     case NPPVpluginNameString:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginDescriptionString:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginWindowBool:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginTransparentBool:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVjavaClass:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginWindowSize:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginTimerInterval:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginScriptableInstance:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginScriptableIID:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVjavascriptPushCallerBool:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginKeepLibraryInMemory:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginNeedsXEmbed:
-        trace_info("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         *(int *)value = 0;
         break;
     case NPPVpluginScriptableNPObject:
-        trace_info("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         do {
             struct pp_instance_s *pp_i = npp->pdata;
             const struct PPP_Instance_Private_0_1 *ppp_instance_private =
@@ -967,32 +967,32 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
         } while (0);
         break;
     case NPPVformValue:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginUrlRequestsDisplayedBool:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginWantsAllNetworkStreams:
-        trace_info("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         *(int *)value = 1;
         break;
     case NPPVpluginNativeAccessibleAtkPlugId:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginCancelSrcStream:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVsupportsAdvancedKeyHandling:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginUsesDOMForCursorBool:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     case NPPVpluginDrawingModel:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     default:
-        trace_info("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         break;
     }
 
@@ -1002,30 +1002,30 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
 NPError
 NPP_SetValue(NPP npp, NPNVariable variable, void *value)
 {
-    trace_info("[NPP] {zilch} %s npp=%p, variable=%s, value=%p\n", __func__,
-               npp, reverse_npn_variable(variable), value);
+    trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s, value=%p\n", __func__,
+                 npp, reverse_npn_variable(variable), value);
     return NPERR_NO_ERROR;
 }
 
 NPBool
 NPP_GotFocus(NPP npp, NPFocusDirection direction)
 {
-    trace_info("[NPP] {zilch} %s npp=%p, direction=%d\n", __func__, npp, direction);
+    trace_info_z("[NPP] {zilch} %s npp=%p, direction=%d\n", __func__, npp, direction);
     return 1;
 }
 
 void
 NPP_LostFocus(NPP npp)
 {
-    trace_info("[NPP] {zilch} %s npp=%p\n", __func__, npp);
+    trace_info_z("[NPP] {zilch} %s npp=%p\n", __func__, npp);
     return;
 }
 
 void
 NPP_URLRedirectNotify(NPP npp, const char *url, int32_t status, void *notifyData)
 {
-    trace_info("[NPP] {full} %s npp=%p, url=%s, status=%d, notifyData=%p\n", __func__,
-               npp, url, status, notifyData);
+    trace_info_f("[NPP] {full} %s npp=%p, url=%s, status=%d, notifyData=%p\n", __func__,
+                 npp, url, status, notifyData);
     // We are handling redirects ourselves. Tell browser to stop.
     npn.urlredirectresponse(npp, notifyData, false);
     return;
@@ -1034,21 +1034,21 @@ NPP_URLRedirectNotify(NPP npp, const char *url, int32_t status, void *notifyData
 NPError
 NPP_ClearSiteData(const char *site, uint64_t flags, uint64_t maxAge)
 {
-    trace_info("[NPP] {zilch} %s site=%s, flags=%"PRIu64", maxAge=%"PRIu64"\n", __func__,
-               site, flags, maxAge);
+    trace_info_z("[NPP] {zilch} %s site=%s, flags=%"PRIu64", maxAge=%"PRIu64"\n", __func__,
+                 site, flags, maxAge);
     return NPERR_NO_ERROR;
 }
 
 char**
 NPP_GetSitesWithData(void)
 {
-    trace_info("[NPP] {zilch} %s\n", __func__);
+    trace_info_z("[NPP] {zilch} %s\n", __func__);
     return NULL;
 }
 
 void
 NPP_DidComposite(NPP npp)
 {
-    trace_info("[NPP] {zilch} %s npp=%p\n", __func__, npp);
+    trace_info_z("[NPP] {zilch} %s npp=%p\n", __func__, npp);
     return;
 }

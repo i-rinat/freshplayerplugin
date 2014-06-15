@@ -100,9 +100,8 @@ ppb_video_capture_dev_close(PP_Resource video_capture)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_video_capture_dev_create(PP_Instance instance)
 {
@@ -110,7 +109,7 @@ trace_ppb_video_capture_dev_create(PP_Instance instance)
     return ppb_video_capture_dev_create(instance);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_video_capture_dev_is_video_capture(PP_Resource video_capture)
 {
@@ -118,7 +117,7 @@ trace_ppb_video_capture_dev_is_video_capture(PP_Resource video_capture)
     return ppb_video_capture_dev_is_video_capture(video_capture);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture,
                                               struct PP_ArrayOutput output,
@@ -128,7 +127,7 @@ trace_ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture,
     return ppb_video_capture_dev_enumerate_devices(video_capture, output, callback);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_dev_monitor_device_change(PP_Resource video_capture,
                                                   PP_MonitorDeviceChangeCallback callback,
@@ -138,7 +137,7 @@ trace_ppb_video_capture_dev_monitor_device_change(PP_Resource video_capture,
     return ppb_video_capture_dev_monitor_device_change(video_capture, callback, user_data);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_dev_open(PP_Resource video_capture, PP_Resource device_ref,
                                  const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
@@ -149,7 +148,7 @@ trace_ppb_video_capture_dev_open(PP_Resource video_capture, PP_Resource device_r
                                       callback);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_dev_start_capture(PP_Resource video_capture)
 {
@@ -157,7 +156,7 @@ trace_ppb_video_capture_dev_start_capture(PP_Resource video_capture)
     return ppb_video_capture_dev_start_capture(video_capture);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_dev_reuse_buffer(PP_Resource video_capture, uint32_t buffer)
 {
@@ -165,7 +164,7 @@ trace_ppb_video_capture_dev_reuse_buffer(PP_Resource video_capture, uint32_t buf
     return ppb_video_capture_dev_reuse_buffer(video_capture, buffer);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_dev_stop_capture(PP_Resource video_capture)
 {
@@ -173,24 +172,23 @@ trace_ppb_video_capture_dev_stop_capture(PP_Resource video_capture)
     return ppb_video_capture_dev_stop_capture(video_capture);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_video_capture_dev_close(PP_Resource video_capture)
 {
     trace_info("[PPB] {fake} %s\n", __func__+6);
     ppb_video_capture_dev_close(video_capture);
 }
-#endif // NDEBUG
 
 
 const struct PPB_VideoCapture_Dev_0_3 ppb_video_capture_dev_interface_0_3 = {
-    .Create =               TWRAP(ppb_video_capture_dev_create),
-    .IsVideoCapture =       TWRAP(ppb_video_capture_dev_is_video_capture),
-    .EnumerateDevices =     TWRAP(ppb_video_capture_dev_enumerate_devices),
-    .MonitorDeviceChange =  TWRAP(ppb_video_capture_dev_monitor_device_change),
-    .Open =                 TWRAP(ppb_video_capture_dev_open),
-    .StartCapture =         TWRAP(ppb_video_capture_dev_start_capture),
-    .ReuseBuffer =          TWRAP(ppb_video_capture_dev_reuse_buffer),
-    .StopCapture =          TWRAP(ppb_video_capture_dev_stop_capture),
-    .Close =                TWRAP(ppb_video_capture_dev_close),
+    .Create =               TWRAPF(ppb_video_capture_dev_create),
+    .IsVideoCapture =       TWRAPF(ppb_video_capture_dev_is_video_capture),
+    .EnumerateDevices =     TWRAPZ(ppb_video_capture_dev_enumerate_devices),
+    .MonitorDeviceChange =  TWRAPZ(ppb_video_capture_dev_monitor_device_change),
+    .Open =                 TWRAPZ(ppb_video_capture_dev_open),
+    .StartCapture =         TWRAPZ(ppb_video_capture_dev_start_capture),
+    .ReuseBuffer =          TWRAPZ(ppb_video_capture_dev_reuse_buffer),
+    .StopCapture =          TWRAPZ(ppb_video_capture_dev_stop_capture),
+    .Close =                TWRAPZ(ppb_video_capture_dev_close),
 };

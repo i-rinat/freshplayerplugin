@@ -247,9 +247,8 @@ ppb_audio_stop_playback(PP_Resource audio)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
                        PPB_Audio_Callback_1_0 audio_callback, void *user_data)
@@ -259,7 +258,7 @@ trace_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
     return ppb_audio_create(instance, audio_config, audio_callback, user_data);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_is_audio(PP_Resource resource)
 {
@@ -267,7 +266,7 @@ trace_ppb_audio_is_audio(PP_Resource resource)
     return ppb_audio_is_audio(resource);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_audio_get_current_config(PP_Resource audio)
 {
@@ -275,7 +274,7 @@ trace_ppb_audio_get_current_config(PP_Resource audio)
     return ppb_audio_get_current_config(audio);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_start_playback(PP_Resource audio)
 {
@@ -283,20 +282,19 @@ trace_ppb_audio_start_playback(PP_Resource audio)
     return ppb_audio_start_playback(audio);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_stop_playback(PP_Resource audio)
 {
     trace_info("[PPB] {full} %s audio=%d\n", __func__+6, audio);
     return ppb_audio_stop_playback(audio);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Audio_1_0 ppb_audio_interface_1_0 = {
-    .Create =           TWRAP(ppb_audio_create),
-    .IsAudio =          TWRAP(ppb_audio_is_audio),
-    .GetCurrentConfig = TWRAP(ppb_audio_get_current_config),
-    .StartPlayback =    TWRAP(ppb_audio_start_playback),
-    .StopPlayback =     TWRAP(ppb_audio_stop_playback),
+    .Create =           TWRAPF(ppb_audio_create),
+    .IsAudio =          TWRAPF(ppb_audio_is_audio),
+    .GetCurrentConfig = TWRAPF(ppb_audio_get_current_config),
+    .StartPlayback =    TWRAPF(ppb_audio_start_playback),
+    .StopPlayback =     TWRAPF(ppb_audio_stop_playback),
 };

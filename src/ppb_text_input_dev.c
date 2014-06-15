@@ -63,9 +63,8 @@ ppb_text_input_dev_interface_selection_changed(PP_Instance instance)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 void
 trace_ppb_text_input_dev_interface_set_text_input_type(PP_Instance instance,
                                                        PP_TextInput_Type_Dev type)
@@ -75,7 +74,7 @@ trace_ppb_text_input_dev_interface_set_text_input_type(PP_Instance instance,
     ppb_text_input_dev_interface_set_text_input_type(instance, type);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_text_input_dev_interface_update_caret_position(PP_Instance instance,
                                                          const struct PP_Rect *caret,
@@ -90,7 +89,7 @@ trace_ppb_text_input_dev_interface_update_caret_position(PP_Instance instance,
     ppb_text_input_dev_interface_update_caret_position(instance, caret, bounding_box);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_text_input_dev_interface_cancel_composition_text(PP_Instance instance)
 {
@@ -98,7 +97,7 @@ trace_ppb_text_input_dev_interface_cancel_composition_text(PP_Instance instance)
     ppb_text_input_dev_interface_cancel_composition_text(instance);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_text_input_dev_interface_update_surrounding_text(PP_Instance instance, const char *text,
                                                            uint32_t caret, uint32_t anchor)
@@ -108,20 +107,19 @@ trace_ppb_text_input_dev_interface_update_surrounding_text(PP_Instance instance,
     ppb_text_input_dev_interface_update_surrounding_text(instance, text, caret, anchor);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_text_input_dev_interface_selection_changed(PP_Instance instance)
 {
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     ppb_text_input_dev_interface_selection_changed(instance);
 }
-#endif // NDEBUG
 
 
 const struct PPB_TextInput_Dev_0_2 ppb_text_input_dev_interface_0_2 = {
-    .SetTextInputType =         TWRAP(ppb_text_input_dev_interface_set_text_input_type),
-    .UpdateCaretPosition =      TWRAP(ppb_text_input_dev_interface_update_caret_position),
-    .CancelCompositionText =    TWRAP(ppb_text_input_dev_interface_cancel_composition_text),
-    .UpdateSurroundingText =    TWRAP(ppb_text_input_dev_interface_update_surrounding_text),
-    .SelectionChanged =         TWRAP(ppb_text_input_dev_interface_selection_changed),
+    .SetTextInputType =         TWRAPZ(ppb_text_input_dev_interface_set_text_input_type),
+    .UpdateCaretPosition =      TWRAPZ(ppb_text_input_dev_interface_update_caret_position),
+    .CancelCompositionText =    TWRAPZ(ppb_text_input_dev_interface_cancel_composition_text),
+    .UpdateSurroundingText =    TWRAPZ(ppb_text_input_dev_interface_update_surrounding_text),
+    .SelectionChanged =         TWRAPZ(ppb_text_input_dev_interface_selection_changed),
 };

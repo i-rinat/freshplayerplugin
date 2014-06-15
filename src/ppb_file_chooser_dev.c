@@ -48,9 +48,8 @@ ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_file_chooser_dev_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
                                   struct PP_Var accept_types)
@@ -59,7 +58,7 @@ trace_ppb_file_chooser_dev_create(PP_Instance instance, PP_FileChooserMode_Dev m
     return ppb_file_chooser_dev_create(instance, mode, accept_types);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_file_chooser_dev_is_file_chooser(PP_Resource resource)
 {
@@ -67,7 +66,7 @@ trace_ppb_file_chooser_dev_is_file_chooser(PP_Resource resource)
     return ppb_file_chooser_dev_is_file_chooser(resource);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
                                 struct PP_CompletionCallback callback)
@@ -75,11 +74,10 @@ trace_ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput outpu
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_file_chooser_dev_show(chooser, output, callback);
 }
-#endif // NDEBUG
 
 
 const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
-    .Create =           TWRAP(ppb_file_chooser_dev_create),
-    .IsFileChooser =    TWRAP(ppb_file_chooser_dev_is_file_chooser),
-    .Show =             TWRAP(ppb_file_chooser_dev_show),
+    .Create =           TWRAPZ(ppb_file_chooser_dev_create),
+    .IsFileChooser =    TWRAPZ(ppb_file_chooser_dev_is_file_chooser),
+    .Show =             TWRAPZ(ppb_file_chooser_dev_show),
 };

@@ -56,9 +56,8 @@ ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_flash_message_loop_create(PP_Instance instance)
 {
@@ -66,7 +65,7 @@ trace_ppb_flash_message_loop_create(PP_Instance instance)
     return ppb_flash_message_loop_create(instance);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_message_loop_is_flash_message_loop(PP_Resource resource)
 {
@@ -74,7 +73,7 @@ trace_ppb_flash_message_loop_is_flash_message_loop(PP_Resource resource)
     return ppb_flash_message_loop_is_flash_message_loop(resource);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_message_loop_run(PP_Resource flash_message_loop)
 {
@@ -82,19 +81,18 @@ trace_ppb_flash_message_loop_run(PP_Resource flash_message_loop)
     return ppb_flash_message_loop_run(flash_message_loop);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
 {
     trace_info("[PPB] {full} %s flash_message_loop=%d\n", __func__+6, flash_message_loop);
     return ppb_flash_message_loop_quit(flash_message_loop);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Flash_MessageLoop_0_1 ppb_flash_message_loop_interface_0_1 = {
-    .Create =               TWRAP(ppb_flash_message_loop_create),
-    .IsFlashMessageLoop =   TWRAP(ppb_flash_message_loop_is_flash_message_loop),
-    .Run =                  TWRAP(ppb_flash_message_loop_run),
-    .Quit =                 TWRAP(ppb_flash_message_loop_quit),
+    .Create =               TWRAPF(ppb_flash_message_loop_create),
+    .IsFlashMessageLoop =   TWRAPF(ppb_flash_message_loop_is_flash_message_loop),
+    .Run =                  TWRAPF(ppb_flash_message_loop_run),
+    .Quit =                 TWRAPF(ppb_flash_message_loop_quit),
 };

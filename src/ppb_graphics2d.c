@@ -294,9 +294,8 @@ ppb_graphics2d_get_scale(PP_Resource resource)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size,
                             PP_Bool is_always_opaque)
@@ -308,7 +307,7 @@ trace_ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size,
     return ppb_graphics2d_create(instance, size, is_always_opaque);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_graphics2d_is_graphics2d(PP_Resource resource)
 {
@@ -316,7 +315,7 @@ trace_ppb_graphics2d_is_graphics2d(PP_Resource resource)
     return ppb_graphics2d_is_graphics2d(resource);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_graphics2d_describe(PP_Resource graphics_2d, struct PP_Size *size,
                               PP_Bool *is_always_opaque)
@@ -327,6 +326,7 @@ trace_ppb_graphics2d_describe(PP_Resource graphics_2d, struct PP_Size *size,
     return ppb_graphics2d_describe(graphics_2d, size, is_always_opaque);
 }
 
+TRACE_WRAPPER
 void
 trace_ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image_data,
                                       const struct PP_Point *top_left,
@@ -341,7 +341,7 @@ trace_ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image
     ppb_graphics2d_paint_image_data(graphics_2d, image_data, top_left, src_rect);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_graphics2d_scroll(PP_Resource graphics_2d, const struct PP_Rect *clip_rect,
                             const struct PP_Point *amount)
@@ -355,7 +355,7 @@ trace_ppb_graphics2d_scroll(PP_Resource graphics_2d, const struct PP_Rect *clip_
     ppb_graphics2d_scroll(graphics_2d, clip_rect, amount);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 {
@@ -364,7 +364,7 @@ trace_ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image
     ppb_graphics2d_replace_contents(graphics_2d, image_data);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callback)
 {
@@ -373,7 +373,7 @@ trace_ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback
     return ppb_graphics2d_flush(graphics_2d, callback);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_graphics2d_set_scale(PP_Resource resource, float scale)
 {
@@ -381,34 +381,33 @@ trace_ppb_graphics2d_set_scale(PP_Resource resource, float scale)
     return ppb_graphics2d_set_scale(resource, scale);
 }
 
-static
+TRACE_WRAPPER
 float
 trace_ppb_graphics2d_get_scale(PP_Resource resource)
 {
     trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_graphics2d_get_scale(resource);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Graphics2D_1_0 ppb_graphics2d_interface_1_0 = {
-    .Create =           TWRAP(ppb_graphics2d_create),
-    .IsGraphics2D =     TWRAP(ppb_graphics2d_is_graphics2d),
-    .Describe =         TWRAP(ppb_graphics2d_describe),
-    .PaintImageData =   TWRAP(ppb_graphics2d_paint_image_data),
-    .Scroll =           TWRAP(ppb_graphics2d_scroll),
-    .ReplaceContents =  TWRAP(ppb_graphics2d_replace_contents),
-    .Flush =            TWRAP(ppb_graphics2d_flush),
+    .Create =           TWRAPF(ppb_graphics2d_create),
+    .IsGraphics2D =     TWRAPF(ppb_graphics2d_is_graphics2d),
+    .Describe =         TWRAPZ(ppb_graphics2d_describe),
+    .PaintImageData =   TWRAPF(ppb_graphics2d_paint_image_data),
+    .Scroll =           TWRAPZ(ppb_graphics2d_scroll),
+    .ReplaceContents =  TWRAPF(ppb_graphics2d_replace_contents),
+    .Flush =            TWRAPF(ppb_graphics2d_flush),
 };
 
 const struct PPB_Graphics2D_1_1 ppb_graphics2d_interface_1_1 = {
-    .Create =           TWRAP(ppb_graphics2d_create),
-    .IsGraphics2D =     TWRAP(ppb_graphics2d_is_graphics2d),
-    .Describe =         TWRAP(ppb_graphics2d_describe),
-    .PaintImageData =   TWRAP(ppb_graphics2d_paint_image_data),
-    .Scroll =           TWRAP(ppb_graphics2d_scroll),
-    .ReplaceContents =  TWRAP(ppb_graphics2d_replace_contents),
-    .Flush =            TWRAP(ppb_graphics2d_flush),
-    .SetScale =         TWRAP(ppb_graphics2d_set_scale),
-    .GetScale =         TWRAP(ppb_graphics2d_get_scale),
+    .Create =           TWRAPF(ppb_graphics2d_create),
+    .IsGraphics2D =     TWRAPF(ppb_graphics2d_is_graphics2d),
+    .Describe =         TWRAPZ(ppb_graphics2d_describe),
+    .PaintImageData =   TWRAPF(ppb_graphics2d_paint_image_data),
+    .Scroll =           TWRAPZ(ppb_graphics2d_scroll),
+    .ReplaceContents =  TWRAPF(ppb_graphics2d_replace_contents),
+    .Flush =            TWRAPF(ppb_graphics2d_flush),
+    .SetScale =         TWRAPF(ppb_graphics2d_set_scale),
+    .GetScale =         TWRAPF(ppb_graphics2d_get_scale),
 };

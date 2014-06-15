@@ -72,9 +72,8 @@ ppb_ime_input_event_dev_get_selection(PP_Resource ime_event, uint32_t *start, ui
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_ime_input_event_dev_create(PP_Instance instance, PP_InputEvent_Type type,
                                      PP_TimeTicks time_stamp, struct PP_Var text,
@@ -88,7 +87,7 @@ trace_ppb_ime_input_event_dev_create(PP_Instance instance, PP_InputEvent_Type ty
                                           selection_end);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_ime_input_event_dev_is_ime_input_event(PP_Resource resource)
 {
@@ -96,7 +95,7 @@ trace_ppb_ime_input_event_dev_is_ime_input_event(PP_Resource resource)
     return ppb_ime_input_event_dev_is_ime_input_event(resource);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_ime_input_event_dev_get_text(PP_Resource ime_event)
 {
@@ -104,7 +103,7 @@ trace_ppb_ime_input_event_dev_get_text(PP_Resource ime_event)
     return ppb_ime_input_event_dev_get_text(ime_event);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_ime_input_event_dev_get_segment_number(PP_Resource ime_event)
 {
@@ -112,7 +111,7 @@ trace_ppb_ime_input_event_dev_get_segment_number(PP_Resource ime_event)
     return ppb_ime_input_event_dev_get_segment_number(ime_event);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_ime_input_event_dev_get_segment_offset(PP_Resource ime_event, uint32_t index)
 {
@@ -120,7 +119,7 @@ trace_ppb_ime_input_event_dev_get_segment_offset(PP_Resource ime_event, uint32_t
     return ppb_ime_input_event_dev_get_segment_offset(ime_event, index);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_ime_input_event_dev_get_target_segment(PP_Resource ime_event)
 {
@@ -128,22 +127,21 @@ trace_ppb_ime_input_event_dev_get_target_segment(PP_Resource ime_event)
     return ppb_ime_input_event_dev_get_target_segment(ime_event);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_ime_input_event_dev_get_selection(PP_Resource ime_event, uint32_t *start, uint32_t *end)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     ppb_ime_input_event_dev_get_selection(ime_event, start, end);
 }
-#endif // NDEBUG
 
 
 const struct PPB_IMEInputEvent_Dev_0_2 ppb_ime_input_event_dev_interface_0_2 = {
-    .Create =           TWRAP(ppb_ime_input_event_dev_create),
-    .IsIMEInputEvent =  TWRAP(ppb_ime_input_event_dev_is_ime_input_event),
-    .GetText =          TWRAP(ppb_ime_input_event_dev_get_text),
-    .GetSegmentNumber = TWRAP(ppb_ime_input_event_dev_get_segment_number),
-    .GetSegmentOffset = TWRAP(ppb_ime_input_event_dev_get_segment_offset),
-    .GetTargetSegment = TWRAP(ppb_ime_input_event_dev_get_target_segment),
-    .GetSelection =     TWRAP(ppb_ime_input_event_dev_get_selection),
+    .Create =           TWRAPZ(ppb_ime_input_event_dev_create),
+    .IsIMEInputEvent =  TWRAPZ(ppb_ime_input_event_dev_is_ime_input_event),
+    .GetText =          TWRAPZ(ppb_ime_input_event_dev_get_text),
+    .GetSegmentNumber = TWRAPZ(ppb_ime_input_event_dev_get_segment_number),
+    .GetSegmentOffset = TWRAPZ(ppb_ime_input_event_dev_get_segment_offset),
+    .GetTargetSegment = TWRAPZ(ppb_ime_input_event_dev_get_target_segment),
+    .GetSelection =     TWRAPZ(ppb_ime_input_event_dev_get_selection),
 };

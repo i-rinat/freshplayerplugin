@@ -313,9 +313,8 @@ ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 void
 trace_ppb_flash_set_instance_always_on_top(PP_Instance instance, PP_Bool on_top)
 {
@@ -323,7 +322,7 @@ trace_ppb_flash_set_instance_always_on_top(PP_Instance instance, PP_Bool on_top)
     ppb_flash_set_instance_always_on_top(instance, on_top);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
                             const struct PP_BrowserFont_Trusted_Description *font_desc,
@@ -355,7 +354,7 @@ trace_ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
                                  glyph_advances);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
 {
@@ -363,7 +362,7 @@ trace_ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
     return ppb_flash_get_proxy_for_url(instance, url);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_user_action)
 {
@@ -372,7 +371,7 @@ trace_ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool f
     return ppb_flash_navigate(request_info, target, from_user_action);
 }
 
-static
+TRACE_WRAPPER
 double
 trace_ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 {
@@ -380,15 +379,15 @@ trace_ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
     return ppb_flash_get_local_time_zone_offset(instance, t);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_flash_get_command_line_args(PP_Module module)
 {
-    trace_info("[PPB] {fake} %s module=%d\n", __func__+6, module);
+    trace_info("[PPB] {full} %s module=%d\n", __func__+6, module);
     return ppb_flash_get_command_line_args(module);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_flash_preload_font_win(const void *logfontw)
 {
@@ -396,7 +395,7 @@ trace_ppb_flash_preload_font_win(const void *logfontw)
     ppb_flash_preload_font_win(logfontw);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect)
 {
@@ -406,7 +405,7 @@ trace_ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect
     return ppb_flash_is_rect_topmost(instance, rect);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_flash_update_activity(PP_Instance instance)
 {
@@ -414,7 +413,7 @@ trace_ppb_flash_update_activity(PP_Instance instance)
     ppb_flash_update_activity(instance);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
@@ -423,7 +422,7 @@ trace_ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
     return ppb_flash_get_setting(instance, setting);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struct PP_Var value)
 {
@@ -434,7 +433,7 @@ trace_ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struc
     return ppb_flash_set_crash_data(instance, key, value);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resource video_capture,
                                                 struct PP_ArrayOutput devices)
@@ -445,7 +444,7 @@ trace_ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resourc
     return ppb_flash_enumerate_video_capture_devices(instance, video_capture, devices);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_flash_run_message_loop(PP_Instance instance)
 {
@@ -453,7 +452,7 @@ trace_ppb_flash_run_message_loop(PP_Instance instance)
     ppb_flash_run_message_loop(instance);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_flash_quit_message_loop(PP_Instance instance)
 {
@@ -461,7 +460,7 @@ trace_ppb_flash_quit_message_loop(PP_Instance instance)
     ppb_flash_quit_message_loop(instance);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_invoke_printing(PP_Instance instance)
 {
@@ -469,7 +468,7 @@ trace_ppb_flash_invoke_printing(PP_Instance instance)
     return ppb_flash_invoke_printing(instance);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_flash_get_device_id(PP_Instance instance)
 {
@@ -477,7 +476,7 @@ trace_ppb_flash_get_device_id(PP_Instance instance)
     return ppb_flash_get_device_id(instance);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
 {
@@ -485,40 +484,39 @@ trace_ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
                reverse_pp_flash_setting(setting));
     return ppb_flash_get_setting_int(instance, setting);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
-    .SetInstanceAlwaysOnTop =       TWRAP(ppb_flash_set_instance_always_on_top),
-    .DrawGlyphs =                   TWRAP(ppb_flash_draw_glyphs),
-    .GetProxyForURL =               TWRAP(ppb_flash_get_proxy_for_url),
-    .Navigate =                     TWRAP(ppb_flash_navigate),
-    .GetLocalTimeZoneOffset =       TWRAP(ppb_flash_get_local_time_zone_offset),
-    .GetCommandLineArgs =           TWRAP(ppb_flash_get_command_line_args),
-    .PreloadFontWin =               TWRAP(ppb_flash_preload_font_win),
-    .IsRectTopmost =                TWRAP(ppb_flash_is_rect_topmost),
-    .UpdateActivity =               TWRAP(ppb_flash_update_activity),
-    .GetSetting =                   TWRAP(ppb_flash_get_setting),
-    .SetCrashData =                 TWRAP(ppb_flash_set_crash_data),
-    .EnumerateVideoCaptureDevices = TWRAP(ppb_flash_enumerate_video_capture_devices),
+    .SetInstanceAlwaysOnTop =       TWRAPZ(ppb_flash_set_instance_always_on_top),
+    .DrawGlyphs =                   TWRAPF(ppb_flash_draw_glyphs),
+    .GetProxyForURL =               TWRAPZ(ppb_flash_get_proxy_for_url),
+    .Navigate =                     TWRAPF(ppb_flash_navigate),
+    .GetLocalTimeZoneOffset =       TWRAPF(ppb_flash_get_local_time_zone_offset),
+    .GetCommandLineArgs =           TWRAPF(ppb_flash_get_command_line_args),
+    .PreloadFontWin =               TWRAPZ(ppb_flash_preload_font_win),
+    .IsRectTopmost =                TWRAPZ(ppb_flash_is_rect_topmost),
+    .UpdateActivity =               TWRAPZ(ppb_flash_update_activity),
+    .GetSetting =                   TWRAPF(ppb_flash_get_setting),
+    .SetCrashData =                 TWRAPZ(ppb_flash_set_crash_data),
+    .EnumerateVideoCaptureDevices = TWRAPZ(ppb_flash_enumerate_video_capture_devices),
 };
 
 const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
-    .SetInstanceAlwaysOnTop =       TWRAP(ppb_flash_set_instance_always_on_top),
-    .DrawGlyphs =                   TWRAP(ppb_flash_draw_glyphs),
-    .GetProxyForURL =               TWRAP(ppb_flash_get_proxy_for_url),
-    .Navigate =                     TWRAP(ppb_flash_navigate),
-    .RunMessageLoop =               TWRAP(ppb_flash_run_message_loop),
-    .QuitMessageLoop =              TWRAP(ppb_flash_quit_message_loop),
-    .GetLocalTimeZoneOffset =       TWRAP(ppb_flash_get_local_time_zone_offset),
-    .GetCommandLineArgs =           TWRAP(ppb_flash_get_command_line_args),
-    .PreloadFontWin =               TWRAP(ppb_flash_preload_font_win),
-    .IsRectTopmost =                TWRAP(ppb_flash_is_rect_topmost),
-    .InvokePrinting =               TWRAP(ppb_flash_invoke_printing),
-    .UpdateActivity =               TWRAP(ppb_flash_update_activity),
-    .GetDeviceID =                  TWRAP(ppb_flash_get_device_id),
-    .GetSettingInt =                TWRAP(ppb_flash_get_setting_int),
-    .GetSetting =                   TWRAP(ppb_flash_get_setting),
-    .SetCrashData =                 TWRAP(ppb_flash_set_crash_data),
-    .EnumerateVideoCaptureDevices = TWRAP(ppb_flash_enumerate_video_capture_devices),
+    .SetInstanceAlwaysOnTop =       TWRAPZ(ppb_flash_set_instance_always_on_top),
+    .DrawGlyphs =                   TWRAPF(ppb_flash_draw_glyphs),
+    .GetProxyForURL =               TWRAPZ(ppb_flash_get_proxy_for_url),
+    .Navigate =                     TWRAPF(ppb_flash_navigate),
+    .RunMessageLoop =               TWRAPZ(ppb_flash_run_message_loop),
+    .QuitMessageLoop =              TWRAPZ(ppb_flash_quit_message_loop),
+    .GetLocalTimeZoneOffset =       TWRAPF(ppb_flash_get_local_time_zone_offset),
+    .GetCommandLineArgs =           TWRAPF(ppb_flash_get_command_line_args),
+    .PreloadFontWin =               TWRAPZ(ppb_flash_preload_font_win),
+    .IsRectTopmost =                TWRAPZ(ppb_flash_is_rect_topmost),
+    .InvokePrinting =               TWRAPZ(ppb_flash_invoke_printing),
+    .UpdateActivity =               TWRAPZ(ppb_flash_update_activity),
+    .GetDeviceID =                  TWRAPZ(ppb_flash_get_device_id),
+    .GetSettingInt =                TWRAPZ(ppb_flash_get_setting_int),
+    .GetSetting =                   TWRAPF(ppb_flash_get_setting),
+    .SetCrashData =                 TWRAPZ(ppb_flash_set_crash_data),
+    .EnumerateVideoCaptureDevices = TWRAPZ(ppb_flash_enumerate_video_capture_devices),
 };

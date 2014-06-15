@@ -34,7 +34,6 @@
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 
-#ifndef NDEBUG
 void
 trace_info(const char *fmt, ...)
 {
@@ -47,7 +46,6 @@ trace_info(const char *fmt, ...)
     va_end(args);
     pthread_mutex_unlock(&lock);
 }
-#endif
 
 void
 trace_warning(const char *fmt, ...)

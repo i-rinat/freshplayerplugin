@@ -258,9 +258,8 @@ ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
                                         PP_Resource custom_image, const struct PP_Point *hot_spot)
@@ -272,7 +271,7 @@ trace_ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType
     return ppb_cursor_control_dev_set_cursor(instance, type, custom_image, hot_spot);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_cursor_control_dev_lock_cursor(PP_Instance instance)
 {
@@ -280,7 +279,7 @@ trace_ppb_cursor_control_dev_lock_cursor(PP_Instance instance)
     return ppb_cursor_control_dev_lock_cursor(instance);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_cursor_control_dev_unlock_cursor(PP_Instance instance)
 {
@@ -288,7 +287,7 @@ trace_ppb_cursor_control_dev_unlock_cursor(PP_Instance instance)
     return ppb_cursor_control_dev_unlock_cursor(instance);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_cursor_control_dev_has_cursor_lock(PP_Instance instance)
 {
@@ -296,20 +295,19 @@ trace_ppb_cursor_control_dev_has_cursor_lock(PP_Instance instance)
     return ppb_cursor_control_dev_has_cursor_lock(instance);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance)
 {
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_cursor_control_dev_can_lock_cursor(instance);
 }
-#endif // NDEBUG
 
 
 const struct PPB_CursorControl_Dev_0_4 ppb_cursor_control_dev_interface_0_4 = {
-    .SetCursor =        TWRAP(ppb_cursor_control_dev_set_cursor),
-    .LockCursor =       TWRAP(ppb_cursor_control_dev_lock_cursor),
-    .UnlockCursor =     TWRAP(ppb_cursor_control_dev_unlock_cursor),
-    .HasCursorLock =    TWRAP(ppb_cursor_control_dev_has_cursor_lock),
-    .CanLockCursor =    TWRAP(ppb_cursor_control_dev_can_lock_cursor),
+    .SetCursor =        TWRAPF(ppb_cursor_control_dev_set_cursor),
+    .LockCursor =       TWRAPZ(ppb_cursor_control_dev_lock_cursor),
+    .UnlockCursor =     TWRAPZ(ppb_cursor_control_dev_unlock_cursor),
+    .HasCursorLock =    TWRAPZ(ppb_cursor_control_dev_has_cursor_lock),
+    .CanLockCursor =    TWRAPZ(ppb_cursor_control_dev_can_lock_cursor),
 };

@@ -109,9 +109,8 @@ ppb_audio_config_recommend_sample_rate(PP_Instance instance)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                             uint32_t sample_frame_count)
@@ -120,7 +119,7 @@ trace_ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSample
     return ppb_audio_config_create_stereo_16_bit(instance, sample_rate, sample_frame_count);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_audio_config_recommend_sample_frame_count(PP_Instance instance,
                                                     PP_AudioSampleRate sample_rate,
@@ -131,7 +130,7 @@ trace_ppb_audio_config_recommend_sample_frame_count(PP_Instance instance,
                                                          requested_sample_frame_count);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_config_is_audio_config(PP_Resource resource)
 {
@@ -139,7 +138,7 @@ trace_ppb_audio_config_is_audio_config(PP_Resource resource)
     return ppb_audio_config_is_audio_config(resource);
 }
 
-static
+TRACE_WRAPPER
 PP_AudioSampleRate
 trace_ppb_audio_config_get_sample_rate(PP_Resource config)
 {
@@ -147,7 +146,7 @@ trace_ppb_audio_config_get_sample_rate(PP_Resource config)
     return ppb_audio_config_get_sample_rate(config);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_audio_config_get_sample_frame_count(PP_Resource config)
 {
@@ -155,21 +154,20 @@ trace_ppb_audio_config_get_sample_frame_count(PP_Resource config)
     return ppb_audio_config_get_sample_frame_count(config);
 }
 
-static
+TRACE_WRAPPER
 PP_AudioSampleRate
 trace_ppb_audio_config_recommend_sample_rate(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_config_recommend_sample_rate(instance);
 }
-#endif // NDEBUG
 
 
 const struct PPB_AudioConfig_1_1 ppb_audio_config_interface_1_1 = {
-    .CreateStereo16Bit =            TWRAP(ppb_audio_config_create_stereo_16_bit),
-    .RecommendSampleFrameCount =    TWRAP(ppb_audio_config_recommend_sample_frame_count),
-    .IsAudioConfig =                TWRAP(ppb_audio_config_is_audio_config),
-    .GetSampleRate =                TWRAP(ppb_audio_config_get_sample_rate),
-    .GetSampleFrameCount =          TWRAP(ppb_audio_config_get_sample_frame_count),
-    .RecommendSampleRate =          TWRAP(ppb_audio_config_recommend_sample_rate),
+    .CreateStereo16Bit =            TWRAPF(ppb_audio_config_create_stereo_16_bit),
+    .RecommendSampleFrameCount =    TWRAPF(ppb_audio_config_recommend_sample_frame_count),
+    .IsAudioConfig =                TWRAPF(ppb_audio_config_is_audio_config),
+    .GetSampleRate =                TWRAPF(ppb_audio_config_get_sample_rate),
+    .GetSampleFrameCount =          TWRAPF(ppb_audio_config_get_sample_frame_count),
+    .RecommendSampleRate =          TWRAPF(ppb_audio_config_recommend_sample_rate),
 };

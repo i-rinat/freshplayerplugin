@@ -424,9 +424,8 @@ ppb_ime_input_event_get_selection(PP_Resource ime_event, uint32_t *start, uint32
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_input_event_request_input_events(PP_Instance instance, uint32_t event_classes)
 {
@@ -437,7 +436,7 @@ trace_ppb_input_event_request_input_events(PP_Instance instance, uint32_t event_
     return ppb_input_event_request_input_events(instance, event_classes);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_input_event_request_filtering_input_events(PP_Instance instance, uint32_t event_classes)
 {
@@ -448,7 +447,7 @@ trace_ppb_input_event_request_filtering_input_events(PP_Instance instance, uint3
     return ppb_input_event_request_filtering_input_events(instance, event_classes);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_input_event_clear_input_event_request(PP_Instance instance, uint32_t event_classes)
 {
@@ -459,7 +458,7 @@ trace_ppb_input_event_clear_input_event_request(PP_Instance instance, uint32_t e
     ppb_input_event_clear_input_event_request(instance, event_classes);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_input_event_is_input_event(PP_Resource resource)
 {
@@ -467,7 +466,7 @@ trace_ppb_input_event_is_input_event(PP_Resource resource)
     return ppb_input_event_is_input_event(resource);
 }
 
-static
+TRACE_WRAPPER
 PP_InputEvent_Type
 trace_ppb_input_event_get_type(PP_Resource event)
 {
@@ -475,7 +474,7 @@ trace_ppb_input_event_get_type(PP_Resource event)
     return ppb_input_event_get_type(event);
 }
 
-static
+TRACE_WRAPPER
 PP_TimeTicks
 trace_ppb_input_event_get_time_stamp(PP_Resource event)
 {
@@ -483,7 +482,7 @@ trace_ppb_input_event_get_time_stamp(PP_Resource event)
     return ppb_input_event_get_time_stamp(event);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_input_event_get_modifiers(PP_Resource event)
 {
@@ -491,7 +490,7 @@ trace_ppb_input_event_get_modifiers(PP_Resource event)
     return ppb_input_event_get_modifiers(event);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                    PP_TimeTicks time_stamp, uint32_t modifiers,
@@ -511,7 +510,7 @@ trace_ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type
                                         mouse_position, click_count, mouse_movement);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_mouse_input_event_is_mouse_input_event(PP_Resource resource)
 {
@@ -519,7 +518,7 @@ trace_ppb_mouse_input_event_is_mouse_input_event(PP_Resource resource)
     return ppb_mouse_input_event_is_mouse_input_event(resource);
 }
 
-static
+TRACE_WRAPPER
 PP_InputEvent_MouseButton
 trace_ppb_mouse_input_event_get_button(PP_Resource mouse_event)
 {
@@ -527,7 +526,7 @@ trace_ppb_mouse_input_event_get_button(PP_Resource mouse_event)
     return ppb_mouse_input_event_get_button(mouse_event);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Point
 trace_ppb_mouse_input_event_get_position(PP_Resource mouse_event)
 {
@@ -535,7 +534,7 @@ trace_ppb_mouse_input_event_get_position(PP_Resource mouse_event)
     return ppb_mouse_input_event_get_position(mouse_event);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_mouse_input_event_get_click_count(PP_Resource mouse_event)
 {
@@ -543,7 +542,7 @@ trace_ppb_mouse_input_event_get_click_count(PP_Resource mouse_event)
     return ppb_mouse_input_event_get_click_count(mouse_event);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Point
 trace_ppb_mouse_input_event_get_movement(PP_Resource mouse_event)
 {
@@ -551,7 +550,7 @@ trace_ppb_mouse_input_event_get_movement(PP_Resource mouse_event)
     return ppb_mouse_input_event_get_movement(mouse_event);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp,
                                    uint32_t modifiers, const struct PP_FloatPoint *wheel_delta,
@@ -568,7 +567,7 @@ trace_ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp
                                         scroll_by_page);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_wheel_input_event_is_wheel_input_event(PP_Resource resource)
 {
@@ -576,7 +575,7 @@ trace_ppb_wheel_input_event_is_wheel_input_event(PP_Resource resource)
     return ppb_wheel_input_event_is_wheel_input_event(resource);
 }
 
-static
+TRACE_WRAPPER
 struct PP_FloatPoint
 trace_ppb_wheel_input_event_get_delta(PP_Resource wheel_event)
 {
@@ -584,7 +583,7 @@ trace_ppb_wheel_input_event_get_delta(PP_Resource wheel_event)
     return ppb_wheel_input_event_get_delta(wheel_event);
 }
 
-static
+TRACE_WRAPPER
 struct PP_FloatPoint
 trace_ppb_wheel_input_event_get_ticks(PP_Resource wheel_event)
 {
@@ -592,7 +591,7 @@ trace_ppb_wheel_input_event_get_ticks(PP_Resource wheel_event)
     return ppb_wheel_input_event_get_ticks(wheel_event);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event)
 {
@@ -600,7 +599,7 @@ trace_ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event)
     return ppb_wheel_input_event_get_scroll_by_page(wheel_event);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                       PP_TimeTicks time_stamp, uint32_t modifiers,
@@ -615,7 +614,7 @@ trace_ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type t
                                            character_text);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_keyboard_input_event_is_keyboard_input_event(PP_Resource resource)
 {
@@ -623,7 +622,7 @@ trace_ppb_keyboard_input_event_is_keyboard_input_event(PP_Resource resource)
     return ppb_keyboard_input_event_is_keyboard_input_event(resource);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_keyboard_input_event_get_key_code(PP_Resource key_event)
 {
@@ -631,7 +630,7 @@ trace_ppb_keyboard_input_event_get_key_code(PP_Resource key_event)
     return ppb_keyboard_input_event_get_key_code(key_event);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
 {
@@ -639,7 +638,7 @@ trace_ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
     return ppb_keyboard_input_event_get_character_text(character_event);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_touch_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                    PP_TimeTicks time_stamp, uint32_t modifiers)
@@ -649,7 +648,7 @@ trace_ppb_touch_input_event_create(PP_Instance instance, PP_InputEvent_Type type
     return ppb_touch_input_event_create(instance, type, time_stamp, modifiers);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_touch_input_event_add_touch_point(PP_Resource touch_event, PP_TouchListType list,
                                             const struct PP_TouchPoint *point)
@@ -661,7 +660,7 @@ trace_ppb_touch_input_event_add_touch_point(PP_Resource touch_event, PP_TouchLis
     return ppb_touch_input_event_add_touch_point(touch_event, list, point);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_touch_input_event_is_touch_input_event(PP_Resource resource)
 {
@@ -669,7 +668,7 @@ trace_ppb_touch_input_event_is_touch_input_event(PP_Resource resource)
     return ppb_touch_input_event_is_touch_input_event(resource);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_touch_input_event_get_touch_count(PP_Resource resource, PP_TouchListType list)
 {
@@ -677,7 +676,7 @@ trace_ppb_touch_input_event_get_touch_count(PP_Resource resource, PP_TouchListTy
     return ppb_touch_input_event_get_touch_count(resource, list);
 }
 
-static
+TRACE_WRAPPER
 struct PP_TouchPoint
 trace_ppb_touch_input_event_get_touch_by_index(PP_Resource resource, PP_TouchListType list,
                                                uint32_t index)
@@ -687,7 +686,7 @@ trace_ppb_touch_input_event_get_touch_by_index(PP_Resource resource, PP_TouchLis
     return ppb_touch_input_event_get_touch_by_index(resource, list, index);
 }
 
-static
+TRACE_WRAPPER
 struct PP_TouchPoint
 trace_ppb_touch_input_event_get_touch_by_id(PP_Resource resource, PP_TouchListType list,
                                             uint32_t touch_id)
@@ -697,7 +696,7 @@ trace_ppb_touch_input_event_get_touch_by_id(PP_Resource resource, PP_TouchListTy
     return ppb_touch_input_event_get_touch_by_id(resource, list, touch_id);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_ime_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                  PP_TimeTicks time_stamp, struct PP_Var text,
@@ -716,7 +715,7 @@ trace_ppb_ime_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                       selection_end);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_ime_input_event_is_ime_input_event(PP_Resource resource)
 {
@@ -724,7 +723,7 @@ trace_ppb_ime_input_event_is_ime_input_event(PP_Resource resource)
     return ppb_ime_input_event_is_ime_input_event(resource);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_ime_input_event_get_text(PP_Resource ime_event)
 {
@@ -732,7 +731,7 @@ trace_ppb_ime_input_event_get_text(PP_Resource ime_event)
     return ppb_ime_input_event_get_text(ime_event);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_ime_input_event_get_segment_number(PP_Resource ime_event)
 {
@@ -740,7 +739,7 @@ trace_ppb_ime_input_event_get_segment_number(PP_Resource ime_event)
     return ppb_ime_input_event_get_segment_number(ime_event);
 }
 
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_ime_input_event_get_segment_offset(PP_Resource ime_event, uint32_t index)
 {
@@ -748,7 +747,7 @@ trace_ppb_ime_input_event_get_segment_offset(PP_Resource ime_event, uint32_t ind
     return ppb_ime_input_event_get_segment_offset(ime_event, index);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_ime_input_event_get_target_segment(PP_Resource ime_event)
 {
@@ -756,65 +755,64 @@ trace_ppb_ime_input_event_get_target_segment(PP_Resource ime_event)
     return ppb_ime_input_event_get_target_segment(ime_event);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_ime_input_event_get_selection(PP_Resource ime_event, uint32_t *start, uint32_t *end)
 {
     trace_info("[PPB] {zilch} %s ime_event=%d\n", __func__+6, ime_event);
     return ppb_ime_input_event_get_selection(ime_event, start, end);
 }
-#endif // NDEBUG
 
 
 const struct PPB_InputEvent_1_0 ppb_input_event_interface_1_0 = {
-    .RequestInputEvents =           TWRAP(ppb_input_event_request_input_events),
-    .RequestFilteringInputEvents =  TWRAP(ppb_input_event_request_filtering_input_events),
-    .ClearInputEventRequest =       TWRAP(ppb_input_event_clear_input_event_request),
-    .IsInputEvent =                 TWRAP(ppb_input_event_is_input_event),
-    .GetType =                      TWRAP(ppb_input_event_get_type),
-    .GetTimeStamp =                 TWRAP(ppb_input_event_get_time_stamp),
-    .GetModifiers =                 TWRAP(ppb_input_event_get_modifiers),
+    .RequestInputEvents =           TWRAPF(ppb_input_event_request_input_events),
+    .RequestFilteringInputEvents =  TWRAPF(ppb_input_event_request_filtering_input_events),
+    .ClearInputEventRequest =       TWRAPF(ppb_input_event_clear_input_event_request),
+    .IsInputEvent =                 TWRAPF(ppb_input_event_is_input_event),
+    .GetType =                      TWRAPF(ppb_input_event_get_type),
+    .GetTimeStamp =                 TWRAPZ(ppb_input_event_get_time_stamp),
+    .GetModifiers =                 TWRAPF(ppb_input_event_get_modifiers),
 };
 
 const struct PPB_MouseInputEvent_1_1 ppb_mouse_input_event_interface_1_1 = {
-    .Create =               TWRAP(ppb_mouse_input_event_create),
-    .IsMouseInputEvent =    TWRAP(ppb_mouse_input_event_is_mouse_input_event),
-    .GetButton =            TWRAP(ppb_mouse_input_event_get_button),
-    .GetPosition =          TWRAP(ppb_mouse_input_event_get_position),
-    .GetClickCount =        TWRAP(ppb_mouse_input_event_get_click_count),
-    .GetMovement =          TWRAP(ppb_mouse_input_event_get_movement),
+    .Create =               TWRAPF(ppb_mouse_input_event_create),
+    .IsMouseInputEvent =    TWRAPF(ppb_mouse_input_event_is_mouse_input_event),
+    .GetButton =            TWRAPF(ppb_mouse_input_event_get_button),
+    .GetPosition =          TWRAPF(ppb_mouse_input_event_get_position),
+    .GetClickCount =        TWRAPF(ppb_mouse_input_event_get_click_count),
+    .GetMovement =          TWRAPZ(ppb_mouse_input_event_get_movement),
 };
 
 const struct PPB_WheelInputEvent_1_0 ppb_wheel_input_event_interface_1_0 = {
-    .Create =               TWRAP(ppb_wheel_input_event_create),
-    .IsWheelInputEvent =    TWRAP(ppb_wheel_input_event_is_wheel_input_event),
-    .GetDelta =             TWRAP(ppb_wheel_input_event_get_delta),
-    .GetTicks =             TWRAP(ppb_wheel_input_event_get_ticks),
-    .GetScrollByPage =      TWRAP(ppb_wheel_input_event_get_scroll_by_page),
+    .Create =               TWRAPF(ppb_wheel_input_event_create),
+    .IsWheelInputEvent =    TWRAPF(ppb_wheel_input_event_is_wheel_input_event),
+    .GetDelta =             TWRAPF(ppb_wheel_input_event_get_delta),
+    .GetTicks =             TWRAPF(ppb_wheel_input_event_get_ticks),
+    .GetScrollByPage =      TWRAPF(ppb_wheel_input_event_get_scroll_by_page),
 };
 
 const struct PPB_KeyboardInputEvent_1_0 ppb_keyboard_input_event_interface_1_0 = {
-    .Create =               TWRAP(ppb_keyboard_input_event_create),
-    .IsKeyboardInputEvent = TWRAP(ppb_keyboard_input_event_is_keyboard_input_event),
-    .GetKeyCode =           TWRAP(ppb_keyboard_input_event_get_key_code),
-    .GetCharacterText =     TWRAP(ppb_keyboard_input_event_get_character_text),
+    .Create =               TWRAPF(ppb_keyboard_input_event_create),
+    .IsKeyboardInputEvent = TWRAPF(ppb_keyboard_input_event_is_keyboard_input_event),
+    .GetKeyCode =           TWRAPF(ppb_keyboard_input_event_get_key_code),
+    .GetCharacterText =     TWRAPF(ppb_keyboard_input_event_get_character_text),
 };
 
 const struct PPB_TouchInputEvent_1_0 ppb_touch_input_event_interface_1_0 = {
-    .Create =               TWRAP(ppb_touch_input_event_create),
-    .AddTouchPoint =        TWRAP(ppb_touch_input_event_add_touch_point),
-    .IsTouchInputEvent =    TWRAP(ppb_touch_input_event_is_touch_input_event),
-    .GetTouchCount =        TWRAP(ppb_touch_input_event_get_touch_count),
-    .GetTouchByIndex =      TWRAP(ppb_touch_input_event_get_touch_by_index),
-    .GetTouchById =         TWRAP(ppb_touch_input_event_get_touch_by_id),
+    .Create =               TWRAPZ(ppb_touch_input_event_create),
+    .AddTouchPoint =        TWRAPZ(ppb_touch_input_event_add_touch_point),
+    .IsTouchInputEvent =    TWRAPZ(ppb_touch_input_event_is_touch_input_event),
+    .GetTouchCount =        TWRAPZ(ppb_touch_input_event_get_touch_count),
+    .GetTouchByIndex =      TWRAPZ(ppb_touch_input_event_get_touch_by_index),
+    .GetTouchById =         TWRAPZ(ppb_touch_input_event_get_touch_by_id),
 };
 
 const struct PPB_IMEInputEvent_1_0 ppb_ime_input_event_interface_1_0 = {
-    .Create =           TWRAP(ppb_ime_input_event_create),
-    .IsIMEInputEvent =  TWRAP(ppb_ime_input_event_is_ime_input_event),
-    .GetText =          TWRAP(ppb_ime_input_event_get_text),
-    .GetSegmentNumber = TWRAP(ppb_ime_input_event_get_segment_number),
-    .GetSegmentOffset = TWRAP(ppb_ime_input_event_get_segment_offset),
-    .GetTargetSegment = TWRAP(ppb_ime_input_event_get_target_segment),
-    .GetSelection =     TWRAP(ppb_ime_input_event_get_selection),
+    .Create =           TWRAPZ(ppb_ime_input_event_create),
+    .IsIMEInputEvent =  TWRAPZ(ppb_ime_input_event_is_ime_input_event),
+    .GetText =          TWRAPZ(ppb_ime_input_event_get_text),
+    .GetSegmentNumber = TWRAPZ(ppb_ime_input_event_get_segment_number),
+    .GetSegmentOffset = TWRAPZ(ppb_ime_input_event_get_segment_offset),
+    .GetTargetSegment = TWRAPZ(ppb_ime_input_event_get_target_segment),
+    .GetSelection =     TWRAPZ(ppb_ime_input_event_get_selection),
 };

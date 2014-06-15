@@ -197,9 +197,8 @@ ppb_core_is_main_thread(void)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 void
 trace_ppb_core_add_ref_resource(PP_Resource resource)
 {
@@ -207,7 +206,7 @@ trace_ppb_core_add_ref_resource(PP_Resource resource)
     ppb_core_add_ref_resource(resource);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_core_release_resource(PP_Resource resource)
 {
@@ -215,7 +214,7 @@ trace_ppb_core_release_resource(PP_Resource resource)
     ppb_core_release_resource(resource);
 }
 
-static
+TRACE_WRAPPER
 PP_Time
 trace_ppb_core_get_time(void)
 {
@@ -223,7 +222,7 @@ trace_ppb_core_get_time(void)
     return ppb_core_get_time();
 }
 
-static
+TRACE_WRAPPER
 PP_TimeTicks
 trace_ppb_core_get_time_ticks(void)
 {
@@ -231,7 +230,7 @@ trace_ppb_core_get_time_ticks(void)
     return ppb_core_get_time_ticks();
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_core_call_on_main_thread(int32_t delay_in_milliseconds,
                                    struct PP_CompletionCallback callback, int32_t result)
@@ -242,21 +241,20 @@ trace_ppb_core_call_on_main_thread(int32_t delay_in_milliseconds,
     ppb_core_call_on_main_thread(delay_in_milliseconds, callback, result);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_core_is_main_thread(void)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_core_is_main_thread();
 }
-#endif // NDEBUG
 
 
 const struct PPB_Core_1_0 ppb_core_interface_1_0 = {
-    .AddRefResource =   TWRAP(ppb_core_add_ref_resource),
-    .ReleaseResource =  TWRAP(ppb_core_release_resource),
-    .GetTime =          TWRAP(ppb_core_get_time),
-    .GetTimeTicks =     TWRAP(ppb_core_get_time_ticks),
-    .CallOnMainThread = TWRAP(ppb_core_call_on_main_thread),
-    .IsMainThread =     TWRAP(ppb_core_is_main_thread),
+    .AddRefResource =   TWRAPF(ppb_core_add_ref_resource),
+    .ReleaseResource =  TWRAPF(ppb_core_release_resource),
+    .GetTime =          TWRAPF(ppb_core_get_time),
+    .GetTimeTicks =     TWRAPF(ppb_core_get_time_ticks),
+    .CallOnMainThread = TWRAPF(ppb_core_call_on_main_thread),
+    .IsMainThread =     TWRAPF(ppb_core_is_main_thread),
 };

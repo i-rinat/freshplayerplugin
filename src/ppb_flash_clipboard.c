@@ -59,9 +59,8 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 uint32_t
 trace_ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const char *format_name)
 {
@@ -70,7 +69,7 @@ trace_ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const 
     return ppb_flash_clipboard_register_custom_format(instance_id, format_name);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
                                               PP_Flash_Clipboard_Type clipboard_type,
@@ -82,7 +81,7 @@ trace_ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
     return ppb_flash_clipboard_is_format_available(instance_id, clipboard_type, format);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type clipboard_type,
                                     uint32_t format)
@@ -93,7 +92,7 @@ trace_ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_
     return ppb_flash_clipboard_read_data(instance_id, clipboard_type, format);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_clipboard_write_data(PP_Instance instance_id,
                                      PP_Flash_Clipboard_Type clipboard_type,
@@ -106,12 +105,11 @@ trace_ppb_flash_clipboard_write_data(PP_Instance instance_id,
     return ppb_flash_clipboard_write_data(instance_id, clipboard_type, data_item_count, formats,
                                           data_items);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
-    .RegisterCustomFormat = TWRAP(ppb_flash_clipboard_register_custom_format),
-    .IsFormatAvailable =    TWRAP(ppb_flash_clipboard_is_format_available),
-    .ReadData =             TWRAP(ppb_flash_clipboard_read_data),
-    .WriteData =            TWRAP(ppb_flash_clipboard_write_data),
+    .RegisterCustomFormat = TWRAPZ(ppb_flash_clipboard_register_custom_format),
+    .IsFormatAvailable =    TWRAPZ(ppb_flash_clipboard_is_format_available),
+    .ReadData =             TWRAPZ(ppb_flash_clipboard_read_data),
+    .WriteData =            TWRAPZ(ppb_flash_clipboard_write_data),
 };

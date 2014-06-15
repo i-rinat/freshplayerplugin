@@ -161,9 +161,8 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_data)
 {
@@ -171,7 +170,7 @@ trace_ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu 
     return ppb_flash_menu_create(instance_id, menu_data);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_menu_is_flash_menu(PP_Resource resource_id)
 {
@@ -179,7 +178,7 @@ trace_ppb_flash_menu_is_flash_menu(PP_Resource resource_id)
     return ppb_flash_menu_is_flash_menu(resource_id);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location,
                           int32_t *selected_id, struct PP_CompletionCallback callback)
@@ -187,11 +186,10 @@ trace_ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location,
     trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_flash_menu_show(menu_id, location, selected_id, callback);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Flash_Menu_0_2 ppb_flash_menu_interface_0_2 = {
-    .Create =       TWRAP(ppb_flash_menu_create),
-    .IsFlashMenu =  TWRAP(ppb_flash_menu_is_flash_menu),
-    .Show =         TWRAP(ppb_flash_menu_show),
+    .Create =       TWRAPF(ppb_flash_menu_create),
+    .IsFlashMenu =  TWRAPF(ppb_flash_menu_is_flash_menu),
+    .Show =         TWRAPF(ppb_flash_menu_show),
 };

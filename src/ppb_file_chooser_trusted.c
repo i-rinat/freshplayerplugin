@@ -37,9 +37,8 @@ ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool 
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
                                                          struct PP_Var suggested_file_name,
@@ -51,8 +50,8 @@ trace_ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP
                                                               suggested_file_name, output,
                                                               callback);
 }
-#endif // NDEBUG
+
 
 const struct PPB_FileChooserTrusted_0_6 ppb_file_chooser_trusted_interface_0_6 = {
-    .ShowWithoutUserGesture = TWRAP(ppb_file_chooser_trusted_show_without_user_gesture),
+    .ShowWithoutUserGesture = TWRAPZ(ppb_file_chooser_trusted_show_without_user_gesture),
 };

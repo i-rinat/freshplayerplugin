@@ -268,9 +268,8 @@ ppb_var_create_object_with_module_deprecated(PP_Module module,
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 void
 trace_ppb_var_add_ref(struct PP_Var var)
 {
@@ -280,7 +279,7 @@ trace_ppb_var_add_ref(struct PP_Var var)
     ppb_var_add_ref(var);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_var_release(struct PP_Var var)
 {
@@ -290,7 +289,7 @@ trace_ppb_var_release(struct PP_Var var)
     ppb_var_release(var);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
 {
@@ -298,7 +297,7 @@ trace_ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
     return ppb_var_var_from_utf8_1_1(data, len);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
 {
@@ -306,7 +305,7 @@ trace_ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len
     return ppb_var_var_from_utf8_1_0(module, data, len);
 }
 
-static
+TRACE_WRAPPER
 const char *
 trace_ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
 {
@@ -316,6 +315,7 @@ trace_ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
     return ppb_var_var_to_utf8(var, len);
 }
 
+TRACE_WRAPPER
 bool
 trace_ppb_var_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -327,6 +327,7 @@ trace_ppb_var_has_property(struct PP_Var object, struct PP_Var name, struct PP_V
     return ppb_var_has_property(object, name, exception);
 }
 
+TRACE_WRAPPER
 bool
 trace_ppb_var_has_method(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -338,6 +339,7 @@ trace_ppb_var_has_method(struct PP_Var object, struct PP_Var name, struct PP_Var
     return ppb_var_has_method(object, name, exception);
 }
 
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_get_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -349,6 +351,7 @@ trace_ppb_var_get_property(struct PP_Var object, struct PP_Var name, struct PP_V
     return ppb_var_get_property(object, name, exception);
 }
 
+TRACE_WRAPPER
 void
 trace_ppb_var_get_all_property_names(struct PP_Var object, uint32_t *property_count,
                                      struct PP_Var **properties, struct PP_Var *exception)
@@ -359,6 +362,7 @@ trace_ppb_var_get_all_property_names(struct PP_Var object, uint32_t *property_co
     ppb_var_get_all_property_names(object, property_count, properties, exception);
 }
 
+TRACE_WRAPPER
 void
 trace_ppb_var_set_property(struct PP_Var object, struct PP_Var name, struct PP_Var value,
                            struct PP_Var *exception)
@@ -374,6 +378,7 @@ trace_ppb_var_set_property(struct PP_Var object, struct PP_Var name, struct PP_V
     ppb_var_set_property(object, name, value, exception);
 }
 
+TRACE_WRAPPER
 void
 trace_ppb_var_remove_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -385,6 +390,7 @@ trace_ppb_var_remove_property(struct PP_Var object, struct PP_Var name, struct P
     ppb_var_remove_property(object, name, exception);
 }
 
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_call(struct PP_Var object, struct PP_Var method_name, uint32_t argc,
                    struct PP_Var *argv, struct PP_Var *exception)
@@ -398,6 +404,7 @@ trace_ppb_var_call(struct PP_Var object, struct PP_Var method_name, uint32_t arg
     return ppb_var_call(object, method_name, argc, argv, exception);
 }
 
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_construct(struct PP_Var object, uint32_t argc, struct PP_Var *argv,
                         struct PP_Var *exception)
@@ -408,6 +415,7 @@ trace_ppb_var_construct(struct PP_Var object, uint32_t argc, struct PP_Var *argv
     return ppb_var_construct(object, argc, argv, exception);
 }
 
+TRACE_WRAPPER
 bool
 trace_ppb_var_is_instance_of(struct PP_Var var, const struct PPP_Class_Deprecated *object_class,
                              void **object_data)
@@ -418,6 +426,7 @@ trace_ppb_var_is_instance_of(struct PP_Var var, const struct PPP_Class_Deprecate
     return ppb_var_is_instance_of(var, object_class, object_data);
 }
 
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_create_object(PP_Instance instance, const struct PPP_Class_Deprecated *object_class,
                             void *object_data)
@@ -427,6 +436,7 @@ trace_ppb_var_create_object(PP_Instance instance, const struct PPP_Class_Depreca
     return ppb_var_create_object(instance, object_class, object_data);
 }
 
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_create_object_with_module_deprecated(PP_Module module,
                                                    const struct PPP_Class_Deprecated *object_class,
@@ -437,37 +447,36 @@ trace_ppb_var_create_object_with_module_deprecated(PP_Module module,
     return ppb_var_create_object_with_module_deprecated(module, object_class,
                                                                    object_data);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Var_1_1 ppb_var_interface_1_1 = {
-    .AddRef =       TWRAP(ppb_var_add_ref),
-    .Release =      TWRAP(ppb_var_release),
-    .VarFromUtf8 =  TWRAP(ppb_var_var_from_utf8_1_1),
-    .VarToUtf8 =    TWRAP(ppb_var_var_to_utf8),
+    .AddRef =       TWRAPF(ppb_var_add_ref),
+    .Release =      TWRAPF(ppb_var_release),
+    .VarFromUtf8 =  TWRAPF(ppb_var_var_from_utf8_1_1),
+    .VarToUtf8 =    TWRAPF(ppb_var_var_to_utf8),
 };
 
 const struct PPB_Var_1_0 ppb_var_interface_1_0 = {
-    .AddRef =       TWRAP(ppb_var_add_ref),
-    .Release =      TWRAP(ppb_var_release),
-    .VarFromUtf8 =  TWRAP(ppb_var_var_from_utf8_1_0),
-    .VarToUtf8 =    TWRAP(ppb_var_var_to_utf8),
+    .AddRef =       TWRAPF(ppb_var_add_ref),
+    .Release =      TWRAPF(ppb_var_release),
+    .VarFromUtf8 =  TWRAPF(ppb_var_var_from_utf8_1_0),
+    .VarToUtf8 =    TWRAPF(ppb_var_var_to_utf8),
 };
 
 const struct PPB_Var_Deprecated ppb_var_deprecated_interface_0_3 = {
-    .AddRef =               TWRAP(ppb_var_add_ref),
-    .Release =              TWRAP(ppb_var_release),
-    .VarFromUtf8 =          TWRAP(ppb_var_var_from_utf8_1_0),
-    .VarToUtf8 =            TWRAP(ppb_var_var_to_utf8),
-    .HasProperty =          TWRAP(ppb_var_has_property),
-    .HasMethod =            TWRAP(ppb_var_has_method),
-    .GetProperty =          TWRAP(ppb_var_get_property),
-    .GetAllPropertyNames =  TWRAP(ppb_var_get_all_property_names),
-    .SetProperty =          TWRAP(ppb_var_set_property),
-    .RemoveProperty =       TWRAP(ppb_var_remove_property),
-    .Call =                 TWRAP(ppb_var_call),
-    .Construct =            TWRAP(ppb_var_construct),
-    .IsInstanceOf =         TWRAP(ppb_var_is_instance_of),
-    .CreateObject =         TWRAP(ppb_var_create_object),
-    .CreateObjectWithModuleDeprecated = TWRAP(ppb_var_create_object_with_module_deprecated),
+    .AddRef =               TWRAPF(ppb_var_add_ref),
+    .Release =              TWRAPF(ppb_var_release),
+    .VarFromUtf8 =          TWRAPF(ppb_var_var_from_utf8_1_0),
+    .VarToUtf8 =            TWRAPF(ppb_var_var_to_utf8),
+    .HasProperty =          TWRAPF(ppb_var_has_property),
+    .HasMethod =            TWRAPF(ppb_var_has_method),
+    .GetProperty =          TWRAPF(ppb_var_get_property),
+    .GetAllPropertyNames =  TWRAPF(ppb_var_get_all_property_names),
+    .SetProperty =          TWRAPF(ppb_var_set_property),
+    .RemoveProperty =       TWRAPF(ppb_var_remove_property),
+    .Call =                 TWRAPF(ppb_var_call),
+    .Construct =            TWRAPF(ppb_var_construct),
+    .IsInstanceOf =         TWRAPF(ppb_var_is_instance_of),
+    .CreateObject =         TWRAPF(ppb_var_create_object),
+    .CreateObjectWithModuleDeprecated = TWRAPF(ppb_var_create_object_with_module_deprecated),
 };

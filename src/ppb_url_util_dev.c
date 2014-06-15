@@ -257,9 +257,8 @@ ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
@@ -267,7 +266,7 @@ trace_ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_D
     return ppb_url_util_dev_canonicalize(url, components);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url,
                                                struct PP_Var relative_string,
@@ -277,7 +276,7 @@ trace_ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url,
     return ppb_url_util_dev_resolve_relative_to_url(base_url, relative_string, components);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance,
                                                     struct PP_Var relative_string,
@@ -287,7 +286,7 @@ trace_ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance,
     return ppb_url_util_dev_resolve_relative_to_document(instance, relative_string, components);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
 {
@@ -295,7 +294,7 @@ trace_ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Va
     return ppb_url_util_dev_is_same_security_origin(url_a, url_b);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
 {
@@ -303,7 +302,7 @@ trace_ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var 
     return ppb_url_util_dev_document_can_request(instance, url);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
 {
@@ -311,7 +310,7 @@ trace_ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Insta
     return ppb_url_util_dev_document_can_access_document(active, target);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_url_util_dev_get_document_url(PP_Instance instance,
                                         struct PP_URLComponents_Dev *components)
@@ -320,7 +319,7 @@ trace_ppb_url_util_dev_get_document_url(PP_Instance instance,
     return ppb_url_util_dev_get_document_url(instance, components);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                                struct PP_URLComponents_Dev *components)
@@ -329,7 +328,7 @@ trace_ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
     return ppb_url_util_dev_get_plugin_instance_url(instance, components);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
                                                struct PP_URLComponents_Dev *components)
@@ -337,28 +336,27 @@ trace_ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
     return ppb_url_util_dev_get_plugin_referrer_url(instance, components);
 }
-#endif // NDEBUG
 
 
 const struct PPB_URLUtil_Dev_0_6 ppb_url_util_dev_interface_0_6 = {
-    .Canonicalize =                 TWRAP(ppb_url_util_dev_canonicalize),
-    .ResolveRelativeToURL =         TWRAP(ppb_url_util_dev_resolve_relative_to_url),
-    .ResolveRelativeToDocument =    TWRAP(ppb_url_util_dev_resolve_relative_to_document),
-    .IsSameSecurityOrigin =         TWRAP(ppb_url_util_dev_is_same_security_origin),
-    .DocumentCanRequest =           TWRAP(ppb_url_util_dev_document_can_request),
-    .DocumentCanAccessDocument =    TWRAP(ppb_url_util_dev_document_can_access_document),
-    .GetDocumentURL =               TWRAP(ppb_url_util_dev_get_document_url),
-    .GetPluginInstanceURL =         TWRAP(ppb_url_util_dev_get_plugin_instance_url),
+    .Canonicalize =                 TWRAPZ(ppb_url_util_dev_canonicalize),
+    .ResolveRelativeToURL =         TWRAPF(ppb_url_util_dev_resolve_relative_to_url),
+    .ResolveRelativeToDocument =    TWRAPF(ppb_url_util_dev_resolve_relative_to_document),
+    .IsSameSecurityOrigin =         TWRAPZ(ppb_url_util_dev_is_same_security_origin),
+    .DocumentCanRequest =           TWRAPZ(ppb_url_util_dev_document_can_request),
+    .DocumentCanAccessDocument =    TWRAPZ(ppb_url_util_dev_document_can_access_document),
+    .GetDocumentURL =               TWRAPF(ppb_url_util_dev_get_document_url),
+    .GetPluginInstanceURL =         TWRAPF(ppb_url_util_dev_get_plugin_instance_url),
 };
 
 const struct PPB_URLUtil_Dev_0_7 ppb_url_util_dev_interface_0_7 = {
-    .Canonicalize =                 TWRAP(ppb_url_util_dev_canonicalize),
-    .ResolveRelativeToURL =         TWRAP(ppb_url_util_dev_resolve_relative_to_url),
-    .ResolveRelativeToDocument =    TWRAP(ppb_url_util_dev_resolve_relative_to_document),
-    .IsSameSecurityOrigin =         TWRAP(ppb_url_util_dev_is_same_security_origin),
-    .DocumentCanRequest =           TWRAP(ppb_url_util_dev_document_can_request),
-    .DocumentCanAccessDocument =    TWRAP(ppb_url_util_dev_document_can_access_document),
-    .GetDocumentURL =               TWRAP(ppb_url_util_dev_get_document_url),
-    .GetPluginInstanceURL =         TWRAP(ppb_url_util_dev_get_plugin_instance_url),
-    .GetPluginReferrerURL =         TWRAP(ppb_url_util_dev_get_plugin_referrer_url),
+    .Canonicalize =                 TWRAPZ(ppb_url_util_dev_canonicalize),
+    .ResolveRelativeToURL =         TWRAPF(ppb_url_util_dev_resolve_relative_to_url),
+    .ResolveRelativeToDocument =    TWRAPF(ppb_url_util_dev_resolve_relative_to_document),
+    .IsSameSecurityOrigin =         TWRAPZ(ppb_url_util_dev_is_same_security_origin),
+    .DocumentCanRequest =           TWRAPZ(ppb_url_util_dev_document_can_request),
+    .DocumentCanAccessDocument =    TWRAPZ(ppb_url_util_dev_document_can_access_document),
+    .GetDocumentURL =               TWRAPF(ppb_url_util_dev_get_document_url),
+    .GetPluginInstanceURL =         TWRAPF(ppb_url_util_dev_get_plugin_instance_url),
+    .GetPluginReferrerURL =         TWRAPZ(ppb_url_util_dev_get_plugin_referrer_url),
 };

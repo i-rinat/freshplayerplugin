@@ -49,9 +49,8 @@ ppb_network_monitor_is_network_monitor(PP_Resource resource)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_network_monitor_create(PP_Instance instance)
 {
@@ -59,7 +58,7 @@ trace_ppb_network_monitor_create(PP_Instance instance)
     return ppb_network_monitor_create(instance);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_network_monitor_update_network_list(PP_Resource network_monitor,
                                               PP_Resource *network_list,
@@ -69,18 +68,17 @@ trace_ppb_network_monitor_update_network_list(PP_Resource network_monitor,
     return ppb_network_monitor_update_network_list(network_monitor, network_list, callback);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_network_monitor_is_network_monitor(PP_Resource resource)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_network_monitor_is_network_monitor(resource);
 }
-#endif // NDEBUG
 
 
 const struct PPB_NetworkMonitor_1_0 ppb_network_monitor_interface_1_0 = {
-    .Create =               TWRAP(ppb_network_monitor_create),
-    .UpdateNetworkList =    TWRAP(ppb_network_monitor_update_network_list),
-    .IsNetworkMonitor =     TWRAP(ppb_network_monitor_is_network_monitor),
+    .Create =               TWRAPF(ppb_network_monitor_create),
+    .UpdateNetworkList =    TWRAPZ(ppb_network_monitor_update_network_list),
+    .IsNetworkMonitor =     TWRAPF(ppb_network_monitor_is_network_monitor),
 };

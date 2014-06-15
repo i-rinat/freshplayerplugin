@@ -148,7 +148,7 @@ ppb_get_interface(const char *interface_name)
     } else if (strcmp(interface_name, DEF) == 0) {  \
         return &name;
 
-    trace_info("[PPB] {full} %s interface_name=%s\n", __func__, interface_name);
+    trace_info_f("[PPB] {full} %s interface_name=%s\n", __func__, interface_name);
 
     if (0) {
         // placeholder

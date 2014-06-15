@@ -177,9 +177,8 @@ n2p_deallocate(void *object)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 bool
 trace_n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -189,7 +188,7 @@ trace_n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exceptio
     return n2p_has_property(object, name, exception);
 }
 
-static
+TRACE_WRAPPER
 bool
 trace_n2p_has_method(void *object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -199,7 +198,7 @@ trace_n2p_has_method(void *object, struct PP_Var name, struct PP_Var *exception)
     return n2p_has_method(object, name, exception);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -209,7 +208,7 @@ trace_n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exceptio
     return n2p_get_property(object, name, exception);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_n2p_get_all_property_names(void *object, uint32_t *property_count, struct PP_Var **properties,
                                  struct PP_Var *exception)
@@ -218,7 +217,7 @@ trace_n2p_get_all_property_names(void *object, uint32_t *property_count, struct 
     n2p_get_all_property_names(object, property_count, properties, exception);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_n2p_set_property(void *object, struct PP_Var name, struct PP_Var value,
                        struct PP_Var *exception)
@@ -232,7 +231,7 @@ trace_n2p_set_property(void *object, struct PP_Var name, struct PP_Var value,
     n2p_set_property(object, name, value, exception);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_n2p_remove_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -242,7 +241,7 @@ trace_n2p_remove_property(void *object, struct PP_Var name, struct PP_Var *excep
     n2p_remove_property(object, name, exception);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
                 struct PP_Var *exception)
@@ -254,7 +253,7 @@ trace_n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP
     return n2p_call(object, method_name, argc, argv, exception);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
@@ -262,24 +261,23 @@ trace_n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_
     return n2p_construct(object, argc, argv, exception);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_n2p_deallocate(void *object)
 {
     trace_info("[CLS] {full} %s object=%p\n", __func__+6, object);
     n2p_deallocate(object);
 }
-#endif // NDEBUG
 
 
 const struct PPP_Class_Deprecated n2p_proxy_class = {
-    .HasProperty =          TWRAP(n2p_has_property),
-    .HasMethod =            TWRAP(n2p_has_method),
-    .GetProperty =          TWRAP(n2p_get_property),
-    .GetAllPropertyNames =  TWRAP(n2p_get_all_property_names),
-    .SetProperty =          TWRAP(n2p_set_property),
-    .RemoveProperty =       TWRAP(n2p_remove_property),
-    .Call =                 TWRAP(n2p_call),
-    .Construct =            TWRAP(n2p_construct),
-    .Deallocate =           TWRAP(n2p_deallocate),
+    .HasProperty =          TWRAPF(n2p_has_property),
+    .HasMethod =            TWRAPZ(n2p_has_method),
+    .GetProperty =          TWRAPF(n2p_get_property),
+    .GetAllPropertyNames =  TWRAPZ(n2p_get_all_property_names),
+    .SetProperty =          TWRAPZ(n2p_set_property),
+    .RemoveProperty =       TWRAPZ(n2p_remove_property),
+    .Call =                 TWRAPF(n2p_call),
+    .Construct =            TWRAPF(n2p_construct),
+    .Deallocate =           TWRAPF(n2p_deallocate),
 };

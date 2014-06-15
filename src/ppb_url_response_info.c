@@ -35,7 +35,7 @@
 PP_Bool
 ppb_url_response_info_is_url_response_info(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_URL_RESPONSE_INFO;
 }
 
 struct PP_Var
@@ -81,17 +81,16 @@ ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_url_response_info_is_url_response_info(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_url_response_info_is_url_response_info(resource);
 }
 
-static
+TRACE_WRAPPER
 struct PP_Var
 trace_ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
@@ -100,18 +99,17 @@ trace_ppb_url_response_info_get_property(PP_Resource response, PP_URLResponsePro
     return ppb_url_response_info_get_property(response, property);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 {
     trace_info("[PPB] {zilch} %s response=%d\n", __func__+6, response);
     return ppb_url_response_info_get_body_as_file_ref(response);
 }
-#endif // NDEBUG
 
 
 const struct PPB_URLResponseInfo_1_0 ppb_url_response_info_interface_1_0 = {
-    .IsURLResponseInfo =    TWRAP(ppb_url_response_info_is_url_response_info),
-    .GetProperty =          TWRAP(ppb_url_response_info_get_property),
-    .GetBodyAsFileRef =     TWRAP(ppb_url_response_info_get_body_as_file_ref),
+    .IsURLResponseInfo =    TWRAPF(ppb_url_response_info_is_url_response_info),
+    .GetProperty =          TWRAPF(ppb_url_response_info_get_property),
+    .GetBodyAsFileRef =     TWRAPZ(ppb_url_response_info_get_body_as_file_ref),
 };

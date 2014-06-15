@@ -42,9 +42,8 @@ ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 void
 trace_ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
 {
@@ -52,7 +51,7 @@ trace_ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
     ppb_url_loader_trusted_grant_universal_access(loader);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
                                                       PP_URLLoaderTrusted_StatusCallback cb)
@@ -60,10 +59,9 @@ trace_ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
     trace_info("[PPB] {zilch} %s loader=%d, cb=%p\n", __func__+6, loader, cb);
     ppb_url_loader_trusted_register_status_callback(loader, cb);
 }
-#endif // NDEBUG
 
 
 const struct PPB_URLLoaderTrusted_0_3 ppb_url_loader_trusted_interface_0_3 = {
-    .GrantUniversalAccess =     TWRAP(ppb_url_loader_trusted_grant_universal_access),
-    .RegisterStatusCallback =   TWRAP(ppb_url_loader_trusted_register_status_callback),
+    .GrantUniversalAccess =     TWRAPZ(ppb_url_loader_trusted_grant_universal_access),
+    .RegisterStatusCallback =   TWRAPZ(ppb_url_loader_trusted_register_status_callback),
 };

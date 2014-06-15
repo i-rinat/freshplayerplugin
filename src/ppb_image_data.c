@@ -140,9 +140,8 @@ ppb_image_data_unmap(PP_Resource image_data)
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 PP_ImageDataFormat
 trace_ppb_image_data_get_native_image_data_format(void)
 {
@@ -150,7 +149,7 @@ trace_ppb_image_data_get_native_image_data_format(void)
     return ppb_image_data_get_native_image_data_format();
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_image_data_is_image_data_format_supported(PP_ImageDataFormat format)
 {
@@ -158,7 +157,7 @@ trace_ppb_image_data_is_image_data_format_supported(PP_ImageDataFormat format)
     return ppb_image_data_is_image_data_format_supported(format);
 }
 
-static
+TRACE_WRAPPER
 PP_Resource
 trace_ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
                             const struct PP_Size *size, PP_Bool init_to_zero)
@@ -170,7 +169,7 @@ trace_ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
     return ppb_image_data_create(instance, format, size, init_to_zero);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_image_data_is_image_data(PP_Resource image_data)
 {
@@ -178,7 +177,7 @@ trace_ppb_image_data_is_image_data(PP_Resource image_data)
     return ppb_image_data_is_image_data(image_data);
 }
 
-static
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc *desc)
 {
@@ -186,7 +185,7 @@ trace_ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc *d
     return ppb_image_data_describe(image_data, desc);
 }
 
-static
+TRACE_WRAPPER
 void *
 trace_ppb_image_data_map(PP_Resource image_data)
 {
@@ -194,22 +193,21 @@ trace_ppb_image_data_map(PP_Resource image_data)
     return ppb_image_data_map(image_data);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_image_data_unmap(PP_Resource image_data)
 {
     trace_info("[PPB] {full} %s image_data=%d\n", __func__+6, image_data);
     ppb_image_data_unmap(image_data);
 }
-#endif // NDEBUG
 
 
 const struct PPB_ImageData_1_0 ppb_image_data_interface_1_0 = {
-    .GetNativeImageDataFormat =     TWRAP(ppb_image_data_get_native_image_data_format),
-    .IsImageDataFormatSupported =   TWRAP(ppb_image_data_is_image_data_format_supported),
-    .Create =                       TWRAP(ppb_image_data_create),
-    .IsImageData =                  TWRAP(ppb_image_data_is_image_data),
-    .Describe =                     TWRAP(ppb_image_data_describe),
-    .Map =                          TWRAP(ppb_image_data_map),
-    .Unmap =                        TWRAP(ppb_image_data_unmap),
+    .GetNativeImageDataFormat =     TWRAPF(ppb_image_data_get_native_image_data_format),
+    .IsImageDataFormatSupported =   TWRAPF(ppb_image_data_is_image_data_format_supported),
+    .Create =                       TWRAPF(ppb_image_data_create),
+    .IsImageData =                  TWRAPF(ppb_image_data_is_image_data),
+    .Describe =                     TWRAPF(ppb_image_data_describe),
+    .Map =                          TWRAPF(ppb_image_data_map),
+    .Unmap =                        TWRAPF(ppb_image_data_unmap),
 };

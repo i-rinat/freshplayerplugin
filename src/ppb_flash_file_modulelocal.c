@@ -347,9 +347,8 @@ ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHa
 }
 
 
-#ifndef NDEBUG
 // trace wrappers
-static
+TRACE_WRAPPER
 bool
 trace_ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance instance)
 {
@@ -357,7 +356,7 @@ trace_ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance 
     return ppb_flash_file_modulelocal_create_thread_adapter_for_instance(instance);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_flash_file_modulelocal_clear_thread_adapter_for_instance(PP_Instance instance)
 {
@@ -365,7 +364,7 @@ trace_ppb_flash_file_modulelocal_clear_thread_adapter_for_instance(PP_Instance i
     ppb_flash_file_modulelocal_clear_thread_adapter_for_instance(instance);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
                                            PP_FileHandle *file)
@@ -374,7 +373,7 @@ trace_ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *pat
     return ppb_flash_file_modulelocal_open_file(instance, path, mode, file);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *path_from,
                                              const char *path_to)
@@ -384,7 +383,7 @@ trace_ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *p
     return ppb_flash_file_modulelocal_rename_file(instance, path_from, path_to);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *path,
                                                     PP_Bool recursive)
@@ -394,7 +393,7 @@ trace_ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const 
     return ppb_flash_file_modulelocal_delete_file_or_dir(instance, path, recursive);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
 {
@@ -402,7 +401,7 @@ trace_ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *pa
     return ppb_flash_file_modulelocal_create_dir(instance, path);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
                                             struct PP_FileInfo *info)
@@ -411,7 +410,7 @@ trace_ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *pa
     return ppb_flash_file_modulelocal_query_file(instance, path, info);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const char *path,
                                                   struct PP_DirContents_Dev **contents)
@@ -420,7 +419,7 @@ trace_ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const ch
     return ppb_flash_file_modulelocal_get_dir_contents(instance, path, contents);
 }
 
-static
+TRACE_WRAPPER
 void
 trace_ppb_flash_file_modulelocal_free_dir_contents(PP_Instance instance,
                                                    struct PP_DirContents_Dev *contents)
@@ -429,27 +428,26 @@ trace_ppb_flash_file_modulelocal_free_dir_contents(PP_Instance instance,
     ppb_flash_file_modulelocal_free_dir_contents(instance, contents);
 }
 
-static
+TRACE_WRAPPER
 int32_t
 trace_ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHandle *file)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_flash_file_modulelocal_create_temporary_file(instance, file);
 }
-#endif // NDEBUG
 
 
 const struct PPB_Flash_File_ModuleLocal_3_0 ppb_flash_file_modulelocal_interface_3_0 = {
     .CreateThreadAdapterForInstance =
-                            TWRAP(ppb_flash_file_modulelocal_create_thread_adapter_for_instance),
+                            TWRAPF(ppb_flash_file_modulelocal_create_thread_adapter_for_instance),
     .ClearThreadAdapterForInstance =
-                            TWRAP(ppb_flash_file_modulelocal_clear_thread_adapter_for_instance),
-    .OpenFile =             TWRAP(ppb_flash_file_modulelocal_open_file),
-    .RenameFile =           TWRAP(ppb_flash_file_modulelocal_rename_file),
-    .DeleteFileOrDir =      TWRAP(ppb_flash_file_modulelocal_delete_file_or_dir),
-    .CreateDir =            TWRAP(ppb_flash_file_modulelocal_create_dir),
-    .QueryFile =            TWRAP(ppb_flash_file_modulelocal_query_file),
-    .GetDirContents =       TWRAP(ppb_flash_file_modulelocal_get_dir_contents),
-    .FreeDirContents =      TWRAP(ppb_flash_file_modulelocal_free_dir_contents),
-    .CreateTemporaryFile =  TWRAP(ppb_flash_file_modulelocal_create_temporary_file),
+                            TWRAPF(ppb_flash_file_modulelocal_clear_thread_adapter_for_instance),
+    .OpenFile =             TWRAPF(ppb_flash_file_modulelocal_open_file),
+    .RenameFile =           TWRAPF(ppb_flash_file_modulelocal_rename_file),
+    .DeleteFileOrDir =      TWRAPF(ppb_flash_file_modulelocal_delete_file_or_dir),
+    .CreateDir =            TWRAPF(ppb_flash_file_modulelocal_create_dir),
+    .QueryFile =            TWRAPF(ppb_flash_file_modulelocal_query_file),
+    .GetDirContents =       TWRAPF(ppb_flash_file_modulelocal_get_dir_contents),
+    .FreeDirContents =      TWRAPF(ppb_flash_file_modulelocal_free_dir_contents),
+    .CreateTemporaryFile =  TWRAPF(ppb_flash_file_modulelocal_create_temporary_file),
 };
