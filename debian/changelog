@@ -1,0 +1,26 @@
+freshplayerplugin (0.2.0) precise; urgency=medium
+
+  * new git pull
+  * build-depend on libgles2-mesa-dev
+
+ -- Kimpe Andy (rpm and ppa key) <andykimpe@gmail.com>  Thu, 15 Jun 2014 22:48:40 +0200
+
+freshplayerplugin (0.1.0+git20140605~webupd8~trusty1) trusty; urgency=medium
+
+  * new git pull
+  * build-depend on libevent-dev
+
+ -- Alin Andrei <webupd8@gmail.com>  Thu, 05 Jun 2014 15:10:40 +0200
+
+freshplayerplugin (0.1.0+git20140602~webupd8~precise) precise; urgency=medium
+
+  * new git pull
+  * build-depend on libglu1-mesa-dev
+
+ -- Alin Andrei <webupd8@gmail.com>  Mon, 02 Jun 2014 16:44:24 +0200
+
+freshplayerplugin (0.1.0+git20140529~webupd8~trusty1) trusty; urgency=medium
+
+  * initial debianization
+
+ -- Alin Andrei <webupd8@gmail.com>  Thu, 29 May 2014 19:05:31 +0200

@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+%:
+	dh $@
+
+override_dh_auto_test:
+	# Cannot run tests without a X11 server (with VAAPI support)
+
+override_dh_auto_install:
+	dh_auto_install
+	mkdir -p debian/freshplayerplugin/usr/lib/freshplayerplugin-nonfree/
+	mkdir -p debian/freshplayerplugin/etc
+	cp obj*/libfreshwrapper.so debian/freshplayerplugin/usr/lib/freshplayerplugin-nonfree/
+	cp debian/freshwrapper.conf debian/freshplayerplugin/etc

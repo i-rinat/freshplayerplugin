@@ -1,0 +1,3 @@
+version=3
+opts=filenamemangle=s/.+\/v?(\d\S*)\.tar\.gz/freshplayerplugin-$1.tar.gz/ \
+  https://github.com/i-rinat/freshplayerplugin/tags .*/v?(\d\S*)\.tar\.gz

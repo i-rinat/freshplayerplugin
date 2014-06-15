@@ -1,0 +1,18 @@
+Source: freshplayerplugin
+Section: libs
+Priority: optional
+Maintainer: Kimpe Andy (rpm and ppa key) <andykimpe@gmail.com>
+Standards-Version: 3.9.5
+Build-Depends: debhelper (>= 9), cmake, pkg-config, libglib2.0-dev, libasound2-dev, libx11-dev, libgl1-mesa-dev, liburiparser-dev, libcairo2-dev, libpango1.0-dev, libfreetype6-dev, libgtk2.0-dev, libxinerama-dev, libconfig-dev, libglu1-mesa-dev, libevent-dev, libgles2-mesa-dev
+Homepage: https://github.com/i-rinat/freshplayerplugin
+
+Package: freshplayerplugin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, pepperflashplugin-nonfree
+Suggests: google-chrome-stable
+Description: PPAPI-host NPAPI-plugin adapter
+ The main goal of this project is to get PPAPI (Pepper)
+ Flash player working in Firefox by implementing a 
+ wrapper, some kind of adapter which will look like 
+ browser to PPAPI  plugin and look like NPAPI plugin 
+ for browser.

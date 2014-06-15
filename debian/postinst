@@ -1,0 +1,10 @@
+#!/bin/bash
+update-alternatives --remove "mozilla-flashplugin" /usr/lib/adobe-flashplugin/libflashplayer.so
+rm -rf /usr/lib/adobe-flashplugin/
+rm -rf /usr/lib/flashplugin-installer/
+rm -rf /var/lib/flashplugin-installer/
+rm -rf /var/cache/flashplugin-installer/
+rm -f /usr/share/ubufox/plugins/libflashplayer.so
+rm -rf /var/lib/update-notifier/package-data-downloads/flashplugin-installer
+update-alternatives --quiet --remove "mozilla-flashplugin" /usr/lib/flashplugin-installer/libflashplayer.so
+update-alternatives --install "/usr/lib/mozilla/plugins/flashplugin-alternative.so" "mozilla-flashplugin" /usr/lib/freshplayerplugin-nonfree/libfreshwrapper.so 50
