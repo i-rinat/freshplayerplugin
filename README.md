@@ -44,6 +44,8 @@ Early alpha. Some video players work, with both video and audio.
 Install
 =======
 
+Ubuntu-Install https://github.com/andykimpe/freshplayerplugin/blob/master/ubuntu-install
+
 Project is using cmake (>=2.8.8) build system. Make build subdirectory, go
 there, call `cmake ..`, then `make`. Put generated
 `libfreshwrapper.so` into broswer plugins directory. Note, path to
