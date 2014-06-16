@@ -129,28 +129,80 @@ task_destroy(struct async_network_task_s *task)
 
 static
 void
-handle_tcp_connect_stage3(int sock, short event_flags, void *arg)
+handle_tcp_connect_stage3(struct async_network_task_s *task);
+
+static
+void
+handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
 {
     struct async_network_task_s *task = arg;
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
-    if (!ts)
+    if (!ts) {
+        free(task->addr);
+        task_destroy(task);
         return;
-    int32_t retval;
+    }
     char buf[200];
     socklen_t len = sizeof(buf);
 
     ts->is_connected = (getpeername(ts->sock, (struct sockaddr *)buf, &len) == 0);
 
     if (ts->is_connected) {
-        retval = PP_OK;
-    } else {
-        retval = get_pp_errno();
+        ppb_core_call_on_main_thread_now(task->instance, task->callback, PP_OK);
+        pp_resource_release(task->resource);
+        free(task->addr);
+        task_destroy(task);
+        return;
     }
 
-    ppb_core_call_on_main_thread_now(task->instance, task->callback, retval);
+    // try other addresses, one by one
+    task->addr_ptr++;
+    if (task->addr_ptr < task->addr_count) {
+        handle_tcp_connect_stage3(task);
+        return;
+    }
+
+    // no addresses left, fail gracefully
+    ppb_core_call_on_main_thread_now(task->instance, task->callback, get_pp_errno());
     pp_resource_release(task->resource);
+    free(task->addr);
     task_destroy(task);
 }
+
+static
+void
+handle_tcp_connect_stage3(struct async_network_task_s *task)
+{
+    int res = -1;
+    if (task->addr_type == DNS_IPv4_A) {
+        struct sockaddr_in sai;
+        sai.sin_family = AF_INET;
+        sai.sin_addr.s_addr = *((uint32_t *)task->addr + task->addr_ptr);
+        sai.sin_port = htons(task->port);
+        res = connect(task->sock, (struct sockaddr *)&sai, sizeof(sai));
+    } else if (task->addr_type == DNS_IPv6_AAAA) {
+        struct sockaddr_in6 sai;
+        sai.sin6_family = AF_INET6;
+        memcpy(&sai.sin6_addr, (char*)task->addr + task->addr_ptr * sizeof(sai.sin6_addr),
+                                                                    sizeof(sai.sin6_addr));
+        sai.sin6_port = htons(task->port);
+        res = connect(task->sock, (struct sockaddr *)&sai, sizeof(sai));
+    } else {
+        // handled in stage2
+    }
+
+    if (res != 0 && errno != EINPROGRESS) {
+        ppb_core_call_on_main_thread_now(task->instance, task->callback, get_pp_errno());
+        free(task->addr);
+        task_destroy(task);
+        return;
+    }
+
+    struct event *ev = event_new(event_b, task->sock, EV_WRITE, handle_tcp_connect_stage4, task);
+    add_event_mapping(task, ev);
+    event_add(ev, NULL);
+}
+
 
 static
 void
@@ -167,33 +219,24 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
 
     evutil_make_socket_nonblocking(task->sock);
 
-    int res = -1;
+    task->addr_count = count;
+    task->addr_ptr = 0;
+    task->addr_type = type;
+
     if (type == DNS_IPv4_A) {
-        struct sockaddr_in sai;
-        sai.sin_family = AF_INET;
-        sai.sin_addr.s_addr = *(uint32_t *)addresses;   // use first address
-        sai.sin_port = htons(task->port);
-        res = connect(task->sock, (struct sockaddr *)&sai, sizeof(sai));
+        task->addr = malloc(4 * count);
+        memcpy(task->addr, addresses, 4 * count);
     } else if (type == DNS_IPv6_AAAA) {
-        struct sockaddr_in6 sai;
-        sai.sin6_family = AF_INET6;
-        // use first address
-        memcpy(&sai.sin6_addr, addresses, sizeof(sai.sin6_addr));
-        sai.sin6_port = htons(task->port);
-        res = connect(task->sock, (struct sockaddr *)&sai, sizeof(sai));
+        task->addr = malloc(16 * count);
+        memcpy(task->addr, addresses, 16 * count);
     } else {
         trace_error("%s wrong evdns type\n", __func__);
-    }
-
-    if (res != 0 && errno != EINPROGRESS) {
-        ppb_core_call_on_main_thread_now(task->instance, task->callback, get_pp_errno());
+        ppb_core_call_on_main_thread_now(task->instance, task->callback, PP_ERROR_FAILED);
         task_destroy(task);
         return;
     }
 
-    struct event *ev = event_new(event_b, task->sock, EV_WRITE, handle_tcp_connect_stage3, task);
-    add_event_mapping(task, ev);
-    event_add(ev, NULL);
+    handle_tcp_connect_stage3(task);
 }
 
 static

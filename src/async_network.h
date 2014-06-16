@@ -49,8 +49,14 @@ struct async_network_task_s {
     struct PP_NetAddress_Private    netaddr;
     char                           *buffer;
     int32_t                         bufsize;
-    void                           *event;
     int                             sock;
+
+    // private fields
+    void                           *event;
+    void                           *addr;
+    uint32_t                        addr_ptr;
+    uint32_t                        addr_type;
+    uint32_t                        addr_count;
 };
 
 void
