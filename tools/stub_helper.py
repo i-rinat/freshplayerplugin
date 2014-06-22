@@ -62,7 +62,7 @@ def gen_trace_functions(ast):
                     a_func_args = a_func[0][1]
                     a_func_rettype = a_func[1][1]
 
-                    print("static")
+                    print("TRACE_WRAPPER")
                     fname = "unknown"
                     if isinstance(a_func_rettype, c_ast.TypeDecl):
                         fname = a_func_rettype.declname

@@ -89,6 +89,7 @@ add_library(freshwrapper-obj OBJECT
 	src/ppb_instance.c
 	src/ppb_instance_private.c
 	src/ppb_memory_dev.c
+	src/ppb_message_loop.c
 	src/ppb_net_address_private.c
 	src/ppb_network_monitor.c
 	src/ppb_opengles2.c
