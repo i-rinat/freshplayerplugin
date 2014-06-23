@@ -2,9 +2,9 @@ install for fédora 18
 
 install chromium repository
 
-sudo yum install http://mirror.yandex.ru/fedora/russianfedora/russianfedora/free/fedora/releases/18/Everything/i386/os/russianfedora-free-release-18-1.R.noarch.rpm
+sudo yum install http://mirror.yandex.ru/fedora/russianfedora/russianfedora/free/fedora/releases/18/Everything/i386/os/russianfedora-free-release-18-2.R.noarch.rpm
 
-sudo yum install http://mirror.yandex.ru/fedora/russianfedora/russianfedora/nonfree/fedora/releases/18/Everything/i386/os/russianfedora-nonfree-release-18-1.R.noarch.rpm
+sudo yum install http://mirror.yandex.ru/fedora/russianfedora/russianfedora/nonfree/fedora/releases/18/Everything/i386/os/russianfedora-nonfree-release-18-2.R.noarch.rpm
 
 install freshplayerplugin repository
 
