@@ -25,6 +25,7 @@ install freshplayerplugin repository
 sudo wget http://download.opensuse.org/repositories/home:/andykimpe/Fedora_18/home:andykimpe.repo -P /etc/yum.repos.d
 
 sudo yum clean all
+
 sudo yum -y install freshplayerplugin
 
 install for fédora 19
@@ -40,6 +41,7 @@ install freshplayerplugin repository
 sudo wget http://download.opensuse.org/repositories/home:/andykimpe/Fedora_19/home:andykimpe.repo -P /etc/yum.repos.d
 
 sudo yum clean all
+
 sudo yum -y install freshplayerplugin
 
 install for fédora 20
@@ -55,4 +57,5 @@ install freshplayerplugin repository
 sudo wget http://download.opensuse.org/repositories/home:/andykimpe/Fedora_20/home:andykimpe.repo -P /etc/yum.repos.d
 
 sudo yum clean all
+
 sudo yum -y install freshplayerplugin
