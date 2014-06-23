@@ -1,5 +1,19 @@
 install for fédora 18
 
+update firefox 30
+
+sudo yum -y install http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm
+
+sudo yum -y install http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-stable.noarch.rpm
+
+sudo yum -y install http://rpms.famillecollet.com/remi-release-18.rpm
+
+sudo yum clean all
+
+sudo yum -y update
+
+sudo yum -y install firefox
+
 install chromium repository
 
 sudo yum install http://mirror.yandex.ru/fedora/russianfedora/russianfedora/free/fedora/releases/18/Everything/i386/os/russianfedora-free-release-18-2.R.noarch.rpm
