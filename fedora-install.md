@@ -28,6 +28,11 @@ sudo yum clean all
 
 sudo yum -y install freshplayerplugin
 
+
+if no work use command
+
+sudo install-flash username
+
 install for fédora 19
 
 install chromium repository
@@ -44,6 +49,11 @@ sudo yum clean all
 
 sudo yum -y install freshplayerplugin
 
+
+if no work use command
+
+sudo install-flash username
+
 install for fédora 20
 
 install chromium repository
@@ -59,3 +69,8 @@ sudo wget http://download.opensuse.org/repositories/home:/andykimpe/Fedora_20/ho
 sudo yum clean all
 
 sudo yum -y install freshplayerplugin
+
+
+if no work use command
+
+sudo install-flash username
