@@ -1,2 +1,0 @@
-#!/bin/bash
-update-alternatives --remove "mozilla-flashplugin" /usr/lib/freshplayerplugin-nonfree/libfreshwrapper.so
