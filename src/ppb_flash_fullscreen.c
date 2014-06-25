@@ -31,6 +31,7 @@
 #include <ppapi/c/ppp_instance.h>
 #include "reverse_constant.h"
 #include <X11/Xatom.h>
+#include <X11/Xutil.h>
 
 
 static volatile gint events_inflight = 0;
