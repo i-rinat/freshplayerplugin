@@ -46,6 +46,8 @@ add_definitions(${REQ_CFLAGS_OTHER})
 add_definitions(-DXP_UNIX)
 link_directories(${REQ_LIBRARY_DIRS})
 
+add_subdirectory(3rdparty)
+
 add_library(freshwrapper-obj OBJECT
 	src/async_network.c
 	src/config.c
