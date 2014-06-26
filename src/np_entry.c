@@ -50,7 +50,7 @@ NP_GetPluginVersion(void)
 {
     trace_info_f("[NP] %s\n", __func__);
     // TODO: get version from manifest
-    return (char*)"13.1.2.3";
+    return (char*)"14.0.0.125";
 }
 
 __attribute__((visibility("default")))
@@ -64,7 +64,7 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
         *(const char **)value = "Shockwave Flash";
         break;
     case NPPVpluginDescriptionString:
-        *(const char **)value = "Shockwave Flash 13.1 r2";
+        *(const char **)value = "Shockwave Flash 14.0 r0";
         break;
     default:
         trace_info_z("    not implemented variable %d\n", variable);

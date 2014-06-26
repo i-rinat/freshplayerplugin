@@ -44,6 +44,10 @@ Early alpha. Some video players work, with both video and audio.
 Install
 =======
 
+Ubuntu-Install https://github.com/i-rinat/freshplayerplugin/blob/master/ubuntu-install.md
+
+Fedora-Install https://github.com/i-rinat/freshplayerplugin/blob/master/fedora-install.md
+
 Project is using cmake (>=2.8.8) build system. Make build subdirectory, go
 there, call `cmake ..`, then `make`. Put generated
 `libfreshwrapper.so` into broswer plugins directory. Note, path to
