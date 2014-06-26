@@ -45,6 +45,7 @@ static struct fpp_config_s default_config = {
 
 struct fpp_config_s config = {};
 static const char *config_file_name = "freshwrapper.conf";
+static int initialized = 0;
 
 
 static
@@ -92,6 +93,9 @@ get_global_config_path(void)
 void
 fpp_config_initialize(void)
 {
+    if (initialized)
+        return;
+
     config_t    cfg;
     char       *local_config = get_local_config_path();
     char       *global_config = get_global_config_path();
@@ -138,6 +142,8 @@ quit:
     g_free(global_config);
 
     initialize_quirks();
+
+    initialized = 1;
 }
 
 void
@@ -149,6 +155,10 @@ fpp_config_destroy(void)
             free(config.field);                         \
     } while (0)
 
+    if (!initialized)
+        return;
+
     FREE_IF_CHANGED(plugin_path);
     FREE_IF_CHANGED(flash_command_line);
+    initialized = 0;
 }
