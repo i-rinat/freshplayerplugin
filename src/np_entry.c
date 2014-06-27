@@ -35,6 +35,74 @@
 #include "pp_interface.h"
 
 
+static void *module_dl_handler;
+
+
+static
+uintptr_t
+load_ppp_module(void)
+{
+    int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
+
+    if (module_dl_handler) {
+        // already loaded
+        return 0;
+    }
+
+    fpp_config_initialize();
+
+    module_dl_handler = dlopen(config.plugin_path, RTLD_LAZY);
+    if (!module_dl_handler) {
+        trace_error("%s, can't open %s\n", __func__, config.plugin_path);
+        config.quirks.plugin_missing = 1;
+        return 1;
+    }
+
+    ppp_initialize_module = dlsym(module_dl_handler, "PPP_InitializeModule");
+    ppp_get_interface = dlsym(module_dl_handler, "PPP_GetInterface");
+
+    if (!ppp_initialize_module || !ppp_get_interface) {
+        trace_error("%s, one of required PPP_* is missing\n", __func__);
+        dlclose(module_dl_handler);
+        module_dl_handler = NULL;
+        return 1;
+    }
+
+    // TODO: make module ids distinct
+    int res = ppp_initialize_module(42, ppb_get_interface);
+    if (0 != res) {
+        trace_error("%s, PPP_InitializeModule returned %d\n", __func__, res);
+        dlclose(module_dl_handler);
+        module_dl_handler = NULL;
+        return 1;
+    }
+
+    return 0;
+}
+
+static
+void
+unload_ppp_module(void)
+{
+    void (*ppp_shutdown_module)(void);
+
+    if (!module_dl_handler) {
+        // module not loaded
+        return;
+    }
+
+    // call module shutdown handler if exists
+    ppp_shutdown_module = dlsym(module_dl_handler, "PPP_ShutdownModule");
+    if (ppp_shutdown_module)
+        ppp_shutdown_module();
+
+    dlclose(module_dl_handler);
+    module_dl_handler = NULL;
+
+    fpp_config_destroy();
+}
+
+
 __attribute__((visibility("default")))
 const char *
 NP_GetMIMEDescription(void)
@@ -76,8 +144,6 @@ __attribute__((visibility("default")))
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
-    int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
-
     trace_info_f("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p, browser API version = %u\n", __func__,
                  aNPNFuncs, aNPPFuncs, aNPNFuncs->version);
 
@@ -106,29 +172,7 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     aNPPFuncs->getsiteswithdata = NPP_GetSitesWithData;
     aNPPFuncs->didComposite = NPP_DidComposite;
 
-    fpp_config_initialize();
-
-    void *h = dlopen(config.plugin_path, RTLD_LAZY);
-    if (!h) {
-        trace_error("%s, can't open %s\n", __func__, config.plugin_path);
-        config.quirks.plugin_missing = 1;
-        return NPERR_NO_ERROR;
-    }
-
-    ppp_initialize_module = dlsym(h, "PPP_InitializeModule");
-    ppp_get_interface = dlsym(h, "PPP_GetInterface");
-
-    if (!ppp_initialize_module || !ppp_get_interface) {
-        trace_error("%s, one of required PPP_* is missing\n", __func__);
-        return NPERR_GENERIC_ERROR;
-    }
-
-    // TODO: make module ids distinct
-    int res = ppp_initialize_module(42, ppb_get_interface);
-    if (0 != res) {
-        trace_error("%s, PPP_InitializeModule returned %d\n", __func__, res);
-        return NPERR_GENERIC_ERROR;
-    }
+    load_ppp_module();
 
     return NPERR_NO_ERROR;
 }
@@ -138,6 +182,8 @@ NPError
 NP_Shutdown(void)
 {
     trace_info_f("[NP] %s\n", __func__);
-    fpp_config_destroy();
+
+    unload_ppp_module();
+
     return NPERR_NO_ERROR;
 }
