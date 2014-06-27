@@ -33,7 +33,7 @@ static struct fpp_config_s default_config = {
     .audio_buffer_min_ms = 20,
     .audio_buffer_max_ms = 500,
     .xinerama_screen     = 0,
-    .plugin_path         = "/opt/google/chrome/PepperFlash/libpepflashplayer.so",
+    .plugin_path         = NULL,
     .flash_command_line  = "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .exp_enable_3d       = 0,
     .quirks = {

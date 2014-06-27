@@ -22,65 +22,61 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__CONFIG_H
-#define FPP__CONFIG_H
+#include "config.h"
+#include <stdlib.h>
 
-#include <stdint.h>
-
-
-struct fpp_config_s {
-    int     audio_buffer_min_ms;
-    int     audio_buffer_max_ms;
-    int     xinerama_screen;
-    char   *plugin_path;
-    char   *flash_command_line;
-    int     exp_enable_3d;
-    struct {
-        int   switch_buttons_2_3;
-        int   dump_resource_histogram;
-        int   plugin_missing;
-    } quirks;
+const char *pepperflash_path_list[] = {
+        "/opt/google/chrome/PepperFlash",
+        "/opt/google/chrome-beta/PepperFlash",
+        "/opt/google/chrome-unstable/PepperFlash",
+        "/usr/lib/pepperflashplugin-nonfree",
+        NULL
 };
 
-extern struct fpp_config_s config;
-
-void
-fpp_config_initialize(void);
-
-void
-fpp_config_destroy(void);
-
-// plugin-specific
-/** array of directories where plugin can be found */
 const char **
-fpp_config_get_plugin_path_list(void);
+fpp_config_get_plugin_path_list(void)
+{
+    return pepperflash_path_list;
+}
 
-/** name of binary (without path) */
 const char *
-fpp_config_get_plugin_file_name(void);
+fpp_config_get_default_plugin_version(void)
+{
+    return "13.1.2.3";
+}
 
-/** default name of plugin to display on plugin list page */
 const char *
-fpp_config_get_plugin_name(void);
+fpp_config_get_plugin_name(void)
+{
+    return "Shockwave Flash";
+}
 
-/** list of mime types in NPAPI format */
 const char *
-fpp_config_get_plugin_mime_type(void);
+fpp_config_get_default_plugin_descr(void)
+{
+    return "Shockwave Flash 13.1 r2";
+}
 
-/** list of mime types in NPAPI format */
 const char *
-fpp_config_get_default_plugin_version(void);
+fpp_config_get_plugin_mime_type(void)
+{
+    return "application/x-shockwave-flash:swf:Shockwave Flash";
+}
 
-/** default plugin description to display on plugin list page */
-const char *
-fpp_config_get_default_plugin_descr(void);
-
-/** return full path to a plugin if set */
 char *
-fpp_config_get_plugin_path(void);
+fpp_config_get_plugin_path(void)
+{
+    return config.plugin_path;
+}
+
+const char *
+fpp_config_get_plugin_file_name(void)
+{
+    return "libpepflashplayer.so";
+}
 
 uintptr_t
-fpp_config_plugin_has_manifest(void);
-
-
-#endif // FPP__CONFIG_H
+fpp_config_plugin_has_manifest(void)
+{
+    return 1;
+}

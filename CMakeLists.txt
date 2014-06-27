@@ -51,6 +51,7 @@ add_subdirectory(3rdparty)
 add_library(freshwrapper-obj OBJECT
 	src/async_network.c
 	src/config.c
+	src/config_pepperflash.c
 	src/header_parser.c
 	src/keycodeconvert.c
 	src/np_entry.c

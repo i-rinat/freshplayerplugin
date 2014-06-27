@@ -45,30 +45,21 @@ static
 void
 use_fallback_version_strings(void)
 {
-    module_version = g_strdup_printf("13.1.2.3");
-    module_descr = g_strdup_printf("Shockwave Flash 13.1 r2");
+    module_version = g_strdup_printf(fpp_config_get_default_plugin_version());
+    module_descr = g_strdup_printf(fpp_config_get_default_plugin_descr());
 }
 
 static
 uintptr_t
-load_ppp_module(void)
+do_load_ppp_module(const char *fname)
 {
-    int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
-
-    if (module_dl_handler) {
-        // already loaded
-        return 0;
-    }
-
-    fpp_config_initialize();
-
-    module_dl_handler = dlopen(config.plugin_path, RTLD_LAZY);
+    module_dl_handler = dlopen(fname, RTLD_LAZY);
     if (!module_dl_handler) {
-        trace_error("%s, can't open %s\n", __func__, config.plugin_path);
-        config.quirks.plugin_missing = 1;
+        trace_info_f("%s, can't open %s\n", __func__, fname);
         return 1;
     }
 
+    int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
     ppp_initialize_module = dlsym(module_dl_handler, "PPP_InitializeModule");
     ppp_get_interface = dlsym(module_dl_handler, "PPP_GetInterface");
 
@@ -88,8 +79,13 @@ load_ppp_module(void)
         return 1;
     }
 
-    // try to read manifest.json file
-    char *manifest_dir = strdup(config.plugin_path);
+    if (!fpp_config_plugin_has_manifest()) {
+        use_fallback_version_strings();
+        return 0;
+    }
+
+    // try to read manifest.json file (only for those who can have it)
+    char *manifest_dir = strdup(fname);
     gchar *manifest_path = g_strdup_printf("%s/manifest.json", dirname(manifest_dir));
     free(manifest_dir);
 
@@ -106,13 +102,47 @@ load_ppp_module(void)
         int v1 = 0, v2 = 0, v3 = 0, v4 = 0;
         module_version = g_strdup(version);
         (void)sscanf(module_version, "%d.%d.%d.%d", &v1, &v2, &v3, &v4);
-        module_descr = g_strdup_printf("Shockwave Flash %d.%d r%d", v1, v2, v3);
+        module_descr = g_strdup_printf("%s %d.%d r%d", fpp_config_get_plugin_name(), v1, v2, v3);
     } else {
         use_fallback_version_strings();
     }
 
     json_value_free(root_val);
     return 0;
+}
+
+static
+uintptr_t
+load_ppp_module()
+{
+    if (module_dl_handler) {
+        // already loaded
+        return 0;
+    }
+
+    fpp_config_initialize();
+
+    if (fpp_config_get_plugin_path()) {
+        // have specific path
+        return do_load_ppp_module(fpp_config_get_plugin_path());
+    }
+
+    // try all paths
+    const char **path_list = fpp_config_get_plugin_path_list();
+    while (*path_list) {
+        gchar *fname = g_strdup_printf("%s/%s", *path_list, fpp_config_get_plugin_file_name());
+        uintptr_t ret = do_load_ppp_module(fname);
+        g_free(fname);
+        if (ret == 0)
+            return 0;
+        path_list ++;
+    }
+
+    // failure
+    config.quirks.plugin_missing = 1;
+    use_fallback_version_strings();
+    trace_error("%s, can't find %s\n", __func__, fpp_config_get_plugin_file_name());
+    return 1;
 }
 
 static
@@ -146,7 +176,7 @@ const char *
 NP_GetMIMEDescription(void)
 {
     trace_info_f("[NP] %s\n", __func__);
-    return "application/x-shockwave-flash:swf:Shockwave Flash";
+    return fpp_config_get_plugin_mime_type();
 }
 
 __attribute__((visibility("default")))
@@ -167,7 +197,7 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
     load_ppp_module();
     switch (variable) {
     case NPPVpluginNameString:
-        *(const char **)value = "Shockwave Flash";
+        *(const char **)value = fpp_config_get_plugin_name();
         break;
     case NPPVpluginDescriptionString:
         *(char **)value = module_descr;
