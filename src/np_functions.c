@@ -823,8 +823,8 @@ handle_focus_in_out_event(NPP npp, void *event)
 
     PP_Bool has_focus = (ev->type == FocusIn) ? PP_TRUE : PP_FALSE;
 
-    if (pp_i->ppp_instance_1_1 && pp_i->ppp_instance_1_1->DidChangeView)
-        pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, has_focus);
+    if (pp_i->ppp_instance_1_1 && pp_i->ppp_instance_1_1->DidChangeFocus)
+        pp_i->ppp_instance_1_1->DidChangeFocus(pp_i->pp_instance_id, has_focus);
 
     return 1;
 }
