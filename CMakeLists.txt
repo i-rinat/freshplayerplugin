@@ -113,6 +113,7 @@ add_library(freshwrapper SHARED $<TARGET_OBJECTS:freshwrapper-obj>)
 
 target_link_libraries(freshwrapper
 	dl
+	parson
 	${REQ_LIBRARIES}
 )
 

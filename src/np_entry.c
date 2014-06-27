@@ -28,6 +28,8 @@
 #include <string.h>
 #include <ppapi/c/ppb.h>
 #include <ppapi/c/pp_module.h>
+#include <parson/parson.h>
+#include <libgen.h>
 #include "trace.h"
 #include "tables.h"
 #include "config.h"
@@ -36,7 +38,16 @@
 
 
 static void *module_dl_handler;
+static gchar *module_version;
+static gchar *module_descr;
 
+static
+void
+use_fallback_version_strings(void)
+{
+    module_version = g_strdup_printf("13.1.2.3");
+    module_descr = g_strdup_printf("Shockwave Flash 13.1 r2");
+}
 
 static
 uintptr_t
@@ -77,6 +88,30 @@ load_ppp_module(void)
         return 1;
     }
 
+    // try to read manifest.json file
+    char *manifest_dir = strdup(config.plugin_path);
+    gchar *manifest_path = g_strdup_printf("%s/manifest.json", dirname(manifest_dir));
+    free(manifest_dir);
+
+    JSON_Value *root_val = json_parse_file(manifest_path);
+    g_free(manifest_path);
+    if (!root_val) {
+        use_fallback_version_strings();
+        return 0;
+    }
+
+    JSON_Object *root_obj = json_value_get_object(root_val);
+    const char *version = json_object_get_string(root_obj, "version");
+    if (version) {
+        int v1 = 0, v2 = 0, v3 = 0, v4 = 0;
+        module_version = g_strdup(version);
+        (void)sscanf(module_version, "%d.%d.%d.%d", &v1, &v2, &v3, &v4);
+        module_descr = g_strdup_printf("Shockwave Flash %d.%d r%d", v1, v2, v3);
+    } else {
+        use_fallback_version_strings();
+    }
+
+    json_value_free(root_val);
     return 0;
 }
 
@@ -90,6 +125,9 @@ unload_ppp_module(void)
         // module not loaded
         return;
     }
+
+    g_free(module_descr); module_descr = NULL;
+    g_free(module_version); module_version = NULL;
 
     // call module shutdown handler if exists
     ppp_shutdown_module = dlsym(module_dl_handler, "PPP_ShutdownModule");
@@ -108,7 +146,6 @@ const char *
 NP_GetMIMEDescription(void)
 {
     trace_info_f("[NP] %s\n", __func__);
-    // TODO: get MIME info from manifest or plugin itself
     return "application/x-shockwave-flash:swf:Shockwave Flash";
 }
 
@@ -117,8 +154,8 @@ char *
 NP_GetPluginVersion(void)
 {
     trace_info_f("[NP] %s\n", __func__);
-    // TODO: get version from manifest
-    return (char*)"13.1.2.3";
+    load_ppp_module();
+    return module_version;
 }
 
 __attribute__((visibility("default")))
@@ -127,12 +164,13 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
 {
     trace_info_f("[NP] %s instance=%p, variable=%s, value=%p\n", __func__, instance,
                  reverse_npp_variable(variable), value);
+    load_ppp_module();
     switch (variable) {
     case NPPVpluginNameString:
         *(const char **)value = "Shockwave Flash";
         break;
     case NPPVpluginDescriptionString:
-        *(const char **)value = "Shockwave Flash 13.1 r2";
+        *(char **)value = module_descr;
         break;
     default:
         trace_info_z("    not implemented variable %d\n", variable);
