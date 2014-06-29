@@ -92,13 +92,24 @@ add_library(freshwrapper-obj OBJECT
     ppb_view.c
 )
 
-add_library(freshwrapper SHARED
+add_library(freshwrapper-pepperflash SHARED
     $<TARGET_OBJECTS:freshwrapper-obj>
     $<TARGET_OBJECTS:parson-obj>
     config_pepperflash.c
 )
 
-target_link_libraries(freshwrapper
+add_library(freshwrapper-nacl SHARED
+    $<TARGET_OBJECTS:freshwrapper-obj>
+    $<TARGET_OBJECTS:parson-obj>
+    config_nacl.c
+)
+
+target_link_libraries(freshwrapper-pepperflash
+    dl
+    ${REQ_LIBRARIES}
+)
+
+target_link_libraries(freshwrapper-nacl
     dl
     ${REQ_LIBRARIES}
 )
@@ -106,4 +117,4 @@ target_link_libraries(freshwrapper
 # ensure libfreshwrapper is linked with all libraries it uses
 add_executable(dep_check dep_check.c)
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(dep_check freshwrapper)
+target_link_libraries(dep_check freshwrapper-pepperflash)
