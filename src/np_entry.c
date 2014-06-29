@@ -45,8 +45,8 @@ static
 void
 use_fallback_version_strings(void)
 {
-    module_version = g_strdup_printf(fpp_config_get_default_plugin_version());
-    module_descr = g_strdup_printf(fpp_config_get_default_plugin_descr());
+    module_version = g_strdup(fpp_config_get_default_plugin_version());
+    module_descr = g_strdup(fpp_config_get_default_plugin_descr());
 }
 
 static
