@@ -75,6 +75,7 @@ add_library(freshwrapper-obj OBJECT
     ppb_instance_private.c
     ppb_memory_dev.c
     ppb_message_loop.c
+    ppb_nacl_private.c
     ppb_net_address_private.c
     ppb_network_monitor.c
     ppb_opengles2.c
