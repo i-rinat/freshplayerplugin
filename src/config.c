@@ -33,7 +33,7 @@ static struct fpp_config_s default_config = {
     .audio_buffer_min_ms = 20,
     .audio_buffer_max_ms = 500,
     .xinerama_screen     = 0,
-    .plugin_path         = NULL,
+    .pepperflash_path    = NULL,
     .flash_command_line  = "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .exp_enable_3d       = 0,
     .quirks = {
@@ -124,8 +124,8 @@ fpp_config_initialize(void)
     }
 
     const char *stringval;
-    if (config_lookup_string(&cfg, "plugin_path", &stringval)) {
-        config.plugin_path = strdup(stringval);
+    if (config_lookup_string(&cfg, "pepperflash_path", &stringval)) {
+        config.pepperflash_path = strdup(stringval);
     }
 
     if (config_lookup_string(&cfg, "flash_command_line", &stringval)) {
@@ -158,7 +158,7 @@ fpp_config_destroy(void)
     if (!initialized)
         return;
 
-    FREE_IF_CHANGED(plugin_path);
+    FREE_IF_CHANGED(pepperflash_path);
     FREE_IF_CHANGED(flash_command_line);
     initialized = 0;
 }

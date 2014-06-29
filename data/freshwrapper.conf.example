@@ -18,8 +18,8 @@ audio_buffer_max_ms = 500
 # Xinerama screen used to acquire fullscreen window geometry
 xinerama_screen = 0
 
-# Path to the wrapped plugin library
-plugin_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
+# Path to the Pepper Flash plugin
+pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
 
 # "Command-line" arguments for Flash
 flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1"

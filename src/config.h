@@ -32,7 +32,7 @@ struct fpp_config_s {
     int     audio_buffer_min_ms;
     int     audio_buffer_max_ms;
     int     xinerama_screen;
-    char   *plugin_path;
+    char   *pepperflash_path;
     char   *flash_command_line;
     int     exp_enable_3d;
     struct {
