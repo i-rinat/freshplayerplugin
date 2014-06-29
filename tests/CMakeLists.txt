@@ -22,9 +22,3 @@ foreach(item ${test_list})
     add_test(${item} ${item})
     add_dependencies(check ${item})
 endforeach()
-
-
-# ensure libfreshwrapper is linked with all libraries it uses
-add_executable(dep-check dep-check.c)
-link_directories(${CMAKE_BINARY_DIR})
-target_link_libraries(dep-check freshwrapper)
