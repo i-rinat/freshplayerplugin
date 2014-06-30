@@ -39,17 +39,47 @@ project. It will benifit other browsers too, not only Firefox.
 Status
 ======
 
-Early alpha. Some video players work, with both video and audio.
+Eternal alpha. I use it on day-to-day basis though.
+
+Security note
+=============
+
+All available Pepper Plugin API documentation usually accompanied with
+assertions of enhanced security due to active sandboxing usage. It's
+worth to note, that API itself doesn't make any sandboxing, it's only
+allows sandboxed implementations. This particular implementation
+**doesn't implement any sandbox**. That means if any malicious code breaks
+through plugin security, there is no additional barriers.
 
 Install
 =======
 
-Project is using cmake (>=2.8.8) build system. Make build subdirectory, go
-there, call `cmake ..`, then `make`. Put generated
-`libfreshwrapper.so` into broswer plugins directory. Note, path to
-PepperFlash is hardcoded, it should be at
-`/opt/google/chrome/PepperFlash/libpepflashplayer.so`. Having Chrome
-installed should be enough.
+Project is using cmake (>=2.8.8) build system.
+
+* Install prerequisites.
+```
+    $ sudo apt-get install cmake pkg-config libglib2.0-dev libasound2-dev libx11-dev \
+               libgl1-mesa-dev liburiparser-dev libcairo2-dev libpango1.0-dev        \
+               libfreetype6-dev libgtk2.0-dev libxinerama-dev libconfig-dev          \
+               libglu1-mesa-dev
+```
+
+* Make `build` subdirectory, go there, call
+```
+    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    $ make
+```
+
+* Put generated `libfreshwrapper-pepperflash.so` into broswer plugins directory (`~/.mozilla/plugins`)
+
+
+When loaded by browser it will search for `libpepflashplayer.so` in a directories
+where it can be: in Chrome (stable/beta/unstable) directory, and in
+`/usr/lib/pepperflashplugin-nonfree/` (pepperflashplugin-nonfree puts it there).
+It should be enough to get it running, but if it doesn't, specify full path in
+`~/.config/freshwrapper.conf`. You may find sample configuration file in `/data`.
+It's better to have `manifest.json` alongside with `libpepflashplayer.so`,
+actual Flash version will be taken from that manifest.
 
 License
 =======
