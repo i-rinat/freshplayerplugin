@@ -5,32 +5,6 @@ endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-find_package(PkgConfig REQUIRED)
-
-pkg_check_modules(REQ
-    alsa
-    glib-2.0
-    x11
-    xinerama
-    egl
-    glesv2
-    liburiparser
-    libconfig
-    libevent
-    libevent_pthreads
-    cairo
-    pango
-    pangocairo
-    pangoft2
-    freetype2
-    gtk+-2.0
-    REQUIRED)
-
-include_directories(${REQ_INCLUDE_DIRS})
-add_definitions(${REQ_CFLAGS_OTHER})
-add_definitions(-DXP_UNIX)
-link_directories(${REQ_LIBRARY_DIRS})
-
 add_library(freshwrapper-obj OBJECT
     async_network.c
     config.c
