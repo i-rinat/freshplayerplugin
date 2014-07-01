@@ -110,20 +110,22 @@ fpp_config_initialize(void)
         }
     }
 
-    int intval;
-    if (config_lookup_int(&cfg, "audio_buffer_min_ms", &intval)) {
+    long long intval;
+    const char *stringval;
+
+    if (config_lookup_int64(&cfg, "audio_buffer_min_ms", &intval)) {
         config.audio_buffer_min_ms = intval;
     }
 
-    if (config_lookup_int(&cfg, "audio_buffer_max_ms", &intval)) {
+    if (config_lookup_int64(&cfg, "audio_buffer_max_ms", &intval)) {
         config.audio_buffer_max_ms = intval;
     }
 
-    if (config_lookup_int(&cfg, "xinerama_screen", &intval)) {
+    if (config_lookup_int64(&cfg, "xinerama_screen", &intval)) {
         config.xinerama_screen = intval;
     }
 
-    const char *stringval;
+
     if (config_lookup_string(&cfg, "pepperflash_path", &stringval)) {
         config.pepperflash_path = strdup(stringval);
     }
@@ -132,7 +134,7 @@ fpp_config_initialize(void)
         config.flash_command_line = strdup(stringval);
     }
 
-    if (config_lookup_int(&cfg, "exp_enable_3d", &intval)) {
+    if (config_lookup_int64(&cfg, "exp_enable_3d", &intval)) {
         config.exp_enable_3d = intval;
     }
 
