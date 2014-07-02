@@ -53,6 +53,7 @@
 #include <ppapi/c/ppb_instance.h>
 #include <ppapi/c/ppb_network_monitor.h>
 #include <ppapi/c/ppb_opengles2.h>
+#include <ppapi/c/ppb_text_input_controller.h>
 #include <ppapi/c/ppb_url_loader.h>
 #include <ppapi/c/ppb_url_request_info.h>
 #include <ppapi/c/ppb_url_response_info.h>
@@ -129,6 +130,7 @@ extern const struct PPB_OpenGLES2                   ppb_opengles2_interface_1_0;
 extern const struct PPB_Printing_Dev_0_7            ppb_printing_dev_0_7;
 extern const struct PPB_TCPSocket_Private_0_4       ppb_tcp_socket_private_interface_0_4;
 extern const struct PPB_TCPSocket_Private_0_5       ppb_tcp_socket_private_interface_0_5;
+extern const struct PPB_TextInputController_1_0     ppb_text_input_controller_interface_1_0;
 extern const struct PPB_TextInput_Dev_0_2           ppb_text_input_dev_interface_0_2;
 extern const struct PPB_TouchInputEvent_1_0         ppb_touch_input_event_interface_1_0;
 extern const struct PPB_UDPSocket_Private_0_4       ppb_udp_socket_private_interface_0_4;
@@ -217,6 +219,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_PRINTING_DEV_INTERFACE_0_7,         ppb_printing_dev_0_7)
     ELSEIFBLOCK(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_4,    ppb_tcp_socket_private_interface_0_4)
     ELSEIFBLOCK(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_5,    ppb_tcp_socket_private_interface_0_5)
+    ELSEIFBLOCK(PPB_TEXTINPUTCONTROLLER_INTERFACE_1_0,  ppb_text_input_controller_interface_1_0)
     ELSEIFBLOCK(PPB_TEXTINPUT_DEV_INTERFACE_0_2,        ppb_text_input_dev_interface_0_2)
     ELSEIFBLOCK(PPB_UDPSOCKET_PRIVATE_INTERFACE_0_4,    ppb_udp_socket_private_interface_0_4)
     ELSEIFBLOCK(PPB_URLLOADER_INTERFACE_1_0,            ppb_url_loader_interface_1_0)

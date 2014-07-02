@@ -56,6 +56,7 @@ add_library(freshwrapper-obj OBJECT
     ppb_opengles2.c
     ppb_printing_dev.c
     ppb_tcp_socket_private.c
+    ppb_text_input_controller.c
     ppb_text_input_dev.c
     ppb_udp_socket_private.c
     ppb_uma.c
