@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ppapi/c/pp_errors.h>
 #include "trace.h"
+#include "tables.h"
 
 
 void
@@ -22,7 +23,11 @@ ppb_nacl_start_ppapi_proxy(PP_Instance instance)
 int32_t
 ppb_nacl_urandom_fd(void)
 {
-    return -1;
+    int fd = tables_get_urandom_fd();
+    if (fd < 0)
+        return 0;
+    else
+        return fd;
 }
 
 PP_Bool
@@ -198,7 +203,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_nacl_urandom_fd(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_nacl_urandom_fd();
 }
 
@@ -412,7 +417,7 @@ trace_ppb_nacl_set_is_installed(PP_Instance instance, PP_Bool is_installed)
 const struct PPB_NaCl_Private_1_0 ppb_nacl_private_interface_1_0 = {
     .LaunchSelLdr =             TWRAPZ(ppb_nacl_launch_sel_ldr),
     .StartPpapiProxy =          TWRAPZ(ppb_nacl_start_ppapi_proxy),
-    .UrandomFD =                TWRAPZ(ppb_nacl_urandom_fd),
+    .UrandomFD =                TWRAPF(ppb_nacl_urandom_fd),
     .Are3DInterfacesDisabled =  TWRAPZ(ppb_nacl_are_3d_interfaces_disabled),
     .BrokerDuplicateHandle =    TWRAPZ(ppb_nacl_broker_duplicate_handle),
     .GetReadonlyPnaclFd =       TWRAPZ(ppb_nacl_get_readonly_pnacl_fd),
