@@ -102,6 +102,18 @@ ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
     }
 }
 
+PP_Resource
+ppb_var_var_to_resource(struct PP_Var var)
+{
+    return 0;
+}
+
+struct PP_Var
+ppb_var_var_from_resource(PP_Resource resource)
+{
+    return PP_MakeUndefined();
+}
+
 bool
 ppb_var_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -316,6 +328,22 @@ trace_ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
 }
 
 TRACE_WRAPPER
+PP_Resource
+trace_ppb_var_var_to_resource(struct PP_Var var)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_var_var_to_resource(var);
+}
+
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_var_var_from_resource(PP_Resource resource)
+{
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    return ppb_var_var_from_resource(resource);
+}
+
+TRACE_WRAPPER
 bool
 trace_ppb_var_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
@@ -448,6 +476,15 @@ trace_ppb_var_create_object_with_module_deprecated(PP_Module module,
                                                                    object_data);
 }
 
+
+const struct PPB_Var_1_2 ppb_var_interface_1_2 = {
+    .AddRef          = TWRAPF(ppb_var_add_ref),
+    .Release         = TWRAPF(ppb_var_release),
+    .VarFromUtf8     = TWRAPF(ppb_var_var_from_utf8_1_1),
+    .VarToUtf8       = TWRAPF(ppb_var_var_to_utf8),
+    .VarToResource   = TWRAPZ(ppb_var_var_to_resource),
+    .VarFromResource = TWRAPZ(ppb_var_var_from_resource),
+};
 
 const struct PPB_Var_1_1 ppb_var_interface_1_1 = {
     .AddRef =       TWRAPF(ppb_var_add_ref),
