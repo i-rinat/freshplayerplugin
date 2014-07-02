@@ -71,6 +71,7 @@
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
 #include <ppapi/c/private/ppb_udp_socket_private.h>
 #include <ppapi/c/private/ppb_nacl_private.h>
+#include <ppapi/c/private/ppb_uma_private.h>
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 #include <ppapi/c/trusted/ppb_file_chooser_trusted.h>
 #include <ppapi/c/trusted/ppb_url_loader_trusted.h>
@@ -137,6 +138,7 @@ extern const struct PPB_URLRequestInfo_1_0          ppb_url_request_info_interfa
 extern const struct PPB_URLResponseInfo_1_0         ppb_url_response_info_interface_1_0;
 extern const struct PPB_URLUtil_Dev_0_6             ppb_url_util_dev_interface_0_6;
 extern const struct PPB_URLUtil_Dev_0_7             ppb_url_util_dev_interface_0_7;
+extern const struct PPB_UMA_Private_0_3             ppb_uma_private_interface_0_3;
 extern const struct PPB_Var_1_0                     ppb_var_interface_1_0;
 extern const struct PPB_Var_1_1                     ppb_var_interface_1_1;
 extern const struct PPB_Var_1_2                     ppb_var_interface_1_2;
@@ -223,6 +225,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_URLRESPONSEINFO_INTERFACE_1_0,      ppb_url_response_info_interface_1_0)
     ELSEIFBLOCK(PPB_URLUTIL_DEV_INTERFACE_0_6,          ppb_url_util_dev_interface_0_6)
     ELSEIFBLOCK(PPB_URLUTIL_DEV_INTERFACE_0_7,          ppb_url_util_dev_interface_0_7)
+    ELSEIFBLOCK(PPB_UMA_PRIVATE_INTERFACE_0_3,          ppb_uma_private_interface_0_3)
     ELSEIFBLOCK(PPB_VAR_INTERFACE_1_0,                  ppb_var_interface_1_0)
     ELSEIFBLOCK(PPB_VAR_INTERFACE_1_1,                  ppb_var_interface_1_1)
     ELSEIFBLOCK(PPB_VAR_INTERFACE_1_2,                  ppb_var_interface_1_2)

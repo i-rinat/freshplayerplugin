@@ -58,6 +58,7 @@ add_library(freshwrapper-obj OBJECT
     ppb_tcp_socket_private.c
     ppb_text_input_dev.c
     ppb_udp_socket_private.c
+    ppb_uma.c
     ppb_url_loader.c
     ppb_url_loader_trusted.c
     ppb_url_request_info.c
