@@ -44,6 +44,7 @@ static PangoContext *pango_ctx = NULL;
 static PangoFontMap *pango_fm = NULL;
 
 static pthread_mutex_t  lock;
+static int urandom_fd = -1;
 
 static
 void
@@ -62,6 +63,10 @@ constructor_tables(void)
 
     // mutex
     pthread_mutex_init(&lock, NULL);
+
+    // urandom
+    urandom_fd = open("/dev/urandom", O_RDONLY);
+    srand(time(NULL) + 42);
 }
 
 static
@@ -83,6 +88,15 @@ destructor_tables(void)
 
     // mutex
     pthread_mutex_destroy(&lock);
+
+    // urandom
+    close(urandom_fd);
+}
+
+int
+tables_get_urandom_fd(void)
+{
+    return urandom_fd;
 }
 
 int
