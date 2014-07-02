@@ -43,6 +43,7 @@
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
 #include <ppapi/c/ppb_core.h>
+#include <ppapi/c/ppb_file_io.h>
 #include <ppapi/c/ppb_file_ref.h>
 #include <ppapi/c/ppb_graphics_2d.h>
 #include <ppapi/c/ppb_graphics_3d.h>
@@ -58,6 +59,7 @@
 #include <ppapi/c/ppb_var.h>
 #include <ppapi/c/ppb_view.h>
 #include <ppapi/c/pp_module.h>
+#include <ppapi/c/private/ppb_file_io_private.h>
 #include <ppapi/c/private/ppb_flash_clipboard.h>
 #include <ppapi/c/private/ppb_flash_file.h>
 #include <ppapi/c/private/ppb_flash_font_file.h>
@@ -86,6 +88,9 @@ extern const struct PPB_Crypto_Dev_0_1              ppb_crypto_dev_interface_0_1
 extern const struct PPB_CursorControl_Dev_0_4       ppb_cursor_control_dev_interface_0_4;
 extern const struct PPB_FileChooser_Dev_0_6         ppb_file_chooser_dev_interface_0_6;
 extern const struct PPB_FileChooserTrusted_0_6      ppb_file_chooser_trusted_interface_0_6;
+extern const struct PPB_FileIO_1_0                  ppb_file_io_interface_1_0;
+extern const struct PPB_FileIO_1_1                  ppb_file_io_interface_1_1;
+extern const struct PPB_FileIO_Private_0_1          ppb_file_io_private_interface_0_1;
 extern const struct PPB_FileRef_1_0                 ppb_file_ref_interface_1_0;
 extern const struct PPB_FileRef_1_1                 ppb_file_ref_interface_1_1;
 extern const struct PPB_Flash_Clipboard_5_0         ppb_flash_clipboard_interface_5_0;
@@ -168,6 +173,9 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_CURSOR_CONTROL_DEV_INTERFACE_0_4,   ppb_cursor_control_dev_interface_0_4)
     ELSEIFBLOCK(PPB_FILECHOOSER_DEV_INTERFACE_0_6,      ppb_file_chooser_dev_interface_0_6)
     ELSEIFBLOCK(PPB_FILECHOOSER_TRUSTED_INTERFACE_0_6,  ppb_file_chooser_trusted_interface_0_6)
+    ELSEIFBLOCK(PPB_FILEIO_PRIVATE_INTERFACE_0_1,       ppb_file_io_private_interface_0_1)
+    ELSEIFBLOCK(PPB_FILEIO_INTERFACE_1_0,               ppb_file_io_interface_1_0)
+    ELSEIFBLOCK(PPB_FILEIO_INTERFACE_1_1,               ppb_file_io_interface_1_1)
     ELSEIFBLOCK(PPB_FILEREF_INTERFACE_1_0,              ppb_file_ref_interface_1_0)
     ELSEIFBLOCK(PPB_FILEREF_INTERFACE_1_1,              ppb_file_ref_interface_1_1)
     ELSEIFBLOCK(PPB_FLASH_CLIPBOARD_INTERFACE_5_0,      ppb_flash_clipboard_interface_5_0)

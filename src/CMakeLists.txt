@@ -30,6 +30,7 @@ add_library(freshwrapper-obj OBJECT
     ppb_cursor_control_dev.c
     ppb_file_chooser_dev.c
     ppb_file_chooser_trusted.c
+    ppb_file_io.c
     ppb_file_ref.c
     ppb_flash_clipboard.c
     ppb_flash_file.c
