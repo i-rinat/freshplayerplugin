@@ -58,10 +58,9 @@ Project is using cmake (>=2.8.8) build system.
 
 * Install prerequisites.
 ```
-    $ sudo apt-get install cmake pkg-config libglib2.0-dev libasound2-dev libx11-dev \
-               libgl1-mesa-dev liburiparser-dev libcairo2-dev libpango1.0-dev        \
-               libfreetype6-dev libgtk2.0-dev libxinerama-dev libconfig-dev          \
-               libglu1-mesa-dev
+    $ sudo apt-get install cmake pkg-config libasound2-dev liburiparser-dev \
+           libglib2.0-dev libconfig-dev libpango1.0-dev libxinerama-dev     \
+           libegl1-mesa-dev libevent-dev libgtk+2.0-dev libgles2-mesa-dev
 ```
 
 * Make `build` subdirectory, go there, call
