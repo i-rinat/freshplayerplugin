@@ -133,7 +133,7 @@ ppb_nacl_get_sandbox_arch(void)
 PP_UrlSchemeType
 ppb_nacl_get_url_scheme(struct PP_Var url)
 {
-    return 0;
+    return PP_SCHEME_OTHER;
 }
 
 void
