@@ -33,6 +33,7 @@
 #include <ppapi/c/private/ppb_flash.h>
 #include <ppapi/c/ppb_image_data.h>
 #include <ppapi/c/private/ppb_flash_clipboard.h>
+#include <ppapi/c/private/ppb_nacl_private.h>
 
 
 const char *reverse_npp_variable(NPPVariable var);
@@ -47,5 +48,8 @@ const char *reverse_char_set_conversion_error(enum PP_CharSet_ConversionError e)
 const char *reverse_gl_enum(unsigned int e);
 const char *reverse_clipboard_type(PP_Flash_Clipboard_Type ct);
 const char *reverse_clipboard_format(uint32_t cf);
+const char *reverse_nacl_event_type(PP_NaClEventType et);
+const char *reverse_nacl_error(PP_NaClError err);
+const char *reverse_nacl_ready_state(PP_NaClReadyState rs);
 
 #endif // FPP__REVERSE_CONSTANT_H
