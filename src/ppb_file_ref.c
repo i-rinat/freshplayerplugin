@@ -111,7 +111,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_file_ref_create(PP_Resource file_system, const char *path)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_system=%d, path=%s\n", __func__+6, file_system, path);
     return ppb_file_ref_create(file_system, path);
 }
 
@@ -119,7 +119,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_file_ref_is_file_ref(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_file_ref_is_file_ref(resource);
 }
 
@@ -127,7 +127,7 @@ TRACE_WRAPPER
 PP_FileSystemType
 trace_ppb_file_ref_get_file_system_type(PP_Resource file_ref)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d\n", __func__+6, file_ref);
     return ppb_file_ref_get_file_system_type(file_ref);
 }
 
@@ -135,7 +135,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_file_ref_get_name(PP_Resource file_ref)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d\n", __func__+6, file_ref);
     return ppb_file_ref_get_name(file_ref);
 }
 
@@ -143,7 +143,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_file_ref_get_path(PP_Resource file_ref)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d\n", __func__+6, file_ref);
     return ppb_file_ref_get_path(file_ref);
 }
 
@@ -151,7 +151,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_file_ref_get_parent(PP_Resource file_ref)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d\n", __func__+6, file_ref);
     return ppb_file_ref_get_parent(file_ref);
 }
 
@@ -160,7 +160,9 @@ int32_t
 trace_ppb_file_ref_make_directory(PP_Resource directory_ref, PP_Bool make_ancestors,
                                   struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s directory_ref=%d, make_ancestors=%u, callback={.func=%p, "
+               ".user_data=%p, .flags=%u}\n", __func__+6, directory_ref, make_ancestors,
+               callback.func, callback.user_data, callback.flags);
     return ppb_file_ref_make_directory(directory_ref, make_ancestors, callback);
 }
 
@@ -169,7 +171,10 @@ int32_t
 trace_ppb_file_ref_touch(PP_Resource file_ref, PP_Time last_access_time, PP_Time last_modified_time,
                          struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d, last_access_time=%f, last_modified_time=%f, "
+               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, file_ref,
+               last_access_time, last_modified_time, callback.func, callback.user_data,
+               callback.flags);
     return ppb_file_ref_touch(file_ref, last_access_time, last_modified_time, callback);
 }
 
@@ -177,7 +182,8 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_file_ref_delete(PP_Resource file_ref, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d, callback={.func=%p, .user_data=%p, .flags=%u}\n",
+               __func__+6, file_ref, callback.func, callback.user_data, callback.flags);
     return ppb_file_ref_delete(file_ref, callback);
 }
 
@@ -186,7 +192,9 @@ int32_t
 trace_ppb_file_ref_rename(PP_Resource file_ref, PP_Resource new_file_ref,
                           struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d, new_file_ref=%d, callback={.func=%p, .user_data=%p, "
+               ".flags=%u}\n", __func__+6, file_ref, new_file_ref, callback.func,
+               callback.user_data, callback.flags);
     return ppb_file_ref_rename(file_ref, new_file_ref, callback);
 }
 
@@ -195,7 +203,8 @@ int32_t
 trace_ppb_file_ref_query(PP_Resource file_ref, struct PP_FileInfo *info,
                          struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d, callback={.func=%p, .user_data=%p, .flags=%u}\n",
+               __func__+6, file_ref, callback.func, callback.user_data, callback.flags);
     return ppb_file_ref_query(file_ref, info, callback);
 }
 
@@ -204,7 +213,10 @@ int32_t
 trace_ppb_file_ref_read_directory_entries(PP_Resource file_ref, struct PP_ArrayOutput output,
                                           struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s file_ref=%d, output={.GetDataBuffer=%p, .user_data=%p}, "
+               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, file_ref,
+               output.GetDataBuffer, output.user_data, callback.func, callback.user_data,
+               callback.flags);
     return ppb_file_ref_read_directory_entries(file_ref, output, callback);
 }
 
