@@ -45,6 +45,7 @@
 #include "ppb_flash_message_loop.h"
 #include "ppb_tcp_socket_private.h"
 #include "ppb_file_ref.h"
+#include "ppb_file_io.h"
 
 
 #define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
@@ -229,6 +230,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_FILE_REF:
             ppb_file_ref_destroy(ptr);
+            break;
+        case PP_RESOURCE_FILE_IO:
+            ppb_file_io_destroy(ptr);
             break;
         default:
             break;

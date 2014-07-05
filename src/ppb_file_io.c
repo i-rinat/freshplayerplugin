@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <ppapi/c/pp_errors.h>
 #include "trace.h"
+#include "pp_resource.h"
 
 
 int32_t
@@ -38,13 +39,19 @@ ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
 PP_Resource
 ppb_file_io_create(PP_Instance instance)
 {
-    return 0;
+    PP_Resource file_io = pp_resource_allocate(PP_RESOURCE_FILE_IO, instance);
+    return file_io;
+}
+
+void
+ppb_file_io_destroy(void *p)
+{
 }
 
 PP_Bool
 ppb_file_io_is_file_io(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_FILE_IO;
 }
 
 int32_t
@@ -122,7 +129,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_file_io_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_file_io_create(instance);
 }
 
@@ -130,7 +137,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_file_io_is_file_io(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_file_io_is_file_io(resource);
 }
 
@@ -234,8 +241,8 @@ const struct PPB_FileIO_Private_0_1 ppb_file_io_private_interface_0_1 = {
 };
 
 const struct PPB_FileIO_1_1 ppb_file_io_interface_1_1 = {
-    .Create =       TWRAPZ(ppb_file_io_create),
-    .IsFileIO =     TWRAPZ(ppb_file_io_is_file_io),
+    .Create =       TWRAPF(ppb_file_io_create),
+    .IsFileIO =     TWRAPF(ppb_file_io_is_file_io),
     .Open =         TWRAPZ(ppb_file_io_open),
     .Query =        TWRAPZ(ppb_file_io_query),
     .Touch =        TWRAPZ(ppb_file_io_touch),
@@ -248,8 +255,8 @@ const struct PPB_FileIO_1_1 ppb_file_io_interface_1_1 = {
 };
 
 const struct PPB_FileIO_1_0 ppb_file_io_interface_1_0 = {
-    .Create =       TWRAPZ(ppb_file_io_create),
-    .IsFileIO =     TWRAPZ(ppb_file_io_is_file_io),
+    .Create =       TWRAPF(ppb_file_io_create),
+    .IsFileIO =     TWRAPF(ppb_file_io_is_file_io),
     .Open =         TWRAPZ(ppb_file_io_open),
     .Query =        TWRAPZ(ppb_file_io_query),
     .Touch =        TWRAPZ(ppb_file_io_touch),

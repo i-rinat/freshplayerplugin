@@ -80,6 +80,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_FLASH_MESSAGE_LOOP,
     PP_RESOURCE_TCP_SOCKET,
     PP_RESOURCE_FILE_REF,
+    PP_RESOURCE_FILE_IO,
 
     PP_RESOURCE_TYPES_COUNT,        // must be the last item in the list
 };
@@ -337,6 +338,10 @@ struct pp_file_ref_s {
     FILE           *fp;
 };
 
+struct pp_file_io_s {
+    struct pp_resource_generic_s _;
+};
+
 union pp_largest_u {
     struct pp_var_object_s          s01;
     struct pp_instance_s            s02;
@@ -361,6 +366,7 @@ union pp_largest_u {
     struct pp_flash_message_loop_s  s21;
     struct pp_tcp_socket_s          s22;
     struct pp_file_ref_s            s23;
+    struct pp_file_io_s             s24;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance);
