@@ -31,6 +31,9 @@
 PP_Resource
 ppb_file_ref_create(PP_Resource file_system, const char *path);
 
+void
+ppb_file_ref_destroy(void *p);
+
 PP_Bool
 ppb_file_ref_is_file_ref(PP_Resource resource);
 

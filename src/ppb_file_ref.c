@@ -34,10 +34,17 @@ ppb_file_ref_create(PP_Resource file_system, const char *path)
     return 0;
 }
 
+void
+ppb_file_ref_destroy(void *p)
+{
+    struct pp_file_ref_s *fr = p;
+    fclose(fr->fp);
+}
+
 PP_Bool
 ppb_file_ref_is_file_ref(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_FILE_REF;
 }
 
 PP_FileSystemType
@@ -119,7 +126,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_file_ref_is_file_ref(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_file_ref_is_file_ref(resource);
 }
 
@@ -223,7 +230,7 @@ trace_ppb_file_ref_read_directory_entries(PP_Resource file_ref, struct PP_ArrayO
 
 const struct PPB_FileRef_1_1 ppb_file_ref_interface_1_1 = {
     .Create =               TWRAPZ(ppb_file_ref_create),
-    .IsFileRef =            TWRAPZ(ppb_file_ref_is_file_ref),
+    .IsFileRef =            TWRAPF(ppb_file_ref_is_file_ref),
     .GetFileSystemType =    TWRAPZ(ppb_file_ref_get_file_system_type),
     .GetName =              TWRAPZ(ppb_file_ref_get_name),
     .GetPath =              TWRAPZ(ppb_file_ref_get_path),
@@ -238,7 +245,7 @@ const struct PPB_FileRef_1_1 ppb_file_ref_interface_1_1 = {
 
 const struct PPB_FileRef_1_0 ppb_file_ref_interface_1_0 = {
     .Create =               TWRAPZ(ppb_file_ref_create),
-    .IsFileRef =            TWRAPZ(ppb_file_ref_is_file_ref),
+    .IsFileRef =            TWRAPF(ppb_file_ref_is_file_ref),
     .GetFileSystemType =    TWRAPZ(ppb_file_ref_get_file_system_type),
     .GetName =              TWRAPZ(ppb_file_ref_get_name),
     .GetPath =              TWRAPZ(ppb_file_ref_get_path),

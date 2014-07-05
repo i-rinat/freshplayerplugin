@@ -77,7 +77,22 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
 PP_Resource
 ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 {
-    return 123003;
+    struct pp_url_response_info_s *ri = pp_resource_acquire(response,PP_RESOURCE_URL_RESPONSE_INFO);
+    if (!ri)
+        return 0;
+    struct pp_url_loader_s *ul = pp_resource_acquire(ri->url_loader, PP_RESOURCE_URL_LOADER);
+
+    PP_Resource file_ref = pp_resource_allocate(ri->_.instance, PP_RESOURCE_FILE_REF);
+    struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
+
+    fr->fp = fdopen(dup(fileno(ul->fp)), "rb");
+    fseek(fr->fp, 0, SEEK_SET);
+
+    pp_resource_release(file_ref);
+    pp_resource_release(ri->url_loader);
+    pp_resource_release(response);
+
+    return file_ref;
 }
 
 
