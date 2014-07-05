@@ -82,7 +82,7 @@ ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
         return 0;
     struct pp_url_loader_s *ul = pp_resource_acquire(ri->url_loader, PP_RESOURCE_URL_LOADER);
 
-    PP_Resource file_ref = pp_resource_allocate(ri->_.instance, PP_RESOURCE_FILE_REF);
+    PP_Resource file_ref = pp_resource_allocate(PP_RESOURCE_FILE_REF, ri->_.instance);
     struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
 
     fr->fp = fdopen(dup(fileno(ul->fp)), "rb");
