@@ -225,6 +225,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     ul->read_pos =         0;
     ul->request_headers =  nullsafe_strdup(ri->headers);
     ul->follow_redirects = ri->follow_redirects;
+    ul->stream_to_file =   ri->stream_to_file;
 
     ul->record_download_progress =         ri->record_download_progress;
     ul->record_upload_progress =           ri->record_upload_progress;
@@ -463,7 +464,20 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
 int32_t
 ppb_url_loader_finish_streaming_to_file(PP_Resource loader, struct PP_CompletionCallback callback)
 {
-    return 0;
+    struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    if (!ul)
+        return PP_ERROR_BADRESOURCE;
+
+    if (!ul->stream_to_file) {
+        pp_resource_release(loader);
+        return PP_ERROR_FAILED;
+    }
+
+    ul->stream_to_file_ccb = callback;
+    // TODO: handle callback.func == NULL case
+
+    pp_resource_release(loader);
+    return PP_OK_COMPLETIONPENDING;
 }
 
 void
@@ -563,7 +577,7 @@ int32_t
 trace_ppb_url_loader_finish_streaming_to_file(PP_Resource loader,
                                               struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s loader=%d callback={.func=%p, .user_data=%p, flags=%d}\n",
+    trace_info("[PPB] {full} %s loader=%d callback={.func=%p, .user_data=%p, flags=%d}\n",
                __func__+6, loader, callback.func, callback.user_data, callback.flags);
     return ppb_url_loader_finish_streaming_to_file(loader, callback);
 }
@@ -586,6 +600,6 @@ const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
     .GetDownloadProgress =      TWRAPF(ppb_url_loader_get_download_progress),
     .GetResponseInfo =          TWRAPF(ppb_url_loader_get_response_info),
     .ReadResponseBody =         TWRAPF(ppb_url_loader_read_response_body),
-    .FinishStreamingToFile =    TWRAPZ(ppb_url_loader_finish_streaming_to_file),
+    .FinishStreamingToFile =    TWRAPF(ppb_url_loader_finish_streaming_to_file),
     .Close =                    TWRAPF(ppb_url_loader_close),
 };

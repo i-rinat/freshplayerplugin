@@ -148,6 +148,8 @@ struct pp_url_loader_s {
                                             ///< a redirection response
     int                     loaded;         ///< if whole stream loaded already
     int32_t                 response_size;  ///< Content-Length value of -1 if absent
+    int                     stream_to_file; ///< whenever streaming to file is allowed
+    struct PP_CompletionCallback    stream_to_file_ccb; ///< callback to call on end of streaming
 
     char                   *request_headers;
     PP_Bool                 follow_redirects;   ///< handle redirections internally

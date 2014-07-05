@@ -349,6 +349,19 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
 
+    if (ul->stream_to_file) {
+        struct PP_CompletionCallback ccb = ul->stream_to_file_ccb;
+        int fd = fileno(ul->fp);
+        struct stat sb = {};
+
+        fflush(ul->fp);
+        pp_resource_release(loader);
+        fstat(fd, &sb);
+        if (ccb.func)
+            ccb.func(ccb.user_data, sb.st_size);
+        return NPERR_NO_ERROR;
+    }
+
     pp_resource_release(loader);
     return NPERR_NO_ERROR;
 }
