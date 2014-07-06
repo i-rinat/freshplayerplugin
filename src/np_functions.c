@@ -351,14 +351,11 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 
     if (ul && ul->stream_to_file) {
         struct PP_CompletionCallback ccb = ul->stream_to_file_ccb;
-        int fd = fileno(ul->fp);
-        struct stat sb = {};
 
         fflush(ul->fp);
         pp_resource_release(loader);
-        fstat(fd, &sb);
         if (ccb.func)
-            ccb.func(ccb.user_data, sb.st_size);
+            ccb.func(ccb.user_data, PP_OK);
         return NPERR_NO_ERROR;
     }
 
