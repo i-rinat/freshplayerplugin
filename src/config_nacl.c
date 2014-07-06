@@ -26,9 +26,11 @@
 #include <stdlib.h>
 
 const char *nacl_path_list[] = {
-        "/opt/google/chrome",
-        "/opt/google/chrome-beta",
-        "/opt/google/chrome-unstable",
+        "/opt/google/chrome",           // Chrome
+        "/opt/google/chrome-beta",      // Chrome beta
+        "/opt/google/chrome-unstable",  // Chrome unstable
+        "/usr/lib64/chromium",          // Chromium (Slackware)
+        "/usr/lib/chromium",            // Chromium (Slackware)
         NULL
 };
 
