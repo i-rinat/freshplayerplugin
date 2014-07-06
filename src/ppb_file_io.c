@@ -25,6 +25,7 @@
 #include "ppb_file_io.h"
 #include <stdlib.h>
 #include <ppapi/c/pp_errors.h>
+#include <inttypes.h>
 #include "trace.h"
 #include "pp_resource.h"
 
@@ -179,9 +180,9 @@ int32_t
 trace_ppb_file_io_read(PP_Resource file_io, int64_t offset, char *buffer, int32_t bytes_to_read,
                        struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s file_io=%d, offset=%ld, bytes_to_read=%d, callback={.func=%p, "
-               ".user_data=%p, .flags=%u}\n", __func__+6, file_io, offset, bytes_to_read,
-               callback.func, callback.user_data, callback.flags);
+    trace_info("[PPB] {zilch} %s file_io=%d, offset=%"PRId64", bytes_to_read=%d, "
+               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, file_io, offset,
+               bytes_to_read, callback.func, callback.user_data, callback.flags);
     return ppb_file_io_read(file_io, offset, buffer, bytes_to_read, callback);
 }
 
@@ -190,9 +191,9 @@ int32_t
 trace_ppb_file_io_write(PP_Resource file_io, int64_t offset, const char *buffer,
                         int32_t bytes_to_write, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s file_io=%d, offset=%ld, bytes_to_write=%d, callback={.func=%p, "
-               ".user_data=%p, .flags=%u}\n", __func__+6, file_io, offset, bytes_to_write,
-               callback.func, callback.user_data, callback.flags);
+    trace_info("[PPB] {zilch} %s file_io=%d, offset=%"PRId64", bytes_to_write=%d, "
+               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, file_io, offset,
+               bytes_to_write, callback.func, callback.user_data, callback.flags);
     return ppb_file_io_write(file_io, offset, buffer, bytes_to_write, callback);
 }
 
@@ -201,7 +202,7 @@ int32_t
 trace_ppb_file_io_set_length(PP_Resource file_io, int64_t length,
                              struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s file_io=%d, length=%ld, callback={.func=%p, .user_data=%p, "
+    trace_info("[PPB] {zilch} %s file_io=%d, length=%"PRId64", callback={.func=%p, .user_data=%p, "
                ".flags=%u}\n", __func__+6, file_io, length, callback.func, callback.user_data,
                callback.flags);
     return ppb_file_io_set_length(file_io, length, callback);
@@ -229,9 +230,9 @@ int32_t
 trace_ppb_file_io_read_to_array(PP_Resource file_io, int64_t offset, int32_t max_read_length,
                                 struct PP_ArrayOutput *output, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s file_io=%d, offset=%ld, max_read_length=%d, callback={.func=%p, "
-               ".user_data=%p, .flags=%u}\n", __func__+6, file_io, offset, max_read_length,
-               callback.func, callback.user_data, callback.flags);
+    trace_info("[PPB] {zilch} %s file_io=%d, offset=%"PRId64", max_read_length=%d, "
+               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, file_io, offset,
+               max_read_length, callback.func, callback.user_data, callback.flags);
     return ppb_file_io_read_to_array(file_io, offset, max_read_length, output, callback);
 }
 

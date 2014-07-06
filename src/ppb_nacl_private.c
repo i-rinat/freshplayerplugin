@@ -1,5 +1,6 @@
 #include "ppb_nacl_private.h"
 #include <stdlib.h>
+#include <inttypes.h>
 #include <ppapi/c/pp_errors.h>
 #include "trace.h"
 #include "tables.h"
@@ -318,9 +319,9 @@ trace_ppb_nacl_dispatch_event(PP_Instance instance, PP_NaClEventType event_type,
                               uint64_t loaded_bytes, uint64_t total_bytes)
 {
     trace_info("[PPB] {zilch} %s instance=%d, event_type=%s, resource_url=%s, "
-               "length_is_computable=%u, loaded_bytes=%lu, total_bytes=%lu\n", __func__+6,
-               instance, reverse_nacl_event_type(event_type), resource_url, length_is_computable,
-               loaded_bytes, total_bytes);
+               "length_is_computable=%u, loaded_bytes=%"PRIu64", total_bytes=%"PRIu64"\n",
+               __func__+6, instance, reverse_nacl_event_type(event_type), resource_url,
+               length_is_computable, loaded_bytes, total_bytes);
     return ppb_nacl_dispatch_event(instance, event_type, resource_url, length_is_computable,
                                    loaded_bytes, total_bytes);
 }
