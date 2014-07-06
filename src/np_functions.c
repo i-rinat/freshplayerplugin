@@ -349,7 +349,7 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
 
-    if (ul->stream_to_file) {
+    if (ul && ul->stream_to_file) {
         struct PP_CompletionCallback ccb = ul->stream_to_file_ccb;
         int fd = fileno(ul->fp);
         struct stat sb = {};
