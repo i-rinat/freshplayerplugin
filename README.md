@@ -80,6 +80,12 @@ It should be enough to get it running, but if it doesn't, specify full path in
 It's better to have `manifest.json` alongside with `libpepflashplayer.so`,
 actual Flash version will be taken from that manifest.
 
+You can also build from source using this script by copying and pasting it into an sh file anywhere then running it:
+https://github.com/zeuslightning125/UtilScripts/blob/2e4163af6a5c3b73f52fb4ffac5af0ea1b8cf829/Unix/Linux/Install-Build/installpepperflashfirefox.sh
+
+All dependencies as well as things required to build are automatically installed, and the files are copied into the mozilla plugins.
+Be sure to turn off firefox before running this script, and restart firefox once complete.
+
 License
 =======
 
