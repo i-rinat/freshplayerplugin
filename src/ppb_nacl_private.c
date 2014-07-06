@@ -127,7 +127,17 @@ ppb_nacl_nacl_debug_enabled_for_url(const char *alleged_nmf_url)
 const char *
 ppb_nacl_get_sandbox_arch(void)
 {
-    return "amd64";
+#if defined(__x86_64__)
+    return "x86-64";
+#elif defined(__i386__)
+    return "x86-32";
+#elif defined(__mips__)
+    return "mips32";
+#elif defined(__arm__)
+    return "arm";
+#else
+    return "x86-32"; // fallback
+#endif
 }
 
 PP_UrlSchemeType
@@ -366,7 +376,7 @@ TRACE_WRAPPER
 const char *
 trace_ppb_nacl_get_sandbox_arch(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_nacl_get_sandbox_arch();
 }
 
@@ -459,7 +469,7 @@ const struct PPB_NaCl_Private_1_0 ppb_nacl_private_interface_1_0 = {
     .InstanceCreated =          TWRAPZ(ppb_nacl_instance_created),
     .InstanceDestroyed =        TWRAPZ(ppb_nacl_instance_destroyed),
     .NaClDebugEnabledForURL =   TWRAPZ(ppb_nacl_nacl_debug_enabled_for_url),
-    .GetSandboxArch =           TWRAPZ(ppb_nacl_get_sandbox_arch),
+    .GetSandboxArch =           TWRAPF(ppb_nacl_get_sandbox_arch),
     .GetUrlScheme =             TWRAPZ(ppb_nacl_get_url_scheme),
     .LogToConsole =             TWRAPZ(ppb_nacl_log_to_console),
     .GetNexeErrorReported =     TWRAPZ(ppb_nacl_get_nexe_error_reported),
