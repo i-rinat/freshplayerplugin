@@ -218,27 +218,32 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     memset(&npn, 0, sizeof(npn));
     memcpy(&npn, aNPNFuncs, sizeof(npn) < aNPNFuncs->size ? sizeof(npn) : aNPNFuncs->size);
 
-    aNPPFuncs->size = sizeof(NPPluginFuncs);
-    aNPPFuncs->version = NP_VERSION_MAJOR + NP_VERSION_MINOR;
-    aNPPFuncs->newp = NPP_New;
-    aNPPFuncs->destroy = NPP_Destroy;
-    aNPPFuncs->setwindow = NPP_SetWindow;
-    aNPPFuncs->newstream = NPP_NewStream;
-    aNPPFuncs->destroystream = NPP_DestroyStream;
-    aNPPFuncs->asfile = NPP_StreamAsFile;
-    aNPPFuncs->writeready = NPP_WriteReady;
-    aNPPFuncs->write = NPP_Write;
-    aNPPFuncs->print = NPP_Print;
-    aNPPFuncs->event = NPP_HandleEvent;
-    aNPPFuncs->urlnotify = NPP_URLNotify;
-    aNPPFuncs->getvalue = NPP_GetValue;
-    aNPPFuncs->setvalue = NPP_SetValue;
-    aNPPFuncs->gotfocus = NPP_GotFocus;
-    aNPPFuncs->lostfocus = NPP_LostFocus;
-    aNPPFuncs->urlredirectnotify = NPP_URLRedirectNotify;
-    aNPPFuncs->clearsitedata = NPP_ClearSiteData;
-    aNPPFuncs->getsiteswithdata = NPP_GetSitesWithData;
-    aNPPFuncs->didComposite = NPP_DidComposite;
+    NPPluginFuncs pf;
+    memset(&pf, 0, sizeof(NPPluginFuncs));
+    pf.size = MIN(aNPPFuncs->size, sizeof(NPPluginFuncs));
+
+    // browser is supposed to fill .size and .version
+    pf.newp =               NPP_New;
+    pf.destroy =            NPP_Destroy;
+    pf.setwindow =          NPP_SetWindow;
+    pf.newstream =          NPP_NewStream;
+    pf.destroystream =      NPP_DestroyStream;
+    pf.asfile =             NPP_StreamAsFile;
+    pf.writeready =         NPP_WriteReady;
+    pf.write =              NPP_Write;
+    pf.print =              NPP_Print;
+    pf.event =              NPP_HandleEvent;
+    pf.urlnotify =          NPP_URLNotify;
+    pf.getvalue =           NPP_GetValue;
+    pf.setvalue =           NPP_SetValue;
+    pf.gotfocus =           NPP_GotFocus;
+    pf.lostfocus =          NPP_LostFocus;
+    pf.urlredirectnotify =  NPP_URLRedirectNotify;
+    pf.clearsitedata =      NPP_ClearSiteData;
+    pf.getsiteswithdata =   NPP_GetSitesWithData;
+    pf.didComposite =       NPP_DidComposite;
+
+    memcpy(aNPPFuncs, &pf, pf.size);
 
     load_ppp_module();
 
