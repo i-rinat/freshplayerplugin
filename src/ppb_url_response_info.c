@@ -118,7 +118,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 {
-    trace_info("[PPB] {zilch} %s response=%d\n", __func__+6, response);
+    trace_info("[PPB] {full} %s response=%d\n", __func__+6, response);
     return ppb_url_response_info_get_body_as_file_ref(response);
 }
 
@@ -126,5 +126,5 @@ trace_ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 const struct PPB_URLResponseInfo_1_0 ppb_url_response_info_interface_1_0 = {
     .IsURLResponseInfo =    TWRAPF(ppb_url_response_info_is_url_response_info),
     .GetProperty =          TWRAPF(ppb_url_response_info_get_property),
-    .GetBodyAsFileRef =     TWRAPZ(ppb_url_response_info_get_body_as_file_ref),
+    .GetBodyAsFileRef =     TWRAPF(ppb_url_response_info_get_body_as_file_ref),
 };
