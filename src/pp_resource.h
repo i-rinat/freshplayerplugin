@@ -346,6 +346,7 @@ struct pp_file_ref_s {
 
 struct pp_file_io_s {
     struct pp_resource_generic_s _;
+    int             fd;
 };
 
 union pp_largest_u {

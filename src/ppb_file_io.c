@@ -28,6 +28,7 @@
 #include <inttypes.h>
 #include "trace.h"
 #include "pp_resource.h"
+#include "ppb_core.h"
 
 
 int32_t
@@ -59,7 +60,33 @@ int32_t
 ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
                  struct PP_CompletionCallback callback)
 {
-    return PP_OK;
+    int32_t retval;
+    struct pp_file_io_s *fio = pp_resource_acquire(file_io, PP_RESOURCE_FILE_IO);
+    if (!fio)
+        return PP_ERROR_BADRESOURCE;
+
+    struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
+    if (!fr) {
+        pp_resource_release(file_io);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    switch (fr->type) {
+    case PP_FILE_REF_TYPE_FD:
+        fio->fd = dup(fr->fd);
+        break;
+    default:
+        trace_error("%s, fr->type not implemented\n", __func__);
+        goto out;
+    }
+
+    ppb_core_call_on_main_thread_now(fio->_.instance, callback, PP_OK);
+    retval = PP_OK_COMPLETIONPENDING;
+
+out:
+    pp_resource_release(file_io);
+    pp_resource_release(file_ref);
+    return retval;
 }
 
 int32_t
@@ -147,7 +174,7 @@ int32_t
 trace_ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
                        struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s file_io=%d, file_ref=%d, open_flags=%u, callback={.func=%p, "
+    trace_info("[PPB] {full} %s file_io=%d, file_ref=%d, open_flags=%u, callback={.func=%p, "
                ".user_data=%p, .flags=%u}\n", __func__+6, file_io, file_ref, open_flags,
                callback.func, callback.user_data, callback.flags);
     return ppb_file_io_open(file_io, file_ref, open_flags, callback);
@@ -244,7 +271,7 @@ const struct PPB_FileIO_Private_0_1 ppb_file_io_private_interface_0_1 = {
 const struct PPB_FileIO_1_1 ppb_file_io_interface_1_1 = {
     .Create =       TWRAPF(ppb_file_io_create),
     .IsFileIO =     TWRAPF(ppb_file_io_is_file_io),
-    .Open =         TWRAPZ(ppb_file_io_open),
+    .Open =         TWRAPF(ppb_file_io_open),
     .Query =        TWRAPZ(ppb_file_io_query),
     .Touch =        TWRAPZ(ppb_file_io_touch),
     .Read =         TWRAPZ(ppb_file_io_read),
@@ -258,7 +285,7 @@ const struct PPB_FileIO_1_1 ppb_file_io_interface_1_1 = {
 const struct PPB_FileIO_1_0 ppb_file_io_interface_1_0 = {
     .Create =       TWRAPF(ppb_file_io_create),
     .IsFileIO =     TWRAPF(ppb_file_io_is_file_io),
-    .Open =         TWRAPZ(ppb_file_io_open),
+    .Open =         TWRAPF(ppb_file_io_open),
     .Query =        TWRAPZ(ppb_file_io_query),
     .Touch =        TWRAPZ(ppb_file_io_touch),
     .Read =         TWRAPZ(ppb_file_io_read),
