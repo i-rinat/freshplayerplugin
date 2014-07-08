@@ -35,7 +35,15 @@ int32_t
 ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
                                    struct PP_CompletionCallback callback)
 {
-    return 0;
+    struct pp_file_io_s *fio = pp_resource_acquire(file_io, PP_RESOURCE_FILE_IO);
+    if (!fio)
+        return PP_ERROR_BADRESOURCE;
+
+    *handle = fio->fd;
+
+    ppb_core_call_on_main_thread_now(fio->_.instance, callback, PP_OK);
+    pp_resource_release(file_io);
+    return PP_OK_COMPLETIONPENDING;
 }
 
 PP_Resource
@@ -148,7 +156,7 @@ int32_t
 trace_ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
                                          struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s file_io=%d, callback={.func=%p, .user_data=%p, .flags=%u}\n",
+    trace_info("[PPB] {full} %s file_io=%d, callback={.func=%p, .user_data=%p, .flags=%u}\n",
                __func__+6, file_io, callback.func, callback.user_data, callback.flags);
     return ppb_file_io_request_os_file_handle(file_io, handle, callback);
 }
@@ -265,7 +273,7 @@ trace_ppb_file_io_read_to_array(PP_Resource file_io, int64_t offset, int32_t max
 
 
 const struct PPB_FileIO_Private_0_1 ppb_file_io_private_interface_0_1 = {
-    .RequestOSFileHandle = TWRAPZ(ppb_file_io_request_os_file_handle),
+    .RequestOSFileHandle = TWRAPF(ppb_file_io_request_os_file_handle),
 };
 
 const struct PPB_FileIO_1_1 ppb_file_io_interface_1_1 = {
