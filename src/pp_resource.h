@@ -91,6 +91,11 @@ enum pp_request_method_e {
     PP_METHOD_POST,
 };
 
+enum file_ref_type_e {
+    PP_FILE_REF_TYPE_NAME,
+    PP_FILE_REF_TYPE_FD,
+};
+
 struct pp_var_object_s {
     const struct PPP_Class_Deprecated *klass;
     void *data;
@@ -335,7 +340,8 @@ struct pp_tcp_socket_s {
 
 struct pp_file_ref_s {
     struct pp_resource_generic_s _;
-    FILE           *fp;
+    int                     fd;
+    enum file_ref_type_e    type;
 };
 
 struct pp_file_io_s {

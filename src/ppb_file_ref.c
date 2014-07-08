@@ -38,7 +38,8 @@ void
 ppb_file_ref_destroy(void *p)
 {
     struct pp_file_ref_s *fr = p;
-    fclose(fr->fp);
+    if (fr->type == PP_FILE_REF_TYPE_FD)
+        close(fr->fd);
 }
 
 PP_Bool

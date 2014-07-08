@@ -85,8 +85,8 @@ ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
     PP_Resource file_ref = pp_resource_allocate(PP_RESOURCE_FILE_REF, ri->_.instance);
     struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
 
-    fr->fp = fdopen(dup(fileno(ul->fp)), "rb");
-    fseek(fr->fp, 0, SEEK_SET);
+    fr->fd = dup(fileno(ul->fp));
+    fr->type = PP_FILE_REF_TYPE_FD;
 
     pp_resource_release(file_ref);
     pp_resource_release(ri->url_loader);
