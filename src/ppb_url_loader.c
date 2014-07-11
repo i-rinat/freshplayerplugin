@@ -311,10 +311,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
 
-    struct PP_Var rel_url = PP_MakeString(ul->redirect_url);
-    struct PP_Var full_url =
-        ppb_url_util_dev_resolve_relative_to_document(ul->_.instance, rel_url, NULL);
-    ppb_var_release(rel_url);
+    char *new_url = nullsafe_strdup(ul->redirect_url);
 
     free_and_nullify(ul, url);
     free_and_nullify(ul, redirect_url);
@@ -332,11 +329,10 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     }
 
     ul->fp = open_temporary_file_stream();
-    ul->url = strdup(ppb_var_var_to_utf8(full_url, NULL));
+    ul->url = new_url;
     ul->read_pos = 0;
     ul->method = PP_METHOD_GET;
     ul->ccb = callback;
-    ppb_var_release(full_url);
 
     struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
     comt_params->url =                              ul->url;

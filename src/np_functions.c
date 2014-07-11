@@ -275,7 +275,6 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         ul->np_stream = stream;
 
         // handling redirection
-        ul->redirect_url = nullsafe_strdup(hp_get_header_value(ph, "Location"));
         if (ph->http_code >= 300 && ph->http_code <= 307 && ul->redirect_url) {
             if (ul->follow_redirects) {
                 trace_info_f("       %s, redirecting to %s\n", __func__, ul->redirect_url);
@@ -1037,6 +1036,17 @@ NPP_URLRedirectNotify(NPP npp, const char *url, int32_t status, void *notifyData
 {
     trace_info_f("[NPP] {full} %s npp=%p, url=%s, status=%d, notifyData=%p\n", __func__,
                  npp, url, status, notifyData);
+
+    PP_Resource loader = (size_t)notifyData;
+    if (loader) {
+        struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+        if (ul) {
+            free_and_nullify(ul, redirect_url);
+            ul->redirect_url = strdup(url);
+            pp_resource_release(loader);
+        }
+    }
+
     // We are handling redirects ourselves. Tell browser to stop.
     npn.urlredirectresponse(npp, notifyData, false);
     return;
