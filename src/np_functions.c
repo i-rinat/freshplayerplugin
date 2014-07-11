@@ -53,6 +53,7 @@
 #include "ppb_core.h"
 #include "header_parser.h"
 #include "keycodeconvert.h"
+#include "eintr_retry.h"
 
 
 static
@@ -337,8 +338,8 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         struct url_loader_read_task_s *rt = llink->data;
         ul->read_tasks = g_list_delete_link(ul->read_tasks, llink);
 
-        fseek(ul->fp, ul->read_pos, SEEK_SET);
-        int32_t read_bytes = fread(rt->buffer, 1, rt->bytes_to_read, ul->fp);
+        lseek(ul->fd, ul->read_pos, SEEK_SET);
+        int32_t read_bytes = RETRY_ON_EINTR(read(ul->fd, rt->buffer, rt->bytes_to_read));
         ul->read_pos += read_bytes;
 
         pp_resource_release(loader);
@@ -351,7 +352,6 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
     if (ul && ul->stream_to_file) {
         struct PP_CompletionCallback ccb = ul->stream_to_file_ccb;
 
-        fflush(ul->fp);
         pp_resource_release(loader);
         if (ccb.func)
             ccb.func(ccb.user_data, PP_OK);
@@ -387,13 +387,13 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
             return -1;
     }
 
-    if (!ul->fp || len <= 0) {
+    if (ul->fd == -1 || len <= 0) {
         pp_resource_release(loader);
         return len;
     }
 
-    fseek(ul->fp, offset, SEEK_SET);
-    fwrite(buffer, len, 1, ul->fp);
+    lseek(ul->fd, offset, SEEK_SET);
+    RETRY_ON_EINTR(write(ul->fd, buffer, len));
 
     if (ul->read_tasks == NULL) {
         pp_resource_release(loader);
@@ -404,8 +404,8 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
     struct url_loader_read_task_s *rt = llink->data;
     ul->read_tasks = g_list_delete_link(ul->read_tasks, llink);
 
-    fseek(ul->fp, ul->read_pos, SEEK_SET);
-    int32_t read_bytes = fread(rt->buffer, 1, rt->bytes_to_read, ul->fp);
+    lseek(ul->fd, ul->read_pos, SEEK_SET);
+    int32_t read_bytes = RETRY_ON_EINTR(read(ul->fd, rt->buffer, rt->bytes_to_read));
     ul->read_pos += read_bytes;
 
     if (read_bytes > 0) {

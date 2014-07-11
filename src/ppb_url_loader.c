@@ -37,6 +37,7 @@
 #include "trace.h"
 #include "pp_resource.h"
 #include "tables.h"
+#include "eintr_retry.h"
 
 
 PP_Resource
@@ -48,6 +49,7 @@ ppb_url_loader_create(PP_Instance instance)
     // all fields are zeroed by default
     ul->response_size = -1;
     ul->method = PP_METHOD_GET;
+    ul->fd = -1;
 
     pp_resource_release(url_loader);
     return url_loader;
@@ -60,9 +62,9 @@ ppb_url_loader_destroy(void *p)
         return;
     struct pp_url_loader_s *ul = p;
 
-    if (ul->fp) {
-        fclose(ul->fp);
-        ul->fp = NULL;
+    if (ul->fd >= 0) {
+        close(ul->fd);
+        ul->fd = -1;
     }
     free_and_nullify(ul, headers);
     free_and_nullify(ul, url);
@@ -168,8 +170,8 @@ _url_loader_open_comt(void *user_data)
         pthread_barrier_wait(&comt_params->barrier);
 }
 
-FILE *
-open_temporary_file_stream(void)
+int
+open_temporary_file(void)
 {
     char *tmpfname;
     // TODO: make temp path configurable
@@ -177,8 +179,7 @@ open_temporary_file_stream(void)
     int fd = mkstemp(tmpfname);
     unlink(tmpfname);
     g_free(tmpfname);
-    FILE *fp = fdopen(fd, "wb+");
-    return fp;
+    return fd;
 }
 
 /// trim new line characters from the end of the string
@@ -249,7 +250,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
         memcpy(ul->post_data, ri->post_data, ri->post_len);
     }
 
-    ul->fp = open_temporary_file_stream();
+    ul->fd = open_temporary_file();
     ul->ccb = callback;
 
     ppb_var_release(full_url);
@@ -319,8 +320,10 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     free_and_nullify(ul, headers);
     free_and_nullify(ul, request_headers);
 
-    if (ul->fp)
-        fclose(ul->fp);
+    if (ul->fd >= 0) {
+        close(ul->fd);
+        ul->fd = -1;
+    }
 
     // abort further handling of the NPStream
     if (ul->np_stream) {
@@ -328,7 +331,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
         ul->np_stream = NULL;
     }
 
-    ul->fp = open_temporary_file_stream();
+    ul->fd = open_temporary_file();
     ul->url = new_url;
     ul->read_pos = 0;
     ul->method = PP_METHOD_GET;
@@ -400,9 +403,9 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
 
     *total_bytes_to_be_received = ul->response_size;
     *bytes_received = 0;
-    if (ul->fp) {
+    if (ul->fd >= 0) {
         struct stat sb;
-        if (fstat(fileno(ul->fp), &sb) != 0) {
+        if (fstat(ul->fd, &sb) != 0) {
             pp_resource_release(loader);
             *bytes_received = -1;
             return PP_FALSE;
@@ -435,9 +438,9 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     int read_bytes = 0;
 
-    if (ul->fp) {
-        fseek(ul->fp, ul->read_pos, SEEK_SET);
-        read_bytes = fread(buffer, 1, bytes_to_read, ul->fp);
+    if (ul->fd >= 0) {
+        lseek(ul->fd, ul->read_pos, SEEK_SET);
+        read_bytes = RETRY_ON_EINTR(read(ul->fd, buffer, bytes_to_read));
         ul->read_pos += read_bytes;
     }
 
@@ -483,9 +486,9 @@ ppb_url_loader_close(PP_Resource loader)
     if (!ul)
         return;
 
-    if (ul->fp) {
-        fclose(ul->fp);
-        ul->fp = NULL;
+    if (ul->fd >= 0) {
+        close(ul->fd);
+        ul->fd = -1;
     }
     free_and_nullify(ul, headers);
     free_and_nullify(ul, url);

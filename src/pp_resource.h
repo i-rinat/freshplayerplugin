@@ -147,7 +147,7 @@ struct pp_url_loader_s {
     char                   *status_line;    ///< HTTP/1.1 200 OK
     char                   *headers;        ///< response headers
     int                     http_code;      ///< HTTP response code
-    FILE                   *fp;             ///< file used to store response
+    int                     fd;             ///< file used to store response
     size_t                  read_pos;       ///< reading position
     enum pp_request_method_e method;        ///< GET/POST
     char                   *url;            ///< request URL
