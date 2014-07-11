@@ -43,7 +43,7 @@ ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
 
     ppb_core_call_on_main_thread_now(fio->_.instance, callback, PP_OK);
     pp_resource_release(file_io);
-    return PP_OK_COMPLETIONPENDING;
+    return PP_OK;
 }
 
 PP_Resource
@@ -82,6 +82,7 @@ ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
     switch (fr->type) {
     case PP_FILE_REF_TYPE_FD:
         fio->fd = dup(fr->fd);
+        lseek(fio->fd, 0, SEEK_SET);
         break;
     default:
         trace_error("%s, fr->type not implemented\n", __func__);
