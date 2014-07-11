@@ -50,12 +50,21 @@ PP_Resource
 ppb_file_io_create(PP_Instance instance)
 {
     PP_Resource file_io = pp_resource_allocate(PP_RESOURCE_FILE_IO, instance);
+    struct pp_file_io_s *fio = pp_resource_acquire(file_io, PP_RESOURCE_FILE_IO);
+
+    fio->fd = -1;
+
+    pp_resource_release(file_io);
     return file_io;
 }
 
 void
 ppb_file_io_destroy(void *p)
 {
+    struct pp_file_io_s *fio = p;
+
+    if (fio->fd >= 0)
+        close(fio->fd);
 }
 
 PP_Bool
