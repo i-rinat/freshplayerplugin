@@ -175,6 +175,10 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         goto err;
     }
 
+    // clear surface
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     g3d->sub_maps = g_hash_table_new(g_direct_hash, g_direct_equal);
     pthread_mutex_unlock(&pp_i->lock);
 
@@ -259,6 +263,10 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 
     // make new g3d->egl_surf current to current thread to release old_surf
     eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+
+    // clear surface
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     // destroy old egl surface and x pixmap
     eglDestroySurface(g3d->egl_dpy, old_surf);
