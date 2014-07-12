@@ -120,15 +120,8 @@ ppb_message_loop_run(PP_Resource message_loop)
             timeout = (task->when.tv_sec - now.tv_sec) * 1000 * 1000 +
                       (task->when.tv_nsec - now.tv_nsec) / 1000;
             if (timeout <= 0) {
-                int terminate = task->terminate;
                 // remove task from the queue
                 g_queue_pop_head(int_q);
-
-                if (terminate) {
-                    // TODO: decide what to do with remaining tasks
-                    g_slice_free(struct message_loop_task_s, task);
-                    break;
-                }
 
                 // run task
                 const struct PP_CompletionCallback ccb = task->ccb;
@@ -143,8 +136,15 @@ ppb_message_loop_run(PP_Resource message_loop)
         }
 
         task = g_async_queue_timeout_pop(ml->async_q, timeout);
-        if (task)
-            g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
+        if (task) {
+            if (task->terminate) {
+                // TODO: decide what to do with remaining tasks
+                g_slice_free(struct message_loop_task_s, task);
+                break;
+            } else {
+                g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
+            }
+        }
     }
 
     g_queue_free(int_q);
