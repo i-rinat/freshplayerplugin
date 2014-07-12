@@ -152,10 +152,33 @@ ppb_message_loop_run(PP_Resource message_loop)
 }
 
 int32_t
+ppb_message_loop_post_work_with_result(PP_Resource message_loop,
+                                       struct PP_CompletionCallback callback, int64_t delay_ms,
+                                       int32_t result_to_pass)
+{
+    struct message_loop_task_s *task = g_slice_alloc(sizeof(*task));
+
+    task->terminate = 0;
+    task->result_to_pass = result_to_pass;
+    task->ccb = callback;
+
+    // calculate absolute time callback should be run at
+    clock_gettime(CLOCK_REALTIME, &task->when);
+    task->when.tv_sec += delay_ms / 1000;
+    task->when.tv_nsec += (delay_ms % 1000) * 1000 * 1000;
+    while (task->when.tv_nsec >= 1000 * 1000 * 1000) {
+        task->when.tv_sec += 1;
+        task->when.tv_nsec -= 1000 * 1000 * 1000;
+    }
+
+    return PP_OK;
+}
+
+int32_t
 ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
                            int64_t delay_ms)
 {
-    return PP_ERROR_FAILED;
+    return ppb_message_loop_post_work_with_result(message_loop, callback, delay_ms, PP_OK);
 }
 
 int32_t
@@ -211,7 +234,7 @@ int32_t
 trace_ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
                                  int64_t delay_ms)
 {
-    trace_info("[PPB] {zilch} %s message_loop=%d, callback={.func=%p, .user_data=%p, .flags=%u}, "
+    trace_info("[PPB] {full} %s message_loop=%d, callback={.func=%p, .user_data=%p, .flags=%u}, "
                "delay_ms=%"PRId64"\n", __func__+6, message_loop, callback.func, callback.user_data,
                callback.flags, delay_ms);
     return ppb_message_loop_post_work(message_loop, callback, delay_ms);
@@ -232,6 +255,6 @@ const struct PPB_MessageLoop_1_0 ppb_message_loop_interface_1_0 = {
     .GetCurrent =            TWRAPZ(ppb_message_loop_get_current),
     .AttachToCurrentThread = TWRAPZ(ppb_message_loop_attach_to_current_thread),
     .Run =                   TWRAPF(ppb_message_loop_run),
-    .PostWork =              TWRAPZ(ppb_message_loop_post_work),
+    .PostWork =              TWRAPF(ppb_message_loop_post_work),
     .PostQuit =              TWRAPZ(ppb_message_loop_post_quit),
 };

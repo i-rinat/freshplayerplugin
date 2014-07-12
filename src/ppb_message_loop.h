@@ -47,6 +47,11 @@ int32_t
 ppb_message_loop_run(PP_Resource message_loop);
 
 int32_t
+ppb_message_loop_post_work_with_result(PP_Resource message_loop,
+                                       struct PP_CompletionCallback callback, int64_t delay_ms,
+                                       int32_t result_to_pass);
+
+int32_t
 ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
                            int64_t delay_ms);
 
