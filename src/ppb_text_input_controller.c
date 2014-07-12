@@ -60,7 +60,8 @@ trace_ppb_text_input_controller_set_text_input_type(PP_Instance instance, PP_Tex
 
 TRACE_WRAPPER
 void
-trace_ppb_text_input_controller_update_caret_position(PP_Instance instance, const struct PP_Rect *caret)
+trace_ppb_text_input_controller_update_caret_position(PP_Instance instance,
+                                                      const struct PP_Rect *caret)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
     return ppb_text_input_controller_update_caret_position(instance, caret);

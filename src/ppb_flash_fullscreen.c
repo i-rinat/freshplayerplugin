@@ -75,7 +75,7 @@ _update_instance_view_comt(void *p)
         }
         pp_resource_release(view);
 
-        pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
+        pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
         ppb_core_release_resource(view);
     }
 }

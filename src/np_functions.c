@@ -125,8 +125,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     }
 
     pp_i->is_fullframe = (mode == NP_FULL);
-    pp_i->pp_instance_id = generate_new_pp_instance_id();
-    tables_add_pp_instance(pp_i->pp_instance_id, pp_i);
+    pp_i->id = generate_new_pp_instance_id();
+    tables_add_pp_instance(pp_i->id, pp_i);
 
     pthread_mutex_init(&pp_i->lock, NULL);
     pp_i->dpy = XOpenDisplay(NULL);
@@ -162,12 +162,12 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     }
     pthread_mutex_unlock(&pp_i->lock);
 
-    pp_i->ppp_instance_1_1->DidCreate(pp_i->pp_instance_id, pp_i->argc, pp_i->argn, pp_i->argv);
+    pp_i->ppp_instance_1_1->DidCreate(pp_i->id, pp_i->argc, pp_i->argn, pp_i->argv);
     pp_i->instance_loaded = 1;
 
     if (mode == NP_FULL) {
-        PP_Resource request_info = ppb_url_request_info_create(pp_i->pp_instance_id);
-        PP_Resource url_loader = ppb_url_loader_create(pp_i->pp_instance_id);
+        PP_Resource request_info = ppb_url_request_info_create(pp_i->id);
+        PP_Resource url_loader = ppb_url_loader_create(pp_i->id);
 
         struct PP_Var s_url = PP_MakeString(pp_i->instance_url);
         struct PP_Var s_method = PP_MakeString("GET");
@@ -180,7 +180,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         ppb_var_release(s_method);
         ppb_core_release_resource(request_info);
 
-        pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->pp_instance_id, url_loader);
+        pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->id, url_loader);
     }
 
     return NPERR_NO_ERROR;
@@ -196,7 +196,7 @@ NPP_Destroy(NPP npp, NPSavedData **save)
         return NPERR_NO_ERROR;
 
     struct pp_instance_s *pp_i = npp->pdata;
-    pp_i->ppp_instance_1_1->DidDestroy(pp_i->pp_instance_id);
+    pp_i->ppp_instance_1_1->DidDestroy(pp_i->id);
     if (save)
         *save = NULL;
     return NPERR_NO_ERROR;
@@ -228,7 +228,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
             v->rect.size.height = window->height;
             pp_resource_release(view);
 
-            pp_i->ppp_instance_1_1->DidChangeView(pp_i->pp_instance_id, view);
+            pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
             ppb_core_release_resource(view);
         }
     }
@@ -607,10 +607,10 @@ handle_enter_leave_event(NPP npp, void *event)
     PP_InputEvent_Type event_type = (ev->type == EnterNotify) ? PP_INPUTEVENT_TYPE_MOUSEENTER
                                                               : PP_INPUTEVENT_TYPE_MOUSELEAVE;
     PP_Resource pp_event;
-    pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
+    pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,
                                             ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
                                             &mouse_position, 0, &zero_point);
-    PP_Bool ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+    PP_Bool ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
     ppb_core_release_resource(pp_event);
 
     // return false only if handler returns PP_FALSE and event is filtered
@@ -641,10 +641,10 @@ handle_motion_event(NPP npp, void *event)
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
     PP_Resource pp_event;
 
-    pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
+    pp_event = ppb_mouse_input_event_create(pp_i->id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
                                             ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
                                             &mouse_position, 0, &zero_point);
-    PP_Bool ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+    PP_Bool ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
     ppb_core_release_resource(pp_event);
 
     // return false only if handler returns PP_FALSE and event is filtered
@@ -730,21 +730,21 @@ handle_button_press_release_event(NPP npp, void *event)
 
         event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
                                                : PP_INPUTEVENT_TYPE_MOUSEUP;
-        pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id, event_type,
+        pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,
                                                 ev->time/1.0e6, mod, mouse_button,
                                                 &mouse_position, 1, &zero_point);
 
-        ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+        ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
         handled = handled || ret;
         ppb_core_release_resource(pp_event);
 
         // context menu event
         if (ev->type == ButtonRelease && ev_button == 3) {
-            pp_event = ppb_mouse_input_event_create(pp_i->pp_instance_id,
+            pp_event = ppb_mouse_input_event_create(pp_i->id,
                                                     PP_INPUTEVENT_TYPE_CONTEXTMENU,
                                                     ev->time/1.0e6, mod, mouse_button,
                                                     &mouse_position, 1, &zero_point);
-            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
             handled = handled || ret;
             ppb_core_release_resource(pp_event);
         }
@@ -755,7 +755,7 @@ handle_button_press_release_event(NPP npp, void *event)
         struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
 
         // pp_event = ppb_wheel_input_event_create(
-        //                 pp_i->pp_instance_id, ev->time/1.0e6, mod,
+        //                 pp_i->id, ev->time/1.0e6, mod,
         //                 &wheel_delta, &wheel_ticks, PP_FALSE);
         (void)wheel_delta;
         (void)wheel_ticks;
@@ -803,17 +803,17 @@ handle_key_press_release_event(NPP npp, void *event)
     if (ev->type == KeyPress && charcount > 0) {
         struct PP_Var character_text = PP_MakeStringN(buffer, charcount);
         pp_event = ppb_keyboard_input_event_create(
-                        pp_i->pp_instance_id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
+                        pp_i->id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
                         pp_keycode, character_text);
         ppb_var_release(character_text);
 
-        pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+        pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
         ppb_core_release_resource(pp_event);
     }
 
-    pp_event = ppb_keyboard_input_event_create(pp_i->pp_instance_id, event_type, ev->time/1.0e6,
+    pp_event = ppb_keyboard_input_event_create(pp_i->id, event_type, ev->time/1.0e6,
                                                mod, pp_keycode, PP_MakeUndefined());
-    ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->pp_instance_id, pp_event);
+    ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
     ppb_core_release_resource(pp_event);
 
     // return false only if handler returns PP_FALSE and event is filtered
@@ -833,7 +833,7 @@ handle_focus_in_out_event(NPP npp, void *event)
     PP_Bool has_focus = (ev->type == FocusIn) ? PP_TRUE : PP_FALSE;
 
     if (pp_i->ppp_instance_1_1 && pp_i->ppp_instance_1_1->DidChangeFocus)
-        pp_i->ppp_instance_1_1->DidChangeFocus(pp_i->pp_instance_id, has_focus);
+        pp_i->ppp_instance_1_1->DidChangeFocus(pp_i->id, has_focus);
 
     return 1;
 }
@@ -968,7 +968,7 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
                 break;
             }
 
-            struct PP_Var ppobj = ppp_instance_private->GetInstanceObject(pp_i->pp_instance_id);
+            struct PP_Var ppobj = ppp_instance_private->GetInstanceObject(pp_i->id);
             NPVariant np_var = pp_var_to_np_variant(ppobj);
             ppb_var_release(ppobj);
 

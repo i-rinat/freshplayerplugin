@@ -112,7 +112,7 @@ struct pp_instance_s {
     uint32_t        event_mask;
     uint32_t        filtered_event_mask;
     Window          wnd;
-    PP_Instance     pp_instance_id;
+    PP_Instance     id;
     NPP             npp;
     uint32_t        is_fullframe;
     uint32_t        is_fullscreen;

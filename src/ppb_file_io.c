@@ -277,7 +277,8 @@ trace_ppb_file_io_close(PP_Resource file_io)
 TRACE_WRAPPER
 int32_t
 trace_ppb_file_io_read_to_array(PP_Resource file_io, int64_t offset, int32_t max_read_length,
-                                struct PP_ArrayOutput *output, struct PP_CompletionCallback callback)
+                                struct PP_ArrayOutput *output,
+                                struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s file_io=%d, offset=%"PRId64", max_read_length=%d, "
                "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, file_io, offset,

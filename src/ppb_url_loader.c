@@ -220,8 +220,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
         full_url = PP_MakeString(ri->url);
     } else {
         struct PP_Var rel_url = PP_MakeString(ri->url);
-        full_url = ppb_url_util_dev_resolve_relative_to_document(ul->instance->pp_instance_id,
-                                                                 rel_url, NULL);
+        full_url = ppb_url_util_dev_resolve_relative_to_document(ul->instance->id, rel_url, NULL);
         ppb_var_release(rel_url);
     }
 
