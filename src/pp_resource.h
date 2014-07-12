@@ -204,7 +204,8 @@ struct pp_url_request_info_s {
 
 struct pp_url_response_info_s {
     struct pp_resource_generic_s _;
-    PP_Resource     url_loader;
+    PP_Resource                 url_loader_id;
+    struct pp_url_loader_s     *url_loader;
 };
 
 struct pp_view_s {

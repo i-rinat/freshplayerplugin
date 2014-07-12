@@ -34,6 +34,7 @@
 #include "ppb_image_data.h"
 #include "ppb_url_loader.h"
 #include "ppb_url_request_info.h"
+#include "ppb_url_response_info.h"
 #include "ppb_browser_font_trusted.h"
 #include "ppb_audio_config.h"
 #include "ppb_audio.h"
@@ -47,8 +48,6 @@
 #include "ppb_file_ref.h"
 #include "ppb_file_io.h"
 
-
-#define FREE_IF_NOT_NULL(ptr)   if (ptr) { free(ptr); ptr = NULL; }
 
 static GHashTable      *res_tbl;
 static int              res_tbl_next = 0;
@@ -166,7 +165,6 @@ _count_resources(gpointer key, gpointer value, gpointer user_data)
 void
 pp_resource_unref(PP_Resource resource)
 {
-    PP_Resource parent = 0;
     int ref_cnt = 0;
 
     pthread_mutex_lock(&res_tbl_lock);
@@ -184,7 +182,7 @@ pp_resource_unref(PP_Resource resource)
             ppb_url_loader_destroy(ptr);
             break;
         case PP_RESOURCE_URL_RESPONSE_INFO:
-            parent = ((struct pp_url_response_info_s *)ptr)->url_loader;
+            ppb_url_response_info_destroy(ptr);
             break;
         case PP_RESOURCE_URL_REQUEST_INFO:
             ppb_url_request_info_destroy(ptr);
@@ -239,11 +237,8 @@ pp_resource_unref(PP_Resource resource)
         }
     }
 
-    if (ref_cnt <= 0) {
+    if (ref_cnt <= 0)
         pp_resource_expunge(resource);
-        if (parent)
-            pp_resource_unref(parent);
-    }
 
     if (config.quirks.dump_resource_histogram) {
         time_t current_time = time(NULL);

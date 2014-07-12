@@ -38,12 +38,21 @@ ppb_url_response_info_is_url_response_info(PP_Resource resource)
     return pp_resource_get_type(resource) == PP_RESOURCE_URL_RESPONSE_INFO;
 }
 
+void
+ppb_url_response_info_destroy(void *p)
+{
+    struct pp_url_response_info_s *ri = p;
+    pp_resource_unref(ri->url_loader_id);
+}
+
 struct PP_Var
 ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
-    struct PP_Var var = PP_MakeUndefined();
     struct pp_url_response_info_s *ri = pp_resource_acquire(response,PP_RESOURCE_URL_RESPONSE_INFO);
-    struct pp_url_loader_s *ul = pp_resource_acquire(ri->url_loader, PP_RESOURCE_URL_LOADER);
+    if (!ri)
+        return PP_MakeUndefined();
+    struct pp_url_loader_s *ul = ri->url_loader;
+    struct PP_Var var = PP_MakeUndefined();
 
     switch (property) {
     case PP_URLRESPONSEPROPERTY_URL:
@@ -69,7 +78,6 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
         break;
     }
 
-    pp_resource_release(ri->url_loader);
     pp_resource_release(response);
     return var;
 }
@@ -80,7 +88,7 @@ ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
     struct pp_url_response_info_s *ri = pp_resource_acquire(response,PP_RESOURCE_URL_RESPONSE_INFO);
     if (!ri)
         return 0;
-    struct pp_url_loader_s *ul = pp_resource_acquire(ri->url_loader, PP_RESOURCE_URL_LOADER);
+    struct pp_url_loader_s *ul = ri->url_loader;
 
     PP_Resource file_ref = pp_resource_allocate(PP_RESOURCE_FILE_REF, ri->_.instance);
     struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
@@ -89,7 +97,6 @@ ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
     fr->type = PP_FILE_REF_TYPE_FD;
 
     pp_resource_release(file_ref);
-    pp_resource_release(ri->url_loader);
     pp_resource_release(response);
 
     return file_ref;
