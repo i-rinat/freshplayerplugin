@@ -184,7 +184,15 @@ ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallbac
 int32_t
 ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
 {
-    return PP_ERROR_FAILED;
+    struct message_loop_task_s *task = g_slice_alloc(sizeof(*task));
+
+    task->terminate = 1;
+    task->result_to_pass = PP_OK;
+    task->ccb = PP_MakeCompletionCallback(NULL, NULL);
+
+    clock_gettime(CLOCK_REALTIME, &task->when); // run as early as possible
+
+    return PP_OK;
 }
 
 
@@ -244,7 +252,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
 {
-    trace_info("[PPB] {zilch} %s message_loop=%d, should_destroy=%d\n", __func__+6,
+    trace_info("[PPB] {full} %s message_loop=%d, should_destroy=%d\n", __func__+6,
                message_loop, should_destroy);
     return ppb_message_loop_post_quit(message_loop, should_destroy);
 }
@@ -256,5 +264,5 @@ const struct PPB_MessageLoop_1_0 ppb_message_loop_interface_1_0 = {
     .AttachToCurrentThread = TWRAPZ(ppb_message_loop_attach_to_current_thread),
     .Run =                   TWRAPF(ppb_message_loop_run),
     .PostWork =              TWRAPF(ppb_message_loop_post_work),
-    .PostQuit =              TWRAPZ(ppb_message_loop_post_quit),
+    .PostQuit =              TWRAPF(ppb_message_loop_post_quit),
 };
