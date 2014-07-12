@@ -47,6 +47,7 @@
 #include "ppb_tcp_socket_private.h"
 #include "ppb_file_ref.h"
 #include "ppb_file_io.h"
+#include "ppb_message_loop.h"
 
 
 static GHashTable      *res_tbl;
@@ -231,6 +232,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_FILE_IO:
             ppb_file_io_destroy(ptr);
+            break;
+        case PP_RESOURCE_MESSAGE_LOOP:
+            ppb_message_loop_destroy(ptr);
             break;
         default:
             break;

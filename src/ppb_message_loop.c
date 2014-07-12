@@ -25,13 +25,31 @@
 #include "ppb_message_loop.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include "trace.h"
+#include "tables.h"
+#include "pp_resource.h"
 
 
 PP_Resource
 ppb_message_loop_create(PP_Instance instance)
 {
-    return 0;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+
+    PP_Resource message_loop = pp_resource_allocate(PP_RESOURCE_MESSAGE_LOOP, pp_i);
+    struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
+
+    (void)ml;
+
+    pp_resource_release(message_loop);
+    return message_loop;
+}
+
+void
+ppb_message_loop_destroy(void *p)
+{
 }
 
 PP_Resource
@@ -77,7 +95,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_message_loop_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_message_loop_create(instance);
 }
 
@@ -101,7 +119,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_message_loop_attach_to_current_thread(PP_Resource message_loop)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s message_loop=%d\n", __func__+6, message_loop);
     return ppb_message_loop_attach_to_current_thread(message_loop);
 }
 
@@ -109,7 +127,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_message_loop_run(PP_Resource message_loop)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s message_loop=%d\n", __func__+6, message_loop);
     return ppb_message_loop_run(message_loop);
 }
 
@@ -118,7 +136,9 @@ int32_t
 trace_ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
                                  int64_t delay_ms)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s message_loop=%d, callback={.func=%p, .user_data=%p, .flags=%u}, "
+               "delay_ms=%"PRId64"\n", __func__+6, message_loop, callback.func, callback.user_data,
+               callback.flags, delay_ms);
     return ppb_message_loop_post_work(message_loop, callback, delay_ms);
 }
 
@@ -126,12 +146,13 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s message_loop=%d, should_destroy=%d\n", __func__+6,
+               message_loop, should_destroy);
     return ppb_message_loop_post_quit(message_loop, should_destroy);
 }
 
 const struct PPB_MessageLoop_1_0 ppb_message_loop_interface_1_0 = {
-    .Create =                TWRAPZ(ppb_message_loop_create),
+    .Create =                TWRAPF(ppb_message_loop_create),
     .GetForMainThread =      TWRAPZ(ppb_message_loop_get_for_main_thread),
     .GetCurrent =            TWRAPZ(ppb_message_loop_get_current),
     .AttachToCurrentThread = TWRAPZ(ppb_message_loop_attach_to_current_thread),
