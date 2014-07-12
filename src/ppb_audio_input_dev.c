@@ -28,12 +28,16 @@
 #include "ppb_core.h"
 #include "pp_resource.h"
 #include "trace.h"
+#include "tables.h"
 
 
 PP_Resource
 ppb_audio_input_dev_create(PP_Instance instance)
 {
-    PP_Resource audio_input = pp_resource_allocate(PP_RESOURCE_AUDIO_INPUT, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource audio_input = pp_resource_allocate(PP_RESOURCE_AUDIO_INPUT, pp_i);
     return audio_input;
 }
 

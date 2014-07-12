@@ -29,6 +29,7 @@
 #include <inttypes.h>
 #include <ctype.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
 #include "ppb_var.h"
@@ -37,7 +38,10 @@
 PP_Resource
 ppb_url_request_info_create(PP_Instance instance)
 {
-    PP_Resource request_info = pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource request_info = pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO, pp_i);
     struct pp_url_request_info_s *ri =
                             pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
 

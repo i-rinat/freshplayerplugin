@@ -177,10 +177,9 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
 }
 
 void
-ppb_core_call_on_main_thread_now(PP_Instance instance, struct PP_CompletionCallback callback,
+ppb_core_call_on_main_thread_now(struct pp_instance_s *pp_i, struct PP_CompletionCallback callback,
                                  int32_t result)
 {
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     struct comt_task_s *task = g_slice_alloc(sizeof(*task));
 
     task->callback = callback;

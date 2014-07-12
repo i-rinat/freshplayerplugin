@@ -43,7 +43,10 @@
 PP_Resource
 ppb_url_loader_create(PP_Instance instance)
 {
-    PP_Resource url_loader = pp_resource_allocate(PP_RESOURCE_URL_LOADER, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource url_loader = pp_resource_allocate(PP_RESOURCE_URL_LOADER, pp_i);
     struct pp_url_loader_s *ul = pp_resource_acquire(url_loader, PP_RESOURCE_URL_LOADER);
 
     // all fields are zeroed by default
@@ -84,7 +87,7 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
 struct comt_param_s {
     const char                 *url;
     PP_Resource                 loader;
-    PP_Instance                 instance;
+    struct pp_instance_s       *instance;
     enum pp_request_method_e    method;
     const char                 *request_headers;
     const char                 *custom_referrer_url;
@@ -103,7 +106,7 @@ void
 _url_loader_open_comt(void *user_data)
 {
     struct comt_param_s *comt_params = user_data;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(comt_params->instance);
+    struct pp_instance_s *pp_i = comt_params->instance;
 
     // called on main thread
     if (comt_params->method == PP_METHOD_POST) {
@@ -217,7 +220,8 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
         full_url = PP_MakeString(ri->url);
     } else {
         struct PP_Var rel_url = PP_MakeString(ri->url);
-        full_url = ppb_url_util_dev_resolve_relative_to_document(ul->instance, rel_url, NULL);
+        full_url = ppb_url_util_dev_resolve_relative_to_document(ul->instance->pp_instance_id,
+                                                                 rel_url, NULL);
         ppb_var_release(rel_url);
     }
 
@@ -269,7 +273,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     comt_params->post_len =                         ul->post_len;
     comt_params->post_data =                        ul->post_data;
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(ul->instance);
+    struct pp_instance_s *pp_i = ul->instance;
     if (ppb_core_is_main_thread()) {
         comt_params->should_wait = 0;
         _url_loader_open_comt(comt_params);
@@ -350,7 +354,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     comt_params->post_len =                         0;
     comt_params->post_data =                        NULL;
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(ul->instance);
+    struct pp_instance_s *pp_i = ul->instance;
     if (ppb_core_is_main_thread()) {
         comt_params->should_wait = 0;
         _url_loader_open_comt(comt_params);

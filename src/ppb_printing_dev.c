@@ -25,12 +25,16 @@
 #include "ppb_printing_dev.h"
 #include "pp_resource.h"
 #include "trace.h"
+#include "tables.h"
 
 
 PP_Resource
 ppb_printing_dev_create(PP_Instance instance)
 {
-    PP_Resource printing = pp_resource_allocate(PP_RESOURCE_PRINTING, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource printing = pp_resource_allocate(PP_RESOURCE_PRINTING, pp_i);
     return printing;
 }
 

@@ -2,14 +2,17 @@
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
-
 
 
 PP_Resource
 ppb_flash_message_loop_create(PP_Instance instance)
 {
-    PP_Resource message_loop = pp_resource_allocate(PP_RESOURCE_FLASH_MESSAGE_LOOP, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource message_loop = pp_resource_allocate(PP_RESOURCE_FLASH_MESSAGE_LOOP, pp_i);
     struct pp_flash_message_loop_s *fml =
                         pp_resource_acquire(message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
 

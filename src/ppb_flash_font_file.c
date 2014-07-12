@@ -37,7 +37,10 @@ ppb_flash_font_file_create(PP_Instance instance,
                            const struct PP_BrowserFont_Trusted_Description *description,
                            PP_PrivateFontCharset charset)
 {
-    PP_Resource font_file = pp_resource_allocate(PP_RESOURCE_FLASH_FONT_FILE, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource font_file = pp_resource_allocate(PP_RESOURCE_FLASH_FONT_FILE, pp_i);
     struct pp_flash_font_file_s *fff = pp_resource_acquire(font_file, PP_RESOURCE_FLASH_FONT_FILE);
     PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
 

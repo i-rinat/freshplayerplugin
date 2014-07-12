@@ -45,7 +45,10 @@ struct g2d_paint_task_s {
 PP_Resource
 ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque)
 {
-    PP_Resource graphics_2d = pp_resource_allocate(PP_RESOURCE_GRAPHICS2D, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource graphics_2d = pp_resource_allocate(PP_RESOURCE_GRAPHICS2D, pp_i);
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
     if (!g2d) {
         trace_warning("%s, can't create graphics2d resource\n", __func__);
@@ -164,7 +167,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         return PP_ERROR_BADRESOURCE;
     }
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(g2d->instance);
+    struct pp_instance_s *pp_i = g2d->instance;
 
     while (g2d->task_list) {
         GList *link = g_list_first(g2d->task_list);
@@ -254,7 +257,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     }
 
     if (callback.func) {
-        ppb_core_call_on_main_thread_now(pp_i->pp_instance_id, callback, PP_OK);
+        ppb_core_call_on_main_thread_now(pp_i, callback, PP_OK);
         return PP_OK_COMPLETIONPENDING;
     }
 

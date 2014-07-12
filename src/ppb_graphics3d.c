@@ -50,7 +50,7 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         return 0;
     }
 
-    PP_Resource context = pp_resource_allocate(PP_RESOURCE_GRAPHICS3D, instance);
+    PP_Resource context = pp_resource_allocate(PP_RESOURCE_GRAPHICS3D, pp_i);
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d) {
         trace_error("%s, can't create context\n", __func__);
@@ -195,7 +195,7 @@ void
 ppb_graphics3d_destroy(void *p)
 {
     struct pp_graphics3d_s *g3d = p;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->instance);
+    struct pp_instance_s *pp_i = g3d->instance;
     g_hash_table_destroy(g3d->sub_maps);
 
     pthread_mutex_lock(&pp_i->lock);
@@ -245,7 +245,7 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d)
         return PP_ERROR_BADRESOURCE;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->instance);
+    struct pp_instance_s *pp_i = g3d->instance;
 
     g3d->width = width;
     g3d->height = height;
@@ -284,7 +284,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     if (!g3d)
         return PP_ERROR_BADRESOURCE;
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->instance);
+    struct pp_instance_s *pp_i = g3d->instance;
 
     if (pp_i->graphics != context) {
         // Other context bound, do nothing.
@@ -312,7 +312,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     pp_resource_release(context);
 
     if (callback.func) {
-        ppb_core_call_on_main_thread_now(pp_i->pp_instance_id, callback, PP_OK);
+        ppb_core_call_on_main_thread_now(pp_i, callback, PP_OK);
         return PP_OK_COMPLETIONPENDING;
     }
 

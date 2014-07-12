@@ -63,7 +63,7 @@ pp_resource_constructor(void)
 }
 
 PP_Resource
-pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
+pp_resource_allocate(enum pp_resource_type_e type, struct pp_instance_s *instance)
 {
     struct pp_resource_generic_s *res = g_slice_alloc0(sizeof(union pp_largest_u));
     res->resource_type = type;

@@ -25,6 +25,7 @@
 #include "ppb_audio_config.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 
 
@@ -45,7 +46,10 @@ PP_Resource
 ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                       uint32_t sample_frame_count)
 {
-    PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, pp_i);
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
 
     ac->sample_rate = sample_rate;

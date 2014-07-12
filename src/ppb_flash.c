@@ -149,10 +149,9 @@ ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_us
         pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
     if (!ri)
         return PP_ERROR_BADRESOURCE;
-    PP_Instance instance = ri->instance;
     pp_resource_release(request_info);
 
-    PP_Resource url_loader = ppb_url_loader_create(instance);
+    PP_Resource url_loader = ppb_url_loader_create(ri->instance->pp_instance_id);
     int32_t result = ppb_url_loader_open_target(url_loader, request_info,
                                                 PP_MakeCompletionCallback(nop_callback, NULL),
                                                 target);

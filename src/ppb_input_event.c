@@ -110,7 +110,10 @@ ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type, PP_T
                              const struct PP_Point *mouse_position, int32_t click_count,
                              const struct PP_Point *mouse_movement)
 {
-    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, pp_i);
     struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
     if (!ie)
         return 0;
@@ -199,7 +202,10 @@ ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp, uint
                              const struct PP_FloatPoint *wheel_delta,
                              const struct PP_FloatPoint *wheel_ticks, PP_Bool scroll_by_page)
 {
-    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, pp_i);
     struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
     if (!ie)
         return 0;
@@ -280,7 +286,10 @@ ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                 PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
                                 struct PP_Var character_text)
 {
-    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, pp_i);
     struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
     if (!ie)
         return 0;

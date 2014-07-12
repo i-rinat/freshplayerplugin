@@ -193,6 +193,8 @@ struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return PP_MakeUndefined();
 
     struct PP_Var result = PP_MakeString("");
     NPIdentifier location_id = npn.getstringidentifier("location");
@@ -241,6 +243,9 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return PP_MakeUndefined();
+
     struct PP_Var var = PP_MakeString(pp_i->instance_url);
 
     if (components)

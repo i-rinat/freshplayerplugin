@@ -31,15 +31,18 @@
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
+    PP_Bool retval;
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
-        trace_warning("%s, pp_i is NULL\n", __func__);
+        trace_warning("%s, wrong instance\n", __func__);
         return PP_FALSE;
     }
 
     if (device == 0) {
         // unbind
+        pthread_mutex_lock(&pp_i->lock);
         pp_i->graphics = 0;
+        pthread_mutex_unlock(&pp_i->lock);
         return PP_TRUE;
     }
 
@@ -47,27 +50,49 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
     struct pp_graphics3d_s *g3d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS3D);
 
     if (g2d) {
-        g2d->instance = instance;
+        if (pp_i != g2d->instance) {
+            retval = PP_FALSE;
+            goto done;
+        }
+
+        pthread_mutex_lock(&pp_i->lock);
         pp_i->graphics = device;
-        pp_resource_release(device);
-        return PP_TRUE;
+        pthread_mutex_unlock(&pp_i->lock);
+        retval = PP_TRUE;
     } else if (g3d) {
+        if (pp_i != g3d->instance) {
+            retval = PP_FALSE;
+            goto done;
+        }
+
+        pthread_mutex_lock(&pp_i->lock);
         pp_i->graphics = device;
+        pthread_mutex_unlock(&pp_i->lock);
         pp_resource_release(device);
-        return PP_TRUE;
+        retval = PP_TRUE;
     } else {
         trace_warning("%s, unsupported graphics resource %d on instance %d\n", __func__,
                       device, instance);
-        return PP_FALSE;
+        retval = PP_FALSE;
     }
+
+done:
+    pp_resource_release(device);
+    return retval;
 }
 
 PP_Bool
 ppb_instance_is_full_frame(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return PP_FALSE;
 
-    if (pp_i->is_fullframe)
+    pthread_mutex_lock(&pp_i->lock);
+    int is_fullframe = pp_i->is_fullframe;
+    pthread_mutex_unlock(&pp_i->lock);
+
+    if (is_fullframe)
         return PP_TRUE;
     else
         return PP_FALSE;

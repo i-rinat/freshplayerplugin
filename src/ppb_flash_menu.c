@@ -25,6 +25,7 @@
 #include "ppb_flash_menu.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 #include <ppapi/c/pp_errors.h>
 #include <gtk/gtk.h>
@@ -109,7 +110,10 @@ convert_menu(const struct PP_Flash_Menu *pp_menu)
 PP_Resource
 ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_data)
 {
-    PP_Resource flash_menu = pp_resource_allocate(PP_RESOURCE_FLASH_MENU, instance_id);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance_id);
+    if (!pp_i)
+        return 0;
+    PP_Resource flash_menu = pp_resource_allocate(PP_RESOURCE_FLASH_MENU, pp_i);
     struct pp_flash_menu_s *fm = pp_resource_acquire(flash_menu, PP_RESOURCE_FLASH_MENU);
 
     // recursively construct menu

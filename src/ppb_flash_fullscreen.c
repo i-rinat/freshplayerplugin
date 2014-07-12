@@ -42,8 +42,8 @@ struct handle_event_comt_param_s {
 };
 
 struct thread_param_s {
-    PP_Instance         instance;
-    pthread_barrier_t   startup_barrier;
+    struct pp_instance_s   *pp_i;
+    pthread_barrier_t       startup_barrier;
 };
 
 
@@ -59,11 +59,10 @@ static
 void
 _update_instance_view_comt(void *p)
 {
-    PP_Instance instance = (size_t)p;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    struct pp_instance_s *pp_i = p;
 
     if (pp_i->instance_loaded) {
-        PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i->pp_instance_id);
+        PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
         struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
         v->rect.point.x = 0;
         v->rect.point.y = 0;
@@ -97,7 +96,7 @@ fullscreen_window_thread(void *p)
 {
     struct thread_param_s *tp = p;
     Display *dpy = XOpenDisplay(NULL);
-    struct pp_instance_s *pp_i = tables_get_pp_instance(tp->instance);
+    struct pp_instance_s *pp_i = tp->pp_i;
 
     pp_i->fs_wnd = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy),
                                        0, 0, pp_i->fs_width, pp_i->fs_height, 0, 0, 0x809080);
@@ -134,7 +133,7 @@ fullscreen_window_thread(void *p)
     pthread_barrier_wait(&tp->startup_barrier);
     pthread_barrier_destroy(&tp->startup_barrier);
 
-    npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, (void*)(size_t)tp->instance);
+    npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, pp_i);
 
     while (1) {
         XEvent ev;
@@ -167,7 +166,7 @@ quit_and_destroy_fs_wnd:
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
 
-    npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, (void*)(size_t)tp->instance);
+    npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, pp_i);
     g_slice_free(struct thread_param_s, tp);
     return NULL;
 }
@@ -185,12 +184,10 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 
     if (fullscreen) {
         struct thread_param_s *tparams = g_slice_alloc(sizeof(*tparams));
-        tparams->instance = instance;
+        tparams->pp_i = pp_i;
 
         pthread_barrier_init(&tparams->startup_barrier, NULL, 2);
-
         pthread_create(&pp_i->fs_thread, NULL, fullscreen_window_thread, tparams);
-
         pthread_barrier_wait(&tparams->startup_barrier);
     } else {
         pthread_mutex_lock(&pp_i->lock);

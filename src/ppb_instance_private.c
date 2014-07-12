@@ -35,13 +35,12 @@ struct PP_Var
 ppb_instance_private_get_window_object(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    NPObject *np_window_obj;
-
     if (!pp_i) {
         trace_error("%s, wrong instance %d\n", __func__, instance);
         return PP_MakeUndefined();
     }
 
+    NPObject *np_window_obj;
     NPError err = npn.getvalue(pp_i->npp, NPNVWindowNPObject, &np_window_obj);
     if (err != NPERR_NO_ERROR) {
         trace_error("%s, NPN_GetValue returned %d\n", __func__, err);
@@ -105,14 +104,14 @@ struct PP_Var
 ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
                                     struct PP_Var *exception)
 {
-    struct pp_instance_s *pp_i;
-
     if (script.type != PP_VARTYPE_STRING) {
         // TODO: fill exception
         return PP_MakeUndefined();
     }
 
-    pp_i = tables_get_pp_instance(instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return PP_MakeUndefined();
 
     struct execute_script_param_s *esp = calloc(1, sizeof(*esp));
     esp->script = script;

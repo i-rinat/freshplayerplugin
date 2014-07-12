@@ -27,6 +27,7 @@
 #include <ppapi/c/pp_errors.h>
 #include <inttypes.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 #include "ppb_core.h"
 
@@ -49,7 +50,10 @@ ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
 PP_Resource
 ppb_file_io_create(PP_Instance instance)
 {
-    PP_Resource file_io = pp_resource_allocate(PP_RESOURCE_FILE_IO, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource file_io = pp_resource_allocate(PP_RESOURCE_FILE_IO, pp_i);
     struct pp_file_io_s *fio = pp_resource_acquire(file_io, PP_RESOURCE_FILE_IO);
 
     fio->fd = -1;

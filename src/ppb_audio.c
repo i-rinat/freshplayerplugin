@@ -36,7 +36,10 @@ PP_Resource
 ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
                  PPB_Audio_Callback_1_0 audio_callback, void *user_data)
 {
-    PP_Resource audio = pp_resource_allocate(PP_RESOURCE_AUDIO, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource audio = pp_resource_allocate(PP_RESOURCE_AUDIO, pp_i);
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
     if (!a)
         return 0;

@@ -34,10 +34,10 @@
 
 
 struct comt_param_s {
-    PP_Instance         instance;
-    pthread_barrier_t  *barrier;
-    int                 wait;
-    int                 xtype;
+    struct pp_instance_s   *pp_i;
+    pthread_barrier_t      *barrier;
+    int                     wait;
+    int                     xtype;
 };
 
 void
@@ -46,8 +46,7 @@ _set_cursor_comt(void *user_data)
     Window wnd;
     Cursor cursor;
     struct comt_param_s *params = user_data;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance);
-
+    struct pp_instance_s *pp_i = params->pp_i;
 
     pthread_mutex_lock(&pp_i->lock);
     cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
@@ -208,24 +207,27 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
         break;
     }
 
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return PP_FALSE;
     struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
 
-    comt_params->instance = instance;
+    comt_params->pp_i     = pp_i;
     comt_params->xtype =    xtype;
 
     if (ppb_core_is_main_thread()) {
         comt_params->wait = 0;
         _set_cursor_comt(comt_params);
     } else {
-        struct pp_instance_s *pp_i;
         pthread_barrier_t barrier;
 
         pthread_barrier_init(&barrier, NULL, 2);
         comt_params->wait = 1;
         comt_params->barrier = &barrier;
 
-        pp_i = tables_get_pp_instance(instance);
+        pthread_mutex_lock(&pp_i->lock);
         npn.pluginthreadasynccall(pp_i->npp, _set_cursor_comt, comt_params);
+        pthread_mutex_unlock(&pp_i->lock);
         pthread_barrier_wait(&barrier);
         pthread_barrier_destroy(&barrier);
     }

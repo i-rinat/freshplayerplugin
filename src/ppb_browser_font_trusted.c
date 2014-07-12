@@ -41,7 +41,10 @@ PP_Resource
 ppb_browser_font_trusted_create(PP_Instance instance,
                                 const struct PP_BrowserFont_Trusted_Description *description)
 {
-    PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, pp_i);
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
     PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
 

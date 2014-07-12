@@ -29,6 +29,7 @@
 #include <ppapi/c/pp_errors.h>
 #include "ppb_core.h"
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 #include "async_network.h"
 
@@ -36,7 +37,10 @@
 PP_Resource
 ppb_tcp_socket_private_create(PP_Instance instance)
 {
-    PP_Resource tcp_socket = pp_resource_allocate(PP_RESOURCE_TCP_SOCKET, instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return 0;
+    PP_Resource tcp_socket = pp_resource_allocate(PP_RESOURCE_TCP_SOCKET, pp_i);
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     ts->sock = socket(AF_INET, SOCK_STREAM, 0);
     pp_resource_release(tcp_socket);

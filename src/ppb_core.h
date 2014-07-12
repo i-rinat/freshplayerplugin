@@ -27,6 +27,7 @@
 
 #include <ppapi/c/ppb_core.h>
 #include <ppapi/c/pp_instance.h>
+#include "pp_resource.h"
 
 
 void
@@ -46,7 +47,7 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
                              int32_t result);
 
 void
-ppb_core_call_on_main_thread_now(PP_Instance instance, struct PP_CompletionCallback callback,
+ppb_core_call_on_main_thread_now(struct pp_instance_s *pp_i, struct PP_CompletionCallback callback,
                                  int32_t result);
 
 PP_Bool
