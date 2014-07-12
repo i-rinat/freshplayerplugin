@@ -357,6 +357,7 @@ struct pp_file_io_s {
 
 struct pp_message_loop_s {
     COMMON_STRUCTURE_FIELDS
+    GAsyncQueue            *async_q;
 };
 
 union pp_largest_u {
