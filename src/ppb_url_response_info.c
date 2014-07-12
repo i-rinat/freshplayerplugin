@@ -90,7 +90,7 @@ ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
         return 0;
     struct pp_url_loader_s *ul = ri->url_loader;
 
-    PP_Resource file_ref = pp_resource_allocate(PP_RESOURCE_FILE_REF, ri->_.instance);
+    PP_Resource file_ref = pp_resource_allocate(PP_RESOURCE_FILE_REF, ri->instance);
     struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
 
     fr->fd = dup(ul->fd);

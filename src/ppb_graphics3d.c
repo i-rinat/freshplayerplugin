@@ -195,7 +195,7 @@ void
 ppb_graphics3d_destroy(void *p)
 {
     struct pp_graphics3d_s *g3d = p;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->_.instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->instance);
     g_hash_table_destroy(g3d->sub_maps);
 
     pthread_mutex_lock(&pp_i->lock);
@@ -245,7 +245,7 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d)
         return PP_ERROR_BADRESOURCE;
-    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->_.instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->instance);
 
     g3d->width = width;
     g3d->height = height;
@@ -284,7 +284,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     if (!g3d)
         return PP_ERROR_BADRESOURCE;
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->_.instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(g3d->instance);
 
     if (pp_i->graphics != context) {
         // Other context bound, do nothing.

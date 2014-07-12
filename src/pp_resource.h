@@ -134,16 +134,21 @@ struct pp_instance_s {
     pthread_mutex_t lock;
 };
 
-struct pp_resource_generic_s {
-    int             type;
-    int             ref_cnt;
-    PP_Instance     instance;
-    PP_Resource     self_id;
+
+#define COMMON_STRUCTURE_FIELDS                 \
+    int             resource_type;              \
+    int             ref_cnt;                    \
+    PP_Instance     instance;                   \
+    PP_Resource     self_id;                    \
     pthread_mutex_t lock;
+
+
+struct pp_resource_generic_s {
+    COMMON_STRUCTURE_FIELDS
 };
 
 struct pp_url_loader_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     char                   *status_line;    ///< HTTP/1.1 200 OK
     char                   *headers;        ///< response headers
     int                     http_code;      ///< HTTP response code
@@ -182,7 +187,7 @@ struct url_loader_read_task_s {
 };
 
 struct pp_url_request_info_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     enum pp_request_method_e    method;
     char                       *url;
     char                       *headers;
@@ -203,18 +208,18 @@ struct pp_url_request_info_s {
 };
 
 struct pp_url_response_info_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     PP_Resource                 url_loader_id;
     struct pp_url_loader_s     *url_loader;
 };
 
 struct pp_view_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     struct PP_Rect      rect;
 };
 
 struct pp_graphics3d_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     EGLContext      glc;
     EGLConfig       egl_config;
     Pixmap          pixmap;
@@ -227,7 +232,7 @@ struct pp_graphics3d_s {
 };
 
 struct pp_image_data_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     int32_t             width;
     int32_t             height;
     int32_t             stride;
@@ -237,8 +242,7 @@ struct pp_image_data_s {
 };
 
 struct pp_graphics2d_s {
-    struct pp_resource_generic_s _;
-    PP_Instance         instance;
+    COMMON_STRUCTURE_FIELDS
     int                 is_always_opaque;
     int32_t             width;
     int32_t             height;
@@ -254,11 +258,11 @@ struct pp_graphics2d_s {
 };
 
 struct pp_network_monitor_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
 };
 
 struct pp_browser_font_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     PangoFont              *font;
     PangoFontDescription   *font_desc;
     int32_t                 letter_spacing;
@@ -267,13 +271,13 @@ struct pp_browser_font_s {
 };
 
 struct pp_audio_config_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     PP_AudioSampleRate      sample_rate;
     uint32_t                sample_frame_count;
 };
 
 struct pp_audio_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     uint32_t                sample_rate;
     uint32_t                sample_frame_count;
     uint32_t                period_size;
@@ -287,7 +291,7 @@ struct pp_audio_s {
 };
 
 struct pp_input_event_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     uint32_t                    event_class;
     PP_InputEvent_Type          type;
     PP_TimeTicks                time_stamp;
@@ -304,49 +308,49 @@ struct pp_input_event_s {
 };
 
 struct pp_flash_font_file_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     PangoFont              *font;
     FT_Face                 ft_face;
     PP_PrivateFontCharset   charset;
 };
 
 struct pp_printing_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
 };
 
 struct pp_video_capture_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
 };
 
 struct pp_audio_input_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
 };
 
 struct pp_flash_menu_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     GtkWidget              *menu;
 };
 
 struct pp_flash_message_loop_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     GMainLoop              *loop;
 };
 
 struct pp_tcp_socket_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     int             sock;
     unsigned int    is_connected;
     unsigned int    destroyed;
 };
 
 struct pp_file_ref_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     int                     fd;
     enum file_ref_type_e    type;
 };
 
 struct pp_file_io_s {
-    struct pp_resource_generic_s _;
+    COMMON_STRUCTURE_FIELDS
     int             fd;
 };
 

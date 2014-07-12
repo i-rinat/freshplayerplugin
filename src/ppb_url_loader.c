@@ -217,7 +217,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
         full_url = PP_MakeString(ri->url);
     } else {
         struct PP_Var rel_url = PP_MakeString(ri->url);
-        full_url = ppb_url_util_dev_resolve_relative_to_document(ul->_.instance, rel_url, NULL);
+        full_url = ppb_url_util_dev_resolve_relative_to_document(ul->instance, rel_url, NULL);
         ppb_var_release(rel_url);
     }
 
@@ -259,7 +259,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
     comt_params->url =                              strdup(ul->url);
     comt_params->loader =                           loader;
-    comt_params->instance =                         ul->_.instance;
+    comt_params->instance =                         ul->instance;
     comt_params->method =                           ul->method;
     comt_params->request_headers =                  ul->request_headers;
     comt_params->custom_referrer_url =              ul->custom_referrer_url;
@@ -269,7 +269,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     comt_params->post_len =                         ul->post_len;
     comt_params->post_data =                        ul->post_data;
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(ul->_.instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(ul->instance);
     if (ppb_core_is_main_thread()) {
         comt_params->should_wait = 0;
         _url_loader_open_comt(comt_params);
@@ -340,7 +340,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
     comt_params->url =                              ul->url;
     comt_params->loader =                           loader;
-    comt_params->instance =                         ul->_.instance;
+    comt_params->instance =                         ul->instance;
     comt_params->method =                           ul->method;
     comt_params->request_headers =                  ul->request_headers;
     comt_params->custom_referrer_url =              ul->custom_referrer_url;
@@ -350,7 +350,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     comt_params->post_len =                         0;
     comt_params->post_data =                        NULL;
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(ul->_.instance);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(ul->instance);
     if (ppb_core_is_main_thread()) {
         comt_params->should_wait = 0;
         _url_loader_open_comt(comt_params);
@@ -421,7 +421,7 @@ PP_Resource
 ppb_url_loader_get_response_info(PP_Resource loader)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
-    PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO, ul->_.instance);
+    PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO, ul->instance);
     struct pp_url_response_info_s *ri = pp_resource_acquire(response_info,
                                                             PP_RESOURCE_URL_RESPONSE_INFO);
 

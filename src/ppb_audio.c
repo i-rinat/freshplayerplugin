@@ -164,7 +164,7 @@ ppb_audio_get_current_config(PP_Resource audio)
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
     if (!a)
         return 0;
-    PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, a->_.instance);
+    PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, a->instance);
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
     if (!ac) {
         pp_resource_release(audio);

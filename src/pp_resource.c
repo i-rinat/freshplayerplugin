@@ -66,7 +66,7 @@ PP_Resource
 pp_resource_allocate(enum pp_resource_type_e type, PP_Instance instance)
 {
     struct pp_resource_generic_s *res = g_slice_alloc0(sizeof(union pp_largest_u));
-    res->type = type;
+    res->resource_type = type;
     res->ref_cnt = 1;
     pthread_mutex_init(&res->lock, NULL);
     res->instance = instance;
@@ -98,7 +98,7 @@ pp_resource_acquire(PP_Resource resource, enum pp_resource_type_e type)
     while (1) {
         pthread_mutex_lock(&res_tbl_lock);
         gr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
-        if (!gr || gr->type != type) {
+        if (!gr || gr->resource_type != type) {
             gr = NULL;
             break;
         }
@@ -130,7 +130,7 @@ pp_resource_get_type(PP_Resource resource)
     pthread_mutex_lock(&res_tbl_lock);
     struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
     if (ptr) {
-        type = ptr->type;
+        type = ptr->resource_type;
     }
     pthread_mutex_unlock(&res_tbl_lock);
     return type;
@@ -156,8 +156,8 @@ _count_resources(gpointer key, gpointer value, gpointer user_data)
     int *counts = user_data;
     struct pp_resource_generic_s *r = value;
 
-    if (0 <= r->type && r->type < PP_RESOURCE_TYPES_COUNT)
-        counts[r->type] ++;
+    if (0 <= r->resource_type && r->resource_type < PP_RESOURCE_TYPES_COUNT)
+        counts[r->resource_type] ++;
     else
         counts[PP_RESOURCE_TYPES_COUNT] ++;
 }
@@ -177,7 +177,7 @@ pp_resource_unref(PP_Resource resource)
         return;
 
     if (ref_cnt <= 0) {
-        switch (ptr->type) {
+        switch (ptr->resource_type) {
         case PP_RESOURCE_URL_LOADER:
             ppb_url_loader_destroy(ptr);
             break;
