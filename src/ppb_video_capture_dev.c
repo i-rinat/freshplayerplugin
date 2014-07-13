@@ -26,6 +26,7 @@
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
 #include "pp_resource.h"
+#include "ppb_core.h"
 #include "trace.h"
 #include "tables.h"
 
@@ -58,9 +59,8 @@ ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture, struct PP_Arr
 {
     output.GetDataBuffer(output.user_data, 0, sizeof(int));
 
-    if (callback.func)
-        callback.func(callback.user_data, PP_OK);
-    return PP_OK;
+    ppb_core_call_on_main_thread(0, callback, PP_OK);
+    return PP_OK_COMPLETIONPENDING;
 }
 
 int32_t
