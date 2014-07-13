@@ -117,6 +117,7 @@ struct pp_instance_s {
     NPP             npp;
     uint32_t        is_fullframe;
     uint32_t        is_fullscreen;
+    uint32_t        incognito_mode;
     pthread_t       fs_thread;
     Window          fs_wnd;
     uint32_t        fs_width;

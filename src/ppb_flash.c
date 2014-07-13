@@ -234,12 +234,7 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
         break;
     case PP_FLASHSETTING_INCOGNITO:
         var.type = PP_VARTYPE_BOOL;
-        var.value.as_bool = PP_FALSE;
-
-        NPBool private;
-        if (npn.getvalue(pp_i->npp, NPNVprivateModeBool, &private) == NPERR_NO_ERROR) {
-            var.value.as_bool = private ? PP_TRUE : PP_FALSE;
-        }
+        var.value.as_bool = pp_i->incognito_mode ? PP_TRUE : PP_FALSE;
         break;
     case PP_FLASHSETTING_STAGE3DENABLED:
         var.type = PP_VARTYPE_BOOL;

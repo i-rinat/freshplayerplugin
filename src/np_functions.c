@@ -157,6 +157,11 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->id = generate_new_pp_instance_id();
     tables_add_pp_instance(pp_i->id, pp_i);
 
+    NPBool private;
+    pp_i->incognito_mode = 0;
+    if (npn.getvalue(pp_i->npp, NPNVprivateModeBool, &private) == NPERR_NO_ERROR)
+        pp_i->incognito_mode = private ? 1 : 0;
+
     pthread_mutex_init(&pp_i->lock, NULL);
     pp_i->dpy = XOpenDisplay(NULL);
     if (!pp_i->dpy) {
