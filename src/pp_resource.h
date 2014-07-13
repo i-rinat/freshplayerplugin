@@ -359,6 +359,7 @@ struct pp_message_loop_s {
     COMMON_STRUCTURE_FIELDS
     GAsyncQueue            *async_q;
     int                     running;
+    int                     teardown;
 };
 
 union pp_largest_u {

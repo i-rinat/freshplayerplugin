@@ -101,6 +101,7 @@ struct message_loop_task_s {
     int                             terminate;
     struct PP_CompletionCallback    ccb;
     int32_t                         result_to_pass;
+    PP_Bool                         should_destroy_ml;
 };
 
 static gint
@@ -138,6 +139,9 @@ ppb_message_loop_run(PP_Resource message_loop)
     }
 
     ml->running = 1;
+    ml->teardown = 0;
+    int teardown = 0;
+    int destroy_ml = 0;
     pp_resource_ref(message_loop);
     GAsyncQueue *async_q = ml->async_q;
     GQueue *int_q = g_queue_new();
@@ -165,14 +169,22 @@ ppb_message_loop_run(PP_Resource message_loop)
                 g_slice_free(struct message_loop_task_s, task);
                 continue;   // run cycle again
             }
+        } else if (teardown) {
+            // teardown, no tasks in queue left
+            break;
         }
 
         task = g_async_queue_timeout_pop(async_q, timeout);
         if (task) {
             if (task->terminate) {
-                // TODO: decide what to do with remaining tasks
+                ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
+                if (ml) {
+                    ml->teardown = 1;
+                    teardown = 1;
+                    destroy_ml = task->should_destroy_ml;
+                    pp_resource_release(message_loop);
+                }
                 g_slice_free(struct message_loop_task_s, task);
-                break;
             } else {
                 g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
             }
@@ -188,6 +200,8 @@ ppb_message_loop_run(PP_Resource message_loop)
         pp_resource_release(message_loop);
     }
     pp_resource_unref(message_loop);
+    if (destroy_ml)
+        pp_resource_unref(message_loop);
     return PP_OK;
 }
 
@@ -196,9 +210,21 @@ ppb_message_loop_post_work_with_result(PP_Resource message_loop,
                                        struct PP_CompletionCallback callback, int64_t delay_ms,
                                        int32_t result_to_pass)
 {
-    struct message_loop_task_s *task = g_slice_alloc(sizeof(*task));
+    if (callback.func == NULL)
+        return PP_ERROR_BADARGUMENT;
 
-    task->terminate = 0;
+    struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
+    if (!ml)
+        return PP_ERROR_BADRESOURCE;
+
+    if (ml->running && ml->teardown) {
+        // message loop is in a teardown state
+        pp_resource_release(message_loop);
+        return PP_ERROR_FAILED;
+    }
+
+    struct message_loop_task_s *task = g_slice_alloc0(sizeof(*task));
+
     task->result_to_pass = result_to_pass;
     task->ccb = callback;
 
@@ -211,6 +237,8 @@ ppb_message_loop_post_work_with_result(PP_Resource message_loop,
         task->when.tv_nsec -= 1000 * 1000 * 1000;
     }
 
+    g_async_queue_push(ml->async_q, task);
+    pp_resource_release(message_loop);
     return PP_OK;
 }
 
@@ -224,14 +252,20 @@ ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallbac
 int32_t
 ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
 {
-    struct message_loop_task_s *task = g_slice_alloc(sizeof(*task));
+    struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
+    if (!ml)
+        return PP_ERROR_BADRESOURCE;
+
+    struct message_loop_task_s *task = g_slice_alloc0(sizeof(*task));
 
     task->terminate = 1;
+    task->should_destroy_ml = should_destroy;
     task->result_to_pass = PP_OK;
-    task->ccb = PP_MakeCompletionCallback(NULL, NULL);
 
     clock_gettime(CLOCK_REALTIME, &task->when); // run as early as possible
 
+    g_async_queue_push(ml->async_q, task);
+    pp_resource_release(message_loop);
     return PP_OK;
 }
 
