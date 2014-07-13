@@ -34,6 +34,8 @@
 
 static __thread PP_Resource this_thread_message_loop = 0;
 static __thread int         thread_is_not_suitable_for_message_loop = 0;
+static          PP_Resource main_thread_message_loop = 0;
+
 
 PP_Resource
 ppb_message_loop_create(PP_Instance instance)
@@ -65,7 +67,18 @@ ppb_message_loop_destroy(void *p)
 PP_Resource
 ppb_message_loop_get_for_main_thread(void)
 {
-    return 0;
+    assert(main_thread_message_loop);   // should never be uninitialized
+    return main_thread_message_loop;
+}
+
+int32_t
+ppb_message_loop_set_this_thread_main(PP_Resource message_loop)
+{
+    if (pp_resource_get_type(message_loop) != PP_RESOURCE_MESSAGE_LOOP)
+        return PP_ERROR_BADRESOURCE;
+
+    main_thread_message_loop = message_loop;
+    return PP_OK;
 }
 
 PP_Resource
@@ -283,7 +296,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_message_loop_get_for_main_thread(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_message_loop_get_for_main_thread();
 }
 
@@ -333,7 +346,7 @@ trace_ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destro
 
 const struct PPB_MessageLoop_1_0 ppb_message_loop_interface_1_0 = {
     .Create =                TWRAPF(ppb_message_loop_create),
-    .GetForMainThread =      TWRAPZ(ppb_message_loop_get_for_main_thread),
+    .GetForMainThread =      TWRAPF(ppb_message_loop_get_for_main_thread),
     .GetCurrent =            TWRAPF(ppb_message_loop_get_current),
     .AttachToCurrentThread = TWRAPF(ppb_message_loop_attach_to_current_thread),
     .Run =                   TWRAPF(ppb_message_loop_run),

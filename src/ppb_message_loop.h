@@ -37,6 +37,9 @@ ppb_message_loop_destroy(void *p);
 PP_Resource
 ppb_message_loop_get_for_main_thread(void);
 
+int32_t
+ppb_message_loop_set_this_thread_main(PP_Resource message_loop);
+
 PP_Resource
 ppb_message_loop_get_current(void);
 
