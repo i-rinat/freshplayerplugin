@@ -97,7 +97,6 @@ struct comt_param_s {
     const char                 *post_data;
     size_t                      post_len;
     pthread_barrier_t           barrier;
-    size_t                      should_wait;
     int                         retval;
 };
 
@@ -170,8 +169,7 @@ _url_loader_open_comt(void *user_data)
         }
     }
 
-    if (comt_params->should_wait)
-        pthread_barrier_wait(&comt_params->barrier);
+    pthread_barrier_wait(&comt_params->barrier);
 }
 
 int
@@ -260,34 +258,27 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     ppb_var_release(full_url);
     pp_resource_release(request_info);
 
-    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
-    comt_params->url =                              strdup(ul->url);
-    comt_params->loader =                           loader;
-    comt_params->instance =                         ul->instance;
-    comt_params->method =                           ul->method;
-    comt_params->request_headers =                  ul->request_headers;
-    comt_params->custom_referrer_url =              ul->custom_referrer_url;
-    comt_params->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
-    comt_params->custom_user_agent =                ul->custom_user_agent;
-    comt_params->target =                           ul->target;
-    comt_params->post_len =                         ul->post_len;
-    comt_params->post_data =                        ul->post_data;
+    struct comt_param_s comt_params;
+    comt_params.url =                               strdup(ul->url);
+    comt_params.loader =                            loader;
+    comt_params.instance =                          ul->instance;
+    comt_params.method =                            ul->method;
+    comt_params.request_headers =                   ul->request_headers;
+    comt_params.custom_referrer_url =               ul->custom_referrer_url;
+    comt_params.custom_content_transfer_encoding =  ul->custom_content_transfer_encoding;
+    comt_params.custom_user_agent =                 ul->custom_user_agent;
+    comt_params.target =                            ul->target;
+    comt_params.post_len =                          ul->post_len;
+    comt_params.post_data =                         ul->post_data;
 
     struct pp_instance_s *pp_i = ul->instance;
-    if (ppb_core_is_main_thread()) {
-        comt_params->should_wait = 0;
-        _url_loader_open_comt(comt_params);
-    } else {
-        comt_params->should_wait = 1;
-        pthread_barrier_init(&comt_params->barrier, NULL, 2);
-        npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
-        pthread_barrier_wait(&comt_params->barrier);
-        pthread_barrier_destroy(&comt_params->barrier);
-    }
+    pthread_barrier_init(&comt_params.barrier, NULL, 2);
+    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, &comt_params);
+    pthread_barrier_wait(&comt_params.barrier);
+    pthread_barrier_destroy(&comt_params.barrier);
 
-    int retval = comt_params->retval;
+    int retval = comt_params.retval;
     pp_resource_release(loader);
-    g_slice_free(struct comt_param_s, comt_params);
 
     if (retval != NPERR_NO_ERROR)
         return PP_ERROR_FAILED;
@@ -341,34 +332,27 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ul->method = PP_METHOD_GET;
     ul->ccb = callback;
 
-    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
-    comt_params->url =                              ul->url;
-    comt_params->loader =                           loader;
-    comt_params->instance =                         ul->instance;
-    comt_params->method =                           ul->method;
-    comt_params->request_headers =                  ul->request_headers;
-    comt_params->custom_referrer_url =              ul->custom_referrer_url;
-    comt_params->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
-    comt_params->custom_user_agent =                ul->custom_user_agent;
-    comt_params->target =                           NULL;
-    comt_params->post_len =                         0;
-    comt_params->post_data =                        NULL;
+    struct comt_param_s comt_params;
+    comt_params.url =                               ul->url;
+    comt_params.loader =                            loader;
+    comt_params.instance =                          ul->instance;
+    comt_params.method =                            ul->method;
+    comt_params.request_headers =                   ul->request_headers;
+    comt_params.custom_referrer_url =               ul->custom_referrer_url;
+    comt_params.custom_content_transfer_encoding =  ul->custom_content_transfer_encoding;
+    comt_params.custom_user_agent =                 ul->custom_user_agent;
+    comt_params.target =                            NULL;
+    comt_params.post_len =                          0;
+    comt_params.post_data =                         NULL;
 
     struct pp_instance_s *pp_i = ul->instance;
-    if (ppb_core_is_main_thread()) {
-        comt_params->should_wait = 0;
-        _url_loader_open_comt(comt_params);
-    } else {
-        comt_params->should_wait = 1;
-        pthread_barrier_init(&comt_params->barrier, NULL, 2);
-        npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, comt_params);
-        pthread_barrier_wait(&comt_params->barrier);
-        pthread_barrier_destroy(&comt_params->barrier);
-    }
+    pthread_barrier_init(&comt_params.barrier, NULL, 2);
+    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, &comt_params);
+    pthread_barrier_wait(&comt_params.barrier);
+    pthread_barrier_destroy(&comt_params.barrier);
 
-    int retval = comt_params->retval;
+    int retval = comt_params.retval;
     pp_resource_release(loader);
-    g_slice_free(struct comt_param_s, comt_params);
 
     if (retval != NPERR_NO_ERROR)
         return PP_ERROR_FAILED;
