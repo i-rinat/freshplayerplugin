@@ -42,7 +42,7 @@ ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
 
     *handle = fio->fd;
 
-    ppb_core_call_on_main_thread_now(fio->instance, callback, PP_OK);
+    ppb_core_call_on_main_thread(0, callback, PP_OK);
     pp_resource_release(file_io);
     return PP_OK;
 }
@@ -102,7 +102,7 @@ ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
         goto out;
     }
 
-    ppb_core_call_on_main_thread_now(fio->instance, callback, PP_OK);
+    ppb_core_call_on_main_thread(0, callback, PP_OK);
     retval = PP_OK_COMPLETIONPENDING;
 
 out:

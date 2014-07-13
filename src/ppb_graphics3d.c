@@ -312,7 +312,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     pp_resource_release(context);
 
     if (callback.func) {
-        ppb_core_call_on_main_thread_now(pp_i, callback, PP_OK);
+        ppb_core_call_on_main_thread(0, callback, PP_OK);
         return PP_OK_COMPLETIONPENDING;
     }
 

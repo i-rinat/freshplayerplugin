@@ -61,25 +61,6 @@ ppb_core_get_time_ticks(void)
     return t.tv_sec + t.tv_nsec / 1e9;
 }
 
-struct comt_task_s {
-    struct PP_CompletionCallback    callback;
-    int32_t                     result_to_pass;
-    struct timespec             when;
-    int                         terminate;
-};
-
-static
-void
-comt_proxy(void *param)
-{
-    struct comt_task_s *p = param;
-
-    if (p->callback.func) {
-        p->callback.func(p->callback.user_data, p->result_to_pass);
-    }
-    g_slice_free(struct comt_task_s, p);
-}
-
 void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result)
@@ -87,19 +68,6 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
     PP_Resource main_message_loop = ppb_message_loop_get_for_main_thread();
     ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
                                            result);
-}
-
-void
-ppb_core_call_on_main_thread_now(struct pp_instance_s *pp_i, struct PP_CompletionCallback callback,
-                                 int32_t result)
-{
-    struct comt_task_s *task = g_slice_alloc(sizeof(*task));
-
-    task->callback = callback;
-    task->result_to_pass = result;
-    task->terminate = 0;
-
-    npn.pluginthreadasynccall(pp_i->npp, comt_proxy, task);
 }
 
 PP_Bool
