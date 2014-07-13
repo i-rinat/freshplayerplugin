@@ -124,10 +124,20 @@ time_compare_func(gconstpointer a, gconstpointer b, gpointer user_data)
 int32_t
 ppb_message_loop_run(PP_Resource message_loop)
 {
+    if (this_thread_message_loop == 0)
+        return PP_ERROR_WRONG_THREAD;
+
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
     if (!ml)
         return PP_ERROR_BADRESOURCE;
 
+    // prevent nested loops
+    if (ml->running) {
+        pp_resource_release(message_loop);
+        return PP_ERROR_INPROGRESS;
+    }
+
+    ml->running = 1;
     pp_resource_ref(message_loop);
     GAsyncQueue *async_q = ml->async_q;
     GQueue *int_q = g_queue_new();
@@ -170,6 +180,13 @@ ppb_message_loop_run(PP_Resource message_loop)
     }
 
     g_queue_free(int_q);
+
+    // mark thread as non-running
+    ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
+    if (ml) {
+        ml->running = 0;
+        pp_resource_release(message_loop);
+    }
     pp_resource_unref(message_loop);
     return PP_OK;
 }
