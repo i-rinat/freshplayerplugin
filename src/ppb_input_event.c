@@ -43,7 +43,9 @@ ppb_input_event_request_input_events(PP_Instance instance, uint32_t event_classe
     if (!pp_i)
         return PP_ERROR_BADARGUMENT;
 
+    pthread_mutex_lock(&pp_i->lock);
     pp_i->event_mask |= event_classes;
+    pthread_mutex_unlock(&pp_i->lock);
     return PP_OK;
 }
 
@@ -54,7 +56,9 @@ ppb_input_event_request_filtering_input_events(PP_Instance instance, uint32_t ev
     if (!pp_i)
         return PP_ERROR_BADARGUMENT;
 
+    pthread_mutex_lock(&pp_i->lock);
     pp_i->filtered_event_mask |= event_classes;
+    pthread_mutex_unlock(&pp_i->lock);
     return PP_OK;
 }
 
@@ -65,8 +69,10 @@ ppb_input_event_clear_input_event_request(PP_Instance instance, uint32_t event_c
     if (!pp_i)
         return;
 
+    pthread_mutex_lock(&pp_i->lock);
     pp_i->event_mask &= ~event_classes;
     pp_i->filtered_event_mask &= ~event_classes;
+    pthread_mutex_unlock(&pp_i->lock);
     return;
 }
 
