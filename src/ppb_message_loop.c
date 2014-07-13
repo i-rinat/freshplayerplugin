@@ -109,10 +109,13 @@ ppb_message_loop_run(PP_Resource message_loop)
     if (!ml)
         return PP_ERROR_BADRESOURCE;
 
+    pp_resource_ref(message_loop);
+    GAsyncQueue *async_q = ml->async_q;
     GQueue *int_q = g_queue_new();
-    struct timespec now;
+    pp_resource_release(message_loop);
 
     while (1) {
+        struct timespec now;
         struct message_loop_task_s *task = g_queue_peek_head(int_q);
         gint64 timeout = 1000 * 1000;
         if (task) {
@@ -135,7 +138,7 @@ ppb_message_loop_run(PP_Resource message_loop)
             }
         }
 
-        task = g_async_queue_timeout_pop(ml->async_q, timeout);
+        task = g_async_queue_timeout_pop(async_q, timeout);
         if (task) {
             if (task->terminate) {
                 // TODO: decide what to do with remaining tasks
@@ -148,6 +151,7 @@ ppb_message_loop_run(PP_Resource message_loop)
     }
 
     g_queue_free(int_q);
+    pp_resource_unref(message_loop);
     return PP_OK;
 }
 
