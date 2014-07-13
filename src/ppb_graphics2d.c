@@ -158,6 +158,25 @@ ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
     pp_resource_release(graphics_2d);
 }
 
+struct call_invalidaterect_param_s {
+    pthread_barrier_t       barrier;
+    struct pp_graphics2d_s *g2d;
+};
+
+static
+void
+_call_invalidaterect(void *param)
+{
+    struct call_invalidaterect_param_s *p = param;
+    NPP npp = p->g2d->instance->npp;
+    NPRect npr = {.top = 0, .left = 0, .bottom = p->g2d->height, .right = p->g2d->width};
+
+    npn.invalidaterect(npp, &npr);
+    npn.forceredraw(npp);
+
+    pthread_barrier_wait(&p->barrier);
+}
+
 int32_t
 ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callback)
 {
@@ -237,7 +256,6 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         cairo_surface_destroy(surf);
     }
 
-    NPRect npr = {.top = 0, .left = 0, .bottom = g2d->height, .right = g2d->width};
     pp_resource_release(graphics_2d);
     if (pp_i->is_fullscreen) {
         XGraphicsExposeEvent ev = {
@@ -252,8 +270,12 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         XFlush(pp_i->dpy);
         pthread_mutex_unlock(&pp_i->lock);
     } else {
-        npn.invalidaterect(pp_i->npp, &npr);
-        npn.forceredraw(pp_i->npp);
+        struct call_invalidaterect_param_s p;
+        p.g2d = g2d;
+        pthread_barrier_init(&p.barrier, NULL, 2);
+        npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect, &p);
+        pthread_barrier_wait(&p.barrier);
+        pthread_barrier_destroy(&p.barrier);
     }
 
     if (callback.func) {
