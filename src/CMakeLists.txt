@@ -12,6 +12,7 @@ add_library(freshwrapper-obj OBJECT
     keycodeconvert.c
     np_entry.c
     np_functions.c
+    main_thread.c
     reverse_constant.c
     tables.c
     trace.c

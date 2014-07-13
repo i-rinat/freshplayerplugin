@@ -22,46 +22,28 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_MESSAGE_LOOP_H
-#define FPP__PPB_MESSAGE_LOOP_H
+#include "main_thread.h"
+#include "ppb_message_loop.h"
+#include "pp_resource.h"
+#include "trace.h"
 
-#include <ppapi/c/ppb_message_loop.h>
 
+void *
+fresh_wrapper_main_thread(void *p)
+{
+    struct pp_instance_s *pp_i = p;
+    PP_Resource message_loop;
 
-PP_Resource
-ppb_message_loop_create(PP_Instance instance);
+    message_loop = ppb_message_loop_create(pp_i->id);
+    if (!message_loop) {
+        trace_error("%s, can't create message loop\n", __func__);
+        return NULL;
+    }
 
-void
-ppb_message_loop_destroy(void *p);
+    ppb_message_loop_proclaim_this_thread_main(message_loop);
+    ppb_message_loop_attach_to_current_thread(message_loop);
 
-PP_Resource
-ppb_message_loop_get_for_main_thread(void);
+    ppb_message_loop_run(message_loop);
 
-int32_t
-ppb_message_loop_proclaim_this_thread_main(PP_Resource message_loop);
-
-PP_Resource
-ppb_message_loop_get_current(void);
-
-int32_t
-ppb_message_loop_attach_to_current_thread(PP_Resource message_loop);
-
-int32_t
-ppb_message_loop_run(PP_Resource message_loop);
-
-int32_t
-ppb_message_loop_post_work_with_result(PP_Resource message_loop,
-                                       struct PP_CompletionCallback callback, int64_t delay_ms,
-                                       int32_t result_to_pass);
-
-int32_t
-ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
-                           int64_t delay_ms);
-
-int32_t
-ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy);
-
-void
-ppb_message_loop_mark_thread_unsuitable(void);
-
-#endif // FPP__PPB_MESSAGE_LOOP_H
+    return NULL;
+}

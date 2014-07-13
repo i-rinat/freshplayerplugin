@@ -72,7 +72,7 @@ ppb_message_loop_get_for_main_thread(void)
 }
 
 int32_t
-ppb_message_loop_set_this_thread_main(PP_Resource message_loop)
+ppb_message_loop_proclaim_this_thread_main(PP_Resource message_loop)
 {
     if (pp_resource_get_type(message_loop) != PP_RESOURCE_MESSAGE_LOOP)
         return PP_ERROR_BADRESOURCE;

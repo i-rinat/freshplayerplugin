@@ -22,46 +22,11 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_MESSAGE_LOOP_H
-#define FPP__PPB_MESSAGE_LOOP_H
-
-#include <ppapi/c/ppb_message_loop.h>
+#ifndef FPP__MAIN_THREAD_H
+#define FPP__MAIN_THREAD_H
 
 
-PP_Resource
-ppb_message_loop_create(PP_Instance instance);
+void *
+fresh_wrapper_main_thread(void *p);
 
-void
-ppb_message_loop_destroy(void *p);
-
-PP_Resource
-ppb_message_loop_get_for_main_thread(void);
-
-int32_t
-ppb_message_loop_proclaim_this_thread_main(PP_Resource message_loop);
-
-PP_Resource
-ppb_message_loop_get_current(void);
-
-int32_t
-ppb_message_loop_attach_to_current_thread(PP_Resource message_loop);
-
-int32_t
-ppb_message_loop_run(PP_Resource message_loop);
-
-int32_t
-ppb_message_loop_post_work_with_result(PP_Resource message_loop,
-                                       struct PP_CompletionCallback callback, int64_t delay_ms,
-                                       int32_t result_to_pass);
-
-int32_t
-ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
-                           int64_t delay_ms);
-
-int32_t
-ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy);
-
-void
-ppb_message_loop_mark_thread_unsuitable(void);
-
-#endif // FPP__PPB_MESSAGE_LOOP_H
+#endif // FPP__MAIN_THREAD_H
