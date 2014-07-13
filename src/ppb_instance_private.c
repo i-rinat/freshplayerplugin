@@ -59,7 +59,6 @@ ppb_instance_private_get_owner_element_object(PP_Instance instance)
 
 struct execute_script_param_s {
     pthread_barrier_t   barrier;
-    int                 should_wait;
     struct PP_Var       script;
     struct PP_Var       result;
     NPP                 npp;
@@ -95,9 +94,9 @@ _execute_script_comt(void *p)
         tables_add_npobj_npp_mapping(np_result.value.objectValue, esp->npp);
     else
         npn.releasevariantvalue(&np_result);
+
 quit:
-    if (esp->should_wait)
-        pthread_barrier_wait(&esp->barrier);
+    pthread_barrier_wait(&esp->barrier);
 }
 
 struct PP_Var
@@ -113,26 +112,16 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     if (!pp_i)
         return PP_MakeUndefined();
 
-    struct execute_script_param_s *esp = calloc(1, sizeof(*esp));
-    esp->script = script;
-    esp->npp = pp_i->npp;
+    struct execute_script_param_s esp;
+    esp.script = script;
+    esp.npp = pp_i->npp;
 
-    if (ppb_core_is_main_thread()) {
-        esp->should_wait = 0;
-        //_execute_script_comt(esp, 0);
-        _execute_script_comt(esp);
-    } else {
-        esp->should_wait = 1;
-        pthread_barrier_init(&esp->barrier, NULL, 2);
-        npn.pluginthreadasynccall(esp->npp, _execute_script_comt, esp);
-        pthread_barrier_wait(&esp->barrier);
-        pthread_barrier_destroy(&esp->barrier);
-    }
+    pthread_barrier_init(&esp.barrier, NULL, 2);
+    npn.pluginthreadasynccall(esp.npp, _execute_script_comt, &esp);
+    pthread_barrier_wait(&esp.barrier);
+    pthread_barrier_destroy(&esp.barrier);
 
-    struct PP_Var result = esp->result;
-    free(esp);
-
-    return result;
+    return esp.result;
 }
 
 
