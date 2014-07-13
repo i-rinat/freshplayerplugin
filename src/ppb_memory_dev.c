@@ -31,13 +31,13 @@
 void *
 ppb_memory_dev_mem_alloc(uint32_t num_bytes)
 {
-    return npn.memalloc(num_bytes);
+    return npn.memalloc(num_bytes); // TODO: is it safe to call npn.memalloc()?
 }
 
 void
 ppb_memory_dev_mem_free(void *ptr)
 {
-    npn.memfree(ptr);
+    npn.memfree(ptr); // TODO: is it safe to call npn.memfree()?
 }
 
 
