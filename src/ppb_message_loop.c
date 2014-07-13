@@ -32,6 +32,9 @@
 #include "pp_resource.h"
 
 
+static __thread PP_Resource this_thread_message_loop = 0;
+static __thread int         thread_is_not_suitable_for_message_loop = 0;
+
 PP_Resource
 ppb_message_loop_create(PP_Instance instance)
 {
@@ -68,13 +71,23 @@ ppb_message_loop_get_for_main_thread(void)
 PP_Resource
 ppb_message_loop_get_current(void)
 {
-    return 0;
+    return this_thread_message_loop;
 }
 
 int32_t
 ppb_message_loop_attach_to_current_thread(PP_Resource message_loop)
 {
-    return PP_ERROR_FAILED;
+    if (pp_resource_get_type(message_loop) != PP_RESOURCE_MESSAGE_LOOP)
+        return PP_ERROR_BADRESOURCE;
+
+    if (thread_is_not_suitable_for_message_loop)
+        return PP_ERROR_WRONG_THREAD;
+
+    if (this_thread_message_loop != 0)
+        return PP_ERROR_INPROGRESS;
+
+    this_thread_message_loop = message_loop;
+    return PP_OK;
 }
 
 struct message_loop_task_s {
@@ -221,7 +234,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_message_loop_get_current(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_message_loop_get_current();
 }
 
@@ -229,7 +242,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_message_loop_attach_to_current_thread(PP_Resource message_loop)
 {
-    trace_info("[PPB] {zilch} %s message_loop=%d\n", __func__+6, message_loop);
+    trace_info("[PPB] {full} %s message_loop=%d\n", __func__+6, message_loop);
     return ppb_message_loop_attach_to_current_thread(message_loop);
 }
 
@@ -264,8 +277,8 @@ trace_ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destro
 const struct PPB_MessageLoop_1_0 ppb_message_loop_interface_1_0 = {
     .Create =                TWRAPF(ppb_message_loop_create),
     .GetForMainThread =      TWRAPZ(ppb_message_loop_get_for_main_thread),
-    .GetCurrent =            TWRAPZ(ppb_message_loop_get_current),
-    .AttachToCurrentThread = TWRAPZ(ppb_message_loop_attach_to_current_thread),
+    .GetCurrent =            TWRAPF(ppb_message_loop_get_current),
+    .AttachToCurrentThread = TWRAPF(ppb_message_loop_attach_to_current_thread),
     .Run =                   TWRAPF(ppb_message_loop_run),
     .PostWork =              TWRAPF(ppb_message_loop_post_work),
     .PostQuit =              TWRAPF(ppb_message_loop_post_quit),
