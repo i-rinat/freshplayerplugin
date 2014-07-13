@@ -200,32 +200,35 @@ ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance ta
     return PP_TRUE;
 }
 
+struct get_document_url_param_s {
+    struct PP_Var           result;
+    struct pp_instance_s   *pp_i;
+    pthread_barrier_t       barrier;
+};
 
-struct PP_Var
-ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
+static
+void
+_get_document_url(void *user_data)
 {
-    reset_components(components);
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
-        return PP_MakeUndefined();
+    struct get_document_url_param_s *p = user_data;
 
-    struct PP_Var result = PP_MakeString("");
+    p->result = PP_MakeString("");
     NPIdentifier location_id = npn.getstringidentifier("location");
     NPIdentifier href_id = npn.getstringidentifier("href");
     NPObject *np_window_obj, *np_location_obj;
     NPVariant location_var, href_var;
 
-    if (npn.getvalue(pp_i->npp, NPNVWindowNPObject, &np_window_obj) != NPERR_NO_ERROR)
+    if (npn.getvalue(p->pp_i->npp, NPNVWindowNPObject, &np_window_obj) != NPERR_NO_ERROR)
         goto err_1;
 
-    if (!npn.getproperty(pp_i->npp, np_window_obj, location_id, &location_var))
+    if (!npn.getproperty(p->pp_i->npp, np_window_obj, location_id, &location_var))
         goto err_2;
 
     if (location_var.type != NPVariantType_Object)
         goto err_3;
 
     np_location_obj = location_var.value.objectValue;
-    if (!npn.getproperty(pp_i->npp, np_location_obj, href_id, &href_var))
+    if (!npn.getproperty(p->pp_i->npp, np_location_obj, href_id, &href_var))
         goto err_3;
 
 
@@ -235,11 +238,9 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
         goto err_4;
     }
 
-    ppb_var_release(result);
-    result = var;
+    ppb_var_release(p->result);
+    p->result = var;
 
-    if (components)
-        parse_url_string(ppb_var_var_to_utf8(result, NULL), components);
 
 err_4:
     npn.releasevariantvalue(&href_var);
@@ -248,7 +249,30 @@ err_3:
 err_2:
     npn.releaseobject(np_window_obj);
 err_1:
-    return result;
+    pthread_barrier_wait(&p->barrier);
+    return;
+}
+
+
+struct PP_Var
+ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
+{
+    reset_components(components);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return PP_MakeUndefined();
+
+    struct get_document_url_param_s p;
+    p.pp_i = pp_i;
+    pthread_barrier_init(&p.barrier, NULL, 2);
+    npn.pluginthreadasynccall(pp_i->npp, _get_document_url, &p);
+    pthread_barrier_wait(&p.barrier);
+    pthread_barrier_destroy(&p.barrier);
+
+    if (components)
+        parse_url_string(ppb_var_var_to_utf8(p.result, NULL), components);
+
+    return p.result;
 }
 
 struct PP_Var
