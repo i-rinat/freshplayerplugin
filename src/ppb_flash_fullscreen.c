@@ -175,12 +175,9 @@ PP_Bool
 ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    Window browser_wnd;
 
     if (!!fullscreen == !!pp_i->is_fullscreen)
         return PP_FALSE;
-
-    npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &browser_wnd);
 
     if (fullscreen) {
         struct thread_param_s *tparams = g_slice_alloc(sizeof(*tparams));
