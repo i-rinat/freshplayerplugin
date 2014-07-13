@@ -67,7 +67,6 @@ ppb_message_loop_destroy(void *p)
 PP_Resource
 ppb_message_loop_get_for_main_thread(void)
 {
-    assert(main_thread_message_loop);   // should never be uninitialized
     return main_thread_message_loop;
 }
 

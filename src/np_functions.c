@@ -51,9 +51,11 @@
 #include "ppb_url_request_info.h"
 #include "ppb_var.h"
 #include "ppb_core.h"
+#include "ppb_message_loop.h"
 #include "header_parser.h"
 #include "keycodeconvert.h"
 #include "eintr_retry.h"
+#include "main_thread.h"
 
 
 static
@@ -78,6 +80,34 @@ empty_completion_callback(void *user_data, int32_t result)
     (void)result;
 }
 
+static
+void
+call_plugin_did_create(void *user_data, int32_t result)
+{
+    struct pp_instance_s *pp_i = user_data;
+
+    pp_i->ppp_instance_1_1->DidCreate(pp_i->id, pp_i->argc, pp_i->argn, pp_i->argv);
+    pp_i->instance_loaded = 1;
+
+    if (pp_i->is_fullframe) {
+        PP_Resource request_info = ppb_url_request_info_create(pp_i->id);
+        PP_Resource url_loader = ppb_url_loader_create(pp_i->id);
+
+        struct PP_Var s_url = PP_MakeString(pp_i->instance_url);
+        struct PP_Var s_method = PP_MakeString("GET");
+
+        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL, s_url);
+        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_METHOD, s_method);
+        ppb_url_loader_open(url_loader, request_info,
+                            PP_MakeCompletionCallback(empty_completion_callback, NULL));
+        ppb_var_release(s_url);
+        ppb_var_release(s_method);
+        ppb_core_release_resource(request_info);
+
+        pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->id, url_loader);
+    }
+}
+
 NPError
 NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
@@ -88,7 +118,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
                  pluginType, npp, mode, argc, saved);
 
     tables_add_npp_instance(npp);
-    np_main_thread = pthread_self();
 
     for (k = 0; k < argc; k ++)
         trace_info_f("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
@@ -162,26 +191,17 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     }
     pthread_mutex_unlock(&pp_i->lock);
 
-    pp_i->ppp_instance_1_1->DidCreate(pp_i->id, pp_i->argc, pp_i->argn, pp_i->argv);
-    pp_i->instance_loaded = 1;
+    if (ppb_message_loop_get_for_main_thread() == 0) {
+        pthread_t main_thread_id;
 
-    if (mode == NP_FULL) {
-        PP_Resource request_info = ppb_url_request_info_create(pp_i->id);
-        PP_Resource url_loader = ppb_url_loader_create(pp_i->id);
+        pthread_barrier_init(&pp_i->main_thread_barrier, NULL, 2);
+        pthread_create(&main_thread_id, NULL, fresh_wrapper_main_thread, pp_i);
 
-        struct PP_Var s_url = PP_MakeString(pp_i->instance_url);
-        struct PP_Var s_method = PP_MakeString("GET");
-
-        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL, s_url);
-        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_METHOD, s_method);
-        ppb_url_loader_open(url_loader, request_info,
-                            PP_MakeCompletionCallback(empty_completion_callback, NULL));
-        ppb_var_release(s_url);
-        ppb_var_release(s_method);
-        ppb_core_release_resource(request_info);
-
-        pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->id, url_loader);
+        pthread_barrier_wait(&pp_i->main_thread_barrier);
+        pthread_barrier_destroy(&pp_i->main_thread_barrier);
     }
+
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(call_plugin_did_create, pp_i), PP_OK);
 
     return NPERR_NO_ERROR;
 }

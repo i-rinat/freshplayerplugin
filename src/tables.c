@@ -33,7 +33,6 @@
 
 
 NPNetscapeFuncs npn;
-pthread_t       np_main_thread;
 
 static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;

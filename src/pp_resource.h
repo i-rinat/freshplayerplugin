@@ -133,6 +133,7 @@ struct pp_instance_s {
     Display        *dpy;
     EGLDisplay      egl_dpy;
     pthread_mutex_t lock;
+    pthread_barrier_t   main_thread_barrier;
 };
 
 

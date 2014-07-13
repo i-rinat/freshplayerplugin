@@ -30,9 +30,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
-
-
-static GAsyncQueue *async_q = NULL;
+#include "ppb_message_loop.h"
 
 
 void
@@ -82,98 +80,13 @@ comt_proxy(void *param)
     g_slice_free(struct comt_task_s, p);
 }
 
-gint
-time_compare_func(gconstpointer a, gconstpointer b, gpointer user_data)
-{
-    const struct comt_task_s *task_a = a;
-    const struct comt_task_s *task_b = b;
-
-    if (task_a->when.tv_sec < task_b->when.tv_sec)
-        return -1;
-    else if (task_a->when.tv_sec > task_b->when.tv_sec)
-        return 1;
-    else if (task_a->when.tv_nsec < task_b->when.tv_nsec)
-        return -1;
-    else if (task_a->when.tv_nsec > task_b->when.tv_nsec)
-        return 1;
-    else
-        return 0;
-}
-
-static
-void *
-comt_delay_thread(void *param)
-{
-    struct timespec now;
-    GAsyncQueue *async_q = param;
-    GQueue *int_q = g_queue_new();
-
-    while (1) {
-        struct comt_task_s *task = g_queue_peek_head(int_q);
-        gint64 timeout = 1000 * 1000;
-        if (task) {
-            clock_gettime(CLOCK_REALTIME, &now);
-            timeout = (task->when.tv_sec - now.tv_sec) * 1000 * 1000 +
-                      (task->when.tv_nsec - now.tv_nsec) / 1000;
-            if (timeout <= 0) {
-                int terminate = task->terminate;
-                // remove task from queue
-                g_queue_pop_head(int_q);
-
-                // run task
-                NPP npp = tables_get_some_npp_instance();
-                if (npp)
-                    npn.pluginthreadasynccall(npp, comt_proxy, task);
-
-                if (terminate)  // should terminate?
-                    break;
-
-                continue;   // run cycle again
-            }
-        }
-
-        task = g_async_queue_timeout_pop(async_q, timeout);
-        if (task)
-            g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
-    }
-
-    g_queue_free(int_q);
-    return NULL;
-}
-
 void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result)
 {
-    struct comt_task_s *task = g_slice_alloc(sizeof(*task));
-
-    task->callback = callback;
-    task->result_to_pass = result;
-    task->terminate = 0;
-
-    if (delay_in_milliseconds <= 0) {
-        NPP npp = tables_get_some_npp_instance();
-        if (npp)
-            npn.pluginthreadasynccall(npp, comt_proxy, task);
-    } else {
-        // start thread and create async queue (once)
-        if (!async_q) {
-            async_q = g_async_queue_new();
-            g_thread_new("delay-thread", comt_delay_thread, async_q);
-        }
-
-        // calculate absolute time callback should be run at
-        clock_gettime(CLOCK_REALTIME, &task->when);
-        task->when.tv_sec += delay_in_milliseconds / 1000;
-        task->when.tv_nsec += (delay_in_milliseconds % 1000) * 1000 * 1000;
-        while (task->when.tv_nsec >= 1000 * 1000 * 1000) {
-            task->when.tv_sec += 1;
-            task->when.tv_nsec -= 1000 * 1000 * 1000;
-        }
-
-        g_async_queue_push(async_q, task);
-    }
-    return;
+    PP_Resource main_message_loop = ppb_message_loop_get_for_main_thread();
+    ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
+                                           result);
 }
 
 void
@@ -192,7 +105,7 @@ ppb_core_call_on_main_thread_now(struct pp_instance_s *pp_i, struct PP_Completio
 PP_Bool
 ppb_core_is_main_thread(void)
 {
-    return pthread_equal(np_main_thread, pthread_self());
+    return ppb_message_loop_get_current() == ppb_message_loop_get_for_main_thread();
 }
 
 

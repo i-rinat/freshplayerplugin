@@ -33,7 +33,6 @@
 
 
 extern NPNetscapeFuncs  npn;
-extern pthread_t        np_main_thread;
 
 int         tables_get_urandom_fd(void);
 
