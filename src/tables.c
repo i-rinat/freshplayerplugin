@@ -246,7 +246,7 @@ pp_var_to_np_variant(struct PP_Var var)
         do {
             const char *s1 = ppb_var_var_to_utf8(var, NULL);
             uint32_t len = strlen(s1);
-            char *s2 = npn.memalloc(len + 1);
+            char *s2 = npn.memalloc(len + 1); // TODO: call on main thread?
             memcpy(s2, s1, len + 1);
             res.type = NPVariantType_String;
             res.value.stringValue.UTF8Length = len;
@@ -259,7 +259,7 @@ pp_var_to_np_variant(struct PP_Var var)
         if (ppobj->klass == &n2p_proxy_class) {
             res.type = NPVariantType_Object;
             res.value.objectValue = ppobj->data;
-            npn.retainobject(res.value.objectValue);
+            npn.retainobject(res.value.objectValue); // TODO: call on main thread?
         } else {
             struct np_proxy_object_s *np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
             res.type = NPVariantType_Object;

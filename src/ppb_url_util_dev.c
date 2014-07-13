@@ -206,6 +206,7 @@ struct get_document_url_param_s {
     pthread_barrier_t       barrier;
 };
 
+// called on browser thread
 static
 void
 _get_document_url(void *user_data)

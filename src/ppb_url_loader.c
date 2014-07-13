@@ -101,6 +101,7 @@ struct comt_param_s {
     int                         retval;
 };
 
+// called on browser thread
 static
 void
 _url_loader_open_comt(void *user_data)
