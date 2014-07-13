@@ -33,6 +33,22 @@
 
 static
 void
+reset_components(struct PP_URLComponents_Dev *components)
+{
+    if (!components)
+        return;
+    components->scheme.begin =   0;     components->scheme.len =   -1;
+    components->username.begin = 0;     components->username.len = -1;
+    components->password.begin = 0;     components->password.len = -1;
+    components->host.begin =     0;     components->host.len =     -1;
+    components->port.begin =     0;     components->port.len =     -1;
+    components->path.begin =     0;     components->path.len =     -1;
+    components->query.begin =    0;     components->query.len =    -1;
+    components->ref.begin =      0;     components->ref.len =      -1;
+}
+
+static
+void
 parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
 {
     UriParserStateA ups;
@@ -45,14 +61,7 @@ parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
         return;
     }
 
-    components->scheme.begin =   0;     components->scheme.len =   -1;
-    components->username.begin = 0;     components->username.len = -1;
-    components->password.begin = 0;     components->password.len = -1;
-    components->host.begin =     0;     components->host.len =     -1;
-    components->port.begin =     0;     components->port.len =     -1;
-    components->path.begin =     0;     components->path.len =     -1;
-    components->query.begin =    0;     components->query.len =    -1;
-    components->ref.begin =      0;     components->ref.len =      -1;
+    reset_components(components);
 
 #define C_PARSE(c1, c2) \
     components->c1.begin = uri.c2.first ? uri.c2.first - s + 1 : 0; \
@@ -103,6 +112,7 @@ parse_url_string(const char *s, struct PP_URLComponents_Dev *components)
 struct PP_Var
 ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
+    reset_components(components);
     return PP_MakeUndefined();
 }
 
@@ -110,6 +120,7 @@ struct PP_Var
 ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
                                          struct PP_URLComponents_Dev *components)
 {
+    reset_components(components);
     struct PP_Var var = PP_MakeNull();
 
     if (base_url.type != PP_VARTYPE_STRING) {
@@ -166,6 +177,7 @@ struct PP_Var
 ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
                                               struct PP_URLComponents_Dev *components)
 {
+    reset_components(components);
     struct PP_Var base = ppb_url_util_dev_get_document_url(instance, NULL);
     return ppb_url_util_dev_resolve_relative_to_url(base, relative_string, components);
 }
@@ -192,6 +204,7 @@ ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance ta
 struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
+    reset_components(components);
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i)
         return PP_MakeUndefined();
@@ -242,6 +255,7 @@ struct PP_Var
 ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
+    reset_components(components);
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i)
         return PP_MakeUndefined();
@@ -258,6 +272,7 @@ struct PP_Var
 ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
                                          struct PP_URLComponents_Dev *components)
 {
+    reset_components(components);
     return PP_MakeUndefined();
 }
 
