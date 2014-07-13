@@ -389,8 +389,10 @@ NPP_WriteReady(NPP npp, NPStream *stream)
 int32_t
 NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 {
-    trace_info_f("[NPP] {full} %s npp=%p, stream=%p, offset=%d, len=%d, buffer=%p\n", __func__,
-               npp, stream, offset, len, buffer);
+    trace_info_f("[NPP] {full} %s npp=%p, stream={.pdata=%p, .ndata=%p, .url=%s, end=%u, "
+                 "lastmodified=%u, .notifyData=%p, .headers=<skipped>}, offset=%d, len=%d, buffer=%p\n",
+                 __func__, npp, stream->pdata, stream->ndata, stream->url, stream->end,
+                 stream->lastmodified, stream->notifyData, offset, len, buffer);
     if (config.quirks.plugin_missing)
         return len;
 
