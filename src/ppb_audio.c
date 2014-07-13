@@ -30,6 +30,7 @@
 #include "tables.h"
 #include "config.h"
 #include "pp_resource.h"
+#include "ppb_message_loop.h"
 
 
 PP_Resource
@@ -189,6 +190,7 @@ audio_player_thread(void *p)
     struct pp_audio_s *a = p;
     int error_cnt = 0;
 
+    ppb_message_loop_mark_thread_unsuitable();
     a->playing = 1;
     while (1) {
         if (a->shutdown)

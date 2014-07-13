@@ -58,4 +58,7 @@ ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallbac
 int32_t
 ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy);
 
+void
+ppb_message_loop_mark_thread_unsuitable(void);
+
 #endif // FPP__PPB_MESSAGE_LOOP_H

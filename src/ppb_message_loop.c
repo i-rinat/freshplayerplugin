@@ -74,6 +74,12 @@ ppb_message_loop_get_current(void)
     return this_thread_message_loop;
 }
 
+void
+ppb_message_loop_mark_thread_unsuitable(void)
+{
+    thread_is_not_suitable_for_message_loop = 1;
+}
+
 int32_t
 ppb_message_loop_attach_to_current_thread(PP_Resource message_loop)
 {
