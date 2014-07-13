@@ -329,8 +329,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
     }
 
 quit:
-    if (ccb.func)
-        ccb.func(ccb.user_data, PP_OK);
+    ppb_core_call_on_main_thread(0, ccb, PP_OK);
 
     return NPERR_NO_ERROR;
 }
@@ -363,8 +362,7 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         ul->read_pos += read_bytes;
 
         pp_resource_release(loader);
-        if (rt->ccb.func)
-            rt->ccb.func(rt->ccb.user_data, read_bytes);
+        ppb_core_call_on_main_thread(0, rt->ccb, read_bytes);
         g_slice_free(struct url_loader_read_task_s, rt);
         ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
@@ -373,8 +371,7 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         struct PP_CompletionCallback ccb = ul->stream_to_file_ccb;
 
         pp_resource_release(loader);
-        if (ccb.func)
-            ccb.func(ccb.user_data, PP_OK);
+        ppb_core_call_on_main_thread(0, ccb, PP_OK);
         return NPERR_NO_ERROR;
     }
 
@@ -430,8 +427,7 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 
     if (read_bytes > 0) {
         pp_resource_release(loader);
-        if (rt->ccb.func)
-            rt->ccb.func(rt->ccb.user_data, read_bytes);
+        ppb_core_call_on_main_thread(0, rt->ccb, read_bytes);
         g_slice_free(struct url_loader_read_task_s, rt);
         return len;
     } else {
