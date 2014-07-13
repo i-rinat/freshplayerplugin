@@ -31,6 +31,31 @@
 #include "n2p_proxy_class.h"
 
 
+struct get_window_object_param_s {
+    pthread_barrier_t   barrier;
+    struct PP_Var       result;
+    NPP                 npp;
+};
+
+static
+void
+_get_window_object(void *param)
+{
+    struct get_window_object_param_s *p = param;
+    NPObject *np_window_obj;
+    NPError err = npn.getvalue(p->npp, NPNVWindowNPObject, &np_window_obj);
+    if (err != NPERR_NO_ERROR) {
+        trace_error("%s, NPN_GetValue returned %d\n", __func__, err);
+        p->result = PP_MakeUndefined();
+        goto done;
+    }
+    tables_add_npobj_npp_mapping(np_window_obj, p->npp);
+    p->result = PP_MakeBrowserObject(np_window_obj, NULL);
+
+done:
+    pthread_barrier_wait(&p->barrier);
+}
+
 struct PP_Var
 ppb_instance_private_get_window_object(PP_Instance instance)
 {
@@ -40,15 +65,14 @@ ppb_instance_private_get_window_object(PP_Instance instance)
         return PP_MakeUndefined();
     }
 
-    NPObject *np_window_obj;
-    NPError err = npn.getvalue(pp_i->npp, NPNVWindowNPObject, &np_window_obj);
-    if (err != NPERR_NO_ERROR) {
-        trace_error("%s, NPN_GetValue returned %d\n", __func__, err);
-        return PP_MakeUndefined();
-    }
-    tables_add_npobj_npp_mapping(np_window_obj, pp_i->npp);
+    struct get_window_object_param_s p;
+    p.npp = pp_i->npp;
+    pthread_barrier_init(&p.barrier, NULL, 2);
+    npn.pluginthreadasynccall(pp_i->npp, _get_window_object, &p);
+    pthread_barrier_wait(&p.barrier);
+    pthread_barrier_destroy(&p.barrier);
 
-    return PP_MakeBrowserObject(np_window_obj, NULL);
+    return p.result;
 }
 
 struct PP_Var
