@@ -36,7 +36,6 @@ NPNetscapeFuncs npn;
 
 static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;
-static GHashTable  *npp_ht;
 static GHashTable  *npobj_to_npp_ht = NULL;     // NPObject-to-NPP mapping
 
 static PangoContext *pango_ctx = NULL;
@@ -53,7 +52,6 @@ constructor_tables(void)
     // hash tables
     var_ht =            g_hash_table_new(g_direct_hash, g_direct_equal);
     pp_to_np_ht =       g_hash_table_new(g_direct_hash, g_direct_equal);
-    npp_ht =            g_hash_table_new(g_direct_hash, g_direct_equal);
     npobj_to_npp_ht =   g_hash_table_new(g_direct_hash, g_direct_equal);
 
     // pango
@@ -76,7 +74,6 @@ destructor_tables(void)
     // hash tables
     g_hash_table_unref(var_ht);
     g_hash_table_unref(pp_to_np_ht);
-    g_hash_table_unref(npp_ht);
     g_hash_table_unref(npobj_to_npp_ht);
 
     // pango
@@ -282,39 +279,6 @@ pp_var_to_np_variant(struct PP_Var var)
     }
 
     return res;
-}
-
-void
-tables_add_npp_instance(NPP npp)
-{
-    pthread_mutex_lock(&lock);
-    g_hash_table_insert(npp_ht, (gpointer)npp, GINT_TO_POINTER(1));
-    pthread_mutex_unlock(&lock);
-}
-
-void
-tables_remove_npp_instance(NPP npp)
-{
-    pthread_mutex_lock(&lock);
-    g_hash_table_remove(npp_ht, (gpointer)npp);
-    pthread_mutex_unlock(&lock);
-}
-
-NPP
-tables_get_some_npp_instance(void)
-{
-    gpointer key, val;
-    GHashTableIter iter;
-
-    pthread_mutex_lock(&lock);
-    g_hash_table_iter_init(&iter, npp_ht);
-    gboolean have_key = g_hash_table_iter_next(&iter, &key, &val);
-    pthread_mutex_unlock(&lock);
-
-    if (have_key)
-        return key;
-
-    return NULL;
 }
 
 PangoContext *

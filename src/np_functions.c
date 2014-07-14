@@ -117,8 +117,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     trace_info_f("[NPP] {full} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                  pluginType, npp, mode, argc, saved);
 
-    tables_add_npp_instance(npp);
-
     for (k = 0; k < argc; k ++)
         trace_info_f("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
@@ -224,7 +222,6 @@ NPError
 NPP_Destroy(NPP npp, NPSavedData **save)
 {
     trace_info_f("[NPP] {full} %s npp=%p, save=%p\n", __func__, npp, save);
-    tables_remove_npp_instance(npp);
 
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
