@@ -630,6 +630,35 @@ x_state_mask_to_pp_inputevent_modifier(unsigned int state)
     return mod;
 }
 
+struct call_plugin_handle_input_event_param_s {
+    struct pp_instance_s       *pp_i;
+    PP_Resource                 event_id;
+};
+
+static
+void
+_call_ppp_handle_input_event(void *user_data, int32_t result)
+{
+    struct call_plugin_handle_input_event_param_s *p = user_data;
+
+    if (p->pp_i->ppp_input_event)
+        p->pp_i->ppp_input_event->HandleInputEvent(p->pp_i->id, p->event_id);
+
+    ppb_core_release_resource(p->event_id);
+    g_slice_free(struct call_plugin_handle_input_event_param_s, p);
+}
+
+static
+void
+ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id)
+{
+    struct call_plugin_handle_input_event_param_s *p = g_slice_alloc0(sizeof(*p));
+    p->pp_i = pp_i;
+    p->event_id = event_id;
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_call_ppp_handle_input_event, p),
+                                 PP_OK);
+}
+
 static
 int16_t
 handle_enter_leave_event(NPP npp, void *event)
@@ -654,14 +683,8 @@ handle_enter_leave_event(NPP npp, void *event)
     pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,
                                             ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
                                             &mouse_position, 0, &zero_point);
-    PP_Bool ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
-    ppb_core_release_resource(pp_event);
+    ppp_handle_input_event_helper(pp_i, pp_event);
 
-    // return false only if handler returns PP_FALSE and event is filtered
-    if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
-        return 0;
-
-    // for non-filtered events return values are ignored
     return 1;
 }
 
@@ -688,14 +711,7 @@ handle_motion_event(NPP npp, void *event)
     pp_event = ppb_mouse_input_event_create(pp_i->id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
                                             ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
                                             &mouse_position, 0, &zero_point);
-    PP_Bool ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
-    ppb_core_release_resource(pp_event);
-
-    // return false only if handler returns PP_FALSE and event is filtered
-    if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_MOUSE & pp_i->filtered_event_mask))
-        return 0;
-
-    // for non-filtered events return values are ignored
+    ppp_handle_input_event_helper(pp_i, pp_event);
     return 1;
 }
 
@@ -765,22 +781,16 @@ handle_button_press_release_event(NPP npp, void *event)
     if (!(event_class & combined_mask))
         return 0;
 
-    PP_Bool handled = PP_FALSE;
-
     if (event_class == PP_INPUTEVENT_CLASS_MOUSE) {
         PP_Resource         pp_event;
         PP_InputEvent_Type  event_type;
-        PP_Bool             ret;
 
         event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
                                                : PP_INPUTEVENT_TYPE_MOUSEUP;
         pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,
                                                 ev->time/1.0e6, mod, mouse_button,
                                                 &mouse_position, 1, &zero_point);
-
-        ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
-        handled = handled || ret;
-        ppb_core_release_resource(pp_event);
+        ppp_handle_input_event_helper(pp_i, pp_event);
 
         // context menu event
         if (ev->type == ButtonRelease && ev_button == 3) {
@@ -788,9 +798,7 @@ handle_button_press_release_event(NPP npp, void *event)
                                                     PP_INPUTEVENT_TYPE_CONTEXTMENU,
                                                     ev->time/1.0e6, mod, mouse_button,
                                                     &mouse_position, 1, &zero_point);
-            ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
-            handled = handled || ret;
-            ppb_core_release_resource(pp_event);
+            ppp_handle_input_event_helper(pp_i, pp_event);
         }
     } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
         const float scroll_by_tick = 10.0;
@@ -806,11 +814,6 @@ handle_button_press_release_event(NPP npp, void *event)
         return 0;
     }
 
-    // return false only if handler returns PP_FALSE and event is filtered
-    if (!handled && (pp_i->filtered_event_mask & event_class))
-        return 0;
-
-    // for non-filtered events return values are ignored
     return 1;
 }
 
@@ -833,7 +836,6 @@ handle_key_press_release_event(NPP npp, void *event)
     if (!(PP_INPUTEVENT_CLASS_KEYBOARD & combined_mask))
         return 0;
 
-    PP_Bool        ret = PP_FALSE;
     char           buffer[20];
     KeySym         keysym;
     XComposeStatus compose_status;
@@ -851,20 +853,12 @@ handle_key_press_release_event(NPP npp, void *event)
                         pp_keycode, character_text);
         ppb_var_release(character_text);
 
-        pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
-        ppb_core_release_resource(pp_event);
+        ppp_handle_input_event_helper(pp_i, pp_event);
     }
 
     pp_event = ppb_keyboard_input_event_create(pp_i->id, event_type, ev->time/1.0e6,
                                                mod, pp_keycode, PP_MakeUndefined());
-    ret = pp_i->ppp_input_event->HandleInputEvent(pp_i->id, pp_event);
-    ppb_core_release_resource(pp_event);
-
-    // return false only if handler returns PP_FALSE and event is filtered
-    if (ret == PP_FALSE && (PP_INPUTEVENT_CLASS_KEYBOARD & pp_i->filtered_event_mask))
-        return 0;
-
-    // for non-filtered events return values are ignored
+    ppp_handle_input_event_helper(pp_i, pp_event);
     return 1;
 }
 
