@@ -41,6 +41,7 @@ int         tables_unref_var(struct PP_Var var);
 
 struct pp_instance_s   *tables_get_pp_instance(PP_Instance instance);
 void                    tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i);
+void                    tables_remove_pp_instance(PP_Instance instance);
 
 struct PP_Var       PP_MakeString(const char *s);
 struct PP_Var       PP_MakeStringN(const char *s, unsigned int len);

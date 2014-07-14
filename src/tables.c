@@ -150,6 +150,14 @@ tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i)
     pthread_mutex_unlock(&lock);
 }
 
+void
+tables_remove_pp_instance(PP_Instance instance)
+{
+    pthread_mutex_lock(&lock);
+    g_hash_table_remove(pp_to_np_ht, GINT_TO_POINTER(instance));
+    pthread_mutex_unlock(&lock);
+}
+
 struct PP_Var
 PP_MakeString(const char *s)
 {
