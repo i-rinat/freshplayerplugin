@@ -882,82 +882,6 @@ handle_focus_in_out_event(NPP npp, void *event)
     return 1;
 }
 
-struct handle_event_comt_param_s {
-    struct pp_instance_s       *pp_i;
-    XEvent                      event;
-    int16_t                     result;
-};
-
-static
-void
-_handle_event_comt(void *user_data, int32_t result)
-{
-    struct handle_event_comt_param_s *p = user_data;
-    XAnyEvent *xaev = &p->event.xany;
-    NPP npp = p->pp_i->npp;
-
-#define TRACE_HELPER(implstatus, f)                                                     \
-    trace_info_##f("[NPP] " implstatus " %s npp=%p, event={.type=%s, .serial=%lu, "     \
-               ".send_event=%d, .display=%p, .window=0x%x}\n", __func__, npp,           \
-               reverse_xevent_type(xaev->type), xaev->serial, xaev->send_event,         \
-               xaev->display, (uint32_t)xaev->window)
-
-    switch (xaev->type) {
-    case Expose:
-        TRACE_HELPER("{full}", f);
-        // its event have similar layout to GraphicsExpose, so let ge handler to do the work
-        p->result = handle_graphics_expose_event(npp, &p->event);
-        break;
-    case GraphicsExpose:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_graphics_expose_event(npp, &p->event);
-        break;
-    case EnterNotify:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_enter_leave_event(npp, &p->event);
-        break;
-    case LeaveNotify:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_enter_leave_event(npp, &p->event);
-        break;
-    case MotionNotify:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_motion_event(npp, &p->event);
-        break;
-    case ButtonPress:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_button_press_release_event(npp, &p->event);
-        break;
-    case ButtonRelease:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_button_press_release_event(npp, &p->event);
-        break;
-    case KeyPress:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_key_press_release_event(npp, &p->event);
-        break;
-    case KeyRelease:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_key_press_release_event(npp, &p->event);
-        break;
-    case FocusIn:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_focus_in_out_event(npp, &p->event);
-        break;
-    case FocusOut:
-        TRACE_HELPER("{full}", f);
-        p->result = handle_focus_in_out_event(npp, &p->event);
-        break;
-    default:
-        TRACE_HELPER("{zilch}", z);
-        p->result = 0;
-        break;
-    }
-#undef TRACE_HELPER
-
-    g_slice_free(struct handle_event_comt_param_s, p);
-}
-
 int16_t
 NPP_HandleEvent(NPP npp, void *event)
 {
@@ -974,12 +898,52 @@ NPP_HandleEvent(NPP npp, void *event)
         return 0;
     }
 
-    struct handle_event_comt_param_s *p = g_slice_alloc0(sizeof(*p));
-    p->pp_i = pp_i;
-    p->event = *(XEvent *)event;
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_handle_event_comt, p), PP_OK);
+#define TRACE_HELPER(implstatus, f)                                                     \
+    trace_info_##f("[NPP] " implstatus " %s npp=%p, event={.type=%s, .serial=%lu, "     \
+               ".send_event=%d, .display=%p, .window=0x%x}\n", __func__, npp,           \
+               reverse_xevent_type(xaev->type), xaev->serial, xaev->send_event,         \
+               xaev->display, (uint32_t)xaev->window)
 
-    return 1;
+    switch (xaev->type) {
+    case Expose:
+        TRACE_HELPER("{full}", f);
+        // its event have similar layout to GraphicsExpose, so let ge handler to do the work
+        return handle_graphics_expose_event(npp, event);
+    case GraphicsExpose:
+        TRACE_HELPER("{full}", f);
+        return handle_graphics_expose_event(npp, event);
+    case EnterNotify:
+        TRACE_HELPER("{full}", f);
+        return handle_enter_leave_event(npp, event);
+    case LeaveNotify:
+        TRACE_HELPER("{full}", f);
+        return handle_enter_leave_event(npp, event);
+    case MotionNotify:
+        TRACE_HELPER("{full}", f);
+        return handle_motion_event(npp, event);
+    case ButtonPress:
+        TRACE_HELPER("{full}", f);
+        return handle_button_press_release_event(npp, event);
+    case ButtonRelease:
+        TRACE_HELPER("{full}", f);
+        return handle_button_press_release_event(npp, event);
+    case KeyPress:
+        TRACE_HELPER("{full}", f);
+        return handle_key_press_release_event(npp, event);
+    case KeyRelease:
+        TRACE_HELPER("{full}", f);
+        return handle_key_press_release_event(npp, event);
+    case FocusIn:
+        TRACE_HELPER("{full}", f);
+        return handle_focus_in_out_event(npp, event);
+    case FocusOut:
+        TRACE_HELPER("{full}", f);
+        return handle_focus_in_out_event(npp, event);
+    default:
+        TRACE_HELPER("{zilch}", z);
+        return 0;
+    }
+#undef TRACE_HELPER
 }
 
 void
