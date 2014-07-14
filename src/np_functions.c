@@ -82,7 +82,7 @@ empty_completion_callback(void *user_data, int32_t result)
 
 static
 void
-call_plugin_did_create(void *user_data, int32_t result)
+_call_plugin_did_create_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
 
@@ -206,14 +206,15 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pthread_barrier_destroy(&pp_i->main_thread_barrier);
     }
 
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(call_plugin_did_create, pp_i), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_call_plugin_did_create_comt, pp_i),
+                                 PP_OK);
 
     return NPERR_NO_ERROR;
 }
 
 static
 void
-_destroy_instance(void *user_data, int32_t result)
+_destroy_instance_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
     pp_i->ppp_instance_1_1->DidDestroy(pp_i->id);
@@ -229,7 +230,7 @@ NPP_Destroy(NPP npp, NPSavedData **save)
         return NPERR_NO_ERROR;
 
     struct pp_instance_s *pp_i = npp->pdata;
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_destroy_instance, pp_i), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_destroy_instance_comt, pp_i), PP_OK);
 
     if (save)
         *save = NULL;
@@ -238,7 +239,7 @@ NPP_Destroy(NPP npp, NPSavedData **save)
 
 static
 void
-_set_window(void *user_data, int32_t result)
+_set_window_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
 
@@ -275,7 +276,8 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         pp_i->height = window->height;
 
         if (pp_i->instance_loaded)
-            ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_window, pp_i), PP_OK);
+            ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_window_comt, pp_i),
+                                         PP_OK);
     }
     pthread_mutex_unlock(&pp_i->lock);
 
@@ -637,7 +639,7 @@ struct call_plugin_handle_input_event_param_s {
 
 static
 void
-_call_ppp_handle_input_event(void *user_data, int32_t result)
+_call_ppp_handle_input_event_comt(void *user_data, int32_t result)
 {
     struct call_plugin_handle_input_event_param_s *p = user_data;
 
@@ -655,7 +657,7 @@ ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id)
     struct call_plugin_handle_input_event_param_s *p = g_slice_alloc0(sizeof(*p));
     p->pp_i = pp_i;
     p->event_id = event_id;
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_call_ppp_handle_input_event, p),
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_call_ppp_handle_input_event_comt, p),
                                  PP_OK);
 }
 
