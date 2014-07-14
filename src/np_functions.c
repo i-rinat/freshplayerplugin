@@ -211,6 +211,14 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     return NPERR_NO_ERROR;
 }
 
+static
+void
+_destroy_instance(void *user_data, int32_t result)
+{
+    struct pp_instance_s *pp_i = user_data;
+    pp_i->ppp_instance_1_1->DidDestroy(pp_i->id);
+}
+
 NPError
 NPP_Destroy(NPP npp, NPSavedData **save)
 {
@@ -221,7 +229,8 @@ NPP_Destroy(NPP npp, NPSavedData **save)
         return NPERR_NO_ERROR;
 
     struct pp_instance_s *pp_i = npp->pdata;
-    pp_i->ppp_instance_1_1->DidDestroy(pp_i->id);
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_destroy_instance, pp_i), PP_OK);
+
     if (save)
         *save = NULL;
     return NPERR_NO_ERROR;
