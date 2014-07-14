@@ -227,6 +227,26 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     return NPERR_NO_ERROR;
 }
 
+static
+void
+_set_window(void *user_data, int32_t result)
+{
+    struct pp_instance_s *pp_i = user_data;
+
+    pthread_mutex_lock(&pp_i->lock);
+    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
+    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+    v->rect.point.x = 0; // TODO: pp_i->x;
+    v->rect.point.y = 0; // TODO: pp_i->y;
+    v->rect.size.width = pp_i->width;
+    v->rect.size.height = pp_i->height;
+    pp_resource_release(view);
+    pthread_mutex_unlock(&pp_i->lock);
+
+    pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
+    ppb_core_release_resource(view);
+}
+
 NPError
 NPP_SetWindow(NPP npp, NPWindow *window)
 {
@@ -239,24 +259,16 @@ NPP_SetWindow(NPP npp, NPWindow *window)
 
     struct pp_instance_s *pp_i = npp->pdata;
 
+    pthread_mutex_lock(&pp_i->lock);
     if (pp_i && !pp_i->is_fullscreen) {
         pp_i->wnd = (Window)window->window;
         pp_i->width = window->width;
         pp_i->height = window->height;
 
-        if (pp_i->instance_loaded) {
-            PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
-            struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-            v->rect.point.x = window->x;
-            v->rect.point.y = window->y;
-            v->rect.size.width = window->width;
-            v->rect.size.height = window->height;
-            pp_resource_release(view);
-
-            pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
-            ppb_core_release_resource(view);
-        }
+        if (pp_i->instance_loaded)
+            ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_window, pp_i), PP_OK);
     }
+    pthread_mutex_unlock(&pp_i->lock);
 
     return NPERR_NO_ERROR;
 }
