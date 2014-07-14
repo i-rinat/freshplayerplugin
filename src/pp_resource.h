@@ -125,8 +125,8 @@ struct pp_instance_s {
     uint32_t        width;
     uint32_t        height;
     int             argc;
-    const char    **argn;
-    const char    **argv;
+    char          **argn;
+    char          **argv;
     int             instance_loaded;
     const char     *instance_url;
     pthread_t       pp_thread;

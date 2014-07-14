@@ -86,8 +86,17 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
 
-    pp_i->ppp_instance_1_1->DidCreate(pp_i->id, pp_i->argc, pp_i->argn, pp_i->argv);
+    pp_i->ppp_instance_1_1->DidCreate(pp_i->id, pp_i->argc, (const char **)pp_i->argn,
+                                      (const char **)pp_i->argv);
     pp_i->instance_loaded = 1;
+
+    // no need to keep argn/argv after initialization
+    for (uintptr_t k = 0; k < pp_i->argc; k++) {
+        free(pp_i->argn[k]);
+        free(pp_i->argv[k]);
+    }
+    free_and_nullify(pp_i, argn);
+    free_and_nullify(pp_i, argv);
 
     if (pp_i->is_fullframe) {
         PP_Resource request_info = ppb_url_request_info_create(pp_i->id);
@@ -216,6 +225,8 @@ _destroy_instance_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
     pp_i->ppp_instance_1_1->DidDestroy(pp_i->id);
+    tables_remove_pp_instance(pp_i->id);
+    free(pp_i);
 }
 
 NPError
