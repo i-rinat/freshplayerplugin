@@ -864,6 +864,17 @@ handle_key_press_release_event(NPP npp, void *event)
     return 1;
 }
 
+static
+void
+_call_ppp_did_change_focus_comt(void *user_data, int32_t result)
+{
+    struct pp_instance_s *pp_i = user_data;
+    PP_Bool has_focus = result;
+
+    if (pp_i->ppp_instance_1_1 && pp_i->ppp_instance_1_1->DidChangeFocus)
+        pp_i->ppp_instance_1_1->DidChangeFocus(pp_i->id, has_focus);
+}
+
 int16_t
 handle_focus_in_out_event(NPP npp, void *event)
 {
@@ -872,9 +883,9 @@ handle_focus_in_out_event(NPP npp, void *event)
 
     PP_Bool has_focus = (ev->type == FocusIn) ? PP_TRUE : PP_FALSE;
 
-    if (pp_i->ppp_instance_1_1 && pp_i->ppp_instance_1_1->DidChangeFocus)
-        pp_i->ppp_instance_1_1->DidChangeFocus(pp_i->id, has_focus);
-
+    struct PP_CompletionCallback ccb;
+    ccb = PP_MakeCompletionCallback(_call_ppp_did_change_focus_comt, pp_i);
+    ppb_core_call_on_main_thread(0, ccb, has_focus);
     return 1;
 }
 
