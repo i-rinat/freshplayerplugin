@@ -510,12 +510,14 @@ handle_graphics_expose_event(NPP npp, void *event)
         XFree(xi);
         pp_resource_release(pp_i->graphics);
 
-        if (pp_i->graphics_ccb.func) {
-            ppb_core_call_on_main_thread(0, pp_i->graphics_ccb, PP_OK);
-        } else {
-            pthread_mutex_unlock(&pp_i->lock);
-            pthread_barrier_wait(&pp_i->graphics_barrier);
-            pthread_mutex_lock(&pp_i->lock);
+        if (pp_i->graphics_in_progress) {
+            if (pp_i->graphics_ccb.func) {
+                ppb_core_call_on_main_thread(0, pp_i->graphics_ccb, PP_OK);
+            } else {
+                pthread_mutex_unlock(&pp_i->lock);
+                pthread_barrier_wait(&pp_i->graphics_barrier);
+                pthread_mutex_lock(&pp_i->lock);
+            }
         }
 
         pp_i->graphics_in_progress = 0;
@@ -530,12 +532,14 @@ handle_graphics_expose_event(NPP npp, void *event)
         XFlush(dpy);
         pp_resource_release(pp_i->graphics);
 
-        if (pp_i->graphics_ccb.func) {
-            ppb_core_call_on_main_thread(0, pp_i->graphics_ccb, PP_OK);
-        } else {
-            pthread_mutex_unlock(&pp_i->lock);
-            pthread_barrier_wait(&pp_i->graphics_barrier);
-            pthread_mutex_lock(&pp_i->lock);
+        if (pp_i->graphics_in_progress) {
+            if (pp_i->graphics_ccb.func) {
+                ppb_core_call_on_main_thread(0, pp_i->graphics_ccb, PP_OK);
+            } else {
+                pthread_mutex_unlock(&pp_i->lock);
+                pthread_barrier_wait(&pp_i->graphics_barrier);
+                pthread_mutex_lock(&pp_i->lock);
+            }
         }
 
         pp_i->graphics_in_progress = 0;

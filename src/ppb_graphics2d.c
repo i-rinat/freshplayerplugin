@@ -202,6 +202,8 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         return PP_ERROR_INPROGRESS;
     }
 
+    pp_i->graphics_ccb = callback;
+    pp_i->graphics_in_progress = 1;
     pthread_mutex_unlock(&pp_i->lock);
 
     while (g2d->task_list) {
@@ -275,9 +277,6 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     pp_resource_release(graphics_2d);
 
     pthread_mutex_lock(&pp_i->lock);
-    pp_i->graphics_ccb = callback;
-    pp_i->graphics_in_progress = 1;
-
     if (!callback.func)
         pthread_barrier_init(&pp_i->graphics_barrier, NULL, 2);
     if (pp_i->is_fullscreen) {
