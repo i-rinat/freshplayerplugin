@@ -110,31 +110,43 @@ struct np_proxy_object_s {
 struct pp_instance_s {
     const struct PPP_Instance_1_1  *ppp_instance_1_1;
     const struct PPP_InputEvent_0_1 *ppp_input_event;
-    uint32_t        event_mask;
-    uint32_t        filtered_event_mask;
-    Window          wnd;
-    PP_Instance     id;
-    NPP             npp;
-    uint32_t        is_fullframe;
-    uint32_t        is_fullscreen;
-    uint32_t        incognito_mode;
-    pthread_t       fs_thread;
-    Window          fs_wnd;
-    uint32_t        fs_width;
-    uint32_t        fs_height;
-    uint32_t        width;
-    uint32_t        height;
-    int             argc;
-    char          **argn;
-    char          **argv;
-    int             instance_loaded;
-    const char     *instance_url;
-    pthread_t       pp_thread;
-    PP_Resource     graphics;
-    Display        *dpy;
-    EGLDisplay      egl_dpy;
-    pthread_mutex_t lock;
-    pthread_barrier_t   main_thread_barrier;
+    uint32_t                        event_mask;
+    uint32_t                        filtered_event_mask;
+    Window                          wnd;
+    PP_Instance                     id;
+    NPP                             npp;
+    Display                        *dpy;
+    EGLDisplay                      egl_dpy;
+    pthread_mutex_t                 lock;
+    uint32_t                        is_fullframe;
+    uint32_t                        is_fullscreen;
+    uint32_t                        incognito_mode;
+    uint32_t                        instance_loaded;
+
+    // full screen
+    pthread_t                       fs_thread;
+    Window                          fs_wnd;
+    uint32_t                        fs_width;
+    uint32_t                        fs_height;
+
+    // geometry
+    uint32_t                        x;
+    uint32_t                        y;
+    uint32_t                        width;
+    uint32_t                        height;
+
+    int                             argc;
+    char                          **argn;
+    char                          **argv;
+
+    const char                     *instance_url;
+    pthread_t                       main_thread;
+    pthread_barrier_t               main_thread_barrier;
+
+    // graphics2d and graphics3d
+    PP_Resource                     graphics;
+    struct PP_CompletionCallback    graphics_ccb;
+    pthread_barrier_t               graphics_barrier;
 };
 
 
