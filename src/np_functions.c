@@ -508,8 +508,18 @@ handle_graphics_expose_event(NPP npp, void *event)
         XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0,
                   g2d->scaled_width, g2d->scaled_height);
         XFree(xi);
-        pthread_mutex_unlock(&pp_i->lock);
         pp_resource_release(pp_i->graphics);
+
+        if (pp_i->graphics_ccb.func) {
+            ppb_core_call_on_main_thread(0, pp_i->graphics_ccb, PP_OK);
+        } else {
+            pthread_mutex_unlock(&pp_i->lock);
+            pthread_barrier_wait(&pp_i->graphics_barrier);
+            pthread_mutex_lock(&pp_i->lock);
+        }
+
+        pp_i->graphics_in_progress = 0;
+        pthread_mutex_unlock(&pp_i->lock);
     } else if (g3d) {
         pthread_mutex_lock(&pp_i->lock);
 
@@ -518,9 +528,18 @@ handle_graphics_expose_event(NPP npp, void *event)
                   g3d->width, g3d->height,
                   0, 0);
         XFlush(dpy);
-
-        pthread_mutex_unlock(&pp_i->lock);
         pp_resource_release(pp_i->graphics);
+
+        if (pp_i->graphics_ccb.func) {
+            ppb_core_call_on_main_thread(0, pp_i->graphics_ccb, PP_OK);
+        } else {
+            pthread_mutex_unlock(&pp_i->lock);
+            pthread_barrier_wait(&pp_i->graphics_barrier);
+            pthread_mutex_lock(&pp_i->lock);
+        }
+
+        pp_i->graphics_in_progress = 0;
+        pthread_mutex_unlock(&pp_i->lock);
     } else {
         return 0;
     }

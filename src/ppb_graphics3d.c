@@ -305,11 +305,24 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
 
     struct pp_instance_s *pp_i = g3d->instance;
 
+    pthread_mutex_lock(&pp_i->lock);
     if (pp_i->graphics != context) {
         // Other context bound, do nothing.
         pp_resource_release(context);
-        return PP_OK;
+        pthread_mutex_unlock(&pp_i->lock);
+        return PP_ERROR_FAILED;
     }
+
+    if (pp_i->graphics_in_progress) {
+        pp_resource_release(context);
+        pthread_mutex_unlock(&pp_i->lock);
+        return PP_ERROR_INPROGRESS;
+    }
+
+    pp_i->graphics_ccb = callback;
+    pp_i->graphics_in_progress = 1;
+    if (!callback.func)
+        pthread_barrier_init(&pp_i->graphics_barrier, NULL, 2);
 
     if (pp_i->is_fullscreen) {
         XGraphicsExposeEvent ev = {
@@ -319,12 +332,12 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
             .height = pp_i->height
         };
 
-        pthread_mutex_lock(&pp_i->lock);
         XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
         XFlush(pp_i->dpy);
         pthread_mutex_unlock(&pp_i->lock);
     } else {
         struct call_invalidaterect_param_s p;
+        pthread_mutex_unlock(&pp_i->lock);
         p.g3d = g3d;
         pthread_barrier_init(&p.barrier, NULL, 2);
         npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect, &p);
@@ -333,11 +346,10 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     }
     pp_resource_release(context);
 
-    if (callback.func) {
-        ppb_core_call_on_main_thread(0, callback, PP_OK);
+    if (callback.func)
         return PP_OK_COMPLETIONPENDING;
-    }
 
+    pthread_barrier_wait(&pp_i->graphics_barrier);
     return PP_OK;
 }
 

@@ -188,6 +188,22 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     struct pp_instance_s *pp_i = g2d->instance;
 
+    pthread_mutex_lock(&pp_i->lock);
+
+    if (pp_i->graphics != graphics_2d) {
+        pp_resource_release(graphics_2d);
+        pthread_mutex_unlock(&pp_i->lock);
+        return PP_ERROR_FAILED;
+    }
+
+    if (pp_i->graphics_in_progress) {
+        pp_resource_release(graphics_2d);
+        pthread_mutex_unlock(&pp_i->lock);
+        return PP_ERROR_INPROGRESS;
+    }
+
+    pthread_mutex_unlock(&pp_i->lock);
+
     while (g2d->task_list) {
         GList *link = g_list_first(g2d->task_list);
         struct g2d_paint_task_s *pt = link->data;
@@ -257,6 +273,13 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     }
 
     pp_resource_release(graphics_2d);
+
+    pthread_mutex_lock(&pp_i->lock);
+    pp_i->graphics_ccb = callback;
+    pp_i->graphics_in_progress = 1;
+
+    if (!callback.func)
+        pthread_barrier_init(&pp_i->graphics_barrier, NULL, 2);
     if (pp_i->is_fullscreen) {
         XGraphicsExposeEvent ev = {
             .type = GraphicsExpose,
@@ -265,12 +288,12 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
             .height = pp_i->height
         };
 
-        pthread_mutex_lock(&pp_i->lock);
         XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
         XFlush(pp_i->dpy);
         pthread_mutex_unlock(&pp_i->lock);
     } else {
         struct call_invalidaterect_param_s p;
+        pthread_mutex_unlock(&pp_i->lock);
         p.g2d = g2d;
         pthread_barrier_init(&p.barrier, NULL, 2);
         npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect, &p);
@@ -278,11 +301,10 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         pthread_barrier_destroy(&p.barrier);
     }
 
-    if (callback.func) {
-        ppb_core_call_on_main_thread(0, callback, PP_OK);
+    if (callback.func)
         return PP_OK_COMPLETIONPENDING;
-    }
 
+    pthread_barrier_wait(&pp_i->graphics_barrier);
     return PP_OK;
 }
 
