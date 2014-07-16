@@ -98,6 +98,16 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
     free_and_nullify(pp_i, argn);
     free_and_nullify(pp_i, argv);
 
+    pp_i->ppp_instance_private = ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
+    if (pp_i->ppp_instance_private && pp_i->ppp_instance_private->GetInstanceObject) {
+        struct PP_Var ppobj = pp_i->ppp_instance_private->GetInstanceObject(pp_i->id);
+        NPVariant np_var = pp_var_to_np_variant(ppobj);
+        ppb_var_release(ppobj);
+
+        pp_i->scriptable_obj = np_var.value.objectValue;
+        tables_add_npobj_npp_mapping(np_var.value.objectValue, pp_i->npp);
+    }
+
     if (pp_i->is_fullframe) {
         PP_Resource request_info = ppb_url_request_info_create(pp_i->id);
         PP_Resource url_loader = ppb_url_loader_create(pp_i->id);
@@ -993,6 +1003,7 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 NPError
 NPP_GetValue(NPP npp, NPPVariable variable, void *value)
 {
+    struct pp_instance_s *pp_i = npp->pdata;
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
 
@@ -1038,22 +1049,7 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
         break;
     case NPPVpluginScriptableNPObject:
         trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
-        do {
-            struct pp_instance_s *pp_i = npp->pdata;
-            const struct PPP_Instance_Private_0_1 *ppp_instance_private =
-                ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
-            if (!ppp_instance_private || !ppp_instance_private->GetInstanceObject) {
-                *(void **)value = NULL;
-                break;
-            }
-
-            struct PP_Var ppobj = ppp_instance_private->GetInstanceObject(pp_i->id);
-            NPVariant np_var = pp_var_to_np_variant(ppobj);
-            ppb_var_release(ppobj);
-
-            *(void **)value = np_var.value.objectValue;
-            tables_add_npobj_npp_mapping(np_var.value.objectValue, npp);
-        } while (0);
+        *(void **)value = pp_i->scriptable_obj;
         break;
     case NPPVformValue:
         trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
