@@ -57,7 +57,7 @@ PP_TimeTicks
 ppb_core_get_time_ticks(void)
 {
     struct timespec t;
-    clock_gettime(CLOCK_MONOTONIC, &t);
+    clock_gettime(CLOCK_REALTIME, &t);
     return t.tv_sec + t.tv_nsec / 1e9;
 }
 
