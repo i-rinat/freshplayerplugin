@@ -48,7 +48,6 @@ add_library(freshwrapper-obj OBJECT
     ppb_ime_input_event_dev.c
     ppb_input_event.c
     ppb_instance.c
-    ppb_instance_private.c
     ppb_memory_dev.c
     ppb_message_loop.c
     ppb_nacl_private.c

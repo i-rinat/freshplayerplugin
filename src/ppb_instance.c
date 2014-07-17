@@ -27,6 +27,10 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
+#include "ppb_var.h"
+#include "ppb_core.h"
+#include "n2p_proxy_class.h"
+
 
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
@@ -98,6 +102,123 @@ ppb_instance_is_full_frame(PP_Instance instance)
         return PP_FALSE;
 }
 
+struct get_window_object_param_s {
+    pthread_barrier_t   barrier;
+    struct PP_Var       result;
+    NPP                 npp;
+};
+
+static
+void
+_get_window_object(void *param)
+{
+    struct get_window_object_param_s *p = param;
+    NPObject *np_window_obj;
+    NPError err = npn.getvalue(p->npp, NPNVWindowNPObject, &np_window_obj);
+    if (err != NPERR_NO_ERROR) {
+        trace_error("%s, NPN_GetValue returned %d\n", __func__, err);
+        p->result = PP_MakeUndefined();
+        goto done;
+    }
+    tables_add_npobj_npp_mapping(np_window_obj, p->npp);
+    p->result = PP_MakeBrowserObject(np_window_obj, NULL);
+
+done:
+    pthread_barrier_wait(&p->barrier);
+}
+
+struct PP_Var
+ppb_instance_private_get_window_object(PP_Instance instance)
+{
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, wrong instance %d\n", __func__, instance);
+        return PP_MakeUndefined();
+    }
+
+    struct get_window_object_param_s p;
+    p.npp = pp_i->npp;
+    pthread_barrier_init(&p.barrier, NULL, 2);
+    npn.pluginthreadasynccall(pp_i->npp, _get_window_object, &p);
+    pthread_barrier_wait(&p.barrier);
+    pthread_barrier_destroy(&p.barrier);
+
+    return p.result;
+}
+
+struct PP_Var
+ppb_instance_private_get_owner_element_object(PP_Instance instance)
+{
+    return PP_MakeUndefined();
+}
+
+struct execute_script_param_s {
+    pthread_barrier_t   barrier;
+    struct PP_Var       script;
+    struct PP_Var       result;
+    NPP                 npp;
+};
+
+static
+void
+_execute_script_comt(void *p)
+{
+    struct execute_script_param_s *esp = p;
+    NPError err;
+    NPObject *np_window_obj;
+    NPString  np_script;
+    NPVariant np_result;
+
+    err = npn.getvalue(esp->npp, NPNVWindowNPObject, &np_window_obj);
+    if (err != NPERR_NO_ERROR) {
+        trace_error("%s, NPN_GetValue failed with code %d\n", __func__, err);
+        esp->result = PP_MakeUndefined();
+        goto quit;
+    }
+
+    np_script.UTF8Characters = ppb_var_var_to_utf8(esp->script, &np_script.UTF8Length);
+    if (!npn.evaluate(esp->npp, np_window_obj, &np_script, &np_result)) {
+        trace_error("%s, NPN_Evaluate failed\n", __func__);
+        esp->result = PP_MakeUndefined();
+        goto quit;
+    }
+
+    // TODO: find out what exception is
+    esp->result = np_variant_to_pp_var(np_result);
+    if (np_result.type == NPVariantType_Object)
+        tables_add_npobj_npp_mapping(np_result.value.objectValue, esp->npp);
+    else
+        npn.releasevariantvalue(&np_result);
+
+quit:
+    pthread_barrier_wait(&esp->barrier);
+}
+
+struct PP_Var
+ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
+                                    struct PP_Var *exception)
+{
+    if (script.type != PP_VARTYPE_STRING) {
+        // TODO: fill exception
+        return PP_MakeUndefined();
+    }
+
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return PP_MakeUndefined();
+
+    struct execute_script_param_s esp;
+    esp.script = script;
+    esp.npp = pp_i->npp;
+
+    pthread_barrier_init(&esp.barrier, NULL, 2);
+    npn.pluginthreadasynccall(esp.npp, _execute_script_comt, &esp);
+    pthread_barrier_wait(&esp.barrier);
+    pthread_barrier_destroy(&esp.barrier);
+
+    return esp.result;
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -116,8 +237,41 @@ trace_ppb_instance_is_full_frame(PP_Instance instance)
     return ppb_instance_is_full_frame(instance);
 }
 
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_instance_private_get_window_object(PP_Instance instance)
+{
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
+    return ppb_instance_private_get_window_object(instance);
+}
+
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_instance_private_get_owner_element_object(PP_Instance instance)
+{
+    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    return ppb_instance_private_get_owner_element_object(instance);
+}
+
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
+                                          struct PP_Var *exception)
+{
+    char *s_script = trace_var_as_string(script);
+    trace_info("[PPB] {full} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
+    g_free(s_script);
+    return ppb_instance_private_execute_script(instance, script, exception);
+}
+
 
 const struct PPB_Instance_1_0 ppb_instance_interface_1_0 = {
     .BindGraphics = TWRAPF(ppb_instance_bind_graphics),
     .IsFullFrame =  TWRAPF(ppb_instance_is_full_frame),
+};
+
+const struct PPB_Instance_Private_0_1 ppb_instance_private_interface_0_1 = {
+    .GetWindowObject =          TWRAPF(ppb_instance_private_get_window_object),
+    .GetOwnerElementObject =    TWRAPZ(ppb_instance_private_get_owner_element_object),
+    .ExecuteScript =            TWRAPF(ppb_instance_private_execute_script),
 };

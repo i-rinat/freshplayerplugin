@@ -26,12 +26,22 @@
 #define FPP__PPB_INSTANCE_H
 
 #include <ppapi/c/ppb_instance.h>
-
+#include <ppapi/c/private/ppb_instance_private.h>
 
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device);
 
 PP_Bool
 ppb_instance_is_full_frame(PP_Instance instance);
+
+struct PP_Var
+ppb_instance_private_get_window_object(PP_Instance instance);
+
+struct PP_Var
+ppb_instance_private_get_owner_element_object(PP_Instance instance);
+
+struct PP_Var
+ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
+                                    struct PP_Var *exception);
 
 #endif // FPP__PPB_INSTANCE_H
