@@ -35,8 +35,6 @@
 
 struct comt_param_s {
     struct pp_instance_s   *pp_i;
-    pthread_barrier_t      *barrier;
-    int                     wait;
     int                     xtype;
 };
 
@@ -61,8 +59,6 @@ _set_cursor_comt(void *user_data)
     }
     pthread_mutex_unlock(&pp_i->lock);
 
-    if (params->wait)
-        pthread_barrier_wait(params->barrier);
     g_slice_free(struct comt_param_s, params);
 }
 
@@ -212,25 +208,12 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
         return PP_FALSE;
     struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
 
-    comt_params->pp_i     = pp_i;
-    comt_params->xtype =    xtype;
+    comt_params->pp_i  = pp_i;
+    comt_params->xtype = xtype;
 
-    if (ppb_core_is_main_thread()) {
-        comt_params->wait = 0;
-        _set_cursor_comt(comt_params);
-    } else {
-        pthread_barrier_t barrier;
-
-        pthread_barrier_init(&barrier, NULL, 2);
-        comt_params->wait = 1;
-        comt_params->barrier = &barrier;
-
-        pthread_mutex_lock(&pp_i->lock);
-        npn.pluginthreadasynccall(pp_i->npp, _set_cursor_comt, comt_params);
-        pthread_mutex_unlock(&pp_i->lock);
-        pthread_barrier_wait(&barrier);
-        pthread_barrier_destroy(&barrier);
-    }
+    pthread_mutex_lock(&pp_i->lock);
+    npn.pluginthreadasynccall(pp_i->npp, _set_cursor_comt, comt_params);
+    pthread_mutex_unlock(&pp_i->lock);
 
     return PP_TRUE;
 }
