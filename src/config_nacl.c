@@ -43,7 +43,7 @@ fpp_config_get_plugin_path_list(void)
 const char *
 fpp_config_get_default_plugin_version(void)
 {
-    return "0.0.0.0";
+    return "1.0.0.0";
 }
 
 const char *
