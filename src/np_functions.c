@@ -392,7 +392,7 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
     if (!ul)
         return NPERR_NO_ERROR;
 
-    ul->loaded = 1;
+    ul->finished_loading = 1;
 
     // execute all remaining tasks in task list
     while (ul && ul->read_tasks) {

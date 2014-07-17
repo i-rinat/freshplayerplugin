@@ -288,7 +288,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
         while (!done) {
             ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
             if (ul) {
-                done = ul->loaded;
+                done = ul->finished_loading;
                 pp_resource_release(loader);
             } else {
                 break;
@@ -362,7 +362,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
         while (!done) {
             ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
             if (ul) {
-                done = ul->loaded;
+                done = ul->finished_loading;
                 pp_resource_release(loader);
             } else {
                 break;
@@ -435,7 +435,7 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
         ul->read_pos += read_bytes;
     }
 
-    if (read_bytes == 0) {
+    if (read_bytes == 0 && !ul->finished_loading) {
         // no data ready, schedule read task
         struct url_loader_read_task_s *rt = g_slice_alloc(sizeof(*rt));
         rt->buffer = buffer;
@@ -448,7 +448,11 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
     }
 
     pp_resource_release(loader);
-    return read_bytes;
+    if (callback.flags & PP_COMPLETIONCALLBACK_FLAG_OPTIONAL)
+        return read_bytes;
+
+    ppb_core_call_on_main_thread(0, callback, read_bytes);
+    return PP_OK_COMPLETIONPENDING;
 }
 
 int32_t
