@@ -26,6 +26,7 @@
 #define FPP__PPB_URL_LOADER_H
 
 #include <ppapi/c/ppb_url_loader.h>
+#include <ppapi/c/trusted/ppb_url_loader_trusted.h>
 
 
 PP_Resource
@@ -68,5 +69,12 @@ ppb_url_loader_finish_streaming_to_file(PP_Resource loader, struct PP_Completion
 
 void
 ppb_url_loader_close(PP_Resource loader);
+
+void
+ppb_url_loader_trusted_grant_universal_access(PP_Resource loader);
+
+void
+ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
+                                                PP_URLLoaderTrusted_StatusCallback cb);
 
 #endif // FPP__PPB_URL_LOADER_H

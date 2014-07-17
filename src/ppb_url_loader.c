@@ -491,6 +491,20 @@ ppb_url_loader_close(PP_Resource loader)
     return;
 }
 
+void
+ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
+{
+    // TODO: do something
+    return;
+}
+
+void
+ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
+                                                PP_URLLoaderTrusted_StatusCallback cb)
+{
+    return;
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -584,6 +598,23 @@ trace_ppb_url_loader_close(PP_Resource loader)
     ppb_url_loader_close(loader);
 }
 
+TRACE_WRAPPER
+void
+trace_ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
+{
+    trace_info("[PPB] {fake} %s loader=%d\n", __func__+6, loader);
+    ppb_url_loader_trusted_grant_universal_access(loader);
+}
+
+TRACE_WRAPPER
+void
+trace_ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
+                                                      PP_URLLoaderTrusted_StatusCallback cb)
+{
+    trace_info("[PPB] {zilch} %s loader=%d, cb=%p\n", __func__+6, loader, cb);
+    ppb_url_loader_trusted_register_status_callback(loader, cb);
+}
+
 
 const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
     .Create =                   TWRAPF(ppb_url_loader_create),
@@ -596,4 +627,9 @@ const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
     .ReadResponseBody =         TWRAPF(ppb_url_loader_read_response_body),
     .FinishStreamingToFile =    TWRAPF(ppb_url_loader_finish_streaming_to_file),
     .Close =                    TWRAPF(ppb_url_loader_close),
+};
+
+const struct PPB_URLLoaderTrusted_0_3 ppb_url_loader_trusted_interface_0_3 = {
+    .GrantUniversalAccess =     TWRAPZ(ppb_url_loader_trusted_grant_universal_access),
+    .RegisterStatusCallback =   TWRAPZ(ppb_url_loader_trusted_register_status_callback),
 };
