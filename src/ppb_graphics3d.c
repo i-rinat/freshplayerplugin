@@ -279,7 +279,7 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 
 struct call_invalidaterect_param_s {
     pthread_barrier_t       barrier;
-    struct pp_graphics3d_s *g3d;
+    struct pp_instance_s   *pp_i;
 };
 
 static
@@ -287,8 +287,8 @@ void
 _call_invalidaterect(void *param)
 {
     struct call_invalidaterect_param_s *p = param;
-    NPP npp = p->g3d->instance->npp;
-    NPRect npr = {.top = 0, .left = 0, .bottom = p->g3d->height, .right = p->g3d->width};
+    NPP npp = p->pp_i->npp;
+    NPRect npr = {.top = 0, .left = 0, .bottom = p->pp_i->height, .right = p->pp_i->width};
 
     npn.invalidaterect(npp, &npr);
     npn.forceredraw(npp);
@@ -318,6 +318,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         pthread_mutex_unlock(&pp_i->lock);
         return PP_ERROR_INPROGRESS;
     }
+    pp_resource_release(context);
 
     pp_i->graphics_ccb = callback;
     pp_i->graphics_in_progress = 1;
@@ -338,13 +339,12 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     } else {
         struct call_invalidaterect_param_s p;
         pthread_mutex_unlock(&pp_i->lock);
-        p.g3d = g3d;
+        p.pp_i = pp_i;
         pthread_barrier_init(&p.barrier, NULL, 2);
         npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect, &p);
         pthread_barrier_wait(&p.barrier);
         pthread_barrier_destroy(&p.barrier);
     }
-    pp_resource_release(context);
 
     if (callback.func)
         return PP_OK_COMPLETIONPENDING;
