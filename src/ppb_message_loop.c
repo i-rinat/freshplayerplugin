@@ -48,6 +48,7 @@ ppb_message_loop_create(PP_Instance instance)
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
 
     ml->async_q = g_async_queue_new();
+    ml->int_q = g_queue_new();
 
     pp_resource_release(message_loop);
     return message_loop;
@@ -61,6 +62,11 @@ ppb_message_loop_destroy(void *p)
     if (ml->async_q) {
         g_async_queue_unref(ml->async_q);
         ml->async_q = NULL;
+    }
+
+    if (ml->int_q) {
+        g_queue_free(ml->int_q);
+        ml->int_q = NULL;
     }
 }
 
@@ -178,7 +184,7 @@ ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
     int destroy_ml = 0;
     pp_resource_ref(message_loop);
     GAsyncQueue *async_q = ml->async_q;
-    GQueue *int_q = g_queue_new();
+    GQueue *int_q = ml->int_q;
     pp_resource_release(message_loop);
 
     while (1) {
@@ -224,8 +230,6 @@ ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
             }
         }
     }
-
-    g_queue_free(int_q);
 
     // mark thread as non-running
     ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
