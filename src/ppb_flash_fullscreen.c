@@ -29,6 +29,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include <ppapi/c/ppp_instance.h>
+#include <ppapi/c/pp_errors.h>
 #include "reverse_constant.h"
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
@@ -54,12 +55,11 @@ ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
     return pp_i->is_fullscreen;
 }
 
-
 static
 void
-_update_instance_view_comt(void *p)
+_update_instance_view_comt(void *user_data, int32_t result)
 {
-    struct pp_instance_s *pp_i = p;
+    struct pp_instance_s *pp_i = user_data;
 
     if (pp_i->instance_loaded) {
         PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
@@ -133,8 +133,8 @@ fullscreen_window_thread(void *p)
     pthread_barrier_wait(&tp->startup_barrier);
     pthread_barrier_destroy(&tp->startup_barrier);
 
-    npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, pp_i);
-
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_update_instance_view_comt, pp_i),
+                                 PP_OK);
     while (1) {
         XEvent ev;
         XNextEvent(dpy, &ev);
@@ -166,7 +166,8 @@ quit_and_destroy_fs_wnd:
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
 
-    npn.pluginthreadasynccall(pp_i->npp, _update_instance_view_comt, pp_i);
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_update_instance_view_comt, pp_i),
+                                 PP_OK);
     g_slice_free(struct thread_param_s, tp);
     return NULL;
 }
