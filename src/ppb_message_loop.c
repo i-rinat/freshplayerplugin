@@ -137,6 +137,12 @@ time_compare_func(gconstpointer a, gconstpointer b, gpointer user_data)
 int32_t
 ppb_message_loop_run(PP_Resource message_loop)
 {
+    return ppb_message_loop_run_nested(message_loop, 0);
+}
+
+int32_t
+ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
+{
     if (this_thread_message_loop == 0)
         return PP_ERROR_WRONG_THREAD;
 
@@ -145,9 +151,25 @@ ppb_message_loop_run(PP_Resource message_loop)
         return PP_ERROR_BADRESOURCE;
 
     // prevent nested loops
-    if (ml->running) {
+    if (!nested && ml->running) {
         pp_resource_release(message_loop);
         return PP_ERROR_INPROGRESS;
+    }
+
+    // if nested, ensure message loop is running
+    if (nested && !ml->running) {
+        pp_resource_release(message_loop);
+        return PP_ERROR_FAILED;
+    }
+
+    struct {
+        int running;
+        int teardown;
+    } saved_state;
+
+    if (nested) {
+        saved_state.running = ml->running;
+        saved_state.teardown = ml->teardown;
     }
 
     ml->running = 1;
@@ -209,6 +231,10 @@ ppb_message_loop_run(PP_Resource message_loop)
     ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
     if (ml) {
         ml->running = 0;
+        if (nested) {
+            ml->running = saved_state.running;
+            ml->teardown = saved_state.teardown;
+        }
         pp_resource_release(message_loop);
     }
     pp_resource_unref(message_loop);
