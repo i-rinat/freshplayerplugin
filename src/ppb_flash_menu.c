@@ -170,7 +170,8 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_data)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s instance_id=%d, menu_data=%p\n", __func__+6, instance_id,
+               menu_data);
     return ppb_flash_menu_create(instance_id, menu_data);
 }
 
@@ -178,7 +179,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_menu_is_flash_menu(PP_Resource resource_id)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s resource_id=%d\n", __func__+6, resource_id);
     return ppb_flash_menu_is_flash_menu(resource_id);
 }
 
@@ -187,7 +188,11 @@ int32_t
 trace_ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location,
                           int32_t *selected_id, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    gchar *s_location = trace_point_as_string(location);
+    trace_info("[PPB] {full} %s menu_id=%d, location=%s, callback={.func=%p, .user_data=%p, "
+               ".flags=%d}\n", __func__+6, menu_id, s_location, callback.func, callback.user_data,
+               callback.flags);
+    g_free(s_location);
     return ppb_flash_menu_show(menu_id, location, selected_id, callback);
 }
 
