@@ -103,7 +103,7 @@ struct comt_param_s {
 // called on browser thread
 static
 void
-_url_loader_open_comt(void *user_data)
+_url_loader_open_ptac(void *user_data)
 {
     struct comt_param_s *comt_params = user_data;
     struct pp_instance_s *pp_i = comt_params->instance;
@@ -273,7 +273,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
 
     struct pp_instance_s *pp_i = ul->instance;
     pthread_barrier_init(&comt_params.barrier, NULL, 2);
-    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, &comt_params);
+    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_ptac, &comt_params);
     pthread_barrier_wait(&comt_params.barrier);
     pthread_barrier_destroy(&comt_params.barrier);
 
@@ -347,7 +347,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
 
     struct pp_instance_s *pp_i = ul->instance;
     pthread_barrier_init(&comt_params.barrier, NULL, 2);
-    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_comt, &comt_params);
+    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_ptac, &comt_params);
     pthread_barrier_wait(&comt_params.barrier);
     pthread_barrier_destroy(&comt_params.barrier);
 

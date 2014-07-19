@@ -82,7 +82,7 @@ _update_instance_view_comt(void *user_data, int32_t result)
 
 static
 void
-_handle_event_comt(void *p)
+_handle_event_ptac(void *p)
 {
     struct handle_event_comt_param_s *params = p;
     NPP_HandleEvent(params->npp, &params->ev);
@@ -152,7 +152,7 @@ fullscreen_window_thread(void *p)
         params->npp = pp_i->npp;
         params->ev =  ev;
         g_atomic_int_add(&events_inflight, 1);
-        npn.pluginthreadasynccall(pp_i->npp, _handle_event_comt, params);
+        npn.pluginthreadasynccall(pp_i->npp, _handle_event_ptac, params);
     }
 
 quit_and_destroy_fs_wnd:

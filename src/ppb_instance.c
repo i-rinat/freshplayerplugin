@@ -110,7 +110,7 @@ struct get_window_object_param_s {
 
 static
 void
-_get_window_object(void *param)
+_get_window_object_ptac(void *param)
 {
     struct get_window_object_param_s *p = param;
     NPObject *np_window_obj;
@@ -139,7 +139,7 @@ ppb_instance_private_get_window_object(PP_Instance instance)
     struct get_window_object_param_s p;
     p.npp = pp_i->npp;
     pthread_barrier_init(&p.barrier, NULL, 2);
-    npn.pluginthreadasynccall(pp_i->npp, _get_window_object, &p);
+    npn.pluginthreadasynccall(pp_i->npp, _get_window_object_ptac, &p);
     pthread_barrier_wait(&p.barrier);
     pthread_barrier_destroy(&p.barrier);
 
@@ -161,7 +161,7 @@ struct execute_script_param_s {
 
 static
 void
-_execute_script_comt(void *p)
+_execute_script_ptac(void *p)
 {
     struct execute_script_param_s *esp = p;
     NPError err;
@@ -212,7 +212,7 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     esp.npp = pp_i->npp;
 
     pthread_barrier_init(&esp.barrier, NULL, 2);
-    npn.pluginthreadasynccall(esp.npp, _execute_script_comt, &esp);
+    npn.pluginthreadasynccall(esp.npp, _execute_script_ptac, &esp);
     pthread_barrier_wait(&esp.barrier);
     pthread_barrier_destroy(&esp.barrier);
 

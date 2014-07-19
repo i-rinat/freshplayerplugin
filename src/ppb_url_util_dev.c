@@ -209,7 +209,7 @@ struct get_document_url_param_s {
 // called on browser thread
 static
 void
-_get_document_url(void *user_data)
+_get_document_url_ptac(void *user_data)
 {
     struct get_document_url_param_s *p = user_data;
 
@@ -266,7 +266,7 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
     struct get_document_url_param_s p;
     p.pp_i = pp_i;
     pthread_barrier_init(&p.barrier, NULL, 2);
-    npn.pluginthreadasynccall(pp_i->npp, _get_document_url, &p);
+    npn.pluginthreadasynccall(pp_i->npp, _get_document_url_ptac, &p);
     pthread_barrier_wait(&p.barrier);
     pthread_barrier_destroy(&p.barrier);
 

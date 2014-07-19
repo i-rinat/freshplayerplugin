@@ -279,7 +279,7 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 
 static
 void
-_call_invalidaterect(void *param)
+_call_invalidaterect_ptac(void *param)
 {
     struct pp_instance_s *pp_i = param;
     NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
@@ -330,7 +330,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         pthread_mutex_unlock(&pp_i->lock);
     } else {
         pthread_mutex_unlock(&pp_i->lock);
-        npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect, pp_i);
+        npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect_ptac, pp_i);
     }
 
     if (callback.func)

@@ -160,7 +160,7 @@ ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 
 static
 void
-_call_invalidaterect(void *param)
+_call_invalidaterect_ptac(void *param)
 {
     struct pp_instance_s *pp_i = param;
     NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
@@ -284,7 +284,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         pthread_mutex_unlock(&pp_i->lock);
     } else {
         pthread_mutex_unlock(&pp_i->lock);
-        npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect, pp_i);
+        npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect_ptac, pp_i);
     }
 
     if (callback.func)

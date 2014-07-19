@@ -142,7 +142,7 @@ ppb_flash_menu_is_flash_menu(PP_Resource resource_id)
 
 static
 void
-_menu_popup_comt(void *p)
+_menu_popup_ptac(void *p)
 {
     GtkWidget *menu = p;
     gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 3, gtk_get_current_event_time());
@@ -166,7 +166,7 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
     popup_menu_ccb = callback;
     popup_menu_result = selected_id;
 
-    npn.pluginthreadasynccall(fm->instance->npp, _menu_popup_comt, fm->menu);
+    npn.pluginthreadasynccall(fm->instance->npp, _menu_popup_ptac, fm->menu);
 
     pp_resource_release(menu_id);
     return PP_OK_COMPLETIONPENDING;

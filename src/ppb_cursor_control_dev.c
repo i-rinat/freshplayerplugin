@@ -39,7 +39,7 @@ struct comt_param_s {
 };
 
 void
-_set_cursor_comt(void *user_data)
+_set_cursor_ptac(void *user_data)
 {
     Window wnd;
     Cursor cursor;
@@ -212,7 +212,7 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
     comt_params->xtype = xtype;
 
     pthread_mutex_lock(&pp_i->lock);
-    npn.pluginthreadasynccall(pp_i->npp, _set_cursor_comt, comt_params);
+    npn.pluginthreadasynccall(pp_i->npp, _set_cursor_ptac, comt_params);
     pthread_mutex_unlock(&pp_i->lock);
 
     return PP_TRUE;
