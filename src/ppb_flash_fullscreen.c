@@ -205,14 +205,6 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
     return PP_TRUE;
 }
 
-struct get_fs_param_s {
-    PP_Instance         instance;
-    struct PP_Size     *size;
-    pthread_barrier_t   barrier;
-    int                 should_wait;
-    int                 retval;
-};
-
 PP_Bool
 ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
 {
