@@ -181,6 +181,10 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     pthread_mutex_init(&pp_i->lock, NULL);
     pp_i->dpy = XOpenDisplay(NULL);
+
+    if (config.quirks.x_synchronize)
+        XSynchronize(pp_i->dpy, True);
+
     if (!pp_i->dpy) {
         trace_error("%s, can't open X Display\n", __func__);
     }

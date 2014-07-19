@@ -40,6 +40,7 @@ static struct fpp_config_s default_config = {
         .switch_buttons_2_3      = 0,
         .dump_resource_histogram = 0,
         .plugin_missing          = 0,
+        .x_synchronize           = 0,
     },
 };
 
