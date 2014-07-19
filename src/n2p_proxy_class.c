@@ -35,6 +35,27 @@
 #include "ppb_var.h"
 
 
+struct has_property_param_s {
+    NPP                 npp;
+    struct PP_Var       name;
+    struct PP_Var      *exception;
+    void               *object;
+    bool                res;
+    pthread_barrier_t   barrier;
+};
+
+static
+void
+_n2p_has_property_ptac(void *param)
+{
+    struct has_property_param_s *p = param;
+    const char *s_name = ppb_var_var_to_utf8(p->name, NULL);
+    NPIdentifier identifier = npn.getstringidentifier(s_name);
+
+    p->res = npn.hasproperty(p->npp, p->object, identifier);
+    pthread_barrier_wait(&p->barrier);
+}
+
 static
 bool
 n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
@@ -44,13 +65,18 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
         return false;
     }
 
-    const char *s_name = ppb_var_var_to_utf8(name, NULL);
-    NPIdentifier identifier = npn.getstringidentifier(s_name);
+    struct has_property_param_s p;
+    p.object = object;
+    p.name = name;
+    p.exception = exception;
+    p.npp = tables_get_npobj_npp_mapping(object);
 
-    NPP npp = tables_get_npobj_npp_mapping(object);
-    bool res = npn.hasproperty(npp, object, identifier);
+    pthread_barrier_init(&p.barrier, NULL, 2);
+    npn.pluginthreadasynccall(p.npp, _n2p_has_property_ptac, &p);
+    pthread_barrier_wait(&p.barrier);
+    pthread_barrier_destroy(&p.barrier);
 
-    return res;
+    return p.res;
 }
 
 static
