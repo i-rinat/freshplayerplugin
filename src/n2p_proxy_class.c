@@ -86,6 +86,39 @@ n2p_has_method(void *object, struct PP_Var name, struct PP_Var *exception)
     return false;
 }
 
+struct get_property_param_s {
+    NPP                 npp;
+    void               *object;
+    struct PP_Var       name;
+    struct PP_Var      *exception;
+    struct PP_Var       res;
+    pthread_barrier_t   barrier;
+};
+
+static
+void
+_n2p_get_property_ptac(void *param)
+{
+    struct get_property_param_s *p = param;
+    const char *s_name = ppb_var_var_to_utf8(p->name, NULL);
+    NPIdentifier identifier = npn.getstringidentifier(s_name);
+    NPVariant np_value;
+
+    if (npn.getproperty(p->npp, p->object, identifier, &np_value)) {
+        struct PP_Var var = np_variant_to_pp_var(np_value);
+
+        if (np_value.type == NPVariantType_Object)
+            tables_add_npobj_npp_mapping(np_value.value.objectValue, p->npp);
+        else
+            npn.releasevariantvalue(&np_value);
+
+        p->res = var;
+    } else {
+        p->res = PP_MakeUndefined();
+    }
+    pthread_barrier_wait(&p->barrier);
+}
+
 static
 struct PP_Var
 n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
@@ -95,22 +128,18 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
         return PP_MakeUndefined();
     }
 
-    const char *s_name = ppb_var_var_to_utf8(name, NULL);
-    NPIdentifier identifier = npn.getstringidentifier(s_name);
-    NPVariant np_value;
-    NPP npp = tables_get_npobj_npp_mapping(object);
-    if (npn.getproperty(npp, object, identifier, &np_value)) {
-        struct PP_Var var = np_variant_to_pp_var(np_value);
+    struct get_property_param_s p;
+    p.npp = tables_get_npobj_npp_mapping(object);
+    p.object = object;
+    p.name = name;
+    p.exception = exception;
 
-        if (np_value.type == NPVariantType_Object)
-            tables_add_npobj_npp_mapping(np_value.value.objectValue, npp);
-        else
-            npn.releasevariantvalue(&np_value);
+    pthread_barrier_init(&p.barrier, NULL, 2);
+    npn.pluginthreadasynccall(p.npp, _n2p_get_property_ptac, &p);
+    pthread_barrier_wait(&p.barrier);
+    pthread_barrier_destroy(&p.barrier);
 
-        return var;
-    } else {
-        return PP_MakeUndefined();
-    }
+    return p.res;
 }
 
 static
