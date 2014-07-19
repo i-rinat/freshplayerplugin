@@ -179,12 +179,19 @@ _n2p_call_ptac(void *param)
     struct call_param_s *p = param;
     const char *s_method_name = ppb_var_var_to_utf8(p->method_name, NULL);
     NPIdentifier np_method_name = npn.getstringidentifier(s_method_name);
+
     NPVariant *np_args = malloc(p->argc * sizeof(NPVariant));
     for (uint32_t k = 0; k < p->argc; k ++)
         np_args[k] = pp_var_to_np_variant(p->argv[k]);
 
     NPVariant np_result;
-    if (npn.invoke(p->npp, p->object, np_method_name, np_args, p->argc, &np_result)) {
+    bool res = npn.invoke(p->npp, p->object, np_method_name, np_args, p->argc, &np_result);
+
+    for (uint32_t k = 0; k < p->argc; k ++)
+        npn.releasevariantvalue(&np_args[k]);
+    free(np_args);
+
+    if (res) {
         struct PP_Var var = np_variant_to_pp_var(np_result);
 
         if (np_result.type == NPVariantType_Object)
