@@ -226,18 +226,29 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
     return p.res;
 }
 
-static
-struct PP_Var
-n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
-{
-    NPVariant *np_args = malloc(argc * sizeof(NPVariant));
-    for (uint32_t k = 0; k < argc; k ++)
-        np_args[k] = pp_var_to_np_variant(argv[k]);
-    NPP npp = tables_get_npobj_npp_mapping(object);
-    NPVariant np_result;
+struct construct_param_s {
+    NPP                 npp;
+    void               *object;
+    uint32_t            argc;
+    struct PP_Var      *argv;
+    struct PP_Var      *exception;
+    struct PP_Var       res;
+    pthread_barrier_t   barrier;
+};
 
-    bool res = npn.construct(npp, object, np_args, argc, &np_result);
-    for (uint32_t k = 0; k < argc; k ++)
+static
+void
+_n2p_construct_ptac(void *param)
+{
+    struct construct_param_s *p = param;
+
+    NPVariant *np_args = malloc(p->argc * sizeof(NPVariant));
+    for (uint32_t k = 0; k < p->argc; k ++)
+        np_args[k] = pp_var_to_np_variant(p->argv[k]);
+
+    NPVariant np_result;
+    bool res = npn.construct(p->npp, p->object, np_args, p->argc, &np_result);
+    for (uint32_t k = 0; k < p->argc; k ++)
         npn.releasevariantvalue(&np_args[k]);
     free(np_args);
 
@@ -245,14 +256,35 @@ n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *e
         struct PP_Var var = np_variant_to_pp_var(np_result);
 
         if (np_result.type == NPVariantType_Object)
-            tables_add_npobj_npp_mapping(np_result.value.objectValue, npp);
+            tables_add_npobj_npp_mapping(np_result.value.objectValue, p->npp);
         else
             npn.releasevariantvalue(&np_result);
 
-        return var;
+        p->res = var;
     } else {
-        return PP_MakeUndefined();
+        p->res = PP_MakeUndefined();
     }
+
+    pthread_barrier_wait(&p->barrier);
+}
+
+static
+struct PP_Var
+n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
+{
+    struct construct_param_s p;
+    p.npp =         tables_get_npobj_npp_mapping(object);
+    p.object =      object;
+    p.argc =        argc;
+    p.argv =        argv;
+    p.exception =   exception;
+
+    pthread_barrier_init(&p.barrier, NULL, 2);
+    npn.pluginthreadasynccall(p.npp, _n2p_construct_ptac, &p);
+    pthread_barrier_wait(&p.barrier);
+    pthread_barrier_destroy(&p.barrier);
+
+    return p.res;
 }
 
 static
