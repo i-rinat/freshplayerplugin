@@ -217,6 +217,11 @@ ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
         task = g_async_queue_timeout_pop(async_q, timeout);
         if (task) {
             if (task->terminate) {
+                if (nested) {
+                    // exit at once, all remaining task will be processed by outer loop
+                    g_slice_free(struct message_loop_task_s, task);
+                    break;
+                }
                 ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
                 if (ml) {
                     ml->teardown = 1;
