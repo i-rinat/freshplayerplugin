@@ -99,6 +99,7 @@ ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
         break;
     default:
         trace_error("%s, fr->type not implemented\n", __func__);
+        retval = PP_ERROR_FAILED;
         goto out;
     }
 
