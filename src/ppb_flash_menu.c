@@ -23,6 +23,7 @@
  */
 
 #include "ppb_flash_menu.h"
+#include "ppb_core.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
@@ -56,8 +57,7 @@ menu_selection_done(GtkMenuShell *object, gboolean user_data)
 {
     int32_t code = popup_menu_canceled ? PP_ERROR_USERCANCEL : PP_OK;
 
-    if (popup_menu_ccb.func)
-        popup_menu_ccb.func(popup_menu_ccb.user_data, code);
+    ppb_core_call_on_main_thread(0, popup_menu_ccb, code);
 
     popup_menu_sentinel = 0;
     popup_menu_result = NULL;
