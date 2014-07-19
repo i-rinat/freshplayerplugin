@@ -126,12 +126,22 @@ ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_
     return flash_menu;
 }
 
+static
+void
+_destroy_flash_menu_ptac(void *param)
+{
+    GMenu *menu = param;
+    g_object_unref(menu);
+}
+
 void
 ppb_flash_menu_destroy(void *p)
 {
     struct pp_flash_menu_s *fm = p;
     g_object_ref_sink(fm->menu);
-    g_object_unref(fm->menu);
+
+    // actual menu destroy can make something X-related, call in on browser thread
+    npn.pluginthreadasynccall(fm->instance->npp, _destroy_flash_menu_ptac, fm->menu);
 }
 
 PP_Bool
