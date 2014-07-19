@@ -277,23 +277,15 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     return PP_OK;
 }
 
-struct call_invalidaterect_param_s {
-    pthread_barrier_t       barrier;
-    struct pp_instance_s   *pp_i;
-};
-
 static
 void
 _call_invalidaterect(void *param)
 {
-    struct call_invalidaterect_param_s *p = param;
-    NPP npp = p->pp_i->npp;
-    NPRect npr = {.top = 0, .left = 0, .bottom = p->pp_i->height, .right = p->pp_i->width};
+    struct pp_instance_s *pp_i = param;
+    NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
 
-    npn.invalidaterect(npp, &npr);
-    npn.forceredraw(npp);
-
-    pthread_barrier_wait(&p->barrier);
+    npn.invalidaterect(pp_i->npp, &npr);
+    npn.forceredraw(pp_i->npp);
 }
 
 int32_t
@@ -337,13 +329,8 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         XFlush(pp_i->dpy);
         pthread_mutex_unlock(&pp_i->lock);
     } else {
-        struct call_invalidaterect_param_s p;
         pthread_mutex_unlock(&pp_i->lock);
-        p.pp_i = pp_i;
-        pthread_barrier_init(&p.barrier, NULL, 2);
-        npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect, &p);
-        pthread_barrier_wait(&p.barrier);
-        pthread_barrier_destroy(&p.barrier);
+        npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect, pp_i);
     }
 
     if (callback.func)
