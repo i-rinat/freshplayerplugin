@@ -326,8 +326,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         return NPERR_NO_ERROR;
     }
 
-    struct PP_CompletionCallback ccb;
-    ccb.func = NULL;
+    struct PP_CompletionCallback ccb = {};
 
     stream->pdata = (void*)(size_t)loader;
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
