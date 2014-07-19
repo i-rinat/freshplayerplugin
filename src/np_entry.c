@@ -101,7 +101,7 @@ do_load_ppp_module(const char *fname)
     if (version) {
         int v1 = 0, v2 = 0, v3 = 0, v4 = 0;
         module_version = g_strdup(version);
-        (void)sscanf(module_version, "%d.%d.%d.%d", &v1, &v2, &v3, &v4);
+        (void)sscanf(module_version, "%9d.%9d.%9d.%9d", &v1, &v2, &v3, &v4);
         module_descr = g_strdup_printf("%s %d.%d r%d", fpp_config_get_plugin_name(), v1, v2, v3);
     } else {
         use_fallback_version_strings();
