@@ -4,6 +4,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
+#include "ppb_message_loop.h"
 
 
 PP_Resource
@@ -13,12 +14,6 @@ ppb_flash_message_loop_create(PP_Instance instance)
     if (!pp_i)
         return 0;
     PP_Resource message_loop = pp_resource_allocate(PP_RESOURCE_FLASH_MESSAGE_LOOP, pp_i);
-    struct pp_flash_message_loop_s *fml =
-                        pp_resource_acquire(message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
-
-    fml->loop = g_main_loop_new(NULL, FALSE);
-
-    pp_resource_release(message_loop);
     return message_loop;
 }
 
@@ -26,7 +21,8 @@ void
 ppb_flash_message_loop_destroy(void *p)
 {
     struct pp_flash_message_loop_s *fml = p;
-    g_main_loop_unref(fml->loop);
+    if (fml->running)
+        ppb_flash_message_loop_quit(fml->self_id);
 }
 
 PP_Bool
@@ -42,9 +38,23 @@ ppb_flash_message_loop_run(PP_Resource flash_message_loop)
                         pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
     if (!fml)
         return PP_ERROR_BADRESOURCE;
-    GMainLoop *loop = fml->loop;
+
+    PP_Resource message_loop = ppb_message_loop_get_current();
+    fml->running = 1;
+    fml->message_loop = message_loop;
+
+    pp_resource_ref(flash_message_loop);        // prevent destroy of running loop
     pp_resource_release(flash_message_loop);
-    g_main_loop_run(loop);
+
+    ppb_message_loop_run_nested(message_loop, 1);
+
+    fml = pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
+    if (fml) {
+        fml->running = 0;
+        pp_resource_release(flash_message_loop);
+    }
+
+    pp_resource_unref(flash_message_loop);
     return PP_OK;
 }
 
@@ -53,9 +63,11 @@ ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
 {
     struct pp_flash_message_loop_s *fml =
                         pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
-    GMainLoop *loop = fml->loop;
+    if (!fml)
+        return;
+    if (fml->running)
+        ppb_message_loop_post_quit(fml->message_loop, PP_FALSE);
     pp_resource_release(flash_message_loop);
-    g_main_loop_quit(loop);
 }
 
 

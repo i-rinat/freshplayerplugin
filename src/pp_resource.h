@@ -351,7 +351,8 @@ struct pp_flash_menu_s {
 
 struct pp_flash_message_loop_s {
     COMMON_STRUCTURE_FIELDS
-    GMainLoop              *loop;
+    int             running;
+    PP_Resource     message_loop;
 };
 
 struct pp_tcp_socket_s {
