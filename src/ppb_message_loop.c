@@ -171,12 +171,10 @@ ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
     struct {
         int running;
         int teardown;
-    } saved_state;
-
-    if (nested) {
-        saved_state.running = ml->running;
-        saved_state.teardown = ml->teardown;
-    }
+    } saved_state = {
+        .running = ml->running,
+        .teardown = ml->teardown,
+    };
 
     ml->running = 1;
     ml->teardown = 0;
