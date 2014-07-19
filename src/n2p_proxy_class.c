@@ -161,6 +161,45 @@ n2p_remove_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
 }
 
+struct call_param_s {
+    NPP                 npp;
+    void               *object;
+    struct PP_Var       method_name;
+    uint32_t            argc;
+    struct PP_Var      *argv;
+    struct PP_Var      *exception;
+    struct PP_Var       res;
+    pthread_barrier_t   barrier;
+};
+
+static
+void
+_n2p_call_ptac(void *param)
+{
+    struct call_param_s *p = param;
+    const char *s_method_name = ppb_var_var_to_utf8(p->method_name, NULL);
+    NPIdentifier np_method_name = npn.getstringidentifier(s_method_name);
+    NPVariant *np_args = malloc(p->argc * sizeof(NPVariant));
+    for (uint32_t k = 0; k < p->argc; k ++)
+        np_args[k] = pp_var_to_np_variant(p->argv[k]);
+
+    NPVariant np_result;
+    if (npn.invoke(p->npp, p->object, np_method_name, np_args, p->argc, &np_result)) {
+        struct PP_Var var = np_variant_to_pp_var(np_result);
+
+        if (np_result.type == NPVariantType_Object)
+            tables_add_npobj_npp_mapping(np_result.value.objectValue, p->npp);
+        else
+            npn.releasevariantvalue(&np_result);
+
+        p->res = var;
+    } else {
+        p->res = PP_MakeUndefined();
+    }
+
+    pthread_barrier_wait(&p->barrier);
+}
+
 static
 struct PP_Var
 n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *argv,
@@ -171,28 +210,20 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
         return PP_MakeUndefined();
     }
 
-    const char *s_method_name = ppb_var_var_to_utf8(method_name, NULL);
-    NPIdentifier np_method_name = npn.getstringidentifier(s_method_name);
-    NPVariant *np_args = malloc(argc * sizeof(NPVariant));
-    for (uint32_t k = 0; k < argc; k ++)
-        np_args[k] = pp_var_to_np_variant(argv[k]);
+    struct call_param_s p;
+    p.npp = tables_get_npobj_npp_mapping(object);
+    p.object =      object;
+    p.method_name = method_name;
+    p.argc =        argc;
+    p.argv =        argv;
+    p.exception =   exception;
 
-    NPP npp = tables_get_npobj_npp_mapping(object);
-    NPVariant np_result;
-    if (npn.invoke(npp, object, np_method_name, np_args, argc, &np_result)) {
-        struct PP_Var var = np_variant_to_pp_var(np_result);
+    pthread_barrier_init(&p.barrier, NULL, 2);
+    npn.pluginthreadasynccall(p.npp, _n2p_call_ptac, &p);
+    pthread_barrier_wait(&p.barrier);
+    pthread_barrier_destroy(&p.barrier);
 
-        if (np_result.type == NPVariantType_Object)
-            tables_add_npobj_npp_mapping(np_result.value.objectValue, npp);
-        else
-            npn.releasevariantvalue(&np_result);
-
-        return var;
-    } else {
-        return PP_MakeUndefined();
-    }
-
-    return PP_MakeUndefined();
+    return p.res;
 }
 
 static
