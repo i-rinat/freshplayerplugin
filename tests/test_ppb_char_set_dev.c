@@ -54,6 +54,7 @@ test_to_utf16(void)
                                                  PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == sizeof(out) / sizeof(uint16_t));
         assert(memcmp(res, out, sizeof(out)) == 0);
+        free(res);
     }
 
     printf("to utf16: basic UTF-8\n");
@@ -66,6 +67,7 @@ test_to_utf16(void)
                                                  PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == sizeof(out) / sizeof(out[0]));
         assert(memcmp(res, out, sizeof(out)) == 0);
+        free(res);
     }
 
     printf("to utf16: wrong UTF-8 with error\n");
@@ -76,6 +78,7 @@ test_to_utf16(void)
                                                  PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == 0);
         assert(res == NULL);
+        free(res);
     }
 
     // testing PP_CHARSET_CONVERSIONERROR_SKIP or PP_CHARSET_CONVERSIONERROR_SUBSTITUTE
@@ -99,6 +102,7 @@ test_from_utf16(void)
                                              "cp1251", PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == strlen(out));
         assert(memcmp(res, out, res_len) == 0);
+        free(res);
     }
 
     printf("to utf16: non-ASCII all correct\n");
@@ -111,6 +115,7 @@ test_from_utf16(void)
                                              "cp1251", PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == strlen(out));
         assert(memcmp(res, out, res_len) == 0);
+        free(res);
     }
 
     printf("to utf16: non-ASCII PP_CHARSET_CONVERSIONERROR_FAIL\n");
@@ -124,6 +129,7 @@ test_from_utf16(void)
                                              "cp1251", PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == 0);
         assert(res == NULL);
+        free(res);
     }
 
     printf("to utf16: non-ASCII PP_CHARSET_CONVERSIONERROR_SKIP\n");
@@ -136,6 +142,7 @@ test_from_utf16(void)
                                              "cp1251", PP_CHARSET_CONVERSIONERROR_SKIP, &res_len);
         assert(res_len == strlen(out));
         assert(memcmp(res, out, res_len) == 0);
+        free(res);
     }
 
     printf("to utf16: non-ASCII PP_CHARSET_CONVERSIONERROR_SUBSTITUTE\n");
@@ -148,6 +155,7 @@ test_from_utf16(void)
                                      "cp1251", PP_CHARSET_CONVERSIONERROR_SUBSTITUTE, &res_len);
         assert(res_len == strlen(out));
         assert(memcmp(res, out, res_len) == 0);
+        free(res);
     }
 }
 
