@@ -30,9 +30,12 @@
 #include "trace.h"
 #include "tables.h"
 #include <ppapi/c/private/ppp_instance_private.h>
+#include <ppapi/c/pp_errors.h>
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_var.h"
+#include "ppb_core.h"
+#include "n2p_proxy_class.h"
 
 
 NPObject *
@@ -80,37 +83,45 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
     return res;
 }
 
-bool
-p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount,
-           NPVariant *result)
+struct invoke_param_s {
+    NPObject               *npobj;
+    NPIdentifier            name;
+    const NPVariant        *args;
+    uint32_t                argCount;
+    NPVariant              *result;
+    pthread_barrier_t       barrier;
+};
+
+static
+void
+_p2n_invoke_comt(void *user_data, int32_t result)
 {
-    if (!npn.identifierisstring(name))
-        return false;
+    struct invoke_param_s *p = user_data;
 
     unsigned int k;
-    struct np_proxy_object_s *obj = (void *)npobj;
-    char *s = npn.utf8fromidentifier(name);
+    struct np_proxy_object_s *obj = (void *)p->npobj;
+    char *s = npn.utf8fromidentifier(p->name);
     struct PP_Var exception = PP_MakeUndefined();
     struct PP_Var method_name = PP_MakeString(s);
     struct PP_Var res;
     npn.memfree(s);
 
-    struct PP_Var *pp_args = malloc(argCount * sizeof(*pp_args));
-    for (k = 0; k < argCount; k ++) {
-        pp_args[k] = np_variant_to_pp_var(args[k]);
+    struct PP_Var *pp_args = malloc(p->argCount * sizeof(*pp_args));
+    for (k = 0; k < p->argCount; k ++) {
+        pp_args[k] = np_variant_to_pp_var(p->args[k]);
     }
 
-    res = ppb_var_call(obj->ppobj, method_name, argCount, pp_args, &exception);
+    res = ppb_var_call(obj->ppobj, method_name, p->argCount, pp_args, &exception);
 
-    for (k = 0; k < argCount; k ++)
+    for (k = 0; k < p->argCount; k ++)
         ppb_var_release(pp_args[k]);
     free(pp_args);
 
-    if (result) {
-        *result = pp_var_to_np_variant(res);
-        if (result->type == NPVariantType_Object) {
-            NPP npp = tables_get_npobj_npp_mapping(npobj);
-            tables_add_npobj_npp_mapping(result->value.objectValue, npp);
+    if (p->result) {
+        *p->result = pp_var_to_np_variant(res);
+        if (p->result->type == NPVariantType_Object) {
+            NPP npp = tables_get_npobj_npp_mapping(p->npobj);
+            tables_add_npobj_npp_mapping(p->result->value.objectValue, npp);
         }
     }
 
@@ -118,7 +129,33 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
     ppb_var_release(method_name);
     ppb_var_release(exception);
 
-    return true;
+    pthread_barrier_wait(&p->barrier);
+}
+
+bool
+p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount,
+           NPVariant *result)
+{
+    if (!npn.identifierisstring(name))
+        return false;
+
+    if (npobj->_class == &p2n_proxy_class) {
+        struct invoke_param_s p;
+        p.npobj =       npobj;
+        p.name =        name;
+        p.args =        args;
+        p.argCount =    argCount;
+        p.result =      result;
+
+        pthread_barrier_init(&p.barrier, NULL, 2);
+        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_invoke_comt, &p), PP_OK);
+        pthread_barrier_wait(&p.barrier);
+        pthread_barrier_destroy(&p.barrier);
+
+        return true;
+    } else {
+        return npobj->_class->invoke(npobj, name, args, argCount, result);
+    }
 }
 
 bool
