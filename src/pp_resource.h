@@ -123,7 +123,7 @@ struct pp_instance_s {
     uint32_t                        is_fullframe;
     uint32_t                        is_fullscreen;
     uint32_t                        incognito_mode;
-    uint32_t                        instance_loaded;
+    volatile gint                   instance_loaded;
 
     // full screen
     pthread_t                       fs_thread;

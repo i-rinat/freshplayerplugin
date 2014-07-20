@@ -118,7 +118,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         pp_i->width = window->width;
         pp_i->height = window->height;
 
-        if (pp_i->instance_loaded)
+        if (g_atomic_int_get(&pp_i->instance_loaded))
             ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_window_comt, pp_i),
                                          PP_OK);
     }
@@ -172,9 +172,7 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
         pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->id, url_loader);
     }
 
-    pthread_mutex_lock(&pp_i->lock);
-    pp_i->instance_loaded = 1;
-    pthread_mutex_unlock(&pp_i->lock);
+    g_atomic_int_set(&pp_i->instance_loaded, 1);
 
     // Since current function is called asynchronously, browser may call NPP_SetWindow earlier.
     // To ensure plugin gets corrent drawing area dimensions, call DidChangeView one more time.

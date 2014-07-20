@@ -61,7 +61,7 @@ _update_instance_view_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
 
-    if (pp_i->instance_loaded) {
+    if (g_atomic_int_get(&pp_i->instance_loaded)) {
         PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
         struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
         v->rect.point.x = 0;
