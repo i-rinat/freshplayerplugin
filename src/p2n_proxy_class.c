@@ -68,8 +68,10 @@ p2n_invalidate(NPObject *npobj)
 bool
 p2n_has_method(NPObject *npobj, NPIdentifier name)
 {
-    if (!npn.identifierisstring(name))
+    if (!npn.identifierisstring(name)) {
+        trace_error("%s, name is not a string\n", __func__);
         return false;
+    }
 
     struct np_proxy_object_s *obj = (void *)npobj;
     char *s = npn.utf8fromidentifier(name);
@@ -136,8 +138,10 @@ bool
 p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount,
            NPVariant *result)
 {
-    if (!npn.identifierisstring(name))
+    if (!npn.identifierisstring(name)) {
+        trace_error("%s, name is not a string\n", __func__);
         return false;
+    }
 
     if (npobj->_class == &p2n_proxy_class) {
         struct invoke_param_s p;
@@ -167,8 +171,10 @@ p2n_invoke_default(NPObject *npobj, const NPVariant *args, uint32_t argCount, NP
 bool
 p2n_has_property(NPObject *npobj, NPIdentifier name)
 {
-    if (!npn.identifierisstring(name))
+    if (!npn.identifierisstring(name)) {
+        trace_error("%s, name is not a string\n", __func__);
         return false;
+    }
 
     struct np_proxy_object_s *obj = (void *)npobj;
     char *s = npn.utf8fromidentifier(name);
@@ -185,8 +191,10 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
 bool
 p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
 {
-    if (!npn.identifierisstring(name))
+    if (!npn.identifierisstring(name)) {
+        trace_error("%s, name is not a string\n", __func__);
         return false;
+    }
 
     struct np_proxy_object_s *obj = (void *)npobj;
     char *s = npn.utf8fromidentifier(name);
