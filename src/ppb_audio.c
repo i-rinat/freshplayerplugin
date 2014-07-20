@@ -38,16 +38,18 @@ ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
                  PPB_Audio_Callback_1_0 audio_callback, void *user_data)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, wrong instance\n", __func__);
         return 0;
+    }
     PP_Resource audio = pp_resource_allocate(PP_RESOURCE_AUDIO, pp_i);
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
-    if (!a)
-        return 0;
 
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
-    if (!ac)
+    if (!ac) {
+        trace_error("%s, wrong audio config resource\n", __func__);
         goto err;
+    }
 
     a->sample_rate = ac->sample_rate;
     a->sample_frame_count = ac->sample_frame_count;
@@ -129,8 +131,10 @@ ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
     a->callback = audio_callback;
     a->user_data = user_data;
     a->audio_buffer = malloc(a->sample_frame_count * 2 * sizeof(int16_t));
-    if (!a->audio_buffer)
+    if (!a->audio_buffer) {
+        trace_error("%s, failed to allocate audio buffer\n", __func__);
         goto err;
+    }
 
     pp_resource_release(audio);
     return audio;
@@ -144,8 +148,6 @@ void
 ppb_audio_destroy(void *p)
 {
     struct pp_audio_s *a = p;
-    if (!a)
-        return;
 
     if (a->playing) {
         a->shutdown = 1;
@@ -166,14 +168,12 @@ PP_Resource
 ppb_audio_get_current_config(PP_Resource audio)
 {
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
-    if (!a)
-        return 0;
-    PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, a->instance);
-    struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
-    if (!ac) {
-        pp_resource_release(audio);
+    if (!a) {
+        trace_error("%s, wrong audio resource\n", __func__);
         return 0;
     }
+    PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, a->instance);
+    struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
 
     ac->sample_rate = a->sample_rate;
     ac->sample_frame_count = a->sample_frame_count;
@@ -222,8 +222,10 @@ PP_Bool
 ppb_audio_start_playback(PP_Resource audio)
 {
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
-    if (!a)
+    if (!a) {
+        trace_error("%s, wrong audio resource\n", __func__);
         return PP_FALSE;
+    }
     if (a->playing) {
         pp_resource_release(audio);
         return PP_TRUE;
@@ -238,8 +240,10 @@ PP_Bool
 ppb_audio_stop_playback(PP_Resource audio)
 {
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
-    if (!a)
+    if (!a) {
+        trace_error("%s, wrong audio resource\n", __func__);
         return PP_FALSE;
+    }
 
     if (a->playing) {
         a->shutdown = 1;
