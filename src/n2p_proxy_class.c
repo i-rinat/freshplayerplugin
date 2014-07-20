@@ -61,6 +61,7 @@ bool
 n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     if (name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, name is not a string\n", __func__);
         // TODO: fill exception
         return false;
     }
@@ -124,6 +125,7 @@ struct PP_Var
 n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
 {
     if (name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, name is not a string\n", __func__);
         // TODO: fill exception
         return PP_MakeUndefined();
     }
@@ -213,6 +215,7 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
          struct PP_Var *exception)
 {
     if (method_name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, method_name is not a string\n", __func__);
         // TODO: fill exception
         return PP_MakeUndefined();
     }
