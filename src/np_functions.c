@@ -82,13 +82,59 @@ empty_completion_callback(void *user_data, int32_t result)
 
 static
 void
+_set_window_comt(void *user_data, int32_t result)
+{
+    struct pp_instance_s *pp_i = user_data;
+
+    pthread_mutex_lock(&pp_i->lock);
+    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
+    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+    v->rect.point.x = 0; // TODO: pp_i->x;
+    v->rect.point.y = 0; // TODO: pp_i->y;
+    v->rect.size.width = pp_i->width;
+    v->rect.size.height = pp_i->height;
+    pp_resource_release(view);
+    pthread_mutex_unlock(&pp_i->lock);
+
+    pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
+    ppb_core_release_resource(view);
+}
+
+NPError
+NPP_SetWindow(NPP npp, NPWindow *window)
+{
+    if (config.quirks.plugin_missing)
+        return NPERR_NO_ERROR;
+
+    char *window_str = trace_np_window_as_string(window);
+    trace_info_f("[NPP] {full} %s npp=%p, window=%s\n", __func__, npp, window_str);
+    g_free(window_str);
+
+    struct pp_instance_s *pp_i = npp->pdata;
+
+    pthread_mutex_lock(&pp_i->lock);
+    if (pp_i && !pp_i->is_fullscreen) {
+        pp_i->wnd = (Window)window->window;
+        pp_i->width = window->width;
+        pp_i->height = window->height;
+
+        if (pp_i->instance_loaded)
+            ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_window_comt, pp_i),
+                                         PP_OK);
+    }
+    pthread_mutex_unlock(&pp_i->lock);
+
+    return NPERR_NO_ERROR;
+}
+
+static
+void
 _call_plugin_did_create_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
 
     pp_i->ppp_instance_1_1->DidCreate(pp_i->id, pp_i->argc, (const char **)pp_i->argn,
                                       (const char **)pp_i->argv);
-    pp_i->instance_loaded = 1;
 
     // no need to keep argn/argv after initialization
     for (uintptr_t k = 0; k < pp_i->argc; k++) {
@@ -125,6 +171,14 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
 
         pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->id, url_loader);
     }
+
+    pthread_mutex_lock(&pp_i->lock);
+    pp_i->instance_loaded = 1;
+    pthread_mutex_unlock(&pp_i->lock);
+
+    // Since current function is called asynchronously, browser may call NPP_SetWindow earlier.
+    // To ensure plugin gets corrent drawing area dimensions, call DidChangeView one more time.
+    _set_window_comt(pp_i, PP_OK);
 }
 
 NPError
@@ -253,53 +307,6 @@ NPP_Destroy(NPP npp, NPSavedData **save)
 
     if (save)
         *save = NULL;
-    return NPERR_NO_ERROR;
-}
-
-static
-void
-_set_window_comt(void *user_data, int32_t result)
-{
-    struct pp_instance_s *pp_i = user_data;
-
-    pthread_mutex_lock(&pp_i->lock);
-    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
-    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-    v->rect.point.x = 0; // TODO: pp_i->x;
-    v->rect.point.y = 0; // TODO: pp_i->y;
-    v->rect.size.width = pp_i->width;
-    v->rect.size.height = pp_i->height;
-    pp_resource_release(view);
-    pthread_mutex_unlock(&pp_i->lock);
-
-    pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
-    ppb_core_release_resource(view);
-}
-
-NPError
-NPP_SetWindow(NPP npp, NPWindow *window)
-{
-    if (config.quirks.plugin_missing)
-        return NPERR_NO_ERROR;
-
-    char *window_str = trace_np_window_as_string(window);
-    trace_info_f("[NPP] {full} %s npp=%p, window=%s\n", __func__, npp, window_str);
-    g_free(window_str);
-
-    struct pp_instance_s *pp_i = npp->pdata;
-
-    pthread_mutex_lock(&pp_i->lock);
-    if (pp_i && !pp_i->is_fullscreen) {
-        pp_i->wnd = (Window)window->window;
-        pp_i->width = window->width;
-        pp_i->height = window->height;
-
-        if (pp_i->instance_loaded)
-            ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_window_comt, pp_i),
-                                         PP_OK);
-    }
-    pthread_mutex_unlock(&pp_i->lock);
-
     return NPERR_NO_ERROR;
 }
 
