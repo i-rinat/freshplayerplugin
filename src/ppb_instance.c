@@ -29,6 +29,7 @@
 #include "pp_resource.h"
 #include "ppb_var.h"
 #include "ppb_core.h"
+#include "ppb_message_loop.h"
 #include "n2p_proxy_class.h"
 
 
@@ -153,10 +154,10 @@ ppb_instance_private_get_owner_element_object(PP_Instance instance)
 }
 
 struct execute_script_param_s {
-    pthread_barrier_t   barrier;
     struct PP_Var       script;
     struct PP_Var       result;
     NPP                 npp;
+    PP_Resource         message_loop;
 };
 
 static
@@ -191,7 +192,7 @@ _execute_script_ptac(void *p)
         npn.releasevariantvalue(&np_result);
 
 quit:
-    pthread_barrier_wait(&esp->barrier);
+    ppb_message_loop_post_quit(esp->message_loop, PP_FALSE);
 }
 
 struct PP_Var
@@ -210,11 +211,10 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     struct execute_script_param_s esp;
     esp.script = script;
     esp.npp = pp_i->npp;
+    esp.message_loop = ppb_message_loop_get_current();
 
-    pthread_barrier_init(&esp.barrier, NULL, 2);
     npn.pluginthreadasynccall(esp.npp, _execute_script_ptac, &esp);
-    pthread_barrier_wait(&esp.barrier);
-    pthread_barrier_destroy(&esp.barrier);
+    ppb_message_loop_run_nested(esp.message_loop, 1);
 
     return esp.result;
 }
