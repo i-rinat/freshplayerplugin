@@ -33,6 +33,7 @@
 #include "pp_resource.h"
 #include <npapi/npruntime.h>
 #include "ppb_var.h"
+#include "ppb_message_loop.h"
 
 
 struct has_property_param_s {
@@ -41,7 +42,7 @@ struct has_property_param_s {
     struct PP_Var      *exception;
     void               *object;
     bool                res;
-    pthread_barrier_t   barrier;
+    PP_Resource         m_loop;
 };
 
 static
@@ -53,7 +54,15 @@ _n2p_has_property_ptac(void *param)
     NPIdentifier identifier = npn.getstringidentifier(s_name);
 
     p->res = npn.hasproperty(p->npp, p->object, identifier);
-    pthread_barrier_wait(&p->barrier);
+    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+}
+
+static
+void
+_n2p_has_property_comt(void *user_data, int32_t result)
+{
+    struct has_property_param_s *p = user_data;
+    npn.pluginthreadasynccall(p->npp, _n2p_has_property_ptac, p);
 }
 
 static
@@ -67,15 +76,14 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
     }
 
     struct has_property_param_s p;
-    p.object = object;
-    p.name = name;
-    p.exception = exception;
-    p.npp = tables_get_npobj_npp_mapping(object);
+    p.object =      object;
+    p.name =        name;
+    p.exception =   exception;
+    p.npp =         tables_get_npobj_npp_mapping(object);
+    p.m_loop =      ppb_message_loop_get_current();
 
-    pthread_barrier_init(&p.barrier, NULL, 2);
-    npn.pluginthreadasynccall(p.npp, _n2p_has_property_ptac, &p);
-    pthread_barrier_wait(&p.barrier);
-    pthread_barrier_destroy(&p.barrier);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_has_property_comt, &p), 0);
+    ppb_message_loop_run_nested(p.m_loop, 1);
 
     return p.res;
 }
@@ -88,12 +96,12 @@ n2p_has_method(void *object, struct PP_Var name, struct PP_Var *exception)
 }
 
 struct get_property_param_s {
-    NPP                 npp;
-    void               *object;
-    struct PP_Var       name;
-    struct PP_Var      *exception;
-    struct PP_Var       res;
-    pthread_barrier_t   barrier;
+    NPP             npp;
+    void           *object;
+    struct PP_Var   name;
+    struct PP_Var  *exception;
+    struct PP_Var   res;
+    PP_Resource     m_loop;
 };
 
 static
@@ -117,7 +125,15 @@ _n2p_get_property_ptac(void *param)
     } else {
         p->res = PP_MakeUndefined();
     }
-    pthread_barrier_wait(&p->barrier);
+    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+}
+
+static
+void
+_n2p_get_property_comt(void *user_data, int32_t result)
+{
+    struct get_property_param_s *p = user_data;
+    npn.pluginthreadasynccall(p->npp, _n2p_get_property_ptac, p);
 }
 
 static
@@ -131,15 +147,14 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
     }
 
     struct get_property_param_s p;
-    p.npp = tables_get_npobj_npp_mapping(object);
-    p.object = object;
-    p.name = name;
-    p.exception = exception;
+    p.npp =         tables_get_npobj_npp_mapping(object);
+    p.object =      object;
+    p.name =        name;
+    p.exception =   exception;
+    p.m_loop =      ppb_message_loop_get_current();
 
-    pthread_barrier_init(&p.barrier, NULL, 2);
-    npn.pluginthreadasynccall(p.npp, _n2p_get_property_ptac, &p);
-    pthread_barrier_wait(&p.barrier);
-    pthread_barrier_destroy(&p.barrier);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_get_property_comt, &p), 0);
+    ppb_message_loop_run_nested(p.m_loop, 1);
 
     return p.res;
 }
@@ -171,7 +186,7 @@ struct call_param_s {
     struct PP_Var      *argv;
     struct PP_Var      *exception;
     struct PP_Var       res;
-    pthread_barrier_t   barrier;
+    PP_Resource         m_loop;
 };
 
 static
@@ -206,7 +221,15 @@ _n2p_call_ptac(void *param)
         p->res = PP_MakeUndefined();
     }
 
-    pthread_barrier_wait(&p->barrier);
+    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+}
+
+static
+void
+_n2p_call_comt(void *user_data, int32_t result)
+{
+    struct call_param_s *p = user_data;
+    npn.pluginthreadasynccall(p->npp, _n2p_call_ptac, p);
 }
 
 static
@@ -221,17 +244,16 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
     }
 
     struct call_param_s p;
-    p.npp = tables_get_npobj_npp_mapping(object);
+    p.npp =         tables_get_npobj_npp_mapping(object);
     p.object =      object;
     p.method_name = method_name;
     p.argc =        argc;
     p.argv =        argv;
     p.exception =   exception;
+    p.m_loop =      ppb_message_loop_get_current();
 
-    pthread_barrier_init(&p.barrier, NULL, 2);
-    npn.pluginthreadasynccall(p.npp, _n2p_call_ptac, &p);
-    pthread_barrier_wait(&p.barrier);
-    pthread_barrier_destroy(&p.barrier);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_call_comt, &p), 0);
+    ppb_message_loop_run_nested(p.m_loop, 1);
 
     return p.res;
 }
@@ -243,7 +265,7 @@ struct construct_param_s {
     struct PP_Var      *argv;
     struct PP_Var      *exception;
     struct PP_Var       res;
-    pthread_barrier_t   barrier;
+    PP_Resource         m_loop;
 };
 
 static
@@ -275,7 +297,15 @@ _n2p_construct_ptac(void *param)
         p->res = PP_MakeUndefined();
     }
 
-    pthread_barrier_wait(&p->barrier);
+    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+}
+
+static
+void
+_n2p_construct_comt(void *user_data, int32_t result)
+{
+    struct construct_param_s *p = user_data;
+    npn.pluginthreadasynccall(p->npp, _n2p_construct_ptac, p);
 }
 
 static
@@ -288,11 +318,10 @@ n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *e
     p.argc =        argc;
     p.argv =        argv;
     p.exception =   exception;
+    p.m_loop =      ppb_message_loop_get_current();
 
-    pthread_barrier_init(&p.barrier, NULL, 2);
-    npn.pluginthreadasynccall(p.npp, _n2p_construct_ptac, &p);
-    pthread_barrier_wait(&p.barrier);
-    pthread_barrier_destroy(&p.barrier);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_construct_comt, &p), 0);
+    ppb_message_loop_run_nested(p.m_loop, 1);
 
     return p.res;
 }
