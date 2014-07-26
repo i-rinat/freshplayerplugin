@@ -41,8 +41,10 @@ PP_Resource
 ppb_message_loop_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, wrong instance\n", __func__);
         return 0;
+    }
 
     PP_Resource message_loop = pp_resource_allocate(PP_RESOURCE_MESSAGE_LOOP, pp_i);
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
@@ -79,8 +81,10 @@ ppb_message_loop_get_for_main_thread(void)
 int32_t
 ppb_message_loop_proclaim_this_thread_main(PP_Resource message_loop)
 {
-    if (pp_resource_get_type(message_loop) != PP_RESOURCE_MESSAGE_LOOP)
+    if (pp_resource_get_type(message_loop) != PP_RESOURCE_MESSAGE_LOOP) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     main_thread_message_loop = message_loop;
     return PP_OK;
@@ -101,14 +105,20 @@ ppb_message_loop_mark_thread_unsuitable(void)
 int32_t
 ppb_message_loop_attach_to_current_thread(PP_Resource message_loop)
 {
-    if (pp_resource_get_type(message_loop) != PP_RESOURCE_MESSAGE_LOOP)
+    if (pp_resource_get_type(message_loop) != PP_RESOURCE_MESSAGE_LOOP) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
-    if (thread_is_not_suitable_for_message_loop)
+    if (thread_is_not_suitable_for_message_loop) {
+        trace_error("%s, can't attach to this thread\n", __func__);
         return PP_ERROR_WRONG_THREAD;
+    }
 
-    if (this_thread_message_loop != 0)
+    if (this_thread_message_loop != 0) {
+        trace_error("%s, thread already have message loop attached\n", __func__);
         return PP_ERROR_INPROGRESS;
+    }
 
     this_thread_message_loop = message_loop;
     return PP_OK;
@@ -149,21 +159,27 @@ ppb_message_loop_run(PP_Resource message_loop)
 int32_t
 ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
 {
-    if (this_thread_message_loop == 0)
+    if (this_thread_message_loop != message_loop) {
+        trace_error("%s, not attached to current thread\n", __func__);
         return PP_ERROR_WRONG_THREAD;
+    }
 
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
-    if (!ml)
+    if (!ml) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     // prevent nested loops
     if (!nested && ml->running) {
+        trace_error("%s, trying to run nested loop without declaring as nested\n", __func__);
         pp_resource_release(message_loop);
         return PP_ERROR_INPROGRESS;
     }
 
     // if nested, ensure message loop is running
     if (nested && !ml->running) {
+        trace_error("%s, trying to run nested loop with no running loop\n", __func__);
         pp_resource_release(message_loop);
         return PP_ERROR_FAILED;
     }
@@ -255,16 +271,21 @@ ppb_message_loop_post_work_with_result(PP_Resource message_loop,
                                        struct PP_CompletionCallback callback, int64_t delay_ms,
                                        int32_t result_to_pass)
 {
-    if (callback.func == NULL)
+    if (callback.func == NULL) {
+        trace_error("%s, callback.func == NULL\n", __func__);
         return PP_ERROR_BADARGUMENT;
+    }
 
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
-    if (!ml)
+    if (!ml) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     if (ml->running && ml->teardown) {
         // message loop is in a teardown state
         pp_resource_release(message_loop);
+        trace_error("%s, quit request received, no additional work could be posted\n", __func__);
         return PP_ERROR_FAILED;
     }
 
@@ -298,8 +319,10 @@ int32_t
 ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
 {
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
-    if (!ml)
+    if (!ml) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     struct message_loop_task_s *task = g_slice_alloc0(sizeof(*task));
 
