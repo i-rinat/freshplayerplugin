@@ -195,6 +195,14 @@ quit:
     ppb_message_loop_post_quit(esp->message_loop, PP_FALSE);
 }
 
+static
+void
+_execute_script_comt(void *user_data, int32_t result)
+{
+    struct execute_script_param_s *esp = user_data;
+    npn.pluginthreadasynccall(esp->npp, _execute_script_ptac, esp);
+}
+
 struct PP_Var
 ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
                                     struct PP_Var *exception)
@@ -213,7 +221,8 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     esp.npp = pp_i->npp;
     esp.message_loop = ppb_message_loop_get_current();
 
-    npn.pluginthreadasynccall(esp.npp, _execute_script_ptac, &esp);
+    ppb_message_loop_post_work(esp.message_loop,
+                               PP_MakeCompletionCallback(_execute_script_comt, &esp), 0);
     ppb_message_loop_run_nested(esp.message_loop, 1);
 
     return esp.result;
