@@ -112,6 +112,7 @@ struct pp_instance_s {
     const struct PPP_InputEvent_0_1 *ppp_input_event;
     const struct PPP_Instance_Private_0_1 *ppp_instance_private;
     NPObject                       *scriptable_obj;
+    struct PP_Var                   window_obj;
     uint32_t                        event_mask;
     uint32_t                        filtered_event_mask;
     Window                          wnd;
