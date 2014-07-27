@@ -206,8 +206,11 @@ ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
 
     ml->running = 1;
     ml->teardown = 0;
+    ml->depth ++;
+
     int teardown = 0;
     int destroy_ml = 0;
+    int depth = ml->depth;
     pp_resource_ref(message_loop);
     GAsyncQueue *async_q = ml->async_q;
     GQueue *int_q = ml->int_q;
@@ -243,7 +246,7 @@ ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
         task = g_async_queue_timeout_pop(async_q, timeout);
         if (task) {
             if (task->terminate) {
-                if (nested) {
+                if (depth > 1) {
                     // exit at once, all remaining task will be processed by outer loop
                     g_slice_free(struct message_loop_task_s, task);
                     break;
@@ -265,6 +268,7 @@ ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
     // mark thread as non-running
     ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
     if (ml) {
+        ml->depth --;
         ml->running = 0;
         if (nested) {
             ml->running = saved_state.running;

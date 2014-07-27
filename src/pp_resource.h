@@ -380,6 +380,7 @@ struct pp_message_loop_s {
     GQueue                 *int_q;
     int                     running;
     int                     teardown;
+    int                     depth;
 };
 
 union pp_largest_u {
