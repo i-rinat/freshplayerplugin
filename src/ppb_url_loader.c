@@ -27,6 +27,7 @@
 #include "ppb_core.h"
 #include "ppb_url_util_dev.h"
 #include "ppb_var.h"
+#include "ppb_message_loop.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -84,7 +85,8 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
     return PP_RESOURCE_URL_LOADER == pp_resource_get_type(resource);
 }
 
-struct comt_param_s {
+struct url_loader_open_param_s {
+    NPP                         npp;
     const char                 *url;
     PP_Resource                 loader;
     struct pp_instance_s       *instance;
@@ -96,20 +98,18 @@ struct comt_param_s {
     const char                 *target;
     const char                 *post_data;
     size_t                      post_len;
-    pthread_barrier_t           barrier;
+    PP_Resource                 m_loop;
     int                         retval;
 };
 
-// called on browser thread
 static
 void
 _url_loader_open_ptac(void *user_data)
 {
-    struct comt_param_s *comt_params = user_data;
-    struct pp_instance_s *pp_i = comt_params->instance;
+    struct url_loader_open_param_s *p = user_data;
+    struct pp_instance_s *pp_i = p->instance;
 
-    // called on main thread
-    if (comt_params->method == PP_METHOD_POST) {
+    if (p->method == PP_METHOD_POST) {
         // POST request
         char   *tmpfname;
         int     fd;
@@ -121,55 +121,59 @@ _url_loader_open_ptac(void *user_data)
         fd = mkstemp(tmpfname);
         fp = fdopen(fd, "wb+");
 
-        if (comt_params->request_headers) {
-            fprintf(fp, "%s\n", comt_params->request_headers);
+        if (p->request_headers) {
+            fprintf(fp, "%s\n", p->request_headers);
             need_newline = 1;
         }
-        if (comt_params->custom_referrer_url) {
-            fprintf(fp, "Referrer: %s\n", comt_params->custom_referrer_url);
+        if (p->custom_referrer_url) {
+            fprintf(fp, "Referrer: %s\n", p->custom_referrer_url);
             need_newline = 1;
         }
-        if (comt_params->custom_content_transfer_encoding) {
-            fprintf(fp, "Content-Transfer-Encoding: %s\n",
-                    comt_params->custom_content_transfer_encoding);
+        if (p->custom_content_transfer_encoding) {
+            fprintf(fp, "Content-Transfer-Encoding: %s\n", p->custom_content_transfer_encoding);
             need_newline = 1;
         }
-        if (comt_params->custom_user_agent) {
-            fprintf(fp, "User-Agent: %s\n", comt_params->custom_user_agent);
+        if (p->custom_user_agent) {
+            fprintf(fp, "User-Agent: %s\n", p->custom_user_agent);
             need_newline = 1;
         }
-        if (comt_params->post_len > 0) {
-            fprintf(fp, "Content-Length: %"PRIu64"\n", (uint64_t)comt_params->post_len);
+        if (p->post_len > 0) {
+            fprintf(fp, "Content-Length: %"PRIu64"\n", (uint64_t)p->post_len);
             need_newline = 1;
         }
 
         if (need_newline)
             fprintf(fp, "\n");
 
-        fwrite(comt_params->post_data, 1, comt_params->post_len, fp);
+        fwrite(p->post_data, 1, p->post_len, fp);
         fclose(fp);
 
-        if (comt_params->target) {
-            comt_params->retval = npn.posturl(pp_i->npp, comt_params->url, comt_params->target,
-                                              strlen(tmpfname), tmpfname, true);
+        if (p->target) {
+            p->retval = npn.posturl(pp_i->npp, p->url, p->target, strlen(tmpfname), tmpfname, true);
         } else {
-            comt_params->retval = npn.posturlnotify(pp_i->npp, comt_params->url, NULL,
-                                                    strlen(tmpfname), tmpfname, true,
-                                                    (void*)(size_t)comt_params->loader);
+            p->retval = npn.posturlnotify(pp_i->npp, p->url, NULL, strlen(tmpfname), tmpfname, true,
+                                          (void*)(size_t)p->loader);
         }
         unlink(tmpfname);
         g_free(tmpfname);
     } else {
         // GET request
-        if (comt_params->target) {
-            comt_params->retval = npn.geturl(pp_i->npp, comt_params->url, comt_params->target);
+        if (p->target) {
+            p->retval = npn.geturl(pp_i->npp, p->url, p->target);
         } else {
-            comt_params->retval = npn.geturlnotify(pp_i->npp, comt_params->url, NULL,
-                                                   (void*)(size_t)comt_params->loader);
+            p->retval = npn.geturlnotify(pp_i->npp, p->url, NULL, (void*)(size_t)p->loader);
         }
     }
 
-    pthread_barrier_wait(&comt_params->barrier);
+    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+}
+
+static
+void
+_url_loader_open_comt(void *user_data, int32_t result)
+{
+    struct url_loader_open_param_s *p = user_data;
+    npn.pluginthreadasynccall(p->npp, _url_loader_open_ptac, p);
 }
 
 int
@@ -212,7 +216,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     struct pp_url_request_info_s *ri = pp_resource_acquire(request_info,
                                                            PP_RESOURCE_URL_REQUEST_INFO);
-
+    struct pp_instance_s *pp_i = ul->instance;
     struct PP_Var full_url;
 
     if (ri->is_immediate_javascript) {
@@ -258,29 +262,27 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     ppb_var_release(full_url);
     pp_resource_release(request_info);
 
-    struct comt_param_s comt_params;
-    comt_params.url =                               strdup(ul->url);
-    comt_params.loader =                            loader;
-    comt_params.instance =                          ul->instance;
-    comt_params.method =                            ul->method;
-    comt_params.request_headers =                   ul->request_headers;
-    comt_params.custom_referrer_url =               ul->custom_referrer_url;
-    comt_params.custom_content_transfer_encoding =  ul->custom_content_transfer_encoding;
-    comt_params.custom_user_agent =                 ul->custom_user_agent;
-    comt_params.target =                            ul->target;
-    comt_params.post_len =                          ul->post_len;
-    comt_params.post_data =                         ul->post_data;
+    struct url_loader_open_param_s p;
+    p.npp =                 pp_i->npp;
+    p.url =                 strdup(ul->url);
+    p.loader =              loader;
+    p.instance =            ul->instance;
+    p.method =              ul->method;
+    p.request_headers =     ul->request_headers;
+    p.custom_referrer_url = ul->custom_referrer_url;
+    p.custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
+    p.custom_user_agent =   ul->custom_user_agent;
+    p.target =          ul->target;
+    p.post_len =        ul->post_len;
+    p.post_data =       ul->post_data;
+    p.m_loop =          ppb_message_loop_get_current();
 
-    struct pp_instance_s *pp_i = ul->instance;
-    pthread_barrier_init(&comt_params.barrier, NULL, 2);
-    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_ptac, &comt_params);
-    pthread_barrier_wait(&comt_params.barrier);
-    pthread_barrier_destroy(&comt_params.barrier);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_url_loader_open_comt, &p), 0);
+    ppb_message_loop_run_nested(p.m_loop, 1);
 
-    int retval = comt_params.retval;
     pp_resource_release(loader);
 
-    if (retval != NPERR_NO_ERROR)
+    if (p.retval != NPERR_NO_ERROR)
         return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
@@ -306,7 +308,7 @@ int32_t
 ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback callback)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
-
+    struct pp_instance_s *pp_i = ul->instance;
     char *new_url = nullsafe_strdup(ul->redirect_url);
 
     free_and_nullify(ul, url);
@@ -332,29 +334,27 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ul->method = PP_METHOD_GET;
     ul->ccb = callback;
 
-    struct comt_param_s comt_params;
-    comt_params.url =                               ul->url;
-    comt_params.loader =                            loader;
-    comt_params.instance =                          ul->instance;
-    comt_params.method =                            ul->method;
-    comt_params.request_headers =                   ul->request_headers;
-    comt_params.custom_referrer_url =               ul->custom_referrer_url;
-    comt_params.custom_content_transfer_encoding =  ul->custom_content_transfer_encoding;
-    comt_params.custom_user_agent =                 ul->custom_user_agent;
-    comt_params.target =                            NULL;
-    comt_params.post_len =                          0;
-    comt_params.post_data =                         NULL;
+    struct url_loader_open_param_s p;
+    p.npp =                 pp_i->npp;
+    p.url =                 ul->url;
+    p.loader =              loader;
+    p.instance =            ul->instance;
+    p.method =              ul->method;
+    p.request_headers =     ul->request_headers;
+    p.custom_referrer_url = ul->custom_referrer_url;
+    p.custom_content_transfer_encoding =  ul->custom_content_transfer_encoding;
+    p.custom_user_agent =   ul->custom_user_agent;
+    p.target =              NULL;
+    p.post_len =            0;
+    p.post_data =           NULL;
+    p.m_loop =              ppb_message_loop_get_current();
 
-    struct pp_instance_s *pp_i = ul->instance;
-    pthread_barrier_init(&comt_params.barrier, NULL, 2);
-    npn.pluginthreadasynccall(pp_i->npp, _url_loader_open_ptac, &comt_params);
-    pthread_barrier_wait(&comt_params.barrier);
-    pthread_barrier_destroy(&comt_params.barrier);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_url_loader_open_comt, &p), 0);
+    ppb_message_loop_run_nested(p.m_loop, 1);
 
-    int retval = comt_params.retval;
     pp_resource_release(loader);
 
-    if (retval != NPERR_NO_ERROR)
+    if (p.retval != NPERR_NO_ERROR)
         return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
