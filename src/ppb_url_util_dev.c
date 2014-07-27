@@ -24,6 +24,7 @@
 
 #include "ppb_url_util_dev.h"
 #include "ppb_var.h"
+#include "ppb_message_loop.h"
 #include <stdlib.h>
 #include <string.h>
 #include <uriparser/Uri.h>
@@ -201,12 +202,11 @@ ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance ta
 }
 
 struct get_document_url_param_s {
+    NPP                     npp;
     struct PP_Var           result;
-    struct pp_instance_s   *pp_i;
-    pthread_barrier_t       barrier;
+    PP_Resource             m_loop;
 };
 
-// called on browser thread
 static
 void
 _get_document_url_ptac(void *user_data)
@@ -219,17 +219,17 @@ _get_document_url_ptac(void *user_data)
     NPObject *np_window_obj, *np_location_obj;
     NPVariant location_var, href_var;
 
-    if (npn.getvalue(p->pp_i->npp, NPNVWindowNPObject, &np_window_obj) != NPERR_NO_ERROR)
+    if (npn.getvalue(p->npp, NPNVWindowNPObject, &np_window_obj) != NPERR_NO_ERROR)
         goto err_1;
 
-    if (!npn.getproperty(p->pp_i->npp, np_window_obj, location_id, &location_var))
+    if (!npn.getproperty(p->npp, np_window_obj, location_id, &location_var))
         goto err_2;
 
     if (location_var.type != NPVariantType_Object)
         goto err_3;
 
     np_location_obj = location_var.value.objectValue;
-    if (!npn.getproperty(p->pp_i->npp, np_location_obj, href_id, &href_var))
+    if (!npn.getproperty(p->npp, np_location_obj, href_id, &href_var))
         goto err_3;
 
 
@@ -250,10 +250,17 @@ err_3:
 err_2:
     npn.releaseobject(np_window_obj);
 err_1:
-    pthread_barrier_wait(&p->barrier);
+    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
     return;
 }
 
+static
+void
+_get_document_url_comt(void *user_data, int32_t result)
+{
+    struct get_document_url_param_s *p = user_data;
+    npn.pluginthreadasynccall(p->npp, _get_document_url_ptac, p);
+}
 
 struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
@@ -264,11 +271,11 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
         return PP_MakeUndefined();
 
     struct get_document_url_param_s p;
-    p.pp_i = pp_i;
-    pthread_barrier_init(&p.barrier, NULL, 2);
-    npn.pluginthreadasynccall(pp_i->npp, _get_document_url_ptac, &p);
-    pthread_barrier_wait(&p.barrier);
-    pthread_barrier_destroy(&p.barrier);
+    p.npp = pp_i->npp;
+    p.m_loop = ppb_message_loop_get_current();
+
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_get_document_url_comt, &p), 0);
+    ppb_message_loop_run_nested(p.m_loop, 1);
 
     if (components)
         parse_url_string(ppb_var_var_to_utf8(p.result, NULL), components);
