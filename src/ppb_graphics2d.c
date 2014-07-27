@@ -284,7 +284,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         pthread_mutex_unlock(&pp_i->lock);
     } else {
         pthread_mutex_unlock(&pp_i->lock);
-        npn.pluginthreadasynccall(pp_i->npp, _call_invalidaterect_ptac, pp_i);
+        ppb_core_call_on_browser_thread(_call_invalidaterect_ptac, pp_i);
     }
 
     if (callback.func)

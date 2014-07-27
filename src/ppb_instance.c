@@ -169,7 +169,7 @@ void
 _execute_script_comt(void *user_data, int32_t result)
 {
     struct execute_script_param_s *esp = user_data;
-    npn.pluginthreadasynccall(esp->npp, _execute_script_ptac, esp);
+    ppb_core_call_on_browser_thread(_execute_script_ptac, esp);
 }
 
 struct PP_Var

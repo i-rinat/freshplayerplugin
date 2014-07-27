@@ -173,7 +173,7 @@ void
 _url_loader_open_comt(void *user_data, int32_t result)
 {
     struct url_loader_open_param_s *p = user_data;
-    npn.pluginthreadasynccall(p->npp, _url_loader_open_ptac, p);
+    ppb_core_call_on_browser_thread(_url_loader_open_ptac, p);
 }
 
 int

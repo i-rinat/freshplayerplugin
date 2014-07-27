@@ -152,7 +152,7 @@ fullscreen_window_thread(void *p)
         params->npp = pp_i->npp;
         params->ev =  ev;
         g_atomic_int_add(&events_inflight, 1);
-        npn.pluginthreadasynccall(pp_i->npp, _handle_event_ptac, params);
+        ppb_core_call_on_browser_thread(_handle_event_ptac, params);
     }
 
 quit_and_destroy_fs_wnd:

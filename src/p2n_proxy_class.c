@@ -35,6 +35,7 @@
 #include "pp_resource.h"
 #include "ppb_var.h"
 #include "ppb_core.h"
+#include "ppb_message_loop.h"
 #include "n2p_proxy_class.h"
 
 
@@ -91,7 +92,6 @@ struct invoke_param_s {
     const NPVariant        *args;
     uint32_t                argCount;
     NPVariant              *result;
-    pthread_barrier_t       barrier;
 };
 
 static
@@ -131,7 +131,7 @@ _p2n_invoke_comt(void *user_data, int32_t result)
     ppb_var_release(method_name);
     ppb_var_release(exception);
 
-    pthread_barrier_wait(&p->barrier);
+    ppb_message_loop_post_quit(ppb_message_loop_get_for_browser_thread(), PP_FALSE);
 }
 
 bool
@@ -151,10 +151,8 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         p.argCount =    argCount;
         p.result =      result;
 
-        pthread_barrier_init(&p.barrier, NULL, 2);
         ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_invoke_comt, &p), PP_OK);
-        pthread_barrier_wait(&p.barrier);
-        pthread_barrier_destroy(&p.barrier);
+        ppb_message_loop_run_nested(ppb_message_loop_get_for_browser_thread(), 1);
 
         return true;
     } else {

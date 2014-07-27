@@ -24,6 +24,7 @@
 
 #include "ppb_url_util_dev.h"
 #include "ppb_var.h"
+#include "ppb_core.h"
 #include "ppb_message_loop.h"
 #include <stdlib.h>
 #include <string.h>
@@ -259,7 +260,7 @@ void
 _get_document_url_comt(void *user_data, int32_t result)
 {
     struct get_document_url_param_s *p = user_data;
-    npn.pluginthreadasynccall(p->npp, _get_document_url_ptac, p);
+    ppb_core_call_on_browser_thread(_get_document_url_ptac, p);
 }
 
 struct PP_Var

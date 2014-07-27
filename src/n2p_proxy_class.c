@@ -32,6 +32,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include <npapi/npruntime.h>
+#include "ppb_core.h"
 #include "ppb_var.h"
 #include "ppb_message_loop.h"
 
@@ -62,7 +63,7 @@ void
 _n2p_has_property_comt(void *user_data, int32_t result)
 {
     struct has_property_param_s *p = user_data;
-    npn.pluginthreadasynccall(p->npp, _n2p_has_property_ptac, p);
+    ppb_core_call_on_browser_thread(_n2p_has_property_ptac, p);
 }
 
 static
@@ -133,7 +134,7 @@ void
 _n2p_get_property_comt(void *user_data, int32_t result)
 {
     struct get_property_param_s *p = user_data;
-    npn.pluginthreadasynccall(p->npp, _n2p_get_property_ptac, p);
+    ppb_core_call_on_browser_thread(_n2p_get_property_ptac, p);
 }
 
 static
@@ -229,7 +230,7 @@ void
 _n2p_call_comt(void *user_data, int32_t result)
 {
     struct call_param_s *p = user_data;
-    npn.pluginthreadasynccall(p->npp, _n2p_call_ptac, p);
+    ppb_core_call_on_browser_thread(_n2p_call_ptac, p);
 }
 
 static
@@ -305,7 +306,7 @@ void
 _n2p_construct_comt(void *user_data, int32_t result)
 {
     struct construct_param_s *p = user_data;
-    npn.pluginthreadasynccall(p->npp, _n2p_construct_ptac, p);
+    ppb_core_call_on_browser_thread(_n2p_construct_ptac, p);
 }
 
 static

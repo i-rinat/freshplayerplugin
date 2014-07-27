@@ -211,9 +211,7 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
     comt_params->pp_i  = pp_i;
     comt_params->xtype = xtype;
 
-    pthread_mutex_lock(&pp_i->lock);
-    npn.pluginthreadasynccall(pp_i->npp, _set_cursor_ptac, comt_params);
-    pthread_mutex_unlock(&pp_i->lock);
+    ppb_core_call_on_browser_thread(_set_cursor_ptac, comt_params);
 
     return PP_TRUE;
 }
