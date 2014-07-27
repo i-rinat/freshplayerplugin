@@ -38,7 +38,13 @@ PP_Resource
 ppb_message_loop_get_for_main_thread(void);
 
 int32_t
-ppb_message_loop_proclaim_this_thread_main(PP_Resource message_loop);
+ppb_message_loop_proclaim_this_thread_main(void);
+
+PP_Resource
+ppb_message_loop_get_for_browser_thread(void);
+
+int32_t
+ppb_message_loop_proclaim_this_thread_browser(void);
 
 PP_Resource
 ppb_message_loop_get_current(void);

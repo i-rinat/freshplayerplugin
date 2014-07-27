@@ -35,6 +35,7 @@
 static __thread PP_Resource this_thread_message_loop = 0;
 static __thread int         thread_is_not_suitable_for_message_loop = 0;
 static          PP_Resource main_thread_message_loop = 0;
+static          PP_Resource browser_thread_message_loop = 0;
 
 
 PP_Resource
@@ -79,14 +80,32 @@ ppb_message_loop_get_for_main_thread(void)
 }
 
 int32_t
-ppb_message_loop_proclaim_this_thread_main(PP_Resource message_loop)
+ppb_message_loop_proclaim_this_thread_main(void)
 {
-    if (pp_resource_get_type(message_loop) != PP_RESOURCE_MESSAGE_LOOP) {
-        trace_error("%s, bad resource\n", __func__);
-        return PP_ERROR_BADRESOURCE;
+    if (this_thread_message_loop == 0) {
+        trace_error("%s, no message loop attached\n", __func__);
+        return PP_ERROR_WRONG_THREAD;
     }
 
-    main_thread_message_loop = message_loop;
+    main_thread_message_loop = this_thread_message_loop;
+    return PP_OK;
+}
+
+PP_Resource
+ppb_message_loop_get_for_browser_thread(void)
+{
+    return browser_thread_message_loop;
+}
+
+int32_t
+ppb_message_loop_proclaim_this_thread_browser(void)
+{
+    if (this_thread_message_loop == 0) {
+        trace_error("%s, no message loop attached\n", __func__);
+        return PP_ERROR_WRONG_THREAD;
+    }
+
+    browser_thread_message_loop = this_thread_message_loop;
     return PP_OK;
 }
 
@@ -175,13 +194,6 @@ ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
         trace_error("%s, trying to run nested loop without declaring as nested\n", __func__);
         pp_resource_release(message_loop);
         return PP_ERROR_INPROGRESS;
-    }
-
-    // if nested, ensure message loop is running
-    if (nested && !ml->running) {
-        trace_error("%s, trying to run nested loop with no running loop\n", __func__);
-        pp_resource_release(message_loop);
-        return PP_ERROR_FAILED;
     }
 
     struct {

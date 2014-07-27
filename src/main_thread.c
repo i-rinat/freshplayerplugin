@@ -40,8 +40,8 @@ fresh_wrapper_main_thread(void *p)
         return NULL;
     }
 
-    ppb_message_loop_proclaim_this_thread_main(message_loop);
     ppb_message_loop_attach_to_current_thread(message_loop);
+    ppb_message_loop_proclaim_this_thread_main();
 
     pthread_barrier_wait(&pp_i->main_thread_barrier);
 

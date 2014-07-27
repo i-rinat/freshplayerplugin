@@ -70,6 +70,44 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
                                            result);
 }
 
+struct call_on_browser_thread_task_s {
+    void            (*func)(void *);
+    void            *user_data;
+};
+
+static
+void
+_call_on_browser_thread_comt(void *user_data, int32_t result)
+{
+    struct call_on_browser_thread_task_s *task = user_data;
+    task->func(task->user_data);
+    g_slice_free(struct call_on_browser_thread_task_s, task);
+}
+
+void
+ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data)
+{
+    PP_Resource m_loop = ppb_message_loop_get_for_browser_thread();
+    struct pp_message_loop_s *ml = pp_resource_acquire(m_loop, PP_RESOURCE_MESSAGE_LOOP);
+    if (!ml) {
+        trace_error("%s, no message loop for browser thread\n", __func__);
+        return;
+    }
+
+    if (!ml->running) {
+        npn.pluginthreadasynccall(ml->instance->npp, func, user_data);
+        pp_resource_release(m_loop);
+        return;
+    }
+
+    struct call_on_browser_thread_task_s *task = g_slice_alloc(sizeof(*task));
+    task->func = func;
+    task->user_data = user_data;
+    pp_resource_release(m_loop);
+    ppb_message_loop_post_work(m_loop,
+                               PP_MakeCompletionCallback(_call_on_browser_thread_comt, task), 0);
+}
+
 PP_Bool
 ppb_core_is_main_thread(void)
 {
