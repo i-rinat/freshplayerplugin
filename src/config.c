@@ -139,8 +139,9 @@ fpp_config_initialize(void)
         config.exp_enable_3d = intval;
     }
 
-quit:
     config_destroy(&cfg);
+
+quit:
     g_free(local_config);
     g_free(global_config);
 
