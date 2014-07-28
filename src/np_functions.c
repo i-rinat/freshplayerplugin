@@ -233,15 +233,12 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     {
         // getting window object
-        NPError err;
-        NPObject *np_window_obj;
-        err = npn.getvalue(npp, NPNVWindowNPObject, &np_window_obj);
+        NPError err = npn.getvalue(npp, NPNVWindowNPObject, &pp_i->np_window_obj);
         if (err == NPERR_NO_ERROR) {
-            tables_add_npobj_npp_mapping(np_window_obj, npp);
-            pp_i->window_obj = PP_MakeBrowserObject(np_window_obj, NULL);
+            tables_add_npobj_npp_mapping(pp_i->np_window_obj, npp);
         } else {
             trace_error("%s, failed to get NPNVWindowNPObject, err = %d\n", __func__, err);
-            pp_i->window_obj = PP_MakeUndefined();
+            pp_i->np_window_obj = NULL;
         }
     }
 

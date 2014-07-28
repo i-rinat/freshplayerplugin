@@ -204,6 +204,7 @@ ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance ta
 
 struct get_document_url_param_s {
     NPP                     npp;
+    NPObject               *np_window_obj;
     struct PP_Var           result;
     PP_Resource             m_loop;
 };
@@ -217,13 +218,10 @@ _get_document_url_ptac(void *user_data)
     p->result = PP_MakeString("");
     NPIdentifier location_id = npn.getstringidentifier("location");
     NPIdentifier href_id = npn.getstringidentifier("href");
-    NPObject *np_window_obj, *np_location_obj;
+    NPObject *np_location_obj;
     NPVariant location_var, href_var;
 
-    if (npn.getvalue(p->npp, NPNVWindowNPObject, &np_window_obj) != NPERR_NO_ERROR)
-        goto err_1;
-
-    if (!npn.getproperty(p->npp, np_window_obj, location_id, &location_var))
+    if (!npn.getproperty(p->npp, p->np_window_obj, location_id, &location_var))
         goto err_2;
 
     if (location_var.type != NPVariantType_Object)
@@ -249,8 +247,6 @@ err_4:
 err_3:
     npn.releasevariantvalue(&location_var);
 err_2:
-    npn.releaseobject(np_window_obj);
-err_1:
     ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
     return;
 }
@@ -274,6 +270,7 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
     struct get_document_url_param_s p;
     p.npp = pp_i->npp;
     p.m_loop = ppb_message_loop_get_current();
+    p.np_window_obj = pp_i->np_window_obj;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_get_document_url_comt, &p), 0);
     ppb_message_loop_run_nested(p.m_loop, 1);

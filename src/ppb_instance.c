@@ -112,8 +112,7 @@ ppb_instance_private_get_window_object(PP_Instance instance)
         return PP_MakeUndefined();
     }
 
-    ppb_var_add_ref(pp_i->window_obj);
-    return pp_i->window_obj;
+    return PP_MakeBrowserObject(pp_i->np_window_obj, NULL);
 }
 
 struct PP_Var
@@ -126,28 +125,20 @@ struct execute_script_param_s {
     struct PP_Var       script;
     struct PP_Var       result;
     NPP                 npp;
+    NPObject           *np_window_obj;
     PP_Resource         message_loop;
 };
 
 static
 void
-_execute_script_ptac(void *p)
+_execute_script_ptac(void *user_data)
 {
-    struct execute_script_param_s *esp = p;
-    NPError err;
-    NPObject *np_window_obj;
+    struct execute_script_param_s *esp = user_data;
     NPString  np_script;
     NPVariant np_result;
 
-    err = npn.getvalue(esp->npp, NPNVWindowNPObject, &np_window_obj);
-    if (err != NPERR_NO_ERROR) {
-        trace_error("%s, NPN_GetValue failed with code %d\n", __func__, err);
-        esp->result = PP_MakeUndefined();
-        goto quit;
-    }
-
     np_script.UTF8Characters = ppb_var_var_to_utf8(esp->script, &np_script.UTF8Length);
-    if (!npn.evaluate(esp->npp, np_window_obj, &np_script, &np_result)) {
+    if (!npn.evaluate(esp->npp, esp->np_window_obj, &np_script, &np_result)) {
         trace_error("%s, NPN_Evaluate failed\n", __func__);
         esp->result = PP_MakeUndefined();
         goto quit;
@@ -188,6 +179,7 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     struct execute_script_param_s esp;
     esp.script = script;
     esp.npp = pp_i->npp;
+    esp.np_window_obj = pp_i->np_window_obj;
     esp.message_loop = ppb_message_loop_get_current();
 
     ppb_message_loop_post_work(esp.message_loop,
