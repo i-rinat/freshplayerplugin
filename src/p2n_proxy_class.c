@@ -228,24 +228,7 @@ p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
 bool
 p2n_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    (void)result;
-    if (argCount != 1001) {
-        // TODO: figure out how to rid of magic numbers
-        trace_warning("%s, wrong magic %d\n", __func__, argCount);
-        return false;
-    }
-
-    struct PP_Var var = *(struct PP_Var *)args;
-    struct np_proxy_object_s *obj = (void *)npobj;
-    tables_ref_var(var);
-    obj->ppobj = var;
-
-    if (result) {
-        result->type = NPVariantType_Object;
-        result->value.objectValue = npobj;
-    }
-
-    return true;
+    return false;
 }
 
 
@@ -351,7 +334,7 @@ TRACE_WRAPPER
 bool
 trace_p2n_construct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    trace_info("[CLS] {full} %s\n", __func__+6);
+    trace_info("[CLS] {zilch} %s\n", __func__+6);
     return p2n_construct(npobj, args, argCount, result);
 }
 
@@ -370,5 +353,5 @@ struct NPClass p2n_proxy_class = {
     .setProperty =      TWRAPZ(p2n_set_property),
     .removeProperty =   TWRAPZ(p2n_remove_property),
     .enumerate =        TWRAPZ(p2n_enumerate),
-    .construct =        TWRAPF(p2n_construct),
+    .construct =        TWRAPZ(p2n_construct),
 };
