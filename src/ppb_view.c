@@ -86,14 +86,12 @@ ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
 float
 ppb_view_get_device_scale(PP_Resource resource)
 {
-    // TODO: detect scale
     return 1.0;
 }
 
 float
 ppb_view_get_css_scale(PP_Resource resource)
 {
-    // TODO: detect scale
     return 1.0;
 }
 
@@ -151,7 +149,7 @@ TRACE_WRAPPER
 float
 trace_ppb_view_get_device_scale(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_device_scale(resource);
 }
 
@@ -159,14 +157,14 @@ TRACE_WRAPPER
 float
 trace_ppb_view_get_css_scale(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_css_scale(resource);
 }
 
 
 const struct PPB_View_Dev_0_1 ppb_view_dev_interface_0_1 = {
-    .GetDeviceScale =   TWRAPZ(ppb_view_get_device_scale),
-    .GetCSSScale =      TWRAPZ(ppb_view_get_css_scale),
+    .GetDeviceScale =   TWRAPF(ppb_view_get_device_scale),
+    .GetCSSScale =      TWRAPF(ppb_view_get_css_scale),
 };
 
 const struct PPB_View_1_0 ppb_view_interface_1_0 = {
@@ -185,6 +183,6 @@ const struct PPB_View_1_1 ppb_view_interface_1_1 = {
     .IsVisible =        TWRAPZ(ppb_view_is_visible),
     .IsPageVisible =    TWRAPZ(ppb_view_is_page_visible),
     .GetClipRect =      TWRAPF(ppb_view_get_clip_rect),
-    .GetDeviceScale =   TWRAPZ(ppb_view_get_device_scale),
-    .GetCSSScale =      TWRAPZ(ppb_view_get_css_scale),
+    .GetDeviceScale =   TWRAPF(ppb_view_get_device_scale),
+    .GetCSSScale =      TWRAPF(ppb_view_get_css_scale),
 };
