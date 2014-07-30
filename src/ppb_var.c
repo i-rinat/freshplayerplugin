@@ -253,7 +253,7 @@ ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
         }
     }
 
-    trace_warning("%s, 'var' is not a string\n", __func__);
+    trace_warning("%s, 'var' is not a string, (%d)\n", __func__, var.type);
     if (len)
         *len = 0;
     return "";
