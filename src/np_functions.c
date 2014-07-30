@@ -158,8 +158,8 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
         PP_Resource request_info = ppb_url_request_info_create(pp_i->id);
         PP_Resource url_loader = ppb_url_loader_create(pp_i->id);
 
-        struct PP_Var s_url = ppb_var_var_from_utf8_1_1_z(pp_i->instance_url);
-        struct PP_Var s_method = ppb_var_var_from_utf8_1_1_z("GET");
+        struct PP_Var s_url = ppb_var_var_from_utf8_z(pp_i->instance_url);
+        struct PP_Var s_method = ppb_var_var_from_utf8_z("GET");
 
         ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL, s_url);
         ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_METHOD, s_method);
@@ -911,7 +911,7 @@ handle_key_press_release_event(NPP npp, void *event)
     pp_keycode = xkeycode_to_pp_keycode(keysym);
 
     if (ev->type == KeyPress && charcount > 0) {
-        struct PP_Var character_text = ppb_var_var_from_utf8_1_1(buffer, charcount);
+        struct PP_Var character_text = ppb_var_var_from_utf8(buffer, charcount);
         pp_event = ppb_keyboard_input_event_create(
                         pp_i->id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
                         pp_keycode, character_text);

@@ -57,25 +57,25 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
 
     switch (property) {
     case PP_URLRESPONSEPROPERTY_URL:
-        var = ppb_var_var_from_utf8_1_1_z(ul->url);
+        var = ppb_var_var_from_utf8_z(ul->url);
         break;
     case PP_URLRESPONSEPROPERTY_REDIRECTURL:
-        var = ppb_var_var_from_utf8_1_1_z(ul->redirect_url);
+        var = ppb_var_var_from_utf8_z(ul->redirect_url);
         break;
     case PP_URLRESPONSEPROPERTY_REDIRECTMETHOD:
         // redirection is believed to be always GET
         // TODO: check whenever it may be HEAD
-        var = ppb_var_var_from_utf8_1_1_z("GET");
+        var = ppb_var_var_from_utf8_z("GET");
         break;
     case PP_URLRESPONSEPROPERTY_STATUSCODE:
         var.type = PP_VARTYPE_INT32;
         var.value.as_int = ul->http_code;
         break;
     case PP_URLRESPONSEPROPERTY_STATUSLINE:
-        var = ppb_var_var_from_utf8_1_1_z(ul->status_line);
+        var = ppb_var_var_from_utf8_z(ul->status_line);
         break;
     case PP_URLRESPONSEPROPERTY_HEADERS:
-        var = ppb_var_var_from_utf8_1_1_z(ul->headers);
+        var = ppb_var_var_from_utf8_z(ul->headers);
         break;
     }
 

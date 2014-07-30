@@ -86,7 +86,7 @@ ppb_browser_font_trusted_describe(PP_Resource font,
     memset(metrics, 0, sizeof(*metrics));
 
     const char *s_family = pango_font_description_get_family(bf->font_desc);
-    description->face = ppb_var_var_from_utf8_1_1_z(s_family);
+    description->face = ppb_var_var_from_utf8_z(s_family);
 
     description->family = bf->family >= 0 ? bf->family : 0;
 

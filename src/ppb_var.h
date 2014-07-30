@@ -39,18 +39,15 @@ void
 ppb_var_release(struct PP_Var var);
 
 struct PP_Var
-ppb_var_var_from_utf8_1_1(const char *data, uint32_t len);
+ppb_var_var_from_utf8(const char *data, uint32_t len);
 
 static
 inline
 struct PP_Var
-ppb_var_var_from_utf8_1_1_z(const char *data)
+ppb_var_var_from_utf8_z(const char *data)
 {
-    return ppb_var_var_from_utf8_1_1(data, strlen(data));
+    return ppb_var_var_from_utf8(data, strlen(data));
 }
-
-struct PP_Var
-ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len);
 
 const char *
 ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len);

@@ -137,7 +137,7 @@ struct PP_Var
 ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 {
     setlocale(LC_ALL, "");
-    return ppb_var_var_from_utf8_1_1_z(nl_langinfo(CODESET));
+    return ppb_var_var_from_utf8_z(nl_langinfo(CODESET));
 }
 
 

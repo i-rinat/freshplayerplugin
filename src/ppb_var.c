@@ -214,7 +214,7 @@ ppb_var_release(struct PP_Var var)
 }
 
 struct PP_Var
-ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
+ppb_var_var_from_utf8(const char *data, uint32_t len)
 {
     struct var_s *v = g_slice_alloc(sizeof(*v));
     struct PP_Var var = {};
@@ -237,7 +237,7 @@ ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
 struct PP_Var
 ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
 {
-    return ppb_var_var_from_utf8_1_1(data, len);
+    return ppb_var_var_from_utf8(data, len);
 }
 
 const char *
@@ -509,10 +509,10 @@ trace_ppb_var_release(struct PP_Var var)
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
+trace_ppb_var_var_from_utf8(const char *data, uint32_t len)
 {
     trace_info("[PPB] {full} %s data=%.*s, len=%d\n", __func__+6, len, data, len);
-    return ppb_var_var_from_utf8_1_1(data, len);
+    return ppb_var_var_from_utf8(data, len);
 }
 
 TRACE_WRAPPER
@@ -686,7 +686,7 @@ trace_ppb_var_create_object_with_module_deprecated(PP_Module module,
 const struct PPB_Var_1_2 ppb_var_interface_1_2 = {
     .AddRef          = TWRAPF(ppb_var_add_ref),
     .Release         = TWRAPF(ppb_var_release),
-    .VarFromUtf8     = TWRAPF(ppb_var_var_from_utf8_1_1),
+    .VarFromUtf8     = TWRAPF(ppb_var_var_from_utf8),
     .VarToUtf8       = TWRAPF(ppb_var_var_to_utf8),
     .VarToResource   = TWRAPZ(ppb_var_var_to_resource),
     .VarFromResource = TWRAPZ(ppb_var_var_from_resource),
@@ -695,7 +695,7 @@ const struct PPB_Var_1_2 ppb_var_interface_1_2 = {
 const struct PPB_Var_1_1 ppb_var_interface_1_1 = {
     .AddRef =       TWRAPF(ppb_var_add_ref),
     .Release =      TWRAPF(ppb_var_release),
-    .VarFromUtf8 =  TWRAPF(ppb_var_var_from_utf8_1_1),
+    .VarFromUtf8 =  TWRAPF(ppb_var_var_from_utf8),
     .VarToUtf8 =    TWRAPF(ppb_var_var_to_utf8),
 };
 

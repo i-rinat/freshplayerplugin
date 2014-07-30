@@ -174,7 +174,7 @@ ppb_flash_get_local_time_zone_offset(PP_Instance instance, PP_Time t)
 struct PP_Var
 ppb_flash_get_command_line_args(PP_Module module)
 {
-    return ppb_var_var_from_utf8_1_1_z(config.flash_command_line);
+    return ppb_var_var_from_utf8_z(config.flash_command_line);
 }
 
 void
@@ -200,7 +200,7 @@ get_flashsetting_language(void)
 {
     char *lang = getenv("LANG");
     if (!lang)
-        return ppb_var_var_from_utf8_1_1_z("en-US");
+        return ppb_var_var_from_utf8_z("en-US");
 
     // make a working copy
     lang = strdup(lang);
@@ -215,7 +215,7 @@ get_flashsetting_language(void)
     if (ptr)
         *ptr = '-';
 
-    struct PP_Var res = ppb_var_var_from_utf8_1_1_z(lang);
+    struct PP_Var res = ppb_var_var_from_utf8_z(lang);
     free(lang);
     return res;
 }

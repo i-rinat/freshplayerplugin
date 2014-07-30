@@ -126,8 +126,8 @@ np_variant_to_pp_var(NPVariant v)
     case NPVariantType_Bool:    return PP_MakeBool(v.value.boolValue);
     case NPVariantType_Int32:   return PP_MakeInt32(v.value.intValue);
     case NPVariantType_Double:  return PP_MakeDouble(v.value.doubleValue);
-    case NPVariantType_String:  return ppb_var_var_from_utf8_1_1(v.value.stringValue.UTF8Characters,
-                                                                 v.value.stringValue.UTF8Length);
+    case NPVariantType_String:  return ppb_var_var_from_utf8(v.value.stringValue.UTF8Characters,
+                                                             v.value.stringValue.UTF8Length);
     default:                    return PP_MakeUndefined();
 
     case NPVariantType_Object:

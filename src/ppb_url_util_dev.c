@@ -163,7 +163,7 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
     len++;
     char *str = malloc(len);
     uriToStringA(str, &uri_result, len, NULL);
-    var = ppb_var_var_from_utf8_1_1_z(str);
+    var = ppb_var_var_from_utf8_z(str);
     free(str);
 
     if (components)
@@ -215,7 +215,7 @@ _get_document_url_ptac(void *user_data)
 {
     struct get_document_url_param_s *p = user_data;
 
-    p->result = ppb_var_var_from_utf8_1_1("", 0);
+    p->result = ppb_var_var_from_utf8("", 0);
     NPIdentifier location_id = npn.getstringidentifier("location");
     NPIdentifier href_id = npn.getstringidentifier("href");
     NPObject *np_location_obj;
@@ -290,7 +290,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
     if (!pp_i)
         return PP_MakeUndefined();
 
-    struct PP_Var var = ppb_var_var_from_utf8_1_1_z(pp_i->instance_url);
+    struct PP_Var var = ppb_var_var_from_utf8_z(pp_i->instance_url);
 
     if (components)
         parse_url_string(ppb_var_var_to_utf8(var, NULL), components);
