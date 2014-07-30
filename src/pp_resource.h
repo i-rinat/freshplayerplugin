@@ -97,11 +97,6 @@ enum file_ref_type_e {
     PP_FILE_REF_TYPE_FD,
 };
 
-struct pp_var_object_s {
-    const struct PPP_Class_Deprecated *klass;
-    void *data;
-};
-
 struct np_proxy_object_s {
     NPObject npobj;
     struct PP_Var ppobj;
@@ -384,7 +379,6 @@ struct pp_message_loop_s {
 };
 
 union pp_largest_u {
-    struct pp_var_object_s          s01;
     struct pp_instance_s            s02;
     struct pp_resource_generic_s    s03;
     struct pp_url_loader_s          s04;

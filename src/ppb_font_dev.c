@@ -28,6 +28,7 @@
 #include <glib.h>
 #include <pango/pangoft2.h>
 #include "tables.h"
+#include "ppb_var.h"
 
 
 struct PP_Var
@@ -52,7 +53,7 @@ ppb_font_dev_get_font_families(PP_Instance instance)
         ptr += len + 1;
     }
 
-    struct PP_Var var = PP_MakeStringN(s, total_len);
+    struct PP_Var var = ppb_var_var_from_utf8_1_1(s, total_len);
     free(s);
     g_free(families);
 

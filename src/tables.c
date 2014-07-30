@@ -34,7 +34,6 @@
 
 NPNetscapeFuncs npn;
 
-static GHashTable  *var_ht;
 static GHashTable  *pp_to_np_ht;
 static GHashTable  *npobj_to_npp_ht = NULL;     // NPObject-to-NPP mapping
 
@@ -50,7 +49,6 @@ __attribute__((constructor))
 constructor_tables(void)
 {
     // hash tables
-    var_ht =            g_hash_table_new(g_direct_hash, g_direct_equal);
     pp_to_np_ht =       g_hash_table_new(g_direct_hash, g_direct_equal);
     npobj_to_npp_ht =   g_hash_table_new(g_direct_hash, g_direct_equal);
 
@@ -72,7 +70,6 @@ __attribute__((destructor))
 destructor_tables(void)
 {
     // hash tables
-    g_hash_table_unref(var_ht);
     g_hash_table_unref(pp_to_np_ht);
     g_hash_table_unref(npobj_to_npp_ht);
 
@@ -93,44 +90,6 @@ int
 tables_get_urandom_fd(void)
 {
     return urandom_fd;
-}
-
-int
-tables_ref_var(struct PP_Var var)
-{
-    pthread_mutex_lock(&lock);
-    void *key = (void*)(size_t)var.value.as_id;
-    int ref_cnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, key));
-
-    if (ref_cnt > 0) {
-        ref_cnt ++;
-        g_hash_table_replace(var_ht, key, GINT_TO_POINTER(ref_cnt));
-    } else {
-        ref_cnt = 1;
-        g_hash_table_insert(var_ht, key, GINT_TO_POINTER(1));
-    }
-
-    pthread_mutex_unlock(&lock);
-    return ref_cnt;
-}
-
-int
-tables_unref_var(struct PP_Var var)
-{
-    pthread_mutex_lock(&lock);
-    void *key = (void*)(size_t)var.value.as_id;
-    int ref_cnt = GPOINTER_TO_INT(g_hash_table_lookup(var_ht, key));
-
-    if (ref_cnt > 1) {
-        ref_cnt --;
-        g_hash_table_replace(var_ht, key, GINT_TO_POINTER(ref_cnt));
-    } else {
-        ref_cnt = 0;
-        g_hash_table_remove(var_ht, key);
-    }
-
-    pthread_mutex_unlock(&lock);
-    return ref_cnt;
 }
 
 struct pp_instance_s *
@@ -159,52 +118,6 @@ tables_remove_pp_instance(PP_Instance instance)
 }
 
 struct PP_Var
-PP_MakeString(const char *s)
-{
-    return PP_MakeStringN(s, s ? strlen(s) : 0);
-}
-
-struct PP_Var
-PP_MakeStringN(const char *s, unsigned int len)
-{
-    // strings are stored in format   [size]    [data...]
-    //                              (uint32_t)   (char)...
-    // where (size) is uint32_t string length, and (data) is actual
-    // string contents with appended '\0'
-
-    char *ptr = malloc(sizeof(uint32_t) + len + 1);
-    *(uint32_t *)ptr = len;
-    memcpy(ptr + sizeof(uint32_t), s, len);
-    ptr[len + sizeof(uint32_t)] = 0;
-
-    struct PP_Var var = { };
-    var.type = PP_VARTYPE_STRING;
-    var.value.as_id = (size_t)(void *)ptr;
-    tables_ref_var(var);
-    return var;
-}
-
-
-struct PP_Var
-PP_MakeBrowserObject(void *data, const struct pp_var_object_s *reference_obj)
-{
-    struct PP_Var var = { };
-    struct pp_var_object_s *obj;
-
-    obj = malloc(sizeof(*obj));
-    if (reference_obj) {
-        obj->klass = reference_obj->klass;
-    } else {
-        obj->klass = &n2p_proxy_class;
-    }
-    obj->data = data;
-    var.type = PP_VARTYPE_OBJECT;
-    var.value.as_id = (size_t)(void *)obj;
-    tables_ref_var(var);
-    return var;
-}
-
-struct PP_Var
 np_variant_to_pp_var(NPVariant v)
 {
     switch (v.type) {
@@ -213,8 +126,8 @@ np_variant_to_pp_var(NPVariant v)
     case NPVariantType_Bool:    return PP_MakeBool(v.value.boolValue);
     case NPVariantType_Int32:   return PP_MakeInt32(v.value.intValue);
     case NPVariantType_Double:  return PP_MakeDouble(v.value.doubleValue);
-    case NPVariantType_String:  return PP_MakeStringN(v.value.stringValue.UTF8Characters,
-                                                      v.value.stringValue.UTF8Length);
+    case NPVariantType_String:  return ppb_var_var_from_utf8_1_1(v.value.stringValue.UTF8Characters,
+                                                                 v.value.stringValue.UTF8Length);
     default:                    return PP_MakeUndefined();
 
     case NPVariantType_Object:
@@ -222,71 +135,10 @@ np_variant_to_pp_var(NPVariant v)
             struct np_proxy_object_s *p = (void *)v.value.objectValue;
             return p->ppobj;
         } else {
-            return PP_MakeBrowserObject(v.value.objectValue, NULL);
+            return ppb_var_create_object(0, &n2p_proxy_class, v.value.objectValue);
         }
         break;
     }
-}
-
-NPVariant
-pp_var_to_np_variant(struct PP_Var var)
-{
-    NPVariant res;
-    struct pp_var_object_s *ppobj;
-
-    switch (var.type) {
-    case PP_VARTYPE_NULL:
-        NULL_TO_NPVARIANT(res);
-        break;
-    case PP_VARTYPE_BOOL:
-        BOOLEAN_TO_NPVARIANT(var.value.as_bool, res);
-        break;
-    case PP_VARTYPE_INT32:
-        INT32_TO_NPVARIANT(var.value.as_int, res);
-        break;
-    case PP_VARTYPE_DOUBLE:
-        DOUBLE_TO_NPVARIANT(var.value.as_double, res);
-        break;
-    case PP_VARTYPE_STRING:
-        do {
-            const char *s1 = ppb_var_var_to_utf8(var, NULL);
-            uint32_t len = strlen(s1);
-            char *s2 = npn.memalloc(len + 1); // TODO: call on main thread?
-            memcpy(s2, s1, len + 1);
-            res.type = NPVariantType_String;
-            res.value.stringValue.UTF8Length = len;
-            res.value.stringValue.UTF8Characters = s2;
-        } while (0);
-        break;
-    case PP_VARTYPE_OBJECT:
-        ppobj = (void *)(size_t)var.value.as_id;
-        res.type = NPVariantType_Object;
-        if (ppobj->klass == &n2p_proxy_class) {
-            res.type = NPVariantType_Object;
-            res.value.objectValue = ppobj->data;
-            npn.retainobject(res.value.objectValue); // TODO: call on main thread?
-        } else {
-            struct np_proxy_object_s *np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
-            res.type = NPVariantType_Object;
-            np_proxy_object->npobj.referenceCount = 1;
-            np_proxy_object->npobj._class = &p2n_proxy_class;
-            np_proxy_object->ppobj = var;
-            res.value.objectValue = (NPObject *)np_proxy_object;
-            tables_ref_var(var);
-        }
-        break;
-
-    case PP_VARTYPE_UNDEFINED:
-    case PP_VARTYPE_ARRAY:
-    case PP_VARTYPE_DICTIONARY:
-    case PP_VARTYPE_ARRAY_BUFFER:
-    case PP_VARTYPE_RESOURCE:
-    default:
-        VOID_TO_NPVARIANT(res);
-        break;
-    }
-
-    return res;
 }
 
 PangoContext *

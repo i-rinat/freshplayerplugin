@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "pp_resource.h"
+#include "ppb_var.h"
 
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -98,14 +99,10 @@ trace_var_as_string(struct PP_Var var)
         res = g_strdup_printf("{DOUBLE:%f}", var.value.as_double);
         break;
     case PP_VARTYPE_STRING:
-        // TODO: handle inline '\0's
-        res = g_strdup_printf("{STRING:%s}", (char*)(size_t)(var.value.as_id + sizeof(uint32_t)));
+        res = g_strdup_printf("{STRING:%s}", ppb_var_var_to_utf8(var, NULL));
         break;
     case PP_VARTYPE_OBJECT:
-        {
-            struct pp_var_object_s *obj = (void*)(size_t)var.value.as_id;
-            res = g_strdup_printf("{OBJECT:class=%p,data=%p}", obj->klass, obj->data);
-        }
+        res = ppb_var_trace_object_var(var);
         break;
     default:
         res = g_strdup_printf("{NOTIMPLEMENTED:%d}", var.type);

@@ -27,6 +27,9 @@
 
 #include <ppapi/c/ppb_var.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>
+#include <string.h>
+#include <npapi/npapi.h>
+#include <npapi/npruntime.h>
 
 
 void
@@ -37,6 +40,14 @@ ppb_var_release(struct PP_Var var);
 
 struct PP_Var
 ppb_var_var_from_utf8_1_1(const char *data, uint32_t len);
+
+static
+inline
+struct PP_Var
+ppb_var_var_from_utf8_1_1_z(const char *data)
+{
+    return ppb_var_var_from_utf8_1_1(data, strlen(data));
+}
 
 struct PP_Var
 ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len);
@@ -84,5 +95,11 @@ struct PP_Var
 ppb_var_create_object_with_module_deprecated(PP_Module module,
                                              const struct PPP_Class_Deprecated *object_class,
                                              void *object_data);
+
+NPVariant
+pp_var_to_np_variant(struct PP_Var var);
+
+char *
+ppb_var_trace_object_var(struct PP_Var var);
 
 #endif // FPP__PPB_VAR_H

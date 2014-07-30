@@ -31,75 +31,232 @@
 #include <ppapi/c/dev/ppb_var_deprecated.h>
 #include <ppapi/c/dev/ppp_class_deprecated.h>
 #include "n2p_proxy_class.h"
+#include "p2n_proxy_class.h"
 
+
+static GHashTable      *var_ht;
+static pthread_mutex_t  lock;
+static uint32_t         var_id = 1;
+
+struct var_s {
+    int ref_count;
+    struct {
+        uint32_t    len;
+        char       *data;
+    } str;
+    struct {
+        const struct PPP_Class_Deprecated  *_class;
+        void                               *data;
+    } obj;
+};
+
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_var(void)
+{
+    var_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+    pthread_mutex_init(&lock, NULL);
+}
+
+static
+void
+__attribute__((destructor))
+destructor_ppb_var(void)
+{
+    g_hash_table_unref(var_ht);
+    pthread_mutex_destroy(&lock);
+}
+
+static
+int
+reference_countable(struct PP_Var var)
+{
+    return var.type == PP_VARTYPE_STRING || var.type == PP_VARTYPE_OBJECT ||
+           var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
+           var.type == PP_VARTYPE_ARRAY_BUFFER;
+}
+
+/* should be run with lock held */
+static
+uint32_t
+_get_new_var_id(void)
+{
+    do {
+        var_id ++;
+    } while (g_hash_table_lookup(var_ht, GSIZE_TO_POINTER(var_id)) != NULL);
+
+    return var_id;
+}
+
+static
+struct var_s *
+get_var_s(struct PP_Var var)
+{
+    pthread_mutex_lock(&lock);
+    struct var_s *v = g_hash_table_lookup(var_ht, GSIZE_TO_POINTER(var.value.as_id));
+    pthread_mutex_unlock(&lock);
+    return v;
+}
+
+NPVariant
+pp_var_to_np_variant(struct PP_Var var)
+{
+    NPVariant res;
+    struct var_s *v;
+
+    switch (var.type) {
+    case PP_VARTYPE_NULL:
+        NULL_TO_NPVARIANT(res);
+        break;
+    case PP_VARTYPE_BOOL:
+        BOOLEAN_TO_NPVARIANT(var.value.as_bool, res);
+        break;
+    case PP_VARTYPE_INT32:
+        INT32_TO_NPVARIANT(var.value.as_int, res);
+        break;
+    case PP_VARTYPE_DOUBLE:
+        DOUBLE_TO_NPVARIANT(var.value.as_double, res);
+        break;
+    case PP_VARTYPE_STRING:
+        do {
+            uint32_t len;
+            const char *s1 = ppb_var_var_to_utf8(var, &len);
+            char *s2 = npn.memalloc(len + 1); // TODO: call on main thread?
+            memcpy(s2, s1, len + 1);
+            res.type = NPVariantType_String;
+            res.value.stringValue.UTF8Length = len;
+            res.value.stringValue.UTF8Characters = s2;
+        } while (0);
+        break;
+    case PP_VARTYPE_OBJECT:
+        v = get_var_s(var);
+        res.type = NPVariantType_Object;
+        if (v->obj._class == &n2p_proxy_class) {
+            res.type = NPVariantType_Object;
+            res.value.objectValue = v->obj.data;
+            npn.retainobject(res.value.objectValue); // TODO: call on main thread?
+        } else {
+            struct np_proxy_object_s *np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
+            res.type = NPVariantType_Object;
+            np_proxy_object->npobj.referenceCount = 1;
+            np_proxy_object->npobj._class = &p2n_proxy_class;
+            np_proxy_object->ppobj = var;
+            res.value.objectValue = (NPObject *)np_proxy_object;
+            ppb_var_add_ref(var);
+        }
+        break;
+
+    case PP_VARTYPE_UNDEFINED:
+    case PP_VARTYPE_ARRAY:
+    case PP_VARTYPE_DICTIONARY:
+    case PP_VARTYPE_ARRAY_BUFFER:
+    case PP_VARTYPE_RESOURCE:
+    default:
+        VOID_TO_NPVARIANT(res);
+        break;
+    }
+
+    return res;
+}
 
 void
 ppb_var_add_ref(struct PP_Var var)
 {
-    if (var.type == PP_VARTYPE_STRING || var.type == PP_VARTYPE_OBJECT ||
-        var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
-        var.type == PP_VARTYPE_ARRAY_BUFFER)
-    {
-        tables_ref_var(var);
-    }
+    if (!reference_countable(var))
+        return;
+
+    pthread_mutex_lock(&lock);
+    void *key = GSIZE_TO_POINTER(var.value.as_id);
+    struct var_s *v = g_hash_table_lookup(var_ht, key);
+    if (v)
+        v->ref_count ++;
+    pthread_mutex_unlock(&lock);
 }
 
 void
 ppb_var_release(struct PP_Var var)
 {
-    if (var.type == PP_VARTYPE_STRING || var.type == PP_VARTYPE_OBJECT ||
-        var.type == PP_VARTYPE_ARRAY || var.type == PP_VARTYPE_DICTIONARY ||
-        var.type == PP_VARTYPE_ARRAY_BUFFER)
-    {
-        struct pp_var_object_s *obj;
-        int ref_cnt = tables_unref_var(var);
-        if (ref_cnt != 0)
-            return;
+    if (!reference_countable(var))
+        return;
 
-        switch (var.type) {
-        case PP_VARTYPE_STRING:
-            free((void*)(size_t)var.value.as_id);
-            break;
-        case PP_VARTYPE_OBJECT:
-            obj = (void*)(size_t)var.value.as_id;
-            if (obj->klass == &n2p_proxy_class)
-                n2p_proxy_class.Deallocate(obj);
-            free(obj);
-            break;
-        default:
-            // do nothing
-            break;
+    pthread_mutex_lock(&lock);
+    void *key = GSIZE_TO_POINTER(var.value.as_id);
+    struct var_s *v = g_hash_table_lookup(var_ht, key);
+    int retain = 1;
+    if (v) {
+        v->ref_count --;
+        if (v->ref_count <= 0) {
+            retain = 0;
+            g_hash_table_remove(var_ht, key);
         }
     }
+    pthread_mutex_unlock(&lock);
+
+    if (retain)
+        return;
+
+    switch (var.type) {
+    case PP_VARTYPE_STRING:
+        free(v->str.data);
+        break;
+    case PP_VARTYPE_OBJECT:
+        if (v->obj._class == &n2p_proxy_class)
+            n2p_proxy_class.Deallocate(v->obj.data);
+        break;
+    default:
+        // do nothing
+        break;
+    }
+
+    g_slice_free(struct var_s, v);
 }
 
 struct PP_Var
 ppb_var_var_from_utf8_1_1(const char *data, uint32_t len)
 {
-    return PP_MakeStringN(data, len);
+    struct var_s *v = g_slice_alloc(sizeof(*v));
+    struct PP_Var var = {};
+
+    var.type = PP_VARTYPE_STRING;
+    v->str.len = len;
+    v->str.data = malloc(len + 1);
+    memcpy(v->str.data, data, len);
+    v->str.data[len] = 0;       // ensure all strings are zero terminated
+    v->ref_count = 1;
+
+    pthread_mutex_lock(&lock);
+    var.value.as_id = _get_new_var_id();
+    g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
+    pthread_mutex_unlock(&lock);
+
+    return var;
 }
 
 struct PP_Var
 ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
 {
-    (void)module;
-    return PP_MakeStringN(data, len);
+    return ppb_var_var_from_utf8_1_1(data, len);
 }
 
 const char *
 ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len)
 {
     if (PP_VARTYPE_STRING == var.type) {
-        const char *s = (void *)(size_t)(var.value.as_id + sizeof(uint32_t));
-        if (len)
-            *len = *(uint32_t *)(size_t)(var.value.as_id);
-        return s;
-    } else {
-        trace_warning("var is not a string in %s\n", __func__);
-        if (len)
-            *len = 0;
-        return "";
+        struct var_s *v = get_var_s(var);
+        if (v) {
+            if (len)
+                *len = v->str.len;
+            // assuming all strings are stored with zero terminator
+            return v->str.data;
+        }
     }
+
+    trace_warning("%s, 'var' is not a string\n", __func__);
+    if (len)
+        *len = 0;
+    return "";
 }
 
 PP_Resource
@@ -117,12 +274,19 @@ ppb_var_var_from_resource(PP_Resource resource)
 bool
 ppb_var_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
-    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING)
+    if (object.type != PP_VARTYPE_OBJECT) {
+        trace_error("%s, 'object' is not an object\n", __func__);
         return false;
-    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+    }
 
-    if (obj->klass->HasProperty)
-        return obj->klass->HasProperty(obj->data, name, exception);
+    if (name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, 'name' is not a string\n", __func__);
+        return false;
+    }
+
+    struct var_s *objv = get_var_s(object);
+    if (objv->obj._class->HasProperty)
+        return objv->obj._class->HasProperty(objv->obj.data, name, exception);
     else
         return false;
 }
@@ -130,12 +294,19 @@ ppb_var_has_property(struct PP_Var object, struct PP_Var name, struct PP_Var *ex
 bool
 ppb_var_has_method(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
-    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING)
+    if (object.type != PP_VARTYPE_OBJECT) {
+        trace_error("%s, 'object' is not an object\n", __func__);
         return false;
-    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
+    }
 
-    if (obj->klass->HasMethod)
-        return obj->klass->HasMethod(obj->data, name, exception);
+    if (name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, 'name' is not a string\n", __func__);
+        return false;
+    }
+
+    struct var_s *objv = get_var_s(object);
+    if (objv->obj._class->HasMethod)
+        return objv->obj._class->HasMethod(objv->obj.data, name, exception);
     else
         return false;
 }
@@ -143,14 +314,20 @@ ppb_var_has_method(struct PP_Var object, struct PP_Var name, struct PP_Var *exce
 struct PP_Var
 ppb_var_get_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
-    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING) {
+    if (object.type != PP_VARTYPE_OBJECT) {
         // TODO: fill exception
+        trace_error("%s, 'object' is not an object\n", __func__);
         return PP_MakeUndefined();
     }
 
-    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
-    if (obj->klass->GetProperty)
-        return obj->klass->GetProperty(obj->data, name, exception);
+    if (name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, 'name' is not a string\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    struct var_s *objv = get_var_s(object);
+    if (objv->obj._class->GetProperty)
+        return objv->obj._class->GetProperty(objv->obj.data, name, exception);
     else
         return PP_MakeUndefined();
 }
@@ -161,53 +338,73 @@ ppb_var_get_all_property_names(struct PP_Var object, uint32_t *property_count,
 {
     if (object.type != PP_VARTYPE_OBJECT) {
         // TODO: fill exception
+        trace_error("%s, 'object' is not an object\n", __func__);
         return;
     }
 
-    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
-    if (obj->klass->GetAllPropertyNames)
-        obj->klass->GetAllPropertyNames(obj->data, property_count, properties, exception);
+    struct var_s *objv = get_var_s(object);
+    if (objv->obj._class->GetAllPropertyNames)
+        objv->obj._class->GetAllPropertyNames(objv->obj.data, property_count, properties,
+                                              exception);
 }
 
 void
 ppb_var_set_property(struct PP_Var object, struct PP_Var name, struct PP_Var value,
                      struct PP_Var *exception)
 {
-    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING) {
+    if (object.type != PP_VARTYPE_OBJECT) {
         // TODO: fill exception
+        trace_error("%s, 'object' is not an object\n", __func__);
         return;
     }
 
-    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
-    if (obj->klass->SetProperty)
-        obj->klass->SetProperty(obj->data, name, value, exception);
+    if (name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, 'name' is not a string\n", __func__);
+        return;
+    }
+
+    struct var_s *objv = get_var_s(object);
+    if (objv->obj._class->SetProperty)
+        objv->obj._class->SetProperty(objv->obj.data, name, value, exception);
 }
 
 void
 ppb_var_remove_property(struct PP_Var object, struct PP_Var name, struct PP_Var *exception)
 {
-    if (object.type != PP_VARTYPE_OBJECT || name.type != PP_VARTYPE_STRING) {
+    if (object.type != PP_VARTYPE_OBJECT) {
         // TODO: fill exception
+        trace_error("%s, 'object' is not an object\n", __func__);
         return;
     }
 
-    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
-    if (obj->klass->RemoveProperty)
-        obj->klass->RemoveProperty(obj->data, name, exception);
+    if (name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, 'name' is not a string\n", __func__);
+        return;
+    }
+
+    struct var_s *objv = get_var_s(object);
+    if (objv->obj._class->RemoveProperty)
+        objv->obj._class->RemoveProperty(objv->obj.data, name, exception);
 }
 
 struct PP_Var
 ppb_var_call(struct PP_Var object, struct PP_Var method_name, uint32_t argc,
              struct PP_Var *argv, struct PP_Var *exception)
 {
-    if (object.type != PP_VARTYPE_OBJECT || method_name.type != PP_VARTYPE_STRING) {
+    if (object.type != PP_VARTYPE_OBJECT) {
         // TODO: fill exception
+        trace_error("%s, 'object' is not an object\n", __func__);
         return PP_MakeUndefined();
     }
 
-    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
-    if (obj->klass->Call)
-        return obj->klass->Call(obj->data, method_name, argc, argv, exception);
+    if (method_name.type != PP_VARTYPE_STRING) {
+        trace_error("%s, 'method_name' is not a string\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    struct var_s *objv = get_var_s(object);
+    if (objv->obj._class->Call)
+        return objv->obj._class->Call(objv->obj.data, method_name, argc, argv, exception);
     else
         return PP_MakeUndefined();
 }
@@ -218,12 +415,13 @@ ppb_var_construct(struct PP_Var object, uint32_t argc, struct PP_Var *argv,
 {
     if (object.type != PP_VARTYPE_OBJECT) {
         // TODO: fill exception
+        trace_error("%s, 'object' is not an object\n", __func__);
         return PP_MakeUndefined();
     }
 
-    struct pp_var_object_s *obj = (void *)(size_t)object.value.as_id;
-    if (obj->klass->Construct)
-        return obj->klass->Construct(obj->data, argc, argv, exception);
+    struct var_s *objv = get_var_s(object);
+    if (objv->obj._class->Construct)
+        return objv->obj._class->Construct(objv->obj.data, argc, argv, exception);
     else
         return PP_MakeUndefined();
 }
@@ -232,11 +430,15 @@ bool
 ppb_var_is_instance_of(struct PP_Var var, const struct PPP_Class_Deprecated *object_class,
                        void **object_data)
 {
-    if (var.type != PP_VARTYPE_OBJECT)
+    if (var.type != PP_VARTYPE_OBJECT) {
+        trace_error("%s, 'var' is not an object\n", __func__);
         return false;
-    struct pp_var_object_s *obj = (void *)(size_t)var.value.as_id;
-    if (obj->klass == object_class) {
-        *object_data = obj->data;
+    }
+
+    struct var_s *objv = get_var_s(var);
+    if (objv->obj._class == object_class) {
+        if (object_data)
+            *object_data = objv->obj.data;
         return true;
     }
     return false;
@@ -247,15 +449,18 @@ ppb_var_create_object(PP_Instance instance, const struct PPP_Class_Deprecated *o
                       void *object_data)
 {
     (void)instance;
-    struct PP_Var var = { };
-    struct pp_var_object_s *obj;
+    struct PP_Var var = {};
+    struct var_s *v = g_slice_alloc(sizeof(*v));
 
-    obj = malloc(sizeof(*obj));
     var.type = PP_VARTYPE_OBJECT;
-    var.value.as_id = (int64_t)(size_t)obj;
-    obj->klass = object_class;
-    obj->data = object_data;
-    tables_ref_var(var);
+    v->obj._class = object_class;
+    v->obj.data = object_data;
+    v->ref_count = 1;
+
+    pthread_mutex_lock(&lock);
+    var.value.as_id = _get_new_var_id();
+    g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
+    pthread_mutex_unlock(&lock);
 
     return var;
 }
@@ -266,17 +471,18 @@ ppb_var_create_object_with_module_deprecated(PP_Module module,
                                              void *object_data)
 {
     (void)module;
-    struct PP_Var var = { };
-    struct pp_var_object_s *obj;
+    return ppb_var_create_object(0, object_class, object_data);
+}
 
-    obj = malloc(sizeof(*obj));
-    var.type = PP_VARTYPE_OBJECT;
-    var.value.as_id = (int64_t)(size_t)obj;
-    obj->klass = object_class;
-    obj->data = object_data;
-    tables_ref_var(var);
-
-    return var;
+char *
+ppb_var_trace_object_var(struct PP_Var var)
+{
+    if (var.type == PP_VARTYPE_OBJECT) {
+        struct var_s *objv = get_var_s(var);
+        return g_strdup_printf("{OBJECT:class=%p,data=%p}", objv->obj._class, objv->obj.data);
+    } else {
+        return "";
+    }
 }
 
 

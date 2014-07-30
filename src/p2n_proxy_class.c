@@ -77,7 +77,7 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
     struct np_proxy_object_s *obj = (void *)npobj;
     char *s = npn.utf8fromidentifier(name);
     struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var method_name = PP_MakeString(s);
+    struct PP_Var method_name = ppb_var_var_from_utf8_1_1_z(s);
     npn.memfree(s);
     bool res = ppb_var_has_method(obj->ppobj, method_name, &exception);
     ppb_var_release(method_name);
@@ -104,7 +104,7 @@ _p2n_invoke_comt(void *user_data, int32_t result)
     struct np_proxy_object_s *obj = (void *)p->npobj;
     char *s = npn.utf8fromidentifier(p->name);
     struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var method_name = PP_MakeString(s);
+    struct PP_Var method_name = ppb_var_var_from_utf8_1_1_z(s);
     struct PP_Var res;
     npn.memfree(s);
 
@@ -177,7 +177,7 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
     struct np_proxy_object_s *obj = (void *)npobj;
     char *s = npn.utf8fromidentifier(name);
     struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var property_name = PP_MakeString(s);
+    struct PP_Var property_name = ppb_var_var_from_utf8_1_1_z(s);
     npn.memfree(s);
     bool res = ppb_var_has_property(obj->ppobj, property_name, &exception);
     ppb_var_release(property_name);
@@ -197,7 +197,7 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
     struct np_proxy_object_s *obj = (void *)npobj;
     char *s = npn.utf8fromidentifier(name);
     struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var property_name = PP_MakeString(s);
+    struct PP_Var property_name = ppb_var_var_from_utf8_1_1_z(s);
     npn.memfree(s);
     struct PP_Var res = ppb_var_get_property(obj->ppobj, property_name, &exception);
 
