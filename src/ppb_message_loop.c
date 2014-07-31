@@ -158,6 +158,7 @@ ppb_message_loop_attach_to_current_thread(PP_Resource message_loop)
 struct message_loop_task_s {
     struct timespec                 when;
     int                             terminate;
+    int                             depth;
     struct PP_CompletionCallback    ccb;
     int32_t                         result_to_pass;
     PP_Bool                         should_destroy_ml;
@@ -240,6 +241,33 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested)
                 // remove task from the queue
                 g_queue_pop_head(int_q);
 
+                if (task->terminate) {
+                    // check if depth is correct
+                    if (task->depth != depth) {
+                        task->when = now;
+                        g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
+                        continue;
+                    }
+
+                    if (depth > 1) {
+                        // exit at once, all remaining task will be processed by outer loop
+                        g_slice_free(struct message_loop_task_s, task);
+                        break;
+                    }
+
+                    // it's the outermost loop, we should wait for all tasks to be run
+                    ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
+                    if (ml) {
+                        ml->teardown = 1;
+                        teardown = 1;
+                        destroy_ml = task->should_destroy_ml;
+                        pp_resource_release(message_loop);
+                    }
+
+                    g_slice_free(struct message_loop_task_s, task);
+                    continue;
+                }
+
                 // run task
                 const struct PP_CompletionCallback ccb = task->ccb;
                 if (ccb.func) {
@@ -256,25 +284,8 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested)
         }
 
         task = g_async_queue_timeout_pop(async_q, timeout);
-        if (task) {
-            if (task->terminate) {
-                if (depth > 1) {
-                    // exit at once, all remaining task will be processed by outer loop
-                    g_slice_free(struct message_loop_task_s, task);
-                    break;
-                }
-                ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
-                if (ml) {
-                    ml->teardown = 1;
-                    teardown = 1;
-                    destroy_ml = task->should_destroy_ml;
-                    pp_resource_release(message_loop);
-                }
-                g_slice_free(struct message_loop_task_s, task);
-            } else {
-                g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
-            }
-        }
+        if (task)
+            g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
     }
 
     // mark thread as non-running
@@ -344,7 +355,7 @@ ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallbac
 }
 
 int32_t
-ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
+ppb_message_loop_post_quit_depth(PP_Resource message_loop, PP_Bool should_destroy, int depth)
 {
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
     if (!ml) {
@@ -355,6 +366,7 @@ ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
     struct message_loop_task_s *task = g_slice_alloc0(sizeof(*task));
 
     task->terminate = 1;
+    task->depth = depth;
     task->should_destroy_ml = should_destroy;
     task->result_to_pass = PP_OK;
 
@@ -363,6 +375,13 @@ ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
     g_async_queue_push(ml->async_q, task);
     pp_resource_release(message_loop);
     return PP_OK;
+}
+
+int32_t
+ppb_message_loop_post_quit(PP_Resource message_loop, PP_Bool should_destroy)
+{
+    int depth = ppb_message_loop_get_depth(message_loop);
+    return ppb_message_loop_post_quit_depth(message_loop, should_destroy, depth);
 }
 
 
