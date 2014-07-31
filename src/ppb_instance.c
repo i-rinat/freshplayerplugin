@@ -185,7 +185,7 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     ppb_var_add_ref(script);
     ppb_message_loop_post_work(esp.message_loop,
                                PP_MakeCompletionCallback(_execute_script_comt, &esp), 0);
-    ppb_message_loop_run_nested(esp.message_loop, 1);
+    ppb_message_loop_run_int(esp.message_loop, 1);
     ppb_var_release(script);
 
     return esp.result;

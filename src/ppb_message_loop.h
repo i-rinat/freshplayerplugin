@@ -56,7 +56,7 @@ int32_t
 ppb_message_loop_run(PP_Resource message_loop);
 
 int32_t
-ppb_message_loop_run_nested(PP_Resource message_loop, int nested);
+ppb_message_loop_run_int(PP_Resource message_loop, int nested);
 
 int32_t
 ppb_message_loop_post_work_with_result(PP_Resource message_loop,

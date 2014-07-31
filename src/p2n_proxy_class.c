@@ -152,7 +152,7 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         p.result =      result;
 
         ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_invoke_comt, &p), PP_OK);
-        ppb_message_loop_run_nested(ppb_message_loop_get_for_browser_thread(), 1);
+        ppb_message_loop_run_int(ppb_message_loop_get_for_browser_thread(), 1);
 
         return true;
     } else {

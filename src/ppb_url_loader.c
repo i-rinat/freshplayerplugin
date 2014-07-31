@@ -278,7 +278,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     p.m_loop =          ppb_message_loop_get_current();
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_url_loader_open_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop, 1);
+    ppb_message_loop_run_int(p.m_loop, 1);
 
     pp_resource_release(loader);
 
@@ -350,7 +350,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     p.m_loop =              ppb_message_loop_get_current();
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_url_loader_open_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop, 1);
+    ppb_message_loop_run_int(p.m_loop, 1);
 
     pp_resource_release(loader);
 

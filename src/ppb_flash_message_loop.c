@@ -46,7 +46,7 @@ ppb_flash_message_loop_run(PP_Resource flash_message_loop)
     pp_resource_ref(flash_message_loop);        // prevent destroy of running loop
     pp_resource_release(flash_message_loop);
 
-    ppb_message_loop_run_nested(message_loop, 1);
+    ppb_message_loop_run_int(message_loop, 1);
 
     fml = pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
     if (fml) {

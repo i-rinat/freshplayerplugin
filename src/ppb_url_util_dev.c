@@ -273,7 +273,7 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
     p.np_window_obj = pp_i->np_window_obj;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_get_document_url_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop, 1);
+    ppb_message_loop_run_int(p.m_loop, 1);
 
     if (components)
         parse_url_string(ppb_var_var_to_utf8(p.result, NULL), components);

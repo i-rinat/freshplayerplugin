@@ -172,11 +172,11 @@ time_compare_func(gconstpointer a, gconstpointer b, gpointer user_data)
 int32_t
 ppb_message_loop_run(PP_Resource message_loop)
 {
-    return ppb_message_loop_run_nested(message_loop, 0);
+    return ppb_message_loop_run_int(message_loop, 0);
 }
 
 int32_t
-ppb_message_loop_run_nested(PP_Resource message_loop, int nested)
+ppb_message_loop_run_int(PP_Resource message_loop, int nested)
 {
     if (this_thread_message_loop != message_loop) {
         trace_error("%s, not attached to current thread\n", __func__);
