@@ -25,7 +25,7 @@
 #define _XOPEN_SOURCE   600
 #include "ppb_url_loader.h"
 #include "ppb_core.h"
-#include "ppb_url_util_dev.h"
+#include "ppb_url_util.h"
 #include "ppb_var.h"
 #include "ppb_message_loop.h"
 #include <ppapi/c/pp_errors.h>
