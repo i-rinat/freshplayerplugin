@@ -49,6 +49,9 @@ ppb_message_loop_proclaim_this_thread_browser(void);
 PP_Resource
 ppb_message_loop_get_current(void);
 
+int
+ppb_message_loop_get_depth(PP_Resource message_loop);
+
 int32_t
 ppb_message_loop_attach_to_current_thread(PP_Resource message_loop);
 

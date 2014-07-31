@@ -115,6 +115,18 @@ ppb_message_loop_get_current(void)
     return this_thread_message_loop;
 }
 
+int
+ppb_message_loop_get_depth(PP_Resource message_loop)
+{
+    struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
+    if (!ml)
+        return 0;
+
+    int depth = ml->depth;
+    pp_resource_release(message_loop);
+    return depth;
+}
+
 void
 ppb_message_loop_mark_thread_unsuitable(void)
 {
