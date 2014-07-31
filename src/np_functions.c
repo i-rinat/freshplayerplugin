@@ -242,10 +242,12 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         }
     }
 
-    // allocate message loop for browser thread
-    PP_Resource message_loop = ppb_message_loop_create(pp_i->id);
-    ppb_message_loop_attach_to_current_thread(message_loop);
-    ppb_message_loop_proclaim_this_thread_browser();
+    if (ppb_message_loop_get_current() == 0) {
+        // allocate message loop for browser thread
+        PP_Resource message_loop = ppb_message_loop_create(pp_i->id);
+        ppb_message_loop_attach_to_current_thread(message_loop);
+        ppb_message_loop_proclaim_this_thread_browser();
+    }
 
     pthread_mutex_init(&pp_i->lock, NULL);
     pp_i->dpy = XOpenDisplay(NULL);
