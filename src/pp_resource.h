@@ -349,6 +349,7 @@ struct pp_flash_message_loop_s {
     COMMON_STRUCTURE_FIELDS
     int             running;
     PP_Resource     message_loop;
+    int             depth;
 };
 
 struct pp_tcp_socket_s {

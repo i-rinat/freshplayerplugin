@@ -99,6 +99,7 @@ struct url_loader_open_param_s {
     const char                 *post_data;
     size_t                      post_len;
     PP_Resource                 m_loop;
+    int                         depth;
     int                         retval;
 };
 
@@ -165,7 +166,7 @@ _url_loader_open_ptac(void *user_data)
         }
     }
 
-    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 static
@@ -276,6 +277,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     p.post_len =        ul->post_len;
     p.post_data =       ul->post_data;
     p.m_loop =          ppb_message_loop_get_current();
+    p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_url_loader_open_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
@@ -348,6 +350,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     p.post_len =            0;
     p.post_data =           NULL;
     p.m_loop =              ppb_message_loop_get_current();
+    p.depth =               ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_url_loader_open_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);

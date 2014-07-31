@@ -44,6 +44,7 @@ struct has_property_param_s {
     void               *object;
     bool                res;
     PP_Resource         m_loop;
+    int                 depth;
 };
 
 static
@@ -55,7 +56,7 @@ _n2p_has_property_ptac(void *param)
     NPIdentifier identifier = npn.getstringidentifier(s_name);
 
     p->res = npn.hasproperty(p->npp, p->object, identifier);
-    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 static
@@ -82,6 +83,7 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p.exception =   exception;
     p.npp =         tables_get_npobj_npp_mapping(object);
     p.m_loop =      ppb_message_loop_get_current();
+    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_has_property_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
@@ -103,6 +105,7 @@ struct get_property_param_s {
     struct PP_Var  *exception;
     struct PP_Var   res;
     PP_Resource     m_loop;
+    int             depth;
 };
 
 static
@@ -126,7 +129,7 @@ _n2p_get_property_ptac(void *param)
     } else {
         p->res = PP_MakeUndefined();
     }
-    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 static
@@ -153,6 +156,7 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p.name =        name;
     p.exception =   exception;
     p.m_loop =      ppb_message_loop_get_current();
+    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_get_property_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
@@ -188,6 +192,7 @@ struct call_param_s {
     struct PP_Var      *exception;
     struct PP_Var       res;
     PP_Resource         m_loop;
+    int                 depth;
 };
 
 static
@@ -222,7 +227,7 @@ _n2p_call_ptac(void *param)
         p->res = PP_MakeUndefined();
     }
 
-    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 static
@@ -252,6 +257,7 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
     p.argv =        argv;
     p.exception =   exception;
     p.m_loop =      ppb_message_loop_get_current();
+    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_call_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
@@ -267,6 +273,7 @@ struct construct_param_s {
     struct PP_Var      *exception;
     struct PP_Var       res;
     PP_Resource         m_loop;
+    int                 depth;
 };
 
 static
@@ -298,7 +305,7 @@ _n2p_construct_ptac(void *param)
         p->res = PP_MakeUndefined();
     }
 
-    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 static
@@ -320,6 +327,7 @@ n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *e
     p.argv =        argv;
     p.exception =   exception;
     p.m_loop =      ppb_message_loop_get_current();
+    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_construct_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);

@@ -207,6 +207,7 @@ struct get_document_url_param_s {
     NPObject               *np_window_obj;
     struct PP_Var           result;
     PP_Resource             m_loop;
+    int                     depth;
 };
 
 static
@@ -247,7 +248,7 @@ err_4:
 err_3:
     npn.releasevariantvalue(&location_var);
 err_2:
-    ppb_message_loop_post_quit(p->m_loop, PP_FALSE);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
     return;
 }
 
@@ -270,6 +271,7 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
     struct get_document_url_param_s p;
     p.npp = pp_i->npp;
     p.m_loop = ppb_message_loop_get_current();
+    p.depth = ppb_message_loop_get_depth(p.m_loop) + 1;
     p.np_window_obj = pp_i->np_window_obj;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_get_document_url_comt, &p), 0);

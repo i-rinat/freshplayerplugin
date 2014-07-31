@@ -188,6 +188,20 @@ ppb_message_loop_run(PP_Resource message_loop)
     return ppb_message_loop_run_int(message_loop, 0);
 }
 
+static
+struct timespec
+add_ms(struct timespec t, unsigned int ms)
+{
+    t.tv_sec += ms / 1000;
+    t.tv_nsec += (ms % 1000) * 1000 * 1000;
+    if (t.tv_nsec > 1000 * 1000 * 1000) {
+        t.tv_sec += 1;
+        t.tv_nsec -= 1000 * 1000 * 1000;
+    }
+
+    return t;
+}
+
 int32_t
 ppb_message_loop_run_int(PP_Resource message_loop, int nested)
 {
@@ -244,7 +258,8 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested)
                 if (task->terminate) {
                     // check if depth is correct
                     if (task->depth != depth) {
-                        task->when = now;
+                        // wrong, reschedule it a bit later
+                        task->when = add_ms(now, 10);
                         g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
                         continue;
                     }

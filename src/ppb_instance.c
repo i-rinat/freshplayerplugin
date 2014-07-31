@@ -127,6 +127,7 @@ struct execute_script_param_s {
     NPP                 npp;
     NPObject           *np_window_obj;
     PP_Resource         message_loop;
+    int                 depth;
 };
 
 static
@@ -152,7 +153,7 @@ _execute_script_ptac(void *user_data)
         npn.releasevariantvalue(&np_result);
 
 quit:
-    ppb_message_loop_post_quit(esp->message_loop, PP_FALSE);
+    ppb_message_loop_post_quit_depth(esp->message_loop, PP_FALSE, esp->depth);
 }
 
 static
@@ -181,6 +182,7 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     esp.npp = pp_i->npp;
     esp.np_window_obj = pp_i->np_window_obj;
     esp.message_loop = ppb_message_loop_get_current();
+    esp.depth = ppb_message_loop_get_depth(esp.message_loop) + 1;
 
     ppb_var_add_ref(script);
     ppb_message_loop_post_work(esp.message_loop,

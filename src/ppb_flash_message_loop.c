@@ -42,6 +42,7 @@ ppb_flash_message_loop_run(PP_Resource flash_message_loop)
     PP_Resource message_loop = ppb_message_loop_get_current();
     fml->running = 1;
     fml->message_loop = message_loop;
+    fml->depth = ppb_message_loop_get_depth(message_loop) + 1;
 
     pp_resource_ref(flash_message_loop);        // prevent destroy of running loop
     pp_resource_release(flash_message_loop);
@@ -66,7 +67,7 @@ ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
     if (!fml)
         return;
     if (fml->running)
-        ppb_message_loop_post_quit(fml->message_loop, PP_FALSE);
+        ppb_message_loop_post_quit_depth(fml->message_loop, PP_FALSE, fml->depth);
     pp_resource_release(flash_message_loop);
 }
 
