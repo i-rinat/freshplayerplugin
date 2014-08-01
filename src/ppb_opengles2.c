@@ -35,9 +35,11 @@
         trace_error("%s, bad context", __func__);                                       \
         escape_statement;                                                               \
     }                                                                                   \
+    pthread_mutex_lock(&g3d->instance->lock);                                           \
     eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc)
 
 #define EPILOGUE()                                                                      \
+    pthread_mutex_unlock(&g3d->instance->lock);                                         \
     pp_resource_release(context)
 
 void
