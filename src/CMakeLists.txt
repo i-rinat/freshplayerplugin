@@ -74,21 +74,21 @@ add_library(freshwrapper-pepperflash SHARED
     config_pepperflash.c
 )
 
-add_library(freshwrapper-nacl SHARED
-    $<TARGET_OBJECTS:freshwrapper-obj>
-    $<TARGET_OBJECTS:parson-obj>
-    config_nacl.c
-)
+# add_library(freshwrapper-nacl SHARED
+#     $<TARGET_OBJECTS:freshwrapper-obj>
+#     $<TARGET_OBJECTS:parson-obj>
+#     config_nacl.c
+# )
 
 target_link_libraries(freshwrapper-pepperflash
     dl
     ${REQ_LIBRARIES}
 )
 
-target_link_libraries(freshwrapper-nacl
-    dl
-    ${REQ_LIBRARIES}
-)
+# target_link_libraries(freshwrapper-nacl
+#     dl
+#     ${REQ_LIBRARIES}
+# )
 
 # ensure libfreshwrapper is linked with all libraries it uses
 add_executable(dep_check dep_check.c)
