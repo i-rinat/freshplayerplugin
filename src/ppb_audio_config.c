@@ -29,19 +29,6 @@
 #include "pp_resource.h"
 
 
-static
-uint32_t
-clamp_value(uint32_t value, uint32_t v_min, uint32_t v_max)
-{
-    if (value < v_min) {
-        value = v_min;
-    }
-    if (value > v_max) {
-        value = v_max;
-    }
-    return value;
-}
-
 PP_Resource
 ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                       uint32_t sample_frame_count)
@@ -53,8 +40,8 @@ ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate s
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
 
     ac->sample_rate = sample_rate;
-    ac->sample_frame_count =
-        clamp_value(sample_frame_count, PP_AUDIOMINSAMPLEFRAMECOUNT, PP_AUDIOMAXSAMPLEFRAMECOUNT);
+    ac->sample_frame_count = CLAMP(sample_frame_count,
+                                   PP_AUDIOMINSAMPLEFRAMECOUNT, PP_AUDIOMAXSAMPLEFRAMECOUNT);
 
     pp_resource_release(audio_config);
     return audio_config;
@@ -73,8 +60,8 @@ ppb_audio_config_recommend_sample_frame_count(PP_Instance instance, PP_AudioSamp
     (void)instance;
     (void)sample_rate;
 
-    return clamp_value(requested_sample_frame_count, PP_AUDIOMINSAMPLEFRAMECOUNT,
-                       PP_AUDIOMAXSAMPLEFRAMECOUNT);
+    return CLAMP(requested_sample_frame_count,
+                 PP_AUDIOMINSAMPLEFRAMECOUNT, PP_AUDIOMAXSAMPLEFRAMECOUNT);
 }
 
 PP_Bool
