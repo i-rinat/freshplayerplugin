@@ -265,8 +265,10 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
 {
     reset_components(components);
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return PP_MakeUndefined();
+    }
 
     struct get_document_url_param_s p;
     p.npp = pp_i->npp;
@@ -289,8 +291,10 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
 {
     reset_components(components);
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return PP_MakeUndefined();
+    }
 
     struct PP_Var var = ppb_var_var_from_utf8_z(pp_i->instance_url);
 

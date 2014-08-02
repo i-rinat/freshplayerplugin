@@ -32,7 +32,7 @@
 #define PROLOGUE(g3d, escape_statement)                                                 \
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D); \
     if (!g3d) {                                                                         \
-        trace_error("%s, bad context", __func__);                                       \
+        trace_error("%s, bad resource", __func__);                                      \
         escape_statement;                                                               \
     }                                                                                   \
     pthread_mutex_lock(&g3d->instance->lock);                                           \
@@ -1275,13 +1275,13 @@ ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context
                                                              GLenum type, GLenum access)
 {
     if (target != GL_TEXTURE_2D || level != 0 || access != GL_WRITE_ONLY_OES) {
-        trace_warning("%s, wrong arguments\n", __func__);
+        trace_error("%s, wrong arguments\n", __func__);
         return NULL;
     }
 
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d) {
-        trace_warning("%s, wrong context\n", __func__);
+        trace_error("%s, bad resource\n", __func__);
         return NULL;
     }
 

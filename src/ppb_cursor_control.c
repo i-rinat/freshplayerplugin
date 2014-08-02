@@ -204,8 +204,10 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
     }
 
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return PP_FALSE;
+    }
     struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
 
     comt_params->pp_i  = pp_i;

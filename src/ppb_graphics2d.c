@@ -46,12 +46,14 @@ PP_Resource
 ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource graphics_2d = pp_resource_allocate(PP_RESOURCE_GRAPHICS2D, pp_i);
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
     if (!g2d) {
-        trace_warning("%s, can't create graphics2d resource\n", __func__);
+        trace_error("%s, can't create graphics2d resource\n", __func__);
         return 0;
     }
 
@@ -114,10 +116,12 @@ ppb_graphics2d_paint_image_data(PP_Resource graphics_2d, PP_Resource image_data,
                                 const struct PP_Point *top_left, const struct PP_Rect *src_rect)
 {
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
-    if (!g2d)
+    if (!g2d) {
+        trace_error("%s, bad resource\n", __func__);
         return;
-    struct g2d_paint_task_s *pt = g_slice_alloc(sizeof(*pt));
+    }
 
+    struct g2d_paint_task_s *pt = g_slice_alloc(sizeof(*pt));
     pt->type = gpt_paint_id;
     pp_resource_ref(image_data);
     pt->image_data = image_data;
@@ -145,11 +149,12 @@ void
 ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 {
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
-    if (!g2d)
+    if (!g2d) {
+        trace_error("%s, bad resource\n", __func__);
         return;
+    }
 
     struct g2d_paint_task_s *pt = g_slice_alloc(sizeof(*pt));
-
     pt->type = gpt_replace_contents;
     pp_resource_ref(image_data);
     pt->image_data = image_data;
@@ -174,7 +179,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 {
     struct pp_graphics2d_s *g2d = pp_resource_acquire(graphics_2d, PP_RESOURCE_GRAPHICS2D);
     if (!g2d) {
-        trace_warning("%s, wrong graphics_2d\n", __func__);
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
     }
 
@@ -298,8 +303,10 @@ PP_Bool
 ppb_graphics2d_set_scale(PP_Resource resource, float scale)
 {
     struct pp_graphics2d_s *g2d = pp_resource_acquire(resource, PP_RESOURCE_GRAPHICS2D);
-    if (!g2d)
+    if (!g2d) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     g2d->scale = scale;
     g2d->scaled_width = g2d->width * scale + 0.5;
@@ -318,8 +325,10 @@ float
 ppb_graphics2d_get_scale(PP_Resource resource)
 {
     struct pp_graphics2d_s *g2d = pp_resource_acquire(resource, PP_RESOURCE_GRAPHICS2D);
-    if (!g2d)
+    if (!g2d) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     float scale = g2d->scale;
     pp_resource_release(resource);

@@ -39,7 +39,7 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
     PP_Bool retval;
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
-        trace_warning("%s, wrong instance\n", __func__);
+        trace_error("%s, bad instance\n", __func__);
         return PP_FALSE;
     }
 
@@ -90,8 +90,10 @@ PP_Bool
 ppb_instance_is_full_frame(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return PP_FALSE;
+    }
 
     pthread_mutex_lock(&pp_i->lock);
     int is_fullframe = pp_i->is_fullframe;
@@ -108,7 +110,7 @@ ppb_instance_private_get_window_object(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
-        trace_error("%s, wrong instance %d\n", __func__, instance);
+        trace_error("%s, bad instance\n", __func__);
         return PP_MakeUndefined();
     }
 
@@ -169,13 +171,16 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
                                     struct PP_Var *exception)
 {
     if (script.type != PP_VARTYPE_STRING) {
+        trace_error("%s, 'script' is not a string\n", __func__);
         // TODO: fill exception
         return PP_MakeUndefined();
     }
 
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return PP_MakeUndefined();
+    }
 
     struct execute_script_param_s esp;
     esp.script = script;

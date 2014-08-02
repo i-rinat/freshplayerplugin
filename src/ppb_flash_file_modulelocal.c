@@ -251,8 +251,10 @@ int32_t
 ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
                                       struct PP_FileInfo *info)
 {
-    if (!info)
+    if (!info) {
+        trace_error("%s, 'info' is NULL\n", __func__);
         return PP_ERROR_FAILED;
+    }
     char *abs_path = to_abs_path(pepper_data_dir, path);
     struct stat sb;
 

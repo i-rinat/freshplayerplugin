@@ -119,8 +119,10 @@ int
 ppb_message_loop_get_depth(PP_Resource message_loop)
 {
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
-    if (!ml)
+    if (!ml) {
+        trace_error("%s, bad resource\n", __func__);
         return 0;
+    }
 
     int depth = ml->depth;
     pp_resource_release(message_loop);

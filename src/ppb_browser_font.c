@@ -28,6 +28,7 @@
 #include "tables.h"
 #include <stdlib.h>
 #include <string.h>
+#include <ppapi/c/pp_errors.h>
 #include "pp_resource.h"
 
 
@@ -42,8 +43,11 @@ ppb_browser_font_trusted_create(PP_Instance instance,
                                 const struct PP_BrowserFont_Trusted_Description *description)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
+
     PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, pp_i);
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
     PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
@@ -79,8 +83,10 @@ ppb_browser_font_trusted_describe(PP_Resource font,
                                   struct PP_BrowserFont_Trusted_Metrics *metrics)
 {
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
-    if (!bf)
+    if (!bf) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
 
     memset(description, 0, sizeof(*description));
     memset(metrics, 0, sizeof(*metrics));
@@ -120,10 +126,13 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
 {
     (void)image_data_is_opaque; // TODO: is it worth implementing?
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
-    if (!bf)
+    if (!bf) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
     if (!id) {
+        trace_error("%s, bad resource\n", __func__);
         pp_resource_release(font);
         return PP_FALSE;
     }
@@ -165,7 +174,7 @@ ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
 
     pp_resource_release(font);
     pp_resource_release(image_data);
-    return PP_FALSE;
+    return PP_TRUE;
 }
 
 int32_t
@@ -173,8 +182,10 @@ ppb_browser_font_trusted_measure_text(PP_Resource font,
                                       const struct PP_BrowserFont_Trusted_TextRun *text)
 {
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
-    if (!bf)
-        return -1;
+    if (!bf) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_FAILED;
+    }
 
     PangoLayout *layout = pango_layout_new(tables_get_pango_ctx());
     uint32_t len = 0;

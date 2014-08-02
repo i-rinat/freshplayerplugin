@@ -111,8 +111,10 @@ PP_Resource
 ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_data)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance_id);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource flash_menu = pp_resource_allocate(PP_RESOURCE_FLASH_MENU, pp_i);
     struct pp_flash_menu_s *fm = pp_resource_acquire(flash_menu, PP_RESOURCE_FLASH_MENU);
 
@@ -163,8 +165,10 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
                     struct PP_CompletionCallback callback)
 {
     struct pp_flash_menu_s *fm = pp_resource_acquire(menu_id, PP_RESOURCE_FLASH_MENU);
-    if (!fm)
+    if (!fm) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     if (popup_menu_sentinel)
         trace_error("%s, two context menus at the same time\n", __func__);

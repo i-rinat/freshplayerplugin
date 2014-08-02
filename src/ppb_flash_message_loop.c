@@ -11,8 +11,10 @@ PP_Resource
 ppb_flash_message_loop_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource message_loop = pp_resource_allocate(PP_RESOURCE_FLASH_MESSAGE_LOOP, pp_i);
     return message_loop;
 }
@@ -36,8 +38,10 @@ ppb_flash_message_loop_run(PP_Resource flash_message_loop)
 {
     struct pp_flash_message_loop_s *fml =
                         pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
-    if (!fml)
+    if (!fml) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     PP_Resource message_loop = ppb_message_loop_get_current();
     fml->running = 1;
@@ -64,8 +68,10 @@ ppb_flash_message_loop_quit(PP_Resource flash_message_loop)
 {
     struct pp_flash_message_loop_s *fml =
                         pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
-    if (!fml)
+    if (!fml) {
+        trace_error("%s, bad resource\n", __func__);
         return;
+    }
     if (fml->running)
         ppb_message_loop_post_quit_depth(fml->message_loop, PP_FALSE, fml->depth);
     pp_resource_release(flash_message_loop);

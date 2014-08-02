@@ -52,6 +52,10 @@ PP_Bool
 ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return PP_FALSE;
+    }
     return pp_i->is_fullscreen;
 }
 
@@ -176,6 +180,10 @@ PP_Bool
 ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return PP_FALSE;
+    }
 
     if (!!fullscreen == !!pp_i->is_fullscreen)
         return PP_FALSE;
@@ -209,6 +217,10 @@ PP_Bool
 ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return PP_FALSE;
+    }
 
     size->width = pp_i->fs_width;
     size->height = pp_i->fs_height;

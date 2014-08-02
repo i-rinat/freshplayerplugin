@@ -34,8 +34,10 @@ ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate s
                                       uint32_t sample_frame_count)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, pp_i);
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
 
@@ -74,8 +76,10 @@ PP_AudioSampleRate
 ppb_audio_config_get_sample_rate(PP_Resource config)
 {
     struct pp_audio_config_s *ac = pp_resource_acquire(config, PP_RESOURCE_AUDIO_CONFIG);
-    if (!ac)
+    if (!ac) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_AUDIOSAMPLERATE_NONE;
+    }
     PP_AudioSampleRate sample_rate = ac->sample_rate;
     pp_resource_release(config);
     return sample_rate;
@@ -85,8 +89,10 @@ uint32_t
 ppb_audio_config_get_sample_frame_count(PP_Resource config)
 {
     struct pp_audio_config_s *ac = pp_resource_acquire(config, PP_RESOURCE_AUDIO_CONFIG);
-    if (!ac)
+    if (!ac) {
+        trace_error("%s, bad resource\n", __func__);
         return 0;
+    }
     uint32_t sample_frame_count = ac->sample_frame_count;
     pp_resource_release(config);
     return sample_frame_count;

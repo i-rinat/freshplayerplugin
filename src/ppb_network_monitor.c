@@ -33,8 +33,10 @@ PP_Resource
 ppb_network_monitor_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource network_monitor = pp_resource_allocate(PP_RESOURCE_NETWORK_MONITOR, pp_i);
     return network_monitor;
 }

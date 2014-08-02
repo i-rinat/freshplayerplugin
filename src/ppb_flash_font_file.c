@@ -38,8 +38,10 @@ ppb_flash_font_file_create(PP_Instance instance,
                            PP_PrivateFontCharset charset)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource font_file = pp_resource_allocate(PP_RESOURCE_FLASH_FONT_FILE, pp_i);
     struct pp_flash_font_file_s *fff = pp_resource_acquire(font_file, PP_RESOURCE_FLASH_FONT_FILE);
     PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
@@ -79,8 +81,10 @@ ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *
     if (!output_length)
         return PP_FALSE;
     struct pp_flash_font_file_s *fff = pp_resource_acquire(font_file, PP_RESOURCE_FLASH_FONT_FILE);
-    if (!fff)
+    if (!fff) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
 
     FT_ULong len = 0;
     FT_Error ft_error = FT_Load_Sfnt_Table(fff->ft_face, table, 0, NULL, &len);

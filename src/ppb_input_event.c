@@ -40,8 +40,10 @@ int32_t
 ppb_input_event_request_input_events(PP_Instance instance, uint32_t event_classes)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return PP_ERROR_BADARGUMENT;
+    }
 
     pthread_mutex_lock(&pp_i->lock);
     pp_i->event_mask |= event_classes;
@@ -53,8 +55,10 @@ int32_t
 ppb_input_event_request_filtering_input_events(PP_Instance instance, uint32_t event_classes)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return PP_ERROR_BADARGUMENT;
+    }
 
     pthread_mutex_lock(&pp_i->lock);
     pp_i->filtered_event_mask |= event_classes;
@@ -66,8 +70,10 @@ void
 ppb_input_event_clear_input_event_request(PP_Instance instance, uint32_t event_classes)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return;
+    }
 
     pthread_mutex_lock(&pp_i->lock);
     pp_i->event_mask &= ~event_classes;
@@ -86,8 +92,10 @@ PP_InputEvent_Type
 ppb_input_event_get_type(PP_Resource event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_INPUTEVENT_TYPE_UNDEFINED;
+    }
     PP_InputEvent_Type t = ie->type;
     pp_resource_release(event);
     return t;
@@ -103,8 +111,10 @@ uint32_t
 ppb_input_event_get_modifiers(PP_Resource event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return 0;
+    }
     uint32_t modifiers = ie->modifiers;
     pp_resource_release(event);
     return modifiers;
@@ -117,12 +127,16 @@ ppb_mouse_input_event_create(PP_Instance instance, PP_InputEvent_Type type, PP_T
                              const struct PP_Point *mouse_movement)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, pp_i);
     struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, can't allocate memory\n", __func__);
         return 0;
+    }
     ie->event_class = PP_INPUTEVENT_CLASS_MOUSE;
     ie->type = type;
     ie->time_stamp = time_stamp;
@@ -142,8 +156,10 @@ PP_Bool
 ppb_mouse_input_event_is_mouse_input_event(PP_Resource resource)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(resource, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
     PP_Bool res = ie->event_class == PP_INPUTEVENT_CLASS_MOUSE;
     pp_resource_release(resource);
     return res;
@@ -153,9 +169,12 @@ PP_InputEvent_MouseButton
 ppb_mouse_input_event_get_button(PP_Resource mouse_event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(mouse_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_INPUTEVENT_MOUSEBUTTON_NONE;
+    }
     if (ie->event_class != PP_INPUTEVENT_CLASS_MOUSE) {
+        trace_error("%s, not a mouse event\n", __func__);
         pp_resource_release(mouse_event);
         return PP_INPUTEVENT_MOUSEBUTTON_NONE;
     }
@@ -169,9 +188,12 @@ struct PP_Point
 ppb_mouse_input_event_get_position(PP_Resource mouse_event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(mouse_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_MakePoint(0, 0);
+    }
     if (ie->event_class != PP_INPUTEVENT_CLASS_MOUSE) {
+        trace_error("%s, not a mouse event\n", __func__);
         pp_resource_release(mouse_event);
         return PP_MakePoint(0, 0);
     }
@@ -185,9 +207,12 @@ int32_t
 ppb_mouse_input_event_get_click_count(PP_Resource mouse_event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(mouse_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return 0;
+    }
     if (ie->event_class != PP_INPUTEVENT_CLASS_MOUSE) {
+        trace_error("%s, not a mouse event\n", __func__);
         pp_resource_release(mouse_event);
         return 0;
     }
@@ -209,12 +234,16 @@ ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp, uint
                              const struct PP_FloatPoint *wheel_ticks, PP_Bool scroll_by_page)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, pp_i);
     struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, can't allocate memory\n", __func__);
         return 0;
+    }
     ie->event_class = PP_INPUTEVENT_CLASS_WHEEL;
     ie->time_stamp = time_stamp;
     ie->modifiers = modifiers;
@@ -232,8 +261,10 @@ PP_Bool
 ppb_wheel_input_event_is_wheel_input_event(PP_Resource resource)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(resource, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
     PP_Bool res = ie->event_class == PP_INPUTEVENT_CLASS_WHEEL;
     pp_resource_release(resource);
     return res;
@@ -243,9 +274,12 @@ struct PP_FloatPoint
 ppb_wheel_input_event_get_delta(PP_Resource wheel_event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(wheel_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_MakeFloatPoint(0, 0);
+    }
     if (ie->event_class != PP_INPUTEVENT_CLASS_WHEEL) {
+        trace_error("%s, not a wheel event\n", __func__);
         pp_resource_release(wheel_event);
         return PP_MakeFloatPoint(0, 0);
     }
@@ -259,9 +293,12 @@ struct PP_FloatPoint
 ppb_wheel_input_event_get_ticks(PP_Resource wheel_event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(wheel_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_MakeFloatPoint(0, 0);
+    }
     if (ie->event_class != PP_INPUTEVENT_CLASS_WHEEL) {
+        trace_error("%s, not a wheel event\n", __func__);
         pp_resource_release(wheel_event);
         return PP_MakeFloatPoint(0, 0);
     }
@@ -275,9 +312,12 @@ PP_Bool
 ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(wheel_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
     if (ie->event_class != PP_INPUTEVENT_CLASS_WHEEL) {
+        trace_error("%s, not a wheel event\n", __func__);
         pp_resource_release(wheel_event);
         return PP_FALSE;
     }
@@ -293,12 +333,16 @@ ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
                                 struct PP_Var character_text)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource input_event = pp_resource_allocate(PP_RESOURCE_INPUT_EVENT, pp_i);
     struct pp_input_event_s *ie = pp_resource_acquire(input_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, can't allocate memory\n", __func__);
         return 0;
+    }
     ie->event_class = PP_INPUTEVENT_CLASS_KEYBOARD;
     ie->type = type;
     ie->time_stamp = time_stamp;
@@ -315,8 +359,10 @@ PP_Bool
 ppb_keyboard_input_event_is_keyboard_input_event(PP_Resource resource)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(resource, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
     PP_Bool res = ie->event_class == PP_INPUTEVENT_CLASS_KEYBOARD;
     pp_resource_release(resource);
     return res;
@@ -326,9 +372,12 @@ uint32_t
 ppb_keyboard_input_event_get_key_code(PP_Resource key_event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(key_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return 0;
+    }
     if (ie->event_class != PP_INPUTEVENT_CLASS_KEYBOARD) {
+        trace_error("%s, not a keyboard event\n", __func__);
         pp_resource_release(key_event);
         return 0;
     }
@@ -342,9 +391,12 @@ struct PP_Var
 ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
 {
     struct pp_input_event_s *ie = pp_resource_acquire(character_event, PP_RESOURCE_INPUT_EVENT);
-    if (!ie)
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_MakeUndefined();
+    }
     if (ie->event_class != PP_INPUTEVENT_CLASS_KEYBOARD) {
+        trace_error("%s, not a keyboard event\n", __func__);
         pp_resource_release(character_event);
         return PP_MakeUndefined();
     }

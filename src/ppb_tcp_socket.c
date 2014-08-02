@@ -38,8 +38,10 @@ PP_Resource
 ppb_tcp_socket_private_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource tcp_socket = pp_resource_allocate(PP_RESOURCE_TCP_SOCKET, pp_i);
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     ts->sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -77,7 +79,7 @@ ppb_tcp_socket_private_connect(PP_Resource tcp_socket, const char *host, uint16_
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        trace_error("%s, wrong resource %d\n", __func__, tcp_socket);
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
     }
     struct async_network_task_s *task = async_network_task_create();
@@ -102,7 +104,7 @@ ppb_tcp_socket_private_connect_with_net_address(PP_Resource tcp_socket,
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        trace_error("%s, wrong resource %d\n", __func__, tcp_socket);
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
     }
     struct async_network_task_s *task = async_network_task_create();
@@ -124,10 +126,13 @@ ppb_tcp_socket_private_get_local_address(PP_Resource tcp_socket,
                                          struct PP_NetAddress_Private *local_addr)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
-    if (!ts)
+    if (!ts) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
 
     if (!ts->is_connected) {
+        trace_error("%s, not connected\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_FALSE;
     }
@@ -145,10 +150,13 @@ ppb_tcp_socket_private_get_remote_address(PP_Resource tcp_socket,
                                           struct PP_NetAddress_Private *remote_addr)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
-    if (!ts)
+    if (!ts) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
 
     if (!ts->is_connected) {
+        trace_error("%s, not connected\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_FALSE;
     }
@@ -185,14 +193,19 @@ int32_t
 ppb_tcp_socket_private_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
                             struct PP_CompletionCallback callback)
 {
-    if (bytes_to_read <= 0)
+    if (bytes_to_read <= 0) {
+        trace_error("%s, bytes_to_read <= 0\n", __func__);
         return PP_ERROR_BADARGUMENT;
+    }
 
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
-    if (!ts)
+    if (!ts) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     if (!ts->is_connected) {
+        trace_error("%s, not connected\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_ERROR_FAILED;
     }
@@ -218,14 +231,19 @@ int32_t
 ppb_tcp_socket_private_write(PP_Resource tcp_socket, const char *buffer, int32_t bytes_to_write,
                              struct PP_CompletionCallback callback)
 {
-    if (bytes_to_write <= 0)
+    if (bytes_to_write <= 0) {
+        trace_error("%s, bytes_to_write <= 0\n", __func__);
         return PP_ERROR_BADARGUMENT;
+    }
 
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
-    if (!ts)
+    if (!ts) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     if (!ts->is_connected) {
+        trace_error("%s, not connected\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_ERROR_FAILED;
     }
@@ -251,8 +269,10 @@ void
 ppb_tcp_socket_private_disconnect(PP_Resource tcp_socket)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
-    if (!ts)
+    if (!ts) {
+        trace_error("%s, bad resource\n", __func__);
         return;
+    }
     ppb_tcp_socket_private_destroy(ts);
     pp_resource_release(tcp_socket);
 }

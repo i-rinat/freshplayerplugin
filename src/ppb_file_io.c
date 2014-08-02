@@ -37,8 +37,10 @@ ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
                                    struct PP_CompletionCallback callback)
 {
     struct pp_file_io_s *fio = pp_resource_acquire(file_io, PP_RESOURCE_FILE_IO);
-    if (!fio)
+    if (!fio) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     *handle = fio->fd;
 
@@ -51,8 +53,10 @@ PP_Resource
 ppb_file_io_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource file_io = pp_resource_allocate(PP_RESOURCE_FILE_IO, pp_i);
     struct pp_file_io_s *fio = pp_resource_acquire(file_io, PP_RESOURCE_FILE_IO);
 
@@ -83,11 +87,14 @@ ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
 {
     int32_t retval;
     struct pp_file_io_s *fio = pp_resource_acquire(file_io, PP_RESOURCE_FILE_IO);
-    if (!fio)
+    if (!fio) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
     if (!fr) {
+        trace_error("%s, bad resource\n", __func__);
         pp_resource_release(file_io);
         return PP_ERROR_BADRESOURCE;
     }

@@ -55,12 +55,14 @@ ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
                       const struct PP_Size *size, PP_Bool init_to_zero)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource image_data = pp_resource_allocate(PP_RESOURCE_IMAGE_DATA, pp_i);
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
     if (!id) {
-        trace_warning("%s, failed to create image data resource\n", __func__);
+        trace_error("%s, failed to create image data resource\n", __func__);
         return 0;
     }
 
@@ -74,7 +76,7 @@ ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
     if (!id->data) {
         pp_resource_release(image_data);
         ppb_core_release_resource(image_data);
-        trace_warning("%s, can't allocate memory for image\n", __func__);
+        trace_error("%s, can't allocate memory for image\n", __func__);
         return 0;
     }
 
@@ -108,8 +110,10 @@ PP_Bool
 ppb_image_data_describe(PP_Resource image_data, struct PP_ImageDataDesc *desc)
 {
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
-    if (!id)
+    if (!id) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
+    }
 
     desc->format = id->format;
     desc->size.width = id->width;
@@ -125,8 +129,10 @@ ppb_image_data_map(PP_Resource image_data)
 {
     void *data_ptr;
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
-    if (!id)
+    if (!id) {
+        trace_error("%s, bad resource\n", __func__);
         return NULL;
+    }
 
     data_ptr = id->data;
     pp_resource_release(image_data);
@@ -137,8 +143,10 @@ void
 ppb_image_data_unmap(PP_Resource image_data)
 {
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
-    if (!id)
+    if (!id) {
+        trace_error("%s, bad resource\n", __func__);
         return;
+    }
     pp_resource_release(image_data);
 }
 

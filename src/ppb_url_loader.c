@@ -45,8 +45,10 @@ PP_Resource
 ppb_url_loader_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource url_loader = pp_resource_allocate(PP_RESOURCE_URL_LOADER, pp_i);
     struct pp_url_loader_s *ul = pp_resource_acquire(url_loader, PP_RESOURCE_URL_LOADER);
 
@@ -215,8 +217,17 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
                            struct PP_CompletionCallback callback, const char *target)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    if (!ul) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
     struct pp_url_request_info_s *ri = pp_resource_acquire(request_info,
                                                            PP_RESOURCE_URL_REQUEST_INFO);
+    if (!ri) {
+        trace_error("%s, bad resource\n", __func__);
+        pp_resource_release(loader);
+        return PP_ERROR_BADRESOURCE;
+    }
     struct pp_instance_s *pp_i = ul->instance;
     struct PP_Var full_url;
 
@@ -312,6 +323,10 @@ int32_t
 ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback callback)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    if (!ul) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
     struct pp_instance_s *pp_i = ul->instance;
     char *new_url = nullsafe_strdup(ul->redirect_url);
 
@@ -393,6 +408,10 @@ ppb_url_loader_get_download_progress(PP_Resource loader, int64_t *bytes_received
                                      int64_t *total_bytes_to_be_received)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    if (!ul) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
 
     *total_bytes_to_be_received = ul->response_size;
     *bytes_received = 0;
@@ -414,6 +433,10 @@ PP_Resource
 ppb_url_loader_get_response_info(PP_Resource loader)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    if (!ul) {
+        trace_error("%s, bad resource\n", __func__);
+        return 0;
+    }
     PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO, ul->instance);
     struct pp_url_response_info_s *ri = pp_resource_acquire(response_info,
                                                             PP_RESOURCE_URL_RESPONSE_INFO);
@@ -432,6 +455,10 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
                                   struct PP_CompletionCallback callback)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
+    if (!ul) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
     int read_bytes = 0;
 
     if (ul->fd >= 0) {
@@ -464,10 +491,13 @@ int32_t
 ppb_url_loader_finish_streaming_to_file(PP_Resource loader, struct PP_CompletionCallback callback)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
-    if (!ul)
+    if (!ul) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     if (!ul->stream_to_file) {
+        trace_error("%s, not streaming to file\n", __func__);
         pp_resource_release(loader);
         return PP_ERROR_FAILED;
     }
@@ -483,8 +513,10 @@ void
 ppb_url_loader_close(PP_Resource loader)
 {
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
-    if (!ul)
+    if (!ul) {
+        trace_error("%s, bad resource\n", __func__);
         return;
+    }
 
     if (ul->fd >= 0) {
         close(ul->fd);

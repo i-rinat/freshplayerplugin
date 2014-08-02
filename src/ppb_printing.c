@@ -32,8 +32,10 @@ PP_Resource
 ppb_printing_dev_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource printing = pp_resource_allocate(PP_RESOURCE_PRINTING, pp_i);
     return printing;
 }

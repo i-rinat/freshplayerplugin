@@ -239,12 +239,16 @@ ppb_graphics3d_get_error(PP_Resource context)
 int32_t
 ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height)
 {
-    if (width < 0 || height < 0)
+    if (width < 0 || height < 0) {
+        trace_error("%s, width or height are negative\n", __func__);
         return PP_ERROR_BADARGUMENT;
+    }
 
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
-    if (!g3d)
+    if (!g3d) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
     struct pp_instance_s *pp_i = g3d->instance;
 
     g3d->width = width;
@@ -292,8 +296,10 @@ int32_t
 ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
-    if (!g3d)
+    if (!g3d) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
 
     struct pp_instance_s *pp_i = g3d->instance;
 

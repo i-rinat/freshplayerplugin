@@ -50,8 +50,10 @@ struct PP_Var
 ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property)
 {
     struct pp_url_response_info_s *ri = pp_resource_acquire(response,PP_RESOURCE_URL_RESPONSE_INFO);
-    if (!ri)
+    if (!ri) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_MakeUndefined();
+    }
     struct pp_url_loader_s *ul = ri->url_loader;
     struct PP_Var var = PP_MakeUndefined();
 
@@ -87,8 +89,10 @@ PP_Resource
 ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 {
     struct pp_url_response_info_s *ri = pp_resource_acquire(response,PP_RESOURCE_URL_RESPONSE_INFO);
-    if (!ri)
+    if (!ri) {
+        trace_error("%s, bad resource\n", __func__);
         return 0;
+    }
     struct pp_url_loader_s *ul = ri->url_loader;
 
     PP_Resource file_ref = pp_resource_allocate(PP_RESOURCE_FILE_REF, ri->instance);

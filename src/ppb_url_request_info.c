@@ -39,8 +39,10 @@ PP_Resource
 ppb_url_request_info_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i)
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
         return 0;
+    }
     PP_Resource request_info = pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO, pp_i);
     struct pp_url_request_info_s *ri =
                             pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
@@ -146,7 +148,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
     PP_Bool retval = PP_TRUE;
     struct pp_url_request_info_s *ri = pp_resource_acquire(request, PP_RESOURCE_URL_REQUEST_INFO);
     if (!ri) {
-        trace_error("%s, %d is not a request info\n", __func__, request);
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
     }
 
@@ -248,6 +250,10 @@ PP_Bool
 ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, uint32_t len)
 {
     struct pp_url_request_info_s *ri = pp_resource_acquire(request, PP_RESOURCE_URL_REQUEST_INFO);
+    if (!ri) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
     PP_Bool retval = PP_FALSE;
 
     free_and_nullify(ri, post_data);

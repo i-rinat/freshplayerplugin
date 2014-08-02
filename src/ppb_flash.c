@@ -52,6 +52,7 @@ ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
 {
     struct pp_image_data_s *id = pp_resource_acquire(pp_image_data, PP_RESOURCE_IMAGE_DATA);
     if (!id) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
     }
 
@@ -147,8 +148,10 @@ ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_us
 
     struct pp_url_request_info_s *ri =
         pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
-    if (!ri)
+    if (!ri) {
+        trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
     pp_resource_release(request_info);
 
     PP_Resource url_loader = ppb_url_loader_create(ri->instance->id);
@@ -225,6 +228,10 @@ struct PP_Var
 ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return PP_MakeUndefined();
+    }
     struct PP_Var var = PP_MakeUndefined();
 
     switch (setting) {
