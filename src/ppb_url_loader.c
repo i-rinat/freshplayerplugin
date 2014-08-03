@@ -88,7 +88,6 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
 }
 
 struct url_loader_open_param_s {
-    NPP                         npp;
     const char                 *url;
     PP_Resource                 loader;
     struct pp_instance_s       *instance;
@@ -228,7 +227,6 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
         pp_resource_release(loader);
         return PP_ERROR_BADRESOURCE;
     }
-    struct pp_instance_s *pp_i = ul->instance;
     struct PP_Var full_url;
 
     if (ri->is_immediate_javascript) {
@@ -275,7 +273,6 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     pp_resource_release(request_info);
 
     struct url_loader_open_param_s p;
-    p.npp =                 pp_i->npp;
     p.url =                 strdup(ul->url);
     p.loader =              loader;
     p.instance =            ul->instance;
@@ -327,7 +324,6 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
         trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
     }
-    struct pp_instance_s *pp_i = ul->instance;
     char *new_url = nullsafe_strdup(ul->redirect_url);
 
     free_and_nullify(ul, url);
@@ -354,7 +350,6 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ul->ccb = callback;
 
     struct url_loader_open_param_s p;
-    p.npp =                 pp_i->npp;
     p.url =                 ul->url;
     p.loader =              loader;
     p.instance =            ul->instance;
