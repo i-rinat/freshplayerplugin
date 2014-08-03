@@ -415,7 +415,8 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
     }
 
 quit:
-    ppb_core_call_on_main_thread(0, ccb, PP_OK);
+    if (ccb.func)
+        ppb_core_call_on_main_thread(0, ccb, PP_OK);
 
     return NPERR_NO_ERROR;
 }
