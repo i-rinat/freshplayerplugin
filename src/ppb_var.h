@@ -96,6 +96,9 @@ ppb_var_create_object_with_module_deprecated(PP_Module module,
 NPVariant
 pp_var_to_np_variant(struct PP_Var var);
 
+struct PP_Var
+np_variant_to_pp_var(NPVariant v);
+
 char *
 ppb_var_trace_object_var(struct PP_Var var);
 

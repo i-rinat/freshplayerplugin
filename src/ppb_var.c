@@ -161,6 +161,31 @@ pp_var_to_np_variant(struct PP_Var var)
     return res;
 }
 
+struct PP_Var
+np_variant_to_pp_var(NPVariant v)
+{
+    switch (v.type) {
+    case NPVariantType_Void:    return PP_MakeUndefined();
+    case NPVariantType_Null:    return PP_MakeNull();
+    case NPVariantType_Bool:    return PP_MakeBool(v.value.boolValue);
+    case NPVariantType_Int32:   return PP_MakeInt32(v.value.intValue);
+    case NPVariantType_Double:  return PP_MakeDouble(v.value.doubleValue);
+    case NPVariantType_String:  return ppb_var_var_from_utf8(v.value.stringValue.UTF8Characters,
+                                                             v.value.stringValue.UTF8Length);
+    default:                    return PP_MakeUndefined();
+
+    case NPVariantType_Object:
+        if (v.value.objectValue->_class == &p2n_proxy_class) {
+            struct np_proxy_object_s *p = (void *)v.value.objectValue;
+            ppb_var_add_ref(p->ppobj);
+            return p->ppobj;
+        } else {
+            return ppb_var_create_object(0, &n2p_proxy_class, v.value.objectValue);
+        }
+        break;
+    }
+}
+
 void
 ppb_var_add_ref(struct PP_Var var)
 {

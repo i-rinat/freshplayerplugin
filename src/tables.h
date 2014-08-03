@@ -40,8 +40,6 @@ struct pp_instance_s   *tables_get_pp_instance(PP_Instance instance);
 void                    tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i);
 void                    tables_remove_pp_instance(PP_Instance instance);
 
-struct PP_Var       np_variant_to_pp_var(NPVariant v);
-
 PangoContext   *tables_get_pango_ctx(void);
 PangoFontMap   *tables_get_pango_font_map(void);
 
