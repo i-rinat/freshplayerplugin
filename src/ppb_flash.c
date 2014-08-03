@@ -428,7 +428,7 @@ PP_Bool
 trace_ppb_flash_set_crash_data(PP_Instance instance, PP_FlashCrashKey key, struct PP_Var value)
 {
     char *value_str = trace_var_as_string(value);
-    trace_info("[PPB] {fake} %s instance=%d, key=%d, value=%s\n", __func__+6, instance, key,
+    trace_info("[PPB] {full} %s instance=%d, key=%d, value=%s\n", __func__+6, instance, key,
                value_str);
     g_free(value_str);
     return ppb_flash_set_crash_data(instance, key, value);
@@ -498,7 +498,7 @@ const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .IsRectTopmost =                TWRAPZ(ppb_flash_is_rect_topmost),
     .UpdateActivity =               TWRAPZ(ppb_flash_update_activity),
     .GetSetting =                   TWRAPF(ppb_flash_get_setting),
-    .SetCrashData =                 TWRAPZ(ppb_flash_set_crash_data),
+    .SetCrashData =                 TWRAPF(ppb_flash_set_crash_data),
     .EnumerateVideoCaptureDevices = TWRAPZ(ppb_flash_enumerate_video_capture_devices),
 };
 
@@ -518,6 +518,6 @@ const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
     .GetDeviceID =                  TWRAPZ(ppb_flash_get_device_id),
     .GetSettingInt =                TWRAPZ(ppb_flash_get_setting_int),
     .GetSetting =                   TWRAPF(ppb_flash_get_setting),
-    .SetCrashData =                 TWRAPZ(ppb_flash_set_crash_data),
+    .SetCrashData =                 TWRAPF(ppb_flash_set_crash_data),
     .EnumerateVideoCaptureDevices = TWRAPZ(ppb_flash_enumerate_video_capture_devices),
 };
