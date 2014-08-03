@@ -133,6 +133,7 @@ np_variant_to_pp_var(NPVariant v)
     case NPVariantType_Object:
         if (v.value.objectValue->_class == &p2n_proxy_class) {
             struct np_proxy_object_s *p = (void *)v.value.objectValue;
+            ppb_var_add_ref(p->ppobj);
             return p->ppobj;
         } else {
             return ppb_var_create_object(0, &n2p_proxy_class, v.value.objectValue);
