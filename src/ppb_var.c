@@ -260,6 +260,13 @@ ppb_var_var_from_utf8(const char *data, uint32_t len)
 }
 
 struct PP_Var
+ppb_var_var_from_utf8_z(const char *data)
+{
+    return ppb_var_var_from_utf8(data, data ? strlen(data) : 0);
+}
+
+
+struct PP_Var
 ppb_var_var_from_utf8_1_0(PP_Module module, const char *data, uint32_t len)
 {
     return ppb_var_var_from_utf8(data, len);

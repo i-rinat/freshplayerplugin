@@ -41,13 +41,8 @@ ppb_var_release(struct PP_Var var);
 struct PP_Var
 ppb_var_var_from_utf8(const char *data, uint32_t len);
 
-static
-inline
 struct PP_Var
-ppb_var_var_from_utf8_z(const char *data)
-{
-    return ppb_var_var_from_utf8(data, strlen(data));
-}
+ppb_var_var_from_utf8_z(const char *data);
 
 const char *
 ppb_var_var_to_utf8(struct PP_Var var, uint32_t *len);
