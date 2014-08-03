@@ -114,6 +114,7 @@ ppb_instance_private_get_window_object(PP_Instance instance)
         return PP_MakeUndefined();
     }
 
+    npn.retainobject(pp_i->np_window_obj); // TODO: call on browser thread?
     return ppb_var_create_object(instance, &n2p_proxy_class, pp_i->np_window_obj);
 }
 
