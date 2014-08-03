@@ -253,6 +253,34 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
     }
 }
 
+struct get_property_param_s {
+    NPObject               *npobj;
+    NPIdentifier            name;
+    NPVariant              *result;
+    PP_Resource             m_loop;
+    int                     depth;
+};
+
+static
+void
+_p2n_get_property_comt(void *user_data, int32_t result)
+{
+    struct get_property_param_s *p = user_data;
+
+    struct np_proxy_object_s *obj = (void *)p->npobj;
+    char *s = npn.utf8fromidentifier(p->name);
+    struct PP_Var exception = PP_MakeUndefined();
+    struct PP_Var property_name = ppb_var_var_from_utf8_z(s);
+    npn.memfree(s);
+    struct PP_Var res = ppb_var_get_property(obj->ppobj, property_name, &exception);
+
+    *p->result = pp_var_to_np_variant(res);
+    ppb_var_release(res);
+    ppb_var_release(exception);
+
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
 bool
 p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
 {
@@ -261,17 +289,21 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
         return false;
     }
 
-    struct np_proxy_object_s *obj = (void *)npobj;
-    char *s = npn.utf8fromidentifier(name);
-    struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var property_name = ppb_var_var_from_utf8_z(s);
-    npn.memfree(s);
-    struct PP_Var res = ppb_var_get_property(obj->ppobj, property_name, &exception);
+    if (npobj->_class == &p2n_proxy_class) {
+        struct get_property_param_s p;
+        p.npobj =       npobj;
+        p.name =        name;
+        p.result =      result;
+        p.m_loop =      ppb_message_loop_get_for_browser_thread();
+        p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    *result = pp_var_to_np_variant(res);
-    ppb_var_release(res);
-    ppb_var_release(exception);
-    return true;
+        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_get_property_comt, &p),
+                                     PP_OK);
+        ppb_message_loop_run_int(p.m_loop, 1);
+        return true;
+    } else {
+        return npobj->_class->getProperty(npobj, name, result);
+    }
 }
 
 bool
