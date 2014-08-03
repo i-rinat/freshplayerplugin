@@ -127,11 +127,18 @@ NPP_SetWindow(NPP npp, NPWindow *window)
     return NPERR_NO_ERROR;
 }
 
+struct call_plugin_did_create_param_s {
+    PP_Resource             m_loop;
+    int                     depth;
+    struct pp_instance_s   *pp_i;
+};
+
 static
 void
 _call_plugin_did_create_comt(void *user_data, int32_t result)
 {
-    struct pp_instance_s *pp_i = user_data;
+    struct call_plugin_did_create_param_s *p = user_data;
+    struct pp_instance_s *pp_i = p->pp_i;
 
     pp_i->ppp_instance_1_1->DidCreate(pp_i->id, pp_i->argc, (const char **)pp_i->argn,
                                       (const char **)pp_i->argv);
@@ -174,9 +181,7 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
 
     g_atomic_int_set(&pp_i->instance_loaded, 1);
 
-    // Since current function is called asynchronously, browser may call NPP_SetWindow earlier.
-    // To ensure plugin gets corrent drawing area dimensions, call DidChangeView one more time.
-    _set_window_comt(pp_i, PP_OK);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 NPError
@@ -294,8 +299,13 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pthread_barrier_destroy(&pp_i->main_thread_barrier);
     }
 
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_call_plugin_did_create_comt, pp_i),
+    struct call_plugin_did_create_param_s p;
+    p.m_loop =  ppb_message_loop_get_for_browser_thread();
+    p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
+    p.pp_i =    pp_i;
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_call_plugin_did_create_comt, &p),
                                  PP_OK);
+    ppb_message_loop_run_int(p.m_loop, 1);
 
     return NPERR_NO_ERROR;
 }
