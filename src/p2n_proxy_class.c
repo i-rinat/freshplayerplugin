@@ -202,6 +202,33 @@ p2n_invoke_default(NPObject *npobj, const NPVariant *args, uint32_t argCount, NP
     return true;
 }
 
+struct has_property_param_s {
+    NPObject           *npobj;
+    NPIdentifier        name;
+    PP_Resource         m_loop;
+    int                 depth;
+    bool                retval;
+};
+
+static
+void
+_p2n_has_property_comt(void *user_data, int32_t result)
+{
+    struct has_property_param_s *p = user_data;
+
+    struct np_proxy_object_s *obj = (void *)p->npobj;
+    char *s = npn.utf8fromidentifier(p->name);
+    struct PP_Var exception = PP_MakeUndefined();
+    struct PP_Var property_name = ppb_var_var_from_utf8_z(s);
+    npn.memfree(s);
+
+    p->retval = ppb_var_has_property(obj->ppobj, property_name, &exception);
+    ppb_var_release(property_name);
+    ppb_var_release(exception);
+
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
 bool
 p2n_has_property(NPObject *npobj, NPIdentifier name)
 {
@@ -210,16 +237,20 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
         return false;
     }
 
-    struct np_proxy_object_s *obj = (void *)npobj;
-    char *s = npn.utf8fromidentifier(name);
-    struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var property_name = ppb_var_var_from_utf8_z(s);
-    npn.memfree(s);
-    bool res = ppb_var_has_property(obj->ppobj, property_name, &exception);
-    ppb_var_release(property_name);
-    ppb_var_release(exception);
+    if (npobj->_class == &p2n_proxy_class) {
+        struct has_property_param_s p;
+        p.npobj =       npobj;
+        p.name =        name;
+        p.m_loop =      ppb_message_loop_get_for_browser_thread();
+        p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    return res;
+        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_has_property_comt, &p),
+                                     PP_OK);
+        ppb_message_loop_run_int(p.m_loop, 1);
+        return p.retval;
+    } else {
+        return npobj->_class->hasProperty(npobj, name);
+    }
 }
 
 bool
