@@ -117,6 +117,21 @@ tables_remove_pp_instance(PP_Instance instance)
     pthread_mutex_unlock(&lock);
 }
 
+struct pp_instance_s *
+tables_get_some_pp_instance(void)
+{
+    GHashTableIter iter;
+    gpointer key, value;
+
+    pthread_mutex_lock(&lock);
+    g_hash_table_iter_init (&iter, pp_to_np_ht);
+    if (!g_hash_table_iter_next(&iter, &key, &value))
+        value = NULL;
+    pthread_mutex_unlock(&lock);
+
+    return value;
+}
+
 PangoContext *
 tables_get_pango_ctx(void)
 {

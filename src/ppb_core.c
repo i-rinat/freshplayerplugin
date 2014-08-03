@@ -95,7 +95,13 @@ ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data)
     }
 
     if (!ml->running) {
-        npn.pluginthreadasynccall(ml->instance->npp, func, user_data);
+        struct pp_instance_s *pp_i = tables_get_some_pp_instance();
+
+        pthread_mutex_lock(&pp_i->lock);
+        if (pp_i->npp)
+            npn.pluginthreadasynccall(pp_i->npp, func, user_data);
+        pthread_mutex_unlock(&pp_i->lock);
+
         pp_resource_release(m_loop);
         return;
     }

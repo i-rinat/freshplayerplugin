@@ -209,7 +209,11 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     if (!pp_i)
         return NPERR_OUT_OF_MEMORY_ERROR;
 
+    pthread_mutex_init(&pp_i->lock, NULL);
+    pthread_mutex_lock(&pp_i->lock);
     pp_i->npp = npp;
+    pthread_mutex_unlock(&pp_i->lock);
+
     pp_i->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
     if (!pp_i->ppp_instance_1_1)
         return NPERR_GENERIC_ERROR;
@@ -254,7 +258,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         ppb_message_loop_proclaim_this_thread_browser();
     }
 
-    pthread_mutex_init(&pp_i->lock, NULL);
     pp_i->dpy = XOpenDisplay(NULL);
 
     if (config.quirks.x_synchronize)
@@ -330,6 +333,10 @@ NPP_Destroy(NPP npp, NPSavedData **save)
 
     struct pp_instance_s *pp_i = npp->pdata;
     ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_destroy_instance_comt, pp_i), PP_OK);
+
+    pthread_mutex_lock(&pp_i->lock);
+    pp_i->npp = NULL;
+    pthread_mutex_unlock(&pp_i->lock);
 
     if (save)
         *save = NULL;
