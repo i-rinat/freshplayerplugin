@@ -125,38 +125,44 @@ ppb_instance_private_get_owner_element_object(PP_Instance instance)
 }
 
 struct execute_script_param_s {
-    struct PP_Var       script;
-    struct PP_Var       result;
-    NPP                 npp;
-    NPObject           *np_window_obj;
-    PP_Resource         message_loop;
-    int                 depth;
+    struct PP_Var           script;
+    struct PP_Var           result;
+    struct pp_instance_s   *pp_i;
+    PP_Resource             m_loop;
+    int                     depth;
 };
 
 static
 void
 _execute_script_ptac(void *user_data)
 {
-    struct execute_script_param_s *esp = user_data;
+    struct execute_script_param_s *p = user_data;
     NPString  np_script;
     NPVariant np_result;
 
-    np_script.UTF8Characters = ppb_var_var_to_utf8(esp->script, &np_script.UTF8Length);
-    if (!npn.evaluate(esp->npp, esp->np_window_obj, &np_script, &np_result)) {
+    // no need to lock, this function is run only in browser thread
+    if (!p->pp_i->npp) {
+        trace_error("%s, plugin instance was destroyed\n", __func__);
+        p->result = PP_MakeUndefined();
+        goto quit;
+    }
+
+    np_script.UTF8Characters = ppb_var_var_to_utf8(p->script, &np_script.UTF8Length);
+    if (!npn.evaluate(p->pp_i->npp, p->pp_i->np_window_obj, &np_script, &np_result)) {
         trace_error("%s, NPN_Evaluate failed\n", __func__);
-        esp->result = PP_MakeUndefined();
+        p->result = PP_MakeUndefined();
         goto quit;
     }
 
     // TODO: find out what exception is
-    esp->result = np_variant_to_pp_var(np_result);
+    p->result = np_variant_to_pp_var(np_result);
     if (np_result.type == NPVariantType_Object)
-        tables_add_npobj_npp_mapping(np_result.value.objectValue, esp->npp);
+        tables_add_npobj_npp_mapping(np_result.value.objectValue, p->pp_i->npp);
     else
         npn.releasevariantvalue(&np_result);
 
 quit:
-    ppb_message_loop_post_quit_depth(esp->message_loop, PP_FALSE, esp->depth);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 static
@@ -183,20 +189,18 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
         return PP_MakeUndefined();
     }
 
-    struct execute_script_param_s esp;
-    esp.script = script;
-    esp.npp = pp_i->npp;
-    esp.np_window_obj = pp_i->np_window_obj;
-    esp.message_loop = ppb_message_loop_get_current();
-    esp.depth = ppb_message_loop_get_depth(esp.message_loop) + 1;
+    struct execute_script_param_s p;
+    p.script =  script;
+    p.pp_i =    pp_i;
+    p.m_loop =  ppb_message_loop_get_current();
+    p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_var_add_ref(script);
-    ppb_message_loop_post_work(esp.message_loop,
-                               PP_MakeCompletionCallback(_execute_script_comt, &esp), 0);
-    ppb_message_loop_run_int(esp.message_loop, 1);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_execute_script_comt, &p), 0);
+    ppb_message_loop_run_int(p.m_loop, 1);
     ppb_var_release(script);
 
-    return esp.result;
+    return p.result;
 }
 
 
