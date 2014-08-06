@@ -62,7 +62,8 @@ fpp_config_get_default_plugin_descr(void)
 const char *
 fpp_config_get_plugin_mime_type(void)
 {
-    return "application/x-shockwave-flash:swf:Shockwave Flash";
+    return "application/x-shockwave-flash:swf:Shockwave Flash;"
+           "application/futuresplash:spl:FutureSplash Player";
 }
 
 char *
