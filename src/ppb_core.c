@@ -97,6 +97,7 @@ ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data)
     if (!ml->running) {
         struct pp_instance_s *pp_i = tables_get_some_pp_instance();
         if (!pp_i) {
+            pp_resource_release(m_loop);
             trace_error("%s, no alive instance available\n", __func__);
             return;
         }
