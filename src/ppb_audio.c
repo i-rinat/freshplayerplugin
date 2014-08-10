@@ -31,6 +31,7 @@
 #include "config.h"
 #include "pp_resource.h"
 #include "ppb_message_loop.h"
+#include "eintr_retry.h"
 
 
 PP_Resource
@@ -193,7 +194,6 @@ audio_player_thread(void *p)
     ppb_message_loop_mark_thread_unsuitable();
     a->playing = 1;
     while (1) {
-        int ret;
         if (a->shutdown)
             break;
 
@@ -201,9 +201,7 @@ audio_player_thread(void *p)
         int frame_count = snd_pcm_avail_update(a->ph);
         if (frame_count < 0) {
             trace_warning("%s, snd_pcm_avail_update error %d\n", __func__, (int)frame_count);
-            do {
-                ret = snd_pcm_recover(a->ph, frame_count, 1);
-            } while (ret == -EINTR);
+            RETRY_ON_EINTR(snd_pcm_recover(a->ph, frame_count, 1));
             error_cnt++;
             if (error_cnt >= 5)
                 trace_error("%s, too many buffer underruns (1)\n", __func__);
@@ -216,9 +214,7 @@ audio_player_thread(void *p)
         snd_pcm_sframes_t written = snd_pcm_writei(a->ph, a->audio_buffer, frame_count);
         if (written < 0) {
             trace_warning("%s, snd_pcm_writei error %d\n", __func__, (int)written);
-            do {
-                ret = snd_pcm_recover(a->ph, written, 1);
-            } while (ret == -EINTR);
+            RETRY_ON_EINTR(snd_pcm_recover(a->ph, written, 1));
             error_cnt++;
             if (error_cnt >= 5)
                 trace_error("%s, too many buffer underruns (2)\n", __func__);
