@@ -144,17 +144,21 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
     ups.uri = &uri_base;
     if (uriParseUriA(&ups, s_base_url) != URI_SUCCESS) {
         trace_warning("%s, can't parse s_base_url\n", __func__);
+        trace_warning("%s, s_base_url=%s\n", __func__, s_base_url);
         goto err_1;
     }
 
     ups.uri = &uri_rel;
     if (uriParseUriA(&ups, s_relative_string) != URI_SUCCESS) {
         trace_warning("%s, can't parse s_relative_string\n", __func__);
+        trace_warning("%s, s_relative_string=%s\n", __func__,s_relative_string);
         goto err_2;
     }
 
     if (uriAddBaseUriA(&uri_result, &uri_rel, &uri_base) != URI_SUCCESS) {
         trace_warning("%s, can't merge base and rel\n", __func__);
+        trace_warning("%s, s_base_url=%s\n", __func__, s_base_url);
+        trace_warning("%s, s_relative_string=%s\n", __func__,s_relative_string);
         goto err_3;
     }
 
@@ -169,9 +173,12 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
     if (components)
         parse_url_string(str, components);
 
-err_3:  uriFreeUriMembersA(&uri_result);
-err_2:  uriFreeUriMembersA(&uri_rel);
-err_1:  uriFreeUriMembersA(&uri_base);
+err_3:
+    uriFreeUriMembersA(&uri_result);
+err_2:
+    uriFreeUriMembersA(&uri_rel);
+err_1:
+    uriFreeUriMembersA(&uri_base);
     return var;
 }
 
