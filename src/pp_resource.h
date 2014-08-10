@@ -300,7 +300,8 @@ struct pp_audio_s {
     pthread_t               thread;
     uint32_t                playing;
     uint32_t                shutdown;
-    PPB_Audio_Callback_1_0  callback;
+    PPB_Audio_Callback_1_0  callback_1_0;
+    PPB_Audio_Callback      callback_1_1;
     void                   *user_data;
 };
 

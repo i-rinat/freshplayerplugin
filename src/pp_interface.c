@@ -83,6 +83,7 @@ extern const struct PPB_AudioConfig_1_1             ppb_audio_config_interface_1
 extern const struct PPB_AudioInput_Dev_0_3          ppb_audio_input_dev_interface_0_3;
 extern const struct PPB_AudioInput_Dev_0_4          ppb_audio_input_dev_interface_0_4;
 extern const struct PPB_Audio_1_0                   ppb_audio_interface_1_0;
+extern const struct PPB_Audio_1_1                   ppb_audio_interface_1_1;
 extern const struct PPB_BrowserFont_Trusted_1_0     ppb_browser_font_trusted_interface_1_0;
 extern const struct PPB_Buffer_Dev_0_4              ppb_buffer_dev_interface_0_4;
 extern const struct PPB_CharSet_Dev_0_4             ppb_char_set_dev_interface_0_4;
@@ -170,6 +171,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_AUDIO_INPUT_DEV_INTERFACE_0_3,      ppb_audio_input_dev_interface_0_3)
     ELSEIFBLOCK(PPB_AUDIO_INPUT_DEV_INTERFACE_0_4,      ppb_audio_input_dev_interface_0_4)
     ELSEIFBLOCK(PPB_AUDIO_INTERFACE_1_0,                ppb_audio_interface_1_0)
+    ELSEIFBLOCK(PPB_AUDIO_INTERFACE_1_1,                ppb_audio_interface_1_1)
     ELSEIFBLOCK(PPB_BROWSERFONT_TRUSTED_INTERFACE_1_0,  ppb_browser_font_trusted_interface_1_0)
     ELSEIFBLOCK(PPB_BUFFER_DEV_INTERFACE_0_4,           ppb_buffer_dev_interface_0_4)
     ELSEIFBLOCK(PPB_CHAR_SET_DEV_INTERFACE_0_4,         ppb_char_set_dev_interface_0_4)

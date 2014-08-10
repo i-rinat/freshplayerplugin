@@ -23,6 +23,7 @@
  */
 
 #include <pthread.h>
+#include <ppapi/c/pp_errors.h>
 #include "ppb_audio.h"
 #include <stdlib.h>
 #include <glib.h>
@@ -34,15 +35,21 @@
 #include "eintr_retry.h"
 
 
+static
 PP_Resource
-ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
-                 PPB_Audio_Callback_1_0 audio_callback, void *user_data)
+do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
+                    PPB_Audio_Callback_1_0 audio_callback_1_0,
+                    PPB_Audio_Callback     audio_callback_1_1, void *user_data)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
         trace_error("%s, wrong instance\n", __func__);
         return 0;
     }
+
+    if (!audio_callback_1_0 && !audio_callback_1_1)
+        return PP_ERROR_BADARGUMENT;
+
     PP_Resource audio = pp_resource_allocate(PP_RESOURCE_AUDIO, pp_i);
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
 
@@ -129,7 +136,8 @@ ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
 
 #undef ERR_CHECK
 
-    a->callback = audio_callback;
+    a->callback_1_0 = audio_callback_1_0;
+    a->callback_1_1 = audio_callback_1_1;
     a->user_data = user_data;
     a->audio_buffer = malloc(a->sample_frame_count * 2 * sizeof(int16_t));
     if (!a->audio_buffer) {
@@ -143,6 +151,20 @@ err:
     pp_resource_release(audio);
     pp_resource_expunge(audio);
     return 0;
+}
+
+PP_Resource
+ppb_audio_create_1_0(PP_Instance instance, PP_Resource audio_config,
+                     PPB_Audio_Callback_1_0 audio_callback_1_0, void *user_data)
+{
+    return do_ppb_audio_create(instance, audio_config, audio_callback_1_0, NULL, user_data);
+}
+
+PP_Resource
+ppb_audio_create_1_1(PP_Instance instance, PP_Resource audio_config,
+                     PPB_Audio_Callback audio_callback_1_1, void *user_data)
+{
+    return do_ppb_audio_create(instance, audio_config, NULL, audio_callback_1_1, user_data);
 }
 
 void
@@ -209,7 +231,15 @@ audio_player_thread(void *p)
         }
 
         frame_count = MIN(frame_count, (int)a->sample_frame_count);
-        a->callback(a->audio_buffer, frame_count * 2 * sizeof(int16_t), a->user_data);
+
+        if (a->callback_1_1) {
+            snd_pcm_sframes_t latency = MAX(snd_pcm_forwardable(a->ph), 0);
+
+            a->callback_1_1(a->audio_buffer, frame_count * 2 * sizeof(int16_t),
+                            (PP_TimeDelta)latency / a->sample_rate, a->user_data);
+        } else if (a->callback_1_0) {
+            a->callback_1_0(a->audio_buffer, frame_count * 2 * sizeof(int16_t), a->user_data);
+        }
 
         snd_pcm_sframes_t written = snd_pcm_writei(a->ph, a->audio_buffer, frame_count);
         if (written < 0) {
@@ -269,12 +299,22 @@ ppb_audio_stop_playback(PP_Resource audio)
 // trace wrappers
 TRACE_WRAPPER
 PP_Resource
-trace_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
-                       PPB_Audio_Callback_1_0 audio_callback, void *user_data)
+trace_ppb_audio_create_1_0(PP_Instance instance, PP_Resource audio_config,
+                           PPB_Audio_Callback_1_0 audio_callback, void *user_data)
 {
     trace_info("[PPB] {full} %s instance=%d, audio_config=%d, audio_callback=%p, user_data=%p\n",
                __func__+6, instance, audio_config, audio_callback, user_data);
-    return ppb_audio_create(instance, audio_config, audio_callback, user_data);
+    return ppb_audio_create_1_0(instance, audio_config, audio_callback, user_data);
+}
+
+TRACE_WRAPPER
+PP_Resource
+trace_ppb_audio_create_1_1(PP_Instance instance, PP_Resource audio_config,
+                           PPB_Audio_Callback audio_callback, void *user_data)
+{
+    trace_info("[PPB] {full} %s instance=%d, audio_config=%d, audio_callback=%p, user_data=%p\n",
+               __func__+6, instance, audio_config, audio_callback, user_data);
+    return ppb_audio_create_1_1(instance, audio_config, audio_callback, user_data);
 }
 
 TRACE_WRAPPER
@@ -311,7 +351,15 @@ trace_ppb_audio_stop_playback(PP_Resource audio)
 
 
 const struct PPB_Audio_1_0 ppb_audio_interface_1_0 = {
-    .Create =           TWRAPF(ppb_audio_create),
+    .Create =           TWRAPF(ppb_audio_create_1_0),
+    .IsAudio =          TWRAPF(ppb_audio_is_audio),
+    .GetCurrentConfig = TWRAPF(ppb_audio_get_current_config),
+    .StartPlayback =    TWRAPF(ppb_audio_start_playback),
+    .StopPlayback =     TWRAPF(ppb_audio_stop_playback),
+};
+
+const struct PPB_Audio_1_1 ppb_audio_interface_1_1 = {
+    .Create =           TWRAPF(ppb_audio_create_1_1),
     .IsAudio =          TWRAPF(ppb_audio_is_audio),
     .GetCurrentConfig = TWRAPF(ppb_audio_get_current_config),
     .StartPlayback =    TWRAPF(ppb_audio_start_playback),
