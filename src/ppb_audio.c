@@ -193,25 +193,39 @@ audio_player_thread(void *p)
     ppb_message_loop_mark_thread_unsuitable();
     a->playing = 1;
     while (1) {
+        int ret;
         if (a->shutdown)
             break;
+
         snd_pcm_wait(a->ph, 1000);
         int frame_count = snd_pcm_avail_update(a->ph);
-        if (frame_count > 0) {
-            if (frame_count > (int)a->sample_frame_count)
-                frame_count = a->sample_frame_count;
-
-            a->callback(a->audio_buffer, frame_count * 2 * sizeof(int16_t), a->user_data);
-            snd_pcm_sframes_t written = snd_pcm_writei(a->ph, a->audio_buffer, frame_count);
-            if (written < 0) {
-                snd_pcm_recover(a->ph, written, 1);
-                error_cnt++;
-                if (error_cnt >= 5)
-                    trace_error("%s, too many buffer underruns\n", __func__);
-            } else {
-                error_cnt = 0;
-            }
+        if (frame_count < 0) {
+            trace_warning("%s, snd_pcm_avail_update error %d\n", __func__, (int)frame_count);
+            do {
+                ret = snd_pcm_recover(a->ph, frame_count, 1);
+            } while (ret == -EINTR);
+            error_cnt++;
+            if (error_cnt >= 5)
+                trace_error("%s, too many buffer underruns (1)\n", __func__);
+            continue;
         }
+
+        frame_count = MIN(frame_count, (int)a->sample_frame_count);
+        a->callback(a->audio_buffer, frame_count * 2 * sizeof(int16_t), a->user_data);
+
+        snd_pcm_sframes_t written = snd_pcm_writei(a->ph, a->audio_buffer, frame_count);
+        if (written < 0) {
+            trace_warning("%s, snd_pcm_writei error %d\n", __func__, (int)written);
+            do {
+                ret = snd_pcm_recover(a->ph, written, 1);
+            } while (ret == -EINTR);
+            error_cnt++;
+            if (error_cnt >= 5)
+                trace_error("%s, too many buffer underruns (2)\n", __func__);
+            continue;
+        }
+
+        error_cnt = 0;
     }
 
     a->playing = 0;
