@@ -313,14 +313,23 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     return NPERR_NO_ERROR;
 }
 
+struct destroy_instance_param_s {
+    struct pp_instance_s   *pp_i;
+    PP_Resource             m_loop;
+    int                     depth;
+};
+
 static
 void
 _destroy_instance_comt(void *user_data, int32_t result)
 {
-    struct pp_instance_s *pp_i = user_data;
-    pp_i->ppp_instance_1_1->DidDestroy(pp_i->id);
-    tables_remove_pp_instance(pp_i->id);
-    free(pp_i);
+    struct destroy_instance_param_s *p = user_data;
+
+    p->pp_i->ppp_instance_1_1->DidDestroy(p->pp_i->id);
+    tables_remove_pp_instance(p->pp_i->id);
+    p->pp_i->npp = NULL;
+    free(p->pp_i);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 NPError
@@ -331,12 +340,13 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
 
-    struct pp_instance_s *pp_i = npp->pdata;
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_destroy_instance_comt, pp_i), PP_OK);
+    struct destroy_instance_param_s p;
+    p.pp_i =    npp->pdata;
+    p.m_loop =  ppb_message_loop_get_current();
+    p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    pthread_mutex_lock(&pp_i->lock);
-    pp_i->npp = NULL;
-    pthread_mutex_unlock(&pp_i->lock);
+    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_destroy_instance_comt, &p), PP_OK);
+    ppb_message_loop_run_int(p.m_loop, 1);
 
     if (save)
         *save = NULL;
