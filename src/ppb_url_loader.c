@@ -90,7 +90,7 @@ ppb_url_loader_is_url_loader(PP_Resource resource)
 struct url_loader_open_param_s {
     const char                 *url;
     PP_Resource                 loader;
-    struct pp_instance_s       *instance;
+    PP_Instance                 instance_id;
     enum pp_request_method_e    method;
     const char                 *request_headers;
     const char                 *custom_referrer_url;
@@ -109,7 +109,12 @@ void
 _url_loader_open_ptac(void *user_data)
 {
     struct url_loader_open_param_s *p = user_data;
-    struct pp_instance_s *pp_i = p->instance;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(p->instance_id);
+
+    if (!pp_i) {
+        p->retval = NPERR_INVALID_INSTANCE_ERROR;
+        goto quit;
+    }
 
     if (p->method == PP_METHOD_POST) {
         // POST request
@@ -167,6 +172,7 @@ _url_loader_open_ptac(void *user_data)
         }
     }
 
+quit:
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
@@ -275,7 +281,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     struct url_loader_open_param_s p;
     p.url =                 strdup(ul->url);
     p.loader =              loader;
-    p.instance =            ul->instance;
+    p.instance_id =         ul->instance->id;
     p.method =              ul->method;
     p.request_headers =     ul->request_headers;
     p.custom_referrer_url = ul->custom_referrer_url;
@@ -352,7 +358,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     struct url_loader_open_param_s p;
     p.url =                 ul->url;
     p.loader =              loader;
-    p.instance =            ul->instance;
+    p.instance_id =         ul->instance->id;
     p.method =              ul->method;
     p.request_headers =     ul->request_headers;
     p.custom_referrer_url = ul->custom_referrer_url;

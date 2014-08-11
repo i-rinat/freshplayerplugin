@@ -38,7 +38,7 @@
 static volatile gint events_inflight = 0;
 
 struct handle_event_comt_param_s {
-    NPP         npp;
+    PP_Instance instance_id;
     XEvent      ev;
 };
 
@@ -89,7 +89,10 @@ void
 _handle_event_ptac(void *p)
 {
     struct handle_event_comt_param_s *params = p;
-    NPP_HandleEvent(params->npp, &params->ev);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance_id);
+    if (pp_i) {
+        NPP_HandleEvent(pp_i->npp, &params->ev);
+    }
     g_slice_free(struct handle_event_comt_param_s, params);
     g_atomic_int_add(&events_inflight, -1);
 }
@@ -153,8 +156,8 @@ fullscreen_window_thread(void *p)
         ev.xany.display = pp_i->dpy;
 
         struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
-        params->npp = pp_i->npp;
-        params->ev =  ev;
+        params->instance_id =   pp_i->id;
+        params->ev =            ev;
         g_atomic_int_add(&events_inflight, 1);
         ppb_core_call_on_browser_thread(_handle_event_ptac, params);
     }

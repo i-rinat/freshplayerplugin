@@ -34,8 +34,8 @@
 
 
 struct comt_param_s {
-    struct pp_instance_s   *pp_i;
-    int                     xtype;
+    PP_Instance     instance_id;
+    int             xtype;
 };
 
 void
@@ -44,7 +44,10 @@ _set_cursor_ptac(void *user_data)
     Window wnd;
     Cursor cursor;
     struct comt_param_s *params = user_data;
-    struct pp_instance_s *pp_i = params->pp_i;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance_id);
+
+    if (!pp_i)
+        goto quit;
 
     pthread_mutex_lock(&pp_i->lock);
     cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
@@ -59,6 +62,7 @@ _set_cursor_ptac(void *user_data)
     }
     pthread_mutex_unlock(&pp_i->lock);
 
+quit:
     g_slice_free(struct comt_param_s, params);
 }
 
@@ -210,8 +214,8 @@ ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev t
     }
     struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
 
-    comt_params->pp_i  = pp_i;
-    comt_params->xtype = xtype;
+    comt_params->instance_id =  instance;
+    comt_params->xtype =        xtype;
 
     ppb_core_call_on_browser_thread(_set_cursor_ptac, comt_params);
 

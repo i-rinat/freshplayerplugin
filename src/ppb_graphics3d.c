@@ -285,7 +285,9 @@ static
 void
 _call_invalidaterect_ptac(void *param)
 {
-    struct pp_instance_s *pp_i = param;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(GPOINTER_TO_SIZE(param));
+    if (!pp_i)
+        return;
     NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
 
     npn.invalidaterect(pp_i->npp, &npr);
@@ -336,7 +338,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         pthread_mutex_unlock(&pp_i->lock);
     } else {
         pthread_mutex_unlock(&pp_i->lock);
-        ppb_core_call_on_browser_thread(_call_invalidaterect_ptac, pp_i);
+        ppb_core_call_on_browser_thread(_call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
     }
 
     if (callback.func)

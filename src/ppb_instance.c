@@ -127,7 +127,7 @@ ppb_instance_private_get_owner_element_object(PP_Instance instance)
 struct execute_script_param_s {
     struct PP_Var           script;
     struct PP_Var           result;
-    struct pp_instance_s   *pp_i;
+    PP_Instance             instance_id;
     PP_Resource             m_loop;
     int                     depth;
 };
@@ -139,16 +139,22 @@ _execute_script_ptac(void *user_data)
     struct execute_script_param_s *p = user_data;
     NPString  np_script;
     NPVariant np_result;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(p->instance_id);
+
+    if (!pp_i) {
+        p->result = PP_MakeUndefined();
+        goto quit;
+    }
 
     // no need to lock, this function is run only in browser thread
-    if (!p->pp_i->npp) {
+    if (!pp_i->npp) {
         trace_error("%s, plugin instance was destroyed\n", __func__);
         p->result = PP_MakeUndefined();
         goto quit;
     }
 
     np_script.UTF8Characters = ppb_var_var_to_utf8(p->script, &np_script.UTF8Length);
-    if (!npn.evaluate(p->pp_i->npp, p->pp_i->np_window_obj, &np_script, &np_result)) {
+    if (!npn.evaluate(pp_i->npp, pp_i->np_window_obj, &np_script, &np_result)) {
         trace_error("%s, NPN_Evaluate failed\n", __func__);
         p->result = PP_MakeUndefined();
         goto quit;
@@ -157,7 +163,7 @@ _execute_script_ptac(void *user_data)
     // TODO: find out what exception is
     p->result = np_variant_to_pp_var(np_result);
     if (np_result.type == NPVariantType_Object)
-        tables_add_npobj_npp_mapping(np_result.value.objectValue, p->pp_i->npp);
+        tables_add_npobj_npp_mapping(np_result.value.objectValue, pp_i->npp);
     else
         npn.releasevariantvalue(&np_result);
 
@@ -190,10 +196,10 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     }
 
     struct execute_script_param_s p;
-    p.script =  script;
-    p.pp_i =    pp_i;
-    p.m_loop =  ppb_message_loop_get_current();
-    p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
+    p.script =      script;
+    p.instance_id = instance;
+    p.m_loop =      ppb_message_loop_get_current();
+    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_var_add_ref(script);
     ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_execute_script_comt, &p), 0);
