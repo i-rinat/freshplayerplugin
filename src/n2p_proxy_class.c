@@ -38,7 +38,6 @@
 
 
 struct has_property_param_s {
-    NPP                 npp;
     struct PP_Var       name;
     struct PP_Var      *exception;
     void               *object;
@@ -54,8 +53,12 @@ _n2p_has_property_ptac(void *param)
     struct has_property_param_s *p = param;
     const char *s_name = ppb_var_var_to_utf8(p->name, NULL);
     NPIdentifier identifier = npn.getstringidentifier(s_name);
+    NPP npp = tables_get_npobj_npp_mapping(p->object);
 
-    p->res = npn.hasproperty(p->npp, p->object, identifier);
+    if (npp)
+        p->res = npn.hasproperty(npp, p->object, identifier);
+    else
+        p->res = FALSE;
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
@@ -81,7 +84,6 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p.object =      object;
     p.name =        name;
     p.exception =   exception;
-    p.npp =         tables_get_npobj_npp_mapping(object);
     p.m_loop =      ppb_message_loop_get_current();
     p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
@@ -99,7 +101,6 @@ n2p_has_method(void *object, struct PP_Var name, struct PP_Var *exception)
 }
 
 struct get_property_param_s {
-    NPP             npp;
     void           *object;
     struct PP_Var   name;
     struct PP_Var  *exception;
@@ -116,12 +117,13 @@ _n2p_get_property_ptac(void *param)
     const char *s_name = ppb_var_var_to_utf8(p->name, NULL);
     NPIdentifier identifier = npn.getstringidentifier(s_name);
     NPVariant np_value;
+    NPP npp = tables_get_npobj_npp_mapping(p->object);
 
-    if (npn.getproperty(p->npp, p->object, identifier, &np_value)) {
+    if (npp && npn.getproperty(npp, p->object, identifier, &np_value)) {
         struct PP_Var var = np_variant_to_pp_var(np_value);
 
         if (np_value.type == NPVariantType_Object)
-            tables_add_npobj_npp_mapping(np_value.value.objectValue, p->npp);
+            tables_add_npobj_npp_mapping(np_value.value.objectValue, npp);
         else
             npn.releasevariantvalue(&np_value);
 
@@ -151,7 +153,6 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
     }
 
     struct get_property_param_s p;
-    p.npp =         tables_get_npobj_npp_mapping(object);
     p.object =      object;
     p.name =        name;
     p.exception =   exception;
@@ -184,7 +185,6 @@ n2p_remove_property(void *object, struct PP_Var name, struct PP_Var *exception)
 }
 
 struct call_param_s {
-    NPP                 npp;
     void               *object;
     struct PP_Var       method_name;
     uint32_t            argc;
@@ -202,13 +202,15 @@ _n2p_call_ptac(void *param)
     struct call_param_s *p = param;
     const char *s_method_name = ppb_var_var_to_utf8(p->method_name, NULL);
     NPIdentifier np_method_name = npn.getstringidentifier(s_method_name);
+    NPP npp = tables_get_npobj_npp_mapping(p->object);
 
     NPVariant *np_args = malloc(p->argc * sizeof(NPVariant));
     for (uint32_t k = 0; k < p->argc; k ++)
         np_args[k] = pp_var_to_np_variant(p->argv[k]);
 
     NPVariant np_result;
-    bool res = npn.invoke(p->npp, p->object, np_method_name, np_args, p->argc, &np_result);
+    bool res = npp ? npn.invoke(npp, p->object, np_method_name, np_args, p->argc, &np_result)
+                   : FALSE;
 
     for (uint32_t k = 0; k < p->argc; k ++)
         npn.releasevariantvalue(&np_args[k]);
@@ -218,7 +220,7 @@ _n2p_call_ptac(void *param)
         struct PP_Var var = np_variant_to_pp_var(np_result);
 
         if (np_result.type == NPVariantType_Object)
-            tables_add_npobj_npp_mapping(np_result.value.objectValue, p->npp);
+            tables_add_npobj_npp_mapping(np_result.value.objectValue, npp);
         else
             npn.releasevariantvalue(&np_result);
 
@@ -250,7 +252,6 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
     }
 
     struct call_param_s p;
-    p.npp =         tables_get_npobj_npp_mapping(object);
     p.object =      object;
     p.method_name = method_name;
     p.argc =        argc;
@@ -266,7 +267,6 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
 }
 
 struct construct_param_s {
-    NPP                 npp;
     void               *object;
     uint32_t            argc;
     struct PP_Var      *argv;
@@ -281,13 +281,15 @@ void
 _n2p_construct_ptac(void *param)
 {
     struct construct_param_s *p = param;
+    NPP npp = tables_get_npobj_npp_mapping(p->object);
 
     NPVariant *np_args = malloc(p->argc * sizeof(NPVariant));
     for (uint32_t k = 0; k < p->argc; k ++)
         np_args[k] = pp_var_to_np_variant(p->argv[k]);
 
     NPVariant np_result;
-    bool res = npn.construct(p->npp, p->object, np_args, p->argc, &np_result);
+    bool res = npp ? npn.construct(npp, p->object, np_args, p->argc, &np_result) : FALSE;
+
     for (uint32_t k = 0; k < p->argc; k ++)
         npn.releasevariantvalue(&np_args[k]);
     free(np_args);
@@ -296,7 +298,7 @@ _n2p_construct_ptac(void *param)
         struct PP_Var var = np_variant_to_pp_var(np_result);
 
         if (np_result.type == NPVariantType_Object)
-            tables_add_npobj_npp_mapping(np_result.value.objectValue, p->npp);
+            tables_add_npobj_npp_mapping(np_result.value.objectValue, npp);
         else
             npn.releasevariantvalue(&np_result);
 
@@ -321,7 +323,6 @@ struct PP_Var
 n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
     struct construct_param_s p;
-    p.npp =         tables_get_npobj_npp_mapping(object);
     p.object =      object;
     p.argc =        argc;
     p.argv =        argv;
