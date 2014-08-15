@@ -72,7 +72,7 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
         jumpoutstatement;                                                       \
     }
 
-    int res;
+    int res, dir;
     res = snd_pcm_open(&a->ph, "default", SND_PCM_STREAM_PLAYBACK, 0);
     ERR_CHECK(res, snd_pcm_open, goto err);
 
@@ -94,20 +94,22 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
     res = snd_pcm_hw_params_set_channels(a->ph, hw_params, 2);
     ERR_CHECK(res, snd_pcm_hw_params_set_channels, goto err);
 
-    int dir = 1;
-    unsigned int buffer_time = 2 * (long long)a->sample_frame_count * 1000 * 1000 / a->sample_rate;
-
-    buffer_time = CLAMP(buffer_time,
+    unsigned int period_time = (long long)a->sample_frame_count * 1000 * 1000 / a->sample_rate;
+    period_time = CLAMP(period_time,
                         1000 * config.audio_buffer_min_ms,
                         1000 * config.audio_buffer_max_ms);
+    dir = 1;
+    res = snd_pcm_hw_params_set_period_time_near(a->ph, hw_params, &period_time, &dir);
+    ERR_CHECK(res, snd_pcm_hw_params_set_period_time_near, goto err);
+
+    unsigned int buffer_time = 4 * period_time;
+    dir = 1;
     res = snd_pcm_hw_params_set_buffer_time_near(a->ph, hw_params, &buffer_time, &dir);
     ERR_CHECK(res, snd_pcm_hw_params_set_buffer_time_near, goto err);
 
-    snd_pcm_uframes_t period_size = a->sample_frame_count / 4;
-    dir = 1;
-    res = snd_pcm_hw_params_set_period_size_near(a->ph, hw_params, &period_size, &dir);
-    ERR_CHECK(res, snd_pcm_hw_params_set_period_size_near, goto err);
-    a->period_size = period_size;
+    dir = 0;
+    res = snd_pcm_hw_params_get_buffer_time(hw_params, &buffer_time, &dir);
+    ERR_CHECK(res, snd_pcm_hw_params_get_buffer_time, goto err);
 
     res = snd_pcm_hw_params(a->ph, hw_params);
     ERR_CHECK(res, snd_pcm_hw_params, goto err);
@@ -119,12 +121,6 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
 
     res = snd_pcm_sw_params_current(a->ph, sw_params);
     ERR_CHECK(res, snd_pcm_sw_params_current, goto err);
-
-    res = snd_pcm_sw_params_set_avail_min(a->ph, sw_params, a->sample_frame_count);
-    ERR_CHECK(res, snd_pcm_sw_params_set_avail_min, goto err);
-
-    res = snd_pcm_sw_params_set_start_threshold(a->ph, sw_params, 0U);
-    ERR_CHECK(res, snd_pcm_sw_params_set_start_threshold, goto err);
 
     res = snd_pcm_sw_params(a->ph, sw_params);
     ERR_CHECK(res, snd_pcm_sw_params, goto err);
