@@ -81,6 +81,7 @@ char *
 trace_var_as_string(struct PP_Var var)
 {
     char *res = NULL;
+    const char *tmp;
 
     switch (var.type) {
     case PP_VARTYPE_UNDEFINED:
@@ -99,7 +100,8 @@ trace_var_as_string(struct PP_Var var)
         res = g_strdup_printf("{DOUBLE:%f}", var.value.as_double);
         break;
     case PP_VARTYPE_STRING:
-        res = g_strdup_printf("{STRING:%s}", ppb_var_var_to_utf8(var, NULL));
+        tmp = ppb_var_var_to_utf8(var, NULL);
+        res = g_strdup_printf("{STRING:%p:%s}", tmp, tmp);
         break;
     case PP_VARTYPE_OBJECT:
         res = ppb_var_trace_object_var(var);
