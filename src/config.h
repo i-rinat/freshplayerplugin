@@ -83,5 +83,7 @@ fpp_config_get_plugin_path(void);
 uintptr_t
 fpp_config_plugin_has_manifest(void);
 
+const char *
+fpp_config_get_pepper_data_dir(void);
 
 #endif // FPP__CONFIG_H

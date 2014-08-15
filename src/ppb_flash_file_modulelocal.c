@@ -38,9 +38,7 @@
 #include <dirent.h>
 #include <glib.h>
 #include "trace.h"
-
-
-static const char *pepper_data_dir = "/tmp/freshplayerplugin";
+#include "config.h"
 
 
 /// resolve pp module local path to absolute one
@@ -141,7 +139,7 @@ int32_t
 ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
                                      PP_FileHandle *file)
 {
-    char *abs_path = to_abs_path(pepper_data_dir, path);
+    char *abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
     int xmode = pp_mode_to_open_mode(mode);
     if (xmode | O_CREAT) {
         // create subdirectories recursively
@@ -181,8 +179,8 @@ ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *path_fr
                                        const char *path_to)
 {
     (void)instance;
-    char *abs_path_from = to_abs_path(pepper_data_dir, path_from);
-    char *abs_path_to =   to_abs_path(pepper_data_dir, path_to);
+    char *abs_path_from = to_abs_path(fpp_config_get_pepper_data_dir(), path_from);
+    char *abs_path_to =   to_abs_path(fpp_config_get_pepper_data_dir(), path_to);
 
     int ret = rename(abs_path_from, abs_path_to);
 
@@ -206,7 +204,7 @@ ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *
         trace_warning("%s, recursive not implemented\n", __func__);
     }
 
-    char *abs_path = to_abs_path(pepper_data_dir, path);
+    char *abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
     int ret = unlink(abs_path);
     g_free(abs_path);
 
@@ -224,7 +222,7 @@ ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
     char *abs_path, *ptr;
     int ret;
 
-    abs_path = to_abs_path(pepper_data_dir, path);
+    abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
     ptr = strchr(abs_path, '/');
     while (ptr) {
         *ptr = '\0';
@@ -255,7 +253,7 @@ ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
         trace_error("%s, 'info' is NULL\n", __func__);
         return PP_ERROR_FAILED;
     }
-    char *abs_path = to_abs_path(pepper_data_dir, path);
+    char *abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
     struct stat sb;
 
     int ret = lstat(abs_path, &sb);
@@ -288,7 +286,7 @@ ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const char *pa
                                             struct PP_DirContents_Dev **contents)
 {
     struct dirent **namelist;
-    char *abs_path = to_abs_path(pepper_data_dir, path);
+    char *abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
     int n = scandir(abs_path, &namelist, NULL, alphasort);
     *contents = NULL;
     if (n < 0)

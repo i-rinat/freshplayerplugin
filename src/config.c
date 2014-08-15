@@ -46,7 +46,9 @@ static struct fpp_config_s default_config = {
 
 struct fpp_config_s config = {};
 static const char *config_file_name = "freshwrapper.conf";
+static const char *config_dir_name = "freshwrapper-data";
 static int initialized = 0;
+static char *pepper_data_dir;
 
 
 static
@@ -69,16 +71,16 @@ initialize_quirks(void)
 
 static
 char *
-get_local_config_path(void)
+get_local_config_path(const char *file_name)
 {
     char       *res = NULL;
     const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 
     if (xdg_config_home) {
-        res = g_strdup_printf("%s/%s", xdg_config_home, config_file_name);
+        res = g_strdup_printf("%s/%s", xdg_config_home, file_name);
     } else {
         const char *home = getenv("HOME");
-        res = g_strdup_printf("%s/.config/%s", home ? home : "", config_file_name);
+        res = g_strdup_printf("%s/.config/%s", home ? home : "", file_name);
     }
 
     return res;
@@ -86,9 +88,9 @@ get_local_config_path(void)
 
 static
 char *
-get_global_config_path(void)
+get_global_config_path(const char *file_name)
 {
-    return g_strdup_printf("/etc/%s", config_file_name);
+    return g_strdup_printf("/etc/%s", file_name);
 }
 
 void
@@ -98,8 +100,8 @@ fpp_config_initialize(void)
         return;
 
     config_t    cfg;
-    char       *local_config = get_local_config_path();
-    char       *global_config = get_global_config_path();
+    char       *local_config = get_local_config_path(config_file_name);
+    char       *global_config = get_global_config_path(config_file_name);
 
     config = default_config;
 
@@ -147,6 +149,11 @@ quit:
 
     initialize_quirks();
 
+    // calculate plugin data directory
+    local_config = get_local_config_path(config_dir_name);
+    pepper_data_dir = g_strdup_printf("%s/%s", local_config, fpp_config_get_plugin_name());
+    g_free(local_config);
+
     initialized = 1;
 }
 
@@ -164,5 +171,12 @@ fpp_config_destroy(void)
 
     FREE_IF_CHANGED(pepperflash_path);
     FREE_IF_CHANGED(flash_command_line);
+    g_free(pepper_data_dir);
     initialized = 0;
+}
+
+const char *
+fpp_config_get_pepper_data_dir(void)
+{
+    return pepper_data_dir;
 }
