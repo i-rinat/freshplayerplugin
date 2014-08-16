@@ -228,7 +228,14 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         if (strcasecmp(argn[k], "src") == 0) {
             pp_i->instance_url = strdup(argv[k]);
         }
+
+        if (strcasecmp(argn[k], "wmode") == 0)
+            if (strcasecmp(argv[k], "transparent") == 0)
+                pp_i->is_transparent = 1;
     }
+
+    // set transparency mode
+    npn.setvalue(npp, NPPVpluginTransparentBool, (void*)(size_t)pp_i->is_transparent);
 
     pp_i->is_fullframe = (mode == NP_FULL);
     pp_i->id = generate_new_pp_instance_id();
@@ -553,16 +560,24 @@ handle_graphics_expose_event(NPP npp, void *event)
     Display *dpy = ev->display;
     Drawable drawable = ev->drawable;
     int screen = 0;
+    cairo_surface_t *src_surf, *dst_surf;
+    cairo_t *cr;
 
     if (g2d) {
         pthread_mutex_lock(&pp_i->lock);
-        XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
-                                  g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
-                                  g2d->scaled_stride);
-
-        XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0,
-                  g2d->scaled_width, g2d->scaled_height);
-        XFree(xi);
+        dst_surf = cairo_xlib_surface_create(dpy, drawable, DefaultVisual(dpy, screen),
+                                             g2d->scaled_width, g2d->scaled_height);
+        if (pp_i->is_transparent)
+            cairo_surface_mark_dirty(dst_surf);
+        src_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
+                CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
+        cr = cairo_create(dst_surf);
+        cairo_set_source_surface(cr, src_surf, 0, 0);
+        cairo_set_operator(cr, pp_i->is_transparent ? CAIRO_OPERATOR_OVER : CAIRO_OPERATOR_SOURCE);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+        cairo_surface_destroy(dst_surf);
+        cairo_surface_destroy(src_surf);
     } else if (g3d) {
         pthread_mutex_lock(&pp_i->lock);
 

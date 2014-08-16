@@ -118,6 +118,7 @@ struct pp_instance_s {
     pthread_mutex_t                 lock;
     uint32_t                        is_fullframe;
     uint32_t                        is_fullscreen;
+    uint32_t                        is_transparent;
     uint32_t                        incognito_mode;
     volatile gint                   instance_loaded;
 
