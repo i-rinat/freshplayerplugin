@@ -74,7 +74,7 @@ generate_new_pp_instance_id(void)
 
 static
 void
-empty_completion_callback(void *user_data, int32_t result)
+do_nothing(void *user_data, int32_t result)
 {
     (void)user_data;
     (void)result;
@@ -170,8 +170,7 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
 
         ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL, s_url);
         ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_METHOD, s_method);
-        ppb_url_loader_open(url_loader, request_info,
-                            PP_MakeCompletionCallback(empty_completion_callback, NULL));
+        ppb_url_loader_open(url_loader, request_info, PP_MakeCompletionCallback(do_nothing, NULL));
         ppb_var_release(s_url);
         ppb_var_release(s_method);
         ppb_core_release_resource(request_info);
@@ -351,14 +350,6 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     if (save)
         *save = NULL;
     return NPERR_NO_ERROR;
-}
-
-static
-void
-do_nothing(void *user_data, int32_t result)
-{
-    (void)user_data;
-    (void)result;
 }
 
 NPError
