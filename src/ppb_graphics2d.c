@@ -261,7 +261,11 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     }
 
     // scale image
-    {
+    if (g2d->scaled_width == g2d->width && g2d->scaled_height == g2d->height) {
+        // fast path: exact copy
+        memcpy(g2d->second_buffer, g2d->data, g2d->stride * g2d->height);
+    } else {
+        // slow path: scaling required
         cairo_surface_t *surf;
         surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
                 CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
