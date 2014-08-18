@@ -334,6 +334,11 @@ _destroy_instance_comt(void *user_data, int32_t result)
     p->pp_i->ppp_instance_1_1->DidDestroy(p->pp_i->id);
     tables_remove_pp_instance(p->pp_i->id);
     p->pp_i->npp = NULL;
+    eglTerminate(p->pp_i->egl_dpy);
+    XCloseDisplay(p->pp_i->dpy);
+    npn.releaseobject(p->pp_i->np_window_obj);
+    npn.releaseobject(p->pp_i->scriptable_obj);
+    free(p->pp_i->instance_url);
     free(p->pp_i);
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }

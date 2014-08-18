@@ -138,7 +138,7 @@ struct pp_instance_s {
     char                          **argn;
     char                          **argv;
 
-    const char                     *instance_url;
+    char                           *instance_url;
     pthread_t                       main_thread;
     pthread_barrier_t               main_thread_barrier;
 
