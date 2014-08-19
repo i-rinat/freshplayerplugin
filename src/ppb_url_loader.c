@@ -51,6 +51,10 @@ ppb_url_loader_create(PP_Instance instance)
     }
     PP_Resource url_loader = pp_resource_allocate(PP_RESOURCE_URL_LOADER, pp_i);
     struct pp_url_loader_s *ul = pp_resource_acquire(url_loader, PP_RESOURCE_URL_LOADER);
+    if (!ul) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
 
     // all fields are zeroed by default
     ul->response_size = -1;
