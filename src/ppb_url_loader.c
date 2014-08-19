@@ -455,6 +455,11 @@ ppb_url_loader_get_response_info(PP_Resource loader)
     PP_Resource response_info = pp_resource_allocate(PP_RESOURCE_URL_RESPONSE_INFO, ul->instance);
     struct pp_url_response_info_s *ri = pp_resource_acquire(response_info,
                                                             PP_RESOURCE_URL_RESPONSE_INFO);
+    if (!ri) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        pp_resource_release(loader);
+        return 0;
+    }
 
     pp_resource_ref(loader);
     ri->url_loader_id = loader;
