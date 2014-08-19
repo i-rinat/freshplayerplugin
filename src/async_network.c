@@ -184,6 +184,7 @@ handle_tcp_connect_stage3(struct async_network_task_s *task)
         res = connect(task->sock, (struct sockaddr *)&sai, sizeof(sai));
     } else if (task->addr_type == DNS_IPv6_AAAA) {
         struct sockaddr_in6 sai;
+        memset(&sai, 0, sizeof(sai));
         sai.sin6_family = AF_INET6;
         memcpy(&sai.sin6_addr, (char*)task->addr + task->addr_ptr * sizeof(sai.sin6_addr),
                                                                     sizeof(sai.sin6_addr));
