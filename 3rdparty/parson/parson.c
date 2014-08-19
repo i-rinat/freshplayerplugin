@@ -147,12 +147,16 @@ static int is_decimal(const char *string, size_t length) {
 
 static char * read_file(const char * filename) {
     FILE *fp = fopen(filename, "r");
-    size_t file_size;
+    long file_size;
     char *file_contents;
     if (!fp)
         return NULL;
     fseek(fp, 0L, SEEK_END);
     file_size = ftell(fp);
+    if (file_size == -1) {
+        fclose(fp);
+        return NULL;
+    }
     rewind(fp);
     file_contents = (char*)parson_malloc(sizeof(char) * (file_size + 1));
     if (!file_contents) {
