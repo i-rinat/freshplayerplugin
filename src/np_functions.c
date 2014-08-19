@@ -465,9 +465,15 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         struct url_loader_read_task_s *rt = llink->data;
         ul->read_tasks = g_list_delete_link(ul->read_tasks, llink);
 
-        lseek(ul->fd, ul->read_pos, SEEK_SET);
-        int32_t read_bytes = RETRY_ON_EINTR(read(ul->fd, rt->buffer, rt->bytes_to_read));
-        ul->read_pos += read_bytes;
+        int32_t read_bytes = -1;
+        off_t ofs = lseek(ul->fd, ul->read_pos, SEEK_SET);
+        if (ofs != (off_t) -1)
+            read_bytes = RETRY_ON_EINTR(read(ul->fd, rt->buffer, rt->bytes_to_read));
+
+        if (read_bytes == -1)
+            read_bytes = PP_ERROR_FAILED;
+        else
+            ul->read_pos += read_bytes;
 
         pp_resource_release(loader);
         ppb_core_call_on_main_thread(0, rt->ccb, read_bytes);
