@@ -102,7 +102,10 @@ ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
     switch (fr->type) {
     case PP_FILE_REF_TYPE_FD:
         fio->fd = dup(fr->fd);
-        lseek(fio->fd, 0, SEEK_SET);
+        if (fio->fd >= 0)
+            lseek(fio->fd, 0, SEEK_SET);
+        else
+            retval = PP_ERROR_FAILED;
         break;
     default:
         trace_error("%s, fr->type not implemented\n", __func__);
