@@ -46,6 +46,10 @@ ppb_url_request_info_create(PP_Instance instance)
     PP_Resource request_info = pp_resource_allocate(PP_RESOURCE_URL_REQUEST_INFO, pp_i);
     struct pp_url_request_info_s *ri =
                             pp_resource_acquire(request_info, PP_RESOURCE_URL_REQUEST_INFO);
+    if (!ri) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
 
     ri->method = PP_METHOD_UNKNOWN;
     ri->url = NULL;
