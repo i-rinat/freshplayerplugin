@@ -50,6 +50,11 @@ ppb_browser_font_trusted_create(PP_Instance instance,
 
     PP_Resource font = pp_resource_allocate(PP_RESOURCE_BROWSER_FONT, pp_i);
     struct pp_browser_font_s *bf = pp_resource_acquire(font, PP_RESOURCE_BROWSER_FONT);
+    if (!bf) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
+
     PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
 
     bf->family = description->face.type == PP_VARTYPE_STRING ? -1 : description->family;
