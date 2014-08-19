@@ -59,8 +59,10 @@ __attribute__((constructor))
 void
 pp_resource_constructor(void)
 {
+    pthread_mutex_lock(&res_tbl_lock);
     res_tbl = g_hash_table_new(g_direct_hash, g_direct_equal);
     res_tbl_next = 1;
+    pthread_mutex_unlock(&res_tbl_lock);
 }
 
 PP_Resource
