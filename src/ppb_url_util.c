@@ -168,10 +168,10 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
     char *str = malloc(len);
     uriToStringA(str, &uri_result, len, NULL);
     var = ppb_var_var_from_utf8_z(str);
-    free(str);
 
     if (components)
         parse_url_string(str, components);
+    free(str);
 
 err_3:
     uriFreeUriMembersA(&uri_result);
