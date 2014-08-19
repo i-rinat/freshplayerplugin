@@ -68,6 +68,11 @@ _update_instance_view_comt(void *user_data, int32_t result)
     if (g_atomic_int_get(&pp_i->instance_loaded)) {
         PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
         struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+        if (!v) {
+            trace_error("%s, resource allocation failure\n", __func__);
+            return;
+        }
+
         v->rect.point.x = 0;
         v->rect.point.y = 0;
         if (pp_i->is_fullscreen) {
