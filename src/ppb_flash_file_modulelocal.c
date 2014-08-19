@@ -141,7 +141,7 @@ ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int
 {
     char *abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
     int xmode = pp_mode_to_open_mode(mode);
-    if (xmode | O_CREAT) {
+    if (xmode & O_CREAT) {
         // create subdirectories recursively
         char *last_slash = strrchr(abs_path, '/');
         if (last_slash) {
