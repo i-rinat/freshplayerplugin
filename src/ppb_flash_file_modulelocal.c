@@ -150,11 +150,18 @@ ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int
                 char *ptr = strchr(abs_path, '/');
                 while (ptr) {
                     *ptr = '\0';
-                    mkdir(abs_path, 0777);
+                    if (mkdir(abs_path, 0777) != 0) {
+                        g_free(abs_path);
+                        return PP_ERROR_NOACCESS;
+                    }
                     *ptr = '/';
                     ptr = strchr(ptr + 1, '/');
                 }
-                mkdir(abs_path, 0777);
+
+                if (mkdir(abs_path, 0777) != 0) {
+                    g_free(abs_path);
+                    return PP_ERROR_NOACCESS;
+                }
             } while (0);
 
             *last_slash = '/';
@@ -226,7 +233,10 @@ ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
     ptr = strchr(abs_path, '/');
     while (ptr) {
         *ptr = '\0';
-        mkdir(abs_path, 0777);
+        if (mkdir(abs_path, 0777) != 0) {
+            g_free(abs_path);
+            return PP_ERROR_NOACCESS;
+        }
         *ptr = '/';
         ptr = strchr(ptr + 1, '/');
     }
