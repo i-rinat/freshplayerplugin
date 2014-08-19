@@ -49,6 +49,10 @@ ppb_message_loop_create(PP_Instance instance)
 
     PP_Resource message_loop = pp_resource_allocate(PP_RESOURCE_MESSAGE_LOOP, pp_i);
     struct pp_message_loop_s *ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
+    if (!ml) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
 
     ml->async_q = g_async_queue_new();
     ml->int_q = g_queue_new();
