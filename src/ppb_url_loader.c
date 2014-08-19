@@ -137,6 +137,7 @@ _url_loader_open_ptac(void *user_data)
 
         fp = fdopen(fd, "wb+");
         if (!fp) {
+            close(fd);
             p->retval = NPERR_GENERIC_ERROR;
             goto err;
         }
