@@ -511,6 +511,7 @@ static JSON_Value * parse_object_value(const char **string, size_t nesting) {
         new_key = get_processed_string(string);
         skip_whitespaces(string);
         if (!new_key || **string != ':') {
+            parson_free(new_key);
             json_value_free(output_value);
             return NULL;
         }
