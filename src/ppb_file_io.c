@@ -59,6 +59,10 @@ ppb_file_io_create(PP_Instance instance)
     }
     PP_Resource file_io = pp_resource_allocate(PP_RESOURCE_FILE_IO, pp_i);
     struct pp_file_io_s *fio = pp_resource_acquire(file_io, PP_RESOURCE_FILE_IO);
+    if (!fio) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
 
     fio->fd = -1;
 
