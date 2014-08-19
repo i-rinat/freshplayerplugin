@@ -339,7 +339,9 @@ _destroy_instance_comt(void *user_data, int32_t result)
 
     p->pp_i->ppp_instance_1_1->DidDestroy(p->pp_i->id);
     tables_remove_pp_instance(p->pp_i->id);
+    pthread_mutex_lock(&p->pp_i->lock);
     p->pp_i->npp = NULL;
+    pthread_mutex_unlock(&p->pp_i->lock);
     eglTerminate(p->pp_i->egl_dpy);
     XCloseDisplay(p->pp_i->dpy);
     npn.releaseobject(p->pp_i->np_window_obj);
