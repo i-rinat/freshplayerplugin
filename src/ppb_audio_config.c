@@ -40,6 +40,10 @@ ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate s
     }
     PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, pp_i);
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
+    if (!ac) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
 
     ac->sample_rate = sample_rate;
     ac->sample_frame_count = CLAMP(sample_frame_count,
