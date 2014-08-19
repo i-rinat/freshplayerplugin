@@ -526,7 +526,11 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
         return len;
     }
 
-    lseek(ul->fd, offset, SEEK_SET);
+    if (lseek(ul->fd, offset, SEEK_SET) != 0) {
+        pp_resource_release(loader);
+        return -1;
+    }
+
     RETRY_ON_EINTR(write(ul->fd, buffer, len));
 
     if (ul->read_tasks == NULL) {
