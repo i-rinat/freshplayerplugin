@@ -44,6 +44,10 @@ ppb_flash_font_file_create(PP_Instance instance,
     }
     PP_Resource font_file = pp_resource_allocate(PP_RESOURCE_FLASH_FONT_FILE, pp_i);
     struct pp_flash_font_file_s *fff = pp_resource_acquire(font_file, PP_RESOURCE_FLASH_FONT_FILE);
+    if (!fff) {
+        trace_error("%s, resource allocation error\n", __func__);
+        return 0;
+    }
     PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
 
     fff->font = pango_context_load_font(tables_get_pango_ctx(), font_desc);
