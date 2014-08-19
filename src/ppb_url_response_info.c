@@ -97,6 +97,11 @@ ppb_url_response_info_get_body_as_file_ref(PP_Resource response)
 
     PP_Resource file_ref = pp_resource_allocate(PP_RESOURCE_FILE_REF, ri->instance);
     struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
+    if (!fr) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        pp_resource_release(response);
+        return 0;
+    }
 
     fr->fd = dup(ul->fd);
     fr->type = PP_FILE_REF_TYPE_FD;
