@@ -410,6 +410,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
                 ppb_url_loader_follow_redirect(loader, PP_MakeCompletionCallback(do_nothing, NULL));
                 // There is no need to fill response headers, status_line and other parameters
                 // since they are freed in follow_redirect anyway.
+                hp_free_parsed_headers(ph);
                 goto quit;
             }
         }
