@@ -85,19 +85,21 @@ void
 _set_window_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
-
-    pthread_mutex_lock(&pp_i->lock);
     PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
     struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-    v->rect.point.x = 0; // TODO: pp_i->x;
-    v->rect.point.y = 0; // TODO: pp_i->y;
-    v->rect.size.width = pp_i->width;
-    v->rect.size.height = pp_i->height;
-    pp_resource_release(view);
-    pthread_mutex_unlock(&pp_i->lock);
 
-    pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
-    ppb_core_release_resource(view);
+    if (v) {
+        pthread_mutex_lock(&pp_i->lock);
+        v->rect.point.x = 0; // TODO: pp_i->x;
+        v->rect.point.y = 0; // TODO: pp_i->y;
+        v->rect.size.width = pp_i->width;
+        v->rect.size.height = pp_i->height;
+        pp_resource_release(view);
+        pthread_mutex_unlock(&pp_i->lock);
+
+        pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
+        ppb_core_release_resource(view);
+    }
 }
 
 NPError
