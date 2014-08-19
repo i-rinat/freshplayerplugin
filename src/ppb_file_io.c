@@ -107,10 +107,13 @@ ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
     case PP_FILE_REF_TYPE_FD:
         fio->fd = dup(fr->fd);
         if (fio->fd >= 0) {
-            if (lseek(fio->fd, 0, SEEK_SET) != 0)
+            if (lseek(fio->fd, 0, SEEK_SET) != 0) {
                 retval = PP_ERROR_FAILED;
+                goto out;
+            }
         } else {
             retval = PP_ERROR_FAILED;
+            goto out;
         }
         break;
     default:
