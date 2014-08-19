@@ -178,6 +178,7 @@ handle_tcp_connect_stage3(struct async_network_task_s *task)
     int res = -1;
     if (task->addr_type == DNS_IPv4_A) {
         struct sockaddr_in sai;
+        memset(&sai, 0, sizeof(sai));
         sai.sin_family = AF_INET;
         sai.sin_addr.s_addr = *((uint32_t *)task->addr + task->addr_ptr);
         sai.sin_port = htons(task->port);
