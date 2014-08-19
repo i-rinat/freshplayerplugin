@@ -517,8 +517,8 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     if (!ul) {
-            trace_info_f("[NPP] %s, ignoring stream content\n", __func__);
-            return -1;
+        trace_info_f("[NPP] %s, ignoring stream content\n", __func__);
+        return -1;
     }
 
     if (ul->fd == -1 || len <= 0) {
