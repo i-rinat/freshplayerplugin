@@ -475,7 +475,7 @@ int32_t
 ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t bytes_to_read,
                                   struct PP_CompletionCallback callback)
 {
-    int32_t read_bytes = 0;
+    int32_t read_bytes = PP_ERROR_FAILED;
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     if (!ul) {
         trace_error("%s, bad resource\n", __func__);
@@ -483,16 +483,15 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
     }
 
     if (ul->fd >= 0) {
+        read_bytes = -1;
         off_t ofs = lseek(ul->fd, ul->read_pos, SEEK_SET);
-        if (ofs == (off_t)-1)
-            read_bytes = -1;
-        else
+        if (ofs != (off_t)-1)
             read_bytes = RETRY_ON_EINTR(read(ul->fd, buffer, bytes_to_read));
 
-        if (read_bytes > 0)
-            ul->read_pos += read_bytes;
-        else
+        if (read_bytes < 0)
             read_bytes = PP_ERROR_FAILED;
+        else
+            ul->read_pos += read_bytes;
     }
 
     if (read_bytes == 0 && !ul->finished_loading) {
