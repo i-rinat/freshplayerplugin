@@ -128,9 +128,18 @@ _url_loader_open_ptac(void *user_data)
         int     need_newline = 0;
 
         tmpfname = g_strdup_printf("/tmp/FreshPostBodyXXXXXX");    // TODO: make configurable
-        // TODO: error handling
+
         fd = mkstemp(tmpfname);
+        if (fd < 0) {
+            p->retval = NPERR_GENERIC_ERROR;
+            goto err;
+        }
+
         fp = fdopen(fd, "wb+");
+        if (!fp) {
+            p->retval = NPERR_GENERIC_ERROR;
+            goto err;
+        }
 
         if (p->request_headers) {
             fprintf(fp, "%s\n", p->request_headers);
@@ -165,6 +174,7 @@ _url_loader_open_ptac(void *user_data)
             p->retval = npn.posturlnotify(pp_i->npp, p->url, NULL, strlen(tmpfname), tmpfname, true,
                                           (void*)(size_t)p->loader);
         }
+err:
         unlink(tmpfname);
         g_free(tmpfname);
     } else {
