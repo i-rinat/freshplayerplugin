@@ -117,6 +117,10 @@ ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_
     }
     PP_Resource flash_menu = pp_resource_allocate(PP_RESOURCE_FLASH_MENU, pp_i);
     struct pp_flash_menu_s *fm = pp_resource_acquire(flash_menu, PP_RESOURCE_FLASH_MENU);
+    if (!fm) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
 
     // recursively construct menu
     fm->menu = convert_menu(menu_data);
