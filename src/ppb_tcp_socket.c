@@ -44,6 +44,11 @@ ppb_tcp_socket_private_create(PP_Instance instance)
     }
     PP_Resource tcp_socket = pp_resource_allocate(PP_RESOURCE_TCP_SOCKET, pp_i);
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
+    if (!ts) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
+
     ts->sock = socket(AF_INET, SOCK_STREAM, 0);
     pp_resource_release(tcp_socket);
     return tcp_socket;
