@@ -305,21 +305,24 @@ ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const char *pa
     *contents = malloc(sizeof(struct PP_DirContents_Dev));
     if (!*contents)
         goto err;
-    (*contents)->count = n;
     (*contents)->entries = malloc(n * sizeof(struct PP_DirEntry_Dev));
     if (!(*contents)->entries)
         goto err2;
 
+    int cnt = 0;
     for (int k = 0; k < n; k ++) {
-        char *fname;
+        char *fname = g_strdup_printf("%s/%s", abs_path, namelist[k]->d_name);
         struct stat sb;
-        (*contents)->entries[k].name = strdup(namelist[k]->d_name);
-        fname = g_strdup_printf("%s/%s", abs_path, namelist[k]->d_name);
-        lstat(fname, &sb);
+        int ret = lstat(fname, &sb);
         g_free(fname);
-        (*contents)->entries[k].is_dir = S_ISDIR(sb.st_mode);
+        if (ret == 0) {
+            (*contents)->entries[cnt].is_dir = S_ISDIR(sb.st_mode);
+            (*contents)->entries[cnt].name = strdup(namelist[k]->d_name);
+            cnt++;
+        }
         free(namelist[k]);
     }
+    (*contents)->count = cnt;
 
     free(namelist);
     g_free(abs_path);
