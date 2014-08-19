@@ -271,13 +271,13 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     }
 
     pp_i->dpy = XOpenDisplay(NULL);
+    if (!pp_i->dpy) {
+        trace_error("%s, can't open X Display\n", __func__);
+        return NPERR_GENERIC_ERROR;
+    }
 
     if (config.quirks.x_synchronize)
         XSynchronize(pp_i->dpy, True);
-
-    if (!pp_i->dpy) {
-        trace_error("%s, can't open X Display\n", __func__);
-    }
 
     pp_i->egl_dpy = eglGetDisplay(pp_i->dpy);
     EGLint major, minor;
