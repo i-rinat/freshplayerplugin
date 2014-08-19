@@ -52,6 +52,10 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
 
     PP_Resource audio = pp_resource_allocate(PP_RESOURCE_AUDIO, pp_i);
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
+    if (!a) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
 
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
     if (!ac) {
