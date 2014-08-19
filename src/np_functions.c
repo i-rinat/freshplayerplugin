@@ -113,6 +113,10 @@ NPP_SetWindow(NPP npp, NPWindow *window)
     g_free(window_str);
 
     struct pp_instance_s *pp_i = npp->pdata;
+    if (!pp_i) {
+        trace_error("%s, pp_i is NULL\n", __func__);
+        return NPERR_NO_ERROR;
+    }
 
     pthread_mutex_lock(&pp_i->lock);
     if (pp_i && !pp_i->is_fullscreen) {
