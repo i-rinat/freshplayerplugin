@@ -598,7 +598,7 @@ handle_graphics_expose_event(NPP npp, void *event)
                 Window root;
                 int x, y;
                 unsigned int width, height, border, depth;
-            } d;
+            } d = {};
 
             XGetGeometry(dpy, drawable, &d.root, &d.x, &d.y, &d.width, &d.height, &d.border,
                          &d.depth);
