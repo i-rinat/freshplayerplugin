@@ -135,39 +135,48 @@ pp_mode_to_open_mode(int32_t mode)
     return ret;
 }
 
+static
+void
+create_subdirectories_recursively(const char *p)
+{
+    if (!p)
+        return;
+
+    struct stat sb;
+    char *path = strdup(p);
+    char *last_slash = strrchr(path, '/');
+
+    if (!last_slash)
+        goto quit;
+    *last_slash = '\0';
+
+    // check if directory already exists
+    if (lstat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
+        goto quit;
+
+    char *ptr = strchr(path, '/');
+    while (ptr) {
+        *ptr = '\0';
+        (void)mkdir(path, 0777);
+        *ptr = '/';
+        ptr = strchr(ptr + 1, '/');
+    }
+
+    (void)mkdir(path, 0777);
+
+quit:
+    free(path);
+}
+
 int32_t
 ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
                                      PP_FileHandle *file)
 {
     char *abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
     int xmode = pp_mode_to_open_mode(mode);
-    if (xmode & O_CREAT) {
-        // create subdirectories recursively
-        char *last_slash = strrchr(abs_path, '/');
-        if (last_slash) {
-            *last_slash = '\0';
-            do {
-                char *ptr = strchr(abs_path, '/');
-                while (ptr) {
-                    *ptr = '\0';
-                    if (mkdir(abs_path, 0777) != 0) {
-                        g_free(abs_path);
-                        return PP_ERROR_NOACCESS;
-                    }
-                    *ptr = '/';
-                    ptr = strchr(ptr + 1, '/');
-                }
 
-                if (mkdir(abs_path, 0777) != 0) {
-                    g_free(abs_path);
-                    return PP_ERROR_NOACCESS;
-                }
-            } while (0);
-
-            *last_slash = '/';
-        }
-    }
-
+    if (xmode & O_CREAT)
+        create_subdirectories_recursively(abs_path);
     int fd = open(abs_path, xmode, 0666);
     g_free(abs_path);
     *file = fd;
@@ -226,22 +235,9 @@ ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *
 int32_t
 ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path)
 {
-    char *abs_path, *ptr;
-    int ret;
-
-    abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
-    ptr = strchr(abs_path, '/');
-    while (ptr) {
-        *ptr = '\0';
-        if (mkdir(abs_path, 0777) != 0) {
-            g_free(abs_path);
-            return PP_ERROR_NOACCESS;
-        }
-        *ptr = '/';
-        ptr = strchr(ptr + 1, '/');
-    }
-
-    ret = mkdir(abs_path, 0777);
+    char *abs_path = to_abs_path(fpp_config_get_pepper_data_dir(), path);
+    create_subdirectories_recursively(abs_path);
+    int ret = mkdir(abs_path, 0777);
     g_free(abs_path);
 
     if (ret < 0) {
