@@ -526,7 +526,7 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
         return len;
     }
 
-    if (lseek(ul->fd, offset, SEEK_SET) != 0) {
+    if (lseek(ul->fd, offset, SEEK_SET) == (off_t) -1) {
         pp_resource_release(loader);
         return -1;
     }
