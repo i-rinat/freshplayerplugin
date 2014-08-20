@@ -111,6 +111,10 @@ pp_resource_acquire(PP_Resource resource, enum pp_resource_type_e type)
         usleep(1);
     }
 
+    // reference to avoid freeing acquired resource
+    if (gr)
+        gr->ref_cnt++;
+
     pthread_mutex_unlock(&res_tbl_lock);
     return gr;
 }
@@ -124,6 +128,9 @@ pp_resource_release(PP_Resource resource)
         pthread_mutex_unlock(&gr->lock);
     }
     pthread_mutex_unlock(&res_tbl_lock);
+
+    // unref referenced in pp_resource_acquire()
+    pp_resource_unref(resource);
 }
 
 enum pp_resource_type_e
