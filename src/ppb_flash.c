@@ -31,6 +31,7 @@
 #include "ppb_var.h"
 #include "ppb_url_loader.h"
 #include "ppb_core.h"
+#include "ppb_message_loop.h"
 #include "pp_resource.h"
 #include <ppapi/c/dev/ppb_font_dev.h>
 #include <ppapi/c/pp_errors.h>
@@ -127,10 +128,56 @@ ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
     return PP_TRUE;
 }
 
+struct get_proxy_for_url_param_s {
+    PP_Instance         instance_id;
+    const char         *url;
+    struct PP_Var       res;
+    PP_Resource         m_loop;
+    int                 depth;
+};
+
+static
+void
+_get_proxy_for_url_ptac(void *user_data)
+{
+    struct get_proxy_for_url_param_s *p = user_data;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(p->instance_id);
+
+    if (pp_i && pp_i->npp && npn.getvalueforurl) {
+        char *value = NULL;
+        uint32_t len = 0;
+        NPError err;
+
+        err = npn.getvalueforurl(pp_i->npp, NPNURLVProxy, p->url, &value, &len);
+        if (err == NPERR_NO_ERROR) {
+            p->res = ppb_var_var_from_utf8(value, len);
+        }
+    }
+
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+_get_proxy_for_url_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_browser_thread(_get_proxy_for_url_ptac, user_data);
+}
+
 struct PP_Var
 ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
 {
-    return PP_MakeUndefined();
+    struct get_proxy_for_url_param_s p;
+    p.instance_id = instance;
+    p.url =         url;
+    p.res =         PP_MakeUndefined();
+    p.m_loop =      ppb_message_loop_get_current();
+    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_get_proxy_for_url_comt, &p), 0);
+    ppb_message_loop_run_int(p.m_loop, 1);
+
+    return p.res;
 }
 
 static
@@ -359,7 +406,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, url=%s\n", __func__+6, instance, url);
+    trace_info("[PPB] {full} %s instance=%d, url=%s\n", __func__+6, instance, url);
     return ppb_flash_get_proxy_for_url(instance, url);
 }
 
@@ -490,7 +537,7 @@ trace_ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting)
 const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .SetInstanceAlwaysOnTop =       TWRAPZ(ppb_flash_set_instance_always_on_top),
     .DrawGlyphs =                   TWRAPF(ppb_flash_draw_glyphs),
-    .GetProxyForURL =               TWRAPZ(ppb_flash_get_proxy_for_url),
+    .GetProxyForURL =               TWRAPF(ppb_flash_get_proxy_for_url),
     .Navigate =                     TWRAPF(ppb_flash_navigate),
     .GetLocalTimeZoneOffset =       TWRAPF(ppb_flash_get_local_time_zone_offset),
     .GetCommandLineArgs =           TWRAPF(ppb_flash_get_command_line_args),
@@ -505,7 +552,7 @@ const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
 const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
     .SetInstanceAlwaysOnTop =       TWRAPZ(ppb_flash_set_instance_always_on_top),
     .DrawGlyphs =                   TWRAPF(ppb_flash_draw_glyphs),
-    .GetProxyForURL =               TWRAPZ(ppb_flash_get_proxy_for_url),
+    .GetProxyForURL =               TWRAPF(ppb_flash_get_proxy_for_url),
     .Navigate =                     TWRAPF(ppb_flash_navigate),
     .RunMessageLoop =               TWRAPZ(ppb_flash_run_message_loop),
     .QuitMessageLoop =              TWRAPZ(ppb_flash_quit_message_loop),
