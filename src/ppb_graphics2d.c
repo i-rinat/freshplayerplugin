@@ -222,6 +222,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
             cairo_surface_mark_dirty(g2d->cairo_surf);
             cr = cairo_create(g2d->cairo_surf);
             cairo_set_source_surface(cr, id->cairo_surf, pt->ofs.x, pt->ofs.y);
+            cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
             if (pt->src_is_set) {
                 cairo_rectangle(cr, pt->src.point.x + pt->ofs.x, pt->src.point.y + pt->ofs.y,
                                 pt->src.size.width, pt->src.size.height);
