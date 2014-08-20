@@ -589,32 +589,40 @@ handle_graphics_expose_event(NPP npp, void *event)
     int screen = 0;
     cairo_surface_t *src_surf, *dst_surf;
     cairo_t *cr;
+    int retval;
 
+    pthread_mutex_lock(&pp_i->lock);
     if (g2d) {
-        pthread_mutex_lock(&pp_i->lock);
-        dst_surf = cairo_xlib_surface_create(dpy, drawable, DefaultVisual(dpy, screen),
-                                             g2d->scaled_width, g2d->scaled_height);
-        if (pp_i->is_transparent)
+        if (pp_i->is_transparent) {
+            dst_surf = cairo_xlib_surface_create(dpy, drawable, DefaultVisual(dpy, screen),
+                                                 g2d->scaled_width, g2d->scaled_height);
             cairo_surface_mark_dirty(dst_surf);
-        src_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
+            src_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
                 CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
-        cr = cairo_create(dst_surf);
-        cairo_set_source_surface(cr, src_surf, 0, 0);
-        cairo_set_operator(cr, pp_i->is_transparent ? CAIRO_OPERATOR_OVER : CAIRO_OPERATOR_SOURCE);
-        cairo_paint(cr);
-        cairo_destroy(cr);
-        cairo_surface_destroy(dst_surf);
-        cairo_surface_destroy(src_surf);
-    } else if (g3d) {
-        pthread_mutex_lock(&pp_i->lock);
+            cr = cairo_create(dst_surf);
+            cairo_set_source_surface(cr, src_surf, 0, 0);
+            cairo_paint(cr);
+            cairo_destroy(cr);
+            cairo_surface_destroy(dst_surf);
+            cairo_surface_destroy(src_surf);
+        } else {
+            XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
+                                      g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
+                                      g2d->scaled_stride);
 
+            XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0,
+                      g2d->scaled_width, g2d->scaled_height);
+            XFree(xi);
+        }
+    } else if (g3d) {
         XCopyArea(dpy, g3d->pixmap, drawable, DefaultGC(dpy, screen),
                   0, 0,
                   g3d->width, g3d->height,
                   0, 0);
         XFlush(dpy);
     } else {
-        return 0;
+        retval = 0;
+        goto done;
     }
 
     pp_resource_release(pp_i->graphics);
@@ -629,9 +637,11 @@ handle_graphics_expose_event(NPP npp, void *event)
     }
 
     pp_i->graphics_in_progress = 0;
-    pthread_mutex_unlock(&pp_i->lock);
+    retval = 1;
 
-    return 1;
+done:
+    pthread_mutex_unlock(&pp_i->lock);
+    return retval;
 }
 
 /// diplay plugin placeholder and error message in it
