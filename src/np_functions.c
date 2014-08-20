@@ -594,8 +594,16 @@ handle_graphics_expose_event(NPP npp, void *event)
     pthread_mutex_lock(&pp_i->lock);
     if (g2d) {
         if (pp_i->is_transparent) {
+            struct {
+                Window root;
+                int x, y;
+                unsigned int width, height, border, depth;
+            } d;
+
+            XGetGeometry(dpy, drawable, &d.root, &d.x, &d.y, &d.width, &d.height, &d.border,
+                         &d.depth);
             dst_surf = cairo_xlib_surface_create(dpy, drawable, DefaultVisual(dpy, screen),
-                                                 g2d->scaled_width, g2d->scaled_height);
+                                                 d.width, d.height);
             cairo_surface_mark_dirty(dst_surf);
             src_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
                 CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
@@ -605,6 +613,7 @@ handle_graphics_expose_event(NPP npp, void *event)
             cairo_destroy(cr);
             cairo_surface_destroy(dst_surf);
             cairo_surface_destroy(src_surf);
+            XFlush(dpy);
         } else {
             XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
                                       g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
