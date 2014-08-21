@@ -224,9 +224,9 @@ audio_player_thread(void *p)
             break;
 
         snd_pcm_wait(a->ph, 1000);
-        int frame_count = snd_pcm_avail_update(a->ph);
+        int frame_count = snd_pcm_avail(a->ph);
         if (frame_count < 0) {
-            trace_warning("%s, snd_pcm_avail_update error %d\n", __func__, (int)frame_count);
+            trace_warning("%s, snd_pcm_avail error %d\n", __func__, (int)frame_count);
             RETRY_ON_EINTR(snd_pcm_recover(a->ph, frame_count, 1));
             error_cnt++;
             if (error_cnt >= 5)
