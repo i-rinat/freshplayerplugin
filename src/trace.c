@@ -82,6 +82,7 @@ trace_var_as_string(struct PP_Var var)
 {
     char *res = NULL;
     const char *tmp;
+    int ref_count;
 
     switch (var.type) {
     case PP_VARTYPE_UNDEFINED:
@@ -101,7 +102,8 @@ trace_var_as_string(struct PP_Var var)
         break;
     case PP_VARTYPE_STRING:
         tmp = ppb_var_var_to_utf8(var, NULL);
-        res = g_strdup_printf("{STRING:%p:%s}", tmp, tmp);
+        ref_count = ppb_var_get_ref_count(var);
+        res = g_strdup_printf("{STRING:%d:%p:%s}", ref_count, tmp, tmp);
         break;
     case PP_VARTYPE_OBJECT:
         res = ppb_var_trace_object_var(var);

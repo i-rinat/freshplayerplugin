@@ -238,6 +238,21 @@ ppb_var_release(struct PP_Var var)
     g_slice_free(struct var_s, v);
 }
 
+int
+ppb_var_get_ref_count(struct PP_Var var)
+{
+    if (!reference_countable(var))
+        return 0;
+
+    pthread_mutex_lock(&lock);
+    void *key = GSIZE_TO_POINTER(var.value.as_id);
+    struct var_s *v = g_hash_table_lookup(var_ht, key);
+    int ref_count = v ? v->ref_count : 0;
+    pthread_mutex_unlock(&lock);
+
+    return ref_count;
+}
+
 struct PP_Var
 ppb_var_var_from_utf8(const char *data, uint32_t len)
 {

@@ -38,6 +38,9 @@ ppb_var_add_ref(struct PP_Var var);
 void
 ppb_var_release(struct PP_Var var);
 
+int
+ppb_var_get_ref_count(struct PP_Var var);
+
 struct PP_Var
 ppb_var_var_from_utf8(const char *data, uint32_t len);
 
