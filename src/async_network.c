@@ -159,6 +159,7 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
     // try other addresses, one by one
     task->addr_ptr++;
     if (task->addr_ptr < task->addr_count) {
+        pp_resource_release(task->resource);
         handle_tcp_connect_stage3(task);
         return;
     }
