@@ -309,9 +309,9 @@ handle_tcp_read_stage1(struct async_network_task_s *task)
     }
 
     struct event *ev = event_new(event_b, ts->sock, EV_READ, handle_tcp_read_stage2, task);
+    pp_resource_release(task->resource);
     add_event_mapping(task, ev);
     event_add(ev, NULL);
-    pp_resource_release(task->resource);
 }
 
 static
@@ -341,9 +341,9 @@ handle_tcp_write_stage1(struct async_network_task_s *task)
     }
 
     struct event *ev = event_new(event_b, ts->sock, EV_WRITE, handle_tcp_write_stage2, task);
+    pp_resource_release(task->resource);
     add_event_mapping(task, ev);
     event_add(ev, NULL);
-    pp_resource_release(task->resource);
 }
 
 static
