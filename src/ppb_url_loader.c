@@ -78,6 +78,7 @@ ppb_url_loader_destroy(void *p)
     }
     free_and_nullify(ul, headers);
     free_and_nullify(ul, url);
+    free_and_nullify(ul, status_line);
     free_and_nullify(ul, request_headers);
     free_and_nullify(ul, custom_referrer_url);
     free_and_nullify(ul, custom_content_transfer_encoding);
@@ -294,7 +295,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     pp_resource_release(request_info);
 
     struct url_loader_open_param_s p;
-    p.url =                 strdup(ul->url);
+    p.url =                 ul->url;
     p.loader =              loader;
     p.instance_id =         ul->instance->id;
     p.method =              ul->method;
