@@ -25,6 +25,7 @@
 #include "ppb_opengles2.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
 
@@ -35,11 +36,11 @@
         trace_error("%s, bad resource", __func__);                                      \
         escape_statement;                                                               \
     }                                                                                   \
-    pthread_mutex_lock(&g3d->instance->lock);                                           \
-    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc)
+    pthread_mutex_lock(&display.lock);                                                  \
+    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc)
 
 #define EPILOGUE()                                                                      \
-    pthread_mutex_unlock(&g3d->instance->lock);                                         \
+    pthread_mutex_unlock(&display.lock);                                                \
     pp_resource_release(context)
 
 void

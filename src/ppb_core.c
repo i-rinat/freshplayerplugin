@@ -102,10 +102,10 @@ ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data)
             return;
         }
 
-        pthread_mutex_lock(&pp_i->lock);
+        pthread_mutex_lock(&display.lock);
         if (pp_i->npp)
             npn.pluginthreadasynccall(pp_i->npp, func, user_data);
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
 
         pp_resource_release(m_loop);
         return;

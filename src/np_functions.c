@@ -30,7 +30,6 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/extensions/Xinerama.h>
 #include <cairo.h>
 #include <cairo-xlib.h>
 #include <GLES2/gl2.h>
@@ -89,13 +88,13 @@ _set_window_comt(void *user_data, int32_t result)
     struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
 
     if (v) {
-        pthread_mutex_lock(&pp_i->lock);
+        pthread_mutex_lock(&display.lock);
         v->rect.point.x = 0; // TODO: pp_i->x;
         v->rect.point.y = 0; // TODO: pp_i->y;
         v->rect.size.width = pp_i->width;
         v->rect.size.height = pp_i->height;
         pp_resource_release(view);
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
 
         pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
         ppb_core_release_resource(view);
@@ -118,7 +117,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         return NPERR_NO_ERROR;
     }
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
     if (pp_i && !pp_i->is_fullscreen) {
         pp_i->wnd = (Window)window->window;
         pp_i->width = window->width;
@@ -128,7 +127,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
             ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_window_comt, pp_i),
                                          PP_OK);
     }
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
 
     return NPERR_NO_ERROR;
 }
@@ -214,10 +213,9 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     if (!pp_i)
         return NPERR_OUT_OF_MEMORY_ERROR;
 
-    pthread_mutex_init(&pp_i->lock, NULL);
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
     pp_i->npp = npp;
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
 
     pp_i->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
     if (!pp_i->ppp_instance_1_1)
@@ -270,42 +268,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         ppb_message_loop_proclaim_this_thread_browser();
     }
 
-    pp_i->dpy = XOpenDisplay(NULL);
-    if (!pp_i->dpy) {
-        trace_error("%s, can't open X Display\n", __func__);
-        return NPERR_GENERIC_ERROR;
-    }
-
-    if (config.quirks.x_synchronize)
-        XSynchronize(pp_i->dpy, True);
-
-    pp_i->egl_dpy = eglGetDisplay(pp_i->dpy);
-    EGLint major, minor;
-    eglInitialize(pp_i->egl_dpy, &major, &minor);
-    trace_info_f("EGL version %d.%d\n", major, minor);
-
-    // get fullscreen resolution
-    int screen_count;
-    pthread_mutex_lock(&pp_i->lock);
-    XineramaScreenInfo *xsi = XineramaQueryScreens(pp_i->dpy, &screen_count);
-    XWindowAttributes xw_attrs;
-    if (xsi) {
-        int screen = config.xinerama_screen;
-        if (screen < 0)
-            screen = 0;
-        if (screen > screen_count - 1)
-            screen = screen_count - 1;
-        pp_i->fs_width =  xsi[screen].width;
-        pp_i->fs_height = xsi[screen].height;
-        XFree(xsi);
-    } else if (XGetWindowAttributes(pp_i->dpy, DefaultRootWindow(pp_i->dpy), &xw_attrs)) {
-        pp_i->fs_width =  xw_attrs.width;
-        pp_i->fs_height = xw_attrs.height;
-    } else {
-        pp_i->fs_width = 100;
-        pp_i->fs_height = 100;
-    }
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
 
     if (ppb_message_loop_get_for_main_thread() == 0) {
         pthread_barrier_init(&pp_i->main_thread_barrier, NULL, 2);
@@ -339,11 +302,9 @@ _destroy_instance_comt(void *user_data, int32_t result)
 
     p->pp_i->ppp_instance_1_1->DidDestroy(p->pp_i->id);
     tables_remove_pp_instance(p->pp_i->id);
-    pthread_mutex_lock(&p->pp_i->lock);
+    pthread_mutex_lock(&display.lock);
     p->pp_i->npp = NULL;
-    pthread_mutex_unlock(&p->pp_i->lock);
-    eglTerminate(p->pp_i->egl_dpy);
-    XCloseDisplay(p->pp_i->dpy);
+    pthread_mutex_unlock(&display.lock);
     npn.releaseobject(p->pp_i->np_window_obj);
     npn.releaseobject(p->pp_i->scriptable_obj);
     free(p->pp_i->instance_url);
@@ -591,7 +552,7 @@ handle_graphics_expose_event(NPP npp, void *event)
     cairo_t *cr;
     int retval;
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
     if (g2d) {
         if (pp_i->is_transparent) {
             struct {
@@ -639,9 +600,9 @@ handle_graphics_expose_event(NPP npp, void *event)
         if (pp_i->graphics_ccb.func) {
             ppb_core_call_on_main_thread(0, pp_i->graphics_ccb, PP_OK);
         } else {
-            pthread_mutex_unlock(&pp_i->lock);
+            pthread_mutex_unlock(&display.lock);
             pthread_barrier_wait(&pp_i->graphics_barrier);
-            pthread_mutex_lock(&pp_i->lock);
+            pthread_mutex_lock(&display.lock);
         }
     }
 
@@ -649,7 +610,7 @@ handle_graphics_expose_event(NPP npp, void *event)
     retval = 1;
 
 done:
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
     return retval;
 }
 

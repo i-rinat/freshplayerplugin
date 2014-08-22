@@ -187,23 +187,23 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     struct pp_instance_s *pp_i = g2d->instance;
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
 
     if (pp_i->graphics != graphics_2d) {
         pp_resource_release(graphics_2d);
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         return PP_ERROR_FAILED;
     }
 
     if (pp_i->graphics_in_progress) {
         pp_resource_release(graphics_2d);
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         return PP_ERROR_INPROGRESS;
     }
 
     pp_i->graphics_ccb = callback;
     pp_i->graphics_in_progress = 1;
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
 
     while (g2d->task_list) {
         GList *link = g_list_first(g2d->task_list);
@@ -280,7 +280,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     pp_resource_release(graphics_2d);
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
     if (!callback.func)
         pthread_barrier_init(&pp_i->graphics_barrier, NULL, 2);
     if (pp_i->is_fullscreen) {
@@ -291,11 +291,11 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
             .height = pp_i->height
         };
 
-        XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
-        XFlush(pp_i->dpy);
-        pthread_mutex_unlock(&pp_i->lock);
+        XSendEvent(display.x, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
+        XFlush(display.x);
+        pthread_mutex_unlock(&display.lock);
     } else {
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         ppb_core_call_on_browser_thread(_call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
     }
 

@@ -113,9 +113,6 @@ struct pp_instance_s {
     Window                          wnd;
     PP_Instance                     id;
     NPP                             npp;
-    Display                        *dpy;
-    EGLDisplay                      egl_dpy;
-    pthread_mutex_t                 lock;
     uint32_t                        is_fullframe;
     uint32_t                        is_fullscreen;
     uint32_t                        is_transparent;
@@ -125,8 +122,6 @@ struct pp_instance_s {
     // full screen
     pthread_t                       fs_thread;
     Window                          fs_wnd;
-    uint32_t                        fs_width;
-    uint32_t                        fs_height;
 
     // geometry
     uint32_t                        x;
@@ -239,8 +234,6 @@ struct pp_graphics3d_s {
     EGLConfig       egl_config;
     Pixmap          pixmap;
     EGLSurface      egl_surf;
-    Display        *dpy;
-    EGLDisplay      egl_dpy;
     int32_t         width;
     int32_t         height;
     GHashTable     *sub_maps;

@@ -49,18 +49,18 @@ _set_cursor_ptac(void *user_data)
     if (!pp_i)
         goto quit;
 
-    pthread_mutex_lock(&pp_i->lock);
-    cursor = XCreateFontCursor(pp_i->dpy, params->xtype);
+    pthread_mutex_lock(&display.lock);
+    cursor = XCreateFontCursor(display.x, params->xtype);
     if (pp_i->is_fullscreen) {
-        XDefineCursor(pp_i->dpy, pp_i->fs_wnd, cursor);
-        XFlush(pp_i->dpy);
+        XDefineCursor(display.x, pp_i->fs_wnd, cursor);
+        XFlush(display.x);
     } else {
         if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) == NPERR_NO_ERROR) {
-            XDefineCursor(pp_i->dpy, wnd, cursor);
-            XFlush(pp_i->dpy);
+            XDefineCursor(display.x, wnd, cursor);
+            XFlush(display.x);
         }
     }
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
 
 quit:
     g_slice_free(struct comt_param_s, params);

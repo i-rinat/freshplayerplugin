@@ -32,7 +32,16 @@
 #include <npapi/npfunctions.h>
 
 
+struct display_s {
+    Display            *x;
+    EGLDisplay          egl;
+    pthread_mutex_t     lock;
+    uint32_t            fs_width;
+    uint32_t            fs_height;
+};
+
 extern NPNetscapeFuncs  npn;
+extern struct display_s display;
 
 int         tables_get_urandom_fd(void);
 
@@ -50,5 +59,8 @@ pp_font_desc_to_pango_font_desc(const struct PP_BrowserFont_Trusted_Description 
 void    tables_add_npobj_npp_mapping(NPObject *npobj, NPP npp);
 NPP     tables_get_npobj_npp_mapping(NPObject *npobj);
 void    tables_remove_npobj_npp_mapping(NPObject *npobj);
+
+int     tables_open_display(void);
+void    tables_close_display(void);
 
 #endif // FPP__TABLES_H

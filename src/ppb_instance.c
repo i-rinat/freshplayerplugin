@@ -45,9 +45,9 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 
     if (device == 0) {
         // unbind
-        pthread_mutex_lock(&pp_i->lock);
+        pthread_mutex_lock(&display.lock);
         pp_i->graphics = 0;
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         return PP_TRUE;
     }
 
@@ -60,9 +60,9 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
             goto done;
         }
 
-        pthread_mutex_lock(&pp_i->lock);
+        pthread_mutex_lock(&display.lock);
         pp_i->graphics = device;
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         retval = PP_TRUE;
     } else if (g3d) {
         if (pp_i != g3d->instance) {
@@ -70,9 +70,9 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
             goto done;
         }
 
-        pthread_mutex_lock(&pp_i->lock);
+        pthread_mutex_lock(&display.lock);
         pp_i->graphics = device;
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         pp_resource_release(device);
         retval = PP_TRUE;
     } else {
@@ -95,9 +95,9 @@ ppb_instance_is_full_frame(PP_Instance instance)
         return PP_FALSE;
     }
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
     int is_fullframe = pp_i->is_fullframe;
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
 
     if (is_fullframe)
         return PP_TRUE;

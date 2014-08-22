@@ -76,8 +76,8 @@ _update_instance_view_comt(void *user_data, int32_t result)
         v->rect.point.x = 0;
         v->rect.point.y = 0;
         if (pp_i->is_fullscreen) {
-            v->rect.size.width = pp_i->fs_width;
-            v->rect.size.height = pp_i->fs_height;
+            v->rect.size.width = display.fs_width;
+            v->rect.size.height = display.fs_height;
         } else {
             v->rect.size.width = pp_i->width;
             v->rect.size.height = pp_i->height;
@@ -111,7 +111,7 @@ fullscreen_window_thread(void *p)
     struct pp_instance_s *pp_i = tp->pp_i;
 
     pp_i->fs_wnd = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy),
-                                       0, 0, pp_i->fs_width, pp_i->fs_height, 0, 0, 0x809080);
+                                       0, 0, display.fs_width, display.fs_height, 0, 0, 0x809080);
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
                                     ButtonReleaseMask | PointerMotionMask | ExposureMask);
 
@@ -158,7 +158,7 @@ fullscreen_window_thread(void *p)
                 }
             } break;
         }
-        ev.xany.display = pp_i->dpy;
+        ev.xany.display = display.x;
 
         struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
         params->instance_id =   pp_i->id;
@@ -204,18 +204,18 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
         pthread_create(&pp_i->fs_thread, NULL, fullscreen_window_thread, tparams);
         pthread_barrier_wait(&tparams->startup_barrier);
     } else {
-        pthread_mutex_lock(&pp_i->lock);
+        pthread_mutex_lock(&display.lock);
         pp_i->is_fullscreen = 0;
         XKeyEvent ev = {
             .type = KeyPress,
-            .display = pp_i->dpy,
+            .display = display.x,
             .window = pp_i->fs_wnd,
-            .keycode = XKeysymToKeycode(pp_i->dpy, XK_Escape)
+            .keycode = XKeysymToKeycode(display.x, XK_Escape)
         };
 
-        XSendEvent(pp_i->dpy, pp_i->fs_wnd, False, 0, (void *)&ev);
-        XFlush(pp_i->dpy);
-        pthread_mutex_unlock(&pp_i->lock);
+        XSendEvent(display.x, pp_i->fs_wnd, False, 0, (void *)&ev);
+        XFlush(display.x);
+        pthread_mutex_unlock(&display.lock);
     }
 
     return PP_TRUE;
@@ -230,8 +230,8 @@ ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
         return PP_FALSE;
     }
 
-    size->width = pp_i->fs_width;
-    size->height = pp_i->fs_height;
+    size->width = display.fs_width;
+    size->height = display.fs_height;
 
     return PP_TRUE;
 }

@@ -137,9 +137,9 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         }
     }
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
     int nconfigs = 0;
-    EGLBoolean ret = eglChooseConfig(pp_i->egl_dpy, egl_attribute_list,
+    EGLBoolean ret = eglChooseConfig(display.egl, egl_attribute_list,
                                      &g3d->egl_config, 1, &nconfigs);
     free(egl_attribute_list);
     if (!ret) {
@@ -153,23 +153,21 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
 
     EGLint ctxattr[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-    g3d->glc = eglCreateContext(pp_i->egl_dpy, g3d->egl_config, EGL_NO_CONTEXT, ctxattr);
+    g3d->glc = eglCreateContext(display.egl, g3d->egl_config, EGL_NO_CONTEXT, ctxattr);
     if (g3d->glc == EGL_NO_CONTEXT) {
         trace_error("%s, eglCreateContext returned EGL_NO_CONTEXT\n", __func__);
         goto err;
     }
 
-    g3d->pixmap = XCreatePixmap(pp_i->dpy, DefaultRootWindow(pp_i->dpy), g3d->width, g3d->height,
-                                DefaultDepth(pp_i->dpy, 0));
-    g3d->egl_surf = eglCreatePixmapSurface(pp_i->egl_dpy, g3d->egl_config, g3d->pixmap, NULL);
+    g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
+                                DefaultDepth(display.x, 0));
+    g3d->egl_surf = eglCreatePixmapSurface(display.egl, g3d->egl_config, g3d->pixmap, NULL);
     if (g3d->egl_surf == EGL_NO_SURFACE) {
         trace_error("%s, failed to create EGL pixmap surface\n", __func__);
         goto err;
     }
-    g3d->egl_dpy = pp_i->egl_dpy;
-    g3d->dpy = pp_i->dpy;
 
-    ret = eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    ret = eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
     if (!ret) {
         trace_error("%s, eglMakeCurrent failed\n", __func__);
         goto err;
@@ -180,12 +178,12 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     glClear(GL_COLOR_BUFFER_BIT);
 
     g3d->sub_maps = g_hash_table_new(g_direct_hash, g_direct_equal);
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
 
     pp_resource_release(context);
     return context;
 err:
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
     pp_resource_release(context);
     pp_resource_expunge(context);
     return 0;
@@ -195,21 +193,20 @@ void
 ppb_graphics3d_destroy(void *p)
 {
     struct pp_graphics3d_s *g3d = p;
-    struct pp_instance_s *pp_i = g3d->instance;
     g_hash_table_destroy(g3d->sub_maps);
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
 
     // bringing egl_surf to current thread releases it from any others
-    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
     // free it here, to be able to destroy X Pixmap
-    eglMakeCurrent(g3d->egl_dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
-    eglDestroySurface(g3d->egl_dpy, g3d->egl_surf);
-    XFreePixmap(g3d->dpy, g3d->pixmap);
+    eglDestroySurface(display.egl, g3d->egl_surf);
+    XFreePixmap(display.x, g3d->pixmap);
 
-    eglDestroyContext(g3d->egl_dpy, g3d->glc);
-    pthread_mutex_unlock(&pp_i->lock);
+    eglDestroyContext(display.egl, g3d->glc);
+    pthread_mutex_unlock(&display.lock);
 }
 
 PP_Bool
@@ -249,34 +246,33 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
         trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
     }
-    struct pp_instance_s *pp_i = g3d->instance;
 
     g3d->width = width;
     g3d->height = height;
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
 
     EGLSurface old_surf = g3d->egl_surf;
     Pixmap old_pixmap = g3d->pixmap;
     // release possibly bound to other thread g3d->egl_surf and bind it to current
-    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
 
-    g3d->pixmap = XCreatePixmap(g3d->dpy, DefaultRootWindow(g3d->dpy), g3d->width, g3d->height,
-                                DefaultDepth(g3d->dpy, 0));
-    g3d->egl_surf = eglCreatePixmapSurface(g3d->egl_dpy, g3d->egl_config, g3d->pixmap, NULL);
+    g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
+                                DefaultDepth(display.x, 0));
+    g3d->egl_surf = eglCreatePixmapSurface(display.egl, g3d->egl_config, g3d->pixmap, NULL);
 
     // make new g3d->egl_surf current to current thread to release old_surf
-    eglMakeCurrent(g3d->egl_dpy, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
 
     // clear surface
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // destroy old egl surface and x pixmap
-    eglDestroySurface(g3d->egl_dpy, old_surf);
-    XFreePixmap(g3d->dpy, old_pixmap);
+    eglDestroySurface(display.egl, old_surf);
+    XFreePixmap(display.x, old_pixmap);
 
-    pthread_mutex_unlock(&pp_i->lock);
+    pthread_mutex_unlock(&display.lock);
     pp_resource_release(context);
     return PP_OK;
 }
@@ -305,17 +301,17 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
 
     struct pp_instance_s *pp_i = g3d->instance;
 
-    pthread_mutex_lock(&pp_i->lock);
+    pthread_mutex_lock(&display.lock);
     if (pp_i->graphics != context) {
         // Other context bound, do nothing.
         pp_resource_release(context);
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         return PP_ERROR_FAILED;
     }
 
     if (pp_i->graphics_in_progress) {
         pp_resource_release(context);
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         return PP_ERROR_INPROGRESS;
     }
     pp_resource_release(context);
@@ -333,11 +329,11 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
             .height = pp_i->height
         };
 
-        XSendEvent(pp_i->dpy, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
-        XFlush(pp_i->dpy);
-        pthread_mutex_unlock(&pp_i->lock);
+        XSendEvent(display.x, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
+        XFlush(display.x);
+        pthread_mutex_unlock(&display.lock);
     } else {
-        pthread_mutex_unlock(&pp_i->lock);
+        pthread_mutex_unlock(&display.lock);
         ppb_core_call_on_browser_thread(_call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
     }
 

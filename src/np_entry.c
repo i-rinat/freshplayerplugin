@@ -245,6 +245,8 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 
     memcpy(aNPPFuncs, &pf, pf.size);
 
+    if (tables_open_display() != 0)
+        return NPERR_GENERIC_ERROR;
     load_ppp_module();
 
     return NPERR_NO_ERROR;
@@ -257,6 +259,7 @@ NP_Shutdown(void)
     trace_info_f("[NP] %s\n", __func__);
 
     unload_ppp_module();
+    tables_close_display();
 
     return NPERR_NO_ERROR;
 }

@@ -25,14 +25,20 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include "tables.h"
 #include "trace.h"
 #include "ppb_var.h"
 #include "p2n_proxy_class.h"
 #include "n2p_proxy_class.h"
+#include "config.h"
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/extensions/Xinerama.h>
 
 
-NPNetscapeFuncs npn;
+NPNetscapeFuncs     npn;
+struct display_s    display;
 
 static GHashTable  *pp_to_np_ht;
 static GHashTable  *npobj_to_npp_ht = NULL;     // NPObject-to-NPP mapping
@@ -205,4 +211,62 @@ tables_remove_npobj_npp_mapping(NPObject *npobj)
     pthread_mutex_lock(&lock);
     g_hash_table_remove(npobj_to_npp_ht, npobj);
     pthread_mutex_unlock(&lock);
+}
+
+int
+tables_open_display(void)
+{
+    EGLint major, minor;
+    int retval = 0;
+
+    pthread_mutex_init(&display.lock, NULL);
+    pthread_mutex_lock(&display.lock);
+    display.x = XOpenDisplay(NULL);
+    if (!display.x) {
+        trace_error("%s, can't open X Display\n", __func__);
+        retval = 1;
+        goto quit;
+    }
+
+    if (config.quirks.x_synchronize)
+        XSynchronize(display.x, True);
+
+    display.egl = eglGetDisplay(display.x);
+    eglInitialize(display.egl, &major, &minor);
+    trace_info_f("EGL version %d.%d\n", major, minor);
+
+    // get fullscreen resolution
+    int screen_count;
+    XineramaScreenInfo *xsi = XineramaQueryScreens(display.x, &screen_count);
+    XWindowAttributes xw_attrs;
+    if (xsi) {
+        int screen = config.xinerama_screen;
+        if (screen < 0)
+            screen = 0;
+        if (screen > screen_count - 1)
+            screen = screen_count - 1;
+        display.fs_width =  xsi[screen].width;
+        display.fs_height = xsi[screen].height;
+        XFree(xsi);
+    } else if (XGetWindowAttributes(display.x, DefaultRootWindow(display.x), &xw_attrs)) {
+        display.fs_width =  xw_attrs.width;
+        display.fs_height = xw_attrs.height;
+    } else {
+        display.fs_width = 100;
+        display.fs_height = 100;
+    }
+
+quit:
+    pthread_mutex_unlock(&display.lock);
+    return retval;
+}
+
+void
+tables_close_display(void)
+{
+    pthread_mutex_lock(&display.lock);
+    eglTerminate(display.egl);
+    XCloseDisplay(display.x);
+    pthread_mutex_unlock(&display.lock);
+    pthread_mutex_destroy(&display.lock);
 }
