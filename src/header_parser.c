@@ -107,6 +107,7 @@ hp_free_parsed_headers(struct parsed_headers_s *ph)
     }
     free(ph->name);
     free(ph->value);
+    free(ph->status_line);
     free(ph);
 }
 
