@@ -209,64 +209,6 @@ ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance ta
     return PP_TRUE;
 }
 
-struct get_document_url_param_s {
-    NPP                     npp;
-    NPObject               *np_window_obj;
-    struct PP_Var           result;
-    PP_Resource             m_loop;
-    int                     depth;
-};
-
-static
-void
-_get_document_url_ptac(void *user_data)
-{
-    struct get_document_url_param_s *p = user_data;
-
-    p->result = ppb_var_var_from_utf8("", 0);
-    NPIdentifier location_id = npn.getstringidentifier("location");
-    NPIdentifier href_id = npn.getstringidentifier("href");
-    NPObject *np_location_obj;
-    NPVariant location_var, href_var;
-
-    if (!npn.getproperty(p->npp, p->np_window_obj, location_id, &location_var))
-        goto err_2;
-
-    if (location_var.type != NPVariantType_Object)
-        goto err_3;
-
-    np_location_obj = location_var.value.objectValue;
-    if (!npn.getproperty(p->npp, np_location_obj, href_id, &href_var))
-        goto err_3;
-
-
-    struct PP_Var var = np_variant_to_pp_var(href_var);
-    if (var.type != PP_VARTYPE_STRING) {
-        ppb_var_release(var);
-        goto err_4;
-    }
-
-    ppb_var_release(p->result);
-    p->result = var;
-
-
-err_4:
-    npn.releasevariantvalue(&href_var);
-err_3:
-    npn.releasevariantvalue(&location_var);
-err_2:
-    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
-    return;
-}
-
-static
-void
-_get_document_url_comt(void *user_data, int32_t result)
-{
-    struct get_document_url_param_s *p = user_data;
-    ppb_core_call_on_browser_thread(_get_document_url_ptac, p);
-}
-
 struct PP_Var
 ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
@@ -277,19 +219,10 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
         return PP_MakeUndefined();
     }
 
-    struct get_document_url_param_s p;
-    p.npp = pp_i->npp;
-    p.m_loop = ppb_message_loop_get_current();
-    p.depth = ppb_message_loop_get_depth(p.m_loop) + 1;
-    p.np_window_obj = pp_i->np_window_obj;
-
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_get_document_url_comt, &p), 0);
-    ppb_message_loop_run_int(p.m_loop, 1);
-
     if (components)
-        parse_url_string(ppb_var_var_to_utf8(p.result, NULL), components);
+        parse_url_string(ppb_var_var_to_utf8(pp_i->document_url, NULL), components);
 
-    return p.result;
+    return pp_i->document_url;
 }
 
 struct PP_Var

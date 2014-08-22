@@ -186,6 +186,42 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
+static
+struct PP_Var
+get_document_url(const struct pp_instance_s *pp_i)
+{
+    struct PP_Var document_url = PP_MakeUndefined();
+    NPIdentifier location_id = npn.getstringidentifier("location");
+    NPIdentifier href_id = npn.getstringidentifier("href");
+    NPObject *np_location_obj;
+    NPVariant location_var, href_var;
+
+    if (!npn.getproperty(pp_i->npp, pp_i->np_window_obj, location_id, &location_var))
+        goto err_2;
+
+    if (location_var.type != NPVariantType_Object)
+        goto err_3;
+
+    np_location_obj = location_var.value.objectValue;
+    if (!npn.getproperty(pp_i->npp, np_location_obj, href_id, &href_var))
+        goto err_3;
+
+    struct PP_Var var = np_variant_to_pp_var(href_var);
+    if (var.type != PP_VARTYPE_STRING) {
+        ppb_var_release(var);
+        goto err_4;
+    }
+
+    document_url = var;
+
+err_4:
+    npn.releasevariantvalue(&href_var);
+err_3:
+    npn.releasevariantvalue(&location_var);
+err_2:
+    return document_url;
+}
+
 NPError
 NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
@@ -259,6 +295,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         }
     }
 
+    pp_i->document_url = get_document_url(pp_i);
+
     if (ppb_message_loop_get_current() == 0) {
         // allocate message loop for browser thread
         PP_Resource message_loop = ppb_message_loop_create(pp_i->id);
@@ -306,6 +344,7 @@ _destroy_instance_comt(void *user_data, int32_t result)
     npn.releaseobject(p->pp_i->np_window_obj);
     npn.releaseobject(p->pp_i->scriptable_obj);
     ppb_var_release(p->pp_i->instance_url);
+    ppb_var_release(p->pp_i->document_url);
     free(p->pp_i);
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
