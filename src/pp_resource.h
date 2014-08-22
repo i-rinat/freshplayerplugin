@@ -133,7 +133,7 @@ struct pp_instance_s {
     char                          **argn;
     char                          **argv;
 
-    char                           *instance_url;
+    struct PP_Var                   instance_url;
     pthread_t                       main_thread;
     pthread_barrier_t               main_thread_barrier;
 

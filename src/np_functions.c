@@ -170,13 +170,11 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
         PP_Resource request_info = ppb_url_request_info_create(pp_i->id);
         PP_Resource url_loader = ppb_url_loader_create(pp_i->id);
 
-        struct PP_Var s_url = ppb_var_var_from_utf8_z(pp_i->instance_url);
         struct PP_Var s_method = ppb_var_var_from_utf8_z("GET");
-
-        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL, s_url);
+        ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL,
+                                          pp_i->instance_url);
         ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_METHOD, s_method);
         ppb_url_loader_open(url_loader, request_info, PP_MakeCompletionCallback(do_nothing, NULL));
-        ppb_var_release(s_url);
         ppb_var_release(s_method);
         ppb_core_release_resource(request_info);
 
@@ -230,7 +228,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pp_i->argv[k] = strdup(argv[k] ? argv[k] : "");
 
         if (strcasecmp(argn[k], "src") == 0) {
-            pp_i->instance_url = strdup(argv[k]);
+            pp_i->instance_url = ppb_var_var_from_utf8_z(argv[k]);
         }
 
         if (strcasecmp(argn[k], "wmode") == 0)
@@ -307,7 +305,7 @@ _destroy_instance_comt(void *user_data, int32_t result)
     pthread_mutex_unlock(&display.lock);
     npn.releaseobject(p->pp_i->np_window_obj);
     npn.releaseobject(p->pp_i->scriptable_obj);
-    free(p->pp_i->instance_url);
+    ppb_var_release(p->pp_i->instance_url);
     free(p->pp_i);
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }

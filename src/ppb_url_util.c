@@ -303,7 +303,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
         return PP_MakeUndefined();
     }
 
-    struct PP_Var var = ppb_var_var_from_utf8_z(pp_i->instance_url);
+    struct PP_Var var = pp_i->instance_url;
 
     if (components)
         parse_url_string(ppb_var_var_to_utf8(var, NULL), components);
