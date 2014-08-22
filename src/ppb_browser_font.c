@@ -74,6 +74,9 @@ ppb_browser_font_trusted_destroy(void *p)
     struct pp_browser_font_s *bf = p;
     if (!bf)
         return;
+    pango_font_description_free(bf->font_desc);
+    g_object_unref(bf->font);
+
 }
 
 PP_Bool
