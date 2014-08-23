@@ -565,7 +565,9 @@ ppb_var_trace_object_var(struct PP_Var var)
 {
     if (var.type == PP_VARTYPE_OBJECT) {
         struct var_s *objv = get_var_s(var);
-        return g_strdup_printf("{OBJECT:class=%p,data=%p}", objv->obj._class, objv->obj.data);
+        int ref_count = ppb_var_get_ref_count(var);
+        return g_strdup_printf("{OBJECT:%d:class=%p:data=%p}", ref_count, objv->obj._class,
+                               objv->obj.data);
     } else {
         return "";
     }
