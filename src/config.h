@@ -38,6 +38,7 @@ struct fpp_config_s {
     struct {
         int   switch_buttons_2_3;
         int   dump_resource_histogram;
+        int   dump_variables;
         int   plugin_missing;
         int   x_synchronize;
     } quirks;

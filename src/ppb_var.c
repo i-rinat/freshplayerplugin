@@ -32,6 +32,7 @@
 #include <ppapi/c/dev/ppp_class_deprecated.h>
 #include "n2p_proxy_class.h"
 #include "p2n_proxy_class.h"
+#include "config.h"
 
 
 static GHashTable      *var_ht;
@@ -39,7 +40,8 @@ static pthread_mutex_t  lock;
 static uint32_t         var_id = 1;
 
 struct var_s {
-    int ref_count;
+    struct PP_Var   var;
+    int             ref_count;
     struct {
         uint32_t    len;
         char       *data;
@@ -236,6 +238,41 @@ ppb_var_release(struct PP_Var var)
     }
 
     g_slice_free(struct var_s, v);
+
+    if (config.quirks.dump_variables) {
+        time_t current_time = time(NULL);
+        static uintptr_t throttling = 0;
+
+        if (current_time % 5 == 0 || config.quirks.dump_variables > 1) {
+            if (!throttling || config.quirks.dump_variables > 1) {
+                pthread_mutex_lock(&lock);
+                guint var_count = 0;
+                gpointer *keys = g_hash_table_get_keys_as_array(var_ht, &var_count);
+                pthread_mutex_unlock(&lock);
+                trace_info("--- %3u variables --------------------------------\n", var_count);
+
+                for (guint k = 0; k < var_count; k ++) {
+                    pthread_mutex_lock(&lock);
+                    struct var_s *v = g_hash_table_lookup(var_ht, keys[k]);
+                    struct PP_Var var = v ? v->var : PP_MakeUndefined();
+                    pthread_mutex_unlock(&lock);
+
+                    if (v) {
+                        gchar *s_var = trace_var_as_string(var);
+                        trace_info("%s\n", s_var);
+                        g_free(s_var);
+                    } else {
+                        trace_info("expunged\n");
+                    }
+                }
+                g_free(keys);
+                trace_info("==================================================\n");
+                throttling = 1;
+            }
+        } else {
+            throttling = 0;
+        }
+    }
 }
 
 int
@@ -268,6 +305,7 @@ ppb_var_var_from_utf8(const char *data, uint32_t len)
 
     pthread_mutex_lock(&lock);
     var.value.as_id = _get_new_var_id();
+    v->var = var;
     g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
     pthread_mutex_unlock(&lock);
 
@@ -506,6 +544,7 @@ ppb_var_create_object(PP_Instance instance, const struct PPP_Class_Deprecated *o
 
     pthread_mutex_lock(&lock);
     var.value.as_id = _get_new_var_id();
+    v->var = var;
     g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
     pthread_mutex_unlock(&lock);
 

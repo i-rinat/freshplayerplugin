@@ -261,7 +261,6 @@ pp_resource_unref(PP_Resource resource)
             if (!throttling) {
                 int counts[PP_RESOURCE_TYPES_COUNT + 1] = {};
 
-                throttling = 1;
                 pthread_mutex_lock(&res_tbl_lock);
                 g_hash_table_foreach(res_tbl, _count_resources, counts);
                 pthread_mutex_unlock(&res_tbl_lock);
@@ -273,6 +272,7 @@ pp_resource_unref(PP_Resource resource)
                     trace_error("%d unknown resources (should never happen)\n",
                                 counts[PP_RESOURCE_TYPES_COUNT]);
                 trace_error("==========================\n");
+                throttling = 1;
             }
         } else {
             throttling = 0;
