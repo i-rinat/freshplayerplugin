@@ -202,6 +202,7 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
 
         pthread_barrier_init(&tparams->startup_barrier, NULL, 2);
         pthread_create(&pp_i->fs_thread, NULL, fullscreen_window_thread, tparams);
+        pthread_detach(pp_i->fs_thread);
         pthread_barrier_wait(&tparams->startup_barrier);
     } else {
         pthread_mutex_lock(&display.lock);

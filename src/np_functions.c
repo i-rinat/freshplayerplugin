@@ -309,6 +309,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     if (ppb_message_loop_get_for_main_thread() == 0) {
         pthread_barrier_init(&pp_i->main_thread_barrier, NULL, 2);
         pthread_create(&pp_i->main_thread, NULL, fresh_wrapper_main_thread, pp_i);
+        pthread_detach(pp_i->main_thread);
         pthread_barrier_wait(&pp_i->main_thread_barrier);
         pthread_barrier_destroy(&pp_i->main_thread_barrier);
     }

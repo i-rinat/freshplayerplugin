@@ -276,6 +276,7 @@ ppb_audio_start_playback(PP_Resource audio)
     }
 
     pthread_create(&a->thread, NULL, audio_player_thread, a);
+    pthread_detach(a->thread);
     pp_resource_release(audio);
     return PP_TRUE;
 }
