@@ -33,7 +33,7 @@
 #define PROLOGUE(g3d, escape_statement)                                                 \
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D); \
     if (!g3d) {                                                                         \
-        trace_error("%s, bad resource", __func__);                                      \
+        trace_error("%s, bad resource\n", __func__);                                    \
         escape_statement;                                                               \
     }                                                                                   \
     pthread_mutex_lock(&display.lock);                                                  \
