@@ -63,6 +63,7 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
         pthread_mutex_lock(&display.lock);
         pp_i->graphics = device;
         pthread_mutex_unlock(&display.lock);
+        pp_resource_release(device);
         retval = PP_TRUE;
     } else if (g3d) {
         if (pp_i != g3d->instance) {
@@ -82,7 +83,6 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
     }
 
 done:
-    pp_resource_release(device);
     return retval;
 }
 
