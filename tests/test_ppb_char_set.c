@@ -4,7 +4,7 @@
 #include <string.h>
 #include <langinfo.h>
 #include <src/ppb_var.h>
-#include <src/ppb_char_set_dev.c>
+#include <src/ppb_char_set.c>
 
 static PP_Instance instance = 0;
 
