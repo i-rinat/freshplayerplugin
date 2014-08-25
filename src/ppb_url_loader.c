@@ -83,6 +83,7 @@ ppb_url_loader_destroy(void *p)
     free_and_nullify(ul, custom_referrer_url);
     free_and_nullify(ul, custom_content_transfer_encoding);
     free_and_nullify(ul, custom_user_agent);
+    free_and_nullify(ul, post_data);
     free_and_nullify(ul, target);
 }
 
