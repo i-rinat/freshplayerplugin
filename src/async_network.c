@@ -44,6 +44,8 @@ static struct evdns_base *evdns_b = NULL;
 static GHashTable        *tasks_ht = NULL;
 static pthread_mutex_t    lock;
 
+static const struct timeval connect_timeout = { .tv_sec =  60, .tv_usec = 0 };
+
 static
 void
 __attribute__((constructor))
@@ -141,7 +143,10 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
     char buf[200];
     socklen_t len = sizeof(buf);
 
-    ts->is_connected = (getpeername(ts->sock, (struct sockaddr *)buf, &len) == 0);
+    if (event_flags & EV_TIMEOUT)
+        ts->is_connected = 0;
+    else
+        ts->is_connected = (getpeername(ts->sock, (struct sockaddr *)buf, &len) == 0);
 
     if (ts->is_connected) {
         ppb_core_call_on_main_thread(0, task->callback, PP_OK);
@@ -202,7 +207,7 @@ handle_tcp_connect_stage3(struct async_network_task_s *task)
 
     struct event *ev = event_new(event_b, task->sock, EV_WRITE, handle_tcp_connect_stage4, task);
     add_event_mapping(task, ev);
-    event_add(ev, NULL);
+    event_add(ev, &connect_timeout);
 }
 
 static
