@@ -154,7 +154,7 @@ _execute_script_ptac(void *user_data)
     }
 
     np_script.UTF8Characters = ppb_var_var_to_utf8(p->script, &np_script.UTF8Length);
-    if (!npn.evaluate(pp_i->npp, pp_i->np_window_obj, &np_script, &np_result)) {
+    if (!npn.evaluate(pp_i->npp, pp_i->np_plugin_element_obj, &np_script, &np_result)) {
         trace_error("%s, NPN_Evaluate failed\n", __func__);
         p->result = PP_MakeUndefined();
         goto quit;
