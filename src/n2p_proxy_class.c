@@ -341,6 +341,7 @@ void
 n2p_deallocate(void *object)
 {
     npn.releaseobject(object);
+    tables_remove_npobj_npp_mapping(object);
 }
 
 

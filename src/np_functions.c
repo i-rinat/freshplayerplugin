@@ -356,6 +356,10 @@ _destroy_instance_comt(void *user_data, int32_t result)
     npn.releaseobject(p->pp_i->np_plugin_element_obj);
     npn.releaseobject(p->pp_i->scriptable_obj);
 
+    tables_remove_npobj_npp_mapping(p->pp_i->np_window_obj);
+    tables_remove_npobj_npp_mapping(p->pp_i->np_plugin_element_obj);
+    tables_remove_npobj_npp_mapping(p->pp_i->scriptable_obj);
+
     ppb_var_release(p->pp_i->instance_url);
     ppb_var_release(p->pp_i->document_url);
     free(p->pp_i);
