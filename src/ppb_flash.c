@@ -24,6 +24,7 @@
 
 #include "ppb_flash.h"
 #include <stdlib.h>
+#include <unistd.h>
 #include "trace.h"
 #include "tables.h"
 #include "config.h"
@@ -274,6 +275,7 @@ get_flashsetting_language(void)
 struct PP_Var
 ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
 {
+    long cpu_count;
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
         trace_error("%s, bad instance\n", __func__);
@@ -298,9 +300,9 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
         var = get_flashsetting_language();
         break;
     case PP_FLASHSETTING_NUMCORES:
-        // TODO: check number of cores
+        cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
         var.type = PP_VARTYPE_INT32;
-        var.value.as_int = 2;
+        var.value.as_int = cpu_count > 0 ? cpu_count : 1;
         break;
     case PP_FLASHSETTING_LSORESTRICTIONS:
         var.type = PP_VARTYPE_INT32;
