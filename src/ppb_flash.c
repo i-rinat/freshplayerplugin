@@ -303,9 +303,8 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
         var.value.as_int = 2;
         break;
     case PP_FLASHSETTING_LSORESTRICTIONS:
-        // TODO: select restrictions
         var.type = PP_VARTYPE_INT32;
-        var.value.as_int = PP_FLASHLSORESTRICTIONS_IN_MEMORY;
+        var.value.as_int = PP_FLASHLSORESTRICTIONS_NONE;
         break;
     case PP_FLASHSETTING_STAGE3DBASELINEENABLED:
         // TODO: check if driver reliable enough
