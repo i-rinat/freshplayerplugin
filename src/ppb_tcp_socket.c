@@ -215,6 +215,12 @@ ppb_tcp_socket_private_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_
         return PP_ERROR_FAILED;
     }
 
+    if (ts->seen_eof) {
+        trace_error("%s, seen eof\n", __func__);
+        pp_resource_release(tcp_socket);
+        return PP_ERROR_FAILED;
+    }
+
     if (bytes_to_read > 1024 * 1024)
         bytes_to_read = 1024 * 1024;
 

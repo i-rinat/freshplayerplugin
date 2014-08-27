@@ -353,6 +353,7 @@ struct pp_tcp_socket_s {
     int             sock;
     unsigned int    is_connected;
     unsigned int    destroyed;
+    unsigned int    seen_eof;
 };
 
 struct pp_file_ref_s {

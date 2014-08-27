@@ -41,7 +41,7 @@
 
 static struct event_base *event_b = NULL;
 static struct evdns_base *evdns_b = NULL;
-static GHashTable        *events_ht = NULL;
+static GHashTable        *tasks_ht = NULL;
 static pthread_mutex_t    lock;
 
 static
@@ -49,7 +49,7 @@ void
 __attribute__((constructor))
 async_network_constructor(void)
 {
-    events_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+    tasks_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
     pthread_mutex_init(&lock, NULL);
 }
 
@@ -58,7 +58,7 @@ void
 __attribute__((destructor))
 async_network_destructor(void)
 {
-    g_hash_table_unref(events_ht);
+    g_hash_table_unref(tasks_ht);
     pthread_mutex_destroy(&lock);
 }
 
@@ -98,7 +98,7 @@ add_event_mapping(struct async_network_task_s *task, struct event *ev)
 {
     pthread_mutex_lock(&lock);
     task->event = ev;
-    g_hash_table_add(events_ht, task);
+    g_hash_table_add(tasks_ht, task);
     pthread_mutex_unlock(&lock);
 }
 
@@ -110,20 +110,15 @@ async_network_task_create(void)
 
 static
 void
-_task_destroy(struct async_network_task_s *task)
-{
-    if (task->event) {
-        g_hash_table_remove(events_ht, task);
-    }
-    g_slice_free(struct async_network_task_s, task);
-}
-
-static
-void
 task_destroy(struct async_network_task_s *task)
 {
     pthread_mutex_lock(&lock);
-    _task_destroy(task);
+    g_hash_table_remove(tasks_ht, task);
+    if (task->event) {
+        event_free(task->event);
+        task->event = NULL;
+    }
+    g_slice_free(struct async_network_task_s, task);
     pthread_mutex_unlock(&lock);
 }
 
@@ -210,7 +205,6 @@ handle_tcp_connect_stage3(struct async_network_task_s *task)
     event_add(ev, NULL);
 }
 
-
 static
 void
 handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addresses, void *arg)
@@ -288,10 +282,18 @@ void
 handle_tcp_read_stage2(int sock, short event_flags, void *arg)
 {
     struct async_network_task_s *task = arg;
+    int32_t retval;
 
-    int32_t retval = recv(sock, task->buffer, task->bufsize, 0);
+    retval = recv(sock, task->buffer, task->bufsize, 0);
     if (retval < 0)
         retval = get_pp_errno();
+    else if (retval == 0) {
+        struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
+        if (ts) {
+            ts->seen_eof = 1;
+            pp_resource_release(task->resource);
+        }
+    }
 
     ppb_core_call_on_main_thread(0, task->callback, retval);
     task_destroy(task);
@@ -325,7 +327,6 @@ handle_tcp_write_stage2(int sock, short event_flags, void *arg)
         retval = get_pp_errno();
 
     ppb_core_call_on_main_thread(0, task->callback, retval);
-
     task_destroy(task);
 }
 
@@ -355,14 +356,14 @@ handle_tcp_disconnect_stage2(int sock, short event_flags, void *arg)
     gpointer key, val;
 
     pthread_mutex_lock(&lock);
-    g_hash_table_iter_init(&iter, events_ht);
+    g_hash_table_iter_init(&iter, tasks_ht);
     while (g_hash_table_iter_next(&iter, &key, &val)) {
         struct async_network_task_s *cur = key;
         if (cur->resource == task->resource) {
             g_hash_table_iter_remove(&iter);
             event_free(cur->event);
             ppb_core_call_on_main_thread(0, cur->callback, PP_ERROR_ABORTED);
-            _task_destroy(cur);
+            g_slice_free(struct async_network_task_s, cur);
         }
     }
     pthread_mutex_unlock(&lock);
