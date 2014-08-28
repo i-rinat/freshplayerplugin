@@ -246,26 +246,28 @@ ppb_var_release(struct PP_Var var)
         if (current_time % 5 == 0 || config.quirks.dump_variables > 1) {
             if (!throttling || config.quirks.dump_variables > 1) {
                 pthread_mutex_lock(&lock);
-                guint var_count = 0;
-                gpointer *keys = g_hash_table_get_keys_as_array(var_ht, &var_count);
+                GList *key_list = g_hash_table_get_keys(var_ht);
+                guint var_count = g_list_length(key_list);
                 pthread_mutex_unlock(&lock);
                 trace_info("--- %3u variables --------------------------------\n", var_count);
 
-                for (guint k = 0; k < var_count; k ++) {
+                GList *lptr = key_list;
+                while (lptr) {
                     pthread_mutex_lock(&lock);
-                    struct var_s *v = g_hash_table_lookup(var_ht, keys[k]);
+                    struct var_s *v = g_hash_table_lookup(var_ht, lptr->data);
                     struct PP_Var var = v ? v->var : PP_MakeUndefined();
                     pthread_mutex_unlock(&lock);
 
                     if (v) {
                         gchar *s_var = trace_var_as_string(var);
-                        trace_info("%s\n", s_var);
+                        trace_info("[%d] = %s\n", GPOINTER_TO_INT(lptr->data), s_var);
                         g_free(s_var);
                     } else {
-                        trace_info("expunged\n");
+                        trace_info("[%d] expunged\n", GPOINTER_TO_INT(lptr->data));
                     }
+                    lptr = g_list_next(lptr);
                 }
-                g_free(keys);
+                g_list_free(key_list);
                 trace_info("==================================================\n");
                 throttling = 1;
             }
