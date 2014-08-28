@@ -28,4 +28,7 @@
 int
 xkeycode_to_pp_keycode(int xkeycode);
 
+int
+get_left_right_pp_flag(int xkeycode);
+
 #endif // FPP__SRC_KEYCODECONVERT_H

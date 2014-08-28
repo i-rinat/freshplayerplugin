@@ -27,6 +27,7 @@
 #define XK_3270
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
+#include <ppapi/c/ppb_input_event.h>
 
 int
 xkeycode_to_pp_keycode(int xkeycode)
@@ -296,17 +297,16 @@ xkeycode_to_pp_keycode(int xkeycode)
     case XK_Scroll_Lock:
         return VK_SCROLL;
     case XK_Shift_L:
-        return VK_LSHIFT;
     case XK_Shift_R:
-        return VK_RSHIFT;
+        return VK_SHIFT;
     case XK_Control_L:
-        return VK_LCONTROL;
     case XK_Control_R:
-        return VK_RCONTROL;
+        return VK_CONTROL;
     case XK_Meta_L:
-        return VK_LMENU;
     case XK_Meta_R:
-        return VK_RMENU;
+    case XK_Alt_L:
+    case XK_Alt_R:
+        return VK_MENU;
     case XF86XK_Back:
         return VK_BROWSER_BACK;
     case XF86XK_Forward:
@@ -391,4 +391,28 @@ xkeycode_to_pp_keycode(int xkeycode)
         return 0;
     }
 
+}
+
+int
+get_left_right_pp_flag(int xkeycode)
+{
+    switch (xkeycode) {
+
+    case XK_Shift_L:
+    case XK_Control_L:
+    case XK_Meta_L:
+    case XK_Alt_L:
+    case XK_Super_L:
+        return PP_INPUTEVENT_MODIFIER_ISLEFT;
+
+    case XK_Shift_R:
+    case XK_Control_R:
+    case XK_Meta_R:
+    case XK_Alt_R:
+    case XK_Super_R:
+        return PP_INPUTEVENT_MODIFIER_ISRIGHT;
+
+    default:
+        return 0;
+    }
 }

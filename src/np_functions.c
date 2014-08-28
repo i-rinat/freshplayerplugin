@@ -973,10 +973,6 @@ handle_key_press_release_event(NPP npp, void *event)
     if (!pp_i->ppp_input_event)
         return 0;
 
-    event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
-                                        : PP_INPUTEVENT_TYPE_KEYUP;
-    unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
-
     const uint32_t combined_mask = pp_i->event_mask | pp_i->filtered_event_mask;
     if (!(PP_INPUTEVENT_CLASS_KEYBOARD & combined_mask))
         return 0;
@@ -987,9 +983,19 @@ handle_key_press_release_event(NPP npp, void *event)
     int            charcount;
     int            pp_keycode;
     PP_Resource    pp_event;
+    unsigned int   mod;
 
     charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
     pp_keycode = xkeycode_to_pp_keycode(keysym);
+    mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+    mod = mod | get_left_right_pp_flag(keysym);
+
+    // left flag is always set, it needs to be dropped if there is right flag
+    if (mod & PP_INPUTEVENT_MODIFIER_ISRIGHT)
+        mod = mod & (~(unsigned)PP_INPUTEVENT_MODIFIER_ISLEFT);
+
+    event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
+                                        : PP_INPUTEVENT_TYPE_KEYUP;
 
     if (ev->type == KeyPress && charcount > 0) {
         struct PP_Var character_text = ppb_var_var_from_utf8(buffer, charcount);
