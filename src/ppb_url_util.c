@@ -237,6 +237,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
     }
 
     struct PP_Var var = pp_i->instance_url;
+    ppb_var_add_ref(var);
 
     if (components)
         parse_url_string(ppb_var_var_to_utf8(var, NULL), components);
