@@ -92,11 +92,59 @@ get_clipboard_target_atom(uint32_t format)
     }
 }
 
+struct clipboard_is_format_available_param_s {
+    PP_Flash_Clipboard_Type clipboard_type;
+    uint32_t                format;
+    PP_Bool                 result;
+    PP_Resource             m_loop;
+    int                     depth;
+};
+
+static
+void
+_clipboard_is_format_available_ptac(void *user_data)
+{
+    struct clipboard_is_format_available_param_s *p = user_data;
+
+    GtkClipboard *clipboard = get_clipboard_of_type(p->clipboard_type);
+    if (!clipboard)
+        goto quit;
+
+    GdkAtom target = get_clipboard_target_atom(p->format);
+    if (target == GDK_NONE)
+        goto quit;
+
+    p->result = gtk_clipboard_wait_is_target_available(clipboard, target);
+
+quit:
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+_clipboard_is_format_available_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_browser_thread(_clipboard_is_format_available_ptac, user_data);
+}
+
 PP_Bool
 ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
                                         PP_Flash_Clipboard_Type clipboard_type, uint32_t format)
 {
-    return PP_FALSE;
+    if (!clipboard_type_and_format_are_supported(clipboard_type, format, __func__))
+        return PP_FALSE;
+
+    struct clipboard_is_format_available_param_s p;
+    p.clipboard_type =  clipboard_type;
+    p.format =          format;
+    p.result =          PP_FALSE;
+    p.m_loop =          ppb_message_loop_get_current();
+    p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
+
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_clipboard_is_format_available_comt, &p), 0);
+    ppb_message_loop_run_int(p.m_loop, 1);
+
+    return p.result;
 }
 
 struct clipboard_read_data_param_s {
@@ -183,7 +231,7 @@ trace_ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
                                               PP_Flash_Clipboard_Type clipboard_type,
                                               uint32_t format)
 {
-    trace_info("[PPB] {zilch} %s instance_id=%d, clipboard_type=%s, format=%s(%u)\n", __func__+6,
+    trace_info("[PPB] {full} %s instance_id=%d, clipboard_type=%s, format=%s(%u)\n", __func__+6,
                instance_id, reverse_clipboard_type(clipboard_type),
                reverse_clipboard_format(format), format);
     return ppb_flash_clipboard_is_format_available(instance_id, clipboard_type, format);
@@ -217,7 +265,7 @@ trace_ppb_flash_clipboard_write_data(PP_Instance instance_id,
 
 const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
     .RegisterCustomFormat = TWRAPZ(ppb_flash_clipboard_register_custom_format),
-    .IsFormatAvailable =    TWRAPZ(ppb_flash_clipboard_is_format_available),
+    .IsFormatAvailable =    TWRAPF(ppb_flash_clipboard_is_format_available),
     .ReadData =             TWRAPF(ppb_flash_clipboard_read_data),
     .WriteData =            TWRAPZ(ppb_flash_clipboard_write_data),
 };
