@@ -325,8 +325,8 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         XGraphicsExposeEvent ev = {
             .type = GraphicsExpose,
             .drawable = pp_i->fs_wnd,
-            .width = pp_i->width,
-            .height = pp_i->height
+            .width =    display.fs_width,
+            .height =   display.fs_height,
         };
 
         XSendEvent(display.x, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);

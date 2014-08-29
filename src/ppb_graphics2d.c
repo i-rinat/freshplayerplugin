@@ -287,8 +287,8 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         XGraphicsExposeEvent ev = {
             .type = GraphicsExpose,
             .drawable = pp_i->fs_wnd,
-            .width = pp_i->width,
-            .height = pp_i->height
+            .width =    display.fs_width,
+            .height =   display.fs_height,
         };
 
         XSendEvent(display.x, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);

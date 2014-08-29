@@ -605,6 +605,7 @@ handle_graphics_expose_event(NPP npp, void *event)
     pthread_mutex_lock(&display.lock);
     if (g2d) {
         if (pp_i->is_transparent) {
+            XVisualInfo vi;
             struct {
                 Window root;
                 int x, y;
@@ -613,32 +614,33 @@ handle_graphics_expose_event(NPP npp, void *event)
 
             XGetGeometry(dpy, drawable, &d.root, &d.x, &d.y, &d.width, &d.height, &d.border,
                          &d.depth);
-            dst_surf = cairo_xlib_surface_create(dpy, drawable, DefaultVisual(dpy, screen),
-                                                 d.width, d.height);
-            cairo_surface_mark_dirty(dst_surf);
-            src_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
-                CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
-            cr = cairo_create(dst_surf);
-            cairo_set_source_surface(cr, src_surf, 0, 0);
-            cairo_paint(cr);
-            cairo_destroy(cr);
-            cairo_surface_destroy(dst_surf);
-            cairo_surface_destroy(src_surf);
-            XFlush(dpy);
+            if (XMatchVisualInfo(dpy, screen, d.depth, TrueColor, &vi)) {
+                dst_surf = cairo_xlib_surface_create(dpy, drawable, vi.visual, d.width, d.height);
+                src_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
+                    CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
+                cr = cairo_create(dst_surf);
+                cairo_set_source_surface(cr, src_surf, ev->x, ev->y);
+                cairo_paint(cr);
+                cairo_destroy(cr);
+                cairo_surface_destroy(dst_surf);
+                cairo_surface_destroy(src_surf);
+                XFlush(dpy);
+            }
         } else {
             XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
                                       g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
                                       g2d->scaled_stride);
 
-            XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0, 0, 0,
-                      g2d->scaled_width, g2d->scaled_height);
+            XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0,
+                      ev->x, ev->y,
+                      MIN(g2d->scaled_width, ev->width), MIN(g2d->scaled_height, ev->height));
             XFree(xi);
         }
     } else if (g3d) {
         XCopyArea(dpy, g3d->pixmap, drawable, DefaultGC(dpy, screen),
                   0, 0,
-                  g3d->width, g3d->height,
-                  0, 0);
+                  MIN(g3d->width, ev->width), MIN(g3d->height, ev->height),
+                  ev->x, ev->y);
         XFlush(dpy);
     } else {
         retval = 0;
