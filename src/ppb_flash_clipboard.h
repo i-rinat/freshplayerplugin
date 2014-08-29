@@ -44,4 +44,9 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
                                uint32_t data_item_count, const uint32_t formats[],
                                const struct PP_Var data_items[]);
 
+PP_Bool
+ppb_flash_clipboard_get_sequence_number(PP_Instance instance_id,
+                                        PP_Flash_Clipboard_Type clipboard_type,
+                                        uint64_t *sequence_number);
+
 #endif // FPP__PPB_FLASH_CLIPBOARD_H

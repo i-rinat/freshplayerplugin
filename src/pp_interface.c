@@ -97,6 +97,7 @@ extern const struct PPB_FileIO_Private_0_1          ppb_file_io_private_interfac
 extern const struct PPB_FileRef_1_0                 ppb_file_ref_interface_1_0;
 extern const struct PPB_FileRef_1_1                 ppb_file_ref_interface_1_1;
 extern const struct PPB_Flash_Clipboard_5_0         ppb_flash_clipboard_interface_5_0;
+extern const struct PPB_Flash_Clipboard_5_1         ppb_flash_clipboard_interface_5_1;
 extern const struct PPB_Flash_File_FileRef          ppb_flash_file_file_ref_interface_2_0;
 extern const struct PPB_Flash_File_ModuleLocal_3_0  ppb_flash_file_modulelocal_interface_3_0;
 extern const struct PPB_Flash_FontFile_0_1          ppb_flash_font_file_interface_0_1;
@@ -185,6 +186,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_FILEREF_INTERFACE_1_0,              ppb_file_ref_interface_1_0)
     ELSEIFBLOCK(PPB_FILEREF_INTERFACE_1_1,              ppb_file_ref_interface_1_1)
     ELSEIFBLOCK(PPB_FLASH_CLIPBOARD_INTERFACE_5_0,      ppb_flash_clipboard_interface_5_0)
+    ELSEIFBLOCK(PPB_FLASH_CLIPBOARD_INTERFACE_5_1,      ppb_flash_clipboard_interface_5_1)
     ELSEIFBLOCK(PPB_FLASH_FILE_FILEREF_INTERFACE,       ppb_flash_file_file_ref_interface_2_0)
     ELSEIFBLOCK(PPB_FLASH_FILE_MODULELOCAL_INTERFACE_3_0, ppb_flash_file_modulelocal_interface_3_0)
     ELSEIFBLOCK(PPB_FLASH_FONTFILE_INTERFACE_0_1,       ppb_flash_font_file_interface_0_1)

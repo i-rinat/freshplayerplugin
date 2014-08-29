@@ -360,6 +360,14 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
     return p.result;
 }
 
+PP_Bool
+ppb_flash_clipboard_get_sequence_number(PP_Instance instance_id,
+                                        PP_Flash_Clipboard_Type clipboard_type,
+                                        uint64_t *sequence_number)
+{
+    return PP_FALSE;
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -408,6 +416,26 @@ trace_ppb_flash_clipboard_write_data(PP_Instance instance_id,
                                           data_items);
 }
 
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_flash_clipboard_get_sequence_number(PP_Instance instance_id,
+                                              PP_Flash_Clipboard_Type clipboard_type,
+                                              uint64_t *sequence_number)
+{
+    trace_info("[PPB] {zilch} %s instance_id=%d, clipboard_type=%s\n", __func__, instance_id,
+               reverse_clipboard_type(clipboard_type));
+    return ppb_flash_clipboard_get_sequence_number(instance_id, clipboard_type, sequence_number);
+}
+
+
+
+const struct PPB_Flash_Clipboard_5_1 ppb_flash_clipboard_interface_5_1 = {
+    .RegisterCustomFormat = TWRAPZ(ppb_flash_clipboard_register_custom_format),
+    .IsFormatAvailable =    TWRAPF(ppb_flash_clipboard_is_format_available),
+    .ReadData =             TWRAPF(ppb_flash_clipboard_read_data),
+    .WriteData =            TWRAPF(ppb_flash_clipboard_write_data),
+    .GetSequenceNumber =    TWRAPZ(ppb_flash_clipboard_get_sequence_number),
+};
 
 const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
     .RegisterCustomFormat = TWRAPZ(ppb_flash_clipboard_register_custom_format),
