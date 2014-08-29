@@ -57,6 +57,8 @@
 
 #define nullsafe_strdup(s)       ((s) ? strdup(s) : NULL)
 
+#define PP_MakeCCB(func, user_data) PP_MakeCompletionCallback(func, user_data)
+
 
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,
