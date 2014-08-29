@@ -28,6 +28,9 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
+#include "ppb_message_loop.h"
+#include "ppb_var.h"
+#include "ppb_core.h"
 
 
 uint32_t
@@ -43,11 +46,100 @@ ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
     return PP_FALSE;
 }
 
+struct clipboard_read_data_param_s {
+    PP_Flash_Clipboard_Type clipboard_type;
+    uint32_t                format;
+    struct PP_Var           result;
+    PP_Resource             m_loop;
+    int                     depth;
+};
+
+static
+void
+_clipboard_read_data_ptac(void *user_data)
+{
+    struct clipboard_read_data_param_s *p = user_data;
+    GtkClipboard *clipboard;
+
+    switch (p->clipboard_type) {
+    case PP_FLASH_CLIPBOARD_TYPE_STANDARD:
+        clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+        break;
+    case PP_FLASH_CLIPBOARD_TYPE_SELECTION:
+        clipboard = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
+        break;
+    default:
+        goto quit;
+    }
+
+    GdkAtom target;
+    switch (p->format) {
+    case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
+        target = GDK_TARGET_STRING;
+        break;
+    case PP_FLASH_CLIPBOARD_FORMAT_HTML:
+        target = gdk_atom_intern("text/html", FALSE);
+        break;
+    case PP_FLASH_CLIPBOARD_FORMAT_RTF:
+        target = gdk_atom_intern("text/rtf", FALSE);
+        break;
+    default:
+        goto quit;
+    }
+
+    GtkSelectionData *sd = gtk_clipboard_wait_for_contents(clipboard, target);
+    if (sd) {
+        p->result = ppb_var_var_from_utf8((char *)sd->data, sd->length);
+        gtk_selection_data_free(sd);
+    }
+
+quit:
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+_clipboard_read_data_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_browser_thread(_clipboard_read_data_ptac, user_data);
+}
+
 struct PP_Var
 ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type clipboard_type,
                               uint32_t format)
 {
-    return PP_MakeUndefined();
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance_id);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    if (clipboard_type != PP_FLASH_CLIPBOARD_TYPE_STANDARD
+        && clipboard_type != PP_FLASH_CLIPBOARD_TYPE_SELECTION)
+    {
+        trace_error("%s, bad clipboard_type (= %d)\n", __func__, clipboard_type);
+        return PP_MakeUndefined();
+    }
+
+    if (format != PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT
+        && format != PP_FLASH_CLIPBOARD_FORMAT_HTML
+        && format != PP_FLASH_CLIPBOARD_FORMAT_RTF)
+    {
+        trace_error("%s, unknown format (= %d)\n", __func__, format);
+        return PP_MakeUndefined();
+    }
+
+    struct clipboard_read_data_param_s p;
+    p.clipboard_type =  clipboard_type;
+    p.format =          format;
+    p.result =          PP_MakeUndefined();
+    p.m_loop =          ppb_message_loop_get_current();
+    p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
+
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_clipboard_read_data_comt, &p), 0);
+    ppb_message_loop_run_int(p.m_loop, 1);
+
+    return p.result;
 }
 
 int32_t
@@ -86,7 +178,7 @@ struct PP_Var
 trace_ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type clipboard_type,
                                     uint32_t format)
 {
-    trace_info("[PPB] {zilch} %s instance_id=%d, clipboard_type=%s, format=%s(%u)\n", __func__+6,
+    trace_info("[PPB] {full} %s instance_id=%d, clipboard_type=%s, format=%s(%u)\n", __func__+6,
                instance_id, reverse_clipboard_type(clipboard_type),
                reverse_clipboard_format(format), format);
     return ppb_flash_clipboard_read_data(instance_id, clipboard_type, format);
@@ -110,6 +202,6 @@ trace_ppb_flash_clipboard_write_data(PP_Instance instance_id,
 const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
     .RegisterCustomFormat = TWRAPZ(ppb_flash_clipboard_register_custom_format),
     .IsFormatAvailable =    TWRAPZ(ppb_flash_clipboard_is_format_available),
-    .ReadData =             TWRAPZ(ppb_flash_clipboard_read_data),
+    .ReadData =             TWRAPF(ppb_flash_clipboard_read_data),
     .WriteData =            TWRAPZ(ppb_flash_clipboard_write_data),
 };
