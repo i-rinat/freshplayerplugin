@@ -145,8 +145,8 @@ fullscreen_window_thread(void *p)
     pthread_barrier_wait(&tp->startup_barrier);
     pthread_barrier_destroy(&tp->startup_barrier);
 
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_update_instance_view_comt, pp_i),
-                                 PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(_update_instance_view_comt, pp_i), PP_OK);
+
     while (1) {
         XEvent ev;
         XNextEvent(dpy, &ev);
@@ -178,8 +178,7 @@ quit_and_destroy_fs_wnd:
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
 
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_update_instance_view_comt, pp_i),
-                                 PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(_update_instance_view_comt, pp_i), PP_OK);
     g_slice_free(struct thread_param_s, tp);
     return NULL;
 }

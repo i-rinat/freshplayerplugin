@@ -175,7 +175,7 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
     p.m_loop =      ppb_message_loop_get_current();
     p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_get_proxy_for_url_comt, &p), 0);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_get_proxy_for_url_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
 
     return p.res;
@@ -204,8 +204,7 @@ ppb_flash_navigate(PP_Resource request_info, const char *target, PP_Bool from_us
 
     PP_Resource url_loader = ppb_url_loader_create(ri->instance->id);
     int32_t result = ppb_url_loader_open_target(url_loader, request_info,
-                                                PP_MakeCompletionCallback(nop_callback, NULL),
-                                                target);
+                                                PP_MakeCCB(nop_callback, NULL), target);
     ppb_core_release_resource(url_loader);
     if (result != PP_OK && result != PP_OK_COMPLETIONPENDING)
         return result;

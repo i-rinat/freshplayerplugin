@@ -202,7 +202,7 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
     p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_var_add_ref(script);
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_execute_script_comt, &p), 0);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_execute_script_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
     ppb_var_release(script);
 

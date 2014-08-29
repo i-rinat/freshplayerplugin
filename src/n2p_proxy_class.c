@@ -87,7 +87,7 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p.m_loop =      ppb_message_loop_get_current();
     p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_has_property_comt, &p), 0);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_n2p_has_property_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
 
     return p.res;
@@ -159,7 +159,7 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p.m_loop =      ppb_message_loop_get_current();
     p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_get_property_comt, &p), 0);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_n2p_get_property_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
 
     return p.res;
@@ -260,7 +260,7 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
     p.m_loop =      ppb_message_loop_get_current();
     p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_call_comt, &p), 0);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_n2p_call_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
 
     return p.res;
@@ -330,7 +330,7 @@ n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *e
     p.m_loop =      ppb_message_loop_get_current();
     p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCompletionCallback(_n2p_construct_comt, &p), 0);
+    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_n2p_construct_comt, &p), 0);
     ppb_message_loop_run_int(p.m_loop, 1);
 
     return p.res;

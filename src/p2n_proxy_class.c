@@ -109,7 +109,7 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
         p.m_loop =      ppb_message_loop_get_for_browser_thread();
         p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_has_method_comt, &p), PP_OK);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_method_comt, &p), PP_OK);
         ppb_message_loop_run_int(p.m_loop, 1);
 
         return p.retval;
@@ -187,7 +187,7 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         p.m_loop =      ppb_message_loop_get_for_browser_thread();
         p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_invoke_comt, &p), PP_OK);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_invoke_comt, &p), PP_OK);
         ppb_message_loop_run_int(p.m_loop, 1);
 
         return true;
@@ -244,8 +244,7 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
         p.m_loop =      ppb_message_loop_get_for_browser_thread();
         p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_has_property_comt, &p),
-                                     PP_OK);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_property_comt, &p), PP_OK);
         ppb_message_loop_run_int(p.m_loop, 1);
         return p.retval;
     } else {
@@ -297,8 +296,7 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
         p.m_loop =      ppb_message_loop_get_for_browser_thread();
         p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
-        ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_p2n_get_property_comt, &p),
-                                     PP_OK);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_get_property_comt, &p), PP_OK);
         ppb_message_loop_run_int(p.m_loop, 1);
         return true;
     } else {

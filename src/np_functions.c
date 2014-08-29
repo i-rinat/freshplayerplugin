@@ -124,8 +124,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         pp_i->height = window->height;
 
         if (g_atomic_int_get(&pp_i->instance_loaded))
-            ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_set_window_comt, pp_i),
-                                         PP_OK);
+            ppb_core_call_on_main_thread(0, PP_MakeCCB(_set_window_comt, pp_i), PP_OK);
     }
     pthread_mutex_unlock(&display.lock);
 
@@ -174,7 +173,7 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
         ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_URL,
                                           pp_i->instance_url);
         ppb_url_request_info_set_property(request_info, PP_URLREQUESTPROPERTY_METHOD, s_method);
-        ppb_url_loader_open(url_loader, request_info, PP_MakeCompletionCallback(do_nothing, NULL));
+        ppb_url_loader_open(url_loader, request_info, PP_MakeCCB(do_nothing, NULL));
         ppb_var_release(s_method);
         ppb_core_release_resource(request_info);
 
@@ -325,8 +324,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     p.m_loop =  ppb_message_loop_get_for_browser_thread();
     p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
     p.pp_i =    pp_i;
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_call_plugin_did_create_comt, &p),
-                                 PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(_call_plugin_did_create_comt, &p), PP_OK);
     ppb_message_loop_run_int(p.m_loop, 1);
 
     return NPERR_NO_ERROR;
@@ -377,7 +375,7 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     p.m_loop =  ppb_message_loop_get_current();
     p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
 
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_destroy_instance_comt, &p), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(_destroy_instance_comt, &p), PP_OK);
     ppb_message_loop_run_int(p.m_loop, 1);
 
     if (save)
@@ -420,7 +418,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
             if (ul->follow_redirects) {
                 trace_info_f("       %s, redirecting to %s\n", __func__, ul->redirect_url);
                 pp_resource_release(loader);
-                ppb_url_loader_follow_redirect(loader, PP_MakeCompletionCallback(do_nothing, NULL));
+                ppb_url_loader_follow_redirect(loader, PP_MakeCCB(do_nothing, NULL));
                 // There is no need to fill response headers, status_line and other parameters
                 // since they are freed in follow_redirect anyway.
                 hp_free_parsed_headers(ph);
@@ -800,8 +798,7 @@ ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id)
     struct call_plugin_handle_input_event_param_s *p = g_slice_alloc0(sizeof(*p));
     p->pp_i = pp_i;
     p->event_id = event_id;
-    ppb_core_call_on_main_thread(0, PP_MakeCompletionCallback(_call_ppp_handle_input_event_comt, p),
-                                 PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(_call_ppp_handle_input_event_comt, p), PP_OK);
 }
 
 static
@@ -1033,7 +1030,7 @@ handle_focus_in_out_event(NPP npp, void *event)
     PP_Bool has_focus = (ev->type == FocusIn) ? PP_TRUE : PP_FALSE;
 
     struct PP_CompletionCallback ccb;
-    ccb = PP_MakeCompletionCallback(_call_ppp_did_change_focus_comt, pp_i);
+    ccb = PP_MakeCCB(_call_ppp_did_change_focus_comt, pp_i);
     ppb_core_call_on_main_thread(0, ccb, has_focus);
     return 1;
 }
