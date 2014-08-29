@@ -39,6 +39,59 @@ ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const char *
     return 0;
 }
 
+static
+int
+clipboard_type_and_format_are_supported(PP_Flash_Clipboard_Type clipboard_type, uint32_t format,
+                                        const char *func_name)
+{
+    if (clipboard_type != PP_FLASH_CLIPBOARD_TYPE_STANDARD
+        && clipboard_type != PP_FLASH_CLIPBOARD_TYPE_SELECTION)
+    {
+        trace_error("%s, bad clipboard_type (= %d)\n", func_name, clipboard_type);
+        return 0;
+    }
+
+    if (format != PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT
+        && format != PP_FLASH_CLIPBOARD_FORMAT_HTML
+        && format != PP_FLASH_CLIPBOARD_FORMAT_RTF)
+    {
+        trace_error("%s, unknown format (= %d)\n", func_name, format);
+        return 0;
+    }
+
+    return 1;
+}
+
+static
+GtkClipboard *
+get_clipboard_of_type(PP_Flash_Clipboard_Type clipboard_type)
+{
+    switch (clipboard_type) {
+    case PP_FLASH_CLIPBOARD_TYPE_STANDARD:
+        return gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+    case PP_FLASH_CLIPBOARD_TYPE_SELECTION:
+        return gtk_clipboard_get(GDK_SELECTION_PRIMARY);
+    default:
+        return NULL;
+    }
+}
+
+static
+GdkAtom
+get_clipboard_target_atom(uint32_t format)
+{
+    switch (format) {
+    case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
+        return GDK_TARGET_STRING;
+    case PP_FLASH_CLIPBOARD_FORMAT_HTML:
+        return gdk_atom_intern("text/html", FALSE);
+    case PP_FLASH_CLIPBOARD_FORMAT_RTF:
+        return gdk_atom_intern("text/rtf", FALSE);
+    default:
+        return GDK_NONE;
+    }
+}
+
 PP_Bool
 ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
                                         PP_Flash_Clipboard_Type clipboard_type, uint32_t format)
@@ -59,33 +112,14 @@ void
 _clipboard_read_data_ptac(void *user_data)
 {
     struct clipboard_read_data_param_s *p = user_data;
-    GtkClipboard *clipboard;
 
-    switch (p->clipboard_type) {
-    case PP_FLASH_CLIPBOARD_TYPE_STANDARD:
-        clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-        break;
-    case PP_FLASH_CLIPBOARD_TYPE_SELECTION:
-        clipboard = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
-        break;
-    default:
+    GtkClipboard *clipboard = get_clipboard_of_type(p->clipboard_type);
+    if (!clipboard)
         goto quit;
-    }
 
-    GdkAtom target;
-    switch (p->format) {
-    case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
-        target = GDK_TARGET_STRING;
-        break;
-    case PP_FLASH_CLIPBOARD_FORMAT_HTML:
-        target = gdk_atom_intern("text/html", FALSE);
-        break;
-    case PP_FLASH_CLIPBOARD_FORMAT_RTF:
-        target = gdk_atom_intern("text/rtf", FALSE);
-        break;
-    default:
+    GdkAtom target = get_clipboard_target_atom(p->format);
+    if (target == GDK_NONE)
         goto quit;
-    }
 
     GtkSelectionData *sd = gtk_clipboard_wait_for_contents(clipboard, target);
     if (sd) {
@@ -108,26 +142,8 @@ struct PP_Var
 ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type clipboard_type,
                               uint32_t format)
 {
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance_id);
-    if (!pp_i) {
-        trace_error("%s, bad instance\n", __func__);
+    if (!clipboard_type_and_format_are_supported(clipboard_type, format, __func__))
         return PP_MakeUndefined();
-    }
-
-    if (clipboard_type != PP_FLASH_CLIPBOARD_TYPE_STANDARD
-        && clipboard_type != PP_FLASH_CLIPBOARD_TYPE_SELECTION)
-    {
-        trace_error("%s, bad clipboard_type (= %d)\n", __func__, clipboard_type);
-        return PP_MakeUndefined();
-    }
-
-    if (format != PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT
-        && format != PP_FLASH_CLIPBOARD_FORMAT_HTML
-        && format != PP_FLASH_CLIPBOARD_FORMAT_RTF)
-    {
-        trace_error("%s, unknown format (= %d)\n", __func__, format);
-        return PP_MakeUndefined();
-    }
 
     struct clipboard_read_data_param_s p;
     p.clipboard_type =  clipboard_type;
