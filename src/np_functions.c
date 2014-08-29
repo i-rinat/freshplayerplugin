@@ -325,7 +325,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
     p.pp_i =    pp_i;
     ppb_core_call_on_main_thread(0, PP_MakeCCB(_call_plugin_did_create_comt, &p), PP_OK);
-    ppb_message_loop_run_int(p.m_loop, 1);
+    ppb_message_loop_run_nested(p.m_loop);
 
     return NPERR_NO_ERROR;
 }
@@ -376,7 +376,7 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_core_call_on_main_thread(0, PP_MakeCCB(_destroy_instance_comt, &p), PP_OK);
-    ppb_message_loop_run_int(p.m_loop, 1);
+    ppb_message_loop_run_nested(p.m_loop);
 
     if (save)
         *save = NULL;

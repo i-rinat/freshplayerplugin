@@ -176,7 +176,7 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
     p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_get_proxy_for_url_comt, &p), 0);
-    ppb_message_loop_run_int(p.m_loop, 1);
+    ppb_message_loop_run_nested(p.m_loop);
 
     return p.res;
 }

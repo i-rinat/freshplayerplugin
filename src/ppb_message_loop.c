@@ -194,6 +194,12 @@ ppb_message_loop_run(PP_Resource message_loop)
     return ppb_message_loop_run_int(message_loop, 0);
 }
 
+int32_t
+ppb_message_loop_run_nested(PP_Resource message_loop)
+{
+    return ppb_message_loop_run_int(message_loop, 1);
+}
+
 static
 struct timespec
 add_ms(struct timespec t, unsigned int ms)

@@ -143,7 +143,7 @@ ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
     p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_clipboard_is_format_available_comt, &p), 0);
-    ppb_message_loop_run_int(p.m_loop, 1);
+    ppb_message_loop_run_nested(p.m_loop);
 
     return p.result;
 }
@@ -202,7 +202,7 @@ ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type c
     p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_clipboard_read_data_comt, &p), 0);
-    ppb_message_loop_run_int(p.m_loop, 1);
+    ppb_message_loop_run_nested(p.m_loop);
 
     return p.result;
 }
@@ -355,7 +355,7 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
     p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
 
     ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_clipboard_write_data_comt, &p), 0);
-    ppb_message_loop_run_int(p.m_loop, 1);
+    ppb_message_loop_run_nested(p.m_loop);
 
     return p.result;
 }

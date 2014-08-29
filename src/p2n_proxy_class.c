@@ -110,7 +110,7 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
         p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
         ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_method_comt, &p), PP_OK);
-        ppb_message_loop_run_int(p.m_loop, 1);
+        ppb_message_loop_run_nested(p.m_loop);
 
         return p.retval;
     } else {
@@ -188,7 +188,7 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
         ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_invoke_comt, &p), PP_OK);
-        ppb_message_loop_run_int(p.m_loop, 1);
+        ppb_message_loop_run_nested(p.m_loop);
 
         return true;
     } else {
@@ -245,7 +245,7 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
         p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
         ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_property_comt, &p), PP_OK);
-        ppb_message_loop_run_int(p.m_loop, 1);
+        ppb_message_loop_run_nested(p.m_loop);
         return p.retval;
     } else {
         return npobj->_class->hasProperty(npobj, name);
@@ -297,7 +297,7 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
         p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
 
         ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_get_property_comt, &p), PP_OK);
-        ppb_message_loop_run_int(p.m_loop, 1);
+        ppb_message_loop_run_nested(p.m_loop);
         return true;
     } else {
         return npobj->_class->getProperty(npobj, name, result);
