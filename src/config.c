@@ -37,11 +37,12 @@ static struct fpp_config_s default_config = {
     .flash_command_line  = "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .exp_enable_3d       = 0,
     .quirks = {
-        .switch_buttons_2_3      = 0,
-        .dump_resource_histogram = 0,
-        .dump_variables          = 0,
-        .plugin_missing          = 0,
-        .x_synchronize           = 0,
+        .switch_buttons_2_3         = 0,
+        .dump_resource_histogram    = 0,
+        .dump_variables             = 0,
+        .plugin_missing             = 0,
+        .incompatible_npapi_version = 0,
+        .x_synchronize              = 0,
     },
 };
 

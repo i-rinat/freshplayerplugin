@@ -247,6 +247,12 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 
     if (tables_open_display() != 0)
         return NPERR_GENERIC_ERROR;
+
+    if (aNPNFuncs->version < NPVERS_HAS_PLUGIN_THREAD_ASYNC_CALL) {
+        config.quirks.plugin_missing = 1;
+        config.quirks.incompatible_npapi_version = 1;
+    }
+
     load_ppp_module();
 
     return NPERR_NO_ERROR;

@@ -40,6 +40,7 @@ struct fpp_config_s {
         int   dump_resource_histogram;
         int   dump_variables;
         int   plugin_missing;
+        int   incompatible_npapi_version;
         int   x_synchronize;
     } quirks;
 };

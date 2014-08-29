@@ -704,7 +704,13 @@ handle_placeholder_graphics_expose_event(NPP npp, void *event)
 
     // show error text
     cairo_text_extents_t extents;
-    gchar *txt = g_strdup_printf("Failed to load \"%s\"", fpp_config_get_plugin_file_name());
+    gchar *txt;
+
+    if (config.quirks.incompatible_npapi_version) {
+        txt = g_strdup_printf("NPAPI version too old (%d)", npn.version);
+    } else {
+        txt = g_strdup_printf("Failed to load \"%s\"", fpp_config_get_plugin_file_name());
+    }
     cairo_set_font_size(cr, 14);
     cairo_move_to(cr, 10.0, 30.0);
     cairo_text_extents(cr, txt, &extents);
