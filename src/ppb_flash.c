@@ -132,7 +132,7 @@ ppb_flash_draw_glyphs(PP_Instance instance, PP_Resource pp_image_data,
 struct get_proxy_for_url_param_s {
     PP_Instance         instance_id;
     const char         *url;
-    struct PP_Var       res;
+    struct PP_Var       result;
     PP_Resource         m_loop;
     int                 depth;
 };
@@ -144,6 +144,7 @@ _get_proxy_for_url_ptac(void *user_data)
     struct get_proxy_for_url_param_s *p = user_data;
     struct pp_instance_s *pp_i = tables_get_pp_instance(p->instance_id);
 
+    p->result = PP_MakeUndefined();
     if (pp_i && pp_i->npp && npn.getvalueforurl) {
         char *value = NULL;
         uint32_t len = 0;
@@ -151,7 +152,7 @@ _get_proxy_for_url_ptac(void *user_data)
 
         err = npn.getvalueforurl(pp_i->npp, NPNURLVProxy, p->url, &value, &len);
         if (err == NPERR_NO_ERROR) {
-            p->res = ppb_var_var_from_utf8(value, len);
+            p->result = ppb_var_var_from_utf8(value, len);
         }
     }
 
@@ -171,17 +172,16 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
     struct get_proxy_for_url_param_s *p = g_slice_alloc(sizeof(*p));
     p->instance_id =    instance;
     p->url =            url;
-    p->res =            PP_MakeUndefined();
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
     ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_get_proxy_for_url_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
-    struct PP_Var res = p->res;
+    struct PP_Var result = p->result;
     g_slice_free1(sizeof(*p), p);
 
-    return res;
+    return result;
 }
 
 static

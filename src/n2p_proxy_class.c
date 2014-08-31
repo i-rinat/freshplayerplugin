@@ -41,7 +41,7 @@ struct has_property_param_s {
     struct PP_Var       name;
     struct PP_Var      *exception;
     void               *object;
-    bool                res;
+    bool                result;
     PP_Resource         m_loop;
     int                 depth;
 };
@@ -56,9 +56,9 @@ _n2p_has_property_ptac(void *param)
     NPP npp = tables_get_npobj_npp_mapping(p->object);
 
     if (npp)
-        p->res = npn.hasproperty(npp, p->object, identifier);
+        p->result = npn.hasproperty(npp, p->object, identifier);
     else
-        p->res = FALSE;
+        p->result = false;
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
@@ -90,7 +90,7 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
     ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_has_property_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
-    bool result = p->res;
+    bool result = p->result;
     g_slice_free1(sizeof(*p), p);
 
     return result;
@@ -107,7 +107,7 @@ struct get_property_param_s {
     void           *object;
     struct PP_Var   name;
     struct PP_Var  *exception;
-    struct PP_Var   res;
+    struct PP_Var   result;
     PP_Resource     m_loop;
     int             depth;
 };
@@ -130,9 +130,9 @@ _n2p_get_property_ptac(void *param)
         else
             npn.releasevariantvalue(&np_value);
 
-        p->res = var;
+        p->result = var;
     } else {
-        p->res = PP_MakeUndefined();
+        p->result = PP_MakeUndefined();
     }
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
@@ -165,7 +165,7 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
     ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_get_property_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
-    struct PP_Var result = p->res;
+    struct PP_Var result = p->result;
     g_slice_free1(sizeof(*p), p);
 
     return result;
@@ -196,7 +196,7 @@ struct call_param_s {
     uint32_t            argc;
     struct PP_Var      *argv;
     struct PP_Var      *exception;
-    struct PP_Var       res;
+    struct PP_Var       result;
     PP_Resource         m_loop;
     int                 depth;
 };
@@ -230,9 +230,9 @@ _n2p_call_ptac(void *param)
         else
             npn.releasevariantvalue(&np_result);
 
-        p->res = var;
+        p->result = var;
     } else {
-        p->res = PP_MakeUndefined();
+        p->result = PP_MakeUndefined();
     }
 
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
@@ -269,7 +269,7 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
     ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_call_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
-    struct PP_Var result = p->res;
+    struct PP_Var result = p->result;
     g_slice_free1(sizeof(*p), p);
 
     return result;
@@ -280,7 +280,7 @@ struct construct_param_s {
     uint32_t            argc;
     struct PP_Var      *argv;
     struct PP_Var      *exception;
-    struct PP_Var       res;
+    struct PP_Var       result;
     PP_Resource         m_loop;
     int                 depth;
 };
@@ -311,9 +311,9 @@ _n2p_construct_ptac(void *param)
         else
             npn.releasevariantvalue(&np_result);
 
-        p->res = var;
+        p->result = var;
     } else {
-        p->res = PP_MakeUndefined();
+        p->result = PP_MakeUndefined();
     }
 
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
@@ -342,7 +342,7 @@ n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *e
     ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_construct_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
-    struct PP_Var result = p->res;
+    struct PP_Var result = p->result;
     g_slice_free1(sizeof(*p), p);
 
     return result;

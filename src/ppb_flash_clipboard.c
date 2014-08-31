@@ -107,6 +107,7 @@ _clipboard_is_format_available_ptac(void *user_data)
 {
     struct clipboard_is_format_available_param_s *p = user_data;
 
+    p->result = PP_FALSE;
     GtkClipboard *clipboard = get_clipboard_of_type(p->clipboard_type);
     if (!clipboard)
         goto quit;
@@ -138,7 +139,6 @@ ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
     struct clipboard_is_format_available_param_s *p = g_slice_alloc(sizeof(*p));
     p->clipboard_type = clipboard_type;
     p->format =         format;
-    p->result =         PP_FALSE;
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
@@ -165,6 +165,7 @@ _clipboard_read_data_ptac(void *user_data)
 {
     struct clipboard_read_data_param_s *p = user_data;
 
+    p->result = PP_MakeUndefined();
     GtkClipboard *clipboard = get_clipboard_of_type(p->clipboard_type);
     if (!clipboard)
         goto quit;
@@ -200,7 +201,6 @@ ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type c
     struct clipboard_read_data_param_s *p = g_slice_alloc(sizeof(*p));
     p->clipboard_type = clipboard_type;
     p->format =         format;
-    p->result =         PP_MakeUndefined();
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
@@ -261,6 +261,7 @@ _clipboard_write_data_ptac(void *user_data)
     struct clipboard_write_data_param_s *p = user_data;
     struct selection_entry_s item;
 
+    p->result = PP_OK;
     GtkClipboard *clipboard = get_clipboard_of_type(p->clipboard_type);
     if (!clipboard)
         goto quit;
@@ -356,7 +357,6 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
     p->data_item_count =    data_item_count;
     p->formats =            formats;
     p->data_items =         data_items;
-    p->result =             PP_OK;
     p->m_loop =             ppb_message_loop_get_current();
     p->depth =              ppb_message_loop_get_depth(p->m_loop) + 1;
 
