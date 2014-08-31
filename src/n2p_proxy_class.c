@@ -80,17 +80,20 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
         return false;
     }
 
-    struct has_property_param_s p;
-    p.object =      object;
-    p.name =        name;
-    p.exception =   exception;
-    p.m_loop =      ppb_message_loop_get_current();
-    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct has_property_param_s *p = g_slice_alloc(sizeof(*p));
+    p->object =     object;
+    p->name =       name;
+    p->exception =  exception;
+    p->m_loop =     ppb_message_loop_get_current();
+    p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_n2p_has_property_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_has_property_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
-    return p.res;
+    bool result = p->res;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 static
@@ -152,17 +155,20 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
         return PP_MakeUndefined();
     }
 
-    struct get_property_param_s p;
-    p.object =      object;
-    p.name =        name;
-    p.exception =   exception;
-    p.m_loop =      ppb_message_loop_get_current();
-    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct get_property_param_s *p = g_slice_alloc(sizeof(*p));
+    p->object =     object;
+    p->name =       name;
+    p->exception =  exception;
+    p->m_loop =     ppb_message_loop_get_current();
+    p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_n2p_get_property_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_get_property_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
-    return p.res;
+    struct PP_Var result = p->res;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 static
@@ -251,19 +257,22 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
         return PP_MakeUndefined();
     }
 
-    struct call_param_s p;
-    p.object =      object;
-    p.method_name = method_name;
-    p.argc =        argc;
-    p.argv =        argv;
-    p.exception =   exception;
-    p.m_loop =      ppb_message_loop_get_current();
-    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct call_param_s *p = g_slice_alloc(sizeof(*p));
+    p->object =         object;
+    p->method_name =    method_name;
+    p->argc =           argc;
+    p->argv =           argv;
+    p->exception =      exception;
+    p->m_loop =         ppb_message_loop_get_current();
+    p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_n2p_call_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_call_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
-    return p.res;
+    struct PP_Var result = p->res;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 struct construct_param_s {
@@ -322,18 +331,21 @@ static
 struct PP_Var
 n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *exception)
 {
-    struct construct_param_s p;
-    p.object =      object;
-    p.argc =        argc;
-    p.argv =        argv;
-    p.exception =   exception;
-    p.m_loop =      ppb_message_loop_get_current();
-    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct construct_param_s *p = g_slice_alloc(sizeof(*p));
+    p->object =     object;
+    p->argc =       argc;
+    p->argv =       argv;
+    p->exception =  exception;
+    p->m_loop =     ppb_message_loop_get_current();
+    p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_n2p_construct_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_construct_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
-    return p.res;
+    struct PP_Var result = p->res;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 static

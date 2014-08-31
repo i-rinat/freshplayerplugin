@@ -135,17 +135,20 @@ ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
     if (!clipboard_type_and_format_are_supported(clipboard_type, format, __func__))
         return PP_FALSE;
 
-    struct clipboard_is_format_available_param_s p;
-    p.clipboard_type =  clipboard_type;
-    p.format =          format;
-    p.result =          PP_FALSE;
-    p.m_loop =          ppb_message_loop_get_current();
-    p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct clipboard_is_format_available_param_s *p = g_slice_alloc(sizeof(*p));
+    p->clipboard_type = clipboard_type;
+    p->format =         format;
+    p->result =         PP_FALSE;
+    p->m_loop =         ppb_message_loop_get_current();
+    p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_clipboard_is_format_available_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_clipboard_is_format_available_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
-    return p.result;
+    PP_Bool result = p->result;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 struct clipboard_read_data_param_s {
@@ -194,17 +197,20 @@ ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type c
     if (!clipboard_type_and_format_are_supported(clipboard_type, format, __func__))
         return PP_MakeUndefined();
 
-    struct clipboard_read_data_param_s p;
-    p.clipboard_type =  clipboard_type;
-    p.format =          format;
-    p.result =          PP_MakeUndefined();
-    p.m_loop =          ppb_message_loop_get_current();
-    p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct clipboard_read_data_param_s *p = g_slice_alloc(sizeof(*p));
+    p->clipboard_type = clipboard_type;
+    p->format =         format;
+    p->result =         PP_MakeUndefined();
+    p->m_loop =         ppb_message_loop_get_current();
+    p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_clipboard_read_data_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_clipboard_read_data_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
-    return p.result;
+    struct PP_Var result = p->result;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 struct clipboard_write_data_param_s {
@@ -345,19 +351,22 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
             return PP_ERROR_FAILED;
     }
 
-    struct clipboard_write_data_param_s p;
-    p.clipboard_type =  clipboard_type;
-    p.data_item_count = data_item_count;
-    p.formats =         formats;
-    p.data_items =      data_items;
-    p.result =          PP_OK;
-    p.m_loop =          ppb_message_loop_get_current();
-    p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct clipboard_write_data_param_s *p = g_slice_alloc(sizeof(*p));
+    p->clipboard_type =     clipboard_type;
+    p->data_item_count =    data_item_count;
+    p->formats =            formats;
+    p->data_items =         data_items;
+    p->result =             PP_OK;
+    p->m_loop =             ppb_message_loop_get_current();
+    p->depth =              ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_clipboard_write_data_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_clipboard_write_data_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
-    return p.result;
+    int32_t result = p->result;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 PP_Bool

@@ -295,29 +295,32 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     ppb_var_release(full_url);
     pp_resource_release(request_info);
 
-    struct url_loader_open_param_s p;
-    p.url =                 ul->url;
-    p.loader =              loader;
-    p.instance_id =         ul->instance->id;
-    p.method =              ul->method;
-    p.request_headers =     ul->request_headers;
-    p.custom_referrer_url = ul->custom_referrer_url;
-    p.custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
-    p.custom_user_agent =   ul->custom_user_agent;
-    p.target =          ul->target;
-    p.post_len =        ul->post_len;
-    p.post_data =       ul->post_data;
-    p.m_loop =          ppb_message_loop_get_current();
-    p.depth =           ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct url_loader_open_param_s *p = g_slice_alloc(sizeof(*p));
+    p->url =                ul->url;
+    p->loader =             loader;
+    p->instance_id =        ul->instance->id;
+    p->method =             ul->method;
+    p->request_headers =    ul->request_headers;
+    p->custom_referrer_url = ul->custom_referrer_url;
+    p->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
+    p->custom_user_agent =  ul->custom_user_agent;
+    p->target =         ul->target;
+    p->post_len =       ul->post_len;
+    p->post_data =      ul->post_data;
+    p->m_loop =         ppb_message_loop_get_current();
+    p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
     ppb_core_add_ref_resource(loader);  // add ref to ensure data in ul remain accessible
     pp_resource_release(loader);
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_url_loader_open_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_url_loader_open_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
     ppb_core_release_resource(loader);
+    
+    int retval = p->retval;
+    g_slice_free1(sizeof(*p), p);
 
-    if (p.retval != NPERR_NO_ERROR)
+    if (retval != NPERR_NO_ERROR)
         return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
@@ -372,27 +375,30 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ul->method = PP_METHOD_GET;
     ul->ccb = callback;
 
-    struct url_loader_open_param_s p;
-    p.url =                 ul->url;
-    p.loader =              loader;
-    p.instance_id =         ul->instance->id;
-    p.method =              ul->method;
-    p.request_headers =     ul->request_headers;
-    p.custom_referrer_url = ul->custom_referrer_url;
-    p.custom_content_transfer_encoding =  ul->custom_content_transfer_encoding;
-    p.custom_user_agent =   ul->custom_user_agent;
-    p.target =              NULL;
-    p.post_len =            0;
-    p.post_data =           NULL;
-    p.m_loop =              ppb_message_loop_get_current();
-    p.depth =               ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct url_loader_open_param_s *p = g_slice_alloc(sizeof(*p));
+    p->url =                ul->url;
+    p->loader =             loader;
+    p->instance_id =        ul->instance->id;
+    p->method =             ul->method;
+    p->request_headers =    ul->request_headers;
+    p->custom_referrer_url = ul->custom_referrer_url;
+    p->custom_content_transfer_encoding =  ul->custom_content_transfer_encoding;
+    p->custom_user_agent =  ul->custom_user_agent;
+    p->target =             NULL;
+    p->post_len =           0;
+    p->post_data =          NULL;
+    p->m_loop =             ppb_message_loop_get_current();
+    p->depth =              ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_url_loader_open_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_url_loader_open_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
     pp_resource_release(loader);
 
-    if (p.retval != NPERR_NO_ERROR)
+    int retval = p->retval;
+    g_slice_free1(sizeof(*p), p);
+
+    if (retval != NPERR_NO_ERROR)
         return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {

@@ -195,18 +195,21 @@ ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
         return PP_MakeUndefined();
     }
 
-    struct execute_script_param_s p;
-    p.script =      script;
-    p.instance_id = instance;
-    p.m_loop =      ppb_message_loop_get_current();
-    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct execute_script_param_s *p = g_slice_alloc(sizeof(*p));
+    p->script =         script;
+    p->instance_id =    instance;
+    p->m_loop =         ppb_message_loop_get_current();
+    p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
     ppb_var_add_ref(script);
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_execute_script_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_execute_script_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
     ppb_var_release(script);
 
-    return p.result;
+    struct PP_Var result = p->result;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 

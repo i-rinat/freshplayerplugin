@@ -103,16 +103,19 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
     }
 
     if (npobj->_class == &p2n_proxy_class) {
-        struct has_method_param_s p;
-        p.npobj =       npobj;
-        p.name =        name;
-        p.m_loop =      ppb_message_loop_get_for_browser_thread();
-        p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+        struct has_method_param_s *p = g_slice_alloc(sizeof(*p));
+        p->npobj =      npobj;
+        p->name =       name;
+        p->m_loop =     ppb_message_loop_get_for_browser_thread();
+        p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_method_comt, &p), PP_OK);
-        ppb_message_loop_run_nested(p.m_loop);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_method_comt, p), PP_OK);
+        ppb_message_loop_run_nested(p->m_loop);
 
-        return p.retval;
+        bool retval = p->retval;
+        g_slice_free1(sizeof(*p), p);
+
+        return retval;
     } else {
         return npobj->_class->hasMethod(npobj, name);
     }
@@ -178,17 +181,18 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
     }
 
     if (npobj->_class == &p2n_proxy_class) {
-        struct invoke_param_s p;
-        p.npobj =       npobj;
-        p.name =        name;
-        p.args =        args;
-        p.argCount =    argCount;
-        p.result =      result;
-        p.m_loop =      ppb_message_loop_get_for_browser_thread();
-        p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+        struct invoke_param_s *p = g_slice_alloc(sizeof(*p));
+        p->npobj =      npobj;
+        p->name =       name;
+        p->args =       args;
+        p->argCount =   argCount;
+        p->result =     result;
+        p->m_loop =     ppb_message_loop_get_for_browser_thread();
+        p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_invoke_comt, &p), PP_OK);
-        ppb_message_loop_run_nested(p.m_loop);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_invoke_comt, p), PP_OK);
+        ppb_message_loop_run_nested(p->m_loop);
+        g_slice_free1(sizeof(*p), p);
 
         return true;
     } else {
@@ -238,15 +242,19 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
     }
 
     if (npobj->_class == &p2n_proxy_class) {
-        struct has_property_param_s p;
-        p.npobj =       npobj;
-        p.name =        name;
-        p.m_loop =      ppb_message_loop_get_for_browser_thread();
-        p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+        struct has_property_param_s *p = g_slice_alloc(sizeof(*p));
+        p->npobj =      npobj;
+        p->name =       name;
+        p->m_loop =     ppb_message_loop_get_for_browser_thread();
+        p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_property_comt, &p), PP_OK);
-        ppb_message_loop_run_nested(p.m_loop);
-        return p.retval;
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_property_comt, p), PP_OK);
+        ppb_message_loop_run_nested(p->m_loop);
+
+        bool result = p->retval;
+        g_slice_free1(sizeof(*p), p);
+
+        return result;
     } else {
         return npobj->_class->hasProperty(npobj, name);
     }
@@ -289,15 +297,16 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *result)
     }
 
     if (npobj->_class == &p2n_proxy_class) {
-        struct get_property_param_s p;
-        p.npobj =       npobj;
-        p.name =        name;
-        p.result =      result;
-        p.m_loop =      ppb_message_loop_get_for_browser_thread();
-        p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+        struct get_property_param_s *p = g_slice_alloc(sizeof(*p));
+        p->npobj =      npobj;
+        p->name =       name;
+        p->result =     result;
+        p->m_loop =     ppb_message_loop_get_for_browser_thread();
+        p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_get_property_comt, &p), PP_OK);
-        ppb_message_loop_run_nested(p.m_loop);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_get_property_comt, p), PP_OK);
+        ppb_message_loop_run_nested(p->m_loop);
+        g_slice_free1(sizeof(*p), p);
         return true;
     } else {
         return npobj->_class->getProperty(npobj, name, result);

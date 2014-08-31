@@ -322,12 +322,13 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pthread_barrier_destroy(&pp_i->main_thread_barrier);
     }
 
-    struct call_plugin_did_create_param_s p;
-    p.m_loop =  ppb_message_loop_get_for_browser_thread();
-    p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
-    p.pp_i =    pp_i;
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_call_plugin_did_create_comt, &p), PP_OK);
-    ppb_message_loop_run_nested(p.m_loop);
+    struct call_plugin_did_create_param_s *p = g_slice_alloc(sizeof(*p));
+    p->m_loop = ppb_message_loop_get_for_browser_thread();
+    p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
+    p->pp_i =   pp_i;
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(_call_plugin_did_create_comt, p), PP_OK);
+    ppb_message_loop_run_nested(p->m_loop);
+    g_slice_free1(sizeof(*p), p);
 
     return NPERR_NO_ERROR;
 }
@@ -372,13 +373,14 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
 
-    struct destroy_instance_param_s p;
-    p.pp_i =    npp->pdata;
-    p.m_loop =  ppb_message_loop_get_current();
-    p.depth =   ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct destroy_instance_param_s *p = g_slice_alloc(sizeof(*p));
+    p->pp_i =   npp->pdata;
+    p->m_loop = ppb_message_loop_get_current();
+    p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_destroy_instance_comt, &p), PP_OK);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(_destroy_instance_comt, p), PP_OK);
+    ppb_message_loop_run_nested(p->m_loop);
+    g_slice_free1(sizeof(*p), p);
 
     if (save)
         *save = NULL;

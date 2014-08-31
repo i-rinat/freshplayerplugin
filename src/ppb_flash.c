@@ -168,17 +168,20 @@ _get_proxy_for_url_comt(void *user_data, int32_t result)
 struct PP_Var
 ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
 {
-    struct get_proxy_for_url_param_s p;
-    p.instance_id = instance;
-    p.url =         url;
-    p.res =         PP_MakeUndefined();
-    p.m_loop =      ppb_message_loop_get_current();
-    p.depth =       ppb_message_loop_get_depth(p.m_loop) + 1;
+    struct get_proxy_for_url_param_s *p = g_slice_alloc(sizeof(*p));
+    p->instance_id =    instance;
+    p->url =            url;
+    p->res =            PP_MakeUndefined();
+    p->m_loop =         ppb_message_loop_get_current();
+    p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p.m_loop, PP_MakeCCB(_get_proxy_for_url_comt, &p), 0);
-    ppb_message_loop_run_nested(p.m_loop);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_get_proxy_for_url_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
 
-    return p.res;
+    struct PP_Var res = p->res;
+    g_slice_free1(sizeof(*p), p);
+
+    return res;
 }
 
 static
