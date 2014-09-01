@@ -462,7 +462,11 @@ quit:
 NPError
 NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 {
-    trace_info_f("[NPP] {full} %s npp=%p, stream=%p, reason=%d\n", __func__, npp, stream, reason);
+    trace_info_f("[NPP] {full} %s npp=%p, stream={.pdata=%p, .ndata=%p, .url=%s, end=%u, "
+                 "lastmodified=%u, .notifyData=%u, .headers=%s}, reason=%d\n", __func__,
+                 npp, stream->pdata, stream->ndata, stream->url, stream->end,
+                 stream->lastmodified, (unsigned)(size_t)stream->notifyData, "<skipped>", reason);
+
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
 
