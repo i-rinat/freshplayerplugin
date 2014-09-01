@@ -391,9 +391,10 @@ NPError
 NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint16_t *stype)
 {
     trace_info_f("[NPP] {full} %s npp=%p, type=%s, stream={.pdata=%p, .ndata=%p, .url=%s, "
-                 "end=%u, lastmodified=%u, .notifyData=%p, .headers=%s}, seekable=%d\n", __func__,
+                 "end=%u, lastmodified=%u, .notifyData=%u, .headers=%s}, seekable=%d\n", __func__,
                  npp, type, stream->pdata, stream->ndata, stream->url, stream->end,
-                 stream->lastmodified, stream->notifyData, stream->headers, seekable);
+                 stream->lastmodified, (unsigned)(size_t)stream->notifyData, stream->headers,
+                 seekable);
 
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
@@ -520,9 +521,10 @@ int32_t
 NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 {
     trace_info_f("[NPP] {full} %s npp=%p, stream={.pdata=%p, .ndata=%p, .url=%s, end=%u, "
-                 "lastmodified=%u, .notifyData=%p, .headers=<skipped>}, offset=%d, len=%d, buffer=%p\n",
+                 "lastmodified=%u, .notifyData=%u, .headers=<skipped>}, offset=%d, len=%d, "
+                 "buffer=%p\n",
                  __func__, npp, stream->pdata, stream->ndata, stream->url, stream->end,
-                 stream->lastmodified, stream->notifyData, offset, len, buffer);
+                 stream->lastmodified, (unsigned)(size_t)stream->notifyData, offset, len, buffer);
     if (config.quirks.plugin_missing)
         return len;
 
@@ -1114,8 +1116,8 @@ NPP_HandleEvent(NPP npp, void *event)
 void
 NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 {
-    trace_info_f("[NPP] {full} %s npp=%p, url=%s, reason=%d, notifyData=%p\n", __func__,
-                 npp, url, reason, notifyData);
+    trace_info_f("[NPP] {full} %s npp=%p, url=%s, reason=%d, notifyData=%u\n", __func__,
+                 npp, url, reason, (unsigned)(size_t)notifyData);
     // This is no-op. We are handling request in NPP_NewStream function.
     return;
 }
@@ -1229,8 +1231,8 @@ NPP_LostFocus(NPP npp)
 void
 NPP_URLRedirectNotify(NPP npp, const char *url, int32_t status, void *notifyData)
 {
-    trace_info_f("[NPP] {full} %s npp=%p, url=%s, status=%d, notifyData=%p\n", __func__,
-                 npp, url, status, notifyData);
+    trace_info_f("[NPP] {full} %s npp=%p, url=%s, status=%d, notifyData=%u\n", __func__,
+                 npp, url, status, (unsigned)(size_t)notifyData);
 
     PP_Resource loader = (size_t)notifyData;
     if (loader) {
