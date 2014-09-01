@@ -478,6 +478,11 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
     if (!ul)
         return NPERR_NO_ERROR;
 
+    if (ul->redirect_url) {
+        pp_resource_release(loader);
+        return NPERR_NO_ERROR;
+    }
+
     ul->finished_loading = 1;
 
     // execute all remaining tasks in task list
