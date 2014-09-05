@@ -68,7 +68,7 @@ p2n_invalidate(NPObject *npobj)
 
 struct has_method_param_s {
     NPObject           *npobj;
-    NPIdentifier        name;
+    char               *name;
     PP_Resource         m_loop;
     int                 depth;
     bool                result;
@@ -80,11 +80,8 @@ _p2n_has_method_comt(void *user_data, int32_t result)
 {
     struct has_method_param_s *p = user_data;
     struct np_proxy_object_s *obj = (void *)p->npobj;
-
-    char *s = npn.utf8fromidentifier(p->name);
     struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var method_name = ppb_var_var_from_utf8_z(s);
-    npn.memfree(s);
+    struct PP_Var method_name = ppb_var_var_from_utf8_z(p->name);
 
     p->result = ppb_var_has_method(obj->ppobj, method_name, &exception);
 
@@ -112,7 +109,7 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
     if (npobj->_class == &p2n_proxy_class) {
         struct has_method_param_s *p = g_slice_alloc(sizeof(*p));
         p->npobj =      npobj;
-        p->name =       name;
+        p->name =       npn.utf8fromidentifier(name);
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
@@ -120,6 +117,7 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
         ppb_message_loop_run_nested(p->m_loop);
 
         bool result = p->result;
+        npn.memfree(p->name);
         g_slice_free1(sizeof(*p), p);
         return result;
     } else {
@@ -129,7 +127,7 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
 
 struct invoke_param_s {
     NPObject               *npobj;
-    NPIdentifier            name;
+    char                   *name;
     const NPVariant        *args;
     uint32_t                argCount;
     NPVariant              *np_result;
@@ -147,11 +145,9 @@ _p2n_invoke_comt(void *user_data, int32_t result)
 
     p->result = true;
     struct np_proxy_object_s *obj = (void *)p->npobj;
-    char *s = npn.utf8fromidentifier(p->name);
     struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var method_name = ppb_var_var_from_utf8_z(s);
+    struct PP_Var method_name = ppb_var_var_from_utf8_z(p->name);
     struct PP_Var res;
-    npn.memfree(s);
 
     struct PP_Var *pp_args = malloc(p->argCount * sizeof(*pp_args));
     for (k = 0; k < p->argCount; k ++) {
@@ -198,7 +194,7 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
     if (npobj->_class == &p2n_proxy_class) {
         struct invoke_param_s *p = g_slice_alloc(sizeof(*p));
         p->npobj =      npobj;
-        p->name =       name;
+        p->name =       npn.utf8fromidentifier(name);
         p->args =       args;
         p->argCount =   argCount;
         p->np_result =  np_result;
@@ -208,6 +204,7 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_p2n_invoke_prepare_comt, p), 0);
         ppb_message_loop_run_nested(p->m_loop);
         bool result = p->result;
+        npn.memfree(p->name);
         g_slice_free1(sizeof(*p), p);
         return result;
     } else {
@@ -223,7 +220,7 @@ p2n_invoke_default(NPObject *npobj, const NPVariant *args, uint32_t argCount, NP
 
 struct has_property_param_s {
     NPObject           *npobj;
-    NPIdentifier        name;
+    char               *name;
     PP_Resource         m_loop;
     int                 depth;
     bool                result;
@@ -236,10 +233,8 @@ _p2n_has_property_comt(void *user_data, int32_t result)
     struct has_property_param_s *p = user_data;
 
     struct np_proxy_object_s *obj = (void *)p->npobj;
-    char *s = npn.utf8fromidentifier(p->name);
     struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var property_name = ppb_var_var_from_utf8_z(s);
-    npn.memfree(s);
+    struct PP_Var property_name = ppb_var_var_from_utf8_z(p->name);
 
     p->result = ppb_var_has_property(obj->ppobj, property_name, &exception);
     ppb_var_release(property_name);
@@ -266,7 +261,7 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
     if (npobj->_class == &p2n_proxy_class) {
         struct has_property_param_s *p = g_slice_alloc(sizeof(*p));
         p->npobj =      npobj;
-        p->name =       name;
+        p->name =       npn.utf8fromidentifier(name);
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
@@ -274,6 +269,7 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
         ppb_message_loop_run_nested(p->m_loop);
 
         bool result = p->result;
+        npn.memfree(p->name);
         g_slice_free1(sizeof(*p), p);
         return result;
     } else {
@@ -283,7 +279,7 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
 
 struct get_property_param_s {
     NPObject               *npobj;
-    NPIdentifier            name;
+    char                   *name;
     NPVariant              *np_result;
     bool                    result;
     PP_Resource             m_loop;
@@ -295,12 +291,9 @@ void
 _p2n_get_property_comt(void *user_data, int32_t result)
 {
     struct get_property_param_s *p = user_data;
-
     struct np_proxy_object_s *obj = (void *)p->npobj;
-    char *s = npn.utf8fromidentifier(p->name);
     struct PP_Var exception = PP_MakeUndefined();
-    struct PP_Var property_name = ppb_var_var_from_utf8_z(s);
-    npn.memfree(s);
+    struct PP_Var property_name = ppb_var_var_from_utf8_z(p->name);
     struct PP_Var res = ppb_var_get_property(obj->ppobj, property_name, &exception);
 
     p->result = true;
@@ -329,7 +322,7 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *np_result)
     if (npobj->_class == &p2n_proxy_class) {
         struct get_property_param_s *p = g_slice_alloc(sizeof(*p));
         p->npobj =      npobj;
-        p->name =       name;
+        p->name =       npn.utf8fromidentifier(name);
         p->np_result =  np_result;
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
@@ -337,6 +330,7 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *np_result)
         ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_p2n_get_property_prepare_comt, p), 0);
         ppb_message_loop_run_nested(p->m_loop);
         bool result = p->result;
+        npn.memfree(p->name);
         g_slice_free1(sizeof(*p), p);
         return result;
     } else {
