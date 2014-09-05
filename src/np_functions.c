@@ -982,6 +982,17 @@ handle_button_press_release_event(NPP npp, void *event)
     return 1;
 }
 
+int
+is_printable_sequence(const char *s, size_t len)
+{
+    const unsigned char *u = (const unsigned char *)s;
+    if (len == 1 && 0x20 <= u[0] && u[0] <= 0x7e)
+        return 1;
+    if (len > 1)
+        return 1;
+    return 0;
+}
+
 int16_t
 handle_key_press_release_event(NPP npp, void *event)
 {
@@ -1017,7 +1028,7 @@ handle_key_press_release_event(NPP npp, void *event)
     event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
                                         : PP_INPUTEVENT_TYPE_KEYUP;
 
-    if (ev->type == KeyPress && charcount > 0) {
+    if (ev->type == KeyPress && is_printable_sequence(buffer, charcount)) {
         struct PP_Var character_text = ppb_var_var_from_utf8(buffer, charcount);
         pp_event = ppb_keyboard_input_event_create(
                         pp_i->id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
