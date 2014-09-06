@@ -350,10 +350,72 @@ p2n_remove_property(NPObject *npobj, NPIdentifier name)
     return true;
 }
 
+struct enumerate_param_s {
+    NPObject           *npobj;
+    uint32_t            count;
+    struct PP_Var      *values;
+    bool                result;
+    PP_Resource         m_loop;
+    int                 depth;
+};
+
+static
+void
+_p2n_enumerate_comt(void *user_data, int32_t result)
+{
+    struct enumerate_param_s *p = user_data;
+    struct np_proxy_object_s *obj = (void *)p->npobj;
+    struct PP_Var exception;
+
+    p->count = 0;
+    p->values = NULL;
+    p->result = true;
+
+    ppb_var_get_all_property_names(obj->ppobj, &p->count, &p->values, &exception);
+
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+_p2n_enumerate_prepare_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_enumerate_comt, user_data), PP_OK);
+}
+
 bool
 p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
 {
-    return true;
+    if (npobj->_class == &p2n_proxy_class) {
+        struct enumerate_param_s *p = g_slice_alloc(sizeof(*p));
+        p->npobj =      npobj;
+        p->m_loop =     ppb_message_loop_get_for_browser_thread();
+        p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
+
+        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_p2n_enumerate_prepare_comt, p), 0);
+        ppb_message_loop_run_nested(p->m_loop);
+        bool result = p->result;
+        *count = p->count;
+
+        *value = npn.memalloc(p->count * sizeof(NPIdentifier));
+        char *tmpbuf = malloc(1);
+        for (uint32_t k = 0; k < p->count; k ++) {
+            uint32_t len = 0;
+            const char *s = ppb_var_var_to_utf8(p->values[k], &len);
+
+            // make zero-terminated string
+            tmpbuf = realloc(tmpbuf, len + 1);
+            memcpy(tmpbuf, s, len);
+            tmpbuf[len] = 0;
+            value[k] = npn.getstringidentifier(tmpbuf);
+        }
+        free(tmpbuf);
+        g_slice_free1(sizeof(*p), p);
+
+        return result;
+    } else {
+        return npobj->_class->enumerate(npobj, value, count);
+    }
 }
 
 bool
@@ -457,7 +519,7 @@ TRACE_WRAPPER
 bool
 trace_p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {full} %s npobj=%p\n", __func__+6, npobj);
     return p2n_enumerate(npobj, value, count);
 }
 
@@ -483,6 +545,6 @@ struct NPClass p2n_proxy_class = {
     .getProperty =      TWRAPF(p2n_get_property),
     .setProperty =      TWRAPZ(p2n_set_property),
     .removeProperty =   TWRAPZ(p2n_remove_property),
-    .enumerate =        TWRAPZ(p2n_enumerate),
+    .enumerate =        TWRAPF(p2n_enumerate),
     .construct =        TWRAPZ(p2n_construct),
 };
