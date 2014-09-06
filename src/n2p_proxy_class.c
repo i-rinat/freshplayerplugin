@@ -352,8 +352,11 @@ static
 void
 n2p_deallocate(void *object)
 {
+    NPObject *np_object = object;
+    uint32_t ref_cnt = np_object->referenceCount;
     npn.releaseobject(object);
-    tables_remove_npobj_npp_mapping(object);
+    if (ref_cnt <= 1)
+        tables_remove_npobj_npp_mapping(object);
 }
 
 
