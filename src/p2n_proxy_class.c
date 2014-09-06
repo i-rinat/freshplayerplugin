@@ -64,6 +64,9 @@ p2n_deallocate(NPObject *npobj)
 void
 p2n_invalidate(NPObject *npobj)
 {
+    // No-op.
+    // According to spec, this call is always followed by deallocate(), so it's safe
+    // to do nothing here.
 }
 
 struct has_method_param_s {
@@ -446,7 +449,7 @@ TRACE_WRAPPER
 void
 trace_p2n_invalidate(NPObject *npobj)
 {
-    trace_info("[CLS] {zilch} %s\n", __func__+6);
+    trace_info("[CLS] {full} %s npobj=%p\n", __func__+6, npobj);
     p2n_invalidate(npobj);
 }
 
@@ -537,7 +540,7 @@ struct NPClass p2n_proxy_class = {
     .structVersion =    NP_CLASS_STRUCT_VERSION,
     .allocate =         TWRAPF(p2n_allocate),
     .deallocate =       TWRAPF(p2n_deallocate),
-    .invalidate =       TWRAPZ(p2n_invalidate),
+    .invalidate =       TWRAPF(p2n_invalidate),
     .hasMethod =        TWRAPF(p2n_has_method),
     .invoke =           TWRAPF(p2n_invoke),
     .invokeDefault =    TWRAPZ(p2n_invoke_default),
