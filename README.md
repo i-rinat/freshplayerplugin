@@ -39,7 +39,12 @@ project. It will benifit other browsers too, not only Firefox.
 Status
 ======
 
-Eternal alpha. I use it on day-to-day basis though.
+Mostly works, but some essential APIs are still to be implemented.
+
+Known issues
+============
+
+described [here](doc/known-issues.md).
 
 Security note
 =============
