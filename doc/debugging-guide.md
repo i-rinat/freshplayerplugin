@@ -78,3 +78,13 @@ If you need to trace which calls original plugin plugin makes while running unde
 use [ppapi-trace](https://github.com/i-rinat/ppapi-trace). It's not an easy to use tool, you'll
 need to dig into code if you want to use it for anything other than just printing function names
 to the console.
+
+## Verbose tracing
+
+Reconfiguring project with
+```
+$ cmake -DTRACE_ALL=1 ..
+```
+and subsequent rebuild will enable verbose tracing. There will be every API call in standard output,
+not only unimplemented functions. Verbose tracing can be enabled on per-file basis. One need to add
+`#define TRACE_ALL` line at the top of a source file.
