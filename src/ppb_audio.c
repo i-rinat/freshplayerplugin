@@ -70,71 +70,47 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
     snd_pcm_hw_params_t *hw_params;
     snd_pcm_sw_params_t *sw_params;
 
-#define ERR_CHECK(errcode, funcname, jumpoutstatement)                          \
-    if (errcode < 0) {                                                          \
-        trace_error("%s, " #funcname ", %s\n", __func__, snd_strerror(errcode));\
-        jumpoutstatement;                                                       \
-    }
+#define CHECK_A(funcname, params)                                                       \
+    do {                                                                                \
+        int errcode___ = funcname params;                                               \
+        if (errcode___ < 0) {                                                           \
+            trace_error("%s, " #funcname ", %s\n", __func__, snd_strerror(errcode___)); \
+            goto err;                                                                   \
+        }                                                                               \
+    } while (0)
 
-    int res, dir;
-    res = snd_pcm_open(&a->ph, "default", SND_PCM_STREAM_PLAYBACK, 0);
-    ERR_CHECK(res, snd_pcm_open, goto err);
 
-    res = snd_pcm_hw_params_malloc(&hw_params);
-    ERR_CHECK(res, snd_pcm_hw_params_malloc, goto err);
-
-    res = snd_pcm_hw_params_any(a->ph, hw_params);
-    ERR_CHECK(res, snd_pcm_hw_params_any, goto err);
-
-    res = snd_pcm_hw_params_set_access(a->ph, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
-    ERR_CHECK(res, snd_pcm_hw_params_set_access, goto err);
-
-    res = snd_pcm_hw_params_set_format(a->ph, hw_params, SND_PCM_FORMAT_S16_LE);
-    ERR_CHECK(res, snd_pcm_hw_params_set_format, goto err);
-
-    res = snd_pcm_hw_params_set_rate_near(a->ph, hw_params, &a->sample_rate, 0);
-    ERR_CHECK(res, snd_pcm_hw_params_set_rate_near, goto err);
-
-    res = snd_pcm_hw_params_set_channels(a->ph, hw_params, 2);
-    ERR_CHECK(res, snd_pcm_hw_params_set_channels, goto err);
+    CHECK_A(snd_pcm_open, (&a->ph, "default", SND_PCM_STREAM_PLAYBACK, 0));
+    CHECK_A(snd_pcm_hw_params_malloc, (&hw_params));
+    CHECK_A(snd_pcm_hw_params_any, (a->ph, hw_params));
+    CHECK_A(snd_pcm_hw_params_set_access, (a->ph, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED));
+    CHECK_A(snd_pcm_hw_params_set_format, (a->ph, hw_params, SND_PCM_FORMAT_S16_LE));
+    CHECK_A(snd_pcm_hw_params_set_rate_near, (a->ph, hw_params, &a->sample_rate, 0));
+    CHECK_A(snd_pcm_hw_params_set_channels, (a->ph, hw_params, 2));
 
     unsigned int period_time = (long long)a->sample_frame_count * 1000 * 1000 / a->sample_rate;
     period_time = CLAMP(period_time,
                         1000 * config.audio_buffer_min_ms,
                         1000 * config.audio_buffer_max_ms);
-    dir = 1;
-    res = snd_pcm_hw_params_set_period_time_near(a->ph, hw_params, &period_time, &dir);
-    ERR_CHECK(res, snd_pcm_hw_params_set_period_time_near, goto err);
+    int dir = 1;
+    CHECK_A(snd_pcm_hw_params_set_period_time_near, (a->ph, hw_params, &period_time, &dir));
 
     unsigned int buffer_time = 4 * period_time;
     dir = 1;
-    res = snd_pcm_hw_params_set_buffer_time_near(a->ph, hw_params, &buffer_time, &dir);
-    ERR_CHECK(res, snd_pcm_hw_params_set_buffer_time_near, goto err);
+    CHECK_A(snd_pcm_hw_params_set_buffer_time_near, (a->ph, hw_params, &buffer_time, &dir));
 
     dir = 0;
-    res = snd_pcm_hw_params_get_buffer_time(hw_params, &buffer_time, &dir);
-    ERR_CHECK(res, snd_pcm_hw_params_get_buffer_time, goto err);
-
-    res = snd_pcm_hw_params(a->ph, hw_params);
-    ERR_CHECK(res, snd_pcm_hw_params, goto err);
-
+    CHECK_A(snd_pcm_hw_params_get_buffer_time, (hw_params, &buffer_time, &dir));
+    CHECK_A(snd_pcm_hw_params, (a->ph, hw_params));
     snd_pcm_hw_params_free(hw_params);
 
-    res = snd_pcm_sw_params_malloc(&sw_params);
-    ERR_CHECK(res, snd_pcm_sw_params_malloc, goto err);
-
-    res = snd_pcm_sw_params_current(a->ph, sw_params);
-    ERR_CHECK(res, snd_pcm_sw_params_current, goto err);
-
-    res = snd_pcm_sw_params(a->ph, sw_params);
-    ERR_CHECK(res, snd_pcm_sw_params, goto err);
-
-    res = snd_pcm_prepare(a->ph);
-    ERR_CHECK(res, snd_pcm_prepare, goto err);
-
+    CHECK_A(snd_pcm_sw_params_malloc, (&sw_params));
+    CHECK_A(snd_pcm_sw_params_current, (a->ph, sw_params));
+    CHECK_A(snd_pcm_sw_params, (a->ph, sw_params));
+    CHECK_A(snd_pcm_prepare, (a->ph));
     snd_pcm_sw_params_free(sw_params);
 
-#undef ERR_CHECK
+#undef CHECK_A
 
     a->callback_1_0 = audio_callback_1_0;
     a->callback_1_1 = audio_callback_1_1;
