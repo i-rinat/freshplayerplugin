@@ -33,6 +33,7 @@
 #include "tables.h"
 #include <ppapi/c/pp_errors.h>
 #include "ppb_core.h"
+#include "ppb_opengles2.h"
 
 
 int32_t
@@ -293,6 +294,8 @@ _call_invalidaterect_ptac(void *param)
 int32_t
 ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
+    ppb_opengles2_Flush(context);
+
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
     if (!g3d) {
         trace_error("%s, bad resource\n", __func__);
