@@ -1030,7 +1030,7 @@ handle_key_press_release_event(NPP npp, void *event)
 
     if (ev->type == KeyPress && is_printable_sequence(buffer, charcount)) {
         struct PP_Var character_text = ppb_var_var_from_utf8(buffer, charcount);
-        pp_event = ppb_keyboard_input_event_create(
+        pp_event = ppb_keyboard_input_event_create_1_0(
                         pp_i->id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
                         pp_keycode, character_text);
         ppb_var_release(character_text);
@@ -1038,8 +1038,8 @@ handle_key_press_release_event(NPP npp, void *event)
         ppp_handle_input_event_helper(pp_i, pp_event);
     }
 
-    pp_event = ppb_keyboard_input_event_create(pp_i->id, event_type, ev->time/1.0e6,
-                                               mod, pp_keycode, PP_MakeUndefined());
+    pp_event = ppb_keyboard_input_event_create_1_0(pp_i->id, event_type, ev->time/1.0e6,
+                                                   mod, pp_keycode, PP_MakeUndefined());
     ppp_handle_input_event_helper(pp_i, pp_event);
     return 1;
 }

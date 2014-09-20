@@ -117,6 +117,7 @@ extern const struct PPB_InputEvent_1_0              ppb_input_event_interface_1_
 extern const struct PPB_Instance_1_0                ppb_instance_interface_1_0;
 extern const struct PPB_Instance_Private_0_1        ppb_instance_private_interface_0_1;
 extern const struct PPB_KeyboardInputEvent_1_0      ppb_keyboard_input_event_interface_1_0;
+extern const struct PPB_KeyboardInputEvent_1_2      ppb_keyboard_input_event_interface_1_2;
 extern const struct PPB_Memory_Dev_0_1              ppb_memory_dev_interface_0_1;
 extern const struct PPB_MouseInputEvent_1_1         ppb_mouse_input_event_interface_1_1;
 extern const struct PPB_NaCl_Private_1_0            ppb_nacl_private_interface_1_0;
@@ -205,6 +206,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_MOUSE_INPUT_EVENT_INTERFACE_1_1,    ppb_mouse_input_event_interface_1_1)
     ELSEIFBLOCK(PPB_WHEEL_INPUT_EVENT_INTERFACE_1_0,    ppb_wheel_input_event_interface_1_0)
     ELSEIFBLOCK(PPB_KEYBOARD_INPUT_EVENT_INTERFACE_1_0, ppb_keyboard_input_event_interface_1_0)
+    ELSEIFBLOCK(PPB_KEYBOARD_INPUT_EVENT_INTERFACE_1_2, ppb_keyboard_input_event_interface_1_2)
     ELSEIFBLOCK(PPB_TOUCH_INPUT_EVENT_INTERFACE_1_0,    ppb_touch_input_event_interface_1_0)
     ELSEIFBLOCK(PPB_IME_INPUT_EVENT_INTERFACE_1_0,      ppb_ime_input_event_interface_1_0)
     ELSEIFBLOCK(PPB_INSTANCE_INTERFACE_1_0,             ppb_instance_interface_1_0)

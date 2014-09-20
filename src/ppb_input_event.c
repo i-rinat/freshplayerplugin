@@ -328,9 +328,18 @@ ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event)
 }
 
 PP_Resource
-ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
-                                PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
-                                struct PP_Var character_text)
+ppb_keyboard_input_event_create_1_0(PP_Instance instance, PP_InputEvent_Type type,
+                                    PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
+                                    struct PP_Var character_text)
+{
+    return ppb_keyboard_input_event_create_1_2(instance, type, time_stamp, modifiers, key_code,
+                                               character_text, PP_MakeUndefined());
+}
+
+PP_Resource
+ppb_keyboard_input_event_create_1_2(PP_Instance instance, PP_InputEvent_Type type,
+                                    PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
+                                    struct PP_Var character_text, struct PP_Var code)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
@@ -349,7 +358,9 @@ ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
     ie->modifiers = modifiers;
     ie->key_code = key_code;
     ie->character_text = character_text;
+    ie->code = code;
     ppb_var_add_ref(character_text);
+    ppb_var_add_ref(code);
 
     pp_resource_release(input_event);
     return input_event;
@@ -405,6 +416,12 @@ ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
     ppb_var_add_ref(character_text);
     pp_resource_release(character_event);
     return character_text;
+}
+
+struct PP_Var
+ppb_keyboard_input_event_get_code(PP_Resource key_event)
+{
+    return PP_MakeUndefined();
 }
 
 PP_Resource
@@ -668,17 +685,35 @@ trace_ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event)
 
 TRACE_WRAPPER
 PP_Resource
-trace_ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
-                                      PP_TimeTicks time_stamp, uint32_t modifiers,
-                                      uint32_t key_code, struct PP_Var character_text)
+trace_ppb_keyboard_input_event_create_1_0(PP_Instance instance, PP_InputEvent_Type type,
+                                          PP_TimeTicks time_stamp, uint32_t modifiers,
+                                          uint32_t key_code, struct PP_Var character_text)
 {
     char *s_character_text = trace_var_as_string(character_text);
     trace_info("[PPB] {full} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
                "key_code=%u, character_text=%s\n", __func__+6, instance, type, time_stamp,
                modifiers, key_code, s_character_text);
     g_free(s_character_text);
-    return ppb_keyboard_input_event_create(instance, type, time_stamp, modifiers, key_code,
-                                           character_text);
+    return ppb_keyboard_input_event_create_1_0(instance, type, time_stamp, modifiers, key_code,
+                                               character_text);
+}
+
+TRACE_WRAPPER
+PP_Resource
+trace_ppb_keyboard_input_event_create_1_2(PP_Instance instance, PP_InputEvent_Type type,
+                                          PP_TimeTicks time_stamp, uint32_t modifiers,
+                                          uint32_t key_code, struct PP_Var character_text,
+                                          struct PP_Var code)
+{
+    char *s_character_text = trace_var_as_string(character_text);
+    char *s_code = trace_var_as_string(code);
+    trace_info("[PPB] {full} %s instance=%d, type=%d, time_stamp=%f, modifiers=0x%x, "
+               "key_code=%u, character_text=%s, code=%s\n", __func__+6, instance, type, time_stamp,
+               modifiers, key_code, s_character_text, s_code);
+    g_free(s_character_text);
+    g_free(s_code);
+    return ppb_keyboard_input_event_create_1_2(instance, type, time_stamp, modifiers, key_code,
+                                               character_text, code);
 }
 
 TRACE_WRAPPER
@@ -704,6 +739,15 @@ trace_ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
     trace_info("[PPB] {full} %s character_event=%d\n", __func__+6, character_event);
     return ppb_keyboard_input_event_get_character_text(character_event);
 }
+
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_keyboard_input_event_get_code(PP_Resource key_event)
+{
+    trace_info("[PPB] {zilch} %s key_event=%d\n", __func__+6, key_event);
+    return ppb_keyboard_input_event_get_code(key_event);
+}
+
 
 TRACE_WRAPPER
 PP_Resource
@@ -859,10 +903,18 @@ const struct PPB_WheelInputEvent_1_0 ppb_wheel_input_event_interface_1_0 = {
 };
 
 const struct PPB_KeyboardInputEvent_1_0 ppb_keyboard_input_event_interface_1_0 = {
-    .Create =               TWRAPF(ppb_keyboard_input_event_create),
+    .Create =               TWRAPF(ppb_keyboard_input_event_create_1_0),
     .IsKeyboardInputEvent = TWRAPF(ppb_keyboard_input_event_is_keyboard_input_event),
     .GetKeyCode =           TWRAPF(ppb_keyboard_input_event_get_key_code),
     .GetCharacterText =     TWRAPF(ppb_keyboard_input_event_get_character_text),
+};
+
+const struct PPB_KeyboardInputEvent_1_2 ppb_keyboard_input_event_interface_1_2 = {
+    .Create =               TWRAPF(ppb_keyboard_input_event_create_1_2),
+    .IsKeyboardInputEvent = TWRAPF(ppb_keyboard_input_event_is_keyboard_input_event),
+    .GetKeyCode =           TWRAPF(ppb_keyboard_input_event_get_key_code),
+    .GetCharacterText =     TWRAPF(ppb_keyboard_input_event_get_character_text),
+    .GetCode =              TWRAPZ(ppb_keyboard_input_event_get_code),
 };
 
 const struct PPB_TouchInputEvent_1_0 ppb_touch_input_event_interface_1_0 = {

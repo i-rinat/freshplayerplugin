@@ -93,9 +93,14 @@ PP_Bool
 ppb_wheel_input_event_get_scroll_by_page(PP_Resource wheel_event);
 
 PP_Resource
-ppb_keyboard_input_event_create(PP_Instance instance, PP_InputEvent_Type type,
-                                PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
-                                struct PP_Var character_text);
+ppb_keyboard_input_event_create_1_0(PP_Instance instance, PP_InputEvent_Type type,
+                                    PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
+                                    struct PP_Var character_text);
+
+PP_Resource
+ppb_keyboard_input_event_create_1_2(PP_Instance instance, PP_InputEvent_Type type,
+                                    PP_TimeTicks time_stamp, uint32_t modifiers, uint32_t key_code,
+                                    struct PP_Var character_text, struct PP_Var code);
 
 PP_Bool
 ppb_keyboard_input_event_is_keyboard_input_event(PP_Resource resource);

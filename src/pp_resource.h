@@ -316,6 +316,7 @@ struct pp_input_event_s {
     PP_Bool                     scroll_by_page;
     uint32_t                    key_code;
     struct PP_Var               character_text;
+    struct PP_Var               code;
 };
 
 struct pp_flash_font_file_s {
