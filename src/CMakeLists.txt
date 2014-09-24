@@ -5,6 +5,8 @@ endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+add_subdirectory(uri_parser)
+
 add_library(freshwrapper-obj OBJECT
     async_network.c
     config.c
@@ -71,6 +73,7 @@ add_library(freshwrapper-obj OBJECT
 add_library(freshwrapper-pepperflash SHARED
     $<TARGET_OBJECTS:freshwrapper-obj>
     $<TARGET_OBJECTS:parson-obj>
+    $<TARGET_OBJECTS:uri-parser-obj>
     config_pepperflash.c
 )
 

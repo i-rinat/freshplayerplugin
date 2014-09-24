@@ -6,6 +6,7 @@ set(test_list
     test_ppb_char_set
     test_ppb_flash_file_modulelocal
     test_ppb_url_request_info
+    test_uri_parser
 )
 
 link_directories(${REQ_LIBRARY_DIRS})
@@ -18,6 +19,7 @@ foreach(item ${test_list})
         ${item}.c
         $<TARGET_OBJECTS:freshwrapper-obj>
         $<TARGET_OBJECTS:parson-obj>
+        $<TARGET_OBJECTS:uri-parser-obj>
         ../src/config_pepperflash.c)
     target_link_libraries(${item}
         "-Wl,-z,muldefs"

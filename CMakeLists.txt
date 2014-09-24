@@ -17,6 +17,12 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g3")
 # request pthreads
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
 
+# find Ragel
+find_program(RAGEL ragel)
+if (${RAGEL} STREQUAL "RAGEL-NOTFOUND")
+    message(FATAL_ERROR "Ragel State Machine Compiler not found")
+endif()
+
 # dependencies
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(REQ
