@@ -32,7 +32,6 @@ pkg_check_modules(REQ
     xinerama
     egl
     glesv2
-    liburiparser
     libconfig
     libevent
     libevent_pthreads
