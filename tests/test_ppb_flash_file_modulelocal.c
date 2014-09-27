@@ -32,6 +32,10 @@ main(void)
     test_case(".", "/start/");
     test_case("../", "/start/");
     test_case("./", "/start/");
+    test_case("g..", "/start/g..");
+    test_case("g.", "/start/g.");
+    test_case("g../a", "/start/g../a");
+    test_case("g./a", "/start/g./a");
 
     printf("pass\n");
     return 0;

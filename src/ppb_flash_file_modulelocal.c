@@ -50,6 +50,7 @@ to_abs_path(const char *root, const char *s)
     char *abs_path = NULL;
     char *src, *dst;
     int dot_cnt = 0;
+    int after_slash = 1;
 
     rel_path = g_strdup_printf("/%s", s);
     src = dst = rel_path;
@@ -68,21 +69,24 @@ to_abs_path(const char *root, const char *s)
             }
             *dst++ = '/';
             dot_cnt = 0;
+            after_slash = 1;
             break;
         case '.':
             *dst++ = '.';
-            dot_cnt++;
+            if (after_slash)
+                dot_cnt ++;
             break;
         default:
             dot_cnt = 0;
+            after_slash = 0;
             *dst++ = *src;
             break;
         }
         src++;
     }
 
-    // treat ending with . or .. as imaginary slash
-    if (dot_cnt == 1 || dot_cnt == 2) {
+    // treat trailing "/." and "/.."
+    if (after_slash && (dot_cnt == 1 || dot_cnt == 2)) {
         for (int k = 0; k < dot_cnt; k ++) {
             while (dst > rel_path && *(dst - 1) != '/')
                 dst --;
