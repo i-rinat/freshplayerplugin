@@ -46,8 +46,8 @@
     }
 
     scheme =    [^:/?#]+        >{mark.scheme = p;}   %fin_scheme;
-    username =  [^/?#@:]+       >{mark.username = p;} %fin_username;
-    password =  [^/?#@]+        >{mark.password = p;} %fin_password;
+    username =  [^/?#@:]+       >{mark.username = p; end_username = p;} %fin_username;
+    password =  [^/?#@]+        >{mark.password = p; end_password = p;} %fin_password;
     host =      [^/?#@:]+       >{mark.host = p;}     %fin_host;
     port =      digit+          >{mark.port = p;}     %fin_port;
     path =      ([^?#]*)        >{mark.path = p;}     %fin_path;

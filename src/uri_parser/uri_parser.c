@@ -81,7 +81,7 @@ uri_parser_parse_uri(const char *s, struct PP_URLComponents_Dev *components)
         const char *query;
         const char *fragment;
     } mark;
-    const char *end_username, *end_password;
+    const char *end_username = NULL, *end_password = NULL;
     int cs;
     struct PP_URLComponents_Dev c2;
 
