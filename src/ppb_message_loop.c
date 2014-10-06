@@ -56,6 +56,7 @@ ppb_message_loop_create(PP_Instance instance)
 
     ml->async_q = g_async_queue_new();
     ml->int_q = g_queue_new();
+    ml->depth = 1;
 
     pp_resource_release(message_loop);
     return message_loop;
@@ -191,13 +192,13 @@ time_compare_func(gconstpointer a, gconstpointer b, gpointer user_data)
 int32_t
 ppb_message_loop_run(PP_Resource message_loop)
 {
-    return ppb_message_loop_run_int(message_loop, 0);
+    return ppb_message_loop_run_int(message_loop, 0, 1);
 }
 
 int32_t
 ppb_message_loop_run_nested(PP_Resource message_loop)
 {
-    return ppb_message_loop_run_int(message_loop, 1);
+    return ppb_message_loop_run_int(message_loop, 1, 1);
 }
 
 static
@@ -215,7 +216,7 @@ add_ms(struct timespec t, unsigned int ms)
 }
 
 int32_t
-ppb_message_loop_run_int(PP_Resource message_loop, int nested)
+ppb_message_loop_run_int(PP_Resource message_loop, int nested, int increase_depth)
 {
     if (this_thread_message_loop != message_loop) {
         trace_error("%s, not attached to current thread\n", __func__);
@@ -245,7 +246,8 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested)
 
     ml->running = 1;
     ml->teardown = 0;
-    ml->depth ++;
+    if (increase_depth)
+        ml->depth++;
 
     int teardown = 0;
     int destroy_ml = 0;
@@ -267,15 +269,15 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested)
                 // remove task from the queue
                 g_queue_pop_head(int_q);
 
-                if (task->terminate) {
-                    // check if depth is correct
-                    if (task->depth != depth) {
-                        // wrong, reschedule it a bit later
-                        task->when = add_ms(now, 10);
-                        g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
-                        continue;
-                    }
+                // check if depth is correct
+                if (task->depth > 0 && task->depth < depth) {
+                    // wrong, reschedule it a bit later
+                    task->when = add_ms(now, 10);
+                    g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
+                    continue;
+                }
 
+                if (task->terminate) {
                     if (depth > 1) {
                         // exit at once, all remaining task will be processed by outer loop
                         g_slice_free(struct message_loop_task_s, task);
@@ -318,7 +320,8 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested)
     // mark thread as non-running
     ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
     if (ml) {
-        ml->depth --;
+        if (increase_depth)
+            ml->depth--;
         ml->running = 0;
         if (nested) {
             ml->running = saved_state.running;
@@ -335,7 +338,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested)
 int32_t
 ppb_message_loop_post_work_with_result(PP_Resource message_loop,
                                        struct PP_CompletionCallback callback, int64_t delay_ms,
-                                       int32_t result_to_pass)
+                                       int32_t result_to_pass, int depth)
 {
     if (callback.func == NULL) {
         trace_error("%s, callback.func == NULL\n", __func__);
@@ -359,6 +362,7 @@ ppb_message_loop_post_work_with_result(PP_Resource message_loop,
 
     task->result_to_pass = result_to_pass;
     task->ccb = callback;
+    task->depth = depth;
 
     // calculate absolute time callback should be run at
     clock_gettime(CLOCK_REALTIME, &task->when);
@@ -378,7 +382,7 @@ int32_t
 ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
                            int64_t delay_ms)
 {
-    return ppb_message_loop_post_work_with_result(message_loop, callback, delay_ms, PP_OK);
+    return ppb_message_loop_post_work_with_result(message_loop, callback, delay_ms, PP_OK, 0);
 }
 
 int32_t
