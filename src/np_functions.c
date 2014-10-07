@@ -634,8 +634,10 @@ handle_graphics_expose_event(NPP npp, void *event)
                 src_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
                     CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
                 cr = cairo_create(dst_surf);
-                cairo_set_source_surface(cr, src_surf, ev->x, ev->y);
-                cairo_paint(cr);
+                cairo_set_source_surface(cr, src_surf, 0, 0);
+                cairo_rectangle(cr, ev->x, ev->y, MIN(g2d->scaled_width, ev->width),
+                                MIN(g2d->scaled_height, ev->height));
+                cairo_fill(cr);
                 cairo_destroy(cr);
                 cairo_surface_destroy(dst_surf);
                 cairo_surface_destroy(src_surf);
