@@ -654,11 +654,65 @@ handle_graphics_expose_event(NPP npp, void *event)
             XFree(xi);
         }
     } else if (g3d) {
+        XSync(dpy, False);
+        if (pp_i->is_transparent) {
+            int ret;
+            // copy background to own pixmap
+            XCopyArea(dpy, drawable, g3d->pixmap, DefaultGC(dpy, screen),
+                      ev->x, ev->y,
+                      ev->width, ev->height,
+                      ev->x, ev->y);
+            XSync(dpy, False);
+
+            eglWaitNative(EGL_CORE_NATIVE_ENGINE);
+            ret = eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc_t);
+            if (!ret) {
+                trace_error("%s, eglMakeCurrent failed\n", __func__);
+                // TODO: abort?
+            }
+            glViewport(0, 0, g3d->width, g3d->height);
+            glBindTexture(GL_TEXTURE_2D, g3d->tex_back);
+            glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, g3d->width, g3d->height, 0);
+            glClearColor(1.0, 1.0, 1.0, 1.0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            GLfloat p_left =    (float)ev->x / g3d->width;
+            GLfloat p_right =   (float)(ev->x + ev->width) / g3d->width;
+            GLfloat p_top =     (float)(g3d->height - ev->y - ev->height) / g3d->height;
+            GLfloat p_bottom =  (float)(g3d->height - ev->y) / g3d->height;
+            GLfloat square_vertices[] = {
+                p_left, p_top,
+                p_right, p_top,
+                p_left, p_bottom,
+                p_right, p_bottom,
+            };
+
+            glUseProgram(g3d->prog.id);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, g3d->tex_back);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, g3d->tex_front);
+
+            glUniform1i(g3d->prog.uniform_tex_back, 0);
+            glUniform1i(g3d->prog.uniform_tex_front, 1);
+
+            glVertexAttribPointer(g3d->prog.attrib_pos, 2, GL_FLOAT, 0, 0, square_vertices);
+            glEnableVertexAttribArray(g3d->prog.attrib_pos);
+
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+            glDisableVertexAttribArray(g3d->prog.attrib_pos);
+
+            glFlush();
+            eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            eglWaitGL();
+        }
+
         XCopyArea(dpy, g3d->pixmap, drawable, DefaultGC(dpy, screen),
-                  0, 0,
-                  MIN(g3d->width, ev->width), MIN(g3d->height, ev->height),
+                  ev->x, ev->y,
+                  ev->width, ev->height,
                   ev->x, ev->y);
-        XFlush(dpy);
+        XSync(dpy, False);
     } else {
         retval = 0;
         goto done;

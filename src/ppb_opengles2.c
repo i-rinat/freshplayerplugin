@@ -40,6 +40,7 @@
     eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc)
 
 #define EPILOGUE()                                                                      \
+    eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);        \
     pthread_mutex_unlock(&display.lock);                                                \
     pp_resource_release(context)
 

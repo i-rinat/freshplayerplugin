@@ -234,11 +234,22 @@ struct pp_graphics3d_s {
     COMMON_STRUCTURE_FIELDS
     EGLContext      glc;
     EGLConfig       egl_config;
+    EGLContext      glc_t;          ///< presentation context for transparent instances
+    EGLConfig       egl_config_t;   ///< EGLConfig for glc_t
     Pixmap          pixmap;
     EGLSurface      egl_surf;
     int32_t         width;
     int32_t         height;
     GHashTable     *sub_maps;
+    GLuint          tex_front;      ///< transparency helper texture, plugin data
+    GLuint          tex_back;       ///< transparency helper texture, previous drawable contents
+
+    struct {
+        GLuint      id;
+        GLuint      attrib_pos;
+        GLint       uniform_tex_back;
+        GLint       uniform_tex_front;
+    } prog;                                     ///< alpha blending GL program
 };
 
 struct pp_image_data_s {
