@@ -1,0 +1,7 @@
+2014-10-22  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.2.1
+	* core: add less-strict URI parser
+	* core: fix/implement transparency handling for 2d/3d
+	* core: fix early-callback-calling bug
+	* doc: initial ChangeLog, documenting changes from v0.2.0
