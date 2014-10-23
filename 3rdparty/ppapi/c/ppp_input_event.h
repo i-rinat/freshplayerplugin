@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppp_input_event.idl modified Mon Dec 19 19:44:12 2011. */
+/* From ppp_input_event.idl modified Tue Apr  8 15:19:45 2014. */
 
 #ifndef PPAPI_C_PPP_INPUT_EVENT_H_
 #define PPAPI_C_PPP_INPUT_EVENT_H_
@@ -35,10 +35,10 @@ struct PPP_InputEvent_0_1 {
    * PPB_InputEvent.RequestInputEvents() or RequestFilteringInputEvents(). By
    * default, no events are delivered.
    *
-   * If the event was handled, it will not be forwarded to the web page or
-   * browser. If it was not handled, it will bubble according to the normal
-   * rules. So it is important that an instance respond accurately with whether
-   * event propagation should continue.
+   * If the event was handled, it will not be forwarded to the default handlers
+   * in the web page.  If it was not handled, it may be dispatched to a default
+   * handler. So it is important that an instance respond accurately with
+   * whether event propagation should continue.
    *
    * Event propagation also controls focus. If you handle an event like a mouse
    * event, typically the instance will be given focus. Returning false from

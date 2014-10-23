@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_view.idl modified Fri Mar 29 11:55:32 2013. */
+/* From ppb_view.idl modified Tue Jun 17 10:27:32 2014. */
 
 #ifndef PPAPI_C_PPB_VIEW_H_
 #define PPAPI_C_PPB_VIEW_H_
@@ -18,6 +18,7 @@
 
 #define PPB_VIEW_INTERFACE_1_0 "PPB_View;1.0"
 #define PPB_VIEW_INTERFACE_1_1 "PPB_View;1.1"
+#define PPB_VIEW_INTERFACE_1_2 "PPB_View;1.2" /* dev */
 #define PPB_VIEW_INTERFACE PPB_VIEW_INTERFACE_1_1
 
 /**
@@ -36,7 +37,7 @@
  * You will receive new view information using
  * <code>PPP_Instance.DidChangeView</code>.
  */
-struct PPB_View_1_1 {
+struct PPB_View_1_2 { /* dev */
   /**
    * IsView() determines if the given resource is a valid
    * <code>PPB_View</code> resource. Note that <code>PPB_ViewChanged</code>
@@ -197,9 +198,21 @@ struct PPB_View_1_1 {
    * DIPs per CSS pixel. If the resource is invalid, the value will be 0.0.
    */
   float (*GetCSSScale)(PP_Resource resource);
+  /**
+   * GetScrollOffset returns the scroll offset of the window containing the
+   * plugin.
+   *
+   * @param[in] resource A <code>PP_Resource</code> corresponding to a
+   * <code>PPB_View</code> resource.
+   *
+   * @param[out] offset A <code>PP_Point</code> which will be set to the value
+   * of the scroll offset in CSS pixels.
+   *
+   * @return Returns <code>PP_TRUE</code> if the resource was valid and the
+   * offset was filled in, <code>PP_FALSE</code> if not.
+   */
+  PP_Bool (*GetScrollOffset)(PP_Resource resource, struct PP_Point* offset);
 };
-
-typedef struct PPB_View_1_1 PPB_View;
 
 struct PPB_View_1_0 {
   PP_Bool (*IsView)(PP_Resource resource);
@@ -209,6 +222,19 @@ struct PPB_View_1_0 {
   PP_Bool (*IsPageVisible)(PP_Resource resource);
   PP_Bool (*GetClipRect)(PP_Resource resource, struct PP_Rect* clip);
 };
+
+struct PPB_View_1_1 {
+  PP_Bool (*IsView)(PP_Resource resource);
+  PP_Bool (*GetRect)(PP_Resource resource, struct PP_Rect* rect);
+  PP_Bool (*IsFullscreen)(PP_Resource resource);
+  PP_Bool (*IsVisible)(PP_Resource resource);
+  PP_Bool (*IsPageVisible)(PP_Resource resource);
+  PP_Bool (*GetClipRect)(PP_Resource resource, struct PP_Rect* clip);
+  float (*GetDeviceScale)(PP_Resource resource);
+  float (*GetCSSScale)(PP_Resource resource);
+};
+
+typedef struct PPB_View_1_1 PPB_View;
 /**
  * @}
  */

@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_var.idl modified Thu Feb  6 13:48:33 2014. */
+/* From ppb_var.idl modified Thu Apr 10 14:54:41 2014. */
 
 #ifndef PPAPI_C_PPB_VAR_H_
 #define PPAPI_C_PPB_VAR_H_
@@ -44,9 +44,13 @@ struct PPB_Var_1_2 {
   void (*AddRef)(struct PP_Var var);
   /**
    * Release() removes a reference to given var, deleting it if the internal
-   * reference count becomes 0. If the given var is not a refcounted object,
-   * this function will do nothing so you can always call it no matter what
-   * the type.
+   * reference count becomes 0. If the <code>PP_Var</code> is of type
+   * <code>PP_VARTYPE_RESOURCE</code>,
+   * it will implicitly release a reference count on the
+   * <code>PP_Resource</code> (equivalent to PPB_Core::ReleaseResource()).
+   *
+   * If the given var is not a refcounted object, this function will do nothing
+   * so you can always call it no matter what the type.
    *
    * @param[in] var A <code>PP_Var</code> that will have a reference removed.
    */
@@ -59,8 +63,8 @@ struct PPB_Var_1_2 {
    *
    * If the length is 0, the <code>*data</code> pointer will not be dereferenced
    * and may be <code>NULL</code>. Note, however if length is 0, the
-   * "NULL-ness" will not be preserved, as <code>VarToUtf8</code> will never
-   * return <code>NULL</code> on success, even for empty strings.
+   * "NULL-ness" will not be preserved, as VarToUtf8() will never return
+   * <code>NULL</code> on success, even for empty strings.
    *
    * The resulting object will be a refcounted string object. It will be
    * AddRef'ed for the caller. When the caller is done with it, it should be
@@ -106,7 +110,9 @@ struct PPB_Var_1_2 {
    */
   PP_Resource (*VarToResource)(struct PP_Var var);
   /**
-   * Creates a new <code>PP_Var</code> from a given resource.
+   * Creates a new <code>PP_Var</code> from a given resource. Implicitly adds a
+   * reference count on the <code>PP_Resource</code> (equivalent to
+   * PPB_Core::AddRefResource(resource)).
    *
    * @param[in] resource A <code>PP_Resource</code> to be wrapped in a var.
    *

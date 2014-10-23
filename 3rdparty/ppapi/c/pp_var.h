@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From pp_var.idl modified Thu Sep 12 16:41:36 2013. */
+/* From pp_var.idl modified Thu Apr 10 14:52:30 2014. */
 
 #ifndef PPAPI_C_PP_VAR_H_
 #define PPAPI_C_PP_VAR_H_
@@ -54,28 +54,29 @@ typedef enum {
    * The Var represents a string. The <code>as_id</code> field is used to
    * identify the string, which may be created and retrieved from the
    * <code>PPB_Var</code> interface. These objects are reference counted, so
-   * AddRef and Release must be used properly to avoid memory leaks.
+   * AddRef() and Release() must be used properly to avoid memory leaks.
    */
   PP_VARTYPE_STRING = 5,
   /**
    * Represents a JavaScript object. This vartype is not currently usable
    * from modules, although it is used internally for some tasks. These objects
-   * are reference counted, so AddRef and Release must be used properly to avoid
-   * memory leaks.
+   * are reference counted, so AddRef() and Release() must be used properly to
+   * avoid memory leaks.
    */
   PP_VARTYPE_OBJECT = 6,
   /**
    * Represents an array of Vars. The <code>as_id</code> field is used to
    * identify the array, which may be created and manipulated from the
    * <code>PPB_VarArray</code> interface. These objects are reference counted,
-   * so AddRef and Release must be used properly to avoid memory leaks.
+   * so AddRef() and Release() must be used properly to avoid memory leaks.
    */
   PP_VARTYPE_ARRAY = 7,
   /**
    * Represents a mapping from strings to Vars. The <code>as_id</code> field is
    * used to identify the dictionary, which may be created and manipulated from
    * the <code>PPB_VarDictionary</code> interface. These objects are reference
-   * counted, so AddRef and Release must be used properly to avoid memory leaks.
+   * counted, so AddRef() and Release() must be used properly to avoid memory
+   * leaks.
    */
   PP_VARTYPE_DICTIONARY = 8,
   /**
@@ -83,14 +84,24 @@ typedef enum {
    * represents Typed Arrays in JavaScript. Unlike JavaScript 'Array', it is
    * only meant to contain basic numeric types, and is always stored
    * contiguously. See PPB_VarArrayBuffer_Dev for functions special to
-   * ArrayBuffer vars. These objects are reference counted, so AddRef and
-   * Release must be used properly to avoid memory leaks.
+   * ArrayBuffer vars. These objects are reference counted, so AddRef() and
+   * Release() must be used properly to avoid memory leaks.
    */
   PP_VARTYPE_ARRAY_BUFFER = 9,
   /**
-   * Resources are not currently supported but will be added in the future
-   * These objects are reference counted, so AddRef and Release must be used
-   * properly to avoid memory leaks.
+   * This type allows the <code>PP_Var</code> to wrap a <code>PP_Resource
+   * </code>. This can be useful for sending or receiving some types of
+   * <code>PP_Resource</code> using <code>PPB_Messaging</code> or
+   * <code>PPP_Messaging</code>.
+   *
+   * These objects are reference counted, so AddRef() and Release() must be used
+   * properly to avoid memory leaks. Under normal circumstances, the
+   * <code>PP_Var</code> will implicitly hold a reference count on the
+   * <code>PP_Resource</code> on your behalf. For example, if you call
+   * VarFromResource(), it implicitly calls PPB_Core::AddRefResource() on the
+   * <code>PP_Resource</code>. Likewise, PPB_Var::Release() on a Resource
+   * <code>PP_Var</code> will invoke PPB_Core::ReleaseResource() when the Var
+   * reference count goes to zero.
    */
   PP_VARTYPE_RESOURCE = 10
 } PP_VarType;

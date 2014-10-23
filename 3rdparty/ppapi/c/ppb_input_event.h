@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_input_event.idl modified Mon Dec 16 15:35:15 2013. */
+/* From ppb_input_event.idl modified Thu Apr  3 14:52:10 2014. */
 
 #ifndef PPAPI_C_PPB_INPUT_EVENT_H_
 #define PPAPI_C_PPB_INPUT_EVENT_H_
@@ -334,9 +334,7 @@ struct PPB_InputEvent_1_0 {
    * (and only if) you do not request touch events.
    *
    * When requesting input events through this function, the events will be
-   * delivered and <i>not</i> bubbled to the page. This means that even if you
-   * aren't interested in the message, no other parts of the page will get
-   * a crack at the message.
+   * delivered and <i>not</i> bubbled to the default handlers.
    *
    * <strong>Example:</strong>
    * @code
@@ -369,8 +367,8 @@ struct PPB_InputEvent_1_0 {
    * By default, no input events are delivered. In most cases you would
    * register to receive events by calling RequestInputEvents(). In some cases,
    * however, you may wish to filter events such that they can be bubbled up
-   * to the DOM. In this case, register for those classes of events using
-   * this function instead of RequestInputEvents().
+   * to the default handlers. In this case, register for those classes of
+   * events using this function instead of RequestInputEvents().
    *
    * Filtering input events requires significantly more overhead than just
    * delivering them to the instance. As such, you should only request

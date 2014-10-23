@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From pp_errors.idl modified Thu Jun 13 13:02:05 2013. */
+/* From pp_errors.idl modified Thu May 15 16:12:26 2014. */
 
 #ifndef PPAPI_C_PP_ERRORS_H_
 #define PPAPI_C_PP_ERRORS_H_
@@ -86,6 +86,17 @@ enum {
    * input events, and there are reentrancy and deadlock issues).
    */
   PP_ERROR_BLOCKS_MAIN_THREAD = -13,
+  /**
+   * This value indicates that the plugin sent bad input data to a resource,
+   * leaving it in an invalid state. The resource can't be used after returning
+   * this error and should be released.
+   */
+  PP_ERROR_MALFORMED_INPUT = -14,
+  /**
+   * This value indicates that a resource has failed.  The resource can't be
+   * used after returning this error and should be released.
+   */
+  PP_ERROR_RESOURCE_FAILED = -15,
   /** This value indicates failure due to a file that does not exist. */
   PP_ERROR_FILENOTFOUND = -20,
   /** This value indicates failure due to a file that already exists. */

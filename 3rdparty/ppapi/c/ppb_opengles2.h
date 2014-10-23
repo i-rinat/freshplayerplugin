@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -609,6 +609,20 @@ struct PPB_OpenGLES2Query {
                                GLuint id,
                                GLenum pname,
                                GLuint* params);
+};
+
+#define PPB_OPENGLES2_VERTEXARRAYOBJECT_INTERFACE_1_0 \
+  "PPB_OpenGLES2VertexArrayObject;1.0"
+#define PPB_OPENGLES2_VERTEXARRAYOBJECT_INTERFACE \
+  PPB_OPENGLES2_VERTEXARRAYOBJECT_INTERFACE_1_0
+
+struct PPB_OpenGLES2VertexArrayObject {
+  void (*GenVertexArraysOES)(PP_Resource context, GLsizei n, GLuint* arrays);
+  void (*DeleteVertexArraysOES)(PP_Resource context,
+                                GLsizei n,
+                                const GLuint* arrays);
+  GLboolean (*IsVertexArrayOES)(PP_Resource context, GLuint array);
+  void (*BindVertexArrayOES)(PP_Resource context, GLuint array);
 };
 
 #endif  // PPAPI_C_PPB_OPENGLES2_H_

@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From pp_rect.idl modified Wed Oct  5 14:06:02 2011. */
+/* From pp_rect.idl modified Tue Jun  3 12:31:06 2014. */
 
 #ifndef PPAPI_C_PP_RECT_H_
 #define PPAPI_C_PP_RECT_H_
@@ -37,6 +37,20 @@ struct PP_Rect {
   struct PP_Size size;
 };
 PP_COMPILE_ASSERT_STRUCT_SIZE_IN_BYTES(PP_Rect, 16);
+
+/**
+ * The <code>PP_FloatRect</code> struct contains the size and location of a 2D
+ * rectangle.
+ */
+struct PP_FloatRect {
+  /**
+   * This value represents the x and y coordinates of the upper-left corner of
+   * the rectangle.
+   */
+  struct PP_FloatPoint point;
+  /** This value represents the width and height of the rectangle. */
+  struct PP_FloatSize size;
+};
 /**
  * @}
  */
@@ -69,6 +83,30 @@ PP_INLINE struct PP_Rect PP_MakeRectFromXYWH(int32_t x, int32_t y,
   ret.size.height = h;
   return ret;
 }
+
+/**
+ * PP_MakeFloatRectFromXYWH() creates a <code>PP_FloatRect</code> given x and y
+ * coordinates and width and height dimensions as float values.
+ *
+ * @param[in] x An float value representing a horizontal coordinate of a
+ * point, starting with 0 as the left-most coordinate.
+ * @param[in] y An float value representing a vertical coordinate of a point,
+ * starting with 0 as the top-most coordinate.
+ * @param[in] w An float value representing a width.
+ * @param[in] h An float value representing a height.
+ *
+ * @return A <code>PP_FloatRect</code> structure.
+ */
+PP_INLINE struct PP_FloatRect PP_MakeFloatRectFromXYWH(float x, float y,
+                                                       float w, float h) {
+  struct PP_FloatRect ret;
+  ret.point.x = x;
+  ret.point.y = y;
+  ret.size.width = w;
+  ret.size.height = h;
+  return ret;
+}
+
 /**
  * @}
  */
