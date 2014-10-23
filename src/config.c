@@ -47,10 +47,12 @@ static struct fpp_config_s default_config = {
 };
 
 struct fpp_config_s config = {};
+static const char *salt_file_name = "salt.dat";
 static const char *config_file_name = "freshwrapper.conf";
 static const char *config_dir_name = "freshwrapper-data";
 static int initialized = 0;
 static char *pepper_data_dir;
+static char *pepper_salt_file_name;
 
 
 static
@@ -154,6 +156,7 @@ quit:
     // calculate plugin data directory
     local_config = get_local_config_path(config_dir_name);
     pepper_data_dir = g_strdup_printf("%s/%s", local_config, fpp_config_get_plugin_name());
+    pepper_salt_file_name = g_strdup_printf("%s/%s", local_config, salt_file_name);
     g_free(local_config);
 
     initialized = 1;
@@ -174,6 +177,7 @@ fpp_config_destroy(void)
     FREE_IF_CHANGED(pepperflash_path);
     FREE_IF_CHANGED(flash_command_line);
     g_free(pepper_data_dir);
+    g_free(pepper_salt_file_name);
     initialized = 0;
 }
 
@@ -181,4 +185,10 @@ const char *
 fpp_config_get_pepper_data_dir(void)
 {
     return pepper_data_dir;
+}
+
+const char *
+fpp_config_get_pepper_salt_file_name(void)
+{
+    return pepper_salt_file_name;
 }

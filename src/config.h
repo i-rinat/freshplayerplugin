@@ -88,4 +88,7 @@ fpp_config_plugin_has_manifest(void);
 const char *
 fpp_config_get_pepper_data_dir(void);
 
+const char *
+fpp_config_get_pepper_salt_file_name(void);
+
 #endif // FPP__CONFIG_H
