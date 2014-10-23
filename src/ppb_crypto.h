@@ -29,6 +29,6 @@
 
 
 void
-ppb_crypto_dev_get_random_bytes(char *buffer, uint32_t num_bytes);
+ppb_crypto_get_random_bytes(char *buffer, uint32_t num_bytes);
 
 #endif // FPP__PPB_CRYPTO_H

@@ -34,7 +34,7 @@
 
 
 void
-ppb_crypto_dev_get_random_bytes(char *buffer, uint32_t num_bytes)
+ppb_crypto_get_random_bytes(char *buffer, uint32_t num_bytes)
 {
     ssize_t bytes_read = read(tables_get_urandom_fd(), buffer, num_bytes);
     if (bytes_read < num_bytes) {
@@ -48,13 +48,13 @@ ppb_crypto_dev_get_random_bytes(char *buffer, uint32_t num_bytes)
 // trace wrapper
 TRACE_WRAPPER
 void
-trace_ppb_crypto_dev_get_random_bytes(char *buffer, uint32_t num_bytes)
+trace_ppb_crypto_get_random_bytes(char *buffer, uint32_t num_bytes)
 {
     trace_info("[PPB] {full} %s num_bytes=%d\n", __func__+6, num_bytes);
-    ppb_crypto_dev_get_random_bytes(buffer, num_bytes);
+    ppb_crypto_get_random_bytes(buffer, num_bytes);
 }
 
 
 const struct PPB_Crypto_Dev_0_1 ppb_crypto_dev_interface_0_1 = {
-    .GetRandomBytes = TWRAPF(ppb_crypto_dev_get_random_bytes),
+    .GetRandomBytes = TWRAPF(ppb_crypto_get_random_bytes),
 };
