@@ -35,6 +35,7 @@ add_library(freshwrapper-obj OBJECT
     ppb_file_io.c
     ppb_file_ref.c
     ppb_flash_clipboard.c
+    ppb_flash_drm.c
     ppb_flash_file.c
     ppb_flash_file_modulelocal.c
     ppb_flash_font_file.c
