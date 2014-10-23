@@ -84,6 +84,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_FILE_REF,
     PP_RESOURCE_FILE_IO,
     PP_RESOURCE_MESSAGE_LOOP,
+    PP_RESOURCE_FLASH_DRM,
 
     PP_RESOURCE_TYPES_COUNT,        // must be the last item in the list
 };
@@ -389,6 +390,10 @@ struct pp_message_loop_s {
     int                     depth;
 };
 
+struct pp_flash_drm_s {
+    COMMON_STRUCTURE_FIELDS
+};
+
 union pp_largest_u {
     struct pp_instance_s            s02;
     struct pp_resource_generic_s    s03;
@@ -414,6 +419,7 @@ union pp_largest_u {
     struct pp_file_ref_s            s23;
     struct pp_file_io_s             s24;
     struct pp_message_loop_s        s25;
+    struct pp_flash_drm_s           s26;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type,

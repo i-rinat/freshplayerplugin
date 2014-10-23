@@ -43,6 +43,7 @@
 #include "ppb_flash_menu.h"
 #include "ppb_video_capture.h"
 #include "ppb_audio_input.h"
+#include "ppb_flash_drm.h"
 #include "ppb_flash_message_loop.h"
 #include "ppb_tcp_socket.h"
 #include "ppb_file_ref.h"
@@ -244,6 +245,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_MESSAGE_LOOP:
             ppb_message_loop_destroy(ptr);
+            break;
+        case PP_RESOURCE_FLASH_DRM:
+            ppb_flash_drm_destroy(ptr);
             break;
         default:
             break;

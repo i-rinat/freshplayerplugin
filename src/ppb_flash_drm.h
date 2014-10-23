@@ -7,6 +7,9 @@
 PP_Resource
 ppb_flash_drm_create(PP_Instance instance);
 
+void
+ppb_flash_drm_destroy(void *p);
+
 int32_t
 ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
                             struct PP_CompletionCallback callback);
