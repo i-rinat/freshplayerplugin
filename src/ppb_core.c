@@ -66,6 +66,8 @@ ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_Completion
                              int32_t result)
 {
     PP_Resource main_message_loop = ppb_message_loop_get_for_main_thread();
+    if (main_message_loop == 0)
+        trace_error("%s, no main loop\n", __func__);
     const int depth = ppb_message_loop_get_depth(main_message_loop);
     ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
                                            result, depth);
