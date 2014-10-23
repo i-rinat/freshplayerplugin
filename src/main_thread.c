@@ -28,6 +28,14 @@
 #include "trace.h"
 
 
+static
+void
+wait_on_barrier(void *user_data, int32_t result)
+{
+    pthread_barrier_t *barrier = user_data;
+    pthread_barrier_wait(barrier);
+}
+
 void *
 fresh_wrapper_main_thread(void *p)
 {
@@ -43,8 +51,9 @@ fresh_wrapper_main_thread(void *p)
     ppb_message_loop_attach_to_current_thread(message_loop);
     ppb_message_loop_proclaim_this_thread_main();
 
-    pthread_barrier_wait(&pp_i->main_thread_barrier);
-
+    // wait for barrier inside a task to ensure loop is running
+    ppb_message_loop_post_work(message_loop,
+                               PP_MakeCCB(wait_on_barrier, &pp_i->main_thread_barrier), 0);
     ppb_message_loop_run(message_loop);
 
     return NULL;
