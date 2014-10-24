@@ -223,7 +223,7 @@ pp_resource_unref(PP_Resource resource)
             ppb_flash_font_file_destroy(ptr);
             break;
         case PP_RESOURCE_VIDEO_CAPTURE:
-            ppb_video_capture_dev_destroy(ptr);
+            ppb_video_capture_destroy(ptr);
             break;
         case PP_RESOURCE_AUDIO_INPUT:
             ppb_audio_input_dev_destroy(ptr);

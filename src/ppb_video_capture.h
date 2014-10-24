@@ -29,39 +29,38 @@
 
 
 PP_Resource
-ppb_video_capture_dev_create(PP_Instance instance);
+ppb_video_capture_create(PP_Instance instance);
 
 void
-ppb_video_capture_dev_destroy(void *p);
+ppb_video_capture_destroy(void *p);
 
 PP_Bool
-ppb_video_capture_dev_is_video_capture(PP_Resource video_capture);
+ppb_video_capture_is_video_capture(PP_Resource video_capture);
 
 int32_t
-ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOutput output,
-                                        struct PP_CompletionCallback callback);
+ppb_video_capture_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOutput output,
+                                    struct PP_CompletionCallback callback);
 
 int32_t
-ppb_video_capture_dev_monitor_device_change(PP_Resource video_capture,
-                                            PP_MonitorDeviceChangeCallback callback,
-                                            void *user_data);
+ppb_video_capture_monitor_device_change(PP_Resource video_capture,
+                                        PP_MonitorDeviceChangeCallback callback, void *user_data);
 
 int32_t
-ppb_video_capture_dev_open(PP_Resource video_capture, PP_Resource device_ref,
-                           const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
-                           uint32_t buffer_count, struct PP_CompletionCallback callback);
+ppb_video_capture_open(PP_Resource video_capture, PP_Resource device_ref,
+                       const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
+                       uint32_t buffer_count, struct PP_CompletionCallback callback);
 
 int32_t
-ppb_video_capture_dev_start_capture(PP_Resource video_capture);
+ppb_video_capture_start_capture(PP_Resource video_capture);
 
 int32_t
-ppb_video_capture_dev_reuse_buffer(PP_Resource video_capture, uint32_t buffer);
+ppb_video_capture_reuse_buffer(PP_Resource video_capture, uint32_t buffer);
 
 int32_t
-ppb_video_capture_dev_stop_capture(PP_Resource video_capture);
+ppb_video_capture_stop_capture(PP_Resource video_capture);
 
 void
-ppb_video_capture_dev_close(PP_Resource video_capture);
+ppb_video_capture_close(PP_Resource video_capture);
 
 
 #endif // FPP__PPB_VIDEO_CAPTURE_H

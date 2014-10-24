@@ -33,7 +33,7 @@
 
 
 PP_Resource
-ppb_video_capture_dev_create(PP_Instance instance)
+ppb_video_capture_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
@@ -45,19 +45,19 @@ ppb_video_capture_dev_create(PP_Instance instance)
 }
 
 void
-ppb_video_capture_dev_destroy(void *p)
+ppb_video_capture_destroy(void *p)
 {
 }
 
 PP_Bool
-ppb_video_capture_dev_is_video_capture(PP_Resource video_capture)
+ppb_video_capture_is_video_capture(PP_Resource video_capture)
 {
     return pp_resource_get_type(video_capture) == PP_RESOURCE_VIDEO_CAPTURE;
 }
 
 int32_t
-ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOutput output,
-                                        struct PP_CompletionCallback callback)
+ppb_video_capture_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOutput output,
+                                    struct PP_CompletionCallback callback)
 {
     output.GetDataBuffer(output.user_data, 0, sizeof(int));
 
@@ -66,41 +66,40 @@ ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture, struct PP_Arr
 }
 
 int32_t
-ppb_video_capture_dev_monitor_device_change(PP_Resource video_capture,
-                                            PP_MonitorDeviceChangeCallback callback,
-                                            void *user_data)
+ppb_video_capture_monitor_device_change(PP_Resource video_capture,
+                                        PP_MonitorDeviceChangeCallback callback, void *user_data)
 {
     return 0;
 }
 
 int32_t
-ppb_video_capture_dev_open(PP_Resource video_capture, PP_Resource device_ref,
-                           const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
-                           uint32_t buffer_count, struct PP_CompletionCallback callback)
+ppb_video_capture_open(PP_Resource video_capture, PP_Resource device_ref,
+                       const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
+                       uint32_t buffer_count, struct PP_CompletionCallback callback)
 {
     return 0;
 }
 
 int32_t
-ppb_video_capture_dev_start_capture(PP_Resource video_capture)
+ppb_video_capture_start_capture(PP_Resource video_capture)
 {
     return 0;
 }
 
 int32_t
-ppb_video_capture_dev_reuse_buffer(PP_Resource video_capture, uint32_t buffer)
+ppb_video_capture_reuse_buffer(PP_Resource video_capture, uint32_t buffer)
 {
     return 0;
 }
 
 int32_t
-ppb_video_capture_dev_stop_capture(PP_Resource video_capture)
+ppb_video_capture_stop_capture(PP_Resource video_capture)
 {
     return 0;
 }
 
 void
-ppb_video_capture_dev_close(PP_Resource video_capture)
+ppb_video_capture_close(PP_Resource video_capture)
 {
     return;
 }
@@ -109,92 +108,92 @@ ppb_video_capture_dev_close(PP_Resource video_capture)
 // trace wrappers
 TRACE_WRAPPER
 PP_Resource
-trace_ppb_video_capture_dev_create(PP_Instance instance)
+trace_ppb_video_capture_create(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
-    return ppb_video_capture_dev_create(instance);
+    return ppb_video_capture_create(instance);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_video_capture_dev_is_video_capture(PP_Resource video_capture)
+trace_ppb_video_capture_is_video_capture(PP_Resource video_capture)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
-    return ppb_video_capture_dev_is_video_capture(video_capture);
+    return ppb_video_capture_is_video_capture(video_capture);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_video_capture_dev_enumerate_devices(PP_Resource video_capture,
-                                              struct PP_ArrayOutput output,
-                                              struct PP_CompletionCallback callback)
+trace_ppb_video_capture_enumerate_devices(PP_Resource video_capture,
+                                          struct PP_ArrayOutput output,
+                                          struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {fake} %s\n", __func__+6);
-    return ppb_video_capture_dev_enumerate_devices(video_capture, output, callback);
+    return ppb_video_capture_enumerate_devices(video_capture, output, callback);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_video_capture_dev_monitor_device_change(PP_Resource video_capture,
-                                                  PP_MonitorDeviceChangeCallback callback,
-                                                  void *user_data)
+trace_ppb_video_capture_monitor_device_change(PP_Resource video_capture,
+                                              PP_MonitorDeviceChangeCallback callback,
+                                              void *user_data)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_video_capture_dev_monitor_device_change(video_capture, callback, user_data);
+    return ppb_video_capture_monitor_device_change(video_capture, callback, user_data);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_video_capture_dev_open(PP_Resource video_capture, PP_Resource device_ref,
-                                 const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
-                                 uint32_t buffer_count, struct PP_CompletionCallback callback)
+trace_ppb_video_capture_open(PP_Resource video_capture, PP_Resource device_ref,
+                             const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
+                             uint32_t buffer_count, struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_video_capture_dev_open(video_capture, device_ref, requested_info, buffer_count,
-                                      callback);
+    return ppb_video_capture_open(video_capture, device_ref, requested_info, buffer_count,
+                                  callback);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_video_capture_dev_start_capture(PP_Resource video_capture)
+trace_ppb_video_capture_start_capture(PP_Resource video_capture)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_video_capture_dev_start_capture(video_capture);
+    return ppb_video_capture_start_capture(video_capture);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_video_capture_dev_reuse_buffer(PP_Resource video_capture, uint32_t buffer)
+trace_ppb_video_capture_reuse_buffer(PP_Resource video_capture, uint32_t buffer)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_video_capture_dev_reuse_buffer(video_capture, buffer);
+    return ppb_video_capture_reuse_buffer(video_capture, buffer);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_video_capture_dev_stop_capture(PP_Resource video_capture)
+trace_ppb_video_capture_stop_capture(PP_Resource video_capture)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_video_capture_dev_stop_capture(video_capture);
+    return ppb_video_capture_stop_capture(video_capture);
 }
 
 TRACE_WRAPPER
 void
-trace_ppb_video_capture_dev_close(PP_Resource video_capture)
+trace_ppb_video_capture_close(PP_Resource video_capture)
 {
     trace_info("[PPB] {fake} %s\n", __func__+6);
-    ppb_video_capture_dev_close(video_capture);
+    ppb_video_capture_close(video_capture);
 }
 
 
 const struct PPB_VideoCapture_Dev_0_3 ppb_video_capture_dev_interface_0_3 = {
-    .Create =               TWRAPF(ppb_video_capture_dev_create),
-    .IsVideoCapture =       TWRAPF(ppb_video_capture_dev_is_video_capture),
-    .EnumerateDevices =     TWRAPZ(ppb_video_capture_dev_enumerate_devices),
-    .MonitorDeviceChange =  TWRAPZ(ppb_video_capture_dev_monitor_device_change),
-    .Open =                 TWRAPZ(ppb_video_capture_dev_open),
-    .StartCapture =         TWRAPZ(ppb_video_capture_dev_start_capture),
-    .ReuseBuffer =          TWRAPZ(ppb_video_capture_dev_reuse_buffer),
-    .StopCapture =          TWRAPZ(ppb_video_capture_dev_stop_capture),
-    .Close =                TWRAPZ(ppb_video_capture_dev_close),
+    .Create =               TWRAPF(ppb_video_capture_create),
+    .IsVideoCapture =       TWRAPF(ppb_video_capture_is_video_capture),
+    .EnumerateDevices =     TWRAPZ(ppb_video_capture_enumerate_devices),
+    .MonitorDeviceChange =  TWRAPZ(ppb_video_capture_monitor_device_change),
+    .Open =                 TWRAPZ(ppb_video_capture_open),
+    .StartCapture =         TWRAPZ(ppb_video_capture_start_capture),
+    .ReuseBuffer =          TWRAPZ(ppb_video_capture_reuse_buffer),
+    .StopCapture =          TWRAPZ(ppb_video_capture_stop_capture),
+    .Close =                TWRAPZ(ppb_video_capture_close),
 };
