@@ -29,32 +29,32 @@
 
 
 struct PP_Var
-ppb_font_dev_get_font_families(PP_Instance instance);
+ppb_font_get_font_families(PP_Instance instance);
 
 PP_Resource
-ppb_font_dev_create(PP_Instance instance, const struct PP_FontDescription_Dev *description);
+ppb_font_create(PP_Instance instance, const struct PP_FontDescription_Dev *description);
 
 PP_Bool
-ppb_font_dev_is_font(PP_Resource resource);
+ppb_font_is_font(PP_Resource resource);
 
 PP_Bool
-ppb_font_dev_describe(PP_Resource font, struct PP_FontDescription_Dev *description,
-                      struct PP_FontMetrics_Dev *metrics);
+ppb_font_describe(PP_Resource font, struct PP_FontDescription_Dev *description,
+                  struct PP_FontMetrics_Dev *metrics);
 
 PP_Bool
-ppb_font_dev_draw_text_at(PP_Resource font, PP_Resource image_data,
-                          const struct PP_TextRun_Dev *text, const struct PP_Point *position,
-                          uint32_t color, const struct PP_Rect *clip, PP_Bool image_data_is_opaque);
+ppb_font_draw_text_at(PP_Resource font, PP_Resource image_data, const struct PP_TextRun_Dev *text,
+                      const struct PP_Point *position, uint32_t color, const struct PP_Rect *clip,
+                      PP_Bool image_data_is_opaque);
 
 int32_t
-ppb_font_dev_measure_text(PP_Resource font, const struct PP_TextRun_Dev *text);
+ppb_font_measure_text(PP_Resource font, const struct PP_TextRun_Dev *text);
 
 uint32_t
-ppb_font_dev_character_offset_for_pixel(PP_Resource font, const struct PP_TextRun_Dev *text,
-                                        int32_t pixel_position);
+ppb_font_character_offset_for_pixel(PP_Resource font, const struct PP_TextRun_Dev *text,
+                                    int32_t pixel_position);
 
 int32_t
-ppb_font_dev_pixel_offset_for_character(PP_Resource font, const struct PP_TextRun_Dev *text,
-                                        uint32_t char_offset);
+ppb_font_pixel_offset_for_character(PP_Resource font, const struct PP_TextRun_Dev *text,
+                                    uint32_t char_offset);
 
 #endif // FPP__PPB_FONT_H

@@ -32,7 +32,7 @@
 
 
 struct PP_Var
-ppb_font_dev_get_font_families(PP_Instance instance)
+ppb_font_get_font_families(PP_Instance instance)
 {
     PangoFontFamily **families;
     int n, k, total_len;
@@ -61,48 +61,48 @@ ppb_font_dev_get_font_families(PP_Instance instance)
 }
 
 PP_Resource
-ppb_font_dev_create(PP_Instance instance, const struct PP_FontDescription_Dev *description)
+ppb_font_create(PP_Instance instance, const struct PP_FontDescription_Dev *description)
 {
     return 0;
 }
 
 PP_Bool
-ppb_font_dev_is_font(PP_Resource resource)
+ppb_font_is_font(PP_Resource resource)
 {
     return PP_TRUE;
 }
 
 PP_Bool
-ppb_font_dev_describe(PP_Resource font, struct PP_FontDescription_Dev *description,
-                      struct PP_FontMetrics_Dev *metrics)
+ppb_font_describe(PP_Resource font, struct PP_FontDescription_Dev *description,
+                  struct PP_FontMetrics_Dev *metrics)
 {
     return PP_FALSE;
 }
 
 PP_Bool
-ppb_font_dev_draw_text_at(PP_Resource font, PP_Resource image_data,
-                          const struct PP_TextRun_Dev *text, const struct PP_Point *position,
-                          uint32_t color, const struct PP_Rect *clip, PP_Bool image_data_is_opaque)
+ppb_font_draw_text_at(PP_Resource font, PP_Resource image_data, const struct PP_TextRun_Dev *text,
+                      const struct PP_Point *position, uint32_t color, const struct PP_Rect *clip,
+                      PP_Bool image_data_is_opaque)
 {
     return PP_FALSE;
 }
 
 int32_t
-ppb_font_dev_measure_text(PP_Resource font, const struct PP_TextRun_Dev *text)
+ppb_font_measure_text(PP_Resource font, const struct PP_TextRun_Dev *text)
 {
     return -1;
 }
 
 uint32_t
-ppb_font_dev_character_offset_for_pixel(PP_Resource font, const struct PP_TextRun_Dev *text,
-                                        int32_t pixel_position)
+ppb_font_character_offset_for_pixel(PP_Resource font, const struct PP_TextRun_Dev *text,
+                                    int32_t pixel_position)
 {
     return 0;
 }
 
 int32_t
-ppb_font_dev_pixel_offset_for_character(PP_Resource font, const struct PP_TextRun_Dev *text,
-                                        uint32_t char_offset)
+ppb_font_pixel_offset_for_character(PP_Resource font, const struct PP_TextRun_Dev *text,
+                                    uint32_t char_offset)
 {
     return -1;
 }
@@ -111,83 +111,83 @@ ppb_font_dev_pixel_offset_for_character(PP_Resource font, const struct PP_TextRu
 // trace wrappers
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_font_dev_get_font_families(PP_Instance instance)
+trace_ppb_font_get_font_families(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
-    return ppb_font_dev_get_font_families(instance);
+    return ppb_font_get_font_families(instance);
 }
 
 TRACE_WRAPPER
 PP_Resource
-trace_ppb_font_dev_create(PP_Instance instance, const struct PP_FontDescription_Dev *description)
+trace_ppb_font_create(PP_Instance instance, const struct PP_FontDescription_Dev *description)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_font_dev_create(instance, description);
+    return ppb_font_create(instance, description);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_font_dev_is_font(PP_Resource resource)
+trace_ppb_font_is_font(PP_Resource resource)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_font_dev_is_font(resource);
+    return ppb_font_is_font(resource);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_font_dev_describe(PP_Resource font, struct PP_FontDescription_Dev *description,
-                            struct PP_FontMetrics_Dev *metrics)
+trace_ppb_font_describe(PP_Resource font, struct PP_FontDescription_Dev *description,
+                        struct PP_FontMetrics_Dev *metrics)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_font_dev_describe(font, description, metrics);
+    return ppb_font_describe(font, description, metrics);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_font_dev_draw_text_at(PP_Resource font, PP_Resource image_data,
-                                const struct PP_TextRun_Dev *text, const struct PP_Point *position,
-                                uint32_t color, const struct PP_Rect *clip,
-                                PP_Bool image_data_is_opaque)
+trace_ppb_font_draw_text_at(PP_Resource font, PP_Resource image_data,
+                            const struct PP_TextRun_Dev *text, const struct PP_Point *position,
+                            uint32_t color, const struct PP_Rect *clip,
+                            PP_Bool image_data_is_opaque)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_font_dev_draw_text_at(font, image_data, text, position, color, clip,
-                                     image_data_is_opaque);
+    return ppb_font_draw_text_at(font, image_data, text, position, color, clip,
+                                 image_data_is_opaque);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_font_dev_measure_text(PP_Resource font, const struct PP_TextRun_Dev *text)
+trace_ppb_font_measure_text(PP_Resource font, const struct PP_TextRun_Dev *text)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_font_dev_measure_text(font, text);
+    return ppb_font_measure_text(font, text);
 }
 
 TRACE_WRAPPER
 uint32_t
-trace_ppb_font_dev_character_offset_for_pixel(PP_Resource font, const struct PP_TextRun_Dev *text,
-                                              int32_t pixel_position)
+trace_ppb_font_character_offset_for_pixel(PP_Resource font, const struct PP_TextRun_Dev *text,
+                                          int32_t pixel_position)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_font_dev_character_offset_for_pixel(font, text, pixel_position);
+    return ppb_font_character_offset_for_pixel(font, text, pixel_position);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_font_dev_pixel_offset_for_character(PP_Resource font, const struct PP_TextRun_Dev *text,
-                                              uint32_t char_offset)
+trace_ppb_font_pixel_offset_for_character(PP_Resource font, const struct PP_TextRun_Dev *text,
+                                          uint32_t char_offset)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_font_dev_pixel_offset_for_character(font, text, char_offset);
+    return ppb_font_pixel_offset_for_character(font, text, char_offset);
 }
 
 
 const struct PPB_Font_Dev_0_6 ppb_font_dev_interface_0_6 = {
-    .GetFontFamilies =          TWRAPF(ppb_font_dev_get_font_families),
-    .Create =                   TWRAPZ(ppb_font_dev_create),
-    .IsFont =                   TWRAPZ(ppb_font_dev_is_font),
-    .Describe =                 TWRAPZ(ppb_font_dev_describe),
-    .DrawTextAt =               TWRAPZ(ppb_font_dev_draw_text_at),
-    .MeasureText =              TWRAPZ(ppb_font_dev_measure_text),
-    .CharacterOffsetForPixel =  TWRAPZ(ppb_font_dev_character_offset_for_pixel),
-    .PixelOffsetForCharacter =  TWRAPZ(ppb_font_dev_pixel_offset_for_character),
+    .GetFontFamilies =          TWRAPF(ppb_font_get_font_families),
+    .Create =                   TWRAPZ(ppb_font_create),
+    .IsFont =                   TWRAPZ(ppb_font_is_font),
+    .Describe =                 TWRAPZ(ppb_font_describe),
+    .DrawTextAt =               TWRAPZ(ppb_font_draw_text_at),
+    .MeasureText =              TWRAPZ(ppb_font_measure_text),
+    .CharacterOffsetForPixel =  TWRAPZ(ppb_font_character_offset_for_pixel),
+    .PixelOffsetForCharacter =  TWRAPZ(ppb_font_pixel_offset_for_character),
 };
