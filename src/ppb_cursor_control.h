@@ -29,19 +29,19 @@
 
 
 PP_Bool
-ppb_cursor_control_dev_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
-                                  PP_Resource custom_image, const struct PP_Point *hot_spot);
+ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
+                              PP_Resource custom_image, const struct PP_Point *hot_spot);
 
 PP_Bool
-ppb_cursor_control_dev_lock_cursor(PP_Instance instance);
+ppb_cursor_control_lock_cursor(PP_Instance instance);
 
 PP_Bool
-ppb_cursor_control_dev_unlock_cursor(PP_Instance instance);
+ppb_cursor_control_unlock_cursor(PP_Instance instance);
 
 PP_Bool
-ppb_cursor_control_dev_has_cursor_lock(PP_Instance instance);
+ppb_cursor_control_has_cursor_lock(PP_Instance instance);
 
 PP_Bool
-ppb_cursor_control_dev_can_lock_cursor(PP_Instance instance);
+ppb_cursor_control_can_lock_cursor(PP_Instance instance);
 
 #endif // FPP__PPB_CURSOR_CONTROL_H
