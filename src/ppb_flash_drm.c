@@ -8,9 +8,12 @@
 #include "trace.h"
 #include "tables.h"
 #include "config.h"
+#include "static_assert.h"
 
 
-const size_t salt_length = 32;
+#define salt_length             32
+
+STATIC_ASSERT(salt_length <= 32);
 
 PP_Resource
 ppb_flash_drm_create(PP_Instance instance)
@@ -38,14 +41,55 @@ ppb_flash_drm_destroy(void *p)
 {
 }
 
+static
+void
+get_system_salt(char *salt)
+{
+    do {
+        FILE *fp = fopen("/etc/machine-id", "rb");
+        if (!fp)
+            break;
+        if (fread(salt, 1, 32, fp) != 32) {
+            fclose(fp);
+            break;
+        }
+
+        fclose(fp);
+        return;
+    } while (0);
+
+    do {
+        FILE *fp = fopen("/var/lib/dbus/machine-id", "rb");
+        if (!fp)
+            break;
+        if (fread(salt, 1, 32, fp) != 32) {
+            fclose(fp);
+            break;
+        }
+
+        fclose(fp);
+        return;
+    } while (0);
+
+    // fall back to random number generator
+    unsigned char salt_raw[salt_length / 2];
+    ppb_crypto_get_random_bytes((char *)salt_raw, salt_length / 2);
+
+    // make hexadecimal string
+    for (unsigned int k = 0; k < salt_length / 2; k ++) {
+        const char tbl[] = "0123456789abcdef";
+        salt[2 * k] =     tbl[(salt_raw[k] >> 4) & 0xf];
+        salt[2 * k + 1] = tbl[salt_raw[k] & 0xf];
+    }
+}
+
 int32_t
 ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
                             struct PP_CompletionCallback callback)
 {
     const char *salt_fname = fpp_config_get_pepper_salt_file_name();
     FILE *fp;
-    unsigned char salt_raw[salt_length];
-    char salt_txt[salt_length * 2];
+    char salt[salt_length];
 
     (void)drm;
 
@@ -59,8 +103,8 @@ ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
             return PP_ERROR_FAILED;
         }
 
-        ppb_crypto_get_random_bytes((char *)salt_raw, salt_length);
-        size_t written = fwrite(salt_raw, 1, salt_length, fp);
+        get_system_salt(salt);
+        size_t written = fwrite(salt, 1, salt_length, fp);
         fclose(fp);
 
         if (written != salt_length) {
@@ -75,7 +119,7 @@ ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
         }
     }
 
-    size_t read_bytes = fread(salt_raw, 1, salt_length, fp);
+    size_t read_bytes = fread(salt, 1, salt_length, fp);
     fclose(fp);
 
     if (read_bytes != salt_length) {
@@ -83,14 +127,7 @@ ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
         return PP_ERROR_FAILED;
     }
 
-    // make hexadecimal string
-    for (unsigned int k = 0; k < salt_length; k ++) {
-        const char tbl[] = "0123456789abcdef";
-        salt_txt[2 * k] =     tbl[(salt_raw[k] >> 4) & 0xf];
-        salt_txt[2 * k + 1] = tbl[salt_raw[k] & 0xf];
-    }
-
-    *id = ppb_var_var_from_utf8(salt_txt, salt_length * 2);
+    *id = ppb_var_var_from_utf8(salt, salt_length);
     ppb_core_call_on_main_thread(0, callback, PP_OK);
     return PP_OK_COMPLETIONPENDING;
 }
