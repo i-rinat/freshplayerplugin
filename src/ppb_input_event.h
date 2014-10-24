@@ -27,6 +27,7 @@
 
 #include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppp_input_event.h>
+#include <ppapi/c/dev/ppb_ime_input_event_dev.h>
 
 
 void

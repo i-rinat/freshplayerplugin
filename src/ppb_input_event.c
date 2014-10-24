@@ -926,6 +926,16 @@ const struct PPB_TouchInputEvent_1_0 ppb_touch_input_event_interface_1_0 = {
     .GetTouchById =         TWRAPZ(ppb_touch_input_event_get_touch_by_id),
 };
 
+const struct PPB_IMEInputEvent_Dev_0_2 ppb_ime_input_event_dev_interface_0_2 = {
+    .Create =           TWRAPZ(ppb_ime_input_event_create),
+    .IsIMEInputEvent =  TWRAPZ(ppb_ime_input_event_is_ime_input_event),
+    .GetText =          TWRAPZ(ppb_ime_input_event_get_text),
+    .GetSegmentNumber = TWRAPZ(ppb_ime_input_event_get_segment_number),
+    .GetSegmentOffset = TWRAPZ(ppb_ime_input_event_get_segment_offset),
+    .GetTargetSegment = TWRAPZ(ppb_ime_input_event_get_target_segment),
+    .GetSelection =     TWRAPZ(ppb_ime_input_event_get_selection),
+};
+
 const struct PPB_IMEInputEvent_1_0 ppb_ime_input_event_interface_1_0 = {
     .Create =           TWRAPZ(ppb_ime_input_event_create),
     .IsIMEInputEvent =  TWRAPZ(ppb_ime_input_event_is_ime_input_event),

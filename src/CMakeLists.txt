@@ -47,7 +47,6 @@ add_library(freshwrapper-obj OBJECT
     ppb_graphics2d.c
     ppb_graphics3d.c
     ppb_image_data.c
-    ppb_ime_input_event.c
     ppb_input_event.c
     ppb_instance.c
     ppb_memory.c
