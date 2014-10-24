@@ -29,21 +29,20 @@
 
 
 void
-ppb_text_input_dev_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type_Dev type);
+ppb_text_input_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type_Dev type);
 
 void
-ppb_text_input_dev_interface_update_caret_position(PP_Instance instance,
-                                                   const struct PP_Rect *caret,
-                                                   const struct PP_Rect *bounding_box);
+ppb_text_input_interface_update_caret_position(PP_Instance instance, const struct PP_Rect *caret,
+                                               const struct PP_Rect *bounding_box);
 
 void
-ppb_text_input_dev_interface_cancel_composition_text(PP_Instance instance);
+ppb_text_input_interface_cancel_composition_text(PP_Instance instance);
 
 void
-ppb_text_input_dev_interface_update_surrounding_text(PP_Instance instance, const char *text,
-                                                     uint32_t caret, uint32_t anchor);
+ppb_text_input_interface_update_surrounding_text(PP_Instance instance, const char *text,
+                                                 uint32_t caret, uint32_t anchor);
 
 void
-ppb_text_input_dev_interface_selection_changed(PP_Instance instance);
+ppb_text_input_interface_selection_changed(PP_Instance instance);
 
 #endif // FPP__PPB_TEXT_INPUT_H
