@@ -29,7 +29,7 @@
 
 
 PP_Resource
-ppb_printing_dev_create(PP_Instance instance)
+ppb_printing_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
@@ -41,9 +41,9 @@ ppb_printing_dev_create(PP_Instance instance)
 }
 
 int32_t
-ppb_printing_dev_get_default_print_settings(PP_Resource resource,
-                                            struct PP_PrintSettings_Dev *print_settings,
-                                            struct PP_CompletionCallback callback)
+ppb_printing_get_default_print_settings(PP_Resource resource,
+                                        struct PP_PrintSettings_Dev *print_settings,
+                                        struct PP_CompletionCallback callback)
 {
     return 0;
 }
@@ -52,25 +52,25 @@ ppb_printing_dev_get_default_print_settings(PP_Resource resource,
 // trace wrappers
 TRACE_WRAPPER
 PP_Resource
-trace_ppb_printing_dev_create(PP_Instance instance)
+trace_ppb_printing_create(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
-    return ppb_printing_dev_create(instance);
+    return ppb_printing_create(instance);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_printing_dev_get_default_print_settings(PP_Resource resource,
-                                                  struct PP_PrintSettings_Dev *print_settings,
-                                                  struct PP_CompletionCallback callback)
+trace_ppb_printing_get_default_print_settings(PP_Resource resource,
+                                              struct PP_PrintSettings_Dev *print_settings,
+                                              struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s resource=%d, callback={.func=%p, .user_data=%p, .flags=%d}\n",
                __func__+6, resource, callback.func, callback.user_data, callback.flags);
-    return ppb_printing_dev_get_default_print_settings(resource, print_settings, callback);
+    return ppb_printing_get_default_print_settings(resource, print_settings, callback);
 }
 
 
-const struct PPB_Printing_Dev_0_7 ppb_printing_dev_0_7 = {
-    .Create =                   TWRAPF(ppb_printing_dev_create),
-    .GetDefaultPrintSettings =  TWRAPZ(ppb_printing_dev_get_default_print_settings),
+const struct PPB_Printing_Dev_0_7 ppb_printing_dev_interface_0_7 = {
+    .Create =                   TWRAPF(ppb_printing_create),
+    .GetDefaultPrintSettings =  TWRAPZ(ppb_printing_get_default_print_settings),
 };

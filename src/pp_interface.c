@@ -133,7 +133,7 @@ extern const struct PPB_OpenGLES2FramebufferMultisample ppb_opengles2_framebuffe
 extern const struct PPB_OpenGLES2InstancedArrays    ppb_opengles2_instanced_arrays_interface_1_0;
 extern const struct PPB_OpenGLES2Query              ppb_opengles2_query_interface_1_0;
 extern const struct PPB_OpenGLES2                   ppb_opengles2_interface_1_0;
-extern const struct PPB_Printing_Dev_0_7            ppb_printing_dev_0_7;
+extern const struct PPB_Printing_Dev_0_7            ppb_printing_dev_interface_0_7;
 extern const struct PPB_TCPSocket_Private_0_4       ppb_tcp_socket_private_interface_0_4;
 extern const struct PPB_TCPSocket_Private_0_5       ppb_tcp_socket_private_interface_0_5;
 extern const struct PPB_TextInputController_1_0     ppb_text_input_controller_interface_1_0;
@@ -227,7 +227,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_OPENGLES2_INSTANCEDARRAYS_INTERFACE_1_0, ppb_opengles2_instanced_arrays_interface_1_0)
     ELSEIFBLOCK(PPB_OPENGLES2_INTERFACE_1_0,            ppb_opengles2_interface_1_0)
     ELSEIFBLOCK(PPB_OPENGLES2_QUERY_INTERFACE_1_0,      ppb_opengles2_query_interface_1_0)
-    ELSEIFBLOCK(PPB_PRINTING_DEV_INTERFACE_0_7,         ppb_printing_dev_0_7)
+    ELSEIFBLOCK(PPB_PRINTING_DEV_INTERFACE_0_7,         ppb_printing_dev_interface_0_7)
     ELSEIFBLOCK(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_4,    ppb_tcp_socket_private_interface_0_4)
     ELSEIFBLOCK(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_5,    ppb_tcp_socket_private_interface_0_5)
     ELSEIFBLOCK(PPB_TEXTINPUTCONTROLLER_INTERFACE_1_0,  ppb_text_input_controller_interface_1_0)

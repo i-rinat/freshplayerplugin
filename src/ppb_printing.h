@@ -29,11 +29,11 @@
 
 
 PP_Resource
-ppb_printing_dev_create(PP_Instance instance);
+ppb_printing_create(PP_Instance instance);
 
 int32_t
-ppb_printing_dev_get_default_print_settings(PP_Resource resource,
-                                            struct PP_PrintSettings_Dev *print_settings,
-                                            struct PP_CompletionCallback callback);
+ppb_printing_get_default_print_settings(PP_Resource resource,
+                                        struct PP_PrintSettings_Dev *print_settings,
+                                        struct PP_CompletionCallback callback);
 
 #endif // FPP__PPB_PRINTING_H
