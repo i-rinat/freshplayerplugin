@@ -30,16 +30,16 @@
 
 
 PP_Bool
-ppb_net_address_private_are_equal(const struct PP_NetAddress_Private *addr1,
-                                  const struct PP_NetAddress_Private *addr2)
+ppb_net_address_are_equal(const struct PP_NetAddress_Private *addr1,
+                          const struct PP_NetAddress_Private *addr2)
 {
     int ret = (addr1->size == addr2->size) && (memcmp(addr1->data, addr2->data, addr1->size) == 0);
     return ret ? PP_TRUE : PP_FALSE;
 }
 
 PP_Bool
-ppb_net_address_private_are_hosts_equal(const struct PP_NetAddress_Private *addr1,
-                                        const struct PP_NetAddress_Private *addr2)
+ppb_net_address_are_hosts_equal(const struct PP_NetAddress_Private *addr1,
+                                const struct PP_NetAddress_Private *addr2)
 {
     if (addr1->size != addr2->size)
         return PP_FALSE;
@@ -62,15 +62,15 @@ ppb_net_address_private_are_hosts_equal(const struct PP_NetAddress_Private *addr
 }
 
 struct PP_Var
-ppb_net_address_private_describe(PP_Module module, const struct PP_NetAddress_Private *addr,
-                                 PP_Bool include_port)
+ppb_net_address_describe(PP_Module module, const struct PP_NetAddress_Private *addr,
+                         PP_Bool include_port)
 {
     return PP_MakeUndefined();
 }
 
 PP_Bool
-ppb_net_address_private_replace_port(const struct PP_NetAddress_Private *src_addr, uint16_t port,
-                                     struct PP_NetAddress_Private *addr_out)
+ppb_net_address_replace_port(const struct PP_NetAddress_Private *src_addr, uint16_t port,
+                             struct PP_NetAddress_Private *addr_out)
 {
     *addr_out = *src_addr;
 
@@ -88,12 +88,12 @@ ppb_net_address_private_replace_port(const struct PP_NetAddress_Private *src_add
 }
 
 void
-ppb_net_address_private_get_any_address(PP_Bool is_ipv6, struct PP_NetAddress_Private *addr)
+ppb_net_address_get_any_address(PP_Bool is_ipv6, struct PP_NetAddress_Private *addr)
 {
 }
 
 PP_NetAddressFamily_Private
-ppb_net_address_private_get_family(const struct PP_NetAddress_Private *addr)
+ppb_net_address_get_family(const struct PP_NetAddress_Private *addr)
 {
     if (addr->size == sizeof(struct sockaddr_in))
         return PP_NETADDRESSFAMILY_PRIVATE_IPV4;
@@ -104,7 +104,7 @@ ppb_net_address_private_get_family(const struct PP_NetAddress_Private *addr)
 }
 
 uint16_t
-ppb_net_address_private_get_port(const struct PP_NetAddress_Private *addr)
+ppb_net_address_get_port(const struct PP_NetAddress_Private *addr)
 {
     if (addr->size == sizeof(struct sockaddr_in)) {
         struct sockaddr_in *a = (struct sockaddr_in *)addr->data;
@@ -118,8 +118,8 @@ ppb_net_address_private_get_port(const struct PP_NetAddress_Private *addr)
 }
 
 PP_Bool
-ppb_net_address_private_get_address(const struct PP_NetAddress_Private *addr, void *address,
-                                    uint16_t address_size)
+ppb_net_address_get_address(const struct PP_NetAddress_Private *addr, void *address,
+                            uint16_t address_size)
 {
     if (addr->size == sizeof(struct sockaddr_in)) {
         struct sockaddr_in *a = (struct sockaddr_in *)addr->data;
@@ -139,21 +139,20 @@ ppb_net_address_private_get_address(const struct PP_NetAddress_Private *addr, vo
 }
 
 uint32_t
-ppb_net_address_private_get_scope_id(const struct PP_NetAddress_Private *addr)
+ppb_net_address_get_scope_id(const struct PP_NetAddress_Private *addr)
 {
     return 0;
 }
 
 void
-ppb_net_address_private_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
-                                                 struct PP_NetAddress_Private *addr_out)
+ppb_net_address_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
+                                         struct PP_NetAddress_Private *addr_out)
 {
 }
 
 void
-ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id,
-                                                 uint16_t port,
-                                                 struct PP_NetAddress_Private *addr_out)
+ppb_net_address_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id, uint16_t port,
+                                         struct PP_NetAddress_Private *addr_out)
 {
 }
 
@@ -161,112 +160,112 @@ ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uint32_t 
 // trace wrappers
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_net_address_private_are_equal(const struct PP_NetAddress_Private *addr1,
-                                        const struct PP_NetAddress_Private *addr2)
+trace_ppb_net_address_are_equal(const struct PP_NetAddress_Private *addr1,
+                                const struct PP_NetAddress_Private *addr2)
 {
     trace_info("[PPB] {full} %s addr1={%p}, addr2={%p}\n", __func__+6, addr1, addr2);
-    return ppb_net_address_private_are_equal(addr1, addr2);
+    return ppb_net_address_are_equal(addr1, addr2);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_net_address_private_are_hosts_equal(const struct PP_NetAddress_Private *addr1,
-                                              const struct PP_NetAddress_Private *addr2)
+trace_ppb_net_address_are_hosts_equal(const struct PP_NetAddress_Private *addr1,
+                                      const struct PP_NetAddress_Private *addr2)
 {
     trace_info("[PPB] {full} %s addr1={%p}, addr2={%p}\n", __func__+6, addr1, addr2);
-    return ppb_net_address_private_are_hosts_equal(addr1, addr2);
+    return ppb_net_address_are_hosts_equal(addr1, addr2);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_net_address_private_describe(PP_Module module, const struct PP_NetAddress_Private *addr,
-                                       PP_Bool include_port)
+trace_ppb_net_address_describe(PP_Module module, const struct PP_NetAddress_Private *addr,
+                               PP_Bool include_port)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_net_address_private_describe(module, addr, include_port);
+    return ppb_net_address_describe(module, addr, include_port);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_net_address_private_replace_port(const struct PP_NetAddress_Private *src_addr,
-                                           uint16_t port, struct PP_NetAddress_Private *addr_out)
+trace_ppb_net_address_replace_port(const struct PP_NetAddress_Private *src_addr, uint16_t port,
+                                   struct PP_NetAddress_Private *addr_out)
 {
     trace_info("[PPB] {full} %s src_addr={%p}, port=%u\n", __func__+6, src_addr, port);
-    return ppb_net_address_private_replace_port(src_addr, port, addr_out);
+    return ppb_net_address_replace_port(src_addr, port, addr_out);
 }
 
 TRACE_WRAPPER
 void
-trace_ppb_net_address_private_get_any_address(PP_Bool is_ipv6, struct PP_NetAddress_Private *addr)
+trace_ppb_net_address_get_any_address(PP_Bool is_ipv6, struct PP_NetAddress_Private *addr)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_net_address_private_get_any_address(is_ipv6, addr);
+    return ppb_net_address_get_any_address(is_ipv6, addr);
 }
 
 TRACE_WRAPPER
 PP_NetAddressFamily_Private
-trace_ppb_net_address_private_get_family(const struct PP_NetAddress_Private *addr)
+trace_ppb_net_address_get_family(const struct PP_NetAddress_Private *addr)
 {
     trace_info("[PPB] {full} %s addr={%p}\n", __func__+6, addr);
-    return ppb_net_address_private_get_family(addr);
+    return ppb_net_address_get_family(addr);
 }
 
 TRACE_WRAPPER
 uint16_t
-trace_ppb_net_address_private_get_port(const struct PP_NetAddress_Private *addr)
+trace_ppb_net_address_get_port(const struct PP_NetAddress_Private *addr)
 {
     trace_info("[PPB] {full} %s addr={%p}\n", __func__+6, addr);
-    return ppb_net_address_private_get_port(addr);
+    return ppb_net_address_get_port(addr);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_net_address_private_get_address(const struct PP_NetAddress_Private *addr, void *address,
-                                          uint16_t address_size)
+trace_ppb_net_address_get_address(const struct PP_NetAddress_Private *addr, void *address,
+                                  uint16_t address_size)
 {
     trace_info("[PPB] {full} %s addr={%p}, address=%p, address_size=%u\n", __func__+6, addr,
                address, address_size);
-    return ppb_net_address_private_get_address(addr, address, address_size);
+    return ppb_net_address_get_address(addr, address, address_size);
 }
 
 TRACE_WRAPPER
 uint32_t
-trace_ppb_net_address_private_get_scope_id(const struct PP_NetAddress_Private *addr)
+trace_ppb_net_address_get_scope_id(const struct PP_NetAddress_Private *addr)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_net_address_private_get_scope_id(addr);
+    return ppb_net_address_get_scope_id(addr);
 }
 
 TRACE_WRAPPER
 void
-trace_ppb_net_address_private_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
-                                                       struct PP_NetAddress_Private *addr_out)
+trace_ppb_net_address_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
+                                               struct PP_NetAddress_Private *addr_out)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_net_address_private_create_from_ipv4_address(ip, port, addr_out);
+    return ppb_net_address_create_from_ipv4_address(ip, port, addr_out);
 }
 
 TRACE_WRAPPER
 void
-trace_ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id,
-                                                       uint16_t port,
-                                                       struct PP_NetAddress_Private *addr_out)
+trace_ppb_net_address_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id,
+                                               uint16_t port,
+                                               struct PP_NetAddress_Private *addr_out)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_net_address_private_create_from_ipv6_address(ip, scope_id, port, addr_out);
+    return ppb_net_address_create_from_ipv6_address(ip, scope_id, port, addr_out);
 }
 
 
 const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = {
-    .AreEqual =         TWRAPF(ppb_net_address_private_are_equal),
-    .AreHostsEqual =    TWRAPF(ppb_net_address_private_are_hosts_equal),
-    .Describe =         TWRAPZ(ppb_net_address_private_describe),
-    .ReplacePort =      TWRAPF(ppb_net_address_private_replace_port),
-    .GetAnyAddress =    TWRAPZ(ppb_net_address_private_get_any_address),
-    .GetFamily =        TWRAPF(ppb_net_address_private_get_family),
-    .GetPort =          TWRAPF(ppb_net_address_private_get_port),
-    .GetAddress =       TWRAPF(ppb_net_address_private_get_address),
-    .GetScopeID =       TWRAPZ(ppb_net_address_private_get_scope_id),
-    .CreateFromIPv4Address = TWRAPZ(ppb_net_address_private_create_from_ipv4_address),
-    .CreateFromIPv6Address = TWRAPZ(ppb_net_address_private_create_from_ipv6_address),
+    .AreEqual =              TWRAPF(ppb_net_address_are_equal),
+    .AreHostsEqual =         TWRAPF(ppb_net_address_are_hosts_equal),
+    .Describe =              TWRAPZ(ppb_net_address_describe),
+    .ReplacePort =           TWRAPF(ppb_net_address_replace_port),
+    .GetAnyAddress =         TWRAPZ(ppb_net_address_get_any_address),
+    .GetFamily =             TWRAPF(ppb_net_address_get_family),
+    .GetPort =               TWRAPF(ppb_net_address_get_port),
+    .GetAddress =            TWRAPF(ppb_net_address_get_address),
+    .GetScopeID =            TWRAPZ(ppb_net_address_get_scope_id),
+    .CreateFromIPv4Address = TWRAPZ(ppb_net_address_create_from_ipv4_address),
+    .CreateFromIPv6Address = TWRAPZ(ppb_net_address_create_from_ipv6_address),
 };
