@@ -235,7 +235,7 @@ pp_resource_unref(PP_Resource resource)
             ppb_flash_message_loop_destroy(ptr);
             break;
         case PP_RESOURCE_TCP_SOCKET:
-            ppb_tcp_socket_private_destroy(ptr);
+            ppb_tcp_socket_destroy(ptr);
             break;
         case PP_RESOURCE_FILE_REF:
             ppb_file_ref_destroy(ptr);

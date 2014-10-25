@@ -35,7 +35,7 @@
 
 
 PP_Resource
-ppb_tcp_socket_private_create(PP_Instance instance)
+ppb_tcp_socket_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
@@ -55,7 +55,7 @@ ppb_tcp_socket_private_create(PP_Instance instance)
 }
 
 void
-ppb_tcp_socket_private_destroy(void *ptr)
+ppb_tcp_socket_destroy(void *ptr)
 {
     struct pp_tcp_socket_s *ts = ptr;
     if (!ts->destroyed) {
@@ -73,14 +73,14 @@ ppb_tcp_socket_private_destroy(void *ptr)
 }
 
 PP_Bool
-ppb_tcp_socket_private_is_tcp_socket(PP_Resource resource)
+ppb_tcp_socket_is_tcp_socket(PP_Resource resource)
 {
     return pp_resource_get_type(resource) == PP_RESOURCE_TCP_SOCKET;
 }
 
 int32_t
-ppb_tcp_socket_private_connect(PP_Resource tcp_socket, const char *host, uint16_t port,
-                               struct PP_CompletionCallback callback)
+ppb_tcp_socket_connect(PP_Resource tcp_socket, const char *host, uint16_t port,
+                       struct PP_CompletionCallback callback)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
@@ -103,9 +103,9 @@ ppb_tcp_socket_private_connect(PP_Resource tcp_socket, const char *host, uint16_
 }
 
 int32_t
-ppb_tcp_socket_private_connect_with_net_address(PP_Resource tcp_socket,
-                                                const struct PP_NetAddress_Private *addr,
-                                                struct PP_CompletionCallback callback)
+ppb_tcp_socket_connect_with_net_address(PP_Resource tcp_socket,
+                                        const struct PP_NetAddress_Private *addr,
+                                        struct PP_CompletionCallback callback)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
@@ -127,8 +127,7 @@ ppb_tcp_socket_private_connect_with_net_address(PP_Resource tcp_socket,
 }
 
 PP_Bool
-ppb_tcp_socket_private_get_local_address(PP_Resource tcp_socket,
-                                         struct PP_NetAddress_Private *local_addr)
+ppb_tcp_socket_get_local_address(PP_Resource tcp_socket, struct PP_NetAddress_Private *local_addr)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
@@ -151,8 +150,7 @@ ppb_tcp_socket_private_get_local_address(PP_Resource tcp_socket,
 }
 
 PP_Bool
-ppb_tcp_socket_private_get_remote_address(PP_Resource tcp_socket,
-                                          struct PP_NetAddress_Private *remote_addr)
+ppb_tcp_socket_get_remote_address(PP_Resource tcp_socket, struct PP_NetAddress_Private *remote_addr)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
@@ -175,28 +173,28 @@ ppb_tcp_socket_private_get_remote_address(PP_Resource tcp_socket,
 }
 
 int32_t
-ppb_tcp_socket_private_ssl_handshake(PP_Resource tcp_socket, const char *server_name,
-                                     uint16_t server_port, struct PP_CompletionCallback callback)
+ppb_tcp_socket_ssl_handshake(PP_Resource tcp_socket, const char *server_name, uint16_t server_port,
+                             struct PP_CompletionCallback callback)
 {
     return -1;
 }
 
 PP_Resource
-ppb_tcp_socket_private_get_server_certificate(PP_Resource tcp_socket)
+ppb_tcp_socket_get_server_certificate(PP_Resource tcp_socket)
 {
     return 0;
 }
 
 PP_Bool
-ppb_tcp_socket_private_add_chain_building_certificate(PP_Resource tcp_socket,
-                                                      PP_Resource certificate, PP_Bool is_trusted)
+ppb_tcp_socket_add_chain_building_certificate(PP_Resource tcp_socket, PP_Resource certificate,
+                                              PP_Bool is_trusted)
 {
     return PP_FALSE;
 }
 
 int32_t
-ppb_tcp_socket_private_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
-                            struct PP_CompletionCallback callback)
+ppb_tcp_socket_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
+                    struct PP_CompletionCallback callback)
 {
     if (bytes_to_read <= 0) {
         trace_error("%s, bytes_to_read <= 0\n", __func__);
@@ -239,8 +237,8 @@ ppb_tcp_socket_private_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_
 }
 
 int32_t
-ppb_tcp_socket_private_write(PP_Resource tcp_socket, const char *buffer, int32_t bytes_to_write,
-                             struct PP_CompletionCallback callback)
+ppb_tcp_socket_write(PP_Resource tcp_socket, const char *buffer, int32_t bytes_to_write,
+                     struct PP_CompletionCallback callback)
 {
     if (bytes_to_write <= 0) {
         trace_error("%s, bytes_to_write <= 0\n", __func__);
@@ -277,20 +275,20 @@ ppb_tcp_socket_private_write(PP_Resource tcp_socket, const char *buffer, int32_t
 }
 
 void
-ppb_tcp_socket_private_disconnect(PP_Resource tcp_socket)
+ppb_tcp_socket_disconnect(PP_Resource tcp_socket)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(tcp_socket, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
         trace_error("%s, bad resource\n", __func__);
         return;
     }
-    ppb_tcp_socket_private_destroy(ts);
+    ppb_tcp_socket_destroy(ts);
     pp_resource_release(tcp_socket);
 }
 
 int32_t
-ppb_tcp_socket_private_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Private name,
-                                  struct PP_Var value, struct PP_CompletionCallback callback)
+ppb_tcp_socket_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Private name,
+                          struct PP_Var value, struct PP_CompletionCallback callback)
 {
     return -1;
 }
@@ -299,157 +297,154 @@ ppb_tcp_socket_private_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Pri
 // trace wrappers
 TRACE_WRAPPER
 PP_Resource
-trace_ppb_tcp_socket_private_create(PP_Instance instance)
+trace_ppb_tcp_socket_create(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
-    return ppb_tcp_socket_private_create(instance);
+    return ppb_tcp_socket_create(instance);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_tcp_socket_private_is_tcp_socket(PP_Resource resource)
+trace_ppb_tcp_socket_is_tcp_socket(PP_Resource resource)
 {
     trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
-    return ppb_tcp_socket_private_is_tcp_socket(resource);
+    return ppb_tcp_socket_is_tcp_socket(resource);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_tcp_socket_private_connect(PP_Resource tcp_socket, const char *host, uint16_t port,
-                                     struct PP_CompletionCallback callback)
+trace_ppb_tcp_socket_connect(PP_Resource tcp_socket, const char *host, uint16_t port,
+                             struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {full} %s tcp_socket=%d, host=%s, port=%u, callback={.func=%p, "
                ".user_data=%p, flags=%u}\n", __func__+6, tcp_socket, host, port, callback.func,
                callback.user_data, callback.flags);
-    return ppb_tcp_socket_private_connect(tcp_socket, host, port, callback);
+    return ppb_tcp_socket_connect(tcp_socket, host, port, callback);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_tcp_socket_private_connect_with_net_address(PP_Resource tcp_socket,
-                                                      const struct PP_NetAddress_Private *addr,
-                                                      struct PP_CompletionCallback callback)
+trace_ppb_tcp_socket_connect_with_net_address(PP_Resource tcp_socket,
+                                              const struct PP_NetAddress_Private *addr,
+                                              struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {full} %s tcp_socket=%d, addr={%p}, callback={.func=%p, "
                ".user_data=%p, .flags=%u}\n", __func__+6, tcp_socket, addr, callback.func,
                callback.user_data, callback.flags);
-    return ppb_tcp_socket_private_connect_with_net_address(tcp_socket, addr, callback);
+    return ppb_tcp_socket_connect_with_net_address(tcp_socket, addr, callback);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_tcp_socket_private_get_local_address(PP_Resource tcp_socket,
-                                               struct PP_NetAddress_Private *local_addr)
+trace_ppb_tcp_socket_get_local_address(PP_Resource tcp_socket,
+                                       struct PP_NetAddress_Private *local_addr)
 {
     trace_info("[PPB] {full} %s tcp_socket=%d\n", __func__+6, tcp_socket);
-    return ppb_tcp_socket_private_get_local_address(tcp_socket, local_addr);
+    return ppb_tcp_socket_get_local_address(tcp_socket, local_addr);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_tcp_socket_private_get_remote_address(PP_Resource tcp_socket,
-                                                struct PP_NetAddress_Private *remote_addr)
+trace_ppb_tcp_socket_get_remote_address(PP_Resource tcp_socket,
+                                        struct PP_NetAddress_Private *remote_addr)
 {
     trace_info("[PPB] {full} %s tcp_socket=%d\n", __func__+6, tcp_socket);
-    return ppb_tcp_socket_private_get_remote_address(tcp_socket, remote_addr);
+    return ppb_tcp_socket_get_remote_address(tcp_socket, remote_addr);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_tcp_socket_private_ssl_handshake(PP_Resource tcp_socket, const char *server_name,
-                                           uint16_t server_port,
-                                           struct PP_CompletionCallback callback)
+trace_ppb_tcp_socket_ssl_handshake(PP_Resource tcp_socket, const char *server_name,
+                                   uint16_t server_port, struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_tcp_socket_private_ssl_handshake(tcp_socket, server_name, server_port, callback);
+    return ppb_tcp_socket_ssl_handshake(tcp_socket, server_name, server_port, callback);
 }
 
 TRACE_WRAPPER
 PP_Resource
-trace_ppb_tcp_socket_private_get_server_certificate(PP_Resource tcp_socket)
+trace_ppb_tcp_socket_get_server_certificate(PP_Resource tcp_socket)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_tcp_socket_private_get_server_certificate(tcp_socket);
+    return ppb_tcp_socket_get_server_certificate(tcp_socket);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_tcp_socket_private_add_chain_building_certificate(PP_Resource tcp_socket,
-                                                            PP_Resource certificate,
-                                                            PP_Bool is_trusted)
+trace_ppb_tcp_socket_add_chain_building_certificate(PP_Resource tcp_socket, PP_Resource certificate,
+                                                    PP_Bool is_trusted)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_tcp_socket_private_add_chain_building_certificate(tcp_socket, certificate,
-                                                                 is_trusted);
+    return ppb_tcp_socket_add_chain_building_certificate(tcp_socket, certificate, is_trusted);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_tcp_socket_private_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
-                                  struct PP_CompletionCallback callback)
+trace_ppb_tcp_socket_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
+                          struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {full} %s tcp_socket=%d, bytes_to_read=%d, callback={.func=%p, "
                ".user_data=%p, .flags=%d}\n", __func__+6, tcp_socket, bytes_to_read, callback.func,
                callback.user_data, callback.flags);
-    return ppb_tcp_socket_private_read(tcp_socket, buffer, bytes_to_read, callback);
+    return ppb_tcp_socket_read(tcp_socket, buffer, bytes_to_read, callback);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_tcp_socket_private_write(PP_Resource tcp_socket, const char *buffer,
-                                   int32_t bytes_to_write, struct PP_CompletionCallback callback)
+trace_ppb_tcp_socket_write(PP_Resource tcp_socket, const char *buffer, int32_t bytes_to_write,
+                           struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {full} %s tcp_socket=%d, bytes_to_write=%d, callback={.func=%p, "
                ".user_data=%p, .flags=%d}\n", __func__+6, tcp_socket, bytes_to_write,
                callback.func, callback.user_data, callback.flags);
-    return ppb_tcp_socket_private_write(tcp_socket, buffer, bytes_to_write, callback);
+    return ppb_tcp_socket_write(tcp_socket, buffer, bytes_to_write, callback);
 }
 
 TRACE_WRAPPER
 void
-trace_ppb_tcp_socket_private_disconnect(PP_Resource tcp_socket)
+trace_ppb_tcp_socket_disconnect(PP_Resource tcp_socket)
 {
     trace_info("[PPB] {full} %s tcp_socket=%d\n", __func__+6, tcp_socket);
-    ppb_tcp_socket_private_disconnect(tcp_socket);
+    ppb_tcp_socket_disconnect(tcp_socket);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_tcp_socket_private_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Private name,
-                                        struct PP_Var value, struct PP_CompletionCallback callback)
+trace_ppb_tcp_socket_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Private name,
+                                struct PP_Var value, struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_tcp_socket_private_set_option(tcp_socket, name, value, callback);
+    return ppb_tcp_socket_set_option(tcp_socket, name, value, callback);
 }
 
 
 const struct PPB_TCPSocket_Private_0_5 ppb_tcp_socket_private_interface_0_5 = {
-    .Create =                       TWRAPF(ppb_tcp_socket_private_create),
-    .IsTCPSocket =                  TWRAPF(ppb_tcp_socket_private_is_tcp_socket),
-    .Connect =                      TWRAPF(ppb_tcp_socket_private_connect),
-    .ConnectWithNetAddress =        TWRAPF(ppb_tcp_socket_private_connect_with_net_address),
-    .GetLocalAddress =              TWRAPF(ppb_tcp_socket_private_get_local_address),
-    .GetRemoteAddress =             TWRAPF(ppb_tcp_socket_private_get_remote_address),
-    .SSLHandshake =                 TWRAPZ(ppb_tcp_socket_private_ssl_handshake),
-    .GetServerCertificate =         TWRAPZ(ppb_tcp_socket_private_get_server_certificate),
-    .AddChainBuildingCertificate =  TWRAPZ(ppb_tcp_socket_private_add_chain_building_certificate),
-    .Read =                         TWRAPF(ppb_tcp_socket_private_read),
-    .Write =                        TWRAPF(ppb_tcp_socket_private_write),
-    .Disconnect =                   TWRAPF(ppb_tcp_socket_private_disconnect),
-    .SetOption =                    TWRAPZ(ppb_tcp_socket_private_set_option),
+    .Create =                       TWRAPF(ppb_tcp_socket_create),
+    .IsTCPSocket =                  TWRAPF(ppb_tcp_socket_is_tcp_socket),
+    .Connect =                      TWRAPF(ppb_tcp_socket_connect),
+    .ConnectWithNetAddress =        TWRAPF(ppb_tcp_socket_connect_with_net_address),
+    .GetLocalAddress =              TWRAPF(ppb_tcp_socket_get_local_address),
+    .GetRemoteAddress =             TWRAPF(ppb_tcp_socket_get_remote_address),
+    .SSLHandshake =                 TWRAPZ(ppb_tcp_socket_ssl_handshake),
+    .GetServerCertificate =         TWRAPZ(ppb_tcp_socket_get_server_certificate),
+    .AddChainBuildingCertificate =  TWRAPZ(ppb_tcp_socket_add_chain_building_certificate),
+    .Read =                         TWRAPF(ppb_tcp_socket_read),
+    .Write =                        TWRAPF(ppb_tcp_socket_write),
+    .Disconnect =                   TWRAPF(ppb_tcp_socket_disconnect),
+    .SetOption =                    TWRAPZ(ppb_tcp_socket_set_option),
 };
 
 const struct PPB_TCPSocket_Private_0_4 ppb_tcp_socket_private_interface_0_4 = {
-    .Create =                       TWRAPF(ppb_tcp_socket_private_create),
-    .IsTCPSocket =                  TWRAPF(ppb_tcp_socket_private_is_tcp_socket),
-    .Connect =                      TWRAPF(ppb_tcp_socket_private_connect),
-    .ConnectWithNetAddress =        TWRAPF(ppb_tcp_socket_private_connect_with_net_address),
-    .GetLocalAddress =              TWRAPF(ppb_tcp_socket_private_get_local_address),
-    .GetRemoteAddress =             TWRAPF(ppb_tcp_socket_private_get_remote_address),
-    .SSLHandshake =                 TWRAPZ(ppb_tcp_socket_private_ssl_handshake),
-    .GetServerCertificate =         TWRAPZ(ppb_tcp_socket_private_get_server_certificate),
-    .AddChainBuildingCertificate =  TWRAPZ(ppb_tcp_socket_private_add_chain_building_certificate),
-    .Read =                         TWRAPF(ppb_tcp_socket_private_read),
-    .Write =                        TWRAPF(ppb_tcp_socket_private_write),
-    .Disconnect =                   TWRAPF(ppb_tcp_socket_private_disconnect),
+    .Create =                       TWRAPF(ppb_tcp_socket_create),
+    .IsTCPSocket =                  TWRAPF(ppb_tcp_socket_is_tcp_socket),
+    .Connect =                      TWRAPF(ppb_tcp_socket_connect),
+    .ConnectWithNetAddress =        TWRAPF(ppb_tcp_socket_connect_with_net_address),
+    .GetLocalAddress =              TWRAPF(ppb_tcp_socket_get_local_address),
+    .GetRemoteAddress =             TWRAPF(ppb_tcp_socket_get_remote_address),
+    .SSLHandshake =                 TWRAPZ(ppb_tcp_socket_ssl_handshake),
+    .GetServerCertificate =         TWRAPZ(ppb_tcp_socket_get_server_certificate),
+    .AddChainBuildingCertificate =  TWRAPZ(ppb_tcp_socket_add_chain_building_certificate),
+    .Read =                         TWRAPF(ppb_tcp_socket_read),
+    .Write =                        TWRAPF(ppb_tcp_socket_write),
+    .Disconnect =                   TWRAPF(ppb_tcp_socket_disconnect),
 };
