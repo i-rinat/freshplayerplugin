@@ -71,10 +71,10 @@ void
 ppb_url_loader_close(PP_Resource loader);
 
 void
-ppb_url_loader_trusted_grant_universal_access(PP_Resource loader);
+ppb_url_loader_grant_universal_access(PP_Resource loader);
 
 void
-ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
-                                                PP_URLLoaderTrusted_StatusCallback cb);
+ppb_url_loader_register_status_callback(PP_Resource loader,
+                                        PP_URLLoaderTrusted_StatusCallback cb);
 
 #endif // FPP__PPB_URL_LOADER_H

@@ -564,15 +564,14 @@ ppb_url_loader_close(PP_Resource loader)
 }
 
 void
-ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
+ppb_url_loader_grant_universal_access(PP_Resource loader)
 {
     // TODO: do something
     return;
 }
 
 void
-ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
-                                                PP_URLLoaderTrusted_StatusCallback cb)
+ppb_url_loader_register_status_callback(PP_Resource loader, PP_URLLoaderTrusted_StatusCallback cb)
 {
     return;
 }
@@ -672,19 +671,19 @@ trace_ppb_url_loader_close(PP_Resource loader)
 
 TRACE_WRAPPER
 void
-trace_ppb_url_loader_trusted_grant_universal_access(PP_Resource loader)
+trace_ppb_url_loader_grant_universal_access(PP_Resource loader)
 {
     trace_info("[PPB] {fake} %s loader=%d\n", __func__+6, loader);
-    ppb_url_loader_trusted_grant_universal_access(loader);
+    ppb_url_loader_grant_universal_access(loader);
 }
 
 TRACE_WRAPPER
 void
-trace_ppb_url_loader_trusted_register_status_callback(PP_Resource loader,
-                                                      PP_URLLoaderTrusted_StatusCallback cb)
+trace_ppb_url_loader_register_status_callback(PP_Resource loader,
+                                              PP_URLLoaderTrusted_StatusCallback cb)
 {
     trace_info("[PPB] {zilch} %s loader=%d, cb=%p\n", __func__+6, loader, cb);
-    ppb_url_loader_trusted_register_status_callback(loader, cb);
+    ppb_url_loader_register_status_callback(loader, cb);
 }
 
 
@@ -702,6 +701,6 @@ const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
 };
 
 const struct PPB_URLLoaderTrusted_0_3 ppb_url_loader_trusted_interface_0_3 = {
-    .GrantUniversalAccess =     TWRAPZ(ppb_url_loader_trusted_grant_universal_access),
-    .RegisterStatusCallback =   TWRAPZ(ppb_url_loader_trusted_register_status_callback),
+    .GrantUniversalAccess =     TWRAPZ(ppb_url_loader_grant_universal_access),
+    .RegisterStatusCallback =   TWRAPZ(ppb_url_loader_register_status_callback),
 };
