@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_FLASH_FILE_H
-#define FPP__PPB_FLASH_FILE_H
+#ifndef FPP_PPB_FLASH_FILE_H
+#define FPP_PPB_FLASH_FILE_H
 
 #include <ppapi/c/dev/deprecated_bool.h>
 #include <ppapi/c/private/ppb_flash_file.h>
@@ -35,4 +35,4 @@ ppb_flash_file_file_ref_open_file(PP_Resource file_ref_id, int32_t mode, PP_File
 int32_t
 ppb_flash_file_file_ref_query_file(PP_Resource file_ref_id, struct PP_FileInfo *info);
 
-#endif // FPP__PPB_FLASH_FILE_H
+#endif // FPP_PPB_FLASH_FILE_H

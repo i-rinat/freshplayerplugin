@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_TCP_SOCKET_H
-#define FPP__PPB_TCP_SOCKET_H
+#ifndef FPP_PPB_TCP_SOCKET_H
+#define FPP_PPB_TCP_SOCKET_H
 
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
 
@@ -80,4 +80,4 @@ int32_t
 ppb_tcp_socket_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Private name,
                           struct PP_Var value, struct PP_CompletionCallback callback);
 
-#endif // FPP__PPB_TCP_SOCKET_H
+#endif // FPP_PPB_TCP_SOCKET_H

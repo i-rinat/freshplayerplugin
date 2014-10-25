@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PP_RESOURCE_H
-#define FPP__PP_RESOURCE_H
+#ifndef FPP_PP_RESOURCE_H
+#define FPP_PP_RESOURCE_H
 
 #include <ppapi/c/pp_completion_callback.h>
 #include <ppapi/c/pp_rect.h>
@@ -433,4 +433,4 @@ void                    pp_resource_ref(PP_Resource resource);
 void                    pp_resource_unref(PP_Resource resource);
 
 
-#endif // FPP__PP_RESOURCE_H
+#endif // FPP_PP_RESOURCE_H

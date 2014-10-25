@@ -1,5 +1,5 @@
-#ifndef FPP__PPB_NACL_H
-#define FPP__PPB_NACL_H
+#ifndef FPP_PPB_NACL_H
+#define FPP_PPB_NACL_H
 
 #include <ppapi/c/private/ppb_nacl_private.h>
 
@@ -65,4 +65,4 @@ ppb_nacl_log_to_console(PP_Instance instance, const char *message);
 PP_NaClReadyState
 ppb_nacl_get_nacl_ready_state(PP_Instance instance);
 
-#endif // FPP__PPB_NACL_H
+#endif // FPP_PPB_NACL_H

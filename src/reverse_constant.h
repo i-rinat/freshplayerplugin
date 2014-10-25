@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__REVERSE_CONSTANT_H
-#define FPP__REVERSE_CONSTANT_H
+#ifndef FPP_REVERSE_CONSTANT_H
+#define FPP_REVERSE_CONSTANT_H
 
 #include <npapi/npapi.h>
 #include <ppapi/c/ppb_url_response_info.h>
@@ -52,4 +52,4 @@ const char *reverse_nacl_event_type(PP_NaClEventType et);
 const char *reverse_nacl_error(PP_NaClError err);
 const char *reverse_nacl_ready_state(PP_NaClReadyState rs);
 
-#endif // FPP__REVERSE_CONSTANT_H
+#endif // FPP_REVERSE_CONSTANT_H

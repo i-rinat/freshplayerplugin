@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_FLASH_H
-#define FPP__PPB_FLASH_H
+#ifndef FPP_PPB_FLASH_H
+#define FPP_PPB_FLASH_H
 
 #include <ppapi/c/private/ppb_flash.h>
 
@@ -85,4 +85,4 @@ ppb_flash_get_device_id(PP_Instance instance);
 int32_t
 ppb_flash_get_setting_int(PP_Instance instance, PP_FlashSetting setting);
 
-#endif // FPP__PPB_FLASH_H
+#endif // FPP_PPB_FLASH_H

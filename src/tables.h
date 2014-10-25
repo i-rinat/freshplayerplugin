@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__TABLES_H
-#define FPP__TABLES_H
+#ifndef FPP_TABLES_H
+#define FPP_TABLES_H
 
 #include <ppapi/c/pp_var.h>
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
@@ -63,4 +63,4 @@ void    tables_remove_npobj_npp_mapping(NPObject *npobj);
 int     tables_open_display(void);
 void    tables_close_display(void);
 
-#endif // FPP__TABLES_H
+#endif // FPP_TABLES_H

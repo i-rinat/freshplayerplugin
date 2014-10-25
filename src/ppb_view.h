@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_VIEW_H
-#define FPP__PPB_VIEW_H
+#ifndef FPP_PPB_VIEW_H
+#define FPP_PPB_VIEW_H
 
 #include <ppapi/c/ppb_view.h>
 #include <ppapi/c/dev/ppb_view_dev.h>
@@ -52,4 +52,4 @@ ppb_view_get_device_scale(PP_Resource resource);
 float
 ppb_view_get_css_scale(PP_Resource resource);
 
-#endif // FPP__PPB_VIEW_H
+#endif // FPP_PPB_VIEW_H

@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_FILE_REF_H
-#define FPP__PPB_FILE_REF_H
+#ifndef FPP_PPB_FILE_REF_H
+#define FPP_PPB_FILE_REF_H
 
 #include <ppapi/c/ppb_file_ref.h>
 
@@ -72,4 +72,4 @@ int32_t
 ppb_file_ref_read_directory_entries(PP_Resource file_ref, struct PP_ArrayOutput output,
                                     struct PP_CompletionCallback callback);
 
-#endif // FPP__PPB_FILE_REF_H
+#endif // FPP_PPB_FILE_REF_H

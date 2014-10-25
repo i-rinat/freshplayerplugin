@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__EINTR_RETRY_H
-#define FPP__EINTR_RETRY_H
+#ifndef FPP_EINTR_RETRY_H
+#define FPP_EINTR_RETRY_H
 
 #include <errno.h>
 
@@ -36,4 +36,4 @@
     ___tmp_res;                                     \
 })
 
-#endif // FPP__EINTR_RETRY_H
+#endif // FPP_EINTR_RETRY_H

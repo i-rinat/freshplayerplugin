@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__SRC_KEYCODECONVERT_H
-#define FPP__SRC_KEYCODECONVERT_H
+#ifndef FPP_KEYCODECONVERT_H
+#define FPP_KEYCODECONVERT_H
 
 int
 xkeycode_to_pp_keycode(int xkeycode);
@@ -31,4 +31,4 @@ xkeycode_to_pp_keycode(int xkeycode);
 int
 get_left_right_pp_flag(int xkeycode);
 
-#endif // FPP__SRC_KEYCODECONVERT_H
+#endif // FPP_KEYCODECONVERT_H

@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_INSTANCE_H
-#define FPP__PPB_INSTANCE_H
+#ifndef FPP_PPB_INSTANCE_H
+#define FPP_PPB_INSTANCE_H
 
 #include <ppapi/c/ppb_instance.h>
 #include <ppapi/c/private/ppb_instance_private.h>
@@ -43,4 +43,4 @@ ppb_instance_get_owner_element_object(PP_Instance instance);
 struct PP_Var
 ppb_instance_execute_script(PP_Instance instance, struct PP_Var script, struct PP_Var *exception);
 
-#endif // FPP__PPB_INSTANCE_H
+#endif // FPP_PPB_INSTANCE_H

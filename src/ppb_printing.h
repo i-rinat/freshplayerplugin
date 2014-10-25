@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_PRINTING_H
-#define FPP__PPB_PRINTING_H
+#ifndef FPP_PPB_PRINTING_H
+#define FPP_PPB_PRINTING_H
 
 #include <ppapi/c/dev/ppb_printing_dev.h>
 
@@ -36,4 +36,4 @@ ppb_printing_get_default_print_settings(PP_Resource resource,
                                         struct PP_PrintSettings_Dev *print_settings,
                                         struct PP_CompletionCallback callback);
 
-#endif // FPP__PPB_PRINTING_H
+#endif // FPP_PPB_PRINTING_H

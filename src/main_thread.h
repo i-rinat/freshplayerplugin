@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__MAIN_THREAD_H
-#define FPP__MAIN_THREAD_H
+#ifndef FPP_MAIN_THREAD_H
+#define FPP_MAIN_THREAD_H
 
 
 void *
 fresh_wrapper_main_thread(void *p);
 
-#endif // FPP__MAIN_THREAD_H
+#endif // FPP_MAIN_THREAD_H

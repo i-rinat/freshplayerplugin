@@ -1,5 +1,5 @@
-#ifndef FPP__SRC_KEYCODEPP_H
-#define FPP__SRC_KEYCODEPP_H
+#ifndef FPP_KEYCODEPP_H
+#define FPP_KEYCODEPP_H
 
 #define VK_LBUTTON      0x01    // Left mouse button
 #define VK_RBUTTON      0x02    // Right mouse button
@@ -178,4 +178,4 @@
 #define VK_PA1          0xFD    // PA1 key
 #define VK_OEM_CLEAR    0xFE    // Clear key
 
-#endif // FPP__SRC_KEYCODEPP_H
+#endif // FPP_KEYCODEPP_H

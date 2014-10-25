@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_NET_ADDRESS_H
-#define FPP__PPB_NET_ADDRESS_H
+#ifndef FPP_PPB_NET_ADDRESS_H
+#define FPP_PPB_NET_ADDRESS_H
 
 #include <ppapi/c/private/ppb_net_address_private.h>
 
@@ -68,4 +68,4 @@ void
 ppb_net_address_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id, uint16_t port,
                                          struct PP_NetAddress_Private *addr_out);
 
-#endif // FPP__PPB_NET_ADDRESS_H
+#endif // FPP_PPB_NET_ADDRESS_H

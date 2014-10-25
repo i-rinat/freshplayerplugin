@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_CORE_H
-#define FPP__PPB_CORE_H
+#ifndef FPP_PPB_CORE_H
+#define FPP_PPB_CORE_H
 
 #include <ppapi/c/ppb_core.h>
 #include <ppapi/c/pp_instance.h>
@@ -51,4 +51,4 @@ ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data);
 PP_Bool
 ppb_core_is_main_thread(void);
 
-#endif // FPP__PPB_CORE_H
+#endif // FPP_PPB_CORE_H

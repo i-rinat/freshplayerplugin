@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_FONT_H
-#define FPP__PPB_FONT_H
+#ifndef FPP_PPB_FONT_H
+#define FPP_PPB_FONT_H
 
 #include <ppapi/c/dev/ppb_font_dev.h>
 
@@ -57,4 +57,4 @@ int32_t
 ppb_font_pixel_offset_for_character(PP_Resource font, const struct PP_TextRun_Dev *text,
                                     uint32_t char_offset);
 
-#endif // FPP__PPB_FONT_H
+#endif // FPP_PPB_FONT_H

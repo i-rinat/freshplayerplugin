@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__TRACE_H
-#define FPP__TRACE_H
+#ifndef FPP_TRACE_H
+#define FPP_TRACE_H
 
 #include <ppapi/c/pp_var.h>
 #include <ppapi/c/pp_rect.h>
@@ -65,4 +65,4 @@ char   *trace_touch_point_as_string(const struct PP_TouchPoint *point);
 char   *trace_event_classes_as_string(uint32_t event_classes);
 char   *trace_np_window_as_string(const NPWindow *window);
 
-#endif // FPP__TRACE_H
+#endif // FPP_TRACE_H

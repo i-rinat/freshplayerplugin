@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_VAR_H
-#define FPP__PPB_VAR_H
+#ifndef FPP_PPB_VAR_H
+#define FPP_PPB_VAR_H
 
 #include <ppapi/c/ppb_var.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>
@@ -100,4 +100,4 @@ np_variant_to_pp_var(NPVariant v);
 char *
 ppb_var_trace_object_var(struct PP_Var var);
 
-#endif // FPP__PPB_VAR_H
+#endif // FPP_PPB_VAR_H

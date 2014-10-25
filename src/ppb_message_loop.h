@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_MESSAGE_LOOP_H
-#define FPP__PPB_MESSAGE_LOOP_H
+#ifndef FPP_PPB_MESSAGE_LOOP_H
+#define FPP_PPB_MESSAGE_LOOP_H
 
 #include <ppapi/c/ppb_message_loop.h>
 
@@ -82,4 +82,4 @@ ppb_message_loop_post_quit_depth(PP_Resource message_loop, PP_Bool should_destro
 void
 ppb_message_loop_mark_thread_unsuitable(void);
 
-#endif // FPP__PPB_MESSAGE_LOOP_H
+#endif // FPP_PPB_MESSAGE_LOOP_H

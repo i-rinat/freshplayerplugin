@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_UDP_SOCKET_H
-#define FPP__PPB_UDP_SOCKET_H
+#ifndef FPP_PPB_UDP_SOCKET_H
+#define FPP_PPB_UDP_SOCKET_H
 
 #include <ppapi/c/private/ppb_udp_socket_private.h>
 
@@ -61,4 +61,4 @@ ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t num_b
 void
 ppb_udp_socket_close(PP_Resource udp_socket);
 
-#endif // FPP__PPB_UDP_SOCKET_H
+#endif // FPP_PPB_UDP_SOCKET_H

@@ -1,5 +1,5 @@
-#ifndef FPP__PPB_FLASH_DRM_H
-#define FPP__PPB_FLASH_DRM_H
+#ifndef FPP_PPB_FLASH_DRM_H
+#define FPP_PPB_FLASH_DRM_H
 
 #include <ppapi/c/private/ppb_flash_drm.h>
 
@@ -26,5 +26,5 @@ ppb_flash_drm_monitor_is_external(PP_Resource drm, PP_Bool *is_external,
                                   struct PP_CompletionCallback callback);
 
 
-#endif // FPP__PPB_FLASH_DRM_H
+#endif // FPP_PPB_FLASH_DRM_H
 

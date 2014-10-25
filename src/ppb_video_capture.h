@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_VIDEO_CAPTURE_H
-#define FPP__PPB_VIDEO_CAPTURE_H
+#ifndef FPP_PPB_VIDEO_CAPTURE_H
+#define FPP_PPB_VIDEO_CAPTURE_H
 
 #include <ppapi/c/dev/ppb_video_capture_dev.h>
 
@@ -63,4 +63,4 @@ void
 ppb_video_capture_close(PP_Resource video_capture);
 
 
-#endif // FPP__PPB_VIDEO_CAPTURE_H
+#endif // FPP_PPB_VIDEO_CAPTURE_H

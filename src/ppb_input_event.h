@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_INPUT_EVENT_H
-#define FPP__PPB_INPUT_EVENT_H
+#ifndef FPP_PPB_INPUT_EVENT_H
+#define FPP_PPB_INPUT_EVENT_H
 
 #include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppp_input_event.h>
@@ -158,4 +158,4 @@ ppb_ime_input_event_get_target_segment(PP_Resource ime_event);
 void
 ppb_ime_input_event_get_selection(PP_Resource ime_event, uint32_t *start, uint32_t *end);
 
-#endif // FPP__PPB_INPUT_EVENT_H
+#endif // FPP_PPB_INPUT_EVENT_H

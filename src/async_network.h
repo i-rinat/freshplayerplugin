@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__ASYNC_NETWORK_H
-#define FPP__ASYNC_NETWORK_H
+#ifndef FPP_ASYNC_NETWORK_H
+#define FPP_ASYNC_NETWORK_H
 
 #include <ppapi/c/pp_completion_callback.h>
 #include <ppapi/c/pp_resource.h>
@@ -65,4 +65,4 @@ async_network_task_push(struct async_network_task_s *task);
 struct async_network_task_s *
 async_network_task_create(void);
 
-#endif // FPP__ASYNC_NETWORK_H
+#endif // FPP_ASYNC_NETWORK_H

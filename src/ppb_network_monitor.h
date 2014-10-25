@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_NETWORK_MONITOR_H
-#define FPP__PPB_NETWORK_MONITOR_H
+#ifndef FPP_PPB_NETWORK_MONITOR_H
+#define FPP_PPB_NETWORK_MONITOR_H
 
 #include <ppapi/c/ppb_network_monitor.h>
 
@@ -38,4 +38,4 @@ ppb_network_monitor_update_network_list(PP_Resource network_monitor, PP_Resource
 PP_Bool
 ppb_network_monitor_is_network_monitor(PP_Resource resource);
 
-#endif // FPP__PPB_NETWORK_MONITOR_H
+#endif // FPP_PPB_NETWORK_MONITOR_H

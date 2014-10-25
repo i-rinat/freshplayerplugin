@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_AUDIO_H
-#define FPP__PPB_AUDIO_H
+#ifndef FPP_PPB_AUDIO_H
+#define FPP_PPB_AUDIO_H
 
 #include <ppapi/c/ppb_audio.h>
 
@@ -51,4 +51,4 @@ ppb_audio_start_playback(PP_Resource audio);
 PP_Bool
 ppb_audio_stop_playback(PP_Resource audio);
 
-#endif // FPP__PPB_AUDIO_H
+#endif // FPP_PPB_AUDIO_H

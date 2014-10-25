@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_GRAPHICS2D_H
-#define FPP__PPB_GRAPHICS2D_H
+#ifndef FPP_PPB_GRAPHICS2D_H
+#define FPP_PPB_GRAPHICS2D_H
 
 #include <ppapi/c/ppb_graphics_2d.h>
 
@@ -60,4 +60,4 @@ ppb_graphics2d_set_scale(PP_Resource resource, float scale);
 float
 ppb_graphics2d_get_scale(PP_Resource resource);
 
-#endif // FPP__PPB_GRAPHICS2D_H
+#endif // FPP_PPB_GRAPHICS2D_H

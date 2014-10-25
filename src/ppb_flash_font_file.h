@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_FLASH_FONT_FILE_H
-#define FPP__PPB_FLASH_FONT_FILE_H
+#ifndef FPP_PPB_FLASH_FONT_FILE_H
+#define FPP_PPB_FLASH_FONT_FILE_H
 
 #include <ppapi/c/private/ppb_flash_font_file.h>
 
@@ -42,4 +42,4 @@ PP_Bool
 ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *output,
                                    uint32_t *output_length);
 
-#endif // FPP__PPB_FLASH_FONT_FILE_H
+#endif // FPP_PPB_FLASH_FONT_FILE_H

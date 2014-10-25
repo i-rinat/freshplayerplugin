@@ -1,5 +1,5 @@
-#ifndef FPP__PPB_FLASH_MESSAGE_LOOP_H
-#define FPP__PPB_FLASH_MESSAGE_LOOP_H
+#ifndef FPP_PPB_FLASH_MESSAGE_LOOP_H
+#define FPP_PPB_FLASH_MESSAGE_LOOP_H
 
 #include <ppapi/c/private/ppb_flash_message_loop.h>
 
@@ -19,4 +19,4 @@ ppb_flash_message_loop_run(PP_Resource flash_message_loop);
 void
 ppb_flash_message_loop_quit(PP_Resource flash_message_loop);
 
-#endif // FPP__PPB_FLASH_MESSAGE_LOOP_H
+#endif // FPP_PPB_FLASH_MESSAGE_LOOP_H

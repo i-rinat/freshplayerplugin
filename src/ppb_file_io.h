@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FPP__PPB_FILE_IO_H
-#define FPP__PPB_FILE_IO_H
+#ifndef FPP_PPB_FILE_IO_H
+#define FPP_PPB_FILE_IO_H
 
 #include <ppapi/c/ppb_file_io.h>
 #include <ppapi/c/private/ppb_file_io_private.h>
@@ -76,4 +76,4 @@ ppb_file_io_read_to_array(PP_Resource file_io, int64_t offset, int32_t max_read_
                           struct PP_ArrayOutput *output, struct PP_CompletionCallback callback);
 
 
-#endif // FPP__PPB_FILE_IO_H
+#endif // FPP_PPB_FILE_IO_H
