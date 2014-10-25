@@ -66,6 +66,7 @@ add_library(freshwrapper-obj OBJECT
     ppb_url_response_info.c
     ppb_url_util.c
     ppb_var.c
+    ppb_var_array_buffer.c
     ppb_video_capture.c
     ppb_view.c
 )
