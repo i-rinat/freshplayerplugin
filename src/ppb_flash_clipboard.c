@@ -32,12 +32,93 @@
 #include "ppb_var.h"
 #include "ppb_core.h"
 #include <ppapi/c/pp_errors.h>
+#include <glib.h>
 
+
+static GHashTable      *format_id_ht;       ///< maps name to id
+static GHashTable      *format_name_ht;     ///< maps id to name
+static uint32_t         next_format_id = 1000;
+static pthread_mutex_t  lock;
+
+static
+void
+free_data_block(gpointer data)
+{
+    g_free(data);
+}
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_clipboard(void)
+{
+    pthread_mutex_init(&lock, NULL);
+
+    pthread_mutex_lock(&lock);
+    format_id_ht = g_hash_table_new_full(g_str_hash, g_str_equal, free_data_block, NULL);
+    format_name_ht = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free_data_block);
+
+    g_hash_table_insert(format_id_ht, g_strdup("TEXT"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
+
+    g_hash_table_insert(format_id_ht, g_strdup("STRING"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
+
+    g_hash_table_insert(format_id_ht, g_strdup("UTF8_STRING"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
+
+    g_hash_table_insert(format_id_ht, g_strdup("COMPOUND_TEXT"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
+
+    g_hash_table_insert(format_id_ht, g_strdup("text/html"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_HTML));
+
+    g_hash_table_insert(format_id_ht, g_strdup("text/rtf"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_RTF));
+
+    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT),
+                        g_strdup("STRING"));
+
+    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_HTML),
+                        g_strdup("text/html"));
+
+    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_RTF),
+                        g_strdup("text/rtf"));
+    pthread_mutex_unlock(&lock);
+}
+
+static
+void
+__attribute__((destructor))
+destructor__ppb_flash_clipboard(void)
+{
+    pthread_mutex_lock(&lock);
+    g_hash_table_unref(format_id_ht);
+    g_hash_table_unref(format_name_ht);
+    pthread_mutex_unlock(&lock);
+
+    pthread_mutex_destroy(&lock);
+}
 
 uint32_t
 ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const char *format_name)
 {
-    return 0;
+    // check if this format was registered already
+    pthread_mutex_lock(&lock);
+    uint32_t format_id = GPOINTER_TO_INT(g_hash_table_lookup(format_id_ht, format_name));
+    pthread_mutex_unlock(&lock);
+
+    if (format_id > 0)
+        return format_id;
+
+    // create new one
+    pthread_mutex_lock(&lock);
+    format_id = next_format_id ++;
+    g_hash_table_insert(format_id_ht, g_strdup(format_name), GINT_TO_POINTER(format_id));
+    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(format_id), g_strdup(format_name));
+    pthread_mutex_unlock(&lock);
+
+    return format_id;
 }
 
 static
@@ -52,9 +133,14 @@ clipboard_type_and_format_are_supported(PP_Flash_Clipboard_Type clipboard_type, 
         return 0;
     }
 
+    pthread_mutex_lock(&lock);
+    gchar *custom_format_name = g_hash_table_lookup(format_name_ht, GINT_TO_POINTER(format));
+    pthread_mutex_unlock(&lock);
+
     if (format != PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT
         && format != PP_FLASH_CLIPBOARD_FORMAT_HTML
-        && format != PP_FLASH_CLIPBOARD_FORMAT_RTF)
+        && format != PP_FLASH_CLIPBOARD_FORMAT_RTF
+        && custom_format_name == NULL)
     {
         trace_error("%s, unknown format (= %d)\n", func_name, format);
         return 0;
@@ -89,8 +175,16 @@ get_clipboard_target_atom(uint32_t format)
     case PP_FLASH_CLIPBOARD_FORMAT_RTF:
         return gdk_atom_intern("text/rtf", FALSE);
     default:
-        return GDK_NONE;
+        break;
     }
+
+    pthread_mutex_lock(&lock);
+    gchar *custom_format_name = g_hash_table_lookup(format_name_ht, GINT_TO_POINTER(format));
+    pthread_mutex_unlock(&lock);
+    if (custom_format_name)
+        return gdk_atom_intern(custom_format_name, FALSE);
+
+    return GDK_NONE;
 }
 
 struct clipboard_is_format_available_param_s {
@@ -176,7 +270,18 @@ _clipboard_read_data_ptac(void *user_data)
 
     GtkSelectionData *sd = gtk_clipboard_wait_for_contents(clipboard, target);
     if (sd) {
-        p->result = ppb_var_var_from_utf8((char *)sd->data, sd->length);
+        switch (p->format) {
+        case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
+        case PP_FLASH_CLIPBOARD_FORMAT_HTML:
+            p->result = ppb_var_var_from_utf8((char *)sd->data, sd->length);
+            break;
+        default:
+            p->result = ppb_var_array_buffer_create(sd->length);
+            memcpy(ppb_var_array_buffer_map(p->result), sd->data, sd->length);
+            ppb_var_array_buffer_unmap(p->result);
+            break;
+        }
+
         gtk_selection_data_free(sd);
     }
 
@@ -235,9 +340,23 @@ _get_func(GtkClipboard *clipboard, GtkSelectionData *selection_data, guint info,
     GArray *items = user_data;
     struct selection_entry_s *item = &g_array_index(items, struct selection_entry_s, info);
     uint32_t len = 0;
-    const char *data = ppb_var_var_to_utf8(item->var, &len);
+    const char *data;
+
+    if (item->var.type == PP_VARTYPE_STRING) {
+        data = ppb_var_var_to_utf8(item->var, &len);
+    } else if (item->var.type == PP_VARTYPE_ARRAY_BUFFER) {
+        data = ppb_var_array_buffer_map(item->var);
+        ppb_var_array_buffer_byte_length(item->var, &len);
+    } else {
+        trace_error("%s, unexpected var type %d\n", __func__, item->var.type);
+        data = NULL;
+        len = 0;
+    }
 
     gtk_selection_data_set(selection_data, item->type, 8, (const guchar *)data, len);
+
+    if (item->var.type == PP_VARTYPE_ARRAY_BUFFER)
+        ppb_var_array_buffer_unmap(item->var);
 }
 
 static
@@ -275,16 +394,13 @@ _clipboard_write_data_ptac(void *user_data)
     GArray *items = g_array_new(FALSE /* no zero teminator */, TRUE /* zero items */, sizeof(item));
 
     for (uint32_t k = 0; k < p->data_item_count; k ++) {
-        const char *data;
-        uint32_t len;
-
         item.var = p->data_items[k];
-        data = ppb_var_var_to_utf8(p->data_items[k], &len);
-        if (!data)
-            continue;
-
         switch (p->formats[k]) {
         case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
+            if (item.var.type != PP_VARTYPE_STRING) {
+                trace_error("%s, plaintext format, var is not a string\n", __func__);
+                break;
+            }
             item.type = gdk_atom_intern("text/html", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
@@ -306,16 +422,33 @@ _clipboard_write_data_ptac(void *user_data)
             g_array_append_val(items, item);
             break;
         case PP_FLASH_CLIPBOARD_FORMAT_HTML:
+            if (item.var.type != PP_VARTYPE_STRING) {
+                trace_error("%s, html format, var is not a string\n", __func__);
+                break;
+            }
             item.type = gdk_atom_intern("text/html", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
             break;
         case PP_FLASH_CLIPBOARD_FORMAT_RTF:
+            if (item.var.type != PP_VARTYPE_ARRAY_BUFFER) {
+                trace_error("%s, rtf, var is not an array buffer\n", __func__);
+                break;
+            }
             item.type = gdk_atom_intern("text/rtf", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
             break;
         default:
+            if (item.var.type != PP_VARTYPE_ARRAY_BUFFER) {
+                trace_error("%s, custom format, var is not an array buffer\n", __func__);
+                break;
+            }
+            item.type = get_clipboard_target_atom(p->formats[k]);
+            if (item.type != GDK_NONE) {
+                ppb_var_add_ref(item.var);
+                g_array_append_val(items, item);
+            }
             break;
         }
     }
@@ -389,7 +522,7 @@ TRACE_WRAPPER
 uint32_t
 trace_ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const char *format_name)
 {
-    trace_info("[PPB] {zilch} %s instance_id=%d, format_name=%s\n", __func__+6, instance_id,
+    trace_info("[PPB] {full} %s instance_id=%d, format_name=%s\n", __func__+6, instance_id,
                format_name);
     return ppb_flash_clipboard_register_custom_format(instance_id, format_name);
 }
@@ -445,7 +578,7 @@ trace_ppb_flash_clipboard_get_sequence_number(PP_Instance instance_id,
 
 
 const struct PPB_Flash_Clipboard_5_1 ppb_flash_clipboard_interface_5_1 = {
-    .RegisterCustomFormat = TWRAPZ(ppb_flash_clipboard_register_custom_format),
+    .RegisterCustomFormat = TWRAPF(ppb_flash_clipboard_register_custom_format),
     .IsFormatAvailable =    TWRAPF(ppb_flash_clipboard_is_format_available),
     .ReadData =             TWRAPF(ppb_flash_clipboard_read_data),
     .WriteData =            TWRAPF(ppb_flash_clipboard_write_data),
@@ -453,7 +586,7 @@ const struct PPB_Flash_Clipboard_5_1 ppb_flash_clipboard_interface_5_1 = {
 };
 
 const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
-    .RegisterCustomFormat = TWRAPZ(ppb_flash_clipboard_register_custom_format),
+    .RegisterCustomFormat = TWRAPF(ppb_flash_clipboard_register_custom_format),
     .IsFormatAvailable =    TWRAPF(ppb_flash_clipboard_is_format_available),
     .ReadData =             TWRAPF(ppb_flash_clipboard_read_data),
     .WriteData =            TWRAPF(ppb_flash_clipboard_write_data),
