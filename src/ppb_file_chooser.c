@@ -48,10 +48,10 @@ ppb_file_chooser_show(PP_Resource chooser, struct PP_ArrayOutput output,
 }
 
 int32_t
-ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
-                                                   struct PP_Var suggested_file_name,
-                                                   struct PP_ArrayOutput output,
-                                                   struct PP_CompletionCallback callback)
+ppb_file_chooser_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
+                                           struct PP_Var suggested_file_name,
+                                           struct PP_ArrayOutput output,
+                                           struct PP_CompletionCallback callback)
 {
     return 0;
 }
@@ -86,15 +86,14 @@ trace_ppb_file_chooser_show(PP_Resource chooser, struct PP_ArrayOutput output,
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
-                                                         struct PP_Var suggested_file_name,
-                                                         struct PP_ArrayOutput output,
-                                                         struct PP_CompletionCallback callback)
+trace_ppb_file_chooser_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
+                                                 struct PP_Var suggested_file_name,
+                                                 struct PP_ArrayOutput output,
+                                                 struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_file_chooser_trusted_show_without_user_gesture(chooser, save_as,
-                                                              suggested_file_name, output,
-                                                              callback);
+    return ppb_file_chooser_show_without_user_gesture(chooser, save_as, suggested_file_name, output,
+                                                      callback);
 }
 
 
@@ -105,5 +104,5 @@ const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
 };
 
 const struct PPB_FileChooserTrusted_0_6 ppb_file_chooser_trusted_interface_0_6 = {
-    .ShowWithoutUserGesture = TWRAPZ(ppb_file_chooser_trusted_show_without_user_gesture),
+    .ShowWithoutUserGesture = TWRAPZ(ppb_file_chooser_show_without_user_gesture),
 };
