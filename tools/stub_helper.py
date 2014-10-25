@@ -104,7 +104,7 @@ def gen_structs(ast):
                         a_func_rettype = a_func_rettype.children()[0][1]
                         fname = a_func_rettype.declname
 
-                    print("    ." + fname + " = trace_" + lowcase_name(node.name, fname) + ",")
+                    print("    ." + fname + " = TWRAPZ(" + lowcase_name(node.name, fname) + "),")
                 print("};")
 
     v = MyVisitor()
@@ -113,7 +113,7 @@ def gen_structs(ast):
 prep_file = sys.argv[1]
 ast = parse_file(prep_file, use_cpp=False)
 
-guardian_name = "FPP__" + prep_file.replace(".prep", "").upper().replace(".", "_")
+guardian_name = "FPP_" + prep_file.replace(".prep", "").upper().replace(".", "_")
 print("#ifndef " + guardian_name)
 print("#define " + guardian_name)
 print("")
