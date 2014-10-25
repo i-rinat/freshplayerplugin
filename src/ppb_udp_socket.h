@@ -29,37 +29,36 @@
 
 
 PP_Resource
-ppb_udp_socket_private_create(PP_Instance instance_id);
+ppb_udp_socket_create(PP_Instance instance_id);
 
 PP_Bool
-ppb_udp_socket_private_is_udp_socket(PP_Resource resource_id);
+ppb_udp_socket_is_udp_socket(PP_Resource resource_id);
 
 int32_t
-ppb_udp_socket_private_set_socket_feature(PP_Resource udp_socket, PP_UDPSocketFeature_Private name,
-                                          struct PP_Var value);
+ppb_udp_socket_set_socket_feature(PP_Resource udp_socket, PP_UDPSocketFeature_Private name,
+                                  struct PP_Var value);
 
 int32_t
-ppb_udp_socket_private_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *addr,
-                            struct PP_CompletionCallback callback);
+ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *addr,
+                    struct PP_CompletionCallback callback);
 
 PP_Bool
-ppb_udp_socket_private_get_bound_address(PP_Resource udp_socket,
-                                         struct PP_NetAddress_Private *addr);
+ppb_udp_socket_get_bound_address(PP_Resource udp_socket, struct PP_NetAddress_Private *addr);
 
 int32_t
-ppb_udp_socket_private_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes,
-                                 struct PP_CompletionCallback callback);
+ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes,
+                         struct PP_CompletionCallback callback);
 
 PP_Bool
-ppb_udp_socket_private_get_recv_from_address(PP_Resource udp_socket,
-                                             struct PP_NetAddress_Private *addr);
+ppb_udp_socket_get_recv_from_address(PP_Resource udp_socket,
+                                     struct PP_NetAddress_Private *addr);
 
 int32_t
-ppb_udp_socket_private_send_to(PP_Resource udp_socket, const char *buffer, int32_t num_bytes,
-                               const struct PP_NetAddress_Private *addr,
-                               struct PP_CompletionCallback callback);
+ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t num_bytes,
+                       const struct PP_NetAddress_Private *addr,
+                       struct PP_CompletionCallback callback);
 
 void
-ppb_udp_socket_private_close(PP_Resource udp_socket);
+ppb_udp_socket_close(PP_Resource udp_socket);
 
 #endif // FPP__PPB_UDP_SOCKET_H
