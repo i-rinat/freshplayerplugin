@@ -41,7 +41,7 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
                                    uint32_t *output_length)
 {
     const uint32_t output_buffer_length = (utf16_len + 1) * 4 + 1;
-    char *output = ppb_memory_dev_mem_alloc(output_buffer_length);
+    char *output = ppb_memory_mem_alloc(output_buffer_length);
     char *inbuf = (char*)utf16;
     char *outbuf = (char*)output;
     size_t inbytesleft = utf16_len * 2;
@@ -72,7 +72,7 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
             trace_warning("%s, this should never happen\n", __func__);
         } else {
             if (on_error == PP_CHARSET_CONVERSIONERROR_FAIL) {
-                ppb_memory_dev_mem_free(output);
+                ppb_memory_mem_free(output);
                 *output_length = 0;
                 iconv_close(cd);
                 return NULL;
@@ -93,7 +93,7 @@ ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint
                                    uint32_t *output_length)
 {
     const uint32_t output_buffer_length = (input_len + 2) * sizeof(uint16_t);
-    uint16_t *output = ppb_memory_dev_mem_alloc(output_buffer_length);
+    uint16_t *output = ppb_memory_mem_alloc(output_buffer_length);
     char *inbuf = (char *)input;
     char *outbuf = (char *)output;
     size_t inbytesleft = input_len;
@@ -119,7 +119,7 @@ ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint
             trace_warning("%s, this should never happen\n", __func__);
         } else {
             if (on_error == PP_CHARSET_CONVERSIONERROR_FAIL) {
-                ppb_memory_dev_mem_free(output);
+                ppb_memory_mem_free(output);
                 *output_length = 0;
                 iconv_close(cd);
                 return NULL;
