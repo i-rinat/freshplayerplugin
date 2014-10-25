@@ -208,7 +208,7 @@ pp_resource_unref(PP_Resource resource)
             ppb_graphics3d_destroy(ptr);
             break;
         case PP_RESOURCE_BROWSER_FONT:
-            ppb_browser_font_trusted_destroy(ptr);
+            ppb_browser_font_destroy(ptr);
             break;
         case PP_RESOURCE_AUDIO_CONFIG:
             ppb_audio_config_destroy(ptr);

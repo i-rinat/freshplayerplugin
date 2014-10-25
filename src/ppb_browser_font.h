@@ -29,39 +29,39 @@
 
 
 struct PP_Var
-ppb_browser_font_trusted_get_font_families(PP_Instance instance);
+ppb_browser_font_get_font_families(PP_Instance instance);
 
 PP_Resource
-ppb_browser_font_trusted_create(PP_Instance instance,
-                                const struct PP_BrowserFont_Trusted_Description *description);
+ppb_browser_font_create(PP_Instance instance,
+                        const struct PP_BrowserFont_Trusted_Description *description);
 
 void
-ppb_browser_font_trusted_destroy(void *p);
+ppb_browser_font_destroy(void *p);
 
 PP_Bool
-ppb_browser_font_trusted_is_font(PP_Resource resource);
+ppb_browser_font_is_font(PP_Resource resource);
 
 PP_Bool
-ppb_browser_font_trusted_describe(PP_Resource font,
-                                  struct PP_BrowserFont_Trusted_Description *description,
-                                  struct PP_BrowserFont_Trusted_Metrics *metrics);
+ppb_browser_font_describe(PP_Resource font, struct PP_BrowserFont_Trusted_Description *description,
+                          struct PP_BrowserFont_Trusted_Metrics *metrics);
 
 PP_Bool
-ppb_browser_font_trusted_draw_text_at(PP_Resource font, PP_Resource image_data,
-                                      const struct PP_BrowserFont_Trusted_TextRun *text,
-                                      const struct PP_Point *position, uint32_t color,
-                                      const struct PP_Rect *clip, PP_Bool image_data_is_opaque);
+ppb_browser_font_draw_text_at(PP_Resource font, PP_Resource image_data,
+                              const struct PP_BrowserFont_Trusted_TextRun *text,
+                              const struct PP_Point *position, uint32_t color,
+                              const struct PP_Rect *clip, PP_Bool image_data_is_opaque);
 
 int32_t
-ppb_browser_font_trusted_measure_text(PP_Resource font,
-                                      const struct PP_BrowserFont_Trusted_TextRun *text);
+ppb_browser_font_measure_text(PP_Resource font, const struct PP_BrowserFont_Trusted_TextRun *text);
 
 uint32_t
-ppb_browser_font_trusted_character_offset_for_pixel(PP_Resource font,
-                    const struct PP_BrowserFont_Trusted_TextRun *text, int32_t pixel_position);
+ppb_browser_font_character_offset_for_pixel(PP_Resource font,
+                                            const struct PP_BrowserFont_Trusted_TextRun *text,
+                                            int32_t pixel_position);
 
 int32_t
-ppb_browser_font_trusted_pixel_offset_for_character(PP_Resource font,
-                    const struct PP_BrowserFont_Trusted_TextRun *text, uint32_t char_offset);
+ppb_browser_font_pixel_offset_for_character(PP_Resource font,
+                                            const struct PP_BrowserFont_Trusted_TextRun *text,
+                                            uint32_t char_offset);
 
 #endif // FPP__PPB_BROWSER_FONT_H
