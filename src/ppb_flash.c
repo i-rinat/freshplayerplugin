@@ -288,7 +288,7 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
     switch (setting) {
     case PP_FLASHSETTING_3DENABLED:
         var.type = PP_VARTYPE_BOOL;
-        var.value.as_bool = config.exp_enable_3d ? PP_TRUE : PP_FALSE; // TODO: turn on
+        var.value.as_bool = config.enable_3d ? PP_TRUE : PP_FALSE;
         break;
     case PP_FLASHSETTING_INCOGNITO:
         var.type = PP_VARTYPE_BOOL;
@@ -296,7 +296,7 @@ ppb_flash_get_setting(PP_Instance instance, PP_FlashSetting setting)
         break;
     case PP_FLASHSETTING_STAGE3DENABLED:
         var.type = PP_VARTYPE_BOOL;
-        var.value.as_bool = config.exp_enable_3d ? PP_TRUE : PP_FALSE; // TODO: turn on
+        var.value.as_bool = config.enable_3d ? PP_TRUE : PP_FALSE;
         break;
     case PP_FLASHSETTING_LANGUAGE:
         var = get_flashsetting_language();

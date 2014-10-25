@@ -35,7 +35,7 @@ static struct fpp_config_s default_config = {
     .xinerama_screen     = 0,
     .pepperflash_path    = NULL,
     .flash_command_line  = "enable_hw_video_decode=1,enable_stagevideo_auto=1",
-    .exp_enable_3d       = 0,
+    .enable_3d           = 1,
     .quirks = {
         .switch_buttons_2_3         = 0,
         .dump_resource_histogram    = 0,
@@ -141,8 +141,8 @@ fpp_config_initialize(void)
         config.flash_command_line = strdup(stringval);
     }
 
-    if (config_lookup_int64(&cfg, "exp_enable_3d", &intval)) {
-        config.exp_enable_3d = intval;
+    if (config_lookup_int64(&cfg, "enable_3d", &intval)) {
+        config.enable_3d = intval;
     }
 
     config_destroy(&cfg);

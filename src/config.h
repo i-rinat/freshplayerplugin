@@ -34,7 +34,7 @@ struct fpp_config_s {
     int     xinerama_screen;
     char   *pepperflash_path;
     char   *flash_command_line;
-    int     exp_enable_3d;
+    int     enable_3d;
     struct {
         int   switch_buttons_2_3;
         int   dump_resource_histogram;
