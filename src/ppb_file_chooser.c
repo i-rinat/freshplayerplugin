@@ -28,21 +28,21 @@
 
 
 PP_Resource
-ppb_file_chooser_dev_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
-                            struct PP_Var accept_types)
+ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
+                        struct PP_Var accept_types)
 {
     return 0;
 }
 
 PP_Bool
-ppb_file_chooser_dev_is_file_chooser(PP_Resource resource)
+ppb_file_chooser_is_file_chooser(PP_Resource resource)
 {
     return PP_TRUE;
 }
 
 int32_t
-ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
-                          struct PP_CompletionCallback callback)
+ppb_file_chooser_show(PP_Resource chooser, struct PP_ArrayOutput output,
+                      struct PP_CompletionCallback callback)
 {
     return 0;
 }
@@ -60,28 +60,28 @@ ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool 
 // trace wrappers
 TRACE_WRAPPER
 PP_Resource
-trace_ppb_file_chooser_dev_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
-                                  struct PP_Var accept_types)
+trace_ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
+                              struct PP_Var accept_types)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_file_chooser_dev_create(instance, mode, accept_types);
+    return ppb_file_chooser_create(instance, mode, accept_types);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_file_chooser_dev_is_file_chooser(PP_Resource resource)
+trace_ppb_file_chooser_is_file_chooser(PP_Resource resource)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_file_chooser_dev_is_file_chooser(resource);
+    return ppb_file_chooser_is_file_chooser(resource);
 }
 
 TRACE_WRAPPER
 int32_t
-trace_ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
-                                struct PP_CompletionCallback callback)
+trace_ppb_file_chooser_show(PP_Resource chooser, struct PP_ArrayOutput output,
+                            struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_file_chooser_dev_show(chooser, output, callback);
+    return ppb_file_chooser_show(chooser, output, callback);
 }
 
 TRACE_WRAPPER
@@ -99,9 +99,9 @@ trace_ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP
 
 
 const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
-    .Create =           TWRAPZ(ppb_file_chooser_dev_create),
-    .IsFileChooser =    TWRAPZ(ppb_file_chooser_dev_is_file_chooser),
-    .Show =             TWRAPZ(ppb_file_chooser_dev_show),
+    .Create =           TWRAPZ(ppb_file_chooser_create),
+    .IsFileChooser =    TWRAPZ(ppb_file_chooser_is_file_chooser),
+    .Show =             TWRAPZ(ppb_file_chooser_show),
 };
 
 const struct PPB_FileChooserTrusted_0_6 ppb_file_chooser_trusted_interface_0_6 = {

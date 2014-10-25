@@ -29,15 +29,15 @@
 #include <ppapi/c/trusted/ppb_file_chooser_trusted.h>
 
 PP_Resource
-ppb_file_chooser_dev_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
-                            struct PP_Var accept_types);
+ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
+                        struct PP_Var accept_types);
 
 PP_Bool
-ppb_file_chooser_dev_is_file_chooser(PP_Resource resource);
+ppb_file_chooser_is_file_chooser(PP_Resource resource);
 
 int32_t
-ppb_file_chooser_dev_show(PP_Resource chooser, struct PP_ArrayOutput output,
-                          struct PP_CompletionCallback callback);
+ppb_file_chooser_show(PP_Resource chooser, struct PP_ArrayOutput output,
+                      struct PP_CompletionCallback callback);
 
 int32_t
 ppb_file_chooser_trusted_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
