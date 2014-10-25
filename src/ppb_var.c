@@ -610,13 +610,13 @@ ppb_var_array_buffer_byte_length(struct PP_Var var, uint32_t *byte_length)
 }
 
 void *
-ppb_var_array_buffer_map(struct PP_Var array)
+ppb_var_array_buffer_map(struct PP_Var var)
 {
     return NULL;
 }
 
 void
-ppb_var_array_buffer_unmap(struct PP_Var array)
+ppb_var_array_buffer_unmap(struct PP_Var var)
 {
 }
 
@@ -837,18 +837,22 @@ trace_ppb_var_array_buffer_byte_length(struct PP_Var var, uint32_t *byte_length)
 
 TRACE_WRAPPER
 void *
-trace_ppb_var_array_buffer_map(struct PP_Var array)
+trace_ppb_var_array_buffer_map(struct PP_Var var)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_var_array_buffer_map(array);
+    char *s_var = trace_var_as_string(var);
+    trace_info("[PPB] {zilch} %s var=%s\n", __func__+6, s_var);
+    g_free(s_var);
+    return ppb_var_array_buffer_map(var);
 }
 
 TRACE_WRAPPER
 void
-trace_ppb_var_array_buffer_unmap(struct PP_Var array)
+trace_ppb_var_array_buffer_unmap(struct PP_Var var)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_var_array_buffer_unmap(array);
+    char *s_var = trace_var_as_string(var);
+    trace_info("[PPB] {zilch} %s var=%s\n", __func__+6, s_var);
+    g_free(s_var);
+    return ppb_var_array_buffer_unmap(var);
 }
 
 

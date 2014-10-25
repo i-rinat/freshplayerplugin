@@ -108,9 +108,9 @@ PP_Bool
 ppb_var_array_buffer_byte_length(struct PP_Var var, uint32_t *byte_length);
 
 void *
-ppb_var_array_buffer_map(struct PP_Var array);
+ppb_var_array_buffer_map(struct PP_Var var);
 
 void
-ppb_var_array_buffer_unmap(struct PP_Var array);
+ppb_var_array_buffer_unmap(struct PP_Var var);
 
 #endif // FPP_PPB_VAR_H
