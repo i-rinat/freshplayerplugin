@@ -50,6 +50,7 @@ struct var_s {
         const struct PPP_Class_Deprecated  *_class;
         void                               *data;
     } obj;
+    void           *map_addr;
 };
 
 
@@ -612,12 +613,50 @@ ppb_var_array_buffer_byte_length(struct PP_Var var, uint32_t *byte_length)
 void *
 ppb_var_array_buffer_map(struct PP_Var var)
 {
-    return NULL;
+    if (var.type != PP_VARTYPE_ARRAY_BUFFER) {
+        trace_error("%s, not an array buffer var\n", __func__);
+        return NULL;
+    }
+
+    struct var_s *v = get_var_s(var);
+    if (!v) {
+        trace_error("%s, variable gone\n", __func__);
+        return NULL;
+    }
+
+    if (v->map_addr)
+        return v->map_addr;
+
+    v->map_addr = malloc(v->str.len);
+    if (!v->map_addr)
+        return NULL;
+    memcpy(v->map_addr, v->str.data, v->str.len);
+
+    return v->map_addr;
 }
 
 void
 ppb_var_array_buffer_unmap(struct PP_Var var)
 {
+    if (var.type != PP_VARTYPE_ARRAY_BUFFER) {
+        trace_error("%s, not an array buffer var\n", __func__);
+        return;
+    }
+
+    struct var_s *v = get_var_s(var);
+    if (!v) {
+        trace_error("%s, variable gone\n", __func__);
+        return;
+    }
+
+    // return if not mapped
+    if (!v->map_addr)
+        return;
+
+    // copy data back to the buffer
+    memcpy(v->str.data, v->map_addr, v->str.len);
+    free(v->map_addr);
+    v->map_addr = NULL;
 }
 
 
@@ -840,7 +879,7 @@ void *
 trace_ppb_var_array_buffer_map(struct PP_Var var)
 {
     char *s_var = trace_var_as_string(var);
-    trace_info("[PPB] {zilch} %s var=%s\n", __func__+6, s_var);
+    trace_info("[PPB] {full} %s var=%s\n", __func__+6, s_var);
     g_free(s_var);
     return ppb_var_array_buffer_map(var);
 }
@@ -850,7 +889,7 @@ void
 trace_ppb_var_array_buffer_unmap(struct PP_Var var)
 {
     char *s_var = trace_var_as_string(var);
-    trace_info("[PPB] {zilch} %s var=%s\n", __func__+6, s_var);
+    trace_info("[PPB] {full} %s var=%s\n", __func__+6, s_var);
     g_free(s_var);
     return ppb_var_array_buffer_unmap(var);
 }
@@ -900,6 +939,6 @@ const struct PPB_Var_Deprecated ppb_var_deprecated_interface_0_3 = {
 const struct PPB_VarArrayBuffer_1_0 ppb_var_array_buffer_interface_1_0 = {
     .Create =       TWRAPF(ppb_var_array_buffer_create),
     .ByteLength =   TWRAPF(ppb_var_array_buffer_byte_length),
-    .Map =          TWRAPZ(ppb_var_array_buffer_map),
-    .Unmap =        TWRAPZ(ppb_var_array_buffer_unmap),
+    .Map =          TWRAPF(ppb_var_array_buffer_map),
+    .Unmap =        TWRAPF(ppb_var_array_buffer_unmap),
 };
