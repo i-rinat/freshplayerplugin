@@ -122,6 +122,7 @@ struct pp_instance_s {
     uint32_t                        is_transparent;
     uint32_t                        incognito_mode;
     volatile gint                   instance_loaded;
+    uint32_t                        ignore_focus_events_cnt; ///< number of focus events to ignore
 
     // full screen
     pthread_t                       fs_thread;

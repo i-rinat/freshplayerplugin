@@ -1107,7 +1107,14 @@ _call_ppp_did_change_focus_comt(void *user_data, int32_t result)
     struct pp_instance_s *pp_i = user_data;
     PP_Bool has_focus = result;
 
-    if (pp_i->ppp_instance_1_1 && pp_i->ppp_instance_1_1->DidChangeFocus)
+    // determine whenever we should pass focus event to the plugin instance
+    pthread_mutex_lock(&display.lock);
+    int muffle_event = (pp_i->ignore_focus_events_cnt > 0);
+    if (pp_i->ignore_focus_events_cnt > 0)
+        pp_i->ignore_focus_events_cnt -= 1;
+    pthread_mutex_unlock(&display.lock);
+
+    if (pp_i->ppp_instance_1_1 && pp_i->ppp_instance_1_1->DidChangeFocus && !muffle_event)
         pp_i->ppp_instance_1_1->DidChangeFocus(pp_i->id, has_focus);
 }
 

@@ -173,6 +173,7 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
         trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
     }
+    struct pp_instance_s *pp_i = fm->instance;
 
     if (popup_menu_sentinel)
         trace_error("%s, two context menus at the same time\n", __func__);
@@ -183,6 +184,13 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
     popup_menu_canceled = 1;
     popup_menu_ccb = callback;
     popup_menu_result = selected_id;
+
+    pthread_mutex_lock(&display.lock);
+    // creating and showing menu together with its closing generates pair of focus events,
+    // FocusOut and FocusIn, which should not be passed to the plugin instance. Otherwise they
+    // will tamper with text selection.
+    pp_i->ignore_focus_events_cnt = 2;
+    pthread_mutex_unlock(&display.lock);
 
     ppb_core_call_on_browser_thread(_menu_popup_ptac, fm->menu);
 
