@@ -266,6 +266,12 @@ _clipboard_write_data_ptac(void *user_data)
     if (!clipboard)
         goto quit;
 
+    if (p->data_item_count == 0) {
+        // one can pass zero items to clear clipboard
+        gtk_clipboard_clear(clipboard);
+        goto quit;
+    }
+
     GArray *items = g_array_new(FALSE /* no zero teminator */, TRUE /* zero items */, sizeof(item));
 
     for (uint32_t k = 0; k < p->data_item_count; k ++) {
