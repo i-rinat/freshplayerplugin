@@ -92,7 +92,7 @@ trace_var_as_string(struct PP_Var var)
         res = g_strdup_printf("{NULL}");
         break;
     case PP_VARTYPE_BOOL:
-        res = g_strdup_printf("{BOOLEAN:%s}", var.value.as_int ? "TRUE" : "FALSE");
+        res = g_strdup_printf("{BOOL:%s}", var.value.as_int ? "TRUE" : "FALSE");
         break;
     case PP_VARTYPE_INT32:
         res = g_strdup_printf("{INT32:%d}", var.value.as_int);
@@ -107,6 +107,22 @@ trace_var_as_string(struct PP_Var var)
         break;
     case PP_VARTYPE_OBJECT:
         res = ppb_var_trace_object_var(var);
+        break;
+    case PP_VARTYPE_ARRAY:
+        ref_count = ppb_var_get_ref_count(var);
+        res = g_strdup_printf("{ARRAY:%d}", ref_count);
+        break;
+    case PP_VARTYPE_DICTIONARY:
+        ref_count = ppb_var_get_ref_count(var);
+        res = g_strdup_printf("{DICTIONARY:%d}", ref_count);
+        break;
+    case PP_VARTYPE_ARRAY_BUFFER:
+        ref_count = ppb_var_get_ref_count(var);
+        res = g_strdup_printf("{ARRAY_BUFFER:%d}", ref_count);
+        break;
+    case PP_VARTYPE_RESOURCE:
+        ref_count = ppb_var_get_ref_count(var);
+        res = g_strdup_printf("{RESOURCE:%d}", ref_count);
         break;
     default:
         res = g_strdup_printf("{NOTIMPLEMENTED:%d}", var.type);
