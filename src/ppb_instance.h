@@ -35,13 +35,12 @@ PP_Bool
 ppb_instance_is_full_frame(PP_Instance instance);
 
 struct PP_Var
-ppb_instance_private_get_window_object(PP_Instance instance);
+ppb_instance_get_window_object(PP_Instance instance);
 
 struct PP_Var
-ppb_instance_private_get_owner_element_object(PP_Instance instance);
+ppb_instance_get_owner_element_object(PP_Instance instance);
 
 struct PP_Var
-ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
-                                    struct PP_Var *exception);
+ppb_instance_execute_script(PP_Instance instance, struct PP_Var script, struct PP_Var *exception);
 
 #endif // FPP__PPB_INSTANCE_H

@@ -106,7 +106,7 @@ ppb_instance_is_full_frame(PP_Instance instance)
 }
 
 struct PP_Var
-ppb_instance_private_get_window_object(PP_Instance instance)
+ppb_instance_get_window_object(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
@@ -119,7 +119,7 @@ ppb_instance_private_get_window_object(PP_Instance instance)
 }
 
 struct PP_Var
-ppb_instance_private_get_owner_element_object(PP_Instance instance)
+ppb_instance_get_owner_element_object(PP_Instance instance)
 {
     return PP_MakeUndefined();
 }
@@ -180,8 +180,7 @@ _execute_script_comt(void *user_data, int32_t result)
 }
 
 struct PP_Var
-ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
-                                    struct PP_Var *exception)
+ppb_instance_execute_script(PP_Instance instance, struct PP_Var script, struct PP_Var *exception)
 {
     if (script.type != PP_VARTYPE_STRING) {
         trace_error("%s, 'script' is not a string\n", __func__);
@@ -232,29 +231,29 @@ trace_ppb_instance_is_full_frame(PP_Instance instance)
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_instance_private_get_window_object(PP_Instance instance)
+trace_ppb_instance_get_window_object(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
-    return ppb_instance_private_get_window_object(instance);
+    return ppb_instance_get_window_object(instance);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_instance_private_get_owner_element_object(PP_Instance instance)
+trace_ppb_instance_get_owner_element_object(PP_Instance instance)
 {
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
-    return ppb_instance_private_get_owner_element_object(instance);
+    return ppb_instance_get_owner_element_object(instance);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_instance_private_execute_script(PP_Instance instance, struct PP_Var script,
-                                          struct PP_Var *exception)
+trace_ppb_instance_execute_script(PP_Instance instance, struct PP_Var script,
+                                  struct PP_Var *exception)
 {
     char *s_script = trace_var_as_string(script);
     trace_info("[PPB] {full} %s instance=%d, script=%s\n", __func__+6, instance, s_script);
     g_free(s_script);
-    return ppb_instance_private_execute_script(instance, script, exception);
+    return ppb_instance_execute_script(instance, script, exception);
 }
 
 
@@ -264,7 +263,7 @@ const struct PPB_Instance_1_0 ppb_instance_interface_1_0 = {
 };
 
 const struct PPB_Instance_Private_0_1 ppb_instance_private_interface_0_1 = {
-    .GetWindowObject =          TWRAPF(ppb_instance_private_get_window_object),
-    .GetOwnerElementObject =    TWRAPZ(ppb_instance_private_get_owner_element_object),
-    .ExecuteScript =            TWRAPF(ppb_instance_private_execute_script),
+    .GetWindowObject =          TWRAPF(ppb_instance_get_window_object),
+    .GetOwnerElementObject =    TWRAPZ(ppb_instance_get_owner_element_object),
+    .ExecuteScript =            TWRAPF(ppb_instance_execute_script),
 };
