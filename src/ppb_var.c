@@ -578,7 +578,21 @@ ppb_var_trace_object_var(struct PP_Var var)
 struct PP_Var
 ppb_var_array_buffer_create(uint32_t size_in_bytes)
 {
-    return PP_MakeUndefined();
+    struct var_s *v = g_slice_alloc0(sizeof(*v));
+    struct PP_Var var = {};
+
+    var.type = PP_VARTYPE_ARRAY;
+    v->str.len = size_in_bytes;
+    v->str.data = calloc(size_in_bytes, 1);
+    v->ref_count = 1;
+
+    pthread_mutex_lock(&lock);
+    var.value.as_id = _get_new_var_id();
+    v->var = var;
+    g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
+    pthread_mutex_unlock(&lock);
+
+    return var;
 }
 
 PP_Bool
@@ -799,7 +813,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_array_buffer_create(uint32_t size_in_bytes)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s size_in_bytes=%u\n", __func__+6, size_in_bytes);
     return ppb_var_array_buffer_create(size_in_bytes);
 }
 
@@ -870,7 +884,7 @@ const struct PPB_Var_Deprecated ppb_var_deprecated_interface_0_3 = {
 };
 
 const struct PPB_VarArrayBuffer_1_0 ppb_var_array_buffer_interface_1_0 = {
-    .Create =       TWRAPZ(ppb_var_array_buffer_create),
+    .Create =       TWRAPF(ppb_var_array_buffer_create),
     .ByteLength =   TWRAPZ(ppb_var_array_buffer_byte_length),
     .Map =          TWRAPZ(ppb_var_array_buffer_map),
     .Unmap =        TWRAPZ(ppb_var_array_buffer_unmap),
