@@ -575,6 +575,29 @@ ppb_var_trace_object_var(struct PP_Var var)
     }
 }
 
+struct PP_Var
+ppb_var_array_buffer_create(uint32_t size_in_bytes)
+{
+    return PP_MakeUndefined();
+}
+
+PP_Bool
+ppb_var_array_buffer_byte_length(struct PP_Var array, uint32_t *byte_length)
+{
+    return PP_FALSE;
+}
+
+void *
+ppb_var_array_buffer_map(struct PP_Var array)
+{
+    return NULL;
+}
+
+void
+ppb_var_array_buffer_unmap(struct PP_Var array)
+{
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -772,6 +795,38 @@ trace_ppb_var_create_object_with_module_deprecated(PP_Module module,
                                                                    object_data);
 }
 
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_var_array_buffer_create(uint32_t size_in_bytes)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_var_array_buffer_create(size_in_bytes);
+}
+
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_var_array_buffer_byte_length(struct PP_Var array, uint32_t *byte_length)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_var_array_buffer_byte_length(array, byte_length);
+}
+
+TRACE_WRAPPER
+void *
+trace_ppb_var_array_buffer_map(struct PP_Var array)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_var_array_buffer_map(array);
+}
+
+TRACE_WRAPPER
+void
+trace_ppb_var_array_buffer_unmap(struct PP_Var array)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_var_array_buffer_unmap(array);
+}
+
 
 const struct PPB_Var_1_2 ppb_var_interface_1_2 = {
     .AddRef          = TWRAPF(ppb_var_add_ref),
@@ -812,4 +867,11 @@ const struct PPB_Var_Deprecated ppb_var_deprecated_interface_0_3 = {
     .IsInstanceOf =         TWRAPF(ppb_var_is_instance_of),
     .CreateObject =         TWRAPF(ppb_var_create_object),
     .CreateObjectWithModuleDeprecated = TWRAPF(ppb_var_create_object_with_module_deprecated),
+};
+
+const struct PPB_VarArrayBuffer_1_0 ppb_var_array_buffer_interface_1_0 = {
+    .Create =       TWRAPZ(ppb_var_array_buffer_create),
+    .ByteLength =   TWRAPZ(ppb_var_array_buffer_byte_length),
+    .Map =          TWRAPZ(ppb_var_array_buffer_map),
+    .Unmap =        TWRAPZ(ppb_var_array_buffer_unmap),
 };

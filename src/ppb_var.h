@@ -26,6 +26,7 @@
 #define FPP_PPB_VAR_H
 
 #include <ppapi/c/ppb_var.h>
+#include <ppapi/c/ppb_var_array_buffer.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>
 #include <string.h>
 #include <npapi/npapi.h>
@@ -99,5 +100,17 @@ np_variant_to_pp_var(NPVariant v);
 
 char *
 ppb_var_trace_object_var(struct PP_Var var);
+
+struct PP_Var
+ppb_var_array_buffer_create(uint32_t size_in_bytes);
+
+PP_Bool
+ppb_var_array_buffer_byte_length(struct PP_Var array, uint32_t *byte_length);
+
+void *
+ppb_var_array_buffer_map(struct PP_Var array);
+
+void
+ppb_var_array_buffer_unmap(struct PP_Var array);
 
 #endif // FPP_PPB_VAR_H
