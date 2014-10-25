@@ -35,10 +35,9 @@
 
 
 char *
-ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,
-                                   const char *output_char_set,
-                                   enum PP_CharSet_ConversionError on_error,
-                                   uint32_t *output_length)
+ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,
+                               const char *output_char_set,
+                               enum PP_CharSet_ConversionError on_error, uint32_t *output_length)
 {
     const uint32_t output_buffer_length = (utf16_len + 1) * 4 + 1;
     char *output = ppb_memory_mem_alloc(output_buffer_length);
@@ -87,10 +86,9 @@ ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, 
 }
 
 uint16_t *
-ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t input_len,
-                                   const char *input_char_set,
-                                   enum PP_CharSet_ConversionError on_error,
-                                   uint32_t *output_length)
+ppb_char_set_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t input_len,
+                               const char *input_char_set, enum PP_CharSet_ConversionError on_error,
+                               uint32_t *output_length)
 {
     const uint32_t output_buffer_length = (input_len + 2) * sizeof(uint16_t);
     uint16_t *output = ppb_memory_mem_alloc(output_buffer_length);
@@ -134,7 +132,7 @@ ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input, uint
 }
 
 struct PP_Var
-ppb_char_set_dev_get_default_char_set(PP_Instance instance)
+ppb_char_set_get_default_char_set(PP_Instance instance)
 {
     setlocale(LC_ALL, "");
     return ppb_var_var_from_utf8_z(nl_langinfo(CODESET));
@@ -144,43 +142,43 @@ ppb_char_set_dev_get_default_char_set(PP_Instance instance)
 // trace wrappers
 TRACE_WRAPPER
 char *
-trace_ppb_char_set_dev_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16,
-                                         uint32_t utf16_len, const char *output_char_set,
-                                         enum PP_CharSet_ConversionError on_error,
-                                         uint32_t *output_length)
+trace_ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16,
+                                     uint32_t utf16_len, const char *output_char_set,
+                                     enum PP_CharSet_ConversionError on_error,
+                                     uint32_t *output_length)
 {
     trace_info("[PPB] {full} %s instance=%d, utf16=%p, utf16_len=%u, output_char_set=%s, "
                "on_error=%s\n", __func__+6, instance, utf16, utf16_len, output_char_set,
                reverse_char_set_conversion_error(on_error));
-    return ppb_char_set_dev_utf16_to_char_set(instance, utf16, utf16_len, output_char_set,
-                                              on_error, output_length);
+    return ppb_char_set_utf16_to_char_set(instance, utf16, utf16_len, output_char_set, on_error,
+                                          output_length);
 }
 
 TRACE_WRAPPER
 uint16_t *
-trace_ppb_char_set_dev_char_set_to_utf16(PP_Instance instance, const char *input,
-                                         uint32_t input_len, const char *input_char_set,
-                                         enum PP_CharSet_ConversionError on_error,
-                                         uint32_t *output_length)
+trace_ppb_char_set_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t input_len,
+                                     const char *input_char_set,
+                                     enum PP_CharSet_ConversionError on_error,
+                                     uint32_t *output_length)
 {
     trace_info("[PPB] {full} %s instance=%d, input=%.*s, input_len=%u, input_char_set=%s, "
                "on_error=%s\n", __func__+6, instance, input_len, input, input_len, input_char_set,
                reverse_char_set_conversion_error(on_error));
-    return ppb_char_set_dev_char_set_to_utf16(instance, input, input_len, input_char_set,
-                                              on_error, output_length);
+    return ppb_char_set_char_set_to_utf16(instance, input, input_len, input_char_set, on_error,
+                                          output_length);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_char_set_dev_get_default_char_set(PP_Instance instance)
+trace_ppb_char_set_get_default_char_set(PP_Instance instance)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
-    return ppb_char_set_dev_get_default_char_set(instance);
+    return ppb_char_set_get_default_char_set(instance);
 }
 
 
 const struct PPB_CharSet_Dev_0_4 ppb_char_set_dev_interface_0_4 = {
-    .UTF16ToCharSet =       TWRAPF(ppb_char_set_dev_utf16_to_char_set),
-    .CharSetToUTF16 =       TWRAPF(ppb_char_set_dev_char_set_to_utf16),
-    .GetDefaultCharSet =    TWRAPF(ppb_char_set_dev_get_default_char_set),
+    .UTF16ToCharSet =       TWRAPF(ppb_char_set_utf16_to_char_set),
+    .CharSetToUTF16 =       TWRAPF(ppb_char_set_char_set_to_utf16),
+    .GetDefaultCharSet =    TWRAPF(ppb_char_set_get_default_char_set),
 };
