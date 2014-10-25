@@ -256,7 +256,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
         full_url = ppb_var_var_from_utf8_z(ri->url);
     } else {
         struct PP_Var rel_url = ppb_var_var_from_utf8_z(ri->url);
-        full_url = ppb_url_util_dev_resolve_relative_to_document(ul->instance->id, rel_url, NULL);
+        full_url = ppb_url_util_resolve_relative_to_document(ul->instance->id, rel_url, NULL);
         ppb_var_release(rel_url);
     }
 

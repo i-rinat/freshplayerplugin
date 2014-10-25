@@ -29,34 +29,32 @@
 
 
 struct PP_Var
-ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components);
+ppb_url_util_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components);
 
 struct PP_Var
-ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
-                                         struct PP_URLComponents_Dev *components);
+ppb_url_util_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
+                                     struct PP_URLComponents_Dev *components);
 
 struct PP_Var
-ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
-                                              struct PP_URLComponents_Dev *components);
+ppb_url_util_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
+                                          struct PP_URLComponents_Dev *components);
 
 PP_Bool
-ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b);
+ppb_url_util_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b);
 
 PP_Bool
-ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url);
+ppb_url_util_document_can_request(PP_Instance instance, struct PP_Var url);
 
 PP_Bool
-ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target);
+ppb_url_util_document_can_access_document(PP_Instance active, PP_Instance target);
 
 struct PP_Var
-ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components);
+ppb_url_util_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components);
 
 struct PP_Var
-ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
-                                         struct PP_URLComponents_Dev *components);
+ppb_url_util_get_plugin_instance_url(PP_Instance instance, struct PP_URLComponents_Dev *components);
 
 struct PP_Var
-ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
-                                         struct PP_URLComponents_Dev *components);
+ppb_url_util_get_plugin_referrer_url(PP_Instance instance, struct PP_URLComponents_Dev *components);
 
 #endif // FPP__PPB_URL_UTIL_H

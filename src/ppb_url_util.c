@@ -34,7 +34,7 @@
 
 
 struct PP_Var
-ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
+ppb_url_util_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
     if (components)
         uri_parser_parse_uri(ppb_var_var_to_utf8(url, NULL), components);
@@ -42,8 +42,8 @@ ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *co
 }
 
 struct PP_Var
-ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
-                                         struct PP_URLComponents_Dev *components)
+ppb_url_util_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
+                                     struct PP_URLComponents_Dev *components)
 {
     const char *s_base_url = ppb_var_var_to_utf8(base_url, NULL);
     const char *s_relative_string = ppb_var_var_to_utf8(relative_string, NULL);
@@ -60,33 +60,33 @@ ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var r
 }
 
 struct PP_Var
-ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
-                                              struct PP_URLComponents_Dev *components)
+ppb_url_util_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
+                                          struct PP_URLComponents_Dev *components)
 {
-    struct PP_Var base = ppb_url_util_dev_get_document_url(instance, NULL);
-    return ppb_url_util_dev_resolve_relative_to_url(base, relative_string, components);
+    struct PP_Var base = ppb_url_util_get_document_url(instance, NULL);
+    return ppb_url_util_resolve_relative_to_url(base, relative_string, components);
 }
 
 PP_Bool
-ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
-{
-    return PP_TRUE;
-}
-
-PP_Bool
-ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
+ppb_url_util_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
 {
     return PP_TRUE;
 }
 
 PP_Bool
-ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
+ppb_url_util_document_can_request(PP_Instance instance, struct PP_Var url)
+{
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_url_util_document_can_access_document(PP_Instance active, PP_Instance target)
 {
     return PP_TRUE;
 }
 
 struct PP_Var
-ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
+ppb_url_util_get_document_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
@@ -101,8 +101,7 @@ ppb_url_util_dev_get_document_url(PP_Instance instance, struct PP_URLComponents_
 }
 
 struct PP_Var
-ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
-                                         struct PP_URLComponents_Dev *components)
+ppb_url_util_get_plugin_instance_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
@@ -120,8 +119,7 @@ ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
 }
 
 struct PP_Var
-ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
-                                         struct PP_URLComponents_Dev *components)
+ppb_url_util_get_plugin_referrer_url(PP_Instance instance, struct PP_URLComponents_Dev *components)
 {
     const char *url = "";
     if (components)
@@ -133,103 +131,101 @@ ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
 // trace wrappers
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_url_util_dev_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
+trace_ppb_url_util_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_url_util_dev_canonicalize(url, components);
+    return ppb_url_util_canonicalize(url, components);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_url_util_dev_resolve_relative_to_url(struct PP_Var base_url,
-                                               struct PP_Var relative_string,
-                                               struct PP_URLComponents_Dev *components)
+trace_ppb_url_util_resolve_relative_to_url(struct PP_Var base_url, struct PP_Var relative_string,
+                                           struct PP_URLComponents_Dev *components)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
-    return ppb_url_util_dev_resolve_relative_to_url(base_url, relative_string, components);
+    return ppb_url_util_resolve_relative_to_url(base_url, relative_string, components);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_url_util_dev_resolve_relative_to_document(PP_Instance instance,
-                                                    struct PP_Var relative_string,
-                                                    struct PP_URLComponents_Dev *components)
+trace_ppb_url_util_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
+                                                struct PP_URLComponents_Dev *components)
 {
     trace_info("[PPB] {full} %s\n", __func__+6);
-    return ppb_url_util_dev_resolve_relative_to_document(instance, relative_string, components);
+    return ppb_url_util_resolve_relative_to_document(instance, relative_string, components);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_url_util_dev_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
+trace_ppb_url_util_is_same_security_origin(struct PP_Var url_a, struct PP_Var url_b)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_url_util_dev_is_same_security_origin(url_a, url_b);
+    return ppb_url_util_is_same_security_origin(url_a, url_b);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_url_util_dev_document_can_request(PP_Instance instance, struct PP_Var url)
+trace_ppb_url_util_document_can_request(PP_Instance instance, struct PP_Var url)
 {
     trace_info("[PPB] {zilch} %s\n", __func__+6);
-    return ppb_url_util_dev_document_can_request(instance, url);
+    return ppb_url_util_document_can_request(instance, url);
 }
 
 TRACE_WRAPPER
 PP_Bool
-trace_ppb_url_util_dev_document_can_access_document(PP_Instance active, PP_Instance target)
+trace_ppb_url_util_document_can_access_document(PP_Instance active, PP_Instance target)
 {
     trace_info("[PPB] {zilch} %s active=%d, target=%d\n", __func__+6, active, target);
-    return ppb_url_util_dev_document_can_access_document(active, target);
+    return ppb_url_util_document_can_access_document(active, target);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_url_util_dev_get_document_url(PP_Instance instance,
-                                        struct PP_URLComponents_Dev *components)
+trace_ppb_url_util_get_document_url(PP_Instance instance,
+                                    struct PP_URLComponents_Dev *components)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
-    return ppb_url_util_dev_get_document_url(instance, components);
+    return ppb_url_util_get_document_url(instance, components);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_url_util_dev_get_plugin_instance_url(PP_Instance instance,
-                                               struct PP_URLComponents_Dev *components)
+trace_ppb_url_util_get_plugin_instance_url(PP_Instance instance,
+                                           struct PP_URLComponents_Dev *components)
 {
     trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
-    return ppb_url_util_dev_get_plugin_instance_url(instance, components);
+    return ppb_url_util_get_plugin_instance_url(instance, components);
 }
 
 TRACE_WRAPPER
 struct PP_Var
-trace_ppb_url_util_dev_get_plugin_referrer_url(PP_Instance instance,
-                                               struct PP_URLComponents_Dev *components)
+trace_ppb_url_util_get_plugin_referrer_url(PP_Instance instance,
+                                           struct PP_URLComponents_Dev *components)
 {
     trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
-    return ppb_url_util_dev_get_plugin_referrer_url(instance, components);
+    return ppb_url_util_get_plugin_referrer_url(instance, components);
 }
 
 
 const struct PPB_URLUtil_Dev_0_6 ppb_url_util_dev_interface_0_6 = {
-    .Canonicalize =                 TWRAPZ(ppb_url_util_dev_canonicalize),
-    .ResolveRelativeToURL =         TWRAPF(ppb_url_util_dev_resolve_relative_to_url),
-    .ResolveRelativeToDocument =    TWRAPF(ppb_url_util_dev_resolve_relative_to_document),
-    .IsSameSecurityOrigin =         TWRAPZ(ppb_url_util_dev_is_same_security_origin),
-    .DocumentCanRequest =           TWRAPZ(ppb_url_util_dev_document_can_request),
-    .DocumentCanAccessDocument =    TWRAPZ(ppb_url_util_dev_document_can_access_document),
-    .GetDocumentURL =               TWRAPF(ppb_url_util_dev_get_document_url),
-    .GetPluginInstanceURL =         TWRAPF(ppb_url_util_dev_get_plugin_instance_url),
+    .Canonicalize =                 TWRAPZ(ppb_url_util_canonicalize),
+    .ResolveRelativeToURL =         TWRAPF(ppb_url_util_resolve_relative_to_url),
+    .ResolveRelativeToDocument =    TWRAPF(ppb_url_util_resolve_relative_to_document),
+    .IsSameSecurityOrigin =         TWRAPZ(ppb_url_util_is_same_security_origin),
+    .DocumentCanRequest =           TWRAPZ(ppb_url_util_document_can_request),
+    .DocumentCanAccessDocument =    TWRAPZ(ppb_url_util_document_can_access_document),
+    .GetDocumentURL =               TWRAPF(ppb_url_util_get_document_url),
+    .GetPluginInstanceURL =         TWRAPF(ppb_url_util_get_plugin_instance_url),
 };
 
 const struct PPB_URLUtil_Dev_0_7 ppb_url_util_dev_interface_0_7 = {
-    .Canonicalize =                 TWRAPZ(ppb_url_util_dev_canonicalize),
-    .ResolveRelativeToURL =         TWRAPF(ppb_url_util_dev_resolve_relative_to_url),
-    .ResolveRelativeToDocument =    TWRAPF(ppb_url_util_dev_resolve_relative_to_document),
-    .IsSameSecurityOrigin =         TWRAPZ(ppb_url_util_dev_is_same_security_origin),
-    .DocumentCanRequest =           TWRAPZ(ppb_url_util_dev_document_can_request),
-    .DocumentCanAccessDocument =    TWRAPZ(ppb_url_util_dev_document_can_access_document),
-    .GetDocumentURL =               TWRAPF(ppb_url_util_dev_get_document_url),
-    .GetPluginInstanceURL =         TWRAPF(ppb_url_util_dev_get_plugin_instance_url),
-    .GetPluginReferrerURL =         TWRAPZ(ppb_url_util_dev_get_plugin_referrer_url),
+    .Canonicalize =                 TWRAPZ(ppb_url_util_canonicalize),
+    .ResolveRelativeToURL =         TWRAPF(ppb_url_util_resolve_relative_to_url),
+    .ResolveRelativeToDocument =    TWRAPF(ppb_url_util_resolve_relative_to_document),
+    .IsSameSecurityOrigin =         TWRAPZ(ppb_url_util_is_same_security_origin),
+    .DocumentCanRequest =           TWRAPZ(ppb_url_util_document_can_request),
+    .DocumentCanAccessDocument =    TWRAPZ(ppb_url_util_document_can_access_document),
+    .GetDocumentURL =               TWRAPF(ppb_url_util_get_document_url),
+    .GetPluginInstanceURL =         TWRAPF(ppb_url_util_get_plugin_instance_url),
+    .GetPluginReferrerURL =         TWRAPZ(ppb_url_util_get_plugin_referrer_url),
 };
