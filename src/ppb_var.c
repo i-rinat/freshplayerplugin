@@ -233,6 +233,12 @@ ppb_var_release(struct PP_Var var)
         if (v->obj._class == &n2p_proxy_class)
             n2p_proxy_class.Deallocate(v->obj.data);
         break;
+    case PP_VARTYPE_ARRAY_BUFFER:
+        free(v->str.data);
+        if (v->map_addr)
+            free(v->map_addr);
+        v->map_addr = NULL;
+        break;
     default:
         // do nothing
         break;
