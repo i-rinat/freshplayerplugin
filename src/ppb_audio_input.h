@@ -29,42 +29,42 @@
 
 
 PP_Resource
-ppb_audio_input_dev_create(PP_Instance instance);
+ppb_audio_input_create(PP_Instance instance);
 
 void
-ppb_audio_input_dev_destroy(void *ptr);
+ppb_audio_input_destroy(void *ptr);
 
 PP_Bool
-ppb_audio_input_dev_is_audio_input(PP_Resource resource);
+ppb_audio_input_is_audio_input(PP_Resource resource);
 
 int32_t
-ppb_audio_input_dev_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput output,
-                                      struct PP_CompletionCallback callback);
+ppb_audio_input_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput output,
+                                  struct PP_CompletionCallback callback);
 
 int32_t
-ppb_audio_input_dev_monitor_device_change(PP_Resource audio_input,
-                                          PP_MonitorDeviceChangeCallback callback, void *user_data);
+ppb_audio_input_monitor_device_change(PP_Resource audio_input,
+                                      PP_MonitorDeviceChangeCallback callback, void *user_data);
 
 int32_t
-ppb_audio_input_dev_open_0_3(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
+ppb_audio_input_open_0_3(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
                          PPB_AudioInput_Callback_0_3 audio_input_callback, void *user_data,
                          struct PP_CompletionCallback callback);
 
 int32_t
-ppb_audio_input_dev_open(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
-                         PPB_AudioInput_Callback audio_input_callback, void *user_data,
-                         struct PP_CompletionCallback callback);
+ppb_audio_input_open(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
+                     PPB_AudioInput_Callback audio_input_callback, void *user_data,
+                     struct PP_CompletionCallback callback);
 
 PP_Resource
-ppb_audio_input_dev_get_current_config(PP_Resource audio_input);
+ppb_audio_input_get_current_config(PP_Resource audio_input);
 
 PP_Bool
-ppb_audio_input_dev_start_capture(PP_Resource audio_input);
+ppb_audio_input_start_capture(PP_Resource audio_input);
 
 PP_Bool
-ppb_audio_input_dev_stop_capture(PP_Resource audio_input);
+ppb_audio_input_stop_capture(PP_Resource audio_input);
 
 void
-ppb_audio_input_dev_close(PP_Resource audio_input);
+ppb_audio_input_close(PP_Resource audio_input);
 
 #endif // FPP__PPB_AUDIO_INPUT_H

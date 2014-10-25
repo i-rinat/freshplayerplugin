@@ -226,7 +226,7 @@ pp_resource_unref(PP_Resource resource)
             ppb_video_capture_destroy(ptr);
             break;
         case PP_RESOURCE_AUDIO_INPUT:
-            ppb_audio_input_dev_destroy(ptr);
+            ppb_audio_input_destroy(ptr);
             break;
         case PP_RESOURCE_FLASH_MENU:
             ppb_flash_menu_destroy(ptr);
