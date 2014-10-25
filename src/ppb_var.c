@@ -581,7 +581,7 @@ ppb_var_array_buffer_create(uint32_t size_in_bytes)
     struct var_s *v = g_slice_alloc0(sizeof(*v));
     struct PP_Var var = {};
 
-    var.type = PP_VARTYPE_ARRAY;
+    var.type = PP_VARTYPE_ARRAY_BUFFER;
     v->str.len = size_in_bytes;
     v->str.data = calloc(size_in_bytes, 1);
     v->ref_count = 1;
@@ -598,7 +598,7 @@ ppb_var_array_buffer_create(uint32_t size_in_bytes)
 PP_Bool
 ppb_var_array_buffer_byte_length(struct PP_Var var, uint32_t *byte_length)
 {
-    if (var.type != PP_VARTYPE_ARRAY || !byte_length)
+    if (var.type != PP_VARTYPE_ARRAY_BUFFER || !byte_length)
         return PP_FALSE;
 
     struct var_s *v = get_var_s(var);
