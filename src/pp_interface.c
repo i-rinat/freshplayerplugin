@@ -39,6 +39,7 @@
 #include <ppapi/c/dev/ppb_url_util_dev.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>
 #include <ppapi/c/dev/ppb_video_capture_dev.h>
+#include <ppapi/c/dev/ppb_video_decoder_dev.h>
 #include <ppapi/c/dev/ppb_view_dev.h>
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
@@ -154,6 +155,7 @@ extern const struct PPB_Var_1_2                     ppb_var_interface_1_2;
 extern const struct PPB_VarArrayBuffer_1_0          ppb_var_array_buffer_interface_1_0;
 extern const struct PPB_Var_Deprecated              ppb_var_deprecated_interface_0_3;
 extern const struct PPB_VideoCapture_Dev_0_3        ppb_video_capture_dev_interface_0_3;
+extern const struct PPB_VideoDecoder_Dev_0_16       ppb_video_decoder_dev_interface_0_16;
 extern const struct PPB_View_Dev_0_1                ppb_view_dev_interface_0_1;
 extern const struct PPB_View_1_0                    ppb_view_interface_1_0;
 extern const struct PPB_View_1_1                    ppb_view_interface_1_1;
@@ -248,6 +250,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_VAR_ARRAY_BUFFER_INTERFACE_1_0,     ppb_var_array_buffer_interface_1_0)
     ELSEIFBLOCK(PPB_VAR_DEPRECATED_INTERFACE_0_3,       ppb_var_deprecated_interface_0_3)
     ELSEIFBLOCK(PPB_VIDEOCAPTURE_DEV_INTERFACE_0_3,     ppb_video_capture_dev_interface_0_3)
+    ELSEIFBLOCK(PPB_VIDEODECODER_DEV_INTERFACE_0_16,    ppb_video_decoder_dev_interface_0_16)
     ELSEIFBLOCK(PPB_VIEW_DEV_INTERFACE_0_1,             ppb_view_dev_interface_0_1)
     ELSEIFBLOCK(PPB_VIEW_INTERFACE_1_0,                 ppb_view_interface_1_0)
     ELSEIFBLOCK(PPB_VIEW_INTERFACE_1_1,                 ppb_view_interface_1_1)
