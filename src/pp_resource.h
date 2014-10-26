@@ -85,6 +85,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_FILE_IO,
     PP_RESOURCE_MESSAGE_LOOP,
     PP_RESOURCE_FLASH_DRM,
+    PP_RESOURCE_VIDEO_DECODER,
 
     PP_RESOURCE_TYPES_COUNT,        // must be the last item in the list
 };
@@ -398,6 +399,10 @@ struct pp_flash_drm_s {
     COMMON_STRUCTURE_FIELDS
 };
 
+struct pp_video_decoder_s {
+    COMMON_STRUCTURE_FIELDS
+};
+
 union pp_largest_u {
     struct pp_instance_s            s02;
     struct pp_resource_generic_s    s03;
@@ -424,6 +429,7 @@ union pp_largest_u {
     struct pp_file_io_s             s24;
     struct pp_message_loop_s        s25;
     struct pp_flash_drm_s           s26;
+    struct pp_video_decoder_s       s27;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type,

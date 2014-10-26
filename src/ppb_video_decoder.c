@@ -26,19 +26,32 @@
 #include <stdlib.h>
 #include <ppapi/c/pp_errors.h>
 #include "trace.h"
+#include "tables.h"
 #include "reverse_constant.h"
 
 
 PP_Resource
 ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDecoder_Profile profile)
 {
-    return 0;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+    PP_Resource video_decoder = pp_resource_allocate(PP_RESOURCE_VIDEO_DECODER, pp_i);
+
+    return video_decoder;
+}
+
+void
+ppb_video_decoder_destroy_priv(void *p)
+{
 }
 
 PP_Bool
 ppb_video_decoder_is_video_decoder(PP_Resource resource)
 {
-    return PP_FALSE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_VIDEO_DECODER;
 }
 
 int32_t
@@ -85,7 +98,7 @@ trace_ppb_video_decoder_create(PP_Instance instance, PP_Resource context,
                                PP_VideoDecoder_Profile profile)
 {
     
-    trace_info("[PPB] {zilch} %s instance=%d, context=%d, profile=%s\n", __func__+6, instance,
+    trace_info("[PPB] {full} %s instance=%d, context=%d, profile=%s\n", __func__+6, instance,
                context, reverse_video_decoder_profile(profile));
     return ppb_video_decoder_create(instance, context, profile);
 }
@@ -94,7 +107,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_video_decoder_is_video_decoder(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_video_decoder_is_video_decoder(resource);
 }
 
@@ -156,8 +169,8 @@ trace_ppb_video_decoder_destroy(PP_Resource video_decoder)
 }
 
 const struct PPB_VideoDecoder_Dev_0_16 ppb_video_decoder_dev_interface_0_16 = {
-    .Create =               TWRAPZ(ppb_video_decoder_create),
-    .IsVideoDecoder =       TWRAPZ(ppb_video_decoder_is_video_decoder),
+    .Create =               TWRAPF(ppb_video_decoder_create),
+    .IsVideoDecoder =       TWRAPF(ppb_video_decoder_is_video_decoder),
     .Decode =               TWRAPZ(ppb_video_decoder_decode),
     .AssignPictureBuffers = TWRAPZ(ppb_video_decoder_assign_picture_buffers),
     .ReusePictureBuffer =   TWRAPZ(ppb_video_decoder_reuse_picture_buffer),
