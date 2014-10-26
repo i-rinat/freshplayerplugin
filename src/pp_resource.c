@@ -50,6 +50,7 @@
 #include "ppb_file_io.h"
 #include "ppb_message_loop.h"
 #include "ppb_video_decoder.h"
+#include "ppb_buffer.h"
 
 
 static GHashTable      *res_tbl;
@@ -252,6 +253,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_VIDEO_DECODER:
             ppb_video_decoder_destroy_priv(ptr);
+            break;
+        case PP_RESOURCE_BUFFER:
+            ppb_buffer_destroy(ptr);
             break;
         default:
             break;

@@ -23,37 +23,80 @@
  */
 
 #include "ppb_buffer.h"
+#include "ppb_core.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 
 
 PP_Resource
 ppb_buffer_create(PP_Instance instance, uint32_t size_in_bytes)
 {
-    return 0;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+    PP_Resource buffer = pp_resource_allocate(PP_RESOURCE_BUFFER, pp_i);
+    struct pp_buffer_s *b = pp_resource_acquire(buffer, PP_RESOURCE_BUFFER);
+    if (!b) {
+        trace_error("%s, failed to create resource\n", __func__);
+        return 0;
+    }
+
+    b->len = size_in_bytes;
+    b->data = calloc(size_in_bytes, 1);
+
+    pp_resource_release(buffer);
+    return buffer;
+}
+
+void
+ppb_buffer_destroy(void *p)
+{
+    struct pp_buffer_s *b = p;
+    free(b->data);
+    b->data = NULL;
 }
 
 PP_Bool
 ppb_buffer_is_buffer(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_BUFFER;
 }
 
 PP_Bool
 ppb_buffer_describe(PP_Resource resource, uint32_t *size_in_bytes)
 {
-    return PP_FALSE;
+    struct pp_buffer_s *b = pp_resource_acquire(resource, PP_RESOURCE_BUFFER);
+    if (!b)
+        return PP_FALSE;
+
+    if (size_in_bytes)
+        *size_in_bytes = b->len;
+
+    pp_resource_release(resource);
+    return PP_TRUE;
 }
 
 void *
 ppb_buffer_map(PP_Resource resource)
 {
-    return NULL;
+    struct pp_buffer_s *b = pp_resource_acquire(resource, PP_RESOURCE_BUFFER);
+    if (!b)
+        return NULL;
+
+    ppb_core_add_ref_resource(resource);
+    void *ptr = b->data;
+    pp_resource_release(resource);
+    return ptr;
 }
 
 void
 ppb_buffer_unmap(PP_Resource resource)
 {
+    if (ppb_buffer_is_buffer(resource))
+        ppb_core_release_resource(resource);
 }
 
 
@@ -62,7 +105,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_buffer_create(PP_Instance instance, uint32_t size_in_bytes)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, size_in_bytes=%u\n", __func__+6,
+    trace_info("[PPB] {full} %s instance=%d, size_in_bytes=%u\n", __func__+6,
                instance, size_in_bytes);
     return ppb_buffer_create(instance, size_in_bytes);
 }
@@ -71,7 +114,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_buffer_is_buffer(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_buffer_is_buffer(resource);
 }
 
@@ -79,7 +122,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_buffer_describe(PP_Resource resource, uint32_t *size_in_bytes)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_buffer_describe(resource, size_in_bytes);
 }
 
@@ -87,7 +130,7 @@ TRACE_WRAPPER
 void *
 trace_ppb_buffer_map(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_buffer_map(resource);
 }
 
@@ -95,15 +138,15 @@ TRACE_WRAPPER
 void
 trace_ppb_buffer_unmap(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     ppb_buffer_unmap(resource);
 }
 
 
 const struct PPB_Buffer_Dev_0_4 ppb_buffer_dev_interface_0_4 = {
-    .Create =   TWRAPZ(ppb_buffer_create),
-    .IsBuffer = TWRAPZ(ppb_buffer_is_buffer),
-    .Describe = TWRAPZ(ppb_buffer_describe),
-    .Map =      TWRAPZ(ppb_buffer_map),
-    .Unmap =    TWRAPZ(ppb_buffer_unmap),
+    .Create =   TWRAPF(ppb_buffer_create),
+    .IsBuffer = TWRAPF(ppb_buffer_is_buffer),
+    .Describe = TWRAPF(ppb_buffer_describe),
+    .Map =      TWRAPF(ppb_buffer_map),
+    .Unmap =    TWRAPF(ppb_buffer_unmap),
 };
