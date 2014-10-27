@@ -35,6 +35,7 @@
 struct display_s {
     Display            *x;
     EGLDisplay          egl;
+    Cursor              transparent_cursor;
     pthread_mutex_t     lock;
     uint32_t            fs_width;
     uint32_t            fs_height;

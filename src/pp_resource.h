@@ -124,6 +124,9 @@ struct pp_instance_s {
     volatile gint                   instance_loaded;
     uint32_t                        ignore_focus_events_cnt; ///< number of focus events to ignore
 
+    Cursor                          prev_cursor;
+    int                             have_prev_cursor;
+
     // full screen
     pthread_t                       fs_thread;
     Window                          fs_wnd;

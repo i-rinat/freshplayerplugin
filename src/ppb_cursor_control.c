@@ -36,6 +36,7 @@
 struct comt_param_s {
     PP_Instance     instance_id;
     int             xtype;
+    int             hide_cursor;
 };
 
 void
@@ -50,7 +51,9 @@ _set_cursor_ptac(void *user_data)
         goto quit;
 
     pthread_mutex_lock(&display.lock);
-    cursor = XCreateFontCursor(display.x, params->xtype);
+
+    cursor = params->hide_cursor ? display.transparent_cursor
+                                 : XCreateFontCursor(display.x, params->xtype);
     if (pp_i->is_fullscreen) {
         XDefineCursor(display.x, pp_i->fs_wnd, cursor);
         XFlush(display.x);
@@ -60,6 +63,11 @@ _set_cursor_ptac(void *user_data)
             XFlush(display.x);
         }
     }
+
+    // remember to free cursor unless we hid it
+    pp_i->have_prev_cursor = !params->hide_cursor;
+    pp_i->prev_cursor = cursor;
+
     pthread_mutex_unlock(&display.lock);
 
 quit:
@@ -71,6 +79,7 @@ ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
                               PP_Resource custom_image, const struct PP_Point *hot_spot)
 {
     int xtype = XC_arrow;
+    int hide_cursor = 0;
     switch (type) {
     case PP_CURSORTYPE_CUSTOM:
         trace_warning("%s, custom cursors not implemented\n", __func__);
@@ -189,6 +198,7 @@ ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
         break;
     case PP_CURSORTYPE_NONE:
         xtype = XC_left_ptr;
+        hide_cursor = 1;
         break;
     case PP_CURSORTYPE_NOTALLOWED:
         xtype = XC_left_ptr;
@@ -216,6 +226,7 @@ ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
 
     comt_params->instance_id =  instance;
     comt_params->xtype =        xtype;
+    comt_params->hide_cursor =  hide_cursor;
 
     ppb_core_call_on_browser_thread(_set_cursor_ptac, comt_params);
 

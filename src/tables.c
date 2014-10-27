@@ -256,6 +256,15 @@ tables_open_display(void)
         display.fs_height = 100;
     }
 
+    // create transparent cursor
+    const char t_pixmap_data = 0;
+    XColor t_color = {};
+    Pixmap t_pixmap = XCreateBitmapFromData(display.x, DefaultRootWindow(display.x),
+                                            &t_pixmap_data, 1, 1);
+    display.transparent_cursor = XCreatePixmapCursor(display.x, t_pixmap, t_pixmap, &t_color,
+                                                     &t_color, 0, 0);
+    XFreePixmap(display.x, t_pixmap);
+
 quit:
     pthread_mutex_unlock(&display.lock);
     return retval;
@@ -265,6 +274,7 @@ void
 tables_close_display(void)
 {
     pthread_mutex_lock(&display.lock);
+    XFreeCursor(display.x, display.transparent_cursor);
     eglTerminate(display.egl);
     XCloseDisplay(display.x);
     pthread_mutex_unlock(&display.lock);

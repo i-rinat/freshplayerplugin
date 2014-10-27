@@ -369,9 +369,16 @@ NPError
 NPP_Destroy(NPP npp, NPSavedData **save)
 {
     trace_info_f("[NPP] {full} %s npp=%p, save=%p\n", __func__, npp, save);
+    struct pp_instance_s *pp_i = npp->pdata;
 
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
+
+    if (pp_i->have_prev_cursor) {
+        pthread_mutex_lock(&display.lock);
+        XFreeCursor(display.x, pp_i->prev_cursor);
+        pthread_mutex_unlock(&display.lock);
+    }
 
     struct destroy_instance_param_s *p = g_slice_alloc(sizeof(*p));
     p->pp_i =   npp->pdata;
