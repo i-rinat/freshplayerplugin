@@ -50,6 +50,18 @@ menu_item_activated(GtkMenuItem *mi, gpointer user_data)
     popup_menu_canceled = 0;
 }
 
+// called when used selects menu item (workaround for submenus)
+static
+void
+menu_item_button_press(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    if (popup_menu_result)
+        *popup_menu_result = (size_t)user_data;
+
+    // set the flag indicating user selected something, not just aborted
+    popup_menu_canceled = 0;
+}
+
 // called when menu is closed
 static
 void
@@ -96,12 +108,16 @@ convert_menu(const struct PP_Flash_Menu *pp_menu)
         gtk_widget_show(mi);
         gtk_menu_shell_append(GTK_MENU_SHELL(menu), mi);
 
-        if (pp_mi.type == PP_FLASH_MENUITEM_TYPE_SUBMENU)
+        if (pp_mi.type == PP_FLASH_MENUITEM_TYPE_SUBMENU) {
             gtk_menu_item_set_submenu(GTK_MENU_ITEM(mi), convert_menu(pp_mi.submenu));
-
-        // each menu item have specific id associated
-        g_signal_connect(G_OBJECT(mi), "activate", G_CALLBACK(menu_item_activated),
-                         (void*)(size_t)pp_mi.id);
+        } else {
+            // each menu item have specific id associated
+            g_signal_connect(G_OBJECT(mi), "activate", G_CALLBACK(menu_item_activated),
+                             (void*)(size_t)pp_mi.id);
+            // connect "button-press-event" to workaround submenu "activate" signal missing issue
+            g_signal_connect(G_OBJECT(mi), "button-press-event", G_CALLBACK(menu_item_button_press),
+                             (void*)(size_t)pp_mi.id);
+        }
     }
 
     return menu;
