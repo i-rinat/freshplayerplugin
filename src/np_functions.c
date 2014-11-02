@@ -680,8 +680,6 @@ handle_graphics_expose_event(NPP npp, void *event)
             glViewport(0, 0, g3d->width, g3d->height);
             glBindTexture(GL_TEXTURE_2D, g3d->tex_back);
             glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, g3d->width, g3d->height, 0);
-            glClearColor(1.0, 1.0, 1.0, 1.0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             GLfloat p_left =    (float)ev->x / g3d->width;
             GLfloat p_right =   (float)(ev->x + ev->width) / g3d->width;
@@ -710,7 +708,7 @@ handle_graphics_expose_event(NPP npp, void *event)
 
             glDisableVertexAttribArray(g3d->prog.attrib_pos);
 
-            glFlush();
+            glFinish();
             eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
             eglWaitGL();
         }
