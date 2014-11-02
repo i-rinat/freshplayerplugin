@@ -208,12 +208,24 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
     return NPERR_NO_ERROR;
 }
 
+static
+int
+x_error_handler(Display *dpy, XErrorEvent *ee)
+{
+    trace_error("[NP] caught Xlib error %d\n", ee->error_code);
+    return 0;
+}
+
 __attribute__((visibility("default")))
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
     trace_info_f("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p, browser API version = %u\n", __func__,
                  aNPNFuncs, aNPPFuncs, aNPNFuncs->version);
+
+    // set logging-only error handler.
+    // Ignore a previous one, we have no plans to restore it
+    (void)XSetErrorHandler(x_error_handler);
 
     memset(&npn, 0, sizeof(npn));
     memcpy(&npn, aNPNFuncs, sizeof(npn) < aNPNFuncs->size ? sizeof(npn) : aNPNFuncs->size);
