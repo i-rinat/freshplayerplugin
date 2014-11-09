@@ -24,20 +24,48 @@
 
 #include "ppb_file_chooser.h"
 #include <stdlib.h>
+#include "pp_resource.h"
+#include "tables.h"
 #include "trace.h"
+#include "ppb_var.h"
 
 
 PP_Resource
 ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
                         struct PP_Var accept_types)
 {
-    return 0;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+    PP_Resource file_chooser = pp_resource_allocate(PP_RESOURCE_FILE_CHOOSER, pp_i);
+    struct pp_file_chooser_s *fc = pp_resource_acquire(file_chooser, PP_RESOURCE_FILE_CHOOSER);
+    if (!fc) {
+        trace_error("%s, failed to create file chooser resource\n", __func__);
+        return 0;
+    }
+
+    fc->mode = mode;
+    fc->accept_types = accept_types;
+    ppb_var_add_ref(accept_types);
+
+    pp_resource_release(file_chooser);
+    return file_chooser;
+}
+
+void
+ppb_file_chooser_destroy(void *p)
+{
+    struct pp_file_chooser_s *fc = p;
+
+    ppb_var_release(fc->accept_types);
 }
 
 PP_Bool
 ppb_file_chooser_is_file_chooser(PP_Resource resource)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_FILE_CHOOSER;
 }
 
 int32_t
@@ -63,7 +91,7 @@ PP_Resource
 trace_ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
                               struct PP_Var accept_types)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_file_chooser_create(instance, mode, accept_types);
 }
 
@@ -71,7 +99,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_file_chooser_is_file_chooser(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_file_chooser_is_file_chooser(resource);
 }
 
@@ -98,8 +126,8 @@ trace_ppb_file_chooser_show_without_user_gesture(PP_Resource chooser, PP_Bool sa
 
 
 const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
-    .Create =           TWRAPZ(ppb_file_chooser_create),
-    .IsFileChooser =    TWRAPZ(ppb_file_chooser_is_file_chooser),
+    .Create =           TWRAPF(ppb_file_chooser_create),
+    .IsFileChooser =    TWRAPF(ppb_file_chooser_is_file_chooser),
     .Show =             TWRAPZ(ppb_file_chooser_show),
 };
 
