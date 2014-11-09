@@ -37,7 +37,7 @@
 
 #define salt_length             32
 
-STATIC_ASSERT(salt_length <= 32);
+STATIC_ASSERT_LESS_OR_EQ(salt_length, 32);
 
 PP_Resource
 ppb_flash_drm_create(PP_Instance instance)

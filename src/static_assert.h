@@ -31,4 +31,6 @@
 #define STATIC_ASSERT(expr)                 STATIC_ASSERT_HELPER2(expr, __LINE__)
 
 
+#define STATIC_ASSERT_LESS_OR_EQ(expr1, expr2)  STATIC_ASSERT(expr1 <= expr2)
+
 #endif // FPP_STATIC_ASSERT_H
