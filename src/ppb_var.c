@@ -203,6 +203,13 @@ ppb_var_add_ref(struct PP_Var var)
     pthread_mutex_unlock(&lock);
 }
 
+struct PP_Var
+ppb_var_add_ref2(struct PP_Var var)
+{
+    ppb_var_add_ref(var);
+    return var;
+}
+
 void
 ppb_var_release(struct PP_Var var)
 {

@@ -36,6 +36,9 @@
 void
 ppb_var_add_ref(struct PP_Var var);
 
+struct PP_Var
+ppb_var_add_ref2(struct PP_Var var);
+
 void
 ppb_var_release(struct PP_Var var);
 
