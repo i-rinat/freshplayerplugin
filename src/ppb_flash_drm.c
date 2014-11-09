@@ -54,8 +54,6 @@ ppb_flash_drm_create(PP_Instance instance)
         return 0;
     }
 
-    (void)fd;
-
     pp_resource_release(flash_drm);
     return flash_drm;
 }
