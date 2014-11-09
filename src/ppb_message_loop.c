@@ -43,7 +43,7 @@ ppb_message_loop_create(PP_Instance instance)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
-        trace_error("%s, wrong instance\n", __func__);
+        trace_error("%s, bad instance\n", __func__);
         return 0;
     }
 

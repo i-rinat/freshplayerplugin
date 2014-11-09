@@ -1277,7 +1277,7 @@ ppb_opengles2_chromium_map_sub_map_tex_sub_image_2d_chromium(PP_Resource context
                                                              GLenum type, GLenum access)
 {
     if (target != GL_TEXTURE_2D || level != 0 || access != GL_WRITE_ONLY_OES) {
-        trace_error("%s, wrong arguments\n", __func__);
+        trace_error("%s, bad arguments\n", __func__);
         return NULL;
     }
 

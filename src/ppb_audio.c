@@ -43,7 +43,7 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
-        trace_error("%s, wrong instance\n", __func__);
+        trace_error("%s, bad instance\n", __func__);
         return 0;
     }
 
@@ -59,7 +59,7 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
 
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
     if (!ac) {
-        trace_error("%s, wrong audio config resource\n", __func__);
+        trace_error("%s, bad audio config\n", __func__);
         goto err;
     }
 
@@ -168,7 +168,7 @@ ppb_audio_get_current_config(PP_Resource audio)
 {
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
     if (!a) {
-        trace_error("%s, wrong audio resource\n", __func__);
+        trace_error("%s, bad resource\n", __func__);
         return 0;
     }
     PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, a->instance);
@@ -243,7 +243,7 @@ ppb_audio_start_playback(PP_Resource audio)
 {
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
     if (!a) {
-        trace_error("%s, wrong audio resource\n", __func__);
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
     }
     if (a->playing) {
@@ -262,7 +262,7 @@ ppb_audio_stop_playback(PP_Resource audio)
 {
     struct pp_audio_s *a = pp_resource_acquire(audio, PP_RESOURCE_AUDIO);
     if (!a) {
-        trace_error("%s, wrong audio resource\n", __func__);
+        trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
     }
 

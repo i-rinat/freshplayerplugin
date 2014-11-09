@@ -236,7 +236,7 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
         task->addr = malloc(16 * count);
         memcpy(task->addr, addresses, 16 * count);
     } else {
-        trace_error("%s wrong evdns type\n", __func__);
+        trace_error("%s bad evdns type\n", __func__);
         ppb_core_call_on_main_thread(0, task->callback, PP_ERROR_FAILED);
         task_destroy(task);
         return;
@@ -276,7 +276,7 @@ handle_tcp_connect_with_net_address(struct async_network_task_s *task)
         task->port = ntohs(sai->sin6_port);
         handle_tcp_connect_stage2(DNS_ERR_NONE, DNS_IPv6_AAAA, 1, 3600, &sai->sin6_addr, task);
     } else {
-        trace_error("%s, wrong address type\n", __func__);
+        trace_error("%s, bad address type\n", __func__);
         ppb_core_call_on_main_thread(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
         task_destroy(task);
     }
@@ -310,7 +310,7 @@ handle_tcp_read_stage1(struct async_network_task_s *task)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        trace_error("%s, wrong resource\n", __func__);
+        trace_error("%s, bad resource\n", __func__);
         task_destroy(task);
         return;
     }
@@ -341,7 +341,7 @@ handle_tcp_write_stage1(struct async_network_task_s *task)
 {
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        trace_error("%s, wrong resource\n", __func__);
+        trace_error("%s, bad resource\n", __func__);
         task_destroy(task);
         return;
     }
