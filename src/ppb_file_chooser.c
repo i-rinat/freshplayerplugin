@@ -28,6 +28,10 @@
 #include "tables.h"
 #include "trace.h"
 #include "ppb_var.h"
+#include "ppb_core.h"
+#include "ppb_file_ref.h"
+#include <ppapi/c/pp_errors.h>
+#include <gdk/gdkx.h>
 
 
 PP_Resource
@@ -75,13 +79,127 @@ ppb_file_chooser_show(PP_Resource chooser, struct PP_ArrayOutput output,
     return 0;
 }
 
+struct show_param_s {
+    struct pp_instance_s           *pp_i;
+    PP_Bool                         save_as;
+    struct PP_Var                   suggested_file_name;
+    struct PP_ArrayOutput           output;
+    struct PP_CompletionCallback    ccb;
+    PP_FileChooserMode_Dev          mode;
+    struct PP_Var                   accept_types;
+    PP_Resource                     chooser_id;
+
+    int                             dialog_closed;
+};
+
+static
+void
+fcd_response_handler(GtkDialog *dialog, gint response_id, gpointer user_data)
+{
+    struct show_param_s *p = user_data;
+    int32_t callback_result;
+    GSList *fname_lst, *ll;
+    guint cnt;
+
+    if (response_id == GTK_RESPONSE_OK) {
+        PP_Resource *file_refs, *file_ref;
+
+        callback_result = PP_OK;
+        fname_lst = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(dialog));
+        cnt = g_slist_length(fname_lst);
+        file_refs = p->output.GetDataBuffer(p->output.user_data, cnt, sizeof(PP_Resource));
+        // TODO: what to do if file_refs == NULL?
+        ll = fname_lst;
+        file_ref = file_refs;
+        while (ll) {
+            *file_ref = ppb_file_ref_create_unrestricted((char *)ll->data, !p->save_as);
+            ll = g_slist_next(ll);
+            file_ref ++;
+        }
+        g_slist_free(fname_lst);
+    } else {
+        callback_result = PP_ERROR_USERCANCEL;
+    }
+
+    if (!p->dialog_closed)
+        gtk_widget_destroy(GTK_WIDGET(dialog));
+
+    ppb_core_call_on_main_thread(0, p->ccb, callback_result);
+
+    ppb_core_release_resource(p->chooser_id);
+    g_slice_free(struct show_param_s, p);
+}
+
+static
+void
+fcd_close_handler(GtkDialog *arg0, gpointer user_data)
+{
+    struct show_param_s *p = user_data;
+    p->dialog_closed = 1;
+}
+
+static
+void
+show_without_user_guesture_ptac(void *param)
+{
+    struct show_param_s *p = param;
+    GtkWidget *fcd;
+
+    fcd = gtk_file_chooser_dialog_new("Open file dialog", NULL,
+                                      p->save_as ? GTK_FILE_CHOOSER_ACTION_SAVE
+                                                 : GTK_FILE_CHOOSER_ACTION_OPEN,
+                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                      GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
+
+    if (p->mode == PP_FILECHOOSERMODE_OPENMULTIPLE)
+        gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fcd), 1);
+
+    gtk_widget_realize(fcd);
+
+    Window parent_wnd;
+    if (npn.getvalue(p->pp_i->npp, NPNVnetscapeWindow, &parent_wnd) == NPERR_NO_ERROR) {
+        GdkWindow *fcd_wnd = gtk_widget_get_window(fcd);
+
+        XSetTransientForHint(GDK_WINDOW_XDISPLAY(fcd_wnd),
+                             GDK_WINDOW_XID(fcd_wnd),
+                             parent_wnd);
+    } else {
+        trace_warning("%s, can't get NPNVnetscapeWindow", __func__);
+    }
+
+    g_signal_connect(G_OBJECT(fcd), "response", G_CALLBACK(fcd_response_handler), p);
+    g_signal_connect(G_OBJECT(fcd), "close", G_CALLBACK(fcd_close_handler), p);
+
+    gtk_widget_show(fcd);
+}
+
 int32_t
 ppb_file_chooser_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
                                            struct PP_Var suggested_file_name,
                                            struct PP_ArrayOutput output,
                                            struct PP_CompletionCallback callback)
 {
-    return 0;
+    struct pp_file_chooser_s *fc = pp_resource_acquire(chooser, PP_RESOURCE_FILE_CHOOSER);
+    if (!fc) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    struct show_param_s *p = g_slice_alloc0(sizeof(*p));
+    p->pp_i =                   fc->instance;
+    p->save_as =                save_as;
+    p->suggested_file_name =    ppb_var_add_ref2(suggested_file_name);
+    p->output =                 output;
+    p->ccb =                    callback;
+    p->mode =                   fc->mode;
+    p->accept_types =           ppb_var_add_ref2(fc->accept_types);
+    p->chooser_id =             chooser;
+
+    ppb_core_add_ref_resource(chooser);
+    ppb_core_call_on_browser_thread(show_without_user_guesture_ptac, p);
+
+    pp_resource_release(chooser);
+    return PP_OK_COMPLETIONPENDING;
 }
 
 
@@ -119,7 +237,13 @@ trace_ppb_file_chooser_show_without_user_gesture(PP_Resource chooser, PP_Bool sa
                                                  struct PP_ArrayOutput output,
                                                  struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    gchar *s_suggested_file_name = trace_var_as_string(suggested_file_name);
+    trace_info("[PPB] {full} %s chooser=%d, save_as=%u, suggested_file_name=%s, output="
+               "{.GetDataBuffer=%p, .user_data=%p}, callback={.func=%p, .user_data=%p, "
+               ".flags=%u}\n", __func__+6, chooser, save_as, s_suggested_file_name,
+               output.GetDataBuffer, output.user_data, callback.func, callback.user_data,
+               callback.flags);
+    g_free(s_suggested_file_name);
     return ppb_file_chooser_show_without_user_gesture(chooser, save_as, suggested_file_name, output,
                                                       callback);
 }
@@ -132,5 +256,5 @@ const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
 };
 
 const struct PPB_FileChooserTrusted_0_6 ppb_file_chooser_trusted_interface_0_6 = {
-    .ShowWithoutUserGesture = TWRAPZ(ppb_file_chooser_show_without_user_gesture),
+    .ShowWithoutUserGesture = TWRAPF(ppb_file_chooser_show_without_user_gesture),
 };
