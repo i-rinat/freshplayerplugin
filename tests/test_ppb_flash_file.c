@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <glib.h>
-#include <src/ppb_flash_file_modulelocal.c>
+#include <src/ppb_flash_file.c>
 
 static
 void

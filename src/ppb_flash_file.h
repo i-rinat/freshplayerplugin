@@ -35,4 +35,41 @@ ppb_flash_file_file_ref_open_file(PP_Resource file_ref_id, int32_t mode, PP_File
 int32_t
 ppb_flash_file_file_ref_query_file(PP_Resource file_ref_id, struct PP_FileInfo *info);
 
+bool
+ppb_flash_file_modulelocal_create_thread_adapter_for_instance(PP_Instance instance);
+
+void
+ppb_flash_file_modulelocal_clear_thread_adapter_for_instance(PP_Instance instance);
+
+int32_t
+ppb_flash_file_modulelocal_open_file(PP_Instance instance, const char *path, int32_t mode,
+                                     PP_FileHandle *file);
+
+int32_t
+ppb_flash_file_modulelocal_rename_file(PP_Instance instance, const char *path_from,
+                                       const char *path_to);
+
+int32_t
+ppb_flash_file_modulelocal_delete_file_or_dir(PP_Instance instance, const char *path,
+                                              PP_Bool recursive);
+
+int32_t
+ppb_flash_file_modulelocal_create_dir(PP_Instance instance, const char *path);
+
+int32_t
+ppb_flash_file_modulelocal_query_file(PP_Instance instance, const char *path,
+                                      struct PP_FileInfo *info);
+
+int32_t
+ppb_flash_file_modulelocal_get_dir_contents(PP_Instance instance, const char *path,
+                                            struct PP_DirContents_Dev **contents);
+
+void
+ppb_flash_file_modulelocal_free_dir_contents(PP_Instance instance,
+                                             struct PP_DirContents_Dev *contents);
+
+int32_t
+ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHandle *file);
+
+
 #endif // FPP_PPB_FLASH_FILE_H

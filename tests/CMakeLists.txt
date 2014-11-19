@@ -4,7 +4,7 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 set(test_list
     test_header_parser
     test_ppb_char_set
-    test_ppb_flash_file_modulelocal
+    test_ppb_flash_file
     test_ppb_url_request_info
     test_uri_parser
 )
