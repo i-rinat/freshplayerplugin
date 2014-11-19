@@ -22,10 +22,14 @@
  * SOFTWARE.
  */
 
+#define _FILE_OFFSET_BITS   64
+#define _GNU_SOURCE             // for basename()
 #include "ppb_file_ref.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
+#include "eintr_retry.h"
+#include "ppb_var.h"
 
 
 PP_Resource
@@ -76,13 +80,36 @@ ppb_file_ref_get_file_system_type(PP_Resource file_ref)
 struct PP_Var
 ppb_file_ref_get_name(PP_Resource file_ref)
 {
-    return PP_MakeUndefined();
+    struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
+    if (!fr) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    struct PP_Var var = PP_MakeUndefined();
+    char *path = strdup(fr->path ? fr->path : "");
+    if (!path)
+        goto quit;
+
+    var = ppb_var_var_from_utf8_z(basename(path));
+    free(path);
+quit:
+    pp_resource_release(file_ref);
+    return var;
 }
 
 struct PP_Var
 ppb_file_ref_get_path(PP_Resource file_ref)
 {
-    return PP_MakeUndefined();
+    struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
+    if (!fr) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    struct PP_Var var = ppb_var_var_from_utf8_z(fr->path);
+    pp_resource_release(file_ref);
+    return var;
 }
 
 PP_Resource
@@ -162,7 +189,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_file_ref_get_name(PP_Resource file_ref)
 {
-    trace_info("[PPB] {zilch} %s file_ref=%d\n", __func__+6, file_ref);
+    trace_info("[PPB] {full} %s file_ref=%d\n", __func__+6, file_ref);
     return ppb_file_ref_get_name(file_ref);
 }
 
@@ -170,7 +197,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_file_ref_get_path(PP_Resource file_ref)
 {
-    trace_info("[PPB] {zilch} %s file_ref=%d\n", __func__+6, file_ref);
+    trace_info("[PPB] {full} %s file_ref=%d\n", __func__+6, file_ref);
     return ppb_file_ref_get_path(file_ref);
 }
 
@@ -252,8 +279,8 @@ const struct PPB_FileRef_1_1 ppb_file_ref_interface_1_1 = {
     .Create =               TWRAPZ(ppb_file_ref_create),
     .IsFileRef =            TWRAPF(ppb_file_ref_is_file_ref),
     .GetFileSystemType =    TWRAPZ(ppb_file_ref_get_file_system_type),
-    .GetName =              TWRAPZ(ppb_file_ref_get_name),
-    .GetPath =              TWRAPZ(ppb_file_ref_get_path),
+    .GetName =              TWRAPF(ppb_file_ref_get_name),
+    .GetPath =              TWRAPF(ppb_file_ref_get_path),
     .GetParent =            TWRAPZ(ppb_file_ref_get_parent),
     .MakeDirectory =        TWRAPZ(ppb_file_ref_make_directory),
     .Touch =                TWRAPZ(ppb_file_ref_touch),
@@ -267,8 +294,8 @@ const struct PPB_FileRef_1_0 ppb_file_ref_interface_1_0 = {
     .Create =               TWRAPZ(ppb_file_ref_create),
     .IsFileRef =            TWRAPF(ppb_file_ref_is_file_ref),
     .GetFileSystemType =    TWRAPZ(ppb_file_ref_get_file_system_type),
-    .GetName =              TWRAPZ(ppb_file_ref_get_name),
-    .GetPath =              TWRAPZ(ppb_file_ref_get_path),
+    .GetName =              TWRAPF(ppb_file_ref_get_name),
+    .GetPath =              TWRAPF(ppb_file_ref_get_path),
     .GetParent =            TWRAPZ(ppb_file_ref_get_parent),
     .MakeDirectory =        TWRAPZ(ppb_file_ref_make_directory),
     .Touch =                TWRAPZ(ppb_file_ref_touch),
