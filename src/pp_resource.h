@@ -381,6 +381,7 @@ struct pp_tcp_socket_s {
 struct pp_file_ref_s {
     COMMON_STRUCTURE_FIELDS
     int                     fd;
+    char                   *path;
     enum file_ref_type_e    type;
 };
 

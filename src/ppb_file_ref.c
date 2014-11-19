@@ -34,12 +34,31 @@ ppb_file_ref_create(PP_Resource file_system, const char *path)
     return 0;
 }
 
+PP_Resource
+ppb_file_ref_create_unrestricted(const char *path, int read_only)
+{
+    // TODO: should PP_Instance be required parameter here?
+    PP_Resource file_ref = pp_resource_allocate(PP_RESOURCE_FILE_REF, NULL);
+    struct pp_file_ref_s *fr = pp_resource_acquire(file_ref, PP_RESOURCE_FILE_REF);
+    if (!fr) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
+
+    fr->type = PP_FILE_REF_TYPE_NAME;
+    fr->path = nullsafe_strdup(path);
+
+    pp_resource_release(file_ref);
+    return file_ref;
+}
+
 void
 ppb_file_ref_destroy(void *p)
 {
     struct pp_file_ref_s *fr = p;
     if (fr->type == PP_FILE_REF_TYPE_FD)
         close(fr->fd);
+    free(fr->path);
 }
 
 PP_Bool

@@ -31,6 +31,12 @@
 PP_Resource
 ppb_file_ref_create(PP_Resource file_system, const char *path);
 
+/// can access any file, outside plugin's filesystem
+///
+/// this function is not exported in any PPB interface
+PP_Resource
+ppb_file_ref_create_unrestricted(const char *path, int read_only);
+
 void
 ppb_file_ref_destroy(void *p);
 
