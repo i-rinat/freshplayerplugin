@@ -30,6 +30,7 @@
 #include "ppb_var.h"
 #include "ppb_core.h"
 #include "ppb_file_ref.h"
+#include "reverse_constant.h"
 #include <ppapi/c/pp_errors.h>
 #include <gdk/gdkx.h>
 
@@ -209,7 +210,10 @@ PP_Resource
 trace_ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
                               struct PP_Var accept_types)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    gchar *s_accept_types = trace_var_as_string(accept_types);
+    trace_info("[PPB] {full} %s instance=%d, mode=%s(%u), accept_types=%s\n", __func__+6,
+               instance, reverse_file_chooser_mode(mode), mode, s_accept_types);
+    g_free(s_accept_types);
     return ppb_file_chooser_create(instance, mode, accept_types);
 }
 
@@ -217,7 +221,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_file_chooser_is_file_chooser(PP_Resource resource)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_file_chooser_is_file_chooser(resource);
 }
 
@@ -226,7 +230,10 @@ int32_t
 trace_ppb_file_chooser_show(PP_Resource chooser, struct PP_ArrayOutput output,
                             struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s chooser=%d, output={.GetDataBuffer=%p, .user_data=%p}, "
+               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, chooser,
+               output.GetDataBuffer, output.user_data, callback.func, callback.user_data,
+               callback.flags);
     return ppb_file_chooser_show(chooser, output, callback);
 }
 
