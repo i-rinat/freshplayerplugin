@@ -152,8 +152,8 @@ _call_plugin_did_create_comt(void *user_data, int32_t result)
         free(pp_i->argn[k]);
         free(pp_i->argv[k]);
     }
-    free_and_nullify(pp_i, argn);
-    free_and_nullify(pp_i, argv);
+    free_and_nullify(pp_i->argn);
+    free_and_nullify(pp_i->argv);
 
     pp_i->ppp_instance_private = ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
     if (pp_i->ppp_instance_private && pp_i->ppp_instance_private->GetInstanceObject) {
@@ -1326,7 +1326,7 @@ NPP_URLRedirectNotify(NPP npp, const char *url, int32_t status, void *notifyData
     if (loader) {
         struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
         if (ul) {
-            free_and_nullify(ul, redirect_url);
+            free_and_nullify(ul->redirect_url);
             ul->redirect_url = strdup(url);
             pp_resource_release(loader);
         }

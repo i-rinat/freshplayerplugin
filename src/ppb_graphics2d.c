@@ -71,8 +71,8 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     g2d->second_buffer = calloc(g2d->scaled_stride * g2d->scaled_height, 1);
     if (!g2d->data || !g2d->second_buffer) {
         trace_warning("%s, can't allocate memory\n", __func__);
-        free_and_nullify(g2d, data);
-        free_and_nullify(g2d, second_buffer);
+        free_and_nullify(g2d->data);
+        free_and_nullify(g2d->second_buffer);
         pp_resource_release(graphics_2d);
         ppb_core_release_resource(graphics_2d);
         return 0;
@@ -91,8 +91,8 @@ ppb_graphics2d_destroy(void *p)
     if (!p)
         return;
     struct pp_graphics2d_s *g2d = p;
-    free_and_nullify(g2d, data);
-    free_and_nullify(g2d, second_buffer);
+    free_and_nullify(g2d->data);
+    free_and_nullify(g2d->second_buffer);
     if (g2d->cairo_surf) {
         cairo_surface_destroy(g2d->cairo_surf);
         g2d->cairo_surf = NULL;

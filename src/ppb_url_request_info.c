@@ -77,12 +77,12 @@ ppb_url_request_info_destroy(void *p)
     if (!ri)
         return;
 
-    free_and_nullify(ri, url);
-    free_and_nullify(ri, headers);
-    free_and_nullify(ri, custom_referrer_url);
-    free_and_nullify(ri, custom_content_transfer_encoding);
-    free_and_nullify(ri, custom_user_agent);
-    free_and_nullify(ri, post_data);
+    free_and_nullify(ri->url);
+    free_and_nullify(ri->headers);
+    free_and_nullify(ri->custom_referrer_url);
+    free_and_nullify(ri->custom_content_transfer_encoding);
+    free_and_nullify(ri->custom_user_agent);
+    free_and_nullify(ri->post_data);
 }
 
 PP_Bool
@@ -117,7 +117,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
     switch (property) {
     case PP_URLREQUESTPROPERTY_URL:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        free_and_nullify(ri, url);
+        free_and_nullify(ri->url);
         tmp = ppb_var_var_to_utf8(value, NULL);
         tmp2 = ltrim(tmp);
         ri->url = strdup(tmp2);
@@ -137,7 +137,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         break;
     case PP_URLREQUESTPROPERTY_HEADERS:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        free_and_nullify(ri, headers);
+        free_and_nullify(ri->headers);
         ri->headers = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_STREAMTOFILE:
@@ -158,7 +158,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMREFERRERURL:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        free_and_nullify(ri, custom_referrer_url);
+        free_and_nullify(ri->custom_referrer_url);
         ri->custom_referrer_url = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_ALLOWCROSSORIGINREQUESTS:
@@ -171,7 +171,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMCONTENTTRANSFERENCODING:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        free_and_nullify(ri, custom_content_transfer_encoding);
+        free_and_nullify(ri->custom_content_transfer_encoding);
         ri->custom_content_transfer_encoding = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     case PP_URLREQUESTPROPERTY_PREFETCHBUFFERUPPERTHRESHOLD:
@@ -184,7 +184,7 @@ ppb_url_request_info_set_property(PP_Resource request, PP_URLRequestProperty pro
         break;
     case PP_URLREQUESTPROPERTY_CUSTOMUSERAGENT:
         ENSURE_TYPE(PP_VARTYPE_STRING);
-        free_and_nullify(ri, custom_user_agent);
+        free_and_nullify(ri->custom_user_agent);
         ri->custom_user_agent = strdup(ppb_var_var_to_utf8(value, NULL));
         break;
     default:
@@ -207,7 +207,7 @@ ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, 
     }
     PP_Bool retval = PP_FALSE;
 
-    free_and_nullify(ri, post_data);
+    free_and_nullify(ri->post_data);
     ri->post_len = 0;
 
     ri->post_data = malloc(len);

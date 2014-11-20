@@ -154,7 +154,7 @@ ppb_audio_destroy(void *p)
             usleep(10);
     }
     snd_pcm_close(a->ph);
-    free_and_nullify(a, audio_buffer);
+    free_and_nullify(a->audio_buffer);
 }
 
 PP_Bool

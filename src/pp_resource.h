@@ -50,10 +50,10 @@
 #include <gtk/gtk.h>
 
 
-#define free_and_nullify(obj, field)    \
+#define free_and_nullify(item)          \
     do {                                \
-        free(obj->field);               \
-        obj->field = NULL;              \
+        free(item);                     \
+        (item) = NULL;                  \
     } while (0)
 
 #define nullsafe_strdup(s)       ((s) ? strdup(s) : NULL)

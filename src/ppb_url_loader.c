@@ -76,15 +76,15 @@ ppb_url_loader_destroy(void *p)
         close(ul->fd);
         ul->fd = -1;
     }
-    free_and_nullify(ul, headers);
-    free_and_nullify(ul, url);
-    free_and_nullify(ul, status_line);
-    free_and_nullify(ul, request_headers);
-    free_and_nullify(ul, custom_referrer_url);
-    free_and_nullify(ul, custom_content_transfer_encoding);
-    free_and_nullify(ul, custom_user_agent);
-    free_and_nullify(ul, post_data);
-    free_and_nullify(ul, target);
+    free_and_nullify(ul->headers);
+    free_and_nullify(ul->url);
+    free_and_nullify(ul->status_line);
+    free_and_nullify(ul->request_headers);
+    free_and_nullify(ul->custom_referrer_url);
+    free_and_nullify(ul->custom_content_transfer_encoding);
+    free_and_nullify(ul->custom_user_agent);
+    free_and_nullify(ul->post_data);
+    free_and_nullify(ul->target);
 }
 
 PP_Bool
@@ -352,11 +352,11 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     }
     char *new_url = nullsafe_strdup(ul->redirect_url);
 
-    free_and_nullify(ul, url);
-    free_and_nullify(ul, redirect_url);
-    free_and_nullify(ul, status_line);
-    free_and_nullify(ul, headers);
-    free_and_nullify(ul, request_headers);
+    free_and_nullify(ul->url);
+    free_and_nullify(ul->redirect_url);
+    free_and_nullify(ul->status_line);
+    free_and_nullify(ul->headers);
+    free_and_nullify(ul->request_headers);
 
     if (ul->fd >= 0) {
         close(ul->fd);
@@ -558,8 +558,8 @@ ppb_url_loader_close(PP_Resource loader)
         close(ul->fd);
         ul->fd = -1;
     }
-    free_and_nullify(ul, headers);
-    free_and_nullify(ul, url);
+    free_and_nullify(ul->headers);
+    free_and_nullify(ul->url);
     pp_resource_release(loader);
     return;
 }
