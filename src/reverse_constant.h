@@ -35,6 +35,7 @@
 #include <ppapi/c/private/ppb_flash_clipboard.h>
 #include <ppapi/c/private/ppb_nacl_private.h>
 #include <ppapi/c/dev/pp_video_dev.h>
+#include <ppapi/c/dev/ppb_file_chooser_dev.h>
 
 
 const char *reverse_npp_variable(NPPVariable var);
@@ -53,5 +54,6 @@ const char *reverse_nacl_event_type(PP_NaClEventType et);
 const char *reverse_nacl_error(PP_NaClError err);
 const char *reverse_nacl_ready_state(PP_NaClReadyState rs);
 const char *reverse_video_decoder_profile(PP_VideoDecoder_Profile profile);
+const char *reverse_file_chooser_mode(PP_FileChooserMode_Dev mode);
 
 #endif // FPP_REVERSE_CONSTANT_H

@@ -1215,3 +1215,14 @@ reverse_video_decoder_profile(PP_VideoDecoder_Profile profile)
         return "UNKNOWNVIDEODECODERPROFILE";
     }
 }
+
+const char *
+reverse_file_chooser_mode(PP_FileChooserMode_Dev mode)
+{
+    switch (mode) {
+    CASE(PP_FILECHOOSERMODE_OPEN);
+    CASE(PP_FILECHOOSERMODE_OPENMULTIPLE);
+    default:
+        return "UNKNOWNFILECHOOSERMODE";
+    }
+}
