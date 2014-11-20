@@ -191,6 +191,7 @@ err:
 
 quit:
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+    ppb_core_release_resource(p->loader);
 }
 
 static
@@ -315,8 +316,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
 
     ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_url_loader_open_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
-    ppb_core_release_resource(loader);
-    
+
     int retval = p->retval;
     g_slice_free1(sizeof(*p), p);
 
@@ -390,10 +390,11 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     p->m_loop =             ppb_message_loop_get_current();
     p->depth =              ppb_message_loop_get_depth(p->m_loop) + 1;
 
+    ppb_core_add_ref_resource(loader);  // add ref to ensure data in ul remain accessible
+    pp_resource_release(loader);
+
     ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_url_loader_open_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
-
-    pp_resource_release(loader);
 
     int retval = p->retval;
     g_slice_free1(sizeof(*p), p);
