@@ -163,7 +163,49 @@ ppb_flash_file_file_ref_open_file(PP_Resource file_ref_id, int32_t mode, PP_File
 int32_t
 ppb_flash_file_file_ref_query_file(PP_Resource file_ref_id, struct PP_FileInfo *info)
 {
-    return -1;
+    if (!info)
+        return PP_ERROR_BADARGUMENT;
+    struct pp_file_ref_s *fr = pp_resource_acquire(file_ref_id, PP_RESOURCE_FILE_REF);
+    if (!fr) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    struct stat sb;
+    int ret;
+    if (fr->type == PP_FILE_REF_TYPE_NAME) {
+        ret = stat(fr->path, &sb);
+    } else {
+        ret = fstat(fr->fd, &sb);
+    }
+
+    if (ret == -1) {
+        pp_resource_release(file_ref_id);
+        // TODO: create and use common errno converter
+        switch (errno) {
+        case ENOENT: return PP_ERROR_FILENOTFOUND;
+        case EACCES: return PP_ERROR_NOACCESS;
+        default:     return PP_ERROR_FAILED;
+        }
+    }
+
+    info->size = sb.st_size;
+
+    if (S_ISREG(sb.st_mode)) {
+        info->type = PP_FILETYPE_REGULAR;
+    } else if (S_ISDIR(sb.st_mode)) {
+        info->type = PP_FILETYPE_DIRECTORY;
+    } else {
+        info->type = PP_FILETYPE_OTHER;
+    }
+
+    info->system_type = PP_FILESYSTEMTYPE_EXTERNAL; // TODO: which fs type should be used?
+    info->creation_time =      sb.st_ctim.tv_sec + sb.st_ctim.tv_nsec / 1e9;
+    info->last_access_time =   sb.st_atim.tv_sec + sb.st_atim.tv_nsec / 1e9;
+    info->last_modified_time = sb.st_mtim.tv_sec + sb.st_mtim.tv_nsec / 1e9;
+
+    pp_resource_release(file_ref_id);
+    return PP_OK;
 }
 
 bool
@@ -414,7 +456,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_flash_file_file_ref_query_file(PP_Resource file_ref_id, struct PP_FileInfo *info)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s file_ref_id=%d\n", __func__+6, file_ref_id);
     return ppb_flash_file_file_ref_query_file(file_ref_id, info);
 }
 
@@ -509,7 +551,7 @@ trace_ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_
 
 const struct PPB_Flash_File_FileRef ppb_flash_file_file_ref_interface_2_0 = {
     .OpenFile =     TWRAPF(ppb_flash_file_file_ref_open_file),
-    .QueryFile =    TWRAPZ(ppb_flash_file_file_ref_query_file),
+    .QueryFile =    TWRAPF(ppb_flash_file_file_ref_query_file),
 };
 
 const struct PPB_Flash_File_ModuleLocal_3_0 ppb_flash_file_modulelocal_interface_3_0 = {
