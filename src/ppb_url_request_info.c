@@ -236,6 +236,21 @@ ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource file_r
                                          int64_t start_offset, int64_t number_of_bytes,
                                          PP_Time expected_last_modified_time)
 {
+    struct pp_url_request_info_s *ri = pp_resource_acquire(request, PP_RESOURCE_URL_REQUEST_INFO);
+    if (!ri) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
+
+    struct post_data_item_s pdi = { 0 };
+    ppb_core_add_ref_resource(file_ref);
+    pdi.file_ref = file_ref;
+    pdi.start_offset = start_offset;
+    pdi.number_of_bytes = number_of_bytes;
+    pdi.expected_last_modified_time = expected_last_modified_time;
+    g_array_append_val(ri->post_data, pdi);
+
+    pp_resource_release(request);
     return PP_TRUE;
 }
 
@@ -414,7 +429,7 @@ trace_ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource 
                                                int64_t start_offset, int64_t number_of_bytes,
                                                PP_Time expected_last_modified_time)
 {
-    trace_info("[PPB] {zilch} %s request=%d, file_ref=%d, start_offset=%"PRId64", "
+    trace_info("[PPB] {full} %s request=%d, file_ref=%d, start_offset=%"PRId64", "
                "number_of_bytes=%"PRId64", expected_last_modified_time=%f\n", __func__+6, request,
                file_ref, start_offset, number_of_bytes, expected_last_modified_time);
     return ppb_url_request_info_append_file_to_body(request, file_ref, start_offset,
@@ -427,5 +442,5 @@ const struct PPB_URLRequestInfo_1_0 ppb_url_request_info_interface_1_0 = {
     .IsURLRequestInfo = TWRAPF(ppb_url_request_info_is_url_request_info),
     .SetProperty =      TWRAPF(ppb_url_request_info_set_property),
     .AppendDataToBody = TWRAPF(ppb_url_request_info_append_data_to_body),
-    .AppendFileToBody = TWRAPZ(ppb_url_request_info_append_file_to_body),
+    .AppendFileToBody = TWRAPF(ppb_url_request_info_append_file_to_body),
 };
