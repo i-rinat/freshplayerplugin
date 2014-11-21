@@ -445,10 +445,13 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         ul->headers = malloc(headers_len + 1);
         char *ptr = ul->headers;
         for (unsigned int k = 0; k < ph->cnt; k ++) {
+            if (k != 0) {
+                memcpy(ptr, "\n", strlen("\n"));
+                ptr += strlen("\n");
+            }
             memcpy(ptr, ph->name[k], strlen(ph->name[k]));  ptr += strlen(ph->name[k]);
             memcpy(ptr, ": ", strlen(": "));                ptr += strlen(": ");
             memcpy(ptr, ph->value[k], strlen(ph->value[k]));ptr += strlen(ph->value[k]);
-            memcpy(ptr, "\n", strlen("\n"));                ptr += strlen("\n");
         }
         *ptr = 0;
         ul->http_code = ph->http_code;
