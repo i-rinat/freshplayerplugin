@@ -136,7 +136,7 @@ ppb_tcp_socket_get_local_address(PP_Resource tcp_socket, struct PP_NetAddress_Pr
     }
 
     if (!ts->is_connected) {
-        trace_error("%s, not connected\n", __func__);
+        trace_warning("%s, not connected\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_FALSE;
     }
@@ -159,7 +159,7 @@ ppb_tcp_socket_get_remote_address(PP_Resource tcp_socket, struct PP_NetAddress_P
     }
 
     if (!ts->is_connected) {
-        trace_error("%s, not connected\n", __func__);
+        trace_warning("%s, not connected\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_FALSE;
     }
@@ -208,13 +208,13 @@ ppb_tcp_socket_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
     }
 
     if (!ts->is_connected) {
-        trace_error("%s, not connected\n", __func__);
+        trace_warning("%s, not connected\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_ERROR_FAILED;
     }
 
     if (ts->seen_eof) {
-        trace_error("%s, seen eof\n", __func__);
+        trace_warning("%s, seen eof\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_ERROR_FAILED;
     }
@@ -252,7 +252,7 @@ ppb_tcp_socket_write(PP_Resource tcp_socket, const char *buffer, int32_t bytes_t
     }
 
     if (!ts->is_connected) {
-        trace_error("%s, not connected\n", __func__);
+        trace_warning("%s, not connected\n", __func__);
         pp_resource_release(tcp_socket);
         return PP_ERROR_FAILED;
     }
