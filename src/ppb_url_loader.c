@@ -440,7 +440,7 @@ PP_Bool
 ppb_url_loader_get_upload_progress(PP_Resource loader, int64_t *bytes_sent,
                                    int64_t *total_bytes_to_be_sent)
 {
-    return PP_TRUE;
+    return PP_FALSE;
 }
 
 PP_Bool
