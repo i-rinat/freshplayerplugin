@@ -440,6 +440,11 @@ PP_Bool
 ppb_url_loader_get_upload_progress(PP_Resource loader, int64_t *bytes_sent,
                                    int64_t *total_bytes_to_be_sent)
 {
+    // TODO: how to get upload progress
+    // Apparently there is no way to determine upload progress using NPAPI.
+    // However, one can try to create anonymous fifo and push data to it.
+    // How particularly browser handles file is still to be discovered. Note,
+    // each browser can do it differently.
     return PP_FALSE;
 }
 
@@ -635,7 +640,7 @@ PP_Bool
 trace_ppb_url_loader_get_upload_progress(PP_Resource loader, int64_t *bytes_sent,
                                          int64_t *total_bytes_to_be_sent)
 {
-    trace_info("[PPB] {zilch} %s loader=%d\n", __func__+6, loader);
+    trace_info("[PPB] {full} %s loader=%d\n", __func__+6, loader);
     return ppb_url_loader_get_upload_progress(loader, bytes_sent, total_bytes_to_be_sent);
 }
 
@@ -708,7 +713,7 @@ const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
     .IsURLLoader =              TWRAPF(ppb_url_loader_is_url_loader),
     .Open =                     TWRAPF(ppb_url_loader_open),
     .FollowRedirect =           TWRAPF(ppb_url_loader_follow_redirect),
-    .GetUploadProgress =        TWRAPZ(ppb_url_loader_get_upload_progress),
+    .GetUploadProgress =        TWRAPF(ppb_url_loader_get_upload_progress),
     .GetDownloadProgress =      TWRAPF(ppb_url_loader_get_download_progress),
     .GetResponseInfo =          TWRAPF(ppb_url_loader_get_response_info),
     .ReadResponseBody =         TWRAPF(ppb_url_loader_read_response_body),
