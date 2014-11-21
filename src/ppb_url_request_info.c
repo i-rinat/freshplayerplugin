@@ -71,7 +71,7 @@ ppb_url_request_info_create(PP_Instance instance)
     ri->prefetch_buffer_upper_threshold = -1;
     ri->prefetch_buffer_lower_threshold = -1;
     ri->custom_user_agent = NULL;
-    ri->post_data2 = post_data_new();
+    ri->post_data = post_data_new();
 
     pp_resource_release(request_info);
     return request_info;
@@ -89,8 +89,8 @@ ppb_url_request_info_destroy(void *p)
     free_and_nullify(ri->custom_referrer_url);
     free_and_nullify(ri->custom_content_transfer_encoding);
     free_and_nullify(ri->custom_user_agent);
-    post_data_free(ri->post_data2);
-    ri->post_data2 = NULL;
+    post_data_free(ri->post_data);
+    ri->post_data = NULL;
 }
 
 PP_Bool
@@ -223,7 +223,7 @@ ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, 
     }
 
     pdi.len = len;
-    g_array_append_val(ri->post_data2, pdi);
+    g_array_append_val(ri->post_data, pdi);
     retval = PP_TRUE;
 
 err:

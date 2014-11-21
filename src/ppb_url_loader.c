@@ -86,8 +86,8 @@ ppb_url_loader_destroy(void *p)
     free_and_nullify(ul->custom_user_agent);
     free_and_nullify(ul->target);
 
-    post_data_free(ul->post_data2);
-    ul->post_data2 = NULL;
+    post_data_free(ul->post_data);
+    ul->post_data = NULL;
 }
 
 PP_Bool
@@ -106,7 +106,7 @@ struct url_loader_open_param_s {
     const char                 *custom_content_transfer_encoding;
     const char                 *custom_user_agent;
     const char                 *target;
-    GArray                     *post_data2;
+    GArray                     *post_data;
     size_t                      post_len;
     PP_Resource                 m_loop;
     int                         depth;
@@ -164,8 +164,8 @@ _url_loader_open_ptac(void *user_data)
             need_newline = 1;
         }
 
-        if (p->post_data2) {
-            size_t post_len = post_data_get_all_item_length(p->post_data2);
+        if (p->post_data) {
+            size_t post_len = post_data_get_all_item_length(p->post_data);
 
             if (post_len == (size_t)-1) {
                 // PP_ERROR_FILECHANGED?
@@ -181,9 +181,9 @@ _url_loader_open_ptac(void *user_data)
         if (need_newline)
             fprintf(fp, "\n");
 
-        if (p->post_data2) {
-            for (guint k = 0; k < p->post_data2->len; k ++)
-                post_data_write_to_fp(p->post_data2, k, fp);
+        if (p->post_data) {
+            for (guint k = 0; k < p->post_data->len; k ++)
+                post_data_write_to_fp(p->post_data, k, fp);
         }
 
         fclose(fp);
@@ -301,8 +301,8 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     TRIM_NEWLINE(ul->custom_content_transfer_encoding);
     TRIM_NEWLINE(ul->custom_user_agent);
 
-    post_data_free(ul->post_data2);
-    ul->post_data2 = post_data_duplicate(ri->post_data2);
+    post_data_free(ul->post_data);
+    ul->post_data = post_data_duplicate(ri->post_data);
 
     ul->fd = open_temporary_file();
     ul->ccb = callback;
@@ -320,7 +320,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     p->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
     p->custom_user_agent =  ul->custom_user_agent;
     p->target =         ul->target;
-    p->post_data2 =     ul->post_data2;
+    p->post_data =      ul->post_data;
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
@@ -370,8 +370,8 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     free_and_nullify(ul->status_line);
     free_and_nullify(ul->headers);
     free_and_nullify(ul->request_headers);
-    post_data_free(ul->post_data2);
-    ul->post_data2 = NULL;
+    post_data_free(ul->post_data);
+    ul->post_data = NULL;
 
     if (ul->fd >= 0) {
         close(ul->fd);
@@ -401,7 +401,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     p->custom_user_agent =  ul->custom_user_agent;
     p->target =             NULL;
     p->post_len =           0;
-    p->post_data2 =         NULL;
+    p->post_data =          NULL;
     p->m_loop =             ppb_message_loop_get_current();
     p->depth =              ppb_message_loop_get_depth(p->m_loop) + 1;
 
