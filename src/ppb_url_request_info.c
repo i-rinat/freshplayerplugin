@@ -33,6 +33,12 @@
 #include "pp_resource.h"
 #include "reverse_constant.h"
 #include "ppb_var.h"
+#include <ppapi/c/pp_file_info.h>
+#include <ppapi/c/ppb_file_io.h>
+#include <ppapi/c/pp_errors.h>
+#include "ppb_flash_file.h"
+#include "ppb_core.h"
+#include "eintr_retry.h"
 
 
 PP_Resource
@@ -65,6 +71,7 @@ ppb_url_request_info_create(PP_Instance instance)
     ri->prefetch_buffer_upper_threshold = -1;
     ri->prefetch_buffer_lower_threshold = -1;
     ri->custom_user_agent = NULL;
+    ri->post_data2 = post_data_new();
 
     pp_resource_release(request_info);
     return request_info;
@@ -82,7 +89,8 @@ ppb_url_request_info_destroy(void *p)
     free_and_nullify(ri->custom_referrer_url);
     free_and_nullify(ri->custom_content_transfer_encoding);
     free_and_nullify(ri->custom_user_agent);
-    free_and_nullify(ri->post_data);
+    post_data_free(ri->post_data2);
+    ri->post_data2 = NULL;
 }
 
 PP_Bool
@@ -205,20 +213,20 @@ ppb_url_request_info_append_data_to_body(PP_Resource request, const void *data, 
         trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
     }
+
     PP_Bool retval = PP_FALSE;
-
-    free_and_nullify(ri->post_data);
-    ri->post_len = 0;
-
-    ri->post_data = malloc(len);
-    if (ri->post_data) {
-        memcpy(ri->post_data, data, len);
-        ri->post_len = len;
-        retval = PP_TRUE;
-    } else {
+    struct post_data_item_s pdi = { 0 };
+    pdi.data = g_memdup(data, len);
+    if (!pdi.data) {
         retval = PP_FALSE;
+        goto err;
     }
 
+    pdi.len = len;
+    g_array_append_val(ri->post_data2, pdi);
+    retval = PP_TRUE;
+
+err:
     pp_resource_release(request);
     return retval;
 }
@@ -229,6 +237,137 @@ ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource file_r
                                          PP_Time expected_last_modified_time)
 {
     return PP_TRUE;
+}
+
+GArray *
+post_data_new(void)
+{
+    return g_array_new(FALSE, TRUE, sizeof(struct post_data_item_s));
+}
+
+GArray *
+post_data_duplicate(GArray *post_data)
+{
+    GArray *post_data2;
+
+    if (!post_data)
+        return NULL;
+
+    post_data2 = post_data_new();
+    if (!post_data2)
+        return NULL;
+
+    for (guint k = 0; k < post_data->len; k ++) {
+        struct post_data_item_s *pdi = &g_array_index(post_data, struct post_data_item_s, k);
+        struct post_data_item_s pdi2 = *pdi;
+
+        if (pdi2.file_ref != 0) {
+            ppb_core_add_ref_resource(pdi2.file_ref);
+        } else {
+            pdi2.data = g_memdup(pdi->data, pdi->len);
+            if (!pdi2.data) {
+                trace_error("%s, can't allocate memory\n", __func__);
+                continue;
+            }
+        }
+
+        g_array_append_val(post_data2, pdi2);
+    }
+
+    return post_data2;
+}
+
+static size_t
+post_data_get_item_length(struct post_data_item_s *pdi)
+{
+    if (pdi->file_ref != 0) {
+        size_t start_offset = MAX(pdi->start_offset, 0);
+        struct PP_FileInfo finfo;
+
+        if (ppb_flash_file_file_ref_query_file(pdi->file_ref, &finfo) != PP_OK)
+            return (size_t)-1;
+
+        if (pdi->expected_last_modified_time != 0
+            && finfo.last_modified_time != pdi->expected_last_modified_time)
+        {
+            return (size_t)-1;
+        }
+
+        if (pdi->number_of_bytes >= 0) {
+            return (size_t)pdi->number_of_bytes;
+        } else if (finfo.size <= start_offset) {
+            return 0;
+        } else {
+            return finfo.size - start_offset;
+        }
+    } else {
+        return pdi->len;
+    }
+}
+
+size_t
+post_data_get_all_item_length(GArray *post_data)
+{
+    size_t total_len = 0;
+
+    for (guint k = 0; k < post_data->len; k ++) {
+        struct post_data_item_s *pdi = &g_array_index(post_data, struct post_data_item_s, k);
+        size_t item_len = post_data_get_item_length(pdi);
+
+        if (item_len == (size_t)-1)
+            goto err;
+
+        total_len += item_len;
+    }
+
+    return total_len;
+err:
+    return (size_t)-1;
+}
+
+void
+post_data_free(GArray *post_data)
+{
+    if (!post_data)
+        return;
+
+    for (guint k = 0; k < post_data->len; k ++) {
+        struct post_data_item_s *pdi = &g_array_index(post_data, struct post_data_item_s, k);
+        if (pdi->file_ref != 0)
+            ppb_core_release_resource(pdi->file_ref);
+        else
+            free(pdi->data);
+    }
+
+    post_data->len = 0; // set length to zero to avoid double freing
+    g_array_unref(post_data);
+}
+
+void
+post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp)
+{
+    char buf[128 * 1024];
+    struct post_data_item_s *pdi = &g_array_index(post_data, struct post_data_item_s, idx);
+
+    if (pdi->file_ref != 0) {
+        int fd;
+        if (ppb_flash_file_file_ref_open_file(pdi->file_ref, PP_FILEOPENFLAG_READ, &fd) != PP_OK) {
+            // some error, skipping this one
+            return;
+        }
+
+        size_t to_write = post_data_get_item_length(pdi);
+        while (to_write > 0) {
+            ssize_t read_bytes = RETRY_ON_EINTR(read(fd, buf, MIN(to_write, sizeof(buf))));
+            if (read_bytes == -1)
+                return;
+            fwrite(buf, 1, (size_t)read_bytes, fp);
+            to_write -= read_bytes;
+        }
+        close(fd);
+    } else {
+        fwrite(pdi->data, 1, pdi->len, fp);
+    }
 }
 
 

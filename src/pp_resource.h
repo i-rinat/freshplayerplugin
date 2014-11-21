@@ -194,8 +194,7 @@ struct pp_url_loader_s {
     char                   *custom_content_transfer_encoding;
     char                   *custom_user_agent;
     char                   *target;
-    char                   *post_data;
-    size_t                  post_len;
+    GArray                 *post_data2;
     GList                  *read_tasks;     ///< list of url_loader_read_task_s
     NPStream               *np_stream;      ///< associated NPStream
     struct PP_CompletionCallback    ccb;    ///< callback to call on headers arrival
@@ -224,8 +223,7 @@ struct pp_url_request_info_s {
     int32_t                     prefetch_buffer_upper_threshold;
     int32_t                     prefetch_buffer_lower_threshold;
     char                       *custom_user_agent;
-    size_t                      post_len;
-    void                       *post_data;
+    GArray                     *post_data2;
 };
 
 struct pp_url_response_info_s {

@@ -26,6 +26,36 @@
 #define FPP_PPB_URL_REQUEST_INFO_H
 
 #include <ppapi/c/ppb_url_request_info.h>
+#include <stdlib.h>
+#include <glib.h>
+#include <stdio.h>
+
+
+/// descriptor of post data item
+struct post_data_item_s {
+    char       *data;
+    size_t      len;
+
+    PP_Resource file_ref;           ///< non-zero if the item is file slice
+    int64_t     start_offset;
+    int64_t     number_of_bytes;
+    PP_Time     expected_last_modified_time;
+};
+
+GArray *
+post_data_new(void);
+
+GArray *
+post_data_duplicate(GArray *post_data);
+
+void
+post_data_free(GArray *post_data);
+
+size_t
+post_data_get_all_item_length(GArray *post_data);
+
+void
+post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp);
 
 PP_Resource
 ppb_url_request_info_create(PP_Instance instance);

@@ -39,6 +39,7 @@
 #include "pp_resource.h"
 #include "tables.h"
 #include "eintr_retry.h"
+#include "ppb_url_request_info.h"
 
 
 PP_Resource
@@ -83,8 +84,10 @@ ppb_url_loader_destroy(void *p)
     free_and_nullify(ul->custom_referrer_url);
     free_and_nullify(ul->custom_content_transfer_encoding);
     free_and_nullify(ul->custom_user_agent);
-    free_and_nullify(ul->post_data);
     free_and_nullify(ul->target);
+
+    post_data_free(ul->post_data2);
+    ul->post_data2 = NULL;
 }
 
 PP_Bool
@@ -103,7 +106,7 @@ struct url_loader_open_param_s {
     const char                 *custom_content_transfer_encoding;
     const char                 *custom_user_agent;
     const char                 *target;
-    const char                 *post_data;
+    GArray                     *post_data2;
     size_t                      post_len;
     PP_Resource                 m_loop;
     int                         depth;
@@ -160,15 +163,29 @@ _url_loader_open_ptac(void *user_data)
             fprintf(fp, "User-Agent: %s\n", p->custom_user_agent);
             need_newline = 1;
         }
-        if (p->post_len > 0) {
-            fprintf(fp, "Content-Length: %"PRIu64"\n", (uint64_t)p->post_len);
-            need_newline = 1;
+
+        if (p->post_data2) {
+            size_t post_len = post_data_get_all_item_length(p->post_data2);
+
+            if (post_len == (size_t)-1) {
+                // PP_ERROR_FILECHANGED?
+                goto err;
+            }
+
+            if (post_len > 0) {
+                fprintf(fp, "Content-Length: %"PRIu64"\n", (uint64_t)post_len);
+                need_newline = 1;
+            }
         }
 
         if (need_newline)
             fprintf(fp, "\n");
 
-        fwrite(p->post_data, 1, p->post_len, fp);
+        if (p->post_data2) {
+            for (guint k = 0; k < p->post_data2->len; k ++)
+                post_data_write_to_fp(p->post_data2, k, fp);
+        }
+
         fclose(fp);
 
         if (p->target) {
@@ -284,11 +301,8 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     TRIM_NEWLINE(ul->custom_content_transfer_encoding);
     TRIM_NEWLINE(ul->custom_user_agent);
 
-    ul->post_len = ri->post_len;
-    if (ri->post_len > 0) {
-        ul->post_data = malloc(ri->post_len);
-        memcpy(ul->post_data, ri->post_data, ri->post_len);
-    }
+    post_data_free(ul->post_data2);
+    ul->post_data2 = post_data_duplicate(ri->post_data2);
 
     ul->fd = open_temporary_file();
     ul->ccb = callback;
@@ -306,8 +320,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
     p->custom_content_transfer_encoding = ul->custom_content_transfer_encoding;
     p->custom_user_agent =  ul->custom_user_agent;
     p->target =         ul->target;
-    p->post_len =       ul->post_len;
-    p->post_data =      ul->post_data;
+    p->post_data2 =     ul->post_data2;
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
@@ -357,6 +370,8 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     free_and_nullify(ul->status_line);
     free_and_nullify(ul->headers);
     free_and_nullify(ul->request_headers);
+    post_data_free(ul->post_data2);
+    ul->post_data2 = NULL;
 
     if (ul->fd >= 0) {
         close(ul->fd);
@@ -386,7 +401,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     p->custom_user_agent =  ul->custom_user_agent;
     p->target =             NULL;
     p->post_len =           0;
-    p->post_data =          NULL;
+    p->post_data2 =         NULL;
     p->m_loop =             ppb_message_loop_get_current();
     p->depth =              ppb_message_loop_get_depth(p->m_loop) + 1;
 
