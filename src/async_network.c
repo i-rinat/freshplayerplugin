@@ -135,7 +135,7 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
     struct async_network_task_s *task = arg;
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        trace_error("%s, tcp socket resource was closed during request\n", __func__);
+        trace_warning("%s, tcp socket resource was closed during request\n", __func__);
         free(task->addr);
         task_destroy(task);
         return;
@@ -165,7 +165,7 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
     }
 
     // no addresses left, fail gracefully
-    trace_error("%s, connection failed to all addresses\n", __func__);
+    trace_warning("%s, connection failed to all addresses\n", __func__);
     ppb_core_call_on_main_thread(0, task->callback, get_pp_errno());
     pp_resource_release(task->resource);
     free(task->addr);
@@ -217,7 +217,7 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
     struct async_network_task_s *task = arg;
 
     if (result != DNS_ERR_NONE || count < 1) {
-        trace_error("%s, evdns returned code %d, count = %d\n", __func__, result, count);
+        trace_warning("%s, evdns returned code %d, count = %d\n", __func__, result, count);
         ppb_core_call_on_main_thread(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
         task_destroy(task);
         return;
@@ -256,7 +256,7 @@ handle_tcp_connect_stage1(struct async_network_task_s *task)
     // TODO: what about ipv6?
 
     if (!req) {
-        trace_error("%s, early dns resolution failure\n", __func__);
+        trace_warning("%s, early dns resolution failure\n", __func__);
         ppb_core_call_on_main_thread(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
         task_destroy(task);
         return;
