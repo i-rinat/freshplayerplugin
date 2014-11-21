@@ -145,8 +145,17 @@ show_without_user_guesture_ptac(void *param)
 {
     struct show_param_s *p = param;
     GtkWidget *fcd;
+    const char *dialog_title;
 
-    fcd = gtk_file_chooser_dialog_new("Open file dialog", NULL,
+    if (p->save_as) {
+        dialog_title = "Save file";
+    } else if (p->mode == PP_FILECHOOSERMODE_OPENMULTIPLE) {
+        dialog_title = "Open files";
+    } else {
+        dialog_title = "Open file";
+    }
+
+    fcd = gtk_file_chooser_dialog_new(dialog_title, NULL,
                                       p->save_as ? GTK_FILE_CHOOSER_ACTION_SAVE
                                                  : GTK_FILE_CHOOSER_ACTION_OPEN,
                                       GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
