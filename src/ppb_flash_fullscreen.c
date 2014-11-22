@@ -226,7 +226,10 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
         return PP_FALSE;
     }
 
-    if (!!fullscreen == !!pp_i->is_fullscreen)
+    pthread_mutex_lock(&display.lock);
+    int in_same_state = (!!fullscreen == !!pp_i->is_fullscreen);
+    pthread_mutex_unlock(&display.lock);
+    if (in_same_state)
         return PP_FALSE;
 
     if (fullscreen) {
