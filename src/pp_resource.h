@@ -134,6 +134,8 @@ struct pp_instance_s {
     // full screen
     pthread_t                       fs_thread;
     Window                          fs_wnd;
+    uint32_t                        fs_width;
+    uint32_t                        fs_height;
 
     // geometry
     uint32_t                        width;

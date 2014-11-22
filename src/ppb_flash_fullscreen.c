@@ -78,8 +78,8 @@ _update_instance_view_comt(void *user_data, int32_t result)
         v->rect.point.x = 0;
         v->rect.point.y = 0;
         if (pp_i->is_fullscreen) {
-            v->rect.size.width = display.fs_width;
-            v->rect.size.height = display.fs_height;
+            v->rect.size.width = pp_i->fs_width;
+            v->rect.size.height = pp_i->fs_height;
         } else {
             v->rect.size.width = pp_i->width;
             v->rect.size.height = pp_i->height;
@@ -125,9 +125,10 @@ fullscreen_window_thread(void *p)
     struct pp_instance_s *pp_i = tp->pp_i;
 
     pp_i->fs_wnd = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy),
-                                       0, 0, display.fs_width, display.fs_height, 0, 0, 0x809080);
+                                       0, 0, 300, 300, 0, 0, 0x809080);
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
-                                    ButtonReleaseMask | PointerMotionMask | ExposureMask);
+                                    ButtonReleaseMask | PointerMotionMask | ExposureMask |
+                                    StructureNotifyMask);
 
     // go fullscreen
     Atom netwm_fullscreen_atom = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
@@ -166,11 +167,11 @@ fullscreen_window_thread(void *p)
     // show window
     XMapWindow(dpy, pp_i->fs_wnd);
     XSync(dpy, False);
+    pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 1;
+    pthread_mutex_unlock(&display.lock);
 
     pthread_barrier_wait(&tp->startup_barrier);
-
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_update_instance_view_comt, pp_i), PP_OK);
 
     while (1) {
         XEvent ev;
@@ -181,6 +182,14 @@ fullscreen_window_thread(void *p)
                 if (XK_Escape == keysym) {
                     goto quit_and_destroy_fs_wnd;
                 }
+            } break;
+            case ConfigureNotify: {
+                pthread_mutex_lock(&display.lock);
+                pp_i->fs_width = ev.xconfigure.width;
+                pp_i->fs_height = ev.xconfigure.height;
+                pthread_mutex_unlock(&display.lock);
+                ppb_core_call_on_main_thread(0, PP_MakeCCB(_update_instance_view_comt, pp_i),
+                                             PP_OK);
             } break;
         }
         ev.xany.display = display.x;
