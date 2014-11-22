@@ -169,7 +169,6 @@ fullscreen_window_thread(void *p)
     pp_i->is_fullscreen = 1;
 
     pthread_barrier_wait(&tp->startup_barrier);
-    pthread_barrier_destroy(&tp->startup_barrier);
 
     ppb_core_call_on_main_thread(0, PP_MakeCCB(_update_instance_view_comt, pp_i), PP_OK);
 
@@ -229,6 +228,7 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
         pthread_create(&pp_i->fs_thread, NULL, fullscreen_window_thread, tparams);
         pthread_detach(pp_i->fs_thread);
         pthread_barrier_wait(&tparams->startup_barrier);
+        pthread_barrier_destroy(&tparams->startup_barrier);
     } else {
         pthread_mutex_lock(&display.lock);
         pp_i->is_fullscreen = 0;
