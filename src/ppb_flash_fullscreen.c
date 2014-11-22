@@ -45,6 +45,8 @@ struct handle_event_comt_param_s {
 struct thread_param_s {
     struct pp_instance_s   *pp_i;
     pthread_barrier_t       startup_barrier;
+    Window                  browser_window;
+    pthread_barrier_t       browser_window_barrier;
 };
 
 
@@ -103,6 +105,18 @@ _handle_event_ptac(void *p)
 }
 
 static
+void
+get_browser_window(void *p)
+{
+    struct thread_param_s *tp = p;
+
+    if (npn.getvalue(tp->pp_i->npp, NPNVnetscapeWindow, &tp->browser_window) != NPERR_NO_ERROR)
+        tp->browser_window = None;
+
+    pthread_barrier_wait(&tp->browser_window_barrier);
+}
+
+static
 void *
 fullscreen_window_thread(void *p)
 {
@@ -136,6 +150,18 @@ fullscreen_window_thread(void *p)
                     XInternAtom(dpy, "UTF8_STRING", False),
                     8, PropModeReplace,
                     (unsigned char *)fs_window_name, strlen(fs_window_name));
+
+    // round trip to browser thread to get browser window
+    tp->browser_window = None;
+    pthread_barrier_init(&tp->browser_window_barrier, NULL, 2);
+    ppb_core_call_on_browser_thread(get_browser_window, tp);
+    pthread_barrier_wait(&tp->browser_window_barrier);
+    pthread_barrier_destroy(&tp->browser_window_barrier);
+
+    if (tp->browser_window != None)
+        XSetTransientForHint(dpy, pp_i->fs_wnd, tp->browser_window);
+    else
+        trace_error("%s, can't get tp->browser_window\n", __func__);
 
     // show window
     XMapWindow(dpy, pp_i->fs_wnd);
