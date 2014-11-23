@@ -421,7 +421,6 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
 
     if (ul) {
         struct parsed_headers_s *ph = hp_parse_headers(stream->headers);
-        unsigned int headers_len = 0;
         ccb = ul->ccb;
         ul->np_stream = stream;
 
@@ -438,7 +437,8 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
             }
         }
 
-        for (unsigned int k = 0; k < ph->cnt; k ++)
+        size_t headers_len = 0;
+        for (uintptr_t k = 0; k < ph->cnt; k ++)
             headers_len += strlen(ph->name[k]) + strlen(": ") + strlen(ph->value[k]) + strlen("\n");
 
         // reconstruct headers
