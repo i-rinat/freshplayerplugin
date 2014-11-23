@@ -16,9 +16,6 @@ audio_buffer_min_ms = 20
 # higher bound of audio buffer size, in milliseconds
 audio_buffer_max_ms = 500
 
-# Xinerama screen used to acquire fullscreen window geometry
-xinerama_screen = 0
-
 # Path to the Pepper Flash plugin
 pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
 

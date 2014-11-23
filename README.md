@@ -64,8 +64,8 @@ Project is using cmake (>=2.8.8) build system.
 * Install prerequisites.
 ```
     $ sudo apt-get install cmake pkg-config ragel libasound2-dev            \
-           libglib2.0-dev libconfig-dev libpango1.0-dev libxinerama-dev     \
-           libegl1-mesa-dev libevent-dev libgtk+2.0-dev libgles2-mesa-dev
+           libglib2.0-dev libconfig-dev libpango1.0-dev libegl1-mesa-dev    \
+           libevent-dev libgtk+2.0-dev libgles2-mesa-dev
 ```
 
 * Make `build` subdirectory, go there, call

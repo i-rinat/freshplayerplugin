@@ -29,7 +29,6 @@ pkg_check_modules(REQ
     alsa
     glib-2.0
     x11
-    xinerama
     egl
     glesv2
     libconfig

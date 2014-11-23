@@ -34,7 +34,6 @@
 #include "config.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/extensions/Xinerama.h>
 
 
 NPNetscapeFuncs     npn;
@@ -236,19 +235,8 @@ tables_open_display(void)
     trace_info_f("EGL version %d.%d\n", major, minor);
 
     // get fullscreen resolution
-    int screen_count;
-    XineramaScreenInfo *xsi = XineramaQueryScreens(display.x, &screen_count);
     XWindowAttributes xw_attrs;
-    if (xsi) {
-        int screen = config.xinerama_screen;
-        if (screen < 0)
-            screen = 0;
-        if (screen > screen_count - 1)
-            screen = screen_count - 1;
-        display.fs_width =  xsi[screen].width;
-        display.fs_height = xsi[screen].height;
-        XFree(xsi);
-    } else if (XGetWindowAttributes(display.x, DefaultRootWindow(display.x), &xw_attrs)) {
+    if (XGetWindowAttributes(display.x, DefaultRootWindow(display.x), &xw_attrs)) {
         display.fs_width =  xw_attrs.width;
         display.fs_height = xw_attrs.height;
     } else {
