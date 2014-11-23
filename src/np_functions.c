@@ -441,7 +441,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         for (unsigned int k = 0; k < ph->cnt; k ++)
             headers_len += strlen(ph->name[k]) + strlen(": ") + strlen(ph->value[k]) + strlen("\n");
 
-        // recostruct headers
+        // reconstruct headers
         ul->headers = malloc(headers_len + 1);
         char *ptr = ul->headers;
         for (unsigned int k = 0; k < ph->cnt; k ++) {
