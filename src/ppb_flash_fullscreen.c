@@ -183,31 +183,42 @@ fullscreen_window_thread(void *p)
     pthread_barrier_wait(&tp->startup_barrier);
 
     while (1) {
-        XEvent ev;
+        XEvent  ev;
+        int     handled = 0;
+        KeySym  keysym;
+
         XNextEvent(dpy, &ev);
         switch (ev.type) {
-            case KeyPress: {
-                KeySym keysym = XLookupKeysym(&ev.xkey, 0);
-                if (XK_Escape == keysym) {
+            case KeyPress:
+                keysym = XLookupKeysym(&ev.xkey, 0);
+                if (XK_Escape == keysym)
                     goto quit_and_destroy_fs_wnd;
-                }
-            } break;
-            case ConfigureNotify: {
+                break;
+
+            case ConfigureNotify:
                 pthread_mutex_lock(&display.lock);
                 pp_i->fs_width = ev.xconfigure.width;
                 pp_i->fs_height = ev.xconfigure.height;
                 pthread_mutex_unlock(&display.lock);
                 ppb_core_call_on_main_thread(0, PP_MakeCCB(_update_instance_view_comt, pp_i),
                                              PP_OK);
-            } break;
+                handled = 1;
+                break;
+
+            case ReparentNotify:
+            case MapNotify:
+                handled = 1;
+                break;
         }
         ev.xany.display = display.x;
 
-        struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
-        params->instance_id =   pp_i->id;
-        params->ev =            ev;
-        g_atomic_int_add(&events_inflight, 1);
-        ppb_core_call_on_browser_thread(_handle_event_ptac, params);
+        if (!handled) {
+            struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
+            params->instance_id =   pp_i->id;
+            params->ev =            ev;
+            g_atomic_int_add(&events_inflight, 1);
+            ppb_core_call_on_browser_thread(_handle_event_ptac, params);
+        }
     }
 
 quit_and_destroy_fs_wnd:
