@@ -26,15 +26,15 @@
 #include <stdlib.h>
 
 const char *pepperflash_path_list[] = {
-        "/opt/google/chrome/PepperFlash",           // Chrome
-        "/opt/google/chrome-beta/PepperFlash",      // Chrome beta
-        "/opt/google/chrome-unstable/PepperFlash",  // Chrome unstable
-        "/usr/lib/pepperflashplugin-nonfree",       // pepperflashplugin-nonfree (Debian)
-        "/usr/lib/PepperFlash",                     // chromium-pepperflash-plugin (Slackware)
-        "/usr/lib64/PepperFlash",                   // chromium-pepperflash-plugin (Slackware)
-        "/usr/lib/chromium-browser/PepperFlash",    // chrome-binary-plugins (Gentoo/Sabayon)
-	"/usr/lib64/chromium-browser/PepperFlash",  // chrome-binary-plugins (Gentoo/Sabayon)
-	NULL
+    "/opt/google/chrome/PepperFlash",           // Chrome
+    "/opt/google/chrome-beta/PepperFlash",      // Chrome beta
+    "/opt/google/chrome-unstable/PepperFlash",  // Chrome unstable
+    "/usr/lib/pepperflashplugin-nonfree",       // pepperflashplugin-nonfree (Debian)
+    "/usr/lib/PepperFlash",                     // chromium-pepperflash-plugin (Slackware)
+    "/usr/lib64/PepperFlash",                   // chromium-pepperflash-plugin (Slackware)
+    "/usr/lib/chromium-browser/PepperFlash",    // chrome-binary-plugins (Gentoo/Sabayon)
+    "/usr/lib64/chromium-browser/PepperFlash",  // chrome-binary-plugins (Gentoo/Sabayon)
+    NULL,
 };
 
 const char **
