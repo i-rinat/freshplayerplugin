@@ -32,7 +32,9 @@ const char *pepperflash_path_list[] = {
         "/usr/lib/pepperflashplugin-nonfree",       // pepperflashplugin-nonfree (Debian)
         "/usr/lib/PepperFlash",                     // chromium-pepperflash-plugin (Slackware)
         "/usr/lib64/PepperFlash",                   // chromium-pepperflash-plugin (Slackware)
-        NULL
+        "/usr/lib/chromium-browser/PepperFlash",    // chrome-binary-plugins (Gentoo/Sabayon)
+	"/usr/lib64/chromium-browser/PepperFlash",  // chrome-binary-plugins (Gentoo/Sabayon)
+	NULL
 };
 
 const char **
