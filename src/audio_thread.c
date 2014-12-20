@@ -185,8 +185,11 @@ audio_thread(void *param)
 
             snd_pcm_poll_descriptors_revents(as->pcm, &fds[k], 1, &revents);
 
-            if (revents & (~(POLLIN | POLLOUT)))
+            if (revents & (~(POLLIN | POLLOUT))) {
+                trace_warning("%s, revents have unexpected flags set (%u)\n", __func__,
+                              (unsigned int)revents);
                 recover_pcm(as->pcm);
+            }
 
             if (revents & (POLLIN | POLLOUT)) {
                 int                 paused = g_atomic_int_get(&as->paused);
