@@ -386,6 +386,14 @@ audio_pause_stream(audio_stream *as, int enabled)
 void
 audio_destroy_stream(audio_stream *as)
 {
+    pthread_mutex_lock(&lock);
     g_hash_table_remove(active_streams_ht, as);
+    pthread_mutex_unlock(&lock);
+
     wakeup_audio_thread();
+
+    pthread_mutex_lock(&lock);
+    snd_pcm_close(as->pcm);
+    pthread_mutex_unlock(&lock);
+    free(as);
 }
