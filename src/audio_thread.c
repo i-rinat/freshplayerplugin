@@ -195,7 +195,7 @@ audio_thread(void *param)
                     // TODO: implement POLLIN
                 } else {
                     // POLLOUT
-                    if (paused)
+                    if (paused || !as->playback_cb)
                         memset(buf, 0, sz);
                     else
                         as->playback_cb(buf, sz, 0, as->cb_user_data);
