@@ -48,6 +48,7 @@
 #include <cairo.h>
 #include <asoundlib.h>
 #include <gtk/gtk.h>
+#include "audio_thread.h"
 
 
 #define free_and_nullify(item)          \
@@ -310,15 +311,10 @@ struct pp_audio_s {
     COMMON_STRUCTURE_FIELDS
     uint32_t                sample_rate;
     uint32_t                sample_frame_count;
-    uint32_t                period_size;
-    snd_pcm_t              *ph;
-    void                   *audio_buffer;
-    pthread_t               thread;
-    uint32_t                playing;
-    uint32_t                shutdown;
     PPB_Audio_Callback_1_0  callback_1_0;
     PPB_Audio_Callback      callback_1_1;
     void                   *user_data;
+    audio_stream           *stream;
 };
 
 struct pp_input_event_s {

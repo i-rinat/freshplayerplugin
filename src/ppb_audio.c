@@ -33,7 +33,20 @@
 #include "pp_resource.h"
 #include "ppb_message_loop.h"
 #include "eintr_retry.h"
+#include "audio_thread.h"
 
+static
+void
+playback_cb(void *buf, uint32_t sz, double latency, void *user_data)
+{
+    struct pp_audio_s *a = user_data;
+
+    if (a->callback_1_0) {
+        a->callback_1_0(buf, sz, a->user_data);
+    } else if (a->callback_1_1) {
+        a->callback_1_1(buf, sz, latency,a->user_data);
+    }
+}
 
 static
 PP_Resource
@@ -67,57 +80,13 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
     a->sample_frame_count = ac->sample_frame_count;
     pp_resource_release(audio_config);
 
-    snd_pcm_hw_params_t *hw_params;
-    snd_pcm_sw_params_t *sw_params;
-
-#define CHECK_A(funcname, params)                                                       \
-    do {                                                                                \
-        int errcode___ = funcname params;                                               \
-        if (errcode___ < 0) {                                                           \
-            trace_error("%s, " #funcname ", %s\n", __func__, snd_strerror(errcode___)); \
-            goto err;                                                                   \
-        }                                                                               \
-    } while (0)
-
-
-    CHECK_A(snd_pcm_open, (&a->ph, "default", SND_PCM_STREAM_PLAYBACK, 0));
-    CHECK_A(snd_pcm_hw_params_malloc, (&hw_params));
-    CHECK_A(snd_pcm_hw_params_any, (a->ph, hw_params));
-    CHECK_A(snd_pcm_hw_params_set_access, (a->ph, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED));
-    CHECK_A(snd_pcm_hw_params_set_format, (a->ph, hw_params, SND_PCM_FORMAT_S16_LE));
-    CHECK_A(snd_pcm_hw_params_set_rate_near, (a->ph, hw_params, &a->sample_rate, 0));
-    CHECK_A(snd_pcm_hw_params_set_channels, (a->ph, hw_params, 2));
-
-    unsigned int period_time = (long long)a->sample_frame_count * 1000 * 1000 / a->sample_rate;
-    period_time = CLAMP(period_time,
-                        1000 * config.audio_buffer_min_ms,
-                        1000 * config.audio_buffer_max_ms);
-    int dir = 1;
-    CHECK_A(snd_pcm_hw_params_set_period_time_near, (a->ph, hw_params, &period_time, &dir));
-
-    unsigned int buffer_time = 4 * period_time;
-    dir = 1;
-    CHECK_A(snd_pcm_hw_params_set_buffer_time_near, (a->ph, hw_params, &buffer_time, &dir));
-
-    dir = 0;
-    CHECK_A(snd_pcm_hw_params_get_buffer_time, (hw_params, &buffer_time, &dir));
-    CHECK_A(snd_pcm_hw_params, (a->ph, hw_params));
-    snd_pcm_hw_params_free(hw_params);
-
-    CHECK_A(snd_pcm_sw_params_malloc, (&sw_params));
-    CHECK_A(snd_pcm_sw_params_current, (a->ph, sw_params));
-    CHECK_A(snd_pcm_sw_params, (a->ph, sw_params));
-    CHECK_A(snd_pcm_prepare, (a->ph));
-    snd_pcm_sw_params_free(sw_params);
-
-#undef CHECK_A
-
     a->callback_1_0 = audio_callback_1_0;
     a->callback_1_1 = audio_callback_1_1;
     a->user_data = user_data;
-    a->audio_buffer = malloc(a->sample_frame_count * 2 * sizeof(int16_t));
-    if (!a->audio_buffer) {
-        trace_error("%s, failed to allocate audio buffer\n", __func__);
+
+    a->stream = audio_create_playback_stream(a->sample_rate, a->sample_frame_count, playback_cb, a);
+    if (!a->stream) {
+        trace_error("%s, can't create playback stream\n", __func__);
         goto err;
     }
 
@@ -147,14 +116,7 @@ void
 ppb_audio_destroy(void *p)
 {
     struct pp_audio_s *a = p;
-
-    if (a->playing) {
-        a->shutdown = 1;
-        while (a->playing)
-            usleep(10);
-    }
-    snd_pcm_close(a->ph);
-    free_and_nullify(a->audio_buffer);
+    audio_destroy_stream(a->stream);
 }
 
 PP_Bool
@@ -186,58 +148,6 @@ ppb_audio_get_current_config(PP_Resource audio)
     return audio_config;
 }
 
-static
-void *
-audio_player_thread(void *p)
-{
-    struct pp_audio_s *a = p;
-    int error_cnt = 0;
-
-    ppb_message_loop_mark_thread_unsuitable();
-    a->playing = 1;
-    while (1) {
-        if (a->shutdown)
-            break;
-
-        snd_pcm_wait(a->ph, 1000);
-        int frame_count = snd_pcm_avail(a->ph);
-        if (frame_count < 0) {
-            trace_warning("%s, snd_pcm_avail error %d\n", __func__, (int)frame_count);
-            RETRY_ON_EINTR(snd_pcm_recover(a->ph, frame_count, 1));
-            error_cnt++;
-            if (error_cnt >= 5)
-                trace_error("%s, too many buffer underruns (1)\n", __func__);
-            continue;
-        }
-
-        frame_count = MIN(frame_count, (int)a->sample_frame_count);
-
-        if (a->callback_1_1) {
-            snd_pcm_sframes_t latency = MAX(snd_pcm_forwardable(a->ph), 0);
-
-            a->callback_1_1(a->audio_buffer, frame_count * 2 * sizeof(int16_t),
-                            (PP_TimeDelta)latency / a->sample_rate, a->user_data);
-        } else if (a->callback_1_0) {
-            a->callback_1_0(a->audio_buffer, frame_count * 2 * sizeof(int16_t), a->user_data);
-        }
-
-        snd_pcm_sframes_t written = snd_pcm_writei(a->ph, a->audio_buffer, frame_count);
-        if (written < 0) {
-            trace_warning("%s, snd_pcm_writei error %d\n", __func__, (int)written);
-            RETRY_ON_EINTR(snd_pcm_recover(a->ph, written, 1));
-            error_cnt++;
-            if (error_cnt >= 5)
-                trace_error("%s, too many buffer underruns (2)\n", __func__);
-            continue;
-        }
-
-        error_cnt = 0;
-    }
-
-    a->playing = 0;
-    return NULL;
-}
-
 PP_Bool
 ppb_audio_start_playback(PP_Resource audio)
 {
@@ -246,13 +156,8 @@ ppb_audio_start_playback(PP_Resource audio)
         trace_error("%s, bad resource\n", __func__);
         return PP_FALSE;
     }
-    if (a->playing) {
-        pp_resource_release(audio);
-        return PP_TRUE;
-    }
 
-    pthread_create(&a->thread, NULL, audio_player_thread, a);
-    pthread_detach(a->thread);
+    audio_pause_stream(a->stream, 0);
     pp_resource_release(audio);
     return PP_TRUE;
 }
@@ -266,12 +171,7 @@ ppb_audio_stop_playback(PP_Resource audio)
         return PP_FALSE;
     }
 
-    if (a->playing) {
-        a->shutdown = 1;
-        while (a->playing)
-            usleep(10);
-    }
-
+    audio_pause_stream(a->stream, 1);
     pp_resource_release(audio);
     return PP_TRUE;
 }
