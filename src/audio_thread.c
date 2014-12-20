@@ -179,6 +179,10 @@ audio_thread(void *param)
             unsigned short revents = 0;
             audio_stream *as = g_hash_table_lookup(stream_by_fd_ht, GINT_TO_POINTER(fds[k].fd));
 
+            // check if stream was deleted
+            if (!as)
+                continue;
+
             snd_pcm_poll_descriptors_revents(as->pcm, &fds[k], 1, &revents);
 
             if (revents & (~(POLLIN | POLLOUT)))
@@ -388,6 +392,8 @@ audio_destroy_stream(audio_stream *as)
 {
     pthread_mutex_lock(&lock);
     g_hash_table_remove(active_streams_ht, as);
+    for (uintptr_t k = 0; k < as->nfds; k ++)
+        g_hash_table_remove(stream_by_fd_ht, GINT_TO_POINTER(as->fds[k].fd));
     pthread_mutex_unlock(&lock);
 
     wakeup_audio_thread();
