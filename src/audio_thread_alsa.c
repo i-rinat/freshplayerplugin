@@ -234,7 +234,7 @@ make_nonblock(int fd)
 static
 void
 __attribute__((constructor))
-constructor_audio_thread(void)
+constructor_audio_thread_alsa(void)
 {
     active_streams_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
     stream_by_fd_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -249,7 +249,7 @@ constructor_audio_thread(void)
 static
 void
 __attribute__((destructor))
-destructor_audio_thread(void)
+destructor_audio_thread_alsa(void)
 {
     if (!g_atomic_int_get(&audio_thread_started)) {
         g_atomic_int_set(&terminate_thread, 1);
@@ -273,7 +273,7 @@ wakeup_audio_thread(void)
 
 static
 audio_stream *
-audio_create_stream(audio_stream_direction type, unsigned int sample_rate,
+alsa_create_stream(audio_stream_direction type, unsigned int sample_rate,
                     unsigned int sample_frame_count)
 {
     audio_stream *as;
@@ -300,6 +300,7 @@ audio_create_stream(audio_stream_direction type, unsigned int sample_rate,
     } while (0)
 
     // TODO: select device
+    // TODO: create capture stream
     CHECK_A(snd_pcm_open, (&as->pcm, "default", SND_PCM_STREAM_PLAYBACK, 0));
     CHECK_A(snd_pcm_hw_params_malloc, (&hw_params));
     CHECK_A(snd_pcm_hw_params_any, (as->pcm, hw_params));
@@ -357,11 +358,12 @@ err:
     return NULL;
 }
 
+static
 audio_stream *
-audio_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_count,
-                             audio_stream_playback_cb_f *cb, void *cb_user_data)
+alsa_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_count,
+                            audio_stream_playback_cb_f *cb, void *cb_user_data)
 {
-    audio_stream *as = audio_create_stream(STREAM_PLAYBACK, sample_rate, sample_frame_count);
+    audio_stream *as = alsa_create_stream(STREAM_PLAYBACK, sample_rate, sample_frame_count);
     if (!as)
         return NULL;
 
@@ -370,11 +372,12 @@ audio_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame
     return as;
 }
 
+static
 audio_stream *
-audio_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_count,
-                            audio_stream_capture_cb_f *cb, void *cb_user_data)
+alsa_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_count,
+                           audio_stream_capture_cb_f *cb, void *cb_user_data)
 {
-    audio_stream *as = audio_create_stream(STREAM_CAPTURE, sample_rate, sample_frame_count);
+    audio_stream *as = alsa_create_stream(STREAM_CAPTURE, sample_rate, sample_frame_count);
 
     if (!as)
         return NULL;
@@ -384,14 +387,16 @@ audio_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_
     return as;
 }
 
+static
 void
-audio_pause_stream(audio_stream *as, int enabled)
+alsa_pause_stream(audio_stream *as, int enabled)
 {
     g_atomic_int_set(&as->paused, enabled);
 }
 
+static
 void
-audio_destroy_stream(audio_stream *as)
+alsa_destroy_stream(audio_stream *as)
 {
     pthread_mutex_lock(&lock);
     g_hash_table_remove(active_streams_ht, as);
@@ -406,3 +411,18 @@ audio_destroy_stream(audio_stream *as)
     pthread_mutex_unlock(&lock);
     free(as);
 }
+
+static
+int
+alsa_available(void)
+{
+    return 1;
+}
+
+audio_stream_ops audio_alsa = {
+    .available =                alsa_available,
+    .create_playback_stream =   alsa_create_playback_stream,
+    .create_capture_stream =    alsa_create_capture_stream,
+    .pause =                    alsa_pause_stream,
+    .destroy =                  alsa_destroy_stream,
+};

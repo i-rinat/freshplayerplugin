@@ -83,8 +83,14 @@ do_ppb_audio_create(PP_Instance instance, PP_Resource audio_config,
     a->callback_1_0 = audio_callback_1_0;
     a->callback_1_1 = audio_callback_1_1;
     a->user_data = user_data;
+    a->stream_ops = audio_select_implementation();
+    if (a->stream_ops == NULL) {
+        trace_error("%s, no viable audio implementation\n", __func__);
+        goto err;
+    }
 
-    a->stream = audio_create_playback_stream(a->sample_rate, a->sample_frame_count, playback_cb, a);
+    a->stream = a->stream_ops->create_playback_stream(a->sample_rate, a->sample_frame_count,
+                                                      playback_cb, a);
     if (!a->stream) {
         trace_error("%s, can't create playback stream\n", __func__);
         goto err;
@@ -116,7 +122,7 @@ void
 ppb_audio_destroy(void *p)
 {
     struct pp_audio_s *a = p;
-    audio_destroy_stream(a->stream);
+    a->stream_ops->destroy(a->stream);
 }
 
 PP_Bool
@@ -157,7 +163,7 @@ ppb_audio_start_playback(PP_Resource audio)
         return PP_FALSE;
     }
 
-    audio_pause_stream(a->stream, 0);
+    a->stream_ops->pause(a->stream, 0);
     pp_resource_release(audio);
     return PP_TRUE;
 }
@@ -171,7 +177,7 @@ ppb_audio_stop_playback(PP_Resource audio)
         return PP_FALSE;
     }
 
-    audio_pause_stream(a->stream, 1);
+    a->stream_ops->pause(a->stream, 1);
     pp_resource_release(audio);
     return PP_TRUE;
 }

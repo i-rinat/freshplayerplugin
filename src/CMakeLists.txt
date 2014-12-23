@@ -9,6 +9,7 @@ add_subdirectory(uri_parser)
 
 add_library(freshwrapper-obj OBJECT
     async_network.c
+    audio_thread.c
     audio_thread_alsa.c
     config.c
     header_parser.c

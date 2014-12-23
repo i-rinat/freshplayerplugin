@@ -314,6 +314,7 @@ struct pp_audio_s {
     PPB_Audio_Callback_1_0  callback_1_0;
     PPB_Audio_Callback      callback_1_1;
     void                   *user_data;
+    audio_stream_ops       *stream_ops;
     audio_stream           *stream;
 };
 

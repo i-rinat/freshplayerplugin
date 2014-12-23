@@ -35,24 +35,40 @@ typedef enum {
 
 typedef struct audio_stream_s audio_stream;
 
-typedef void (audio_stream_capture_cb_f)(const void *buf, uint32_t sz, double latency,
-                                         void *user_data);
-typedef void (audio_stream_playback_cb_f)(void *buf, uint32_t sz, double latency, void *user_data);
+typedef void
+(audio_stream_capture_cb_f)(const void *buf, uint32_t sz, double latency, void *user_data);
+
+typedef void
+(audio_stream_playback_cb_f)(void *buf, uint32_t sz, double latency, void *user_data);
+
+typedef int
+(audio_available_f)(void);
+
+typedef audio_stream *
+(audio_create_playback_stream_f)(unsigned int sample_rate, unsigned int sample_frame_count,
+                                 audio_stream_playback_cb_f *cb, void *cb_user_data);
+
+typedef audio_stream *
+(audio_create_capture_stream_f)(unsigned int sample_rate, unsigned int sample_frame_count,
+                                audio_stream_capture_cb_f *cb, void *cb_user_data);
+
+typedef void
+(audio_pause_stream_f)(audio_stream *s, int enabled);
+
+typedef void
+(audio_destroy_stream_f)(audio_stream *s);
+
+typedef struct {
+    audio_available_f              *available;
+    audio_create_playback_stream_f *create_playback_stream;
+    audio_create_capture_stream_f  *create_capture_stream;
+    audio_pause_stream_f           *pause;
+    audio_destroy_stream_f         *destroy;
+} audio_stream_ops;
 
 
-audio_stream *
-audio_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_count,
-                             audio_stream_playback_cb_f *cb, void *cb_user_data);
-
-audio_stream *
-audio_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_count,
-                            audio_stream_capture_cb_f *cb, void *cb_user_data);
-
-void
-audio_pause_stream(audio_stream *s, int enabled);
-
-void
-audio_destroy_stream(audio_stream *s);
+audio_stream_ops *
+audio_select_implementation(void);
 
 
 #endif // FPP_AUDIO_THREAD_H
