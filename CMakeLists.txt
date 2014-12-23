@@ -42,6 +42,13 @@ pkg_check_modules(REQ
     gtk+-2.0
     REQUIRED)
 
+pkg_check_modules(PULSEAUDIO libpulse>=5.0)
+
+if (${PULSEAUDIO_FOUND})
+    add_definitions(-DUSE_PULSEAUDIO)
+    set(USE_PULSEAUDIO 1)
+endif()
+
 include_directories(${REQ_INCLUDE_DIRS})
 add_definitions(${REQ_CFLAGS_OTHER})
 add_definitions(-DXP_UNIX)

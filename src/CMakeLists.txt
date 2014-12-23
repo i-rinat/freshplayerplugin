@@ -7,7 +7,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_subdirectory(uri_parser)
 
-add_library(freshwrapper-obj OBJECT
+set(source_list
     async_network.c
     audio_thread.c
     audio_thread_alsa.c
@@ -72,6 +72,12 @@ add_library(freshwrapper-obj OBJECT
     ppb_view.c
 )
 
+if (${USE_PULSEAUDIO})
+    list(APPEND source_list audio_thread_pulseaudio.c)
+endif()
+
+add_library(freshwrapper-obj OBJECT ${source_list})
+
 add_library(freshwrapper-pepperflash SHARED
     $<TARGET_OBJECTS:freshwrapper-obj>
     $<TARGET_OBJECTS:parson-obj>
@@ -85,9 +91,15 @@ add_library(freshwrapper-pepperflash SHARED
 #     config_nacl.c
 # )
 
+link_directories(
+    ${REQ_LIBRARY_DIRS}
+    ${PULSEAUDIO_LIBRARY_DIRS}
+)
+
 target_link_libraries(freshwrapper-pepperflash
     dl
     ${REQ_LIBRARIES}
+    ${PULSEAUDIO_LIBRARIES}
 )
 
 # target_link_libraries(freshwrapper-nacl

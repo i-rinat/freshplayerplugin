@@ -25,10 +25,18 @@
 #include "audio_thread.h"
 
 extern audio_stream_ops audio_alsa;
+#ifdef USE_PULSEAUDIO
+extern audio_stream_ops audio_pulse;
+#endif
 
 
 audio_stream_ops *
 audio_select_implementation(void)
 {
+#ifdef USE_PULSEAUDIO
+    if (audio_pulse.available())
+        return &audio_pulse;
+#endif
+
     return &audio_alsa;
 }
