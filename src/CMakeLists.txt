@@ -70,6 +70,7 @@ set(source_list
     ppb_video_capture.c
     ppb_video_decoder.c
     ppb_view.c
+    screensaver_control.c
 )
 
 if (${USE_PULSEAUDIO})
