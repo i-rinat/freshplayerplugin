@@ -36,6 +36,7 @@
 #include "pp_resource.h"
 #include <ppapi/c/dev/ppb_font_dev.h>
 #include <ppapi/c/pp_errors.h>
+#include "screensaver_control.h"
 
 
 void
@@ -245,7 +246,9 @@ ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect)
 void
 ppb_flash_update_activity(PP_Instance instance)
 {
-    return;
+    pthread_mutex_lock(&display.lock);
+    screensaver_deactivate(display.x, SST_XSCREENSAVER);
+    pthread_mutex_unlock(&display.lock);
 }
 
 struct PP_Var
@@ -460,7 +463,7 @@ TRACE_WRAPPER
 void
 trace_ppb_flash_update_activity(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     ppb_flash_update_activity(instance);
 }
 
@@ -546,7 +549,7 @@ const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .GetCommandLineArgs =           TWRAPF(ppb_flash_get_command_line_args),
     .PreloadFontWin =               TWRAPZ(ppb_flash_preload_font_win),
     .IsRectTopmost =                TWRAPZ(ppb_flash_is_rect_topmost),
-    .UpdateActivity =               TWRAPZ(ppb_flash_update_activity),
+    .UpdateActivity =               TWRAPF(ppb_flash_update_activity),
     .GetSetting =                   TWRAPF(ppb_flash_get_setting),
     .SetCrashData =                 TWRAPF(ppb_flash_set_crash_data),
     .EnumerateVideoCaptureDevices = TWRAPZ(ppb_flash_enumerate_video_capture_devices),
@@ -564,7 +567,7 @@ const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
     .PreloadFontWin =               TWRAPZ(ppb_flash_preload_font_win),
     .IsRectTopmost =                TWRAPZ(ppb_flash_is_rect_topmost),
     .InvokePrinting =               TWRAPZ(ppb_flash_invoke_printing),
-    .UpdateActivity =               TWRAPZ(ppb_flash_update_activity),
+    .UpdateActivity =               TWRAPF(ppb_flash_update_activity),
     .GetDeviceID =                  TWRAPZ(ppb_flash_get_device_id),
     .GetSettingInt =                TWRAPZ(ppb_flash_get_setting_int),
     .GetSetting =                   TWRAPF(ppb_flash_get_setting),
