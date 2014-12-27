@@ -251,7 +251,7 @@ void
 __attribute__((destructor))
 destructor_audio_thread_alsa(void)
 {
-    if (!g_atomic_int_get(&audio_thread_started)) {
+    if (g_atomic_int_get(&audio_thread_started)) {
         g_atomic_int_set(&terminate_thread, 1);
         pthread_join(audio_thread_id, NULL);
     }
