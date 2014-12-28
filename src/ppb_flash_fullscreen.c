@@ -117,6 +117,33 @@ get_browser_window(void *p)
 }
 
 static
+void
+append_wm_protocol(Display *dpy, Window wnd, Atom a)
+{
+    Atom   *protocols = NULL;
+    int     n = 0;
+    XGetWMProtocols(dpy, wnd, &protocols, &n);
+
+    // check if the atom was already set
+    for (int k = 0; k < n; k ++)
+        if (protocols[k] == a)
+            goto done;
+
+    // append to the end
+    Atom *p2 = malloc(sizeof(Atom) * (n + 1));
+    if (!p2)
+        goto done;
+
+    memcpy(p2, protocols, sizeof(Atom) * n);
+    p2[n] = a;
+    XSetWMProtocols(dpy, wnd, p2, n + 1);
+    free(p2);
+
+done:
+    XFree(protocols);
+}
+
+static
 void *
 fullscreen_window_thread(void *p)
 {
@@ -182,6 +209,10 @@ fullscreen_window_thread(void *p)
                     8, PropModeReplace,
                     (unsigned char *)fs_window_name, strlen(fs_window_name));
 
+    // tell window manager we want to handle WM_DELETE_WINDOW
+    Atom wm_delete_window_atom = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+    append_wm_protocol(dpy, pp_i->fs_wnd, wm_delete_window_atom);
+
     // show window
     XMapWindow(dpy, pp_i->fs_wnd);
     XSync(dpy, False);
@@ -201,6 +232,11 @@ fullscreen_window_thread(void *p)
             case KeyPress:
                 keysym = XLookupKeysym(&ev.xkey, 0);
                 if (XK_Escape == keysym)
+                    goto quit_and_destroy_fs_wnd;
+                break;
+
+            case ClientMessage:
+                if (ev.xclient.data.l[0] == wm_delete_window_atom)
                     goto quit_and_destroy_fs_wnd;
                 break;
 
