@@ -123,12 +123,33 @@ fullscreen_window_thread(void *p)
     struct thread_param_s *tp = p;
     Display *dpy = XOpenDisplay(NULL);
     struct pp_instance_s *pp_i = tp->pp_i;
+    int             px, py;
+    Window          root, child;
+    int             rel_x, rel_y;
+    unsigned int    mask;
 
+    // get current mouse pointer position
+    XQueryPointer(dpy, DefaultRootWindow(dpy), &root, &child, &px, &py, &rel_x, &rel_y, &mask);
+
+    // create tiny window where mouse pointer is
     pp_i->fs_wnd = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy),
-                                       0, 0, 300, 300, 0, 0, 0x809080);
+                                       px, py, 3, 3, 0, 0, 0x000000);
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
                                     ButtonReleaseMask | PointerMotionMask | ExposureMask |
                                     StructureNotifyMask);
+
+    // round trip to browser thread to get browser window
+    tp->browser_window = None;
+    pthread_barrier_init(&tp->browser_window_barrier, NULL, 2);
+    ppb_core_call_on_browser_thread(get_browser_window, tp);
+    pthread_barrier_wait(&tp->browser_window_barrier);
+    pthread_barrier_destroy(&tp->browser_window_barrier);
+
+    // set window transient for browser window
+    if (tp->browser_window != None)
+        XSetTransientForHint(dpy, pp_i->fs_wnd, tp->browser_window);
+    else
+        trace_error("%s, can't get tp->browser_window\n", __func__);
 
     // go fullscreen
     Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", False);
@@ -160,18 +181,6 @@ fullscreen_window_thread(void *p)
                     XInternAtom(dpy, "UTF8_STRING", False),
                     8, PropModeReplace,
                     (unsigned char *)fs_window_name, strlen(fs_window_name));
-
-    // round trip to browser thread to get browser window
-    tp->browser_window = None;
-    pthread_barrier_init(&tp->browser_window_barrier, NULL, 2);
-    ppb_core_call_on_browser_thread(get_browser_window, tp);
-    pthread_barrier_wait(&tp->browser_window_barrier);
-    pthread_barrier_destroy(&tp->browser_window_barrier);
-
-    if (tp->browser_window != None)
-        XSetTransientForHint(dpy, pp_i->fs_wnd, tp->browser_window);
-    else
-        trace_error("%s, can't get tp->browser_window\n", __func__);
 
     // show window
     XMapWindow(dpy, pp_i->fs_wnd);
