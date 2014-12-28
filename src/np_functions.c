@@ -83,7 +83,13 @@ static
 void
 set_window_comt(void *user_data, int32_t result)
 {
-    struct pp_instance_s *pp_i = user_data;
+    const PP_Instance instance_id = (size_t)user_data;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance_id);
+    if (!pp_i) {
+        // instance was unregistered, no need to do anything
+        return;
+    }
+
     PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
     struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
 
@@ -123,8 +129,10 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         pp_i->width = window->width;
         pp_i->height = window->height;
 
-        if (g_atomic_int_get(&pp_i->instance_loaded))
-            ppb_core_call_on_main_thread(0, PP_MakeCCB(set_window_comt, pp_i), PP_OK);
+        if (g_atomic_int_get(&pp_i->instance_loaded)) {
+            ppb_core_call_on_main_thread(0, PP_MakeCCB(set_window_comt, GINT_TO_POINTER(pp_i->id)),
+                                         PP_OK);
+        }
     }
     pthread_mutex_unlock(&display.lock);
 
