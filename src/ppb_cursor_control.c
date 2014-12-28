@@ -40,7 +40,7 @@ struct comt_param_s {
 };
 
 void
-_set_cursor_ptac(void *user_data)
+set_cursor_ptac(void *user_data)
 {
     Window wnd;
     Cursor cursor;
@@ -228,7 +228,7 @@ ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
     comt_params->xtype =        xtype;
     comt_params->hide_cursor =  hide_cursor;
 
-    ppb_core_call_on_browser_thread(_set_cursor_ptac, comt_params);
+    ppb_core_call_on_browser_thread(set_cursor_ptac, comt_params);
 
     return PP_TRUE;
 }

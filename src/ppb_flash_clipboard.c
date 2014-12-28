@@ -197,7 +197,7 @@ struct clipboard_is_format_available_param_s {
 
 static
 void
-_clipboard_is_format_available_ptac(void *user_data)
+clipboard_is_format_available_ptac(void *user_data)
 {
     struct clipboard_is_format_available_param_s *p = user_data;
 
@@ -218,9 +218,9 @@ quit:
 
 static
 void
-_clipboard_is_format_available_comt(void *user_data, int32_t result)
+clipboard_is_format_available_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_browser_thread(_clipboard_is_format_available_ptac, user_data);
+    ppb_core_call_on_browser_thread(clipboard_is_format_available_ptac, user_data);
 }
 
 PP_Bool
@@ -236,7 +236,7 @@ ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_clipboard_is_format_available_comt, p), 0);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(clipboard_is_format_available_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
     PP_Bool result = p->result;
@@ -255,7 +255,7 @@ struct clipboard_read_data_param_s {
 
 static
 void
-_clipboard_read_data_ptac(void *user_data)
+clipboard_read_data_ptac(void *user_data)
 {
     struct clipboard_read_data_param_s *p = user_data;
 
@@ -291,9 +291,9 @@ quit:
 
 static
 void
-_clipboard_read_data_comt(void *user_data, int32_t result)
+clipboard_read_data_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_browser_thread(_clipboard_read_data_ptac, user_data);
+    ppb_core_call_on_browser_thread(clipboard_read_data_ptac, user_data);
 }
 
 struct PP_Var
@@ -309,7 +309,7 @@ ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type c
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_clipboard_read_data_comt, p), 0);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(clipboard_read_data_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -335,7 +335,8 @@ struct selection_entry_s {
 
 static
 void
-_get_func(GtkClipboard *clipboard, GtkSelectionData *selection_data, guint info, gpointer user_data)
+clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *selection_data, guint info,
+                   gpointer user_data)
 {
     GArray *items = user_data;
     struct selection_entry_s *item = &g_array_index(items, struct selection_entry_s, info);
@@ -361,7 +362,7 @@ _get_func(GtkClipboard *clipboard, GtkSelectionData *selection_data, guint info,
 
 static
 void
-_clear_func(GtkClipboard *clipboard, gpointer user_data)
+clipboard_clear_func(GtkClipboard *clipboard, gpointer user_data)
 {
     GArray *items = user_data;
 
@@ -375,7 +376,7 @@ _clear_func(GtkClipboard *clipboard, gpointer user_data)
 
 static
 void
-_clipboard_write_data_ptac(void *user_data)
+clipboard_write_data_ptac(void *user_data)
 {
     struct clipboard_write_data_param_s *p = user_data;
     struct selection_entry_s item;
@@ -459,7 +460,8 @@ _clipboard_write_data_ptac(void *user_data)
         targets[k].info = k;
     }
 
-    if (gtk_clipboard_set_with_data(clipboard, targets, items->len, _get_func, _clear_func, items))
+    if (gtk_clipboard_set_with_data(clipboard, targets, items->len, clipboard_get_func,
+                                    clipboard_clear_func, items))
     {
         gtk_clipboard_set_can_store(clipboard, targets, items->len);
     } else {
@@ -476,9 +478,9 @@ quit:
 
 static
 void
-_clipboard_write_data_comt(void *user_data, int32_t result)
+clipboard_write_data_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_browser_thread(_clipboard_write_data_ptac, user_data);
+    ppb_core_call_on_browser_thread(clipboard_write_data_ptac, user_data);
 }
 
 int32_t
@@ -499,7 +501,7 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
     p->m_loop =             ppb_message_loop_get_current();
     p->depth =              ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_clipboard_write_data_comt, p), 0);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(clipboard_write_data_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
     int32_t result = p->result;

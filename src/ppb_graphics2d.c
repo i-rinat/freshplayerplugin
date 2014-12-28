@@ -165,7 +165,7 @@ ppb_graphics2d_replace_contents(PP_Resource graphics_2d, PP_Resource image_data)
 
 static
 void
-_call_invalidaterect_ptac(void *param)
+call_invalidaterect_ptac(void *param)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(GPOINTER_TO_SIZE(param));
     if (!pp_i)
@@ -296,7 +296,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         pthread_mutex_unlock(&display.lock);
     } else {
         pthread_mutex_unlock(&display.lock);
-        ppb_core_call_on_browser_thread(_call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
+        ppb_core_call_on_browser_thread(call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
     }
 
     if (callback.func)

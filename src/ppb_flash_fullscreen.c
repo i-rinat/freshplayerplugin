@@ -63,7 +63,7 @@ ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
 
 static
 void
-_update_instance_view_comt(void *user_data, int32_t result)
+update_instance_view_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
 
@@ -93,7 +93,7 @@ _update_instance_view_comt(void *user_data, int32_t result)
 
 static
 void
-_handle_event_ptac(void *p)
+handle_event_ptac(void *p)
 {
     struct handle_event_comt_param_s *params = p;
     struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance_id);
@@ -200,7 +200,7 @@ fullscreen_window_thread(void *p)
                 pp_i->fs_width = ev.xconfigure.width;
                 pp_i->fs_height = ev.xconfigure.height;
                 pthread_mutex_unlock(&display.lock);
-                ppb_core_call_on_main_thread(0, PP_MakeCCB(_update_instance_view_comt, pp_i),
+                ppb_core_call_on_main_thread(0, PP_MakeCCB(update_instance_view_comt, pp_i),
                                              PP_OK);
                 handled = 1;
                 break;
@@ -217,7 +217,7 @@ fullscreen_window_thread(void *p)
             params->instance_id =   pp_i->id;
             params->ev =            ev;
             g_atomic_int_add(&events_inflight, 1);
-            ppb_core_call_on_browser_thread(_handle_event_ptac, params);
+            ppb_core_call_on_browser_thread(handle_event_ptac, params);
         }
     }
 
@@ -232,7 +232,7 @@ quit_and_destroy_fs_wnd:
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
 
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_update_instance_view_comt, pp_i), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(update_instance_view_comt, pp_i), PP_OK);
     g_slice_free(struct thread_param_s, tp);
     return NULL;
 }

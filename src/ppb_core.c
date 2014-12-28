@@ -80,7 +80,7 @@ struct call_on_browser_thread_task_s {
 
 static
 void
-_call_on_browser_thread_comt(void *user_data, int32_t result)
+call_on_browser_thread_comt(void *user_data, int32_t result)
 {
     struct call_on_browser_thread_task_s *task = user_data;
     task->func(task->user_data);
@@ -118,7 +118,7 @@ ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data)
     task->func = func;
     task->user_data = user_data;
     pp_resource_release(m_loop);
-    ppb_message_loop_post_work(m_loop, PP_MakeCCB(_call_on_browser_thread_comt, task), 0);
+    ppb_message_loop_post_work(m_loop, PP_MakeCCB(call_on_browser_thread_comt, task), 0);
 }
 
 PP_Bool

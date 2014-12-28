@@ -48,7 +48,7 @@ struct has_property_param_s {
 
 static
 void
-_n2p_has_property_ptac(void *param)
+n2p_has_property_ptac(void *param)
 {
     struct has_property_param_s *p = param;
     const char *s_name = ppb_var_var_to_utf8(p->name, NULL);
@@ -64,10 +64,10 @@ _n2p_has_property_ptac(void *param)
 
 static
 void
-_n2p_has_property_comt(void *user_data, int32_t result)
+n2p_has_property_comt(void *user_data, int32_t result)
 {
     struct has_property_param_s *p = user_data;
-    ppb_core_call_on_browser_thread(_n2p_has_property_ptac, p);
+    ppb_core_call_on_browser_thread(n2p_has_property_ptac, p);
 }
 
 static
@@ -87,7 +87,7 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p->m_loop =     ppb_message_loop_get_current();
     p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_has_property_comt, p), 0);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_has_property_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
     bool result = p->result;
@@ -114,7 +114,7 @@ struct get_property_param_s {
 
 static
 void
-_n2p_get_property_ptac(void *param)
+n2p_get_property_ptac(void *param)
 {
     struct get_property_param_s *p = param;
     const char *s_name = ppb_var_var_to_utf8(p->name, NULL);
@@ -139,10 +139,10 @@ _n2p_get_property_ptac(void *param)
 
 static
 void
-_n2p_get_property_comt(void *user_data, int32_t result)
+n2p_get_property_comt(void *user_data, int32_t result)
 {
     struct get_property_param_s *p = user_data;
-    ppb_core_call_on_browser_thread(_n2p_get_property_ptac, p);
+    ppb_core_call_on_browser_thread(n2p_get_property_ptac, p);
 }
 
 static
@@ -162,7 +162,7 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p->m_loop =     ppb_message_loop_get_current();
     p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_get_property_comt, p), 0);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_get_property_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -203,7 +203,7 @@ struct call_param_s {
 
 static
 void
-_n2p_call_ptac(void *param)
+n2p_call_ptac(void *param)
 {
     struct call_param_s *p = param;
     const char *s_method_name = ppb_var_var_to_utf8(p->method_name, NULL);
@@ -240,10 +240,10 @@ _n2p_call_ptac(void *param)
 
 static
 void
-_n2p_call_comt(void *user_data, int32_t result)
+n2p_call_comt(void *user_data, int32_t result)
 {
     struct call_param_s *p = user_data;
-    ppb_core_call_on_browser_thread(_n2p_call_ptac, p);
+    ppb_core_call_on_browser_thread(n2p_call_ptac, p);
 }
 
 static
@@ -266,7 +266,7 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_call_comt, p), 0);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_call_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -287,7 +287,7 @@ struct construct_param_s {
 
 static
 void
-_n2p_construct_ptac(void *param)
+n2p_construct_ptac(void *param)
 {
     struct construct_param_s *p = param;
     NPP npp = tables_get_npobj_npp_mapping(p->object);
@@ -321,10 +321,10 @@ _n2p_construct_ptac(void *param)
 
 static
 void
-_n2p_construct_comt(void *user_data, int32_t result)
+n2p_construct_comt(void *user_data, int32_t result)
 {
     struct construct_param_s *p = user_data;
-    ppb_core_call_on_browser_thread(_n2p_construct_ptac, p);
+    ppb_core_call_on_browser_thread(n2p_construct_ptac, p);
 }
 
 static
@@ -339,7 +339,7 @@ n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *e
     p->m_loop =     ppb_message_loop_get_current();
     p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_n2p_construct_comt, p), 0);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_construct_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;

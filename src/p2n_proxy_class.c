@@ -79,7 +79,7 @@ struct has_method_param_s {
 
 static
 void
-_p2n_has_method_comt(void *user_data, int32_t result)
+p2n_has_method_comt(void *user_data, int32_t result)
 {
     struct has_method_param_s *p = user_data;
     struct np_proxy_object_s *obj = (void *)p->npobj;
@@ -96,9 +96,9 @@ _p2n_has_method_comt(void *user_data, int32_t result)
 
 static
 void
-_p2n_has_method_prepare_comt(void *user_data, int32_t result)
+p2n_has_method_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_method_comt, user_data), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(p2n_has_method_comt, user_data), PP_OK);
 }
 
 bool
@@ -116,7 +116,7 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_p2n_has_method_prepare_comt, p), 0);
+        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_has_method_prepare_comt, p), 0);
         ppb_message_loop_run_nested(p->m_loop);
 
         bool result = p->result;
@@ -141,7 +141,7 @@ struct invoke_param_s {
 
 static
 void
-_p2n_invoke_comt(void *user_data, int32_t result)
+p2n_invoke_comt(void *user_data, int32_t result)
 {
     struct invoke_param_s *p = user_data;
     unsigned int k;
@@ -180,9 +180,9 @@ _p2n_invoke_comt(void *user_data, int32_t result)
 
 static
 void
-_p2n_invoke_prepare_comt(void *user_data, int32_t result)
+p2n_invoke_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_invoke_comt, user_data), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(p2n_invoke_comt, user_data), PP_OK);
 }
 
 bool
@@ -204,7 +204,7 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_p2n_invoke_prepare_comt, p), 0);
+        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_invoke_prepare_comt, p), 0);
         ppb_message_loop_run_nested(p->m_loop);
         bool result = p->result;
         npn.memfree(p->name);
@@ -231,7 +231,7 @@ struct has_property_param_s {
 
 static
 void
-_p2n_has_property_comt(void *user_data, int32_t result)
+p2n_has_property_comt(void *user_data, int32_t result)
 {
     struct has_property_param_s *p = user_data;
 
@@ -248,9 +248,9 @@ _p2n_has_property_comt(void *user_data, int32_t result)
 
 static
 void
-_p2n_has_property_prepare_comt(void *user_data, int32_t result)
+p2n_has_property_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_has_property_comt, user_data), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(p2n_has_property_comt, user_data), PP_OK);
 }
 
 bool
@@ -268,7 +268,7 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_p2n_has_property_prepare_comt, p), 0);
+        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_has_property_prepare_comt, p), 0);
         ppb_message_loop_run_nested(p->m_loop);
 
         bool result = p->result;
@@ -291,7 +291,7 @@ struct get_property_param_s {
 
 static
 void
-_p2n_get_property_comt(void *user_data, int32_t result)
+p2n_get_property_comt(void *user_data, int32_t result)
 {
     struct get_property_param_s *p = user_data;
     struct np_proxy_object_s *obj = (void *)p->npobj;
@@ -309,9 +309,9 @@ _p2n_get_property_comt(void *user_data, int32_t result)
 
 static
 void
-_p2n_get_property_prepare_comt(void *user_data, int32_t result)
+p2n_get_property_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_get_property_comt, user_data), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(p2n_get_property_comt, user_data), PP_OK);
 }
 
 bool
@@ -330,7 +330,7 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *np_result)
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_p2n_get_property_prepare_comt, p), 0);
+        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_get_property_prepare_comt, p), 0);
         ppb_message_loop_run_nested(p->m_loop);
         bool result = p->result;
         npn.memfree(p->name);
@@ -364,7 +364,7 @@ struct enumerate_param_s {
 
 static
 void
-_p2n_enumerate_comt(void *user_data, int32_t result)
+p2n_enumerate_comt(void *user_data, int32_t result)
 {
     struct enumerate_param_s *p = user_data;
     struct np_proxy_object_s *obj = (void *)p->npobj;
@@ -381,9 +381,9 @@ _p2n_enumerate_comt(void *user_data, int32_t result)
 
 static
 void
-_p2n_enumerate_prepare_comt(void *user_data, int32_t result)
+p2n_enumerate_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_p2n_enumerate_comt, user_data), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(p2n_enumerate_comt, user_data), PP_OK);
 }
 
 bool
@@ -395,7 +395,7 @@ p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(_p2n_enumerate_prepare_comt, p), 0);
+        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_enumerate_prepare_comt, p), 0);
         ppb_message_loop_run_nested(p->m_loop);
         bool result = p->result;
         *count = p->count;

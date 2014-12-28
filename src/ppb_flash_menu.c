@@ -150,7 +150,7 @@ ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_
 
 static
 void
-_destroy_flash_menu_ptac(void *param)
+destroy_flash_menu_ptac(void *param)
 {
     GMenu *menu = param;
     g_object_unref(menu);
@@ -163,7 +163,7 @@ ppb_flash_menu_destroy(void *p)
     g_object_ref_sink(fm->menu);
 
     // actual menu destroy can make something X-related, call in on browser thread
-    ppb_core_call_on_browser_thread(_destroy_flash_menu_ptac, fm->menu);
+    ppb_core_call_on_browser_thread(destroy_flash_menu_ptac, fm->menu);
 }
 
 PP_Bool
@@ -174,7 +174,7 @@ ppb_flash_menu_is_flash_menu(PP_Resource resource_id)
 
 static
 void
-_menu_popup_ptac(void *p)
+menu_popup_ptac(void *p)
 {
     GtkWidget *menu = p;
     gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 3, gtk_get_current_event_time());
@@ -208,7 +208,7 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
     pp_i->ignore_focus_events_cnt = 2;
     pthread_mutex_unlock(&display.lock);
 
-    ppb_core_call_on_browser_thread(_menu_popup_ptac, fm->menu);
+    ppb_core_call_on_browser_thread(menu_popup_ptac, fm->menu);
 
     pp_resource_release(menu_id);
     return PP_OK_COMPLETIONPENDING;

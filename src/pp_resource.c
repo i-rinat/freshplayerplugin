@@ -165,7 +165,7 @@ pp_resource_ref(PP_Resource resource)
 
 static
 void
-_count_resources(gpointer key, gpointer value, gpointer user_data)
+count_resources_cb(gpointer key, gpointer value, gpointer user_data)
 {
     int *counts = user_data;
     struct pp_resource_generic_s *r = value;
@@ -278,7 +278,7 @@ pp_resource_unref(PP_Resource resource)
                 int counts[PP_RESOURCE_TYPES_COUNT + 1] = {};
 
                 pthread_mutex_lock(&res_tbl_lock);
-                g_hash_table_foreach(res_tbl, _count_resources, counts);
+                g_hash_table_foreach(res_tbl, count_resources_cb, counts);
                 pthread_mutex_unlock(&res_tbl_lock);
 
                 trace_error("-- %10lu ------------\n", (unsigned long)current_time);

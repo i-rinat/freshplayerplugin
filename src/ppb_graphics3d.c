@@ -437,7 +437,7 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 
 static
 void
-_call_invalidaterect_ptac(void *param)
+call_invalidaterect_ptac(void *param)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(GPOINTER_TO_SIZE(param));
     if (!pp_i)
@@ -501,7 +501,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         pthread_mutex_unlock(&display.lock);
     } else {
         pthread_mutex_unlock(&display.lock);
-        ppb_core_call_on_browser_thread(_call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
+        ppb_core_call_on_browser_thread(call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
     }
 
     if (callback.func)

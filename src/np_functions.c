@@ -81,7 +81,7 @@ do_nothing(void *user_data, int32_t result)
 
 static
 void
-_set_window_comt(void *user_data, int32_t result)
+set_window_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
     PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
@@ -124,7 +124,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         pp_i->height = window->height;
 
         if (g_atomic_int_get(&pp_i->instance_loaded))
-            ppb_core_call_on_main_thread(0, PP_MakeCCB(_set_window_comt, pp_i), PP_OK);
+            ppb_core_call_on_main_thread(0, PP_MakeCCB(set_window_comt, pp_i), PP_OK);
     }
     pthread_mutex_unlock(&display.lock);
 
@@ -139,7 +139,7 @@ struct call_plugin_did_create_param_s {
 
 static
 void
-_call_plugin_did_create_comt(void *user_data, int32_t result)
+call_plugin_did_create_comt(void *user_data, int32_t result)
 {
     struct call_plugin_did_create_param_s *p = user_data;
     struct pp_instance_s *pp_i = p->pp_i;
@@ -326,7 +326,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     p->m_loop = ppb_message_loop_get_for_browser_thread();
     p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
     p->pp_i =   pp_i;
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_call_plugin_did_create_comt, p), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_plugin_did_create_comt, p), PP_OK);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
 
@@ -341,7 +341,7 @@ struct destroy_instance_param_s {
 
 static
 void
-_destroy_instance_comt(void *user_data, int32_t result)
+destroy_instance_comt(void *user_data, int32_t result)
 {
     struct destroy_instance_param_s *p = user_data;
 
@@ -385,7 +385,7 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     p->m_loop = ppb_message_loop_get_current();
     p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_destroy_instance_comt, p), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(destroy_instance_comt, p), PP_OK);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
 
@@ -867,7 +867,7 @@ struct call_plugin_handle_input_event_param_s {
 
 static
 void
-_call_ppp_handle_input_event_comt(void *user_data, int32_t result)
+call_ppp_handle_input_event_comt(void *user_data, int32_t result)
 {
     struct call_plugin_handle_input_event_param_s *p = user_data;
 
@@ -885,7 +885,7 @@ ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id)
     struct call_plugin_handle_input_event_param_s *p = g_slice_alloc0(sizeof(*p));
     p->pp_i = pp_i;
     p->event_id = event_id;
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(_call_ppp_handle_input_event_comt, p), PP_OK);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_ppp_handle_input_event_comt, p), PP_OK);
 }
 
 static
@@ -1110,7 +1110,7 @@ handle_key_press_release_event(NPP npp, void *event)
 
 static
 void
-_call_ppp_did_change_focus_comt(void *user_data, int32_t result)
+call_ppp_did_change_focus_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
     PP_Bool has_focus = result;
@@ -1134,9 +1134,7 @@ handle_focus_in_out_event(NPP npp, void *event)
 
     PP_Bool has_focus = (ev->type == FocusIn) ? PP_TRUE : PP_FALSE;
 
-    struct PP_CompletionCallback ccb;
-    ccb = PP_MakeCCB(_call_ppp_did_change_focus_comt, pp_i);
-    ppb_core_call_on_main_thread(0, ccb, has_focus);
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_ppp_did_change_focus_comt, pp_i), has_focus);
     return 1;
 }
 

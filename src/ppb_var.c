@@ -84,7 +84,7 @@ reference_countable(struct PP_Var var)
 /* should be run with lock held */
 static
 uint32_t
-_get_new_var_id(void)
+get_new_var_id(void)
 {
     do {
         var_id ++;
@@ -320,7 +320,7 @@ ppb_var_var_from_utf8(const char *data, uint32_t len)
     v->ref_count = 1;
 
     pthread_mutex_lock(&lock);
-    var.value.as_id = _get_new_var_id();
+    var.value.as_id = get_new_var_id();
     v->var = var;
     g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
     pthread_mutex_unlock(&lock);
@@ -559,7 +559,7 @@ ppb_var_create_object(PP_Instance instance, const struct PPP_Class_Deprecated *o
     v->ref_count = 1;
 
     pthread_mutex_lock(&lock);
-    var.value.as_id = _get_new_var_id();
+    var.value.as_id = get_new_var_id();
     v->var = var;
     g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
     pthread_mutex_unlock(&lock);
@@ -601,7 +601,7 @@ ppb_var_array_buffer_create(uint32_t size_in_bytes)
     v->ref_count = 1;
 
     pthread_mutex_lock(&lock);
-    var.value.as_id = _get_new_var_id();
+    var.value.as_id = get_new_var_id();
     v->var = var;
     g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
     pthread_mutex_unlock(&lock);
