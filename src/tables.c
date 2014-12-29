@@ -234,16 +234,6 @@ tables_open_display(void)
     eglInitialize(display.egl, &major, &minor);
     trace_info_f("EGL version %d.%d\n", major, minor);
 
-    // get fullscreen resolution
-    XWindowAttributes xw_attrs;
-    if (XGetWindowAttributes(display.x, DefaultRootWindow(display.x), &xw_attrs)) {
-        display.fs_width =  xw_attrs.width;
-        display.fs_height = xw_attrs.height;
-    } else {
-        display.fs_width = 100;
-        display.fs_height = 100;
-    }
-
     // create transparent cursor
     const char t_pixmap_data = 0;
     XColor t_color = {};
