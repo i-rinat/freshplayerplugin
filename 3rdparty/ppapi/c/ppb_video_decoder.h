@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_video_decoder.idl modified Fri Jul 11 18:06:37 2014. */
+/* From ppb_video_decoder.idl modified Mon Sep  8 16:40:15 2014. */
 
 #ifndef PPAPI_C_PPB_VIDEO_DECODER_H_
 #define PPAPI_C_PPB_VIDEO_DECODER_H_
@@ -17,7 +17,10 @@
 #include "ppapi/c/pp_size.h"
 #include "ppapi/c/pp_stdint.h"
 
-#define PPB_VIDEODECODER_INTERFACE_0_1 "PPB_VideoDecoder;0.1" /* dev */
+#define PPB_VIDEODECODER_INTERFACE_0_1 "PPB_VideoDecoder;0.1"
+#define PPB_VIDEODECODER_INTERFACE_0_2 "PPB_VideoDecoder;0.2"
+#define PPB_VIDEODECODER_INTERFACE PPB_VIDEODECODER_INTERFACE_0_2
+
 /**
  * @file
  * This file defines the <code>PPB_VideoDecoder</code> interface.
@@ -51,7 +54,7 @@
  * Chrome and ChromeOS: aac, h264.
  * ChromeOS: mpeg4.
  */
-struct PPB_VideoDecoder_0_1 { /* dev */
+struct PPB_VideoDecoder_0_2 {
   /**
    * Creates a new video decoder resource.
    *
@@ -82,9 +85,8 @@ struct PPB_VideoDecoder_0_1 { /* dev */
    * during decoding.
    * @param[in] profile A <code>PP_VideoProfile</code> specifying the video
    * codec profile.
-   * @param[in] allow_software_fallback A <code>PP_Bool</code> specifying
-   * whether the decoder can fall back to software decoding if a suitable
-   * hardware decoder isn't available.
+   * @param[in] acceleration A <code>PP_HardwareAcceleration</code> specifying
+   * whether to use a hardware accelerated or a software implementation.
    * @param[in] callback A <code>PP_CompletionCallback</code> to be called upon
    * completion.
    *
@@ -96,7 +98,7 @@ struct PPB_VideoDecoder_0_1 { /* dev */
   int32_t (*Initialize)(PP_Resource video_decoder,
                         PP_Resource graphics3d_context,
                         PP_VideoProfile profile,
-                        PP_Bool allow_software_fallback,
+                        PP_HardwareAcceleration acceleration,
                         struct PP_CompletionCallback callback);
   /**
    * Decodes a bitstream buffer. Copies |size| bytes of data from the plugin's
@@ -211,6 +213,32 @@ struct PPB_VideoDecoder_0_1 { /* dev */
    * @return An int32_t containing an error code from <code>pp_errors.h</code>.
    * Returns PP_ERROR_FAILED if the decoder isn't initialized.
    */
+  int32_t (*Reset)(PP_Resource video_decoder,
+                   struct PP_CompletionCallback callback);
+};
+
+typedef struct PPB_VideoDecoder_0_2 PPB_VideoDecoder;
+
+struct PPB_VideoDecoder_0_1 {
+  PP_Resource (*Create)(PP_Instance instance);
+  PP_Bool (*IsVideoDecoder)(PP_Resource resource);
+  int32_t (*Initialize)(PP_Resource video_decoder,
+                        PP_Resource graphics3d_context,
+                        PP_VideoProfile profile,
+                        PP_Bool allow_software_fallback,
+                        struct PP_CompletionCallback callback);
+  int32_t (*Decode)(PP_Resource video_decoder,
+                    uint32_t decode_id,
+                    uint32_t size,
+                    const void* buffer,
+                    struct PP_CompletionCallback callback);
+  int32_t (*GetPicture)(PP_Resource video_decoder,
+                        struct PP_VideoPicture* picture,
+                        struct PP_CompletionCallback callback);
+  void (*RecyclePicture)(PP_Resource video_decoder,
+                         const struct PP_VideoPicture* picture);
+  int32_t (*Flush)(PP_Resource video_decoder,
+                   struct PP_CompletionCallback callback);
   int32_t (*Reset)(PP_Resource video_decoder,
                    struct PP_CompletionCallback callback);
 };

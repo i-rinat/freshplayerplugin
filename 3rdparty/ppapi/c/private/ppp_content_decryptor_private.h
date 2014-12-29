@@ -4,7 +4,7 @@
  */
 
 /* From private/ppp_content_decryptor_private.idl,
- *   modified Thu May  1 10:36:31 2014.
+ *   modified Mon Aug 25 14:02:40 2014.
  */
 
 #ifndef PPAPI_C_PRIVATE_PPP_CONTENT_DECRYPTOR_PRIVATE_H_
@@ -50,6 +50,19 @@ struct PPP_ContentDecryptor_Private_0_12 {
    * <code>PP_VARTYPE_STRING</code> containing the name of the key system.
    */
   void (*Initialize)(PP_Instance instance, struct PP_Var key_system);
+  /**
+   * Provides a server certificate to be used to encrypt messages to the
+   * license server.
+   *
+   * @param[in] promise_id A reference for the promise that gets resolved or
+   * rejected depending upon the success or failure of setting the certificate.
+   *
+   * @param[in] server_certificate A <code>PP_Var</code> of type
+   * <code>PP_VARTYPE_ARRAYBUFFER</code> containing the certificate to be used.
+   */
+  void (*SetServerCertificate)(PP_Instance instance,
+                               uint32_t promise_id,
+                               struct PP_Var server_certificate);
   /**
    * Creates a session. <code>init_data_type</code> contains the MIME type of
    * <code>init_data</code>. <code>init_data</code> is a data buffer
@@ -122,19 +135,49 @@ struct PPP_ContentDecryptor_Private_0_12 {
                         struct PP_Var web_session_id,
                         struct PP_Var response);
   /**
-   * Release the specified session and related resources.
+   * Close the specified session and related resources.
    *
    * @param[in] promise_id A reference for the promise that gets resolved or
-   * rejected depending upon the success or failure of releasing the session.
+   * rejected depending upon the success or failure of closing the session.
    *
    * @param[in] web_session_id A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the web session ID of the session
-   * to be released.
+   * to be closed.
    *
    */
-  void (*ReleaseSession)(PP_Instance instance,
-                         uint32_t promise_id,
-                         struct PP_Var web_session_id);
+  void (*CloseSession)(PP_Instance instance,
+                       uint32_t promise_id,
+                       struct PP_Var web_session_id);
+  /**
+   * Remove stored data associated with this session.
+   *
+   * @param[in] promise_id A reference for the promise that gets resolved or
+   * rejected depending upon the success or failure of removing the session
+   * data.
+   *
+   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * <code>PP_VARTYPE_STRING</code> containing the web session ID of the session
+   * to be removed.
+   *
+   */
+  void (*RemoveSession)(PP_Instance instance,
+                        uint32_t promise_id,
+                        struct PP_Var web_session_id);
+  /**
+   * Get the key IDs for keys in the session that the CDM knows are currently
+   * usable to decrypt media data.
+   *
+   * @param[in] promise_id A reference for the promise that gets resolved or
+   * rejected depending upon the success or failure of obtaining the key IDs.
+   *
+   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * <code>PP_VARTYPE_STRING</code> containing the web session ID of the session
+   * to be queried.
+   *
+   */
+  void (*GetUsableKeyIds)(PP_Instance instance,
+                          uint32_t promise_id,
+                          struct PP_Var web_session_id);
   /**
    * Decrypts the block and returns the unencrypted block via
    * <code>DeliverBlock()</code> on the

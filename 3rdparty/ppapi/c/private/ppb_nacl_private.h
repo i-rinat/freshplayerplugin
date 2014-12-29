@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From private/ppb_nacl_private.idl modified Thu Jul 10 10:34:30 2014. */
+/* From private/ppb_nacl_private.idl modified Thu Sep  4 07:46:02 2014. */
 
 #ifndef PPAPI_C_PRIVATE_PPB_NACL_PRIVATE_H_
 #define PPAPI_C_PRIVATE_PPB_NACL_PRIVATE_H_
@@ -304,8 +304,6 @@ struct PPB_NaCl_Private_1_0 {
                           const char* error_message);
   /* Reports that loading a nexe was aborted. */
   void (*ReportLoadAbort)(PP_Instance instance);
-  /* Reports that the nexe has crashed. */
-  void (*NexeDidCrash)(PP_Instance instance, const char* crash_log);
   /* Performs internal setup when an instance is created. */
   void (*InstanceCreated)(PP_Instance instance);
   /* Performs internal cleanup when an instance is destroyed. */
@@ -322,10 +320,6 @@ struct PPB_NaCl_Private_1_0 {
   void (*LogToConsole)(PP_Instance instance, const char* message);
   /* Returns the NaCl readiness status for this instance. */
   PP_NaClReadyState (*GetNaClReadyState)(PP_Instance instance);
-  /* Returns the exit status of the plugin process. */
-  int32_t (*GetExitStatus)(PP_Instance instance);
-  /* Sets the exit status of the plugin process. */
-  void (*SetExitStatus)(PP_Instance instance, int32_t exit_status);
   /* Logs the message via VLOG. */
   void (*Vlog)(const char* message);
   /* Initializes internal state for a NaCl plugin. */
@@ -358,10 +352,6 @@ struct PPB_NaCl_Private_1_0 {
    * of attributes supported by LLVM in its -mattr= option:
    *   http://llvm.org/docs/CommandGuide/llc.html#cmdoption-mattr */
   struct PP_Var (*GetCpuFeatureAttrs)(void);
-  /* Posts a message to the JavaScript object for the given instance.
-   * This method may be called on any thread.
-   */
-  void (*PostMessageToJavaScript)(PP_Instance instance, const char* message);
   /* Downloads the .nexe file at the given URL to a file, and sets |file_info|
    * to information for a handle to a file containing its contents.
    * If metadata for identity-based validation caching is available

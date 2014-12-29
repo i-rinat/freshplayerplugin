@@ -4,7 +4,7 @@
  */
 
 /* From private/ppb_video_source_private.idl,
- *   modified Thu Apr 25 11:51:30 2013.
+ *   modified Mon Oct 27 16:13:24 2014.
  */
 
 #ifndef PPAPI_C_PRIVATE_PPB_VIDEO_SOURCE_PRIVATE_H_
@@ -80,7 +80,8 @@ struct PPB_VideoSource_Private_0_1 {
                   struct PP_Var stream_url,
                   struct PP_CompletionCallback callback);
   /**
-   * Gets a frame from the video source.
+   * Gets a frame from the video source. The returned image data is only valid
+   * until the next call to GetFrame.
    * The image data resource inside the returned frame will have its reference
    * count incremented by one and must be managed by the plugin.
    *

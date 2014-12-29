@@ -1,10 +1,10 @@
-/* Copyright (c) 2012 The Chromium Authors. All rights reserved.
+/* Copyright 2012 The Chromium Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
 
 /* From private/ppp_flash_browser_operations.idl,
- *   modified Thu Mar 28 10:23:11 2013.
+ *   modified Fri Aug 22 11:10:06 2014.
  */
 
 #ifndef PPAPI_C_PRIVATE_PPP_FLASH_BROWSER_OPERATIONS_H_
@@ -186,7 +186,7 @@ struct PPP_Flash_BrowserOperations_1_3 {
    * See also the NPP_GetSitesWithData function in NPAPI:
    * https://wiki.mozilla.org/NPAPI:ClearSiteData
    */
-  void (*GetSitesWithData)(const char* plugin_data_path, char** sites[]);
+  void (*GetSitesWithData)(const char* plugin_data_path, char*** sites);
   /**
    * Frees the list of sites returned by GetSitesWithData.
    *

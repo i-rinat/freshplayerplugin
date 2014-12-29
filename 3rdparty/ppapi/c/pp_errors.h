@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From pp_errors.idl modified Thu May 15 16:12:26 2014. */
+/* From pp_errors.idl modified Tue Sep 23 15:37:27 2014. */
 
 #ifndef PPAPI_C_PP_ERRORS_H_
 #define PPAPI_C_PP_ERRORS_H_
@@ -140,6 +140,13 @@ enum {
    * thread.
    */
   PP_ERROR_WRONG_THREAD = -52,
+  /**
+   * Indicates that a null completion callback was used on a thread handling a
+   * blocking message from JavaScript. Null completion callbacks "block until
+   * complete", which could cause the main JavaScript thread to be blocked
+   * excessively.
+   */
+  PP_ERROR_WOULD_BLOCK_THREAD = -53,
   /**
    * This value indicates that the connection was closed. For TCP sockets, it
    * corresponds to a TCP FIN.

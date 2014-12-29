@@ -4,7 +4,7 @@
  */
 
 /* From private/ppb_content_decryptor_private.idl,
- *   modified Thu Jun  5 13:39:15 2014.
+ *   modified Mon Aug 25 13:52:39 2014.
  */
 
 #ifndef PPAPI_C_PRIVATE_PPB_CONTENT_DECRYPTOR_PRIVATE_H_
@@ -15,6 +15,7 @@
 #include "ppapi/c/pp_macros.h"
 #include "ppapi/c/pp_resource.h"
 #include "ppapi/c/pp_stdint.h"
+#include "ppapi/c/pp_time.h"
 #include "ppapi/c/pp_var.h"
 #include "ppapi/c/private/pp_content_decryptor.h"
 
@@ -50,7 +51,7 @@ struct PPB_ContentDecryptor_Private_0_12 {
    */
   void (*PromiseResolved)(PP_Instance instance, uint32_t promise_id);
   /**
-   * A promise has been resolved by the CDM.
+   * A promise that resulted in a new session has been resolved by the CDM.
    *
    * @param[in] promise_id Identifies the promise that the CDM resolved.
    *
@@ -60,6 +61,18 @@ struct PPB_ContentDecryptor_Private_0_12 {
   void (*PromiseResolvedWithSession)(PP_Instance instance,
                                      uint32_t promise_id,
                                      struct PP_Var web_session_id);
+  /**
+   * A promise that returns a set of key IDs has been resolved by the CDM.
+   *
+   * @param[in] promise_id Identifies the promise that the CDM resolved.
+   *
+   * @param[in] key_ids A <code>PP_Var</code> of type
+   * <code>PP_VARTYPE_ARRAY</code> containing elements of type
+   * <code>PP_VARTYPE_ARRAYBUFFER</code> that are the session's usable key IDs.
+   */
+  void (*PromiseResolvedWithKeyIds)(PP_Instance instance,
+                                    uint32_t promise_id,
+                                    struct PP_Var key_ids_array);
   /**
    * A promise has been rejected by the CDM due to an error.
    *
@@ -93,8 +106,8 @@ struct PPB_ContentDecryptor_Private_0_12 {
    * required to prepare for decryption.
    *
    * @param[in] web_session_id A <code>PP_Var</code> of type
-   * <code>PP_VARTYPE_STRING</code> containing the session's ID attribute for
-   * which the message is intended.
+   * <code>PP_VARTYPE_STRING</code> containing the ID of a session for
+   * which this message is intended.
    *
    * @param[in] message A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_ARRAY_BUFFER</code> that contains the message.
@@ -107,6 +120,33 @@ struct PPB_ContentDecryptor_Private_0_12 {
                          struct PP_Var web_session_id,
                          struct PP_Var message,
                          struct PP_Var destination_url);
+  /**
+   * The keys for a session have changed.
+   *
+   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * <code>PP_VARTYPE_STRING</code> containing the ID of the session that has
+   * a change in keys.
+   *
+   * @param[in] has_additional_usable_key A <code>PP_Bool</code> indicating if
+   * a new usable key has been added.
+   */
+  void (*SessionKeysChange)(PP_Instance instance,
+                            struct PP_Var web_session_id,
+                            PP_Bool has_additional_usable_key);
+  /**
+   * The expiration time for a session has changed.
+   *
+   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * <code>PP_VARTYPE_STRING</code> containing the ID of the session that has
+   * a new expiration time.
+   *
+   * @param[in] new_expiry_time A <code>PP_Time</code> indicating the new
+   * expiry time of the session. The value is defined as the number of seconds
+   * since the Epoch (00:00:00 UTC, January 1, 1970).
+   */
+  void (*SessionExpirationChange)(PP_Instance instance,
+                                  struct PP_Var web_session_id,
+                                  PP_Time new_expiry_time);
   /**
    * The session is now ready to decrypt the media stream.
    *

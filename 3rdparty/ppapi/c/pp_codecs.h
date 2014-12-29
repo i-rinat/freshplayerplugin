@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From pp_codecs.idl modified Mon Jun 30 14:36:36 2014. */
+/* From pp_codecs.idl modified Fri Aug 22 13:39:56 2014. */
 
 #ifndef PPAPI_C_PP_CODECS_H_
 #define PPAPI_C_PP_CODECS_H_
@@ -38,6 +38,22 @@ typedef enum {
   PP_VIDEOPROFILE_VP9_ANY = 12,
   PP_VIDEOPROFILE_MAX = PP_VIDEOPROFILE_VP9_ANY
 } PP_VideoProfile;
+
+/**
+ * Hardware acceleration options.
+ */
+typedef enum {
+  /** Create a hardware accelerated resource only. */
+  PP_HARDWAREACCELERATION_ONLY = 0,
+  /**
+   * Create a hardware accelerated resource if possible. Otherwise, fall back
+   * to the software implementation.
+   */
+  PP_HARDWAREACCELERATION_WITHFALLBACK = 1,
+  /** Create the software implementation only. */
+  PP_HARDWAREACCELERATION_NONE = 2,
+  PP_HARDWAREACCELERATION_LAST = PP_HARDWAREACCELERATION_NONE
+} PP_HardwareAcceleration;
 /**
  * @}
  */

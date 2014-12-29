@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_view.idl modified Tue Jun 17 10:27:32 2014. */
+/* From ppb_view.idl modified Fri Sep  5 11:32:22 2014. */
 
 #ifndef PPAPI_C_PPB_VIEW_H_
 #define PPAPI_C_PPB_VIEW_H_
@@ -18,8 +18,8 @@
 
 #define PPB_VIEW_INTERFACE_1_0 "PPB_View;1.0"
 #define PPB_VIEW_INTERFACE_1_1 "PPB_View;1.1"
-#define PPB_VIEW_INTERFACE_1_2 "PPB_View;1.2" /* dev */
-#define PPB_VIEW_INTERFACE PPB_VIEW_INTERFACE_1_1
+#define PPB_VIEW_INTERFACE_1_2 "PPB_View;1.2"
+#define PPB_VIEW_INTERFACE PPB_VIEW_INTERFACE_1_2
 
 /**
  * @file
@@ -37,7 +37,7 @@
  * You will receive new view information using
  * <code>PPP_Instance.DidChangeView</code>.
  */
-struct PPB_View_1_2 { /* dev */
+struct PPB_View_1_2 {
   /**
    * IsView() determines if the given resource is a valid
    * <code>PPB_View</code> resource. Note that <code>PPB_ViewChanged</code>
@@ -214,6 +214,8 @@ struct PPB_View_1_2 { /* dev */
   PP_Bool (*GetScrollOffset)(PP_Resource resource, struct PP_Point* offset);
 };
 
+typedef struct PPB_View_1_2 PPB_View;
+
 struct PPB_View_1_0 {
   PP_Bool (*IsView)(PP_Resource resource);
   PP_Bool (*GetRect)(PP_Resource resource, struct PP_Rect* rect);
@@ -233,8 +235,6 @@ struct PPB_View_1_1 {
   float (*GetDeviceScale)(PP_Resource resource);
   float (*GetCSSScale)(PP_Resource resource);
 };
-
-typedef struct PPB_View_1_1 PPB_View;
 /**
  * @}
  */
