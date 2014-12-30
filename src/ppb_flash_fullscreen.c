@@ -178,22 +178,15 @@ fullscreen_window_thread(void *p)
     else
         trace_error("%s, can't get tp->browser_window\n", __func__);
 
-    // go fullscreen
+    // update windows state properties
     Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", False);
-    Atom netwm_fullscreen_atom = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
-    XChangeProperty(dpy, pp_i->fs_wnd,
-                    netwm_state_atom,
-                    XA_ATOM,
-                    32, PropModeReplace,
-                    (unsigned char *)&netwm_fullscreen_atom, 1);
-
-    // do not appear in pager
-    Atom netwm_skip_pager_atom = XInternAtom(dpy, "_NET_WM_STATE_SKIP_PAGER", False);
-    XChangeProperty(dpy, pp_i->fs_wnd,
-                    netwm_state_atom,
-                    XA_ATOM,
-                    32, PropModeAppend,
-                    (unsigned char *)&netwm_skip_pager_atom, 1);
+    Atom state_atoms[] = {
+        XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False),    // go fullscreen
+        XInternAtom(dpy, "_NET_WM_STATE_SKIP_PAGER", False),    // do not appear in pager
+    };
+    XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
+                    (unsigned char *)&state_atoms, sizeof(state_atoms)/sizeof(state_atoms[0]));
+    XSync(dpy, False);
 
     // give window a name
     const char *fs_window_name = "freshwrapper fullscreen window";
