@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#define GL_GLEXT_PROTOTYPES
 #include <assert.h>
 #include <inttypes.h>
 #include <npapi/npapi.h>
@@ -682,10 +681,9 @@ handle_graphics_expose_event(NPP npp, void *event)
                       ev->x, ev->y);
             XSync(dpy, False);
 
-            eglWaitNative(EGL_CORE_NATIVE_ENGINE);
-            ret = eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc_t);
+            ret = glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc_t);
             if (!ret) {
-                trace_error("%s, eglMakeCurrent failed\n", __func__);
+                trace_error("%s, glXMakeCurrent failed\n", __func__);
                 // TODO: abort?
             }
             glViewport(0, 0, g3d->width, g3d->height);
@@ -720,8 +718,7 @@ handle_graphics_expose_event(NPP npp, void *event)
             glDisableVertexAttribArray(g3d->prog.attrib_pos);
 
             glFinish();
-            eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-            eglWaitGL();
+            glXMakeCurrent(display.x, None, NULL);
         }
 
         XCopyArea(dpy, g3d->pixmap, drawable, DefaultGC(dpy, screen),

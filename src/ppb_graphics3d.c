@@ -25,9 +25,8 @@
 #include <assert.h>
 #include "ppb_graphics3d.h"
 #include <stdlib.h>
-#include <EGL/egl.h>
+#include <GL/glx.h>
 #include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "tables.h"
@@ -62,38 +61,45 @@ report_shader_compile_error(const char *fname, GLuint shader, const char *shader
 // creates GL context for transparency rendering
 static
 int
-create_presentation_egl_context(struct pp_graphics3d_s *g3d)
+create_presentation_glx_context(struct pp_graphics3d_s *g3d)
 {
+    int cfg_attrs[] = { GLX_ALPHA_SIZE,     8,
+                        GLX_BLUE_SIZE,      8,
+                        GLX_GREEN_SIZE,     8,
+                        GLX_RED_SIZE,       8,
+                        GLX_X_RENDERABLE,   True,
+                        GLX_DRAWABLE_TYPE,  GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
+                        None };
     int nconfigs = 0;
-    EGLint cfg_attrs[] = { EGL_ALPHA_SIZE, 8,
-                           EGL_BLUE_SIZE, 8,
-                           EGL_GREEN_SIZE, 8,
-                           EGL_RED_SIZE, 8,
-                           EGL_RENDERABLE_TYPE,
-                           EGL_OPENGL_ES2_BIT,
-                           EGL_NONE };
+    int screen = DefaultScreen(display.x);
+    GLXFBConfig *fb_cfgs = glXChooseFBConfig(display.x, screen, cfg_attrs, &nconfigs);
+    if (!fb_cfgs) {
+        trace_error("%s, glXChooseFBConfig returned NULL\n", __func__);
+        goto err_1;
+    }
 
-    EGLBoolean ret = eglChooseConfig(display.egl, cfg_attrs, &g3d->egl_config_t, 1, &nconfigs);
+    trace_info_f("%s, glXChooseFBConfig returned %d configs, choosing first one\n", __func__,
+                 nconfigs);
+    g3d->fb_config_t = fb_cfgs[0];
+    XFree(fb_cfgs);
+
+    // create context implementing OpenGL ES 2.0
+    const int ctx_attrs[] = {
+        GLX_RENDER_TYPE,                GLX_RGBA_TYPE,
+        GLX_CONTEXT_MAJOR_VERSION_ARB,  2,
+        GLX_CONTEXT_MINOR_VERSION_ARB,  0,
+        GLX_CONTEXT_PROFILE_MASK_ARB,   GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
+        None,
+    };
+    g3d->glc_t = display.glXCreateContextAttribsARB(display.x, g3d->fb_config_t, g3d->glc, True, ctx_attrs);
+    if (!g3d->glc_t) {
+        trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
+        goto err_1;
+    }
+
+    int ret = glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc_t);
     if (!ret) {
-        trace_error("%s, eglChooseConfig returned FALSE\n", __func__);
-        goto err_1;
-    }
-
-    if (nconfigs != 1) {
-        trace_error("%s, eglChooseConfig returned %d configs, expected 1\n", __func__, nconfigs);
-        goto err_1;
-    }
-
-    EGLint ctxattr[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-    g3d->glc_t = eglCreateContext(display.egl, g3d->egl_config_t, g3d->glc, ctxattr);
-    if (g3d->glc_t == EGL_NO_CONTEXT) {
-        trace_error("%s, eglCreateContext returned EGL_NO_CONTEXT\n", __func__);
-        goto err_1;
-    }
-
-    ret = eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc_t);
-    if (!ret) {
-        trace_error("%s, eglMakeCurrent failed\n", __func__);
+        trace_error("%s, glXMakeCurrent failed\n", __func__);
         goto err_2;
     }
 
@@ -169,7 +175,7 @@ err_3:
     glDeleteShader(frag_shader);
     glDeleteShader(vert_shader);
 err_2:
-    eglDestroyContext(display.egl, g3d->glc_t);
+    glXDestroyContext(display.x, g3d->glc_t);
 err_1:
     return 1;
 }
@@ -180,6 +186,15 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
         trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+
+    // check for required GLX extensions
+    if (!display.glx_arb_create_context || !display.glx_arb_create_context_profile ||
+        !display.glx_ext_create_context_es2_profile)
+    {
+        trace_warning("%s, some of GLX_ARB_create_context, GLX_ARB_create_context_profile, "
+                      "GLX_EXT_create_context_es2_profile missing\n", __func__);
         return 0;
     }
 
@@ -196,13 +211,15 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
     attrib_len ++;
 
-    EGLint *egl_attribute_list = calloc(attrib_len + 3 * 2, sizeof(EGLint));
-    int done = 0, k1 = 0, k2 = 0;
-    egl_attribute_list[k2++] = EGL_SURFACE_TYPE;
-    egl_attribute_list[k2++] = EGL_PIXMAP_BIT | EGL_WINDOW_BIT;
-    egl_attribute_list[k2++] = EGL_RENDERABLE_TYPE;
-    egl_attribute_list[k2++] = EGL_OPENGL_ES2_BIT;
+    int *cfg_attrs = calloc(attrib_len + 3 * 2, sizeof(int));
+    int k2 = 0;
+    cfg_attrs[k2++] = GLX_X_RENDERABLE;
+    cfg_attrs[k2++] = True;
+    cfg_attrs[k2++] = GLX_DRAWABLE_TYPE;
+    cfg_attrs[k2++] = GLX_WINDOW_BIT | GLX_PIXMAP_BIT;
 
+    int done = 0;
+    int k1 = 0;
     while (!done) {
         switch (attrib_list[k1]) {
         case PP_GRAPHICS3DATTRIB_HEIGHT:
@@ -219,47 +236,47 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_NONE:
-            egl_attribute_list[k2++] = EGL_NONE;
+            cfg_attrs[k2++] = None;
             done = 1;
             break;
         case PP_GRAPHICS3DATTRIB_ALPHA_SIZE:
-            egl_attribute_list[k2++] = EGL_ALPHA_SIZE;
-            egl_attribute_list[k2++] = attrib_list[k1 + 1];
+            cfg_attrs[k2++] = GLX_ALPHA_SIZE;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_BLUE_SIZE:
-            egl_attribute_list[k2++] = EGL_BLUE_SIZE;
-            egl_attribute_list[k2++] = attrib_list[k1 + 1];
+            cfg_attrs[k2++] = GLX_BLUE_SIZE;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_GREEN_SIZE:
-            egl_attribute_list[k2++] = EGL_GREEN_SIZE;
-            egl_attribute_list[k2++] = attrib_list[k1 + 1];
+            cfg_attrs[k2++] = GLX_GREEN_SIZE;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_RED_SIZE:
-            egl_attribute_list[k2++] = EGL_RED_SIZE;
-            egl_attribute_list[k2++] = attrib_list[k1 + 1];
+            cfg_attrs[k2++] = GLX_RED_SIZE;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_DEPTH_SIZE:
-            egl_attribute_list[k2++] = EGL_DEPTH_SIZE;
-            egl_attribute_list[k2++] = attrib_list[k1 + 1];
+            cfg_attrs[k2++] = GLX_DEPTH_SIZE;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_STENCIL_SIZE:
-            egl_attribute_list[k2++] = EGL_STENCIL_SIZE;
-            egl_attribute_list[k2++] = attrib_list[k1 + 1];
+            cfg_attrs[k2++] = GLX_STENCIL_SIZE;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_SAMPLES:
-            egl_attribute_list[k2++] = EGL_SAMPLES;
-            egl_attribute_list[k2++] = attrib_list[k1 + 1];
+            cfg_attrs[k2++] = GLX_SAMPLES;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         case PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS:
-            egl_attribute_list[k2++] = EGL_SAMPLE_BUFFERS;
-            egl_attribute_list[k2++] = attrib_list[k1 + 1];
+            cfg_attrs[k2++] = GLX_SAMPLE_BUFFERS;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
         default:
@@ -271,39 +288,47 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
 
     pthread_mutex_lock(&display.lock);
+    int screen = DefaultScreen(display.x);
     int nconfigs = 0;
-    EGLBoolean ret = eglChooseConfig(display.egl, egl_attribute_list,
-                                     &g3d->egl_config, 1, &nconfigs);
-    free(egl_attribute_list);
-    if (!ret) {
-        trace_error("%s, eglChooseConfig returned FALSE\n", __func__);
+    GLXFBConfig *fb_cfgs = glXChooseFBConfig(display.x, screen, cfg_attrs, &nconfigs);
+    free(cfg_attrs);
+
+    if (!fb_cfgs) {
+        trace_error("%s, glXChooseFBConfig returned NULL\n", __func__);
         goto err;
     }
 
-    if (nconfigs != 1) {
-        trace_error("%s, eglChooseConfig returned %d configs, expected 1\n", __func__, nconfigs);
-        goto err;
-    }
+    trace_info_f("%s, glXChooseFBConfig returned %d configs, choosing first one\n", __func__,
+                 nconfigs);
+    g3d->fb_config = fb_cfgs[0];
+    XFree(fb_cfgs);
 
+    // create context implementing OpenGL ES 2.0
+    const int ctx_attrs[] = {
+        GLX_RENDER_TYPE,                GLX_RGBA_TYPE,
+        GLX_CONTEXT_MAJOR_VERSION_ARB,  2,
+        GLX_CONTEXT_MINOR_VERSION_ARB,  0,
+        GLX_CONTEXT_PROFILE_MASK_ARB,   GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
+        None,
+    };
     // TODO: support shared_context
-    EGLint ctxattr[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-    g3d->glc = eglCreateContext(display.egl, g3d->egl_config, EGL_NO_CONTEXT, ctxattr);
-    if (g3d->glc == EGL_NO_CONTEXT) {
-        trace_error("%s, eglCreateContext returned EGL_NO_CONTEXT\n", __func__);
+    g3d->glc = display.glXCreateContextAttribsARB(display.x, g3d->fb_config, NULL, True, ctx_attrs);
+    if (!g3d->glc) {
+        trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
         goto err;
     }
 
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
                                 DefaultDepth(display.x, 0));
-    g3d->egl_surf = eglCreatePixmapSurface(display.egl, g3d->egl_config, g3d->pixmap, NULL);
-    if (g3d->egl_surf == EGL_NO_SURFACE) {
-        trace_error("%s, failed to create EGL pixmap surface\n", __func__);
+    g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
+    if (g3d->glx_pixmap == None) {
+        trace_error("%s, failed to create GLX pixmap\n", __func__);
         goto err;
     }
 
-    ret = eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    int ret = glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     if (!ret) {
-        trace_error("%s, eglMakeCurrent failed\n", __func__);
+        trace_error("%s, glXMakeCurrent failed\n", __func__);
         goto err;
     }
 
@@ -320,13 +345,13 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-        if (create_presentation_egl_context(g3d) != 0) {
-            trace_error("%s, can't create EGL context for transparency processing\n", __func__);
+        if (create_presentation_glx_context(g3d) != 0) {
+            trace_error("%s, can't create GL context for transparency processing\n", __func__);
             goto err;
         }
     }
 
-    eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    glXMakeCurrent(display.x, None, NULL);
 
     g3d->sub_maps = g_hash_table_new(g_direct_hash, g_direct_equal);
     pthread_mutex_unlock(&display.lock);
@@ -349,22 +374,22 @@ ppb_graphics3d_destroy(void *p)
 
     pthread_mutex_lock(&display.lock);
 
-    // bringing egl_surf to current thread releases it from any others
-    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    // bringing context to current thread releases it from any others
+    glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     // free it here, to be able to destroy X Pixmap
-    eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    glXMakeCurrent(display.x, None, NULL);
 
-    eglDestroySurface(display.egl, g3d->egl_surf);
+    glXDestroyPixmap(display.x, g3d->glx_pixmap);
     XFreePixmap(display.x, g3d->pixmap);
 
     if (pp_i->is_transparent) {
         glDeleteTextures(1, &g3d->tex_back);
         glDeleteTextures(1, &g3d->tex_front);
         glDeleteProgram(g3d->prog.id);
-        eglDestroyContext(display.egl, g3d->glc_t);
+        glXDestroyContext(display.x, g3d->glc_t);
     }
 
-    eglDestroyContext(display.egl, g3d->glc);
+    glXDestroyContext(display.x, g3d->glc);
     pthread_mutex_unlock(&display.lock);
 }
 
@@ -410,24 +435,24 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     g3d->width = width;
     g3d->height = height;
 
-    EGLSurface old_surf = g3d->egl_surf;
+    GLXPixmap old_glx_pixmap = g3d->glx_pixmap;
     Pixmap old_pixmap = g3d->pixmap;
-    // release possibly bound to other thread g3d->egl_surf and bind it to current
-    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    // release possibly bound to other thread g3d->glx_pixmap and bind it to the current one
+    glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
 
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
                                 DefaultDepth(display.x, 0));
-    g3d->egl_surf = eglCreatePixmapSurface(display.egl, g3d->egl_config, g3d->pixmap, NULL);
+    g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
 
-    // make new g3d->egl_surf current to current thread to release old_surf
-    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    // make new g3d->glx_pixmap current to the current thread to allow releasing old_glx_pixmap
+    glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
 
     // clear surface
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // destroy old egl surface and x pixmap
-    eglDestroySurface(display.egl, old_surf);
+    // destroy previous glx and x pixmaps
+    glXDestroyPixmap(display.x, old_glx_pixmap);
     XFreePixmap(display.x, old_pixmap);
 
     pthread_mutex_unlock(&display.lock);
@@ -473,13 +498,13 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         return PP_ERROR_INPROGRESS;
     }
 
-    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc);
+    glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     if (pp_i->is_transparent) {
         glBindTexture(GL_TEXTURE_2D, g3d->tex_front);
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, g3d->width, g3d->height, 0);
     }
     glFinish();  // ensure painting is done
-    eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    glXMakeCurrent(display.x, None, NULL);
 
     pp_resource_release(context);
 

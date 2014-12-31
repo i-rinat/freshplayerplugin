@@ -29,7 +29,7 @@ pkg_check_modules(REQ
     alsa
     glib-2.0
     x11
-    egl
+    gl
     glesv2
     libconfig
     libevent

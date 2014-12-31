@@ -28,6 +28,3 @@ foreach(item ${test_list})
     add_test(${item} ${item})
     add_dependencies(check ${item})
 endforeach()
-
-add_executable(util_egl_pixmap util_egl_pixmap.c)
-target_link_libraries(util_egl_pixmap ${REQ_LIBRARIES})

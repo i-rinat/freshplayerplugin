@@ -33,10 +33,13 @@
 
 
 struct display_s {
-    Display            *x;
-    EGLDisplay          egl;
-    Cursor              transparent_cursor;
-    pthread_mutex_t     lock;
+    Display                            *x;
+    Cursor                              transparent_cursor;
+    pthread_mutex_t                     lock;
+    PFNGLXCREATECONTEXTATTRIBSARBPROC   glXCreateContextAttribsARB;
+    uint32_t                            glx_arb_create_context;
+    uint32_t                            glx_arb_create_context_profile;
+    uint32_t                            glx_ext_create_context_es2_profile;
 };
 
 extern NPNetscapeFuncs  npn;

@@ -26,7 +26,6 @@
 #define FPP_PPB_OPENGLES2_H
 
 #include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 #include <ppapi/c/ppb_opengles2.h>
 
 

@@ -28,6 +28,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
+#include <GLES2/gl2ext.h>
 
 
 #define PROLOGUE(g3d, escape_statement)                                                 \
@@ -37,10 +38,10 @@
         escape_statement;                                                               \
     }                                                                                   \
     pthread_mutex_lock(&display.lock);                                                  \
-    eglMakeCurrent(display.egl, g3d->egl_surf, g3d->egl_surf, g3d->glc)
+    glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc)
 
 #define EPILOGUE()                                                                      \
-    eglMakeCurrent(display.egl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);        \
+    glXMakeCurrent(display.x, None, NULL);                                              \
     pthread_mutex_unlock(&display.lock);                                                \
     pp_resource_release(context)
 

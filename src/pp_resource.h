@@ -40,7 +40,7 @@
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
 #include <glib.h>
-#include <EGL/egl.h>
+#include <GL/glx.h>
 #include <GLES2/gl2.h>
 #include <pango/pango.h>
 #include <pango/pangoft2.h>
@@ -242,12 +242,12 @@ struct pp_view_s {
 
 struct pp_graphics3d_s {
     COMMON_STRUCTURE_FIELDS
-    EGLContext      glc;
-    EGLConfig       egl_config;
-    EGLContext      glc_t;          ///< presentation context for transparent instances
-    EGLConfig       egl_config_t;   ///< EGLConfig for glc_t
+    GLXContext      glc;
+    GLXFBConfig     fb_config;
+    GLXContext      glc_t;          ///< presentation context for transparent instances
+    GLXFBConfig     fb_config_t;
     Pixmap          pixmap;
-    EGLSurface      egl_surf;
+    GLXPixmap       glx_pixmap;
     int32_t         width;
     int32_t         height;
     GHashTable     *sub_maps;

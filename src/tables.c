@@ -34,6 +34,7 @@
 #include "config.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <GL/glx.h>
 
 
 NPNetscapeFuncs     npn;
@@ -212,10 +213,26 @@ tables_remove_npobj_npp_mapping(NPObject *npobj)
     pthread_mutex_unlock(&lock);
 }
 
+static
+void
+check_glx_extensions(void)
+{
+    const char *glx_ext_str = glXQueryExtensionsString(display.x, 0);
+    if (!glx_ext_str)
+        return;
+
+    display.glx_arb_create_context = !!strstr(glx_ext_str, "GLX_ARB_create_context");
+    display.glx_arb_create_context_profile = !!strstr(glx_ext_str,
+                                                      "GLX_ARB_create_context_profile");
+    display.glx_ext_create_context_es2_profile = !!strstr(glx_ext_str,
+                                                          "GLX_EXT_create_context_es2_profile");
+    display.glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC)
+        glXGetProcAddressARB((const GLubyte *)"glXCreateContextAttribsARB");
+}
+
 int
 tables_open_display(void)
 {
-    EGLint major, minor;
     int retval = 0;
 
     pthread_mutex_init(&display.lock, NULL);
@@ -230,9 +247,14 @@ tables_open_display(void)
     if (config.quirks.x_synchronize)
         XSynchronize(display.x, True);
 
-    display.egl = eglGetDisplay(display.x);
-    eglInitialize(display.egl, &major, &minor);
-    trace_info_f("EGL version %d.%d\n", major, minor);
+    int major, minor;
+    if (!glXQueryVersion(display.x, &major, &minor)) {
+        trace_error("%s, glXQueryVersion returned False\n", __func__);
+    } else {
+        trace_info_f("GLX version %d.%d\n", major, minor);
+    }
+
+    check_glx_extensions();
 
     // create transparent cursor
     const char t_pixmap_data = 0;
@@ -253,7 +275,6 @@ tables_close_display(void)
 {
     pthread_mutex_lock(&display.lock);
     XFreeCursor(display.x, display.transparent_cursor);
-    eglTerminate(display.egl);
     XCloseDisplay(display.x);
     pthread_mutex_unlock(&display.lock);
     pthread_mutex_destroy(&display.lock);
