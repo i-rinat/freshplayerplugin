@@ -50,6 +50,7 @@
 #include "ppb_var.h"
 #include "ppb_core.h"
 #include "ppb_message_loop.h"
+#include "ppb_flash_fullscreen.h"
 #include "header_parser.h"
 #include "keycodeconvert.h"
 #include "eintr_retry.h"
@@ -351,6 +352,8 @@ void
 destroy_instance_comt(void *user_data, int32_t result)
 {
     struct destroy_instance_param_s *p = user_data;
+
+    ppb_flash_fullscreen_set_fullscreen(p->pp_i->id, PP_FALSE);
 
     p->pp_i->ppp_instance_1_1->DidDestroy(p->pp_i->id);
     tables_remove_pp_instance(p->pp_i->id);
