@@ -31,6 +31,9 @@
 
 enum screensaver_types {
     SST_XSCREENSAVER =      (1 << 0),
+    SST_FDO_SCREENSAVER =   (1 << 1),   // freedesktop.org screensaver interface spec
+    SST_GNOME_SCREENSAVER = (1 << 2),
+    SST_KDE_SCREENSAVER =   (1 << 3),
 };
 
 
@@ -39,6 +42,12 @@ screensaver_type_detect(Display *dpy);
 
 void
 screensaver_deactivate(Display *dpy, uint32_t types);
+
+void
+screensaver_connect(void);
+
+void
+screensaver_disconnect(void);
 
 
 #endif // FPP_SCREENSAVER_CONTROL_H

@@ -22,10 +22,29 @@
  * SOFTWARE.
  */
 
+#include <assert.h>
 #include "screensaver_control.h"
 #include <X11/Xatom.h>
 #include <string.h>
+#include <glib.h>
+#include <gio/gio.h>
 #include "trace.h"
+
+
+#define GS_SERVICE      "org.gnome.ScreenSaver"
+#define GS_PATH         "/org/gnome/ScreenSaver"
+#define GS_INTERFACE    "org.gnome.ScreenSaver"
+
+#define FDOS_SERVICE    "org.freedesktop.ScreenSaver"
+#define FDOS_PATH       "/org/freedesktop/ScreenSaver"
+#define FDOS_INTERFACE  "org.freedesktop.ScreenSaver"
+
+#define KS_SERVICE      "org.kde.screensaver"
+#define KS_PATH         "/ScreenSaver"
+#define KS_INTERFACE    "org.kde.screensaver"
+
+
+static GDBusConnection *connection = NULL;
 
 
 static
@@ -103,22 +122,156 @@ deactivate_xscreensaver(Display *dpy)
     }
 }
 
+static
+void
+deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
+                                  const char *d_interface)
+{
+    if (!connection)
+        screensaver_connect();
+
+    if (!connection)
+        return;
+
+    GDBusMessage *msg = g_dbus_message_new_method_call(d_service, d_path, d_interface,
+                                                       "SimulateUserActivity");
+    if (!msg)
+        return;
+
+    GError *error = NULL;
+    g_dbus_connection_send_message(connection, msg, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL, &error);
+
+    if (error != NULL) {
+        trace_error("%s, can't send message, %s\n", __func__, error->message);
+        g_clear_error(&error);
+        goto err;
+    }
+
+    g_dbus_connection_flush_sync(connection, NULL, &error);
+    if (error != NULL) {
+        trace_error("%s, can't flush dbus connection, %s\n", __func__, error->message);
+        g_clear_error(&error);
+        goto err;
+    }
+
+err:
+    g_object_unref(msg);
+}
+
 void
 screensaver_deactivate(Display *dpy, uint32_t types)
 {
     if (types & SST_XSCREENSAVER)
         deactivate_xscreensaver(dpy);
+
+    if (types & SST_FDO_SCREENSAVER)
+        deactivate_dbus_based_screensaver(FDOS_SERVICE, FDOS_PATH, FDOS_INTERFACE);
+
+    if (types & SST_GNOME_SCREENSAVER)
+        deactivate_dbus_based_screensaver(GS_SERVICE, GS_PATH, GS_INTERFACE);
+
+    if (types & SST_KDE_SCREENSAVER)
+        deactivate_dbus_based_screensaver(KS_SERVICE, KS_PATH, KS_INTERFACE);
+}
+
+static
+uint32_t
+detect_dbus_based_screensavers(void)
+{
+    GDBusMessage *msg, *reply;
+    uint32_t flags;
+
+    assert(connection);
+
+    // enumerate all services
+    msg = g_dbus_message_new_method_call("org.freedesktop.DBus", "/org/freedesktop/DBus",
+                                         "org.freedesktop.DBus", "ListNames");
+    if (!msg) {
+        trace_error("%s, can't allocate GDBusMessage\n", __func__);
+        flags = 0;
+        goto err_1;
+    }
+
+    GError *error = NULL;
+    reply = g_dbus_connection_send_message_with_reply_sync(connection, msg,
+                                                           G_DBUS_SEND_MESSAGE_FLAGS_NONE, -1,
+                                                           NULL, NULL, &error);
+    if (error != NULL) {
+        trace_error("%s, can't send message, %s\n", __func__, error->message);
+        g_clear_error(&error);
+        flags = 0;
+        goto err_2;
+    }
+
+    g_dbus_connection_flush_sync(connection, NULL, &error);
+    if (error != NULL) {
+        trace_error("%s, can't flush dbus connection, %s\n", __func__, error->message);
+        g_clear_error(&error);
+        flags = 0;
+        goto err_3;
+    }
+
+    // iterate over the list
+    GVariant *v = g_dbus_message_get_body(reply);
+    GVariantIter *iter;
+    gchar *str;
+
+    g_variant_get(v, "(as)", &iter);
+    while (g_variant_iter_loop(iter, "s", &str)) {
+        if (strcmp(str, GS_SERVICE) == 0)
+            flags |= SST_GNOME_SCREENSAVER;
+
+        if (strcmp(str, KS_SERVICE) == 0)
+            flags |= SST_KDE_SCREENSAVER;
+
+        if (strcmp(str, FDOS_SERVICE) == 0)
+            flags |= SST_FDO_SCREENSAVER;
+    }
+    g_variant_iter_free(iter);
+
+err_3:
+    g_object_unref(reply);
+err_2:
+    g_object_unref(msg);
+err_1:
+    return flags;
 }
 
 uint32_t
 screensaver_type_detect(Display *dpy)
 {
-    uint32_t flags = 0;
+    if (!connection)
+        screensaver_connect();
 
+    if (!connection)
+        return 0;
+
+    uint32_t flags = 0;
     if (find_xscreensaver_window(dpy) != 0)
         flags |= SST_XSCREENSAVER;
 
-    // TODO: detect screensavers
+    flags |= detect_dbus_based_screensavers();
 
     return flags;
+}
+
+void
+screensaver_connect(void)
+{
+    if (connection)
+        g_object_unref(connection);
+
+    GError *error = NULL;
+    connection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
+    if (connection == NULL) {
+        trace_error("%s, can't connect to dbus, %s\n", __func__, error->message);
+        g_clear_error(&error);
+    }
+}
+
+void
+screensaver_disconnect(void)
+{
+    g_object_unref(connection);
+    connection = NULL;
 }
