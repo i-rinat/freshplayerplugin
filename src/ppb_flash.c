@@ -247,7 +247,7 @@ void
 ppb_flash_update_activity(PP_Instance instance)
 {
     pthread_mutex_lock(&display.lock);
-    screensaver_deactivate(display.x, SST_XSCREENSAVER);
+    screensaver_deactivate(display.x, display.screensaver_types);
     pthread_mutex_unlock(&display.lock);
 }
 

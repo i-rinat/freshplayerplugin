@@ -35,6 +35,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <GL/glx.h>
+#include "screensaver_control.h"
 
 
 NPNetscapeFuncs     npn;
@@ -256,6 +257,18 @@ tables_open_display(void)
 
     check_glx_extensions();
 
+    // initialize screensaver inhibition library
+    screensaver_connect();
+    display.screensaver_types = screensaver_type_detect(display.x);
+
+    gchar *s = g_strdup_printf("screensavers found:%s%s%s%s",
+        (display.screensaver_types & SST_XSCREENSAVER) ? " XScreenSaver" : "",
+        (display.screensaver_types & SST_FDO_SCREENSAVER) ? " fd.o-screensaver" : "",
+        (display.screensaver_types & SST_GNOME_SCREENSAVER) ? " gnome-screensaver" : "",
+        (display.screensaver_types & SST_KDE_SCREENSAVER) ? " kscreensaver" : "");
+    trace_info_f("%s\n", s);
+    g_free(s);
+
     // create transparent cursor
     const char t_pixmap_data = 0;
     XColor t_color = {};
@@ -274,6 +287,7 @@ void
 tables_close_display(void)
 {
     pthread_mutex_lock(&display.lock);
+    screensaver_disconnect();
     XFreeCursor(display.x, display.transparent_cursor);
     XCloseDisplay(display.x);
     pthread_mutex_unlock(&display.lock);

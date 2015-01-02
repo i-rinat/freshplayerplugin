@@ -36,6 +36,7 @@ struct display_s {
     Display                            *x;
     Cursor                              transparent_cursor;
     pthread_mutex_t                     lock;
+    uint32_t                            screensaver_types;
     PFNGLXCREATECONTEXTATTRIBSARBPROC   glXCreateContextAttribsARB;
     uint32_t                            glx_arb_create_context;
     uint32_t                            glx_arb_create_context_profile;
