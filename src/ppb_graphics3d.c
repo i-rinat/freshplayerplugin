@@ -84,15 +84,13 @@ create_presentation_glx_context(struct pp_graphics3d_s *g3d)
     g3d->fb_config_t = fb_cfgs[0];
     XFree(fb_cfgs);
 
-    // create context implementing OpenGL ES 2.0
+    // create context implementing OpenGL (no GL ES here)
     const int ctx_attrs[] = {
         GLX_RENDER_TYPE,                GLX_RGBA_TYPE,
-        GLX_CONTEXT_MAJOR_VERSION_ARB,  2,
-        GLX_CONTEXT_MINOR_VERSION_ARB,  0,
-        GLX_CONTEXT_PROFILE_MASK_ARB,   GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
         None,
     };
-    g3d->glc_t = display.glXCreateContextAttribsARB(display.x, g3d->fb_config_t, g3d->glc, True, ctx_attrs);
+    g3d->glc_t = display.glXCreateContextAttribsARB(display.x, g3d->fb_config_t, g3d->glc, True,
+                                                    ctx_attrs);
     if (!g3d->glc_t) {
         trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
         goto err_1;
