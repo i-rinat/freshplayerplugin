@@ -179,7 +179,7 @@ uint32_t
 detect_dbus_based_screensavers(void)
 {
     GDBusMessage *msg, *reply;
-    uint32_t flags;
+    uint32_t ret;
 
     assert(connection);
 
@@ -188,7 +188,7 @@ detect_dbus_based_screensavers(void)
                                          "org.freedesktop.DBus", "ListNames");
     if (!msg) {
         trace_error("%s, can't allocate GDBusMessage\n", __func__);
-        flags = 0;
+        ret = 0;
         goto err_1;
     }
 
@@ -199,7 +199,7 @@ detect_dbus_based_screensavers(void)
     if (error != NULL) {
         trace_error("%s, can't send message, %s\n", __func__, error->message);
         g_clear_error(&error);
-        flags = 0;
+        ret = 0;
         goto err_2;
     }
 
@@ -207,7 +207,7 @@ detect_dbus_based_screensavers(void)
     if (error != NULL) {
         trace_error("%s, can't flush dbus connection, %s\n", __func__, error->message);
         g_clear_error(&error);
-        flags = 0;
+        ret = 0;
         goto err_3;
     }
 
@@ -216,6 +216,7 @@ detect_dbus_based_screensavers(void)
     GVariantIter *iter;
     gchar *str;
 
+    uint32_t flags = 0;
     g_variant_get(v, "(as)", &iter);
     while (g_variant_iter_loop(iter, "s", &str)) {
         if (strcmp(str, GS_SERVICE) == 0)
@@ -228,13 +229,14 @@ detect_dbus_based_screensavers(void)
             flags |= SST_FDO_SCREENSAVER;
     }
     g_variant_iter_free(iter);
+    ret = flags;
 
 err_3:
     g_object_unref(reply);
 err_2:
     g_object_unref(msg);
 err_1:
-    return flags;
+    return ret;
 }
 
 uint32_t
