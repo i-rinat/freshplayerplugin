@@ -180,6 +180,7 @@ fullscreen_window_thread(void *p)
     Atom state_atoms[] = {
         XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False),    // go fullscreen
         XInternAtom(dpy, "_NET_WM_STATE_SKIP_PAGER", False),    // do not appear in pager
+        XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", False),  // do not appear in taskbar
     };
     XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
                     (unsigned char *)&state_atoms, sizeof(state_atoms)/sizeof(state_atoms[0]));
