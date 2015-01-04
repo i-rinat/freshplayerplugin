@@ -154,29 +154,26 @@ fullscreen_window_thread(void *p)
     Window          root, child;
     int             rel_x, rel_y;
     unsigned int    mask;
+    const int       wnd_size = 10;
 
     // get current mouse pointer position
     XQueryPointer(dpy, DefaultRootWindow(dpy), &root, &child, &px, &py, &rel_x, &rel_y, &mask);
 
     // create tiny window where mouse pointer is
     pp_i->fs_wnd = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy),
-                                       px, py, 3, 3, 0, 0, 0x000000);
+                                       px - wnd_size / 2, py - wnd_size / 2, wnd_size, wnd_size,
+                                       0, 0, 0x000000);
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
                                     ButtonReleaseMask | PointerMotionMask | ExposureMask |
                                     StructureNotifyMask);
 
-    // round trip to browser thread to get browser window
-    tp->browser_window = None;
-    pthread_barrier_init(&tp->browser_window_barrier, NULL, 2);
-    ppb_core_call_on_browser_thread(get_browser_window, tp);
-    pthread_barrier_wait(&tp->browser_window_barrier);
-    pthread_barrier_destroy(&tp->browser_window_barrier);
-
-    // set window transient for browser window
-    if (tp->browser_window != None)
-        XSetTransientForHint(dpy, pp_i->fs_wnd, tp->browser_window);
-    else
-        trace_error("%s, can't get tp->browser_window\n", __func__);
+    // tell window manager we want exact position
+    XSizeHints size_hints = {
+        .flags = USPosition,
+        .x = px - wnd_size / 2,
+        .y = py - wnd_size / 2,
+    };
+    XSetWMNormalHints(dpy, pp_i->fs_wnd, &size_hints);
 
     // update windows state properties
     Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", False);
@@ -186,7 +183,6 @@ fullscreen_window_thread(void *p)
     };
     XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
                     (unsigned char *)&state_atoms, sizeof(state_atoms)/sizeof(state_atoms[0]));
-    XSync(dpy, False);
 
     // give window a name
     const char *fs_window_name = "freshwrapper fullscreen window";
@@ -202,13 +198,33 @@ fullscreen_window_thread(void *p)
                     8, PropModeReplace,
                     (unsigned char *)fs_window_name, strlen(fs_window_name));
 
+    // set hint for a compositor
+    long int net_wm_bypass_compositor_hint_on = 1;
+    XChangeProperty(dpy, pp_i->fs_wnd, XInternAtom(dpy, "_NET_WM_BYPASS_COMPOSITOR", False),
+                    XA_CARDINAL, 32, PropModeReplace,
+                    (unsigned char *)&net_wm_bypass_compositor_hint_on, 1);
+
     // tell window manager we want to handle WM_DELETE_WINDOW
     Atom wm_delete_window_atom = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
     append_wm_protocol(dpy, pp_i->fs_wnd, wm_delete_window_atom);
 
     // show window
-    XMapWindow(dpy, pp_i->fs_wnd);
+    XMapRaised(dpy, pp_i->fs_wnd);
     XSync(dpy, False);
+
+    // round trip to browser thread to get browser window
+    tp->browser_window = None;
+    pthread_barrier_init(&tp->browser_window_barrier, NULL, 2);
+    ppb_core_call_on_browser_thread(get_browser_window, tp);
+    pthread_barrier_wait(&tp->browser_window_barrier);
+    pthread_barrier_destroy(&tp->browser_window_barrier);
+
+    // set window transient for browser window
+    if (tp->browser_window != None)
+        XSetTransientForHint(dpy, pp_i->fs_wnd, tp->browser_window);
+    else
+        trace_error("%s, can't get tp->browser_window\n", __func__);
+
     pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 1;
     pthread_mutex_unlock(&display.lock);
