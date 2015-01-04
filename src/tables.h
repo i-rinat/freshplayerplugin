@@ -32,12 +32,17 @@
 #include <npapi/npfunctions.h>
 
 
+typedef GLXContext
+(*glx_create_context_attribs_arb_f)(Display *dpy, GLXFBConfig config,
+                                    GLXContext share_context, Bool direct,
+                                    const int *attrib_list);
+
 struct display_s {
     Display                            *x;
     Cursor                              transparent_cursor;
     pthread_mutex_t                     lock;
     uint32_t                            screensaver_types;
-    PFNGLXCREATECONTEXTATTRIBSARBPROC   glXCreateContextAttribsARB;
+    glx_create_context_attribs_arb_f    glXCreateContextAttribsARB;
     uint32_t                            glx_arb_create_context;
     uint32_t                            glx_arb_create_context_profile;
     uint32_t                            glx_ext_create_context_es2_profile;

@@ -25,6 +25,9 @@
 #ifndef FPP_PP_RESOURCE_H
 #define FPP_PP_RESOURCE_H
 
+#define GL_GLEXT_LEGACY             // prevent inclusion of glext.h
+#define GLX_GLXEXT_LEGACY           // prevent inclusion of glxext.h
+
 #include <ppapi/c/pp_completion_callback.h>
 #include <ppapi/c/pp_rect.h>
 #include <ppapi/c/pp_resource.h>

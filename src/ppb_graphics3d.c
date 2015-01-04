@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 
+#include "pp_resource.h"
 #include <assert.h>
 #include "ppb_graphics3d.h"
 #include <stdlib.h>
 #include <GL/glx.h>
+#include <GL/glxext.h>
 #include <GLES2/gl2.h>
 #include "trace.h"
-#include "pp_resource.h"
 #include "tables.h"
 #include <ppapi/c/pp_errors.h>
 #include "ppb_core.h"
