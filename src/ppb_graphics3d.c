@@ -111,6 +111,7 @@ create_presentation_glx_context(struct pp_graphics3d_s *g3d)
 
     // Create alpha blending GL program
     const char *vert_shader_body =
+        "#version 100\n"
         "attribute vec4 pos;\n"
         "varying vec2 tex_coord;\n"
         "void main() {\n"
@@ -118,6 +119,7 @@ create_presentation_glx_context(struct pp_graphics3d_s *g3d)
         "    tex_coord = pos.xy;\n"
         "}\n";
     const char *frag_shader_body =
+        "#version 100\n"
         "varying highp vec2 tex_coord;\n"
         "uniform sampler2D tex_front;\n"
         "uniform sampler2D tex_back;\n"
