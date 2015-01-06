@@ -34,6 +34,7 @@ struct fpp_config_s {
     char   *pepperflash_path;
     char   *flash_command_line;
     int     enable_3d;
+    int     enable_3d_transparent;
     struct {
         int   switch_buttons_2_3;
         int   dump_resource_histogram;
