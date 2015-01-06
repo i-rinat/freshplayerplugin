@@ -192,13 +192,13 @@ time_compare_func(gconstpointer a, gconstpointer b, gpointer user_data)
 int32_t
 ppb_message_loop_run(PP_Resource message_loop)
 {
-    return ppb_message_loop_run_int(message_loop, 0, 1);
+    return ppb_message_loop_run_int(message_loop, ML_INCREASE_DEPTH);
 }
 
 int32_t
 ppb_message_loop_run_nested(PP_Resource message_loop)
 {
-    return ppb_message_loop_run_int(message_loop, 1, 1);
+    return ppb_message_loop_run_int(message_loop, ML_NESTED | ML_INCREASE_DEPTH);
 }
 
 static
@@ -216,7 +216,7 @@ add_ms(struct timespec t, unsigned int ms)
 }
 
 int32_t
-ppb_message_loop_run_int(PP_Resource message_loop, int nested, int increase_depth)
+ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
 {
     if (this_thread_message_loop != message_loop) {
         trace_error("%s, not attached to current thread\n", __func__);
@@ -230,7 +230,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested, int increase_dept
     }
 
     // prevent nested loops
-    if (!nested && ml->running) {
+    if (!(flags & ML_NESTED) && ml->running) {
         trace_error("%s, trying to run nested loop without declaring as nested\n", __func__);
         pp_resource_release(message_loop);
         return PP_ERROR_INPROGRESS;
@@ -246,7 +246,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested, int increase_dept
 
     ml->running = 1;
     ml->teardown = 0;
-    if (increase_depth)
+    if (flags & ML_INCREASE_DEPTH)
         ml->depth++;
 
     int teardown = 0;
@@ -320,10 +320,10 @@ ppb_message_loop_run_int(PP_Resource message_loop, int nested, int increase_dept
     // mark thread as non-running
     ml = pp_resource_acquire(message_loop, PP_RESOURCE_MESSAGE_LOOP);
     if (ml) {
-        if (increase_depth)
+        if (flags & ML_INCREASE_DEPTH)
             ml->depth--;
         ml->running = 0;
-        if (nested) {
+        if (flags & ML_NESTED) {
             ml->running = saved_state.running;
             ml->teardown = saved_state.teardown;
         }

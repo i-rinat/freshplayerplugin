@@ -28,6 +28,13 @@
 #include <ppapi/c/ppb_message_loop.h>
 
 
+enum ppb_message_loop_flags_e {
+    ML_NO_FLAGS =           0,
+    ML_NESTED =             (1 << 0),
+    ML_INCREASE_DEPTH =     (1 << 1),
+};
+
+
 PP_Resource
 ppb_message_loop_create(PP_Instance instance);
 
@@ -59,7 +66,7 @@ int32_t
 ppb_message_loop_run(PP_Resource message_loop);
 
 int32_t
-ppb_message_loop_run_int(PP_Resource message_loop, int nested, int increase_depth);
+ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags);
 
 int32_t
 ppb_message_loop_run_nested(PP_Resource message_loop);

@@ -76,7 +76,7 @@ ppb_flash_message_loop_run(PP_Resource flash_message_loop)
     pp_resource_release(flash_message_loop);
 
     // launching nested loop without depth increase to prevent hang up of previously pushed tasks
-    ppb_message_loop_run_int(message_loop, 1, 0);
+    ppb_message_loop_run_int(message_loop, ML_NESTED);
 
     fml = pp_resource_acquire(flash_message_loop, PP_RESOURCE_FLASH_MESSAGE_LOOP);
     if (fml) {
