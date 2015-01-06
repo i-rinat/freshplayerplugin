@@ -87,38 +87,34 @@ call_on_browser_thread_comt(void *user_data, int32_t result)
     g_slice_free(struct call_on_browser_thread_task_s, task);
 }
 
+static
+void
+activate_browser_thread_ml_ptac(void *param)
+{
+    PP_Resource m_loop = ppb_message_loop_get_for_browser_thread();
+    ppb_message_loop_run_int(m_loop, ML_INCREASE_DEPTH | ML_EXIT_ON_EMPTY | ML_NESTED);
+}
+
 void
 ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data)
 {
-    PP_Resource m_loop = ppb_message_loop_get_for_browser_thread();
-    struct pp_message_loop_s *ml = pp_resource_acquire(m_loop, PP_RESOURCE_MESSAGE_LOOP);
-    if (!ml) {
-        trace_error("%s, no message loop for browser thread\n", __func__);
-        return;
-    }
-
-    if (!ml->running) {
-        struct pp_instance_s *pp_i = tables_get_some_pp_instance();
-        if (!pp_i) {
-            pp_resource_release(m_loop);
-            trace_error("%s, no alive instance available\n", __func__);
-            return;
-        }
-
-        pthread_mutex_lock(&display.lock);
-        if (pp_i->npp)
-            npn.pluginthreadasynccall(pp_i->npp, func, user_data);
-        pthread_mutex_unlock(&display.lock);
-
-        pp_resource_release(m_loop);
-        return;
-    }
-
     struct call_on_browser_thread_task_s *task = g_slice_alloc(sizeof(*task));
     task->func = func;
     task->user_data = user_data;
-    pp_resource_release(m_loop);
+
+    PP_Resource m_loop = ppb_message_loop_get_for_browser_thread();
     ppb_message_loop_post_work(m_loop, PP_MakeCCB(call_on_browser_thread_comt, task), 0);
+
+    struct pp_instance_s *pp_i = tables_get_some_pp_instance();
+    if (!pp_i) {
+        trace_error("%s, no alive instance available\n", __func__);
+        return;
+    }
+
+    pthread_mutex_lock(&display.lock);
+    if (pp_i->npp)
+        npn.pluginthreadasynccall(pp_i->npp, activate_browser_thread_ml_ptac, user_data);
+    pthread_mutex_unlock(&display.lock);
 }
 
 PP_Bool
