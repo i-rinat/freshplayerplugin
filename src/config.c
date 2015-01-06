@@ -30,12 +30,12 @@
 
 
 static struct fpp_config_s default_config = {
-    .audio_buffer_min_ms = 20,
-    .audio_buffer_max_ms = 500,
-    .pepperflash_path    = NULL,
-    .flash_command_line  = "enable_hw_video_decode=1,enable_stagevideo_auto=1",
-    .enable_3d           = 0,
-    .enable_3d_transparent = 1,
+    .audio_buffer_min_ms =      20,
+    .audio_buffer_max_ms =      500,
+    .pepperflash_path    =      NULL,
+    .flash_command_line  =      "enable_hw_video_decode=1,enable_stagevideo_auto=1",
+    .enable_3d           =      0,
+    .enable_3d_transparent =    1,
     .quirks = {
         .switch_buttons_2_3         = 0,
         .dump_resource_histogram    = 0,
@@ -120,25 +120,20 @@ fpp_config_initialize(void)
     long long intval;
     const char *stringval;
 
-    if (config_lookup_int64(&cfg, "audio_buffer_min_ms", &intval)) {
+    if (config_lookup_int64(&cfg, "audio_buffer_min_ms", &intval))
         config.audio_buffer_min_ms = intval;
-    }
 
-    if (config_lookup_int64(&cfg, "audio_buffer_max_ms", &intval)) {
+    if (config_lookup_int64(&cfg, "audio_buffer_max_ms", &intval))
         config.audio_buffer_max_ms = intval;
-    }
 
-    if (config_lookup_string(&cfg, "pepperflash_path", &stringval)) {
+    if (config_lookup_string(&cfg, "pepperflash_path", &stringval))
         config.pepperflash_path = strdup(stringval);
-    }
 
-    if (config_lookup_string(&cfg, "flash_command_line", &stringval)) {
+    if (config_lookup_string(&cfg, "flash_command_line", &stringval))
         config.flash_command_line = strdup(stringval);
-    }
 
-    if (config_lookup_int64(&cfg, "enable_3d", &intval)) {
+    if (config_lookup_int64(&cfg, "enable_3d", &intval))
         config.enable_3d = intval;
-    }
 
     if (config_lookup_int64(&cfg, "enable_3d_transparent", &intval))
         config.enable_3d_transparent = intval;
