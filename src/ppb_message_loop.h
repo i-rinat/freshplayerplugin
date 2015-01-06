@@ -32,6 +32,7 @@ enum ppb_message_loop_flags_e {
     ML_NO_FLAGS =           0,
     ML_NESTED =             (1 << 0),
     ML_INCREASE_DEPTH =     (1 << 1),
+    ML_EXIT_ON_EMPTY =      (1 << 2),
 };
 
 

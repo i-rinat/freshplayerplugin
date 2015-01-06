@@ -257,6 +257,17 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
     GQueue *int_q = ml->int_q;
     pp_resource_release(message_loop);
 
+    if (flags & ML_EXIT_ON_EMPTY) {
+        // pump tasks from async_q to int_q. If there is no ML_EXIT_ON_EMPTY in flags, such
+        // action is not necessary
+        struct message_loop_task_s *task;
+        do {
+            task = g_async_queue_try_pop(async_q);
+            if (task)
+                g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
+        } while (task != NULL);
+    }
+
     while (1) {
         struct timespec now;
         struct message_loop_task_s *task = g_queue_peek_head(int_q);
@@ -309,6 +320,9 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
             }
         } else if (teardown) {
             // teardown, no tasks in queue left
+            break;
+        } else if (flags & ML_EXIT_ON_EMPTY) {
+            // loop break was requested for "no-task" condition; and there is no tasks left
             break;
         }
 
