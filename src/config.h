@@ -35,6 +35,7 @@ struct fpp_config_s {
     char   *flash_command_line;
     int     enable_3d;
     int     enable_3d_transparent;
+    int     quiet;
     struct {
         int   switch_buttons_2_3;
         int   dump_resource_histogram;

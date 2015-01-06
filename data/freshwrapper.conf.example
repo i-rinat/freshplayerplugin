@@ -27,3 +27,6 @@ enable_3d = 0
 
 # enable 3d for wmode=transparent instances
 enable_3d_transparent = 1
+
+# when set to 1, limits output to warnings and errors only
+quiet = 0

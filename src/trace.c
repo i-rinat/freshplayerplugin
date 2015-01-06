@@ -28,6 +28,7 @@
 #include <sys/syscall.h>
 #include <stdlib.h>
 #include "trace.h"
+#include "config.h"
 #include "pp_resource.h"
 #include "ppb_var.h"
 
@@ -38,6 +39,8 @@ static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 void
 trace_info(const char *fmt, ...)
 {
+    if (config.quiet)
+        return;
     pthread_mutex_lock(&lock);
     va_list args;
 //    fprintf(stdout, "[fresh] ");
