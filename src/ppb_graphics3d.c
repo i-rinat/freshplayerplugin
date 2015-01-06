@@ -34,6 +34,7 @@
 #include <ppapi/c/pp_errors.h>
 #include "ppb_core.h"
 #include "ppb_opengles2.h"
+#include "config.h"
 
 
 int32_t
@@ -189,6 +190,11 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         trace_error("%s, bad instance\n", __func__);
         return 0;
     }
+
+    // pretend we have no 3d to avoid pixmap rendering issue for transparent instances
+    if (pp_i->is_transparent)
+        if (config.enable_3d_transparent == 0)
+            return 0;
 
     // check for required GLX extensions
     if (!display.glx_arb_create_context || !display.glx_arb_create_context_profile ||
