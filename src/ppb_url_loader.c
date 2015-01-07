@@ -152,7 +152,8 @@ url_loader_open_ptac(void *user_data)
             need_newline = 1;
         }
         if (p->custom_referrer_url) {
-            fprintf(fp, "Referrer: %s\n", p->custom_referrer_url);
+            // the header name should be "referer", that's how it's spelled in HTTP spec
+            fprintf(fp, "Referer: %s\n", p->custom_referrer_url);
             need_newline = 1;
         }
         if (p->custom_content_transfer_encoding) {
