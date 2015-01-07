@@ -120,6 +120,7 @@ task_destroy(struct async_network_task_s *task)
         event_free(task->event);
         task->event = NULL;
     }
+    free(task->host);
     g_slice_free(struct async_network_task_s, task);
     pthread_mutex_unlock(&lock);
 }
@@ -252,7 +253,6 @@ handle_tcp_connect_stage1(struct async_network_task_s *task)
     struct evdns_request *req;
     req = evdns_base_resolve_ipv4(evdns_b, task->host, DNS_QUERY_NO_SEARCH,
                                   handle_tcp_connect_stage2, task);
-    free(task->host);
     // TODO: what about ipv6?
 
     if (!req) {
