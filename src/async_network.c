@@ -166,7 +166,8 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
     }
 
     // no addresses left, fail gracefully
-    trace_warning("%s, connection failed to all addresses\n", __func__);
+    trace_warning("%s, connection failed to all addresses (%s:%d)\n", __func__, task->host,
+                  task->port);
     ppb_core_call_on_main_thread(0, task->callback, get_pp_errno());
     pp_resource_release(task->resource);
     free(task->addr);
