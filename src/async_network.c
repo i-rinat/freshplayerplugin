@@ -136,7 +136,8 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
     struct async_network_task_s *task = arg;
     struct pp_tcp_socket_s *ts = pp_resource_acquire(task->resource, PP_RESOURCE_TCP_SOCKET);
     if (!ts) {
-        trace_warning("%s, tcp socket resource was closed during request\n", __func__);
+        trace_warning("%s, tcp socket resource was closed during request (%s:%u)\n", __func__,
+                      task->host, (unsigned int)task->port);
         free(task->addr);
         task_destroy(task);
         return;
@@ -166,8 +167,8 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
     }
 
     // no addresses left, fail gracefully
-    trace_warning("%s, connection failed to all addresses (%s:%d)\n", __func__, task->host,
-                  task->port);
+    trace_warning("%s, connection failed to all addresses (%s:%u)\n", __func__, task->host,
+                  (unsigned int)task->port);
     ppb_core_call_on_main_thread(0, task->callback, get_pp_errno());
     pp_resource_release(task->resource);
     free(task->addr);
@@ -200,7 +201,8 @@ handle_tcp_connect_stage3(struct async_network_task_s *task)
     }
 
     if (res != 0 && errno != EINPROGRESS) {
-        trace_error("%s, res = %d, errno = %d\n", __func__, res, errno);
+        trace_error("%s, res = %d, errno = %d (%s:%u)\n", __func__, res, errno, task->host,
+                    (unsigned int)task->port);
         ppb_core_call_on_main_thread(0, task->callback, get_pp_errno());
         free(task->addr);
         task_destroy(task);
@@ -219,7 +221,8 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
     struct async_network_task_s *task = arg;
 
     if (result != DNS_ERR_NONE || count < 1) {
-        trace_warning("%s, evdns returned code %d, count = %d\n", __func__, result, count);
+        trace_warning("%s, evdns returned code %d, count = %d (%s:%u)\n", __func__, result, count,
+                      task->host, (unsigned int)task->port);
         ppb_core_call_on_main_thread(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
         task_destroy(task);
         return;
@@ -238,7 +241,8 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
         task->addr = malloc(16 * count);
         memcpy(task->addr, addresses, 16 * count);
     } else {
-        trace_error("%s bad evdns type\n", __func__);
+        trace_error("%s, bad evdns type %d (%s:%u)\n", __func__, type, task->host,
+                    (unsigned int)task->port);
         ppb_core_call_on_main_thread(0, task->callback, PP_ERROR_FAILED);
         task_destroy(task);
         return;
@@ -257,7 +261,8 @@ handle_tcp_connect_stage1(struct async_network_task_s *task)
     // TODO: what about ipv6?
 
     if (!req) {
-        trace_warning("%s, early dns resolution failure\n", __func__);
+        trace_warning("%s, early dns resolution failure (%s:%u)\n", __func__, task->host,
+                      (unsigned int)task->port);
         ppb_core_call_on_main_thread(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED);
         task_destroy(task);
         return;
