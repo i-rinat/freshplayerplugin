@@ -365,10 +365,10 @@ post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp)
     struct post_data_item_s *pdi = &g_array_index(post_data, struct post_data_item_s, idx);
 
     if (pdi->file_ref != 0) {
-        int fd;
+        int fd = -1;
         if (ppb_flash_file_file_ref_open_file(pdi->file_ref, PP_FILEOPENFLAG_READ, &fd) != PP_OK) {
             // some error, skipping this one
-            return;
+            goto err;
         }
 
         size_t to_write = post_data_get_item_length(pdi);
@@ -380,7 +380,8 @@ post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp)
             to_write -= read_bytes;
         }
 err:
-        close(fd);
+        if (fd >= 0)
+            close(fd);
     } else {
         fwrite(pdi->data, 1, pdi->len, fp);
     }
