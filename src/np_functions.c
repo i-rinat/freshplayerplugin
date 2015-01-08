@@ -188,8 +188,6 @@ call_plugin_did_create_comt(void *user_data, int32_t result)
         pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->id, url_loader);
     }
 
-    g_atomic_int_set(&pp_i->instance_loaded, 1);
-
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
@@ -270,10 +268,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pp_i->argn[k] = strdup(argn[k] ? argn[k] : "");
         pp_i->argv[k] = strdup(argv[k] ? argv[k] : "");
 
-        if (strcasecmp(argn[k], "src") == 0) {
-            pp_i->instance_url = ppb_var_var_from_utf8_z(argv[k]);
-        }
-
         if (strcasecmp(argn[k], "wmode") == 0)
             if (strcasecmp(argv[k], "transparent") == 0)
                 pp_i->is_transparent = 1;
@@ -329,14 +323,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pthread_barrier_wait(&pp_i->main_thread_barrier);
         pthread_barrier_destroy(&pp_i->main_thread_barrier);
     }
-
-    struct call_plugin_did_create_param_s *p = g_slice_alloc(sizeof(*p));
-    p->m_loop = ppb_message_loop_get_for_browser_thread();
-    p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
-    p->pp_i =   pp_i;
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_plugin_did_create_comt, p), PP_OK);
-    ppb_message_loop_run_nested(p->m_loop);
-    g_slice_free1(sizeof(*p), p);
 
     return NPERR_NO_ERROR;
 }
@@ -418,9 +404,31 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
 
     PP_Resource loader = (size_t)stream->notifyData;
     if (!loader) {
-        // ignoring unrequested streams
+        struct pp_instance_s *pp_i = npp->pdata;
         stream->pdata = NULL;
         trace_info_f("      ignoring unrequested stream\n");
+
+        if (g_atomic_int_get(&pp_i->instance_loaded) == 0) {
+            // the only unrequest stream from browser is movie contents itself. Use it to get
+            // actual plugin instance url
+            pp_i->instance_url = ppb_var_var_from_utf8_z(stream->url);
+            trace_info_f("      using stream->url as plugin instance url\n");
+
+            // finish initialization by calling plugin's DidCreate()
+            struct call_plugin_did_create_param_s *p = g_slice_alloc(sizeof(*p));
+            p->m_loop = ppb_message_loop_get_for_browser_thread();
+            p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
+            p->pp_i =   pp_i;
+            ppb_core_call_on_main_thread(0, PP_MakeCCB(call_plugin_did_create_comt, p), PP_OK);
+            ppb_message_loop_run_nested(p->m_loop);
+            g_slice_free1(sizeof(*p), p);
+            g_atomic_int_set(&pp_i->instance_loaded, 1);
+
+            NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
+            npn.invalidaterect(npp, &npr);
+            npn.forceredraw(npp);
+        }
+
         return NPERR_NO_ERROR;
     }
 
