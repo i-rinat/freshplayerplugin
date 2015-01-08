@@ -187,8 +187,6 @@ url_loader_open_ptac(void *user_data)
                 post_data_write_to_fp(p->post_data, k, fp);
         }
 
-        fclose(fp);
-
         if (p->target) {
             p->retval = npn.posturl(pp_i->npp, p->url, p->target, strlen(tmpfname), tmpfname, true);
         } else {
@@ -196,6 +194,7 @@ url_loader_open_ptac(void *user_data)
                                           (void*)(size_t)p->loader);
         }
 err:
+        fclose(fp);
         unlink(tmpfname);
         g_free(tmpfname);
     } else {
