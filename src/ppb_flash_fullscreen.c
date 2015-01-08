@@ -283,7 +283,10 @@ quit_and_destroy_fs_wnd:
         usleep(10);
     }
 
+    pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 0;
+    pthread_mutex_unlock(&display.lock);
+
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
 
