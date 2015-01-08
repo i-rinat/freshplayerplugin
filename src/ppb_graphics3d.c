@@ -438,15 +438,15 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
         return PP_ERROR_BADRESOURCE;
     }
 
-    pthread_mutex_lock(&display.lock);
     g3d->width = width;
     g3d->height = height;
 
     GLXPixmap old_glx_pixmap = g3d->glx_pixmap;
     Pixmap old_pixmap = g3d->pixmap;
-    // release possibly bound to other thread g3d->glx_pixmap and bind it to the current one
-    glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
 
+    // release possibly bound to other thread g3d->glx_pixmap and bind it to the current one
+    pthread_mutex_lock(&display.lock);
+    glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
                                 DefaultDepth(display.x, 0));
     g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
