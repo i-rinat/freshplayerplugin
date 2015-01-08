@@ -375,10 +375,11 @@ post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp)
         while (to_write > 0) {
             ssize_t read_bytes = RETRY_ON_EINTR(read(fd, buf, MIN(to_write, sizeof(buf))));
             if (read_bytes == -1)
-                return;
+                goto err;
             fwrite(buf, 1, (size_t)read_bytes, fp);
             to_write -= read_bytes;
         }
+err:
         close(fd);
     } else {
         fwrite(pdi->data, 1, pdi->len, fp);
