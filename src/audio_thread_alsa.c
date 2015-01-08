@@ -169,7 +169,7 @@ audio_thread(void *param)
             continue;
         }
 
-        if (res == 0)
+        if (res == 0 || fds == NULL)
             continue;
 
         if (fds[0].revents)
