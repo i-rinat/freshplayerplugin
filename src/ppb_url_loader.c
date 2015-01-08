@@ -129,7 +129,7 @@ url_loader_open_ptac(void *user_data)
         // POST request
         char   *tmpfname;
         int     fd;
-        FILE   *fp;
+        FILE   *fp = NULL;
         int     need_newline = 0;
 
         tmpfname = g_strdup_printf("/tmp/FreshPostBodyXXXXXX");    // TODO: make configurable
@@ -194,7 +194,8 @@ url_loader_open_ptac(void *user_data)
                                           (void*)(size_t)p->loader);
         }
 err:
-        fclose(fp);
+        if (fp)
+            fclose(fp);
         unlink(tmpfname);
         g_free(tmpfname);
     } else {
