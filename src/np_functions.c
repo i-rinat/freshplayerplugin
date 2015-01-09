@@ -188,8 +188,6 @@ call_plugin_did_create_comt(void *user_data, int32_t result)
         pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->id, url_loader);
     }
 
-    g_atomic_int_set(&pp_i->instance_loaded, 1);
-
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
@@ -337,6 +335,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     ppb_core_call_on_main_thread(0, PP_MakeCCB(call_plugin_did_create_comt, p), PP_OK);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
+
+    g_atomic_int_set(&pp_i->instance_loaded, 1);
 
     return NPERR_NO_ERROR;
 }
