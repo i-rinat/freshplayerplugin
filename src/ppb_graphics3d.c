@@ -326,7 +326,7 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
 
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
-                                DefaultDepth(display.x, 0));
+                                DefaultDepth(display.x, DefaultScreen(display.x)));
     g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
     if (g3d->glx_pixmap == None) {
         trace_error("%s, failed to create GLX pixmap\n", __func__);
@@ -448,7 +448,7 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     pthread_mutex_lock(&display.lock);
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
-                                DefaultDepth(display.x, 0));
+                                DefaultDepth(display.x, DefaultScreen(display.x)));
     g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
 
     // make new g3d->glx_pixmap current to the current thread to allow releasing old_glx_pixmap

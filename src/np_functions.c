@@ -632,7 +632,7 @@ handle_graphics_expose_event(NPP npp, void *event)
     struct pp_graphics3d_s *g3d = pp_resource_acquire(pp_i->graphics, PP_RESOURCE_GRAPHICS3D);
     Display *dpy = ev->display;
     Drawable drawable = ev->drawable;
-    int screen = 0;
+    int screen = DefaultScreen(dpy);
     cairo_surface_t *src_surf, *dst_surf;
     cairo_t *cr;
     int retval;
@@ -761,7 +761,7 @@ handle_placeholder_graphics_expose_event(NPP npp, void *event)
     XGraphicsExposeEvent   *ev = event;
     Display                *dpy = ev->display;
     Drawable                drawable = ev->drawable;
-    int                     screen = 0;
+    int                     screen = DefaultScreen(dpy);
     unsigned int            width, height, border_width, depth;
     Window                  root_wnd;
     int                     x, y;
