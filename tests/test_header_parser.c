@@ -50,6 +50,20 @@ main(void)
     assert(0 == ph->cnt);
     hp_free_parsed_headers(ph);
 
+    // ===
+    // no \r\n at the end of last header line
+    ph = hp_parse_headers(
+        "HTTP/1.0 301 Moved Permanently\r\n"
+        "Location: http://example.org\r\n"
+        "Connection: Keep-Alive"
+    );
+
+    assert(hp_header_exists(ph, "Location") == 1);
+    assert(hp_header_exists(ph, "Connection") == 1);
+    assert(0 == strcmp(hp_get_header_value(ph, "Connection"), "Keep-Alive"));
+    hp_free_parsed_headers(ph);
+
+    // ===
     printf("pass\n");
     return 0;
 }
