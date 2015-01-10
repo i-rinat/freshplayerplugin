@@ -9,7 +9,10 @@ set(test_list
     test_uri_parser
 )
 
-link_directories(${REQ_LIBRARY_DIRS})
+link_directories(
+    ${REQ_LIBRARY_DIRS}
+    ${PULSEAUDIO_LIBRARY_DIRS}
+)
 
 # simplify inclusion of .c sources
 include_directories(..)
@@ -24,7 +27,8 @@ foreach(item ${test_list})
     target_link_libraries(${item}
         "-Wl,-z,muldefs"
         dl
-        ${REQ_LIBRARIES})
+        ${REQ_LIBRARIES}
+        ${PULSEAUDIO_LIBRARIES})
     add_test(${item} ${item})
     add_dependencies(check ${item})
 endforeach()
