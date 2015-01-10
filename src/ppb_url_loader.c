@@ -242,7 +242,7 @@ trim_nl(char *s)
     if (!s)
         return NULL;
     size_t len = strlen(s);
-    while (len > 0 && s[len - 1] == '\n') {
+    while (len > 0 && (s[len - 1] == '\n' || s[len - 1] == '\r')) {
         s[len - 1] = 0;
         len --;
     }
