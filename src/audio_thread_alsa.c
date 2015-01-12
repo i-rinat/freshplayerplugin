@@ -239,7 +239,13 @@ constructor_audio_thread_alsa(void)
     active_streams_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
     stream_by_fd_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
 
-    (void)pipe(notification_pipe);
+    if (pipe(notification_pipe) != 0) {
+        trace_error("%s, pipe creation failed\n", __func__);
+        notification_pipe[0] = -1;
+        notification_pipe[1] = -1;
+        return;
+    }
+
     make_nonblock(notification_pipe[0]);
     make_nonblock(notification_pipe[1]);
 
