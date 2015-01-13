@@ -5,7 +5,7 @@
 	doesn't use it, you need one from ChromeOS.)
 	* core: fix malfunctioning nested submenus
 	* core: implement file chooser dialog
-	* grpahics: fullscreen fixups, stop crashing on Alt-F4
+	* graphics: fullscreen fixups, stop crashing on Alt-F4
 	* audio: rework ALSA code, add optional PulseAudio support
 	* core: implement screen saver inhibition interface
 	* graphics: use GLX to create GL context, for both GL and GLES
