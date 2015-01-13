@@ -270,14 +270,16 @@ clipboard_read_data_ptac(void *user_data)
 
     GtkSelectionData *sd = gtk_clipboard_wait_for_contents(clipboard, target);
     if (sd) {
+        const guchar *sd_data = gtk_selection_data_get_data(sd);
+        const gint sd_length = gtk_selection_data_get_length(sd);
         switch (p->format) {
         case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
         case PP_FLASH_CLIPBOARD_FORMAT_HTML:
-            p->result = ppb_var_var_from_utf8((char *)sd->data, sd->length);
+            p->result = ppb_var_var_from_utf8((char *)sd_data, sd_length);
             break;
         default:
-            p->result = ppb_var_array_buffer_create(sd->length);
-            memcpy(ppb_var_array_buffer_map(p->result), sd->data, sd->length);
+            p->result = ppb_var_array_buffer_create(sd_length);
+            memcpy(ppb_var_array_buffer_map(p->result), sd_data, sd_length);
             ppb_var_array_buffer_unmap(p->result);
             break;
         }
