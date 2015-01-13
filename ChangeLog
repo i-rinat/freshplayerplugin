@@ -1,3 +1,18 @@
+2015-01-13  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release v0.2.2
+	* core: implement Flash DRM interface. (Desktop PepperFlash
+	doesn't use it, you need one from ChromeOS.)
+	* core: fix malfunctioning nested submenus
+	* core: implement file chooser dialog
+	* grpahics: fullscreen fixups, stop crashing on Alt-F4
+	* audio: rework ALSA code, add optional PulseAudio support
+	* core: implement screen saver inhibition interface
+	* graphics: use GLX to create GL context, for both GL and GLES
+	* core: fix hangs caused by wrong nested message loop handling
+	* core: add "quiet" config option to decrease amount of output
+	* core: fix Referer bug
+
 2014-10-22  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.2.1
