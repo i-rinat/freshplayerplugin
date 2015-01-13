@@ -99,18 +99,16 @@ fcd_response_handler(GtkDialog *dialog, gint response_id, gpointer user_data)
 {
     struct show_param_s *p = user_data;
     int32_t callback_result;
-    GSList *fname_lst, *ll;
-    guint cnt;
 
     if (response_id == GTK_RESPONSE_OK) {
         PP_Resource *file_refs, *file_ref;
+        GSList *fname_lst = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(dialog));
+        guint cnt = g_slist_length(fname_lst);
 
         callback_result = PP_OK;
-        fname_lst = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(dialog));
-        cnt = g_slist_length(fname_lst);
         file_refs = p->output.GetDataBuffer(p->output.user_data, cnt, sizeof(PP_Resource));
         // TODO: what to do if file_refs == NULL?
-        ll = fname_lst;
+        GSList *ll = fname_lst;
         file_ref = file_refs;
         while (ll) {
             *file_ref = ppb_file_ref_create_unrestricted((char *)ll->data, !p->save_as);
