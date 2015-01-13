@@ -153,11 +153,21 @@ show_without_user_guesture_ptac(void *param)
         dialog_title = "Open file";
     }
 
+#if GTK_MAJOR_VERSION == 3
+    void *open_button_title = "_Open";
+    void *close_button_title = "_Close";
+#elif GTK_MAJOR_VERSION == 2
+    void *open_button_title = GTK_STOCK_OPEN;
+    void *close_button_title = GTK_STOCK_CANCEL;
+#else
+#error Unknown GTK version
+#endif
+
     fcd = gtk_file_chooser_dialog_new(dialog_title, NULL,
                                       p->save_as ? GTK_FILE_CHOOSER_ACTION_SAVE
                                                  : GTK_FILE_CHOOSER_ACTION_OPEN,
-                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                      GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
+                                      close_button_title, GTK_RESPONSE_CANCEL,
+                                      open_button_title, GTK_RESPONSE_OK, NULL);
 
     if (p->mode == PP_FILECHOOSERMODE_OPENMULTIPLE)
         gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fcd), 1);
