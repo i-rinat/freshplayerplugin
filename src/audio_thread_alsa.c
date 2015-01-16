@@ -354,7 +354,6 @@ alsa_create_stream(audio_stream_direction type, unsigned int sample_rate,
         g_hash_table_insert(stream_by_fd_ht, GINT_TO_POINTER(as->fds[k].fd), as);
 
     wakeup_audio_thread();
-    CHECK_A(snd_pcm_start, (as->pcm));
 
 #undef CHECK_A
 
