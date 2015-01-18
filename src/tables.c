@@ -303,6 +303,12 @@ tables_open_display(void)
         display.min_height = 300;
     }
 
+    // apply size override from the configuration file
+    if (config.fullscreen_width > 0)
+        display.min_width = config.fullscreen_width;
+    if (config.fullscreen_height > 0)
+        display.min_height = config.fullscreen_height;
+
 quit:
     pthread_mutex_unlock(&display.lock);
     return retval;

@@ -37,6 +37,8 @@ static struct fpp_config_s default_config = {
     .enable_3d           =      0,
     .enable_3d_transparent =    1,
     .quiet =                    0,
+    .fullscreen_width    =      0,
+    .fullscreen_height   =      0,
     .quirks = {
         .switch_buttons_2_3         = 0,
         .dump_resource_histogram    = 0,
@@ -141,6 +143,12 @@ fpp_config_initialize(void)
 
     if (config_lookup_int64(&cfg, "quiet", &intval))
         config.quiet = intval;
+
+    if (config_lookup_int64(&cfg, "fullscreen_width", &intval))
+        config.fullscreen_width = intval;
+
+    if (config_lookup_int64(&cfg, "fullscreen_height", &intval))
+        config.fullscreen_height = intval;
 
     config_destroy(&cfg);
 

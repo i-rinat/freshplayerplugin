@@ -30,3 +30,11 @@ enable_3d_transparent = 1
 
 # when set to 1, limits output to warnings and errors only
 quiet = 0
+
+# When multiple monitors with different resolutions are used, size
+# of fullscreen window can vary. But some Flash movies request these
+# parameters once at startup and rely on them to be correct. By default,
+# if zeros are used here, freshwrapper will select minimal width and
+# height across all monitors.
+fullscreen_width = 0
+fullscreen_height = 0

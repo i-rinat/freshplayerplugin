@@ -36,6 +36,8 @@ struct fpp_config_s {
     int     enable_3d;
     int     enable_3d_transparent;
     int     quiet;
+    int     fullscreen_width;
+    int     fullscreen_height;
     struct {
         int   switch_buttons_2_3;
         int   dump_resource_histogram;
