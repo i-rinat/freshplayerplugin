@@ -90,6 +90,20 @@ ppb_net_address_replace_port(const struct PP_NetAddress_Private *src_addr, uint1
 void
 ppb_net_address_get_any_address(PP_Bool is_ipv6, struct PP_NetAddress_Private *addr)
 {
+    if (is_ipv6) {
+        struct sockaddr_in6 a;
+        memset(&a, 0, sizeof(a));
+        a.sin6_addr = in6addr_any;
+        memcpy(addr->data, &a, sizeof(a));
+        addr->size = sizeof(a);
+    } else {
+        // ipv4
+        struct sockaddr_in a;
+        memset(&a, 0, sizeof(a));
+        a.sin_addr.s_addr = INADDR_ANY;
+        memcpy(addr->data, &a, sizeof(a));
+        addr->size = sizeof(a);
+    }
 }
 
 PP_NetAddressFamily_Private
@@ -198,7 +212,7 @@ TRACE_WRAPPER
 void
 trace_ppb_net_address_get_any_address(PP_Bool is_ipv6, struct PP_NetAddress_Private *addr)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_net_address_get_any_address(is_ipv6, addr);
 }
 
@@ -261,7 +275,7 @@ const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = 
     .AreHostsEqual =         TWRAPF(ppb_net_address_are_hosts_equal),
     .Describe =              TWRAPZ(ppb_net_address_describe),
     .ReplacePort =           TWRAPF(ppb_net_address_replace_port),
-    .GetAnyAddress =         TWRAPZ(ppb_net_address_get_any_address),
+    .GetAnyAddress =         TWRAPF(ppb_net_address_get_any_address),
     .GetFamily =             TWRAPF(ppb_net_address_get_family),
     .GetPort =               TWRAPF(ppb_net_address_get_port),
     .GetAddress =            TWRAPF(ppb_net_address_get_address),
