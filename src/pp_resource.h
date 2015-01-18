@@ -93,6 +93,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_VIDEO_DECODER,
     PP_RESOURCE_BUFFER,
     PP_RESOURCE_FILE_CHOOSER,
+    PP_RESOURCE_UDP_SOCKET,
 
     PP_RESOURCE_TYPES_COUNT,        // must be the last item in the list
 };
@@ -419,6 +420,11 @@ struct pp_file_chooser_s {
     struct PP_Var           accept_types;
 };
 
+struct pp_udp_socket_s {
+    COMMON_STRUCTURE_FIELDS
+    int             sock;
+};
+
 union pp_largest_u {
     struct pp_instance_s            s02;
     struct pp_resource_generic_s    s03;
@@ -448,6 +454,7 @@ union pp_largest_u {
     struct pp_video_decoder_s       s27;
     struct pp_buffer_s              s28;
     struct pp_file_chooser_s        s29;
+    struct pp_udp_socket_s          s30;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type,

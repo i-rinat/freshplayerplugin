@@ -24,19 +24,43 @@
 
 #include "ppb_udp_socket.h"
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "trace.h"
+#include "tables.h"
 
 
 PP_Resource
 ppb_udp_socket_create(PP_Instance instance_id)
 {
-    return 0;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance_id);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+    PP_Resource udp_socket = pp_resource_allocate(PP_RESOURCE_UDP_SOCKET, pp_i);
+    struct pp_udp_socket_s *us = pp_resource_acquire(udp_socket, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
+
+    us->sock = socket(AF_INET, SOCK_DGRAM, 0);
+    pp_resource_release(udp_socket);
+    return udp_socket;
+}
+
+void
+ppb_udp_socket_destroy(void *p)
+{
+    struct pp_udp_socket_s *us = p;
+    (void)us;
 }
 
 PP_Bool
 ppb_udp_socket_is_udp_socket(PP_Resource resource_id)
 {
-    return PP_TRUE;
+    return pp_resource_get_type(resource_id) == PP_RESOURCE_UDP_SOCKET;
 }
 
 int32_t
@@ -91,7 +115,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_udp_socket_create(PP_Instance instance_id)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s instance_id=%d\n", __func__+6, instance_id);
     return ppb_udp_socket_create(instance_id);
 }
 
@@ -99,7 +123,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_udp_socket_is_udp_socket(PP_Resource resource_id)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s resource_id=%d\n", __func__+6, resource_id);
     return ppb_udp_socket_is_udp_socket(resource_id);
 }
 
@@ -167,8 +191,8 @@ trace_ppb_udp_socket_close(PP_Resource udp_socket)
 
 
 const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
-    .Create =               TWRAPZ(ppb_udp_socket_create),
-    .IsUDPSocket =          TWRAPZ(ppb_udp_socket_is_udp_socket),
+    .Create =               TWRAPF(ppb_udp_socket_create),
+    .IsUDPSocket =          TWRAPF(ppb_udp_socket_is_udp_socket),
     .SetSocketFeature =     TWRAPZ(ppb_udp_socket_set_socket_feature),
     .Bind =                 TWRAPZ(ppb_udp_socket_bind),
     .GetBoundAddress =      TWRAPZ(ppb_udp_socket_get_bound_address),
