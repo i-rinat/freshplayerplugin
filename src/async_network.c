@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <event2/event.h>
@@ -256,6 +257,16 @@ void
 handle_tcp_connect_stage1(struct async_network_task_s *task)
 {
     struct evdns_request *req;
+    struct sockaddr_in sai;
+
+    memset(&sai, 0, sizeof(sai));
+    if (inet_pton(AF_INET, task->host, &sai.sin_addr) == 1) {
+        // already a valid IP address
+        handle_tcp_connect_stage2(DNS_ERR_NONE, DNS_IPv4_A, 1, 300, &sai.sin_addr, task);
+        return;
+    }
+
+    // queue DNS request
     req = evdns_base_resolve_ipv4(evdns_b, task->host, DNS_QUERY_NO_SEARCH,
                                   handle_tcp_connect_stage2, task);
     // TODO: what about ipv6?
