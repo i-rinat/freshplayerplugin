@@ -65,7 +65,7 @@ Project is using cmake (>=2.8.8) build system.
 ```
     $ sudo apt-get install cmake pkg-config ragel libasound2-dev            \
            libglib2.0-dev libconfig-dev libpango1.0-dev libgl1-mesa-dev     \
-           libevent-dev libgtk+2.0-dev libgles2-mesa-dev
+           libevent-dev libgtk+2.0-dev libgles2-mesa-dev libxrandr-dev
 ```
 * (optional) To enable PulseAudio support, install `libpulse-dev`.
 
