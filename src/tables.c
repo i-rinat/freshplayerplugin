@@ -34,6 +34,7 @@
 #include "config.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/Xrandr.h>
 #include <GL/glx.h>
 #include "screensaver_control.h"
 
@@ -277,6 +278,30 @@ tables_open_display(void)
     display.transparent_cursor = XCreatePixmapCursor(display.x, t_pixmap, t_pixmap, &t_color,
                                                      &t_color, 0, 0);
     XFreePixmap(display.x, t_pixmap);
+
+    // determine minimal size across all screens
+    display.min_width = (uint32_t)-1;
+    display.min_height = (uint32_t)-1;
+    XRRScreenResources *sr = XRRGetScreenResources(display.x, DefaultRootWindow(display.x));
+    if (sr) {
+        for (int k = 0; k < sr->ncrtc; k ++) {
+            XRRCrtcInfo *ci = XRRGetCrtcInfo(display.x, sr, sr->crtcs[k]);
+
+            if (ci && ci->width > 0 && ci->height > 0) {
+                display.min_width = MIN(display.min_width, ci->width);
+                display.min_height = MIN(display.min_height, ci->height);
+            }
+
+            if (ci)
+                XRRFreeCrtcInfo(ci);
+        }
+        XRRFreeScreenResources(sr);
+    }
+
+    if (display.min_width == (uint32_t)-1 || display.min_height == (uint32_t)-1) {
+        display.min_width = 300;
+        display.min_height = 300;
+    }
 
 quit:
     pthread_mutex_unlock(&display.lock);

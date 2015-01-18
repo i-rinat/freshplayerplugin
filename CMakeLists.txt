@@ -30,6 +30,7 @@ pkg_check_modules(REQ
     glib-2.0
     gio-2.0
     x11
+    xrandr
     gl
     glesv2
     libconfig

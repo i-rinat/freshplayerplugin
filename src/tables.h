@@ -41,6 +41,8 @@ struct display_s {
     Display                            *x;
     Cursor                              transparent_cursor;
     pthread_mutex_t                     lock;
+    uint32_t                            min_width;  ///< smallest screen width
+    uint32_t                            min_height; ///< smallest screen height
     uint32_t                            screensaver_types;
     glx_create_context_attribs_arb_f    glXCreateContextAttribsARB;
     uint32_t                            glx_arb_create_context;
