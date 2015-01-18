@@ -28,6 +28,7 @@
 #include <sys/socket.h>
 #include "trace.h"
 #include "tables.h"
+#include "reverse_constant.h"
 
 
 PP_Resource
@@ -132,7 +133,10 @@ int32_t
 trace_ppb_udp_socket_set_socket_feature(PP_Resource udp_socket, PP_UDPSocketFeature_Private name,
                                         struct PP_Var value)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    gchar *s_value = trace_var_as_string(value);
+    trace_info("[PPB] {zilch} %s udp_socket=%d, name=%s(%u), value=%s\n", __func__+6, udp_socket,
+               reverse_udp_socket_feature(name), name, s_value);
+    g_free(s_value);
     return ppb_udp_socket_set_socket_feature(udp_socket, name, value);
 }
 
@@ -141,7 +145,9 @@ int32_t
 trace_ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *addr,
                           struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s udp_socket=%d, addr=%p, callback={.func=%p, .user_data=%p, "
+               ".flags=%u}\n", __func__+6, udp_socket, addr, callback.func, callback.user_data,
+               callback.flags);
     return ppb_udp_socket_bind(udp_socket, addr, callback);
 }
 
@@ -149,7 +155,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_udp_socket_get_bound_address(PP_Resource udp_socket, struct PP_NetAddress_Private *addr)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s udp_socket=%d, addr=%p\n", __func__+6, udp_socket, addr);
     return ppb_udp_socket_get_bound_address(udp_socket, addr);
 }
 
@@ -158,7 +164,9 @@ int32_t
 trace_ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes,
                                struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s udp_socket=%d, buffer=%p, num_bytes=%d, callback={.func=%p, "
+               ".user_data=%p, .flags=%u}\n", __func__+6, udp_socket, buffer, num_bytes,
+               callback.func, callback.user_data, callback.flags);
     return ppb_udp_socket_recv_from(udp_socket, buffer, num_bytes, callback);
 }
 
@@ -167,7 +175,7 @@ PP_Bool
 trace_ppb_udp_socket_get_recv_from_address(PP_Resource udp_socket,
                                            struct PP_NetAddress_Private *addr)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s udp_socket=%d, addr=%p\n", __func__+6, udp_socket, addr);
     return ppb_udp_socket_get_recv_from_address(udp_socket, addr);
 }
 
@@ -177,7 +185,9 @@ trace_ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t
                              const struct PP_NetAddress_Private *addr,
                              struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s udp_socket=%d, buffer=%p, num_bytes=%d, addr=%p, callback={"
+               ".func=%p, .user_data=%p, .flags=%u}\n", __func__+6, udp_socket, buffer, num_bytes,
+               addr, callback.func, callback.user_data, callback.flags);
     return ppb_udp_socket_send_to(udp_socket, buffer, num_bytes, addr, callback);
 }
 
@@ -185,7 +195,7 @@ TRACE_WRAPPER
 void
 trace_ppb_udp_socket_close(PP_Resource udp_socket)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s udp_socket=%d\n", __func__+6, udp_socket);
     return ppb_udp_socket_close(udp_socket);
 }
 
