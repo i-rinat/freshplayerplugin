@@ -1226,3 +1226,14 @@ reverse_file_chooser_mode(PP_FileChooserMode_Dev mode)
         return "UNKNOWNFILECHOOSERMODE";
     }
 }
+
+const char *
+reverse_udp_socket_feature(PP_UDPSocketFeature_Private feature)
+{
+    switch (feature) {
+    CASE(PP_UDPSOCKETFEATURE_PRIVATE_ADDRESS_REUSE);
+    CASE(PP_UDPSOCKETFEATURE_PRIVATE_BROADCAST);
+    default:
+        return "UNKNOWNUDPSOCKETFEATURE";
+    }
+}
