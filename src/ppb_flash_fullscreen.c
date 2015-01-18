@@ -346,8 +346,8 @@ ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
         return PP_FALSE;
     }
 
-    size->width = 100;
-    size->height = 100;
+    size->width = display.min_width;
+    size->height = display.min_height;
 
     return PP_TRUE;
 }
