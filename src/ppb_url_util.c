@@ -63,8 +63,14 @@ struct PP_Var
 ppb_url_util_resolve_relative_to_document(PP_Instance instance, struct PP_Var relative_string,
                                           struct PP_URLComponents_Dev *components)
 {
-    struct PP_Var base = ppb_url_util_get_document_url(instance, NULL);
-    return ppb_url_util_resolve_relative_to_url(base, relative_string, components);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    return ppb_url_util_resolve_relative_to_url(pp_i->document_base_url, relative_string,
+                                                components);
 }
 
 PP_Bool

@@ -227,6 +227,35 @@ err_2:
     return document_url;
 }
 
+static
+struct PP_Var
+get_document_base_url(const struct pp_instance_s *pp_i)
+{
+    struct PP_Var base_url = PP_MakeUndefined();
+    NPIdentifier  document_id = npn.getstringidentifier("document");
+    NPVariant     document_var;
+
+    if (npn.getproperty(pp_i->npp, pp_i->np_window_obj, document_id, &document_var)) {
+        if (document_var.type == NPVariantType_Object) {
+            NPObject     *document_obj = document_var.value.objectValue;
+            NPIdentifier  base_uri_id = npn.getstringidentifier("baseURI");
+            NPVariant     base_uri_var;
+
+            if (npn.getproperty(pp_i->npp, document_obj, base_uri_id, &base_uri_var)) {
+                struct PP_Var var = np_variant_to_pp_var(base_uri_var);
+
+                if (var.type == PP_VARTYPE_STRING)
+                    base_url = ppb_var_add_ref2(var);
+                ppb_var_release(var);
+                npn.releasevariantvalue(&base_uri_var);
+            }
+        }
+        npn.releasevariantvalue(&document_var);
+    }
+
+    return base_url;
+}
+
 NPError
 NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
@@ -312,6 +341,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     } while (0);
 
     pp_i->document_url = get_document_url(pp_i);
+    pp_i->document_base_url = get_document_base_url(pp_i);
 
     if (ppb_message_loop_get_current() == 0) {
         // allocate message loop for browser thread

@@ -152,6 +152,7 @@ struct pp_instance_s {
 
     struct PP_Var                   instance_url;
     struct PP_Var                   document_url;
+    struct PP_Var                   document_base_url;
     pthread_t                       main_thread;
     pthread_barrier_t               main_thread_barrier;
 
