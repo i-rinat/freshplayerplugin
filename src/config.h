@@ -38,6 +38,7 @@ struct fpp_config_s {
     int     quiet;
     int     fullscreen_width;
     int     fullscreen_height;
+    int     randomize_dns_case;
     struct {
         int   switch_buttons_2_3;
         int   dump_resource_histogram;

@@ -39,6 +39,7 @@ static struct fpp_config_s default_config = {
     .quiet =                    0,
     .fullscreen_width    =      0,
     .fullscreen_height   =      0,
+    .randomize_dns_case =       1,
     .quirks = {
         .switch_buttons_2_3         = 0,
         .dump_resource_histogram    = 0,
@@ -149,6 +150,9 @@ fpp_config_initialize(void)
 
     if (config_lookup_int64(&cfg, "fullscreen_height", &intval))
         config.fullscreen_height = intval;
+
+    if (config_lookup_int64(&cfg, "randomize_dns_case", &intval))
+        config.randomize_dns_case = intval;
 
     config_destroy(&cfg);
 
