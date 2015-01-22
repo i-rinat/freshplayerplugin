@@ -32,3 +32,7 @@ foreach(item ${test_list})
     add_test(${item} ${item})
     add_dependencies(check ${item})
 endforeach()
+
+add_executable(util_glx_pixmap EXCLUDE_FROM_ALL util_glx_pixmap.c)
+add_dependencies(check util_glx_pixmap)
+target_link_libraries(util_glx_pixmap ${REQ_LIBRARIES})
