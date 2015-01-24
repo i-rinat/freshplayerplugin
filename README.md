@@ -69,7 +69,7 @@ Project is using cmake (>=2.8.8) build system.
 ```
 * (optional) To enable PulseAudio support, install `libpulse-dev`.
 
-* To make `build` subdirectory, go to `src` then, call
+* Create a `build` subdirectory in the root directory, from that folder, call
 ```
     $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     $ make
