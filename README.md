@@ -11,7 +11,7 @@ not, newer versions are still available for Linux as a part of Chrome
 browser, where Flash comes bundled in a form of PPAPI plugin. PPAPI or
 Pepper Plugin API is an interface promoted by Chromium/Chrome team for
 browser plugins. It's NPAPI-inspired yet significantly different API
-which have every concievable function plugin may want. Two-dimensional
+which have every conceivable function plugin may want. Two-dimensional
 graphics, OpenGL ES, font rendering, network access, audio, and so
 on. It's huge, there are 107 groups of functions, called interfaces
 which todays Chromium browser offers to plugins. And specs are not
@@ -31,9 +31,9 @@ to PPAPI plugin and look like NPAPI plugin for browser.
 First approach requires strong knowledge of Firefox internals, and
 moreover additional effort to get the code into
 mainstream. Maintaining a set of patches doesn't look like a good
-idea. Second approch allows to concentrace on two APIs only. Yes one
+idea. Second approach allows to concentrate on two APIs only. Yes one
 of them is big, but still graspable. Second way will be used for the
-project. It will benifit other browsers too, not only Firefox.
+project. It will benefit other browsers too, not only Firefox.
 
 
 Status
@@ -65,17 +65,17 @@ Project is using cmake (>=2.8.8) build system.
 ```
     $ sudo apt-get install cmake pkg-config ragel libasound2-dev            \
            libglib2.0-dev libconfig-dev libpango1.0-dev libgl1-mesa-dev     \
-           libevent-dev libgtk+2.0-dev libgles2-mesa-dev libxrandr-dev
+           libevent-dev libgtk+2.0-dev libgles2-mesa-dev libxrandr-dev g++
 ```
 * (optional) To enable PulseAudio support, install `libpulse-dev`.
 
-* Make `build` subdirectory, go there, call
+* To make `build` subdirectory, go to `src` then, call
 ```
     $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     $ make
 ```
 
-* Put generated `libfreshwrapper-pepperflash.so` into broswer plugins directory (`~/.mozilla/plugins`)
+* Put generated `libfreshwrapper-pepperflash.so` into browser plugins directory (`~/.mozilla/plugins`)
 
 
 When loaded by browser it will search for `libpepflashplayer.so` in a directories
