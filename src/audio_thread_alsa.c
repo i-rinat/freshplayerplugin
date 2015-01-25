@@ -45,6 +45,7 @@ struct audio_stream_s {
 
 static GHashTable      *active_streams_ht = NULL;
 static GHashTable      *stream_by_fd_ht = NULL;
+static GList           *streams_to_delete = NULL;
 static volatile int     rebuild_fds = 0;
 static volatile int     audio_thread_started = 0;
 static volatile int     terminate_thread = 0;
@@ -82,6 +83,26 @@ drain_wakeup_pipe(int fd)
 }
 
 static
+void
+process_stream_deletions_unlocked(void)
+{
+    GList *ll = streams_to_delete;
+    while (ll) {
+        struct audio_stream_s *as = ll->data;
+
+        g_hash_table_remove(active_streams_ht, as);
+        for (uintptr_t k = 0; k < as->nfds; k ++)
+            g_hash_table_remove(stream_by_fd_ht, GINT_TO_POINTER(as->fds[k].fd));
+        snd_pcm_close(as->pcm);
+        free(as);
+
+        ll = g_list_next(ll);
+    }
+    g_list_free(streams_to_delete);
+    streams_to_delete = NULL;
+}
+
+static
 nfds_t
 do_rebuild_fds(struct pollfd **out_fds)
 {
@@ -92,6 +113,8 @@ do_rebuild_fds(struct pollfd **out_fds)
     struct pollfd  *fds;
 
     pthread_mutex_lock(&lock);
+    process_stream_deletions_unlocked();
+
     fds = *out_fds;
     nfds = 1;
     tmp = realloc(fds, sizeof(fds[0]));
@@ -404,17 +427,9 @@ void
 alsa_destroy_stream(audio_stream *as)
 {
     pthread_mutex_lock(&lock);
-    g_hash_table_remove(active_streams_ht, as);
-    for (uintptr_t k = 0; k < as->nfds; k ++)
-        g_hash_table_remove(stream_by_fd_ht, GINT_TO_POINTER(as->fds[k].fd));
-    pthread_mutex_unlock(&lock);
-
+    streams_to_delete = g_list_prepend(streams_to_delete, as);
     wakeup_audio_thread();
-
-    pthread_mutex_lock(&lock);
-    snd_pcm_close(as->pcm);
     pthread_mutex_unlock(&lock);
-    free(as);
 }
 
 static
