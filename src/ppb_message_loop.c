@@ -30,6 +30,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
+#include "compat.h"
 
 
 static __thread PP_Resource this_thread_message_loop = 0;
@@ -326,7 +327,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
             break;
         }
 
-        task = g_async_queue_timeout_pop(async_q, timeout);
+        task = g_async_queue_timeout_pop_compat(async_q, timeout);
         if (task)
             g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
     }
