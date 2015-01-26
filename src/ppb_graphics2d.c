@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_graphics2d.h"
 #include "ppb_core.h"
 #include <ppapi/c/pp_errors.h>

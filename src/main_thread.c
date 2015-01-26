@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "main_thread.h"
 #include "ppb_message_loop.h"
 #include "pp_resource.h"

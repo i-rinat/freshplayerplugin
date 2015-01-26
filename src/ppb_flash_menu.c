@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_flash_menu.h"
 #include "ppb_core.h"
 #include <stdlib.h>
@@ -152,8 +153,8 @@ static
 void
 destroy_flash_menu_ptac(void *param)
 {
-    GMenu *menu = param;
-    g_object_unref(menu);
+    if (param && G_IS_OBJECT(param))
+      g_object_unref(G_OBJECT(param));
 }
 
 void

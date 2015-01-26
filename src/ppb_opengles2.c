@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_opengles2.h"
 #include <stdlib.h>
 #include "trace.h"

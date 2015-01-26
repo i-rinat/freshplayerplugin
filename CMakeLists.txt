@@ -1,5 +1,5 @@
 project(freshplayerplugin)
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.0)
 
 # request pthreads
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99  -fPIC -fvisibility=hidden")
@@ -49,6 +49,16 @@ pkg_check_modules(PULSEAUDIO libpulse)
 if (${PULSEAUDIO_FOUND})
     add_definitions(-DUSE_PULSEAUDIO)
     set(USE_PULSEAUDIO 1)
+endif()
+
+pkg_check_modules(GIO gio-2.0)
+
+if (${GIO_FOUND})
+	string(COMPARE GREATER "${GIO_VERSION}" "2.32.3" GIO_VERSION_MATCH)
+	if (${GIO_VERSION_MATCH})
+    add_definitions(-DUSE_GIO)
+    message(STATUS "Enable GIO")
+	endif()
 endif()
 
 include_directories(${REQ_INCLUDE_DIRS})

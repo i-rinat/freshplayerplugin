@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_flash_clipboard.h"
 #include <stdlib.h>
 #include "trace.h"

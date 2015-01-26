@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "async_network.h"
 #include <glib.h>
 #include <stdio.h>
@@ -102,7 +103,7 @@ add_event_mapping(struct async_network_task_s *task, struct event *ev)
 {
     pthread_mutex_lock(&lock);
     task->event = ev;
-    g_hash_table_add(tasks_ht, task);
+    g_hash_table_replace(tasks_ht, task, task);
     pthread_mutex_unlock(&lock);
 }
 
@@ -426,7 +427,7 @@ async_network_task_push(struct async_network_task_s *task)
         evdns_base_resolv_conf_parse(evdns_b, DNS_OPTIONS_ALL, "/etc/resolv.conf");
         if (config.randomize_dns_case == 0)
             evdns_base_set_option(evdns_b, "randomize-case:", "0");
-        g_thread_new("network-thread", network_worker_thread, NULL);
+        g_thread_create ((GThreadFunc)network_worker_thread, NULL, FALSE, NULL);
         thread_started = 1;
     }
 

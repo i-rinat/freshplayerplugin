@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_instance.h"
 #include <stdlib.h>
 #include "trace.h"

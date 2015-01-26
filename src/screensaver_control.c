@@ -43,14 +43,15 @@
 #define KS_PATH         "/ScreenSaver"
 #define KS_INTERFACE    "org.kde.screensaver"
 
-
+#ifdef USE_GIO
 static GDBusConnection *connection = NULL;
-
+#endif
 
 static
 Window
 find_xscreensaver_window(Display *dpy)
 {
+#ifdef USE_GIO
     Window          root = DefaultRootWindow(dpy);
     Window          root2, parent_wnd, wnd;
     Window         *children;
@@ -86,12 +87,17 @@ done:
     if (children)
         XFree(children);
     return wnd;
+#else
+    return 0;
+#endif
+
 }
 
 static
 void
 deactivate_xscreensaver(Display *dpy)
 {
+#ifdef USE_GIO
     Window xssw = find_xscreensaver_window(dpy);
 
     if (!xssw) {
@@ -120,6 +126,7 @@ deactivate_xscreensaver(Display *dpy)
         trace_warning("%s, can't send event to XScreenSaver's window\n", __func__);
         return;
     }
+#endif
 }
 
 static
@@ -127,6 +134,7 @@ void
 deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
                                   const char *d_interface)
 {
+#ifdef USE_GIO
     if (!connection)
         screensaver_connect();
 
@@ -156,11 +164,13 @@ deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
 
 err:
     g_object_unref(msg);
+#endif
 }
 
 void
 screensaver_deactivate(Display *dpy, uint32_t types)
 {
+#ifdef USE_GIO
     if (types & SST_XSCREENSAVER)
         deactivate_xscreensaver(dpy);
 
@@ -172,14 +182,16 @@ screensaver_deactivate(Display *dpy, uint32_t types)
 
     if (types & SST_KDE_SCREENSAVER)
         deactivate_dbus_based_screensaver(KS_SERVICE, KS_PATH, KS_INTERFACE);
+#endif
 }
 
 static
 uint32_t
 detect_dbus_based_screensavers(void)
 {
+    uint32_t ret = 0;
+#ifdef USE_GIO
     GDBusMessage *msg, *reply;
-    uint32_t ret;
 
     assert(connection);
 
@@ -236,30 +248,33 @@ err_3:
 err_2:
     g_object_unref(msg);
 err_1:
+#endif
     return ret;
 }
 
 uint32_t
 screensaver_type_detect(Display *dpy)
 {
+    uint32_t flags = 0;
+#ifdef USE_GIO
     if (!connection)
         screensaver_connect();
 
     if (!connection)
         return 0;
 
-    uint32_t flags = 0;
     if (find_xscreensaver_window(dpy) != 0)
         flags |= SST_XSCREENSAVER;
 
     flags |= detect_dbus_based_screensavers();
-
+#endif
     return flags;
 }
 
 void
 screensaver_connect(void)
 {
+#ifdef USE_GIO
     if (connection)
         g_object_unref(connection);
 
@@ -269,11 +284,14 @@ screensaver_connect(void)
         trace_error("%s, can't connect to dbus, %s\n", __func__, error->message);
         g_clear_error(&error);
     }
+#endif
 }
 
 void
 screensaver_disconnect(void)
 {
+#ifdef USE_GIO
     g_object_unref(connection);
     connection = NULL;
+#endif
 }
