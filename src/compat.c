@@ -24,11 +24,13 @@
 
 #include "compat.h"
 
+#undef VER
+#define VER(major, minor)       ((major) << 16 | (minor) << 8)
 
 gpointer
 g_async_queue_timeout_pop_compat(GAsyncQueue *queue, guint64 timeout)
 {
-#if (G_ENCODE_VERSION(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= G_ENCODE_VERSION(2, 32))
+#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= VER(2, 32))
     return g_async_queue_timeout_pop(queue, timeout);
 #else
     GTimeVal end_time;
