@@ -153,7 +153,7 @@ static
 void
 destroy_flash_menu_ptac(void *param)
 {
-    GMenu *menu = param;
+    GtkWidget *menu = param;
     g_object_unref(menu);
 }
 
