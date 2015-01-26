@@ -1,10 +1,10 @@
+#undef NDEBUG
 #include <assert.h>
 #include <X11/Xlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glx.h>
-#include <GLES2/gl2.h>
 
 
 Window      wnd;
