@@ -103,7 +103,7 @@ add_event_mapping(struct async_network_task_s *task, struct event *ev)
 {
     pthread_mutex_lock(&lock);
     task->event = ev;
-    g_hash_table_add(tasks_ht, task);
+    g_hash_table_replace(tasks_ht, task, task);
     pthread_mutex_unlock(&lock);
 }
 
