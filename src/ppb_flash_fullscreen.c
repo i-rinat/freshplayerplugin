@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_flash_fullscreen.h"
 #include "ppb_core.h"
 #include <stdlib.h>

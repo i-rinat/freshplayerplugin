@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_var.h"
 #include <inttypes.h>
 #include <stdlib.h>

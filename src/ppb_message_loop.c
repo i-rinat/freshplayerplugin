@@ -252,6 +252,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
     int teardown = 0;
     int destroy_ml = 0;
     int depth = ml->depth;
+    GTimeVal mtime;
     pp_resource_ref(message_loop);
     GAsyncQueue *async_q = ml->async_q;
     GQueue *int_q = ml->int_q;
@@ -326,7 +327,9 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
             break;
         }
 
-        task = g_async_queue_timeout_pop(async_q, timeout);
+        g_get_current_time(&mtime);
+        g_time_val_add(&mtime, timeout);
+        task = g_async_queue_timed_pop(async_q, &mtime);
         if (task)
             g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
     }

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glx.h>
-#include <GLES2/gl2.h>
+//#include <GLES2/gl2.h>
 
 
 Window      wnd;

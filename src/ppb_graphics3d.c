@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "pp_resource.h"
 #include <assert.h>
 #include "ppb_graphics3d.h"

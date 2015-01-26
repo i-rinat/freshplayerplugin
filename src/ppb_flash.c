@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_flash.h"
 #include <stdlib.h>
 #include <unistd.h>

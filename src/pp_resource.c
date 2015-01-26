@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "pp_resource.h"
 #include "tables.h"
 #include "trace.h"

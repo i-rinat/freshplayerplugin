@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "ppb_input_event.h"
 #include <stdlib.h>
 #include <ppapi/c/pp_errors.h>

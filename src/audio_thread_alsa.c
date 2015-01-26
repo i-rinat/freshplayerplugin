@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <pthread.h>
 #include "audio_thread.h"
 #include <asoundlib.h>
 #include <glib.h>
