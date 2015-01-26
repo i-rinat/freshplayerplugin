@@ -24,6 +24,7 @@
 
 #include "audio_thread.h"
 #include <asoundlib.h>
+#include <pthread.h>
 #include <glib.h>
 #include <unistd.h>
 #include "trace.h"

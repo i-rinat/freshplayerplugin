@@ -25,6 +25,7 @@
 #include "ppb_flash.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "trace.h"
 #include "tables.h"
 #include "config.h"

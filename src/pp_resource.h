@@ -42,6 +42,7 @@
 #include <X11/Xlib.h>
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
+#include <pthread.h>
 #include <glib.h>
 #include <GL/glx.h>
 #include <GLES2/gl2.h>

@@ -24,6 +24,7 @@
 
 #include "ppb_flash_clipboard.h"
 #include <stdlib.h>
+#include <pthread.h>
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"

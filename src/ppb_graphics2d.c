@@ -24,6 +24,7 @@
 
 #include "ppb_graphics2d.h"
 #include "ppb_core.h"
+#include <pthread.h>
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
 #include "trace.h"

@@ -23,6 +23,7 @@
  */
 
 #include "ppb_var.h"
+#include <pthread.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>

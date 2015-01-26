@@ -23,6 +23,7 @@
  */
 
 #include "ppb_input_event.h"
+#include <pthread.h>
 #include <stdlib.h>
 #include <ppapi/c/pp_errors.h>
 #include "trace.h"

@@ -24,6 +24,7 @@
 
 #include "ppb_flash_menu.h"
 #include "ppb_core.h"
+#include <pthread.h>
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"

@@ -25,6 +25,7 @@
 #ifndef FPP_TABLES_H
 #define FPP_TABLES_H
 
+#include <pthread.h>
 #include <ppapi/c/pp_var.h>
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 #include "pp_resource.h"

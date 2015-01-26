@@ -26,6 +26,7 @@
 #include "tables.h"
 #include "trace.h"
 #include "config.h"
+#include <pthread.h>
 #include <glib.h>
 #include <stdlib.h>
 #include <unistd.h>

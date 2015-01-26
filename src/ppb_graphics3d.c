@@ -24,6 +24,7 @@
 
 #include "pp_resource.h"
 #include <assert.h>
+#include <pthread.h>
 #include "ppb_graphics3d.h"
 #include <stdlib.h>
 #include <GL/glx.h>

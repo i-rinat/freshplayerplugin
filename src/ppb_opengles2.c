@@ -23,6 +23,7 @@
  */
 
 #include "ppb_opengles2.h"
+#include <pthread.h>
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
