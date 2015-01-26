@@ -421,13 +421,16 @@ async_network_task_push(struct async_network_task_s *task)
     static int thread_started = 0;
 
     if (!thread_started) {
+        pthread_t t;
+
         evthread_use_pthreads();
         event_b = event_base_new();
         evdns_b = evdns_base_new(event_b, 0);
         evdns_base_resolv_conf_parse(evdns_b, DNS_OPTIONS_ALL, "/etc/resolv.conf");
         if (config.randomize_dns_case == 0)
             evdns_base_set_option(evdns_b, "randomize-case:", "0");
-        g_thread_new("network-thread", network_worker_thread, NULL);
+        pthread_create(&t, NULL, network_worker_thread, NULL);
+        pthread_detach(t);
         thread_started = 1;
     }
 
