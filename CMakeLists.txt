@@ -47,8 +47,8 @@ pkg_check_modules(REQ
 pkg_check_modules(PULSEAUDIO libpulse)
 
 if (${PULSEAUDIO_FOUND})
-    add_definitions(-DUSE_PULSEAUDIO)
-    set(USE_PULSEAUDIO 1)
+    add_definitions(-DHAVE_PULSEAUDIO=1)
+    set(HAVE_PULSEAUDIO 1)
 endif()
 
 include_directories(${REQ_INCLUDE_DIRS})

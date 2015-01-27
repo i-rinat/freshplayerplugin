@@ -74,7 +74,7 @@ set(source_list
     screensaver_control.c
 )
 
-if (${USE_PULSEAUDIO})
+if (${HAVE_PULSEAUDIO})
     list(APPEND source_list audio_thread_pulseaudio.c)
 endif()
 
