@@ -27,6 +27,20 @@
 
 #include <glib.h>
 
+#ifdef VER
+#error macro name collision
+#endif
+
+#define VER(major, minor)       ((major) << 16 | (minor) << 8)
+
+#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= VER(2, 26))
+#define HAVE_GLIB_DBUS 1
+#else
+#define HAVE_GLIB_DBUS 0
+#endif
+
+#undef VER
+
 gpointer
 g_async_queue_timeout_pop_compat(GAsyncQueue *queue, guint64 timeout);
 

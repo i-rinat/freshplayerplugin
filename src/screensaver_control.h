@@ -27,6 +27,7 @@
 
 #include <X11/Xlib.h>
 #include <stdint.h>
+#include "compat.h"
 
 
 enum screensaver_types {

@@ -24,7 +24,10 @@
 
 #include "compat.h"
 
-#undef VER
+
+#ifdef VER
+#error macro name collision
+#endif
 #define VER(major, minor)       ((major) << 16 | (minor) << 8)
 
 gpointer

@@ -29,6 +29,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 #include "trace.h"
+#include "compat.h"
 
 
 #define GS_SERVICE      "org.gnome.ScreenSaver"
@@ -44,7 +45,9 @@
 #define KS_INTERFACE    "org.kde.screensaver"
 
 
+#if HAVE_GLIB_DBUS
 static GDBusConnection *connection = NULL;
+#endif // HAVE_GLIB_DBUS
 
 
 static
@@ -122,6 +125,7 @@ deactivate_xscreensaver(Display *dpy)
     }
 }
 
+#if HAVE_GLIB_DBUS
 static
 void
 deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
@@ -157,6 +161,7 @@ deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
 err:
     g_object_unref(msg);
 }
+#endif // HAVE_GLIB_DBUS
 
 void
 screensaver_deactivate(Display *dpy, uint32_t types)
@@ -164,6 +169,7 @@ screensaver_deactivate(Display *dpy, uint32_t types)
     if (types & SST_XSCREENSAVER)
         deactivate_xscreensaver(dpy);
 
+#if HAVE_GLIB_DBUS
     if (types & SST_FDO_SCREENSAVER)
         deactivate_dbus_based_screensaver(FDOS_SERVICE, FDOS_PATH, FDOS_INTERFACE);
 
@@ -172,8 +178,10 @@ screensaver_deactivate(Display *dpy, uint32_t types)
 
     if (types & SST_KDE_SCREENSAVER)
         deactivate_dbus_based_screensaver(KS_SERVICE, KS_PATH, KS_INTERFACE);
+#endif // HAVE_GLIB_DBUS
 }
 
+#if HAVE_GLIB_DBUS
 static
 uint32_t
 detect_dbus_based_screensavers(void)
@@ -238,21 +246,26 @@ err_2:
 err_1:
     return ret;
 }
+#endif // HAVE_GLIB_DBUS
 
 uint32_t
 screensaver_type_detect(Display *dpy)
 {
+#if HAVE_GLIB_DBUS
     if (!connection)
         screensaver_connect();
 
     if (!connection)
         return 0;
+#endif // HAVE_GLIB_DBUS
 
     uint32_t flags = 0;
     if (find_xscreensaver_window(dpy) != 0)
         flags |= SST_XSCREENSAVER;
 
+#if HAVE_GLIB_DBUS
     flags |= detect_dbus_based_screensavers();
+#endif // HAVE_GLIB_DBUS
 
     return flags;
 }
@@ -260,6 +273,7 @@ screensaver_type_detect(Display *dpy)
 void
 screensaver_connect(void)
 {
+#if HAVE_GLIB_DBUS
     if (connection)
         g_object_unref(connection);
 
@@ -269,11 +283,14 @@ screensaver_connect(void)
         trace_error("%s, can't connect to dbus, %s\n", __func__, error->message);
         g_clear_error(&error);
     }
+#endif // HAVE_GLIB_DBUS
 }
 
 void
 screensaver_disconnect(void)
 {
+#if HAVE_GLIB_DBUS
     g_object_unref(connection);
     connection = NULL;
+#endif // HAVE_GLIB_DBUS
 }
