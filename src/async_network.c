@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#include <pthread.h>
 #include "async_network.h"
 #include <glib.h>
 #include <stdio.h>
@@ -40,6 +39,7 @@
 #include "ppb_core.h"
 #include "trace.h"
 #include "config.h"
+#include "compat.h"
 
 
 static struct event_base *event_b = NULL;
@@ -427,7 +427,7 @@ async_network_task_push(struct async_network_task_s *task)
         evdns_base_resolv_conf_parse(evdns_b, DNS_OPTIONS_ALL, "/etc/resolv.conf");
         if (config.randomize_dns_case == 0)
             evdns_base_set_option(evdns_b, "randomize-case:", "0");
-        g_thread_create ((GThreadFunc)network_worker_thread, NULL, FALSE, NULL);
+        g_thread_new_compat ("network-thread", network_worker_thread, NULL);
         thread_started = 1;
     }
 

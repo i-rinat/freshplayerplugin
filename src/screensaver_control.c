@@ -29,6 +29,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 #include "trace.h"
+#include "compat.h"
 
 
 #define GS_SERVICE      "org.gnome.ScreenSaver"
@@ -43,15 +44,13 @@
 #define KS_PATH         "/ScreenSaver"
 #define KS_INTERFACE    "org.kde.screensaver"
 
-#ifdef USE_GIO
-static GDBusConnection *connection = NULL;
-#endif
+//static GDBusConnection *connection = NULL;
+static void *connection = NULL;
 
 static
 Window
 find_xscreensaver_window(Display *dpy)
 {
-#ifdef USE_GIO
     Window          root = DefaultRootWindow(dpy);
     Window          root2, parent_wnd, wnd;
     Window         *children;
@@ -87,9 +86,6 @@ done:
     if (children)
         XFree(children);
     return wnd;
-#else
-    return 0;
-#endif
 
 }
 
@@ -97,7 +93,6 @@ static
 void
 deactivate_xscreensaver(Display *dpy)
 {
-#ifdef USE_GIO
     Window xssw = find_xscreensaver_window(dpy);
 
     if (!xssw) {
@@ -126,15 +121,15 @@ deactivate_xscreensaver(Display *dpy)
         trace_warning("%s, can't send event to XScreenSaver's window\n", __func__);
         return;
     }
-#endif
 }
 
+#if (G_ENCODE_VERSION(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= G_ENCODE_VERSION(2, 32))
 static
 void
 deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
                                   const char *d_interface)
 {
-#ifdef USE_GIO
+
     if (!connection)
         screensaver_connect();
 
@@ -147,7 +142,7 @@ deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
         return;
 
     GError *error = NULL;
-    g_dbus_connection_send_message(connection, msg, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL, &error);
+    g_dbus_connection_send_message((GDBusConnection*)connection, msg, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL, &error);
 
     if (error != NULL) {
         trace_error("%s, can't send message, %s\n", __func__, error->message);
@@ -155,7 +150,7 @@ deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
         goto err;
     }
 
-    g_dbus_connection_flush_sync(connection, NULL, &error);
+    g_dbus_connection_flush_sync((GDBusConnection*)connection, NULL, &error);
     if (error != NULL) {
         trace_error("%s, can't flush dbus connection, %s\n", __func__, error->message);
         g_clear_error(&error);
@@ -164,16 +159,16 @@ deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
 
 err:
     g_object_unref(msg);
-#endif
+
 }
+#endif
 
 void
 screensaver_deactivate(Display *dpy, uint32_t types)
 {
-#ifdef USE_GIO
     if (types & SST_XSCREENSAVER)
         deactivate_xscreensaver(dpy);
-
+#if (G_ENCODE_VERSION(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= G_ENCODE_VERSION(2, 32))
     if (types & SST_FDO_SCREENSAVER)
         deactivate_dbus_based_screensaver(FDOS_SERVICE, FDOS_PATH, FDOS_INTERFACE);
 
@@ -185,12 +180,11 @@ screensaver_deactivate(Display *dpy, uint32_t types)
 #endif
 }
 
+#if (G_ENCODE_VERSION(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= G_ENCODE_VERSION(2, 32))
 static
 uint32_t
 detect_dbus_based_screensavers(void)
 {
-    uint32_t ret = 0;
-#ifdef USE_GIO
     GDBusMessage *msg, *reply;
 
     assert(connection);
@@ -248,15 +242,15 @@ err_3:
 err_2:
     g_object_unref(msg);
 err_1:
-#endif
     return ret;
 }
+#endif
 
 uint32_t
 screensaver_type_detect(Display *dpy)
 {
     uint32_t flags = 0;
-#ifdef USE_GIO
+#if (G_ENCODE_VERSION(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= G_ENCODE_VERSION(2, 32))
     if (!connection)
         screensaver_connect();
 
@@ -274,7 +268,7 @@ screensaver_type_detect(Display *dpy)
 void
 screensaver_connect(void)
 {
-#ifdef USE_GIO
+#if (G_ENCODE_VERSION(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= G_ENCODE_VERSION(2, 32))
     if (connection)
         g_object_unref(connection);
 
@@ -290,7 +284,7 @@ screensaver_connect(void)
 void
 screensaver_disconnect(void)
 {
-#ifdef USE_GIO
+#if (G_ENCODE_VERSION(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= G_ENCODE_VERSION(2, 32))
     g_object_unref(connection);
     connection = NULL;
 #endif

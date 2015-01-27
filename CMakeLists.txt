@@ -51,16 +51,6 @@ if (${PULSEAUDIO_FOUND})
     set(USE_PULSEAUDIO 1)
 endif()
 
-pkg_check_modules(GIO gio-2.0)
-
-if (${GIO_FOUND})
-	string(COMPARE GREATER "${GIO_VERSION}" "2.32.3" GIO_VERSION_MATCH)
-	if (${GIO_VERSION_MATCH})
-    add_definitions(-DUSE_GIO)
-    message(STATUS "Enable GIO")
-	endif()
-endif()
-
 include_directories(${REQ_INCLUDE_DIRS})
 add_definitions(${REQ_CFLAGS_OTHER})
 add_definitions(-DXP_UNIX)
