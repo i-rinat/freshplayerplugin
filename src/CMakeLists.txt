@@ -71,6 +71,7 @@ set(source_list
     ppb_video_capture.c
     ppb_video_decoder.c
     ppb_view.c
+    ppb_x509_certificate.c
     screensaver_control.c
 )
 

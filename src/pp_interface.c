@@ -76,6 +76,7 @@
 #include <ppapi/c/private/ppb_udp_socket_private.h>
 #include <ppapi/c/private/ppb_nacl_private.h>
 #include <ppapi/c/private/ppb_uma_private.h>
+#include <ppapi/c/private/ppb_x509_certificate_private.h>
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 #include <ppapi/c/trusted/ppb_file_chooser_trusted.h>
 #include <ppapi/c/trusted/ppb_url_loader_trusted.h>
@@ -160,6 +161,7 @@ extern const struct PPB_View_Dev_0_1                ppb_view_dev_interface_0_1;
 extern const struct PPB_View_1_0                    ppb_view_interface_1_0;
 extern const struct PPB_View_1_1                    ppb_view_interface_1_1;
 extern const struct PPB_WheelInputEvent_1_0         ppb_wheel_input_event_interface_1_0;
+extern const struct PPB_X509Certificate_Private_0_1 ppb_x509_certificate_interface_0_1;
 
 const void *(*ppp_get_interface)(const char *interface_name);
 
@@ -254,6 +256,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_VIEW_DEV_INTERFACE_0_1,             ppb_view_dev_interface_0_1)
     ELSEIFBLOCK(PPB_VIEW_INTERFACE_1_0,                 ppb_view_interface_1_0)
     ELSEIFBLOCK(PPB_VIEW_INTERFACE_1_1,                 ppb_view_interface_1_1)
+    ELSEIFBLOCK(PPB_X509CERTIFICATE_PRIVATE_INTERFACE_0_1, ppb_x509_certificate_interface_0_1)
     } else {
         trace_info("not implemented: %s\n", interface_name);
         return NULL;
