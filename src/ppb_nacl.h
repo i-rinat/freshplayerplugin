@@ -30,11 +30,9 @@
 
 void
 ppb_nacl_launch_sel_ldr(PP_Instance instance, PP_Bool main_service_runtime, const char *alleged_url,
-                        const struct PP_NaClFileInfo *nexe_file_info, PP_Bool uses_irt,
-                        PP_Bool uses_ppapi, PP_Bool uses_nonsfi_mode, PP_Bool enable_ppapi_dev,
-                        PP_Bool enable_dyncode_syscalls, PP_Bool enable_exception_handling,
-                        PP_Bool enable_crash_throttling, void *imc_handle,
-                        struct PP_CompletionCallback callback);
+                        const struct PP_NaClFileInfo *nexe_file_info, PP_Bool uses_nonsfi_mode,
+                        PP_Bool enable_ppapi_dev, PP_NaClAppProcessType process_type,
+                        void *imc_handle, struct PP_CompletionCallback callback);
 
 PP_Bool
 ppb_nacl_start_ppapi_proxy(PP_Instance instance);

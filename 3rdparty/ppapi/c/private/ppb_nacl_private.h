@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From private/ppb_nacl_private.idl modified Thu Sep  4 07:46:02 2014. */
+/* From private/ppb_nacl_private.idl modified Wed Oct  1 15:54:15 2014. */
 
 #ifndef PPAPI_C_PRIVATE_PPB_NACL_PRIVATE_H_
 #define PPAPI_C_PRIVATE_PPB_NACL_PRIVATE_H_
@@ -148,6 +148,17 @@ typedef enum {
    */
   PP_NACL_READY_STATE_DONE = 4
 } PP_NaClReadyState;
+
+/** Types of untrusted NaCl processes. Mirrors NaClAppProcessType from
+ *  components/nacl/common/nacl_types.h.
+ */
+typedef enum {
+  PP_UNKNOWN_NACL_PROCESS_TYPE,
+  PP_NATIVE_NACL_PROCESS_TYPE,
+  PP_PNACL_PROCESS_TYPE,
+  PP_PNACL_TRANSLATOR_PROCESS_TYPE,
+  PP_NUM_NACL_PROCESS_TYPES
+} PP_NaClAppProcessType;
 /**
  * @}
  */
@@ -201,36 +212,20 @@ struct PPB_NaCl_Private_1_0 {
   /* Launches NaCl's sel_ldr process.  Returns PP_EXTERNAL_PLUGIN_OK on success
    * and writes a NaClHandle to imc_handle. Returns PP_EXTERNAL_PLUGIN_FAILED on
    * failure. The |enable_ppapi_dev| parameter controls whether GetInterface
-   * returns 'Dev' interfaces to the NaCl plugin.  The |uses_ppapi| flag
-   * indicates that the nexe run by sel_ldr will use the PPAPI APIs.
-   * This implies that LaunchSelLdr is run from the main thread.  If a nexe
-   * does not need PPAPI, then it can run off the main thread.
+   * returns 'Dev' interfaces to the NaCl plugin.
    * The |nexe_file_info| is currently used only in non-SFI mode. It is the
    * file handle for the main nexe file, which should be initially loaded.
    * LaunchSelLdr takes the ownership of the file handle.
-   * The |uses_irt| flag indicates whether the IRT should be loaded in this
-   * NaCl process.  This is true for ABI stable nexes.
    * The |uses_nonsfi_mode| flag indicates whether or not nonsfi-mode should
    * be used with the binary pointed by the url.
-   * The |enable_dyncode_syscalls| flag indicates whether or not the nexe
-   * will be able to use dynamic code system calls (e.g., mmap with PROT_EXEC).
-   * The |enable_exception_handling| flag indicates whether or not the nexe
-   * will be able to use hardware exception handling.
-   * The |enable_crash_throttling| flag indicates whether or not crashes of
-   * the nexe contribute to crash throttling statisics and whether nexe starts
-   * are throttled by crash throttling.
    */
   void (*LaunchSelLdr)(PP_Instance instance,
                        PP_Bool main_service_runtime,
                        const char* alleged_url,
                        const struct PP_NaClFileInfo* nexe_file_info,
-                       PP_Bool uses_irt,
-                       PP_Bool uses_ppapi,
                        PP_Bool uses_nonsfi_mode,
                        PP_Bool enable_ppapi_dev,
-                       PP_Bool enable_dyncode_syscalls,
-                       PP_Bool enable_exception_handling,
-                       PP_Bool enable_crash_throttling,
+                       PP_NaClAppProcessType process_type,
                        void* imc_handle,
                        struct PP_CompletionCallback callback);
   /* This function starts the IPC proxy so the nexe can communicate with the

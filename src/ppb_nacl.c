@@ -31,14 +31,11 @@
 #include "reverse_constant.h"
 
 
-// TODO: sync with changed spec
 void
 ppb_nacl_launch_sel_ldr(PP_Instance instance, PP_Bool main_service_runtime, const char *alleged_url,
-                        const struct PP_NaClFileInfo *nexe_file_info, PP_Bool uses_irt,
-                        PP_Bool uses_ppapi, PP_Bool uses_nonsfi_mode, PP_Bool enable_ppapi_dev,
-                        PP_Bool enable_dyncode_syscalls, PP_Bool enable_exception_handling,
-                        PP_Bool enable_crash_throttling, void *imc_handle,
-                        struct PP_CompletionCallback callback)
+                        const struct PP_NaClFileInfo *nexe_file_info, PP_Bool uses_nonsfi_mode,
+                        PP_Bool enable_ppapi_dev, PP_NaClAppProcessType process_type,
+                        void *imc_handle, struct PP_CompletionCallback callback)
 {
 }
 
@@ -156,24 +153,19 @@ TRACE_WRAPPER
 void
 trace_ppb_nacl_launch_sel_ldr(PP_Instance instance, PP_Bool main_service_runtime,
                               const char *alleged_url, const struct PP_NaClFileInfo *nexe_file_info,
-                              PP_Bool uses_irt, PP_Bool uses_ppapi, PP_Bool uses_nonsfi_mode,
-                              PP_Bool enable_ppapi_dev, PP_Bool enable_dyncode_syscalls,
-                              PP_Bool enable_exception_handling, PP_Bool enable_crash_throttling,
-                              void *imc_handle, struct PP_CompletionCallback callback)
+                              PP_Bool uses_nonsfi_mode, PP_Bool enable_ppapi_dev,
+                              PP_NaClAppProcessType process_type, void *imc_handle,
+                              struct PP_CompletionCallback callback)
 {
     trace_info("[PPB] {zilch} %s instance=%d, main_service_runtime=%u, alleged_url=%s, "
-               "nexe_file_info=%p, uses_irt=%d, uses_ppapi=%d, uses_nonsfi_mode=%d, "
-               "enable_ppapi_dev=%d, enable_dyncode_syscalls=%d, enable_exception_handling=%d, "
-               "enable_crash_throttling=%d, imc_handle=%p, "
-               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, instance,
-               main_service_runtime, alleged_url, nexe_file_info, uses_irt, uses_ppapi,
-               uses_nonsfi_mode, enable_ppapi_dev, enable_dyncode_syscalls,
-               enable_exception_handling, enable_crash_throttling, imc_handle, callback.func,
-               callback.user_data, callback.flags);
+               "nexe_file_info=%p, uses_nonsfi_mode=%d, enable_ppapi_dev=%d, process_type=%u, "
+               "imc_handle=%p, callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6,
+               instance, main_service_runtime, alleged_url, nexe_file_info, uses_nonsfi_mode,
+               enable_ppapi_dev, process_type, imc_handle, callback.func, callback.user_data,
+               callback.flags);
     return ppb_nacl_launch_sel_ldr(instance, main_service_runtime, alleged_url, nexe_file_info,
-                                   uses_irt, uses_ppapi, uses_nonsfi_mode, enable_ppapi_dev,
-                                   enable_dyncode_syscalls, enable_exception_handling,
-                                   enable_crash_throttling, imc_handle, callback);
+                                   uses_nonsfi_mode, enable_ppapi_dev, process_type, imc_handle,
+                                   callback);
 }
 
 TRACE_WRAPPER
