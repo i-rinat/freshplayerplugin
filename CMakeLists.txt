@@ -42,6 +42,7 @@ pkg_check_modules(REQ
     pangoft2
     freetype2
     gtk+-2.0
+    openssl
     REQUIRED)
 
 pkg_check_modules(PULSEAUDIO libpulse)

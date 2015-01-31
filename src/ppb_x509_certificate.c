@@ -27,6 +27,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
+#include <openssl/x509.h>
 
 
 PP_Resource
@@ -45,7 +46,10 @@ void
 ppb_x509_certificate_destroy(void *ptr)
 {
     struct pp_x509_certificate_s *xc = ptr;
-    free_and_nullify(xc->bytes);
+    if (xc->cert) {
+        X509_free(xc->cert);
+        xc->cert = NULL;
+    }
 }
 
 PP_Bool
@@ -57,7 +61,21 @@ ppb_x509_certificate_is_x509_certificate(PP_Resource resource)
 PP_Bool
 ppb_x509_certificate_initialize(PP_Resource resource, const char *bytes, uint32_t length)
 {
-    return PP_FALSE;
+    const unsigned char **in = (const unsigned char **)&bytes;
+    struct pp_x509_certificate_s *xc = pp_resource_acquire(resource, PP_RESOURCE_X509_CERTIFICATE);
+    if (!xc) {
+        return PP_FALSE;
+    }
+
+    PP_Bool retval = PP_TRUE;
+    if (d2i_X509(&xc->cert, in, length) == NULL) {
+        retval = PP_FALSE;
+        goto done;
+    }
+
+done:
+    pp_resource_release(resource);
+    return retval;
 }
 
 struct PP_Var
@@ -88,7 +106,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_x509_certificate_initialize(PP_Resource resource, const char *bytes, uint32_t length)
 {
-    trace_info("[PPB] {zilch} %s resource=%d, bytes=%p, length=%u\n", __func__+6, resource, bytes,
+    trace_info("[PPB] {full} %s resource=%d, bytes=%p, length=%u\n", __func__+6, resource, bytes,
                length);
     return ppb_x509_certificate_initialize(resource, bytes, length);
 }
@@ -105,6 +123,6 @@ trace_ppb_x509_certificate_get_field(PP_Resource resource, PP_X509Certificate_Pr
 const struct PPB_X509Certificate_Private_0_1 ppb_x509_certificate_interface_0_1 = {
     .Create =                   TWRAPF(ppb_x509_certificate_create),
     .IsX509CertificatePrivate = TWRAPF(ppb_x509_certificate_is_x509_certificate),
-    .Initialize =               TWRAPZ(ppb_x509_certificate_initialize),
+    .Initialize =               TWRAPF(ppb_x509_certificate_initialize),
     .GetField =                 TWRAPZ(ppb_x509_certificate_get_field),
 };

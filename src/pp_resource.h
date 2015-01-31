@@ -53,6 +53,7 @@
 #include <asoundlib.h>
 #include <gtk/gtk.h>
 #include "audio_thread.h"
+#include <openssl/x509.h>
 
 
 #define free_and_nullify(item)          \
@@ -430,8 +431,7 @@ struct pp_udp_socket_s {
 
 struct pp_x509_certificate_s {
     COMMON_STRUCTURE_FIELDS
-    char           *bytes;
-    uint32_t        length;
+    X509           *cert;
 };
 
 union pp_largest_u {
