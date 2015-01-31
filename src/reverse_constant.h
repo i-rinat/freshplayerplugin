@@ -37,6 +37,7 @@
 #include <ppapi/c/private/ppb_udp_socket_private.h>
 #include <ppapi/c/dev/pp_video_dev.h>
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
+#include <ppapi/c/private/ppb_x509_certificate_private.h>
 
 
 const char *reverse_npp_variable(NPPVariable var);
@@ -57,5 +58,6 @@ const char *reverse_nacl_ready_state(PP_NaClReadyState rs);
 const char *reverse_video_decoder_profile(PP_VideoDecoder_Profile profile);
 const char *reverse_file_chooser_mode(PP_FileChooserMode_Dev mode);
 const char *reverse_udp_socket_feature(PP_UDPSocketFeature_Private feature);
+const char *reverse_x509_certificate_field(PP_X509Certificate_Private_Field field);
 
 #endif // FPP_REVERSE_CONSTANT_H
