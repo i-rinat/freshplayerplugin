@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
+#include "reverse_constant.h"
 
 
 PP_Resource
@@ -96,7 +97,8 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_x509_certificate_get_field(PP_Resource resource, PP_X509Certificate_Private_Field field)
 {
-    trace_info("[PPB] {zilch} %s resource=%d, field=%u\n", __func__+6, resource, field);
+    trace_info("[PPB] {zilch} %s resource=%d, field=%s(%u)\n", __func__+6, resource,
+               reverse_x509_certificate_field(field), field);
     return ppb_x509_certificate_get_field(resource, field);
 }
 
