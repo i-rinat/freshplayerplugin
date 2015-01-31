@@ -47,3 +47,33 @@ is how to find where profile directory is.
 It's a bug. [Create an issue](https://github.com/i-rinat/freshplayerplugin/issues)
 about this. I need a scenario which can be used to reproduce an issue. It
 would be nice if you search through open issues to avoid duplicates.
+
+## 3d applications are slow
+
+3d is not enabled by default, as it causes rendering issues on some machines.
+It can be enabled by adding `enable_3d = 1` line to `~/.config/freshwrapper.conf`
+If transparency-enabled instances have no graphics, add `enable_3d_transparent = 0`
+to `~/.config/freshwrapper.conf`, that will selectively disable 3d for transparent
+plugin instances.
+
+## DRM doesn't work
+
+Desktop plugin doesn't use PPB_Flash_DRM interface, but plugin from ChromeOS does.
+To get it, download latest version of
+[linux_recovery.sh](https://dl.google.com/dl/edgedl/chromeos/recovery/linux_recovery.sh).
+That file contains a lot of links to ChromeOS recovery images for various Chromebooks.
+I tested one with "zako" in the name, it's for x86_64 hardware. Other recovery images
+may contain x86 and/or arm versions too. After download, find Flash player in
+`/opt/google/chrome/pepper/` directory on partition 3. Partition have to be mounted
+with "ro" flag, otherwise it won't work.
+
+After you extract libpepflashplayer.so (which is the only file you need from that entire
+image), add or update `pepperflash_path` parameter in configuration file
+`~/.config/freshwrapper.conf` to point to where you put libpepflashplayer.so.
+
+## Random network downloads fail
+
+Some routers forcefully lowercase DNS queries, which makes libevent2's DNS client very
+sad. Add `randomize_dns_case = 0` parameter to `~/.config/freshwrapper.conf` to disable
+case randomization in DNS queries. (See
+[dns0x20](https://tools.ietf.org/html/draft-vixie-dnsext-dns0x20-00) for details).
