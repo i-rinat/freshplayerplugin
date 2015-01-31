@@ -95,6 +95,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_BUFFER,
     PP_RESOURCE_FILE_CHOOSER,
     PP_RESOURCE_UDP_SOCKET,
+    PP_RESOURCE_X509_CERTIFICATE,
 
     PP_RESOURCE_TYPES_COUNT,        // must be the last item in the list
 };
@@ -427,6 +428,12 @@ struct pp_udp_socket_s {
     int             sock;
 };
 
+struct pp_x509_certificate_s {
+    COMMON_STRUCTURE_FIELDS
+    char           *bytes;
+    uint32_t        length;
+};
+
 union pp_largest_u {
     struct pp_instance_s            s02;
     struct pp_resource_generic_s    s03;
@@ -457,6 +464,7 @@ union pp_largest_u {
     struct pp_buffer_s              s28;
     struct pp_file_chooser_s        s29;
     struct pp_udp_socket_s          s30;
+    struct pp_x509_certificate_s    s31;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type,

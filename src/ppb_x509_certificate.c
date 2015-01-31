@@ -25,18 +25,32 @@
 #include "ppb_x509_certificate.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "tables.h"
 
 
 PP_Resource
 ppb_x509_certificate_create(PP_Instance instance)
 {
-    return 0;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+    PP_Resource x509 = pp_resource_allocate(PP_RESOURCE_X509_CERTIFICATE, pp_i);
+    return x509;
+}
+
+void
+ppb_x509_certificate_destroy(void *ptr)
+{
+    struct pp_x509_certificate_s *xc = ptr;
+    free_and_nullify(xc->bytes);
 }
 
 PP_Bool
 ppb_x509_certificate_is_x509_certificate(PP_Resource resource)
 {
-    return PP_FALSE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_X509_CERTIFICATE;
 }
 
 PP_Bool
@@ -57,7 +71,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_x509_certificate_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_x509_certificate_create(instance);
 }
 
@@ -65,7 +79,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_x509_certificate_is_x509_certificate(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_x509_certificate_is_x509_certificate(resource);
 }
 
@@ -87,8 +101,8 @@ trace_ppb_x509_certificate_get_field(PP_Resource resource, PP_X509Certificate_Pr
 }
 
 const struct PPB_X509Certificate_Private_0_1 ppb_x509_certificate_interface_0_1 = {
-    .Create =                   TWRAPZ(ppb_x509_certificate_create),
-    .IsX509CertificatePrivate = TWRAPZ(ppb_x509_certificate_is_x509_certificate),
+    .Create =                   TWRAPF(ppb_x509_certificate_create),
+    .IsX509CertificatePrivate = TWRAPF(ppb_x509_certificate_is_x509_certificate),
     .Initialize =               TWRAPZ(ppb_x509_certificate_initialize),
     .GetField =                 TWRAPZ(ppb_x509_certificate_get_field),
 };

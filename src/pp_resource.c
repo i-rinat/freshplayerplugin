@@ -54,6 +54,7 @@
 #include "ppb_buffer.h"
 #include "ppb_file_chooser.h"
 #include "ppb_udp_socket.h"
+#include "ppb_x509_certificate.h"
 
 
 static GHashTable      *res_tbl;
@@ -265,6 +266,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_UDP_SOCKET:
             ppb_udp_socket_destroy(ptr);
+            break;
+        case PP_RESOURCE_X509_CERTIFICATE:
+            ppb_x509_certificate_destroy(ptr);
             break;
         default:
             break;
