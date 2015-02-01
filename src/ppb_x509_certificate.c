@@ -23,11 +23,13 @@
  */
 
 #include "ppb_x509_certificate.h"
+#include "ppb_var.h"
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
 #include <openssl/x509.h>
+#include <ctype.h>
 
 
 PP_Resource
@@ -73,15 +75,349 @@ ppb_x509_certificate_initialize(PP_Resource resource, const char *bytes, uint32_
         goto done;
     }
 
+    free_and_nullify(xc->raw_data);
+    xc->raw_data = malloc(length);
+    if (xc->raw_data) {
+        memcpy(xc->raw_data, bytes, length);
+        xc->raw_data_length = length;
+    }
+
 done:
     pp_resource_release(resource);
     return retval;
 }
 
+static struct PP_Var
+get_xname_field_value(X509_NAME *xname, int nid)
+{
+    ASN1_STRING *asn1_str;
+    int          loc;
+
+    loc = X509_NAME_get_index_by_NID(xname, nid, -1);
+    if (loc == -1)
+        return PP_MakeNull();
+    asn1_str = X509_NAME_ENTRY_get_data(X509_NAME_get_entry(xname, loc));
+    return ppb_var_var_from_utf8((char *)asn1_str->data, asn1_str->length);
+}
+
+static struct PP_Var
+get_cert_issuer_field_value(X509 *cert, int nid)
+{
+    X509_NAME *xname = X509_get_issuer_name(cert);
+    if (!xname)
+        return PP_MakeNull();
+    return get_xname_field_value(xname, nid);
+}
+
+static struct PP_Var
+get_cert_subject_field_value(X509 *cert, int nid)
+{
+    X509_NAME *xname = X509_get_subject_name(cert);
+    if (!xname)
+        return PP_MakeNull();
+    return get_xname_field_value(xname, nid);
+}
+
+static struct PP_Var
+convert_tm_to_pp_var(struct tm *t, double subsec, int hofs, int mofs)
+{
+    return PP_MakeDouble(timegm(t) - hofs * 3600 - mofs * 60 + subsec);
+}
+
+static struct PP_Var
+convert_asn1_time_to_pp_var(ASN1_TIME *asn1_time)
+{
+    struct tm t;
+    int len = asn1_time->length;
+    unsigned char *s = asn1_time->data;
+
+    memset(&t, 0, sizeof(t));
+    if (asn1_time->type == V_ASN1_GENERALIZEDTIME) {
+        // "YYYYMMDDHH[MM[SS[.fff]]]", "YYYYMMDDHH[MM[SS[.fff]]]Z",
+        // or "YYYYMMDDHH[MM[SS[.fff]]]+-HHMM"
+        double subsec = 0;
+
+        // YYYY
+        if (len < 4 || !isdigit(s[0]) || !isdigit(s[1]) || !isdigit(s[2]) || !isdigit(s[3]))
+            goto parse_error;
+        t.tm_year = (s[0] - '0') * 1000 + (s[1] - '0') * 100 + (s[2] - '0') * 10 + (s[3] - '0');
+        t.tm_year -= 1900;
+        len -= 4; s += 4;
+
+        // MM
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        t.tm_mon = (s[0] - '0') * 10 + (s[1] - '0') - 1;
+        len -= 2; s += 2;
+
+        // DD
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        t.tm_mday = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        // HH
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        t.tm_hour = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        if (len >= 2 && isdigit(s[0])) {
+            // MM
+            if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+                goto parse_error;
+            t.tm_min = (s[0] - '0') * 10 + (s[1] - '0');
+            len -= 2; s += 2;
+
+            if (len >= 2 && isdigit(s[0])) {
+                // SS
+                if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+                    goto parse_error;
+                t.tm_sec = (s[0] - '0') * 10 + (s[1] - '0');
+                len -= 2; s += 2;
+
+                if (len >= 4 && s[0] == '.' && isdigit(s[1]) && isdigit(s[2]) && isdigit(s[3])) {
+                    // .fff
+                    subsec = (s[1] - '0') * 0.1 + (s[2] - '0') * 0.01 + (s[3] - '0') * 0.001;
+                    len -= 4; s += 4;
+                }
+            }
+        }
+
+        if (len == 0)
+            return convert_tm_to_pp_var(&t, subsec, 0, 0);
+
+        if (len == 1) {
+            if (s[0] == 'Z')
+                return convert_tm_to_pp_var(&t, subsec, 0, 0);
+            else
+                goto parse_error;
+        }
+
+        if (len < 1 || (s[0] != '+' && s[0] != '-'))
+            goto parse_error;
+
+        int tz_sign = (s[0] == '+') ? 1 : -1;
+        len -= 1; s += 1;
+
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        int tz_hours = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        int tz_minutes = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        return convert_tm_to_pp_var(&t, subsec, tz_sign * tz_hours, tz_minutes);
+    } else if (asn1_time->type == V_ASN1_UTCTIME) {
+        // either "YYMMDDhhmm[ss]Z" or "YYMMDDhhmm[ss](+|-)hhmm"
+
+        // YY
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        t.tm_year = (s[0] - '0') * 10 + (s[1] - '0');
+        t.tm_year += (t.tm_year < 70) * 100;
+        len -= 2; s += 2;
+
+        // MM
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        t.tm_mon = (s[0] - '0') * 10 + (s[1] - '0') - 1;
+        len -= 2; s += 2;
+
+        // DD
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        t.tm_mday = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        // hh
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        t.tm_hour = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        // mm
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        t.tm_min = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        if (len >= 2 && isdigit(s[0])) {
+            // ss
+            if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+                goto parse_error;
+            t.tm_sec = (s[0] - '0') * 10 + (s[1] - '0');
+            len -= 2; s += 2;
+        }
+
+        if (len == 1 && s[0] == 'Z')
+            return convert_tm_to_pp_var(&t, 0, 0, 0);
+
+        if (len < 1 || (s[0] != '+' && s[0] != '-'))
+            goto parse_error;
+
+        int tz_sign = (s[0] == '+') ? 1 : -1;
+        len -= 1; s += 1;
+
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        int tz_hours = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
+            goto parse_error;
+        int tz_minutes = (s[0] - '0') * 10 + (s[1] - '0');
+        len -= 2; s += 2;
+
+        return convert_tm_to_pp_var(&t, 0, tz_sign * tz_hours, tz_minutes);
+    } else {
+        goto parse_error;
+    }
+
+parse_error:
+    return PP_MakeNull();
+}
+
 struct PP_Var
 ppb_x509_certificate_get_field(PP_Resource resource, PP_X509Certificate_Private_Field field)
 {
-    return PP_MakeUndefined();
+    struct PP_Var    var = PP_MakeNull();
+    ASN1_INTEGER    *asn1_int;
+    ASN1_TIME       *asn1_time;
+
+    struct pp_x509_certificate_s *xc = pp_resource_acquire(resource, PP_RESOURCE_X509_CERTIFICATE);
+    if (!xc) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_MakeNull();
+    }
+
+    switch (field) {
+    case PP_X509CERTIFICATE_PRIVATE_ISSUER_COMMON_NAME:
+        var = get_cert_issuer_field_value(xc->cert, NID_commonName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_ISSUER_LOCALITY_NAME:
+        var = get_cert_issuer_field_value(xc->cert, NID_localityName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_ISSUER_STATE_OR_PROVINCE_NAME:
+        var = get_cert_issuer_field_value(xc->cert, NID_stateOrProvinceName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_ISSUER_COUNTRY_NAME:
+        var = get_cert_issuer_field_value(xc->cert, NID_countryName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_ISSUER_ORGANIZATION_NAME:
+        var = get_cert_issuer_field_value(xc->cert, NID_organizationName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_ISSUER_ORGANIZATION_UNIT_NAME:
+        var = get_cert_issuer_field_value(xc->cert, NID_organizationalUnitName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_ISSUER_UNIQUE_ID:
+        var = PP_MakeNull(); // see ppapi/c/private/ppb_x509_certificate_private.h for details
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_COMMON_NAME:
+        var = get_cert_subject_field_value(xc->cert, NID_commonName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_LOCALITY_NAME:
+        var = get_cert_subject_field_value(xc->cert, NID_localityName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_STATE_OR_PROVINCE_NAME:
+        var = get_cert_subject_field_value(xc->cert, NID_stateOrProvinceName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_COUNTRY_NAME:
+        var = get_cert_subject_field_value(xc->cert, NID_countryName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_ORGANIZATION_NAME:
+        var = get_cert_subject_field_value(xc->cert, NID_organizationName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_ORGANIZATION_UNIT_NAME:
+        var = get_cert_subject_field_value(xc->cert, NID_organizationalUnitName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_UNIQUE_ID:
+        var = PP_MakeNull(); // see ppapi/c/private/ppb_x509_certificate_private.h for details
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_VERSION:
+        var = PP_MakeNull(); // see ppapi/c/private/ppb_x509_certificate_private.h for details
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SERIAL_NUMBER:
+        asn1_int = X509_get_serialNumber(xc->cert);
+        if (!asn1_int)
+            return PP_MakeNull();
+        var = ppb_var_array_buffer_create(asn1_int->length);
+        memcpy(ppb_var_array_buffer_map(var), asn1_int->data, asn1_int->length);
+        ppb_var_array_buffer_unmap(var);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SIGNATURE_ALGORITHM_OID:
+        var = PP_MakeNull(); // see ppapi/c/private/ppb_x509_certificate_private.h for details
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SIGNATURE_ALGORITHM_PARAMATERS_RAW:
+        var = PP_MakeNull(); // see ppapi/c/private/ppb_x509_certificate_private.h for details
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_VALIDITY_NOT_BEFORE:
+        asn1_time = X509_get_notBefore(xc->cert);
+        if (!asn1_time)
+            return PP_MakeNull();
+        var = convert_asn1_time_to_pp_var(asn1_time);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_VALIDITY_NOT_AFTER:
+        asn1_time = X509_get_notAfter(xc->cert);
+        if (!asn1_time)
+            return PP_MakeNull();
+        var = convert_asn1_time_to_pp_var(asn1_time);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_PUBLIC_KEY_ALGORITHM_OID:
+        trace_error("%s, not implemented path\n", __func__);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_PUBLIC_KEY:
+        var = PP_MakeNull(); // see ppapi/c/private/ppb_x509_certificate_private.h for details
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_RAW:
+        if (xc->raw_data) {
+            var = ppb_var_array_buffer_create(xc->raw_data_length);
+            memcpy(ppb_var_array_buffer_map(var), xc->raw_data, xc->raw_data_length);
+            ppb_var_array_buffer_unmap(var);
+        }
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_ISSUER_DISTINGUISHED_NAME:
+        var = get_cert_issuer_field_value(xc->cert, NID_distinguishedName);
+        goto done;
+
+    case PP_X509CERTIFICATE_PRIVATE_SUBJECT_DISTINGUISHED_NAME:
+        var = get_cert_subject_field_value(xc->cert, NID_distinguishedName);
+        goto done;
+
+    default:
+        var = PP_MakeNull(); // unknown
+        goto done;
+    }
+
+done:
+    pp_resource_release(resource);
+    return var;
 }
 
 
@@ -115,7 +451,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_x509_certificate_get_field(PP_Resource resource, PP_X509Certificate_Private_Field field)
 {
-    trace_info("[PPB] {zilch} %s resource=%d, field=%s(%u)\n", __func__+6, resource,
+    trace_info("[PPB] {full} %s resource=%d, field=%s(%u)\n", __func__+6, resource,
                reverse_x509_certificate_field(field), field);
     return ppb_x509_certificate_get_field(resource, field);
 }
@@ -124,5 +460,5 @@ const struct PPB_X509Certificate_Private_0_1 ppb_x509_certificate_interface_0_1 
     .Create =                   TWRAPF(ppb_x509_certificate_create),
     .IsX509CertificatePrivate = TWRAPF(ppb_x509_certificate_is_x509_certificate),
     .Initialize =               TWRAPF(ppb_x509_certificate_initialize),
-    .GetField =                 TWRAPZ(ppb_x509_certificate_get_field),
+    .GetField =                 TWRAPF(ppb_x509_certificate_get_field),
 };

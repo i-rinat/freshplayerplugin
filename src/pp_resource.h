@@ -432,6 +432,8 @@ struct pp_udp_socket_s {
 struct pp_x509_certificate_s {
     COMMON_STRUCTURE_FIELDS
     X509           *cert;
+    char           *raw_data;
+    uint32_t        raw_data_length;
 };
 
 union pp_largest_u {
