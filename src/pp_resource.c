@@ -292,7 +292,8 @@ pp_resource_unref(PP_Resource resource)
 
                 trace_error("-- %10lu ------------\n", (unsigned long)current_time);
                 for (int k = 0; k < PP_RESOURCE_TYPES_COUNT; k ++)
-                    trace_error("counts[%2d] = %d\n", k, counts[k]);
+                    if (counts[k] > 0)
+                        trace_error("counts[%2d] = %d\n", k, counts[k]);
                 if (counts[PP_RESOURCE_TYPES_COUNT] > 0)
                     trace_error("%d unknown resources (should never happen)\n",
                                 counts[PP_RESOURCE_TYPES_COUNT]);
