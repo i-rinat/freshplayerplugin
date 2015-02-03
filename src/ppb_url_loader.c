@@ -591,7 +591,7 @@ ppb_url_loader_close(PP_Resource loader)
 void
 ppb_url_loader_grant_universal_access(PP_Resource loader)
 {
-    trace_info("      no-op implementation, all request are always allowed");
+    trace_info_f("      no-op implementation, all request are always allowed\n");
     return;
 }
 
