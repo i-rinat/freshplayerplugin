@@ -304,6 +304,7 @@ struct pp_browser_font_s {
     COMMON_STRUCTURE_FIELDS
     PangoFont              *font;
     PangoFontDescription   *font_desc;
+    PangoLayout            *measure_layout;
     int32_t                 letter_spacing;
     int32_t                 word_spacing;
     int32_t                 family;

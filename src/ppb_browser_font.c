@@ -64,6 +64,8 @@ ppb_browser_font_create(PP_Instance instance,
     bf->font_desc = pango_font_describe_with_absolute_size(bf->font);
     pango_font_description_free(font_desc);
 
+    bf->measure_layout = pango_layout_new(tables_get_pango_ctx());
+
     pp_resource_release(font);
     return font;
 }
@@ -76,7 +78,7 @@ ppb_browser_font_destroy(void *p)
         return;
     pango_font_description_free(bf->font_desc);
     g_object_unref(bf->font);
-
+    g_object_unref(bf->measure_layout);
 }
 
 PP_Bool
@@ -195,18 +197,16 @@ ppb_browser_font_measure_text(PP_Resource font,
         return PP_ERROR_FAILED;
     }
 
-    PangoLayout *layout = pango_layout_new(tables_get_pango_ctx());
     uint32_t len = 0;
     const char *s = "";
     if (text->text.type == PP_VARTYPE_STRING)
         s = ppb_var_var_to_utf8(text->text, &len);
 
     // TODO: factor into rtl direction
-    pango_layout_set_font_description(layout, bf->font_desc);
-    pango_layout_set_text(layout, s, len);
+    pango_layout_set_font_description(bf->measure_layout, bf->font_desc);
+    pango_layout_set_text(bf->measure_layout, s, len);
     int width, height;
-    pango_layout_get_pixel_size(layout, &width, &height);
-    g_object_unref(layout);
+    pango_layout_get_pixel_size(bf->measure_layout, &width, &height);
 
     pp_resource_release(font);
     return width;
