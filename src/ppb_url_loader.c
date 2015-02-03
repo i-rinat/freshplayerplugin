@@ -591,7 +591,7 @@ ppb_url_loader_close(PP_Resource loader)
 void
 ppb_url_loader_grant_universal_access(PP_Resource loader)
 {
-    // TODO: do something
+    trace_info("      no-op implementation, all request are always allowed");
     return;
 }
 
@@ -698,7 +698,7 @@ TRACE_WRAPPER
 void
 trace_ppb_url_loader_grant_universal_access(PP_Resource loader)
 {
-    trace_info("[PPB] {fake} %s loader=%d\n", __func__+6, loader);
+    trace_info("[PPB] {full} %s loader=%d\n", __func__+6, loader);
     ppb_url_loader_grant_universal_access(loader);
 }
 
@@ -726,6 +726,6 @@ const struct PPB_URLLoader_1_0 ppb_url_loader_interface_1_0 = {
 };
 
 const struct PPB_URLLoaderTrusted_0_3 ppb_url_loader_trusted_interface_0_3 = {
-    .GrantUniversalAccess =     TWRAPZ(ppb_url_loader_grant_universal_access),
+    .GrantUniversalAccess =     TWRAPF(ppb_url_loader_grant_universal_access),
     .RegisterStatusCallback =   TWRAPZ(ppb_url_loader_register_status_callback),
 };
