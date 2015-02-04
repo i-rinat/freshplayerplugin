@@ -383,6 +383,8 @@ handle_tcp_disconnect_stage2(int sock, short event_flags, void *arg)
     g_hash_table_iter_init(&iter, tasks_ht);
     while (g_hash_table_iter_next(&iter, &key, &val)) {
         struct async_network_task_s *cur = key;
+        if (cur == task)  // skip current task
+            continue;
         if (cur->resource == task->resource) {
             g_hash_table_iter_remove(&iter);
             event_free(cur->event);
@@ -402,7 +404,8 @@ handle_tcp_disconnect_stage1(struct async_network_task_s *task)
 {
     struct event *ev = evtimer_new(event_b, handle_tcp_disconnect_stage2, task);
     struct timeval timeout = {.tv_sec = 0};
-    evtimer_add(ev, &timeout);
+    add_event_mapping(task, ev);
+    event_add(ev, &timeout);
 }
 
 static
