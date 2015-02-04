@@ -79,9 +79,13 @@ find_xscreensaver_window(Display *dpy)
         status = XGetWindowProperty(dpy, children[k], XA_SCREENSAVER_VERSION, 0, 200, False,
                                     XA_STRING, &type, &format, &nitems, &bytes_after, &prop);
         // relying on error handler already set
-        if (status == Success && type != None) {
-            wnd = children[k];
-            goto done;
+        if (status == Success) {
+            if (prop)
+                XFree(prop);
+            if (type != None) {
+                wnd = children[k];
+                goto done;
+            }
         }
     }
 
