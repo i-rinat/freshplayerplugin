@@ -64,7 +64,10 @@ ppb_browser_font_create(PP_Instance instance,
     bf->font_desc = pango_font_describe_with_absolute_size(bf->font);
     pango_font_description_free(font_desc);
 
+    // font description won't change during lifetime of browser_font resource,
+    // so we can cache it here
     bf->measure_layout = pango_layout_new(tables_get_pango_ctx());
+    pango_layout_set_font_description(bf->measure_layout, bf->font_desc);
 
     pp_resource_release(font);
     return font;
@@ -203,7 +206,6 @@ ppb_browser_font_measure_text(PP_Resource font,
         s = ppb_var_var_to_utf8(text->text, &len);
 
     // TODO: factor into rtl direction
-    pango_layout_set_font_description(bf->measure_layout, bf->font_desc);
     pango_layout_set_text(bf->measure_layout, s, len);
     int width, height;
     pango_layout_get_pixel_size(bf->measure_layout, &width, &height);
