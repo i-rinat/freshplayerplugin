@@ -300,10 +300,7 @@ uri_parser_merge_uris(const char *base_uri, const char *rel_uri)
         fragment.len, fragment.data);
 
     // free temporary strings
-    while (m) {
-        g_free(m->data);
-        m = g_list_next(m);
-    }
+    g_list_free_full(m, g_free);
 
     return res;
 }
