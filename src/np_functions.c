@@ -1248,7 +1248,7 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
     trace_info_f("[NPP] {full} %s npp=%p, url=%s, reason=%d, notifyData=%u\n", __func__,
                  npp, url, reason, (unsigned)(size_t)notifyData);
 
-    if (reason == 0)    // everything OK with stream, nothing to do
+    if (reason != NPRES_NETWORK_ERR)  // no network error, nothing to do
         return;
 
     if (!notifyData)    // no associated url loader, nothing to do
