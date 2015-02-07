@@ -1247,8 +1247,25 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 {
     trace_info_f("[NPP] {full} %s npp=%p, url=%s, reason=%d, notifyData=%u\n", __func__,
                  npp, url, reason, (unsigned)(size_t)notifyData);
-    // This is no-op. We are handling request in NPP_NewStream function.
-    return;
+
+    if (reason == 0)    // everything OK with stream, nothing to do
+        return;
+
+    if (!notifyData)    // no associated url loader, nothing to do
+        return;
+
+    PP_Resource url_loader = (PP_Resource)(size_t)notifyData;
+
+    struct pp_url_loader_s *ul = pp_resource_acquire(url_loader, PP_RESOURCE_URL_LOADER);
+    if (!ul)
+        return;
+
+    struct PP_CompletionCallback ccb = ul->ccb;
+    pp_resource_release(url_loader);
+
+    // notify plugin that download have failed
+    if (ccb.func)
+        ppb_core_call_on_main_thread(0, ccb, PP_ERROR_FAILED);
 }
 
 NPError
