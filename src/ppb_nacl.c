@@ -42,7 +42,7 @@ ppb_nacl_launch_sel_ldr(PP_Instance instance, PP_Bool main_service_runtime, cons
 PP_Bool
 ppb_nacl_start_ppapi_proxy(PP_Instance instance)
 {
-    return PP_EXTERNAL_PLUGIN_OK;
+    return PP_TRUE;
 }
 
 int32_t
