@@ -43,14 +43,23 @@ g_async_queue_timeout_pop_compat(GAsyncQueue *queue, guint64 timeout)
 #endif
 }
 
+static
 void
-g_list_free_full_compat (GList *list, GDestroyNotify free_func)
+call_destroy_notify(gpointer data, gpointer user_data)
 {
-#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= VER(2, 28))
-   return g_list_free_full (list, free_func);
-#else
-   g_list_foreach (list, (GFunc) free_func, NULL);
-   g_list_free (list);
-#endif
+    GDestroyNotify func = (GDestroyNotify)user_data;
+    func(data);
 }
 
+void
+g_list_free_full_compat(GList *list, GDestroyNotify free_func)
+{
+    (void)call_destroy_notify; // inhibit Wunused-function
+
+#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= VER(2, 28))
+    g_list_free_full(list, free_func);
+#else
+    g_list_foreach(list, call_destroy_notify, free_func);
+    g_list_free(list);
+#endif
+}
