@@ -42,3 +42,15 @@ g_async_queue_timeout_pop_compat(GAsyncQueue *queue, guint64 timeout)
     return g_async_queue_timed_pop(queue, &end_time);
 #endif
 }
+
+void
+g_list_free_full_compat (GList *list, GDestroyNotify free_func)
+{
+#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= VER(2, 28))
+   return g_list_free_full (list, free_func);
+#else
+   g_list_foreach (list, (GFunc) free_func, NULL);
+   g_list_free (list);
+#endif
+}
+

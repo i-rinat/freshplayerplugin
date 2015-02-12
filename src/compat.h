@@ -44,5 +44,7 @@
 gpointer
 g_async_queue_timeout_pop_compat(GAsyncQueue *queue, guint64 timeout);
 
+void
+g_list_free_full_compat (GList *list, GDestroyNotify free_func);
 
 #endif // FPP_COMPAT_H
