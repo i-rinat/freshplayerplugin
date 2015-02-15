@@ -1,3 +1,12 @@
+2015-02-16  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.2.3
+	* graphics: use libxrandr to get fullscreen geometry
+	* core: honor document base URL
+	* network: add dns0x20 workaround, don't resolve numeric addresses
+	* network: fix handling of blocked URLs
+	* core: implement ppb_x509_certificate
+
 2015-01-13  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release v0.2.2
