@@ -170,7 +170,7 @@ get_clipboard_target_atom(uint32_t format)
 {
     switch (format) {
     case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
-        return GDK_TARGET_STRING;
+        return gdk_atom_intern_static_string("UTF8_STRING");
     case PP_FLASH_CLIPBOARD_FORMAT_HTML:
         return gdk_atom_intern("text/html", FALSE);
     case PP_FLASH_CLIPBOARD_FORMAT_RTF:
