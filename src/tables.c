@@ -36,7 +36,6 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/Xrandr.h>
 #include <GL/glx.h>
-#include <xf86drm.h>
 #include "screensaver_control.h"
 
 
