@@ -40,6 +40,7 @@
 
 #include <stdlib.h>
 #include <X11/Xlib.h>
+#include <X11/extensions/Xrender.h>
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
 #include <pthread.h>
@@ -252,22 +253,12 @@ struct pp_graphics3d_s {
     COMMON_STRUCTURE_FIELDS
     GLXContext      glc;
     GLXFBConfig     fb_config;
-    GLXContext      glc_t;          ///< presentation context for transparent instances
-    GLXFBConfig     fb_config_t;
     Pixmap          pixmap;
     GLXPixmap       glx_pixmap;
+    Picture         xr_pict;
     int32_t         width;
     int32_t         height;
     GHashTable     *sub_maps;
-    GLuint          tex_front;      ///< transparency helper texture, plugin data
-    GLuint          tex_back;       ///< transparency helper texture, previous drawable contents
-
-    struct {
-        GLuint      id;
-        GLuint      attrib_pos;
-        GLint       uniform_tex_back;
-        GLint       uniform_tex_front;
-    } prog;                                     ///< alpha blending GL program
 };
 
 struct pp_image_data_s {

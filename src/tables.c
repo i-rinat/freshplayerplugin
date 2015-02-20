@@ -36,6 +36,7 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/Xrandr.h>
 #include <GL/glx.h>
+#include <xf86drm.h>
 #include "screensaver_control.h"
 
 
@@ -308,6 +309,9 @@ tables_open_display(void)
         display.min_width = config.fullscreen_width;
     if (config.fullscreen_height > 0)
         display.min_height = config.fullscreen_height;
+
+    display.pictfmt_rgb24 = XRenderFindStandardFormat(display.x, PictStandardRGB24);
+    display.pictfmt_argb32 = XRenderFindStandardFormat(display.x, PictStandardARGB32);
 
 quit:
     pthread_mutex_unlock(&display.lock);

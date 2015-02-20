@@ -42,6 +42,8 @@ struct display_s {
     Display                            *x;
     Cursor                              transparent_cursor;
     pthread_mutex_t                     lock;
+    XRenderPictFormat                  *pictfmt_rgb24;
+    XRenderPictFormat                  *pictfmt_argb32;
     uint32_t                            min_width;  ///< smallest screen width
     uint32_t                            min_height; ///< smallest screen height
     uint32_t                            screensaver_types;

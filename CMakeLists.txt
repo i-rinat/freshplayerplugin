@@ -31,6 +31,7 @@ pkg_check_modules(REQ
     gio-2.0
     x11
     xrandr
+    xrender
     gl
     glesv2
     libconfig

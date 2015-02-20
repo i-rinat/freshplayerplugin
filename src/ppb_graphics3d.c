@@ -44,145 +44,6 @@ ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int
     return 0;
 }
 
-static
-void
-report_shader_compile_error(const char *fname, GLuint shader, const char *shader_body)
-{
-    char *log;
-    GLint log_length = 0;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
-    log = malloc(log_length + 1);
-    if (!log) {
-        trace_error("%s, can't allocate memory\n", __func__);
-        return;
-    }
-    glGetShaderInfoLog(shader, log_length + 1, NULL, log);
-    trace_error("%s, compilation of shader\n%s\nfailed with error: %s\n", fname, shader_body, log);
-    free(log);
-}
-
-// creates GL context for transparency rendering
-static
-int
-create_presentation_glx_context(struct pp_graphics3d_s *g3d)
-{
-    int cfg_attrs[] = { GLX_ALPHA_SIZE,     8,
-                        GLX_BLUE_SIZE,      8,
-                        GLX_GREEN_SIZE,     8,
-                        GLX_RED_SIZE,       8,
-                        GLX_X_RENDERABLE,   True,
-                        GLX_DRAWABLE_TYPE,  GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
-                        None };
-    int nconfigs = 0;
-    int screen = DefaultScreen(display.x);
-    GLXFBConfig *fb_cfgs = glXChooseFBConfig(display.x, screen, cfg_attrs, &nconfigs);
-    if (!fb_cfgs) {
-        trace_error("%s, glXChooseFBConfig returned NULL\n", __func__);
-        goto err_1;
-    }
-
-    trace_info_f("%s, glXChooseFBConfig returned %d configs, choosing first one\n", __func__,
-                 nconfigs);
-    g3d->fb_config_t = fb_cfgs[0];
-    XFree(fb_cfgs);
-
-    // create context implementing OpenGL (no GL ES here)
-    const int ctx_attrs[] = {
-        GLX_RENDER_TYPE,                GLX_RGBA_TYPE,
-        None,
-    };
-    g3d->glc_t = display.glXCreateContextAttribsARB(display.x, g3d->fb_config_t, g3d->glc, True,
-                                                    ctx_attrs);
-    if (!g3d->glc_t) {
-        trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
-        goto err_1;
-    }
-
-    int ret = glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc_t);
-    if (!ret) {
-        trace_error("%s, glXMakeCurrent failed\n", __func__);
-        goto err_2;
-    }
-
-    glGenTextures(1, &g3d->tex_back);
-    glBindTexture(GL_TEXTURE_2D, g3d->tex_back);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    // Create alpha blending GL program
-    const char *vert_shader_body =
-        "#version 100\n"
-        "attribute vec4 pos;\n"
-        "varying vec2 tex_coord;\n"
-        "void main() {\n"
-        "    gl_Position = vec4(2.0 * pos.x - 1.0, 2.0 * pos.y - 1.0, 0.0, 1.0);\n"
-        "    tex_coord = pos.xy;\n"
-        "}\n";
-    const char *frag_shader_body =
-        "#version 100\n"
-        "varying highp vec2 tex_coord;\n"
-        "uniform sampler2D tex_front;\n"
-        "uniform sampler2D tex_back;\n"
-        "void main() {\n"
-        "    highp vec4 c_front = texture2D(tex_front, tex_coord);\n"
-        "    highp vec4 c_back = texture2D(tex_back, tex_coord);\n"
-        "    gl_FragColor = mix(c_back, c_front, c_front.a);\n"
-        "}\n";
-
-    GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    GLint status = 0;
-
-    glShaderSource(vert_shader, 1, &vert_shader_body, NULL);
-    glCompileShader(vert_shader);
-    glGetShaderiv(vert_shader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        report_shader_compile_error(__func__, vert_shader, vert_shader_body);
-        goto err_3;
-    }
-
-    glShaderSource(frag_shader, 1, &frag_shader_body, NULL);
-    glCompileShader(frag_shader);
-    glGetShaderiv(frag_shader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        report_shader_compile_error(__func__, frag_shader, frag_shader_body);
-        goto err_3;
-    }
-
-    g3d->prog.id = glCreateProgram();
-    glAttachShader(g3d->prog.id, vert_shader);
-    glAttachShader(g3d->prog.id, frag_shader);
-    g3d->prog.attrib_pos = 0;
-    glBindAttribLocation(g3d->prog.id, g3d->prog.attrib_pos, "pos");
-
-    glLinkProgram(g3d->prog.id);
-    glGetProgramiv(g3d->prog.id, GL_LINK_STATUS, &status);
-    if (status != GL_TRUE) {
-        trace_error("%s, GL program link failed\n", __func__);
-        goto err_4;
-    }
-
-    glDeleteShader(vert_shader);
-    glDeleteShader(frag_shader);
-
-    g3d->prog.uniform_tex_back = glGetUniformLocation(g3d->prog.id, "tex_back");
-    g3d->prog.uniform_tex_front = glGetUniformLocation(g3d->prog.id, "tex_front");
-
-    return 0;
-
-err_4:
-    glDeleteProgram(g3d->prog.id);
-err_3:
-    glDeleteShader(frag_shader);
-    glDeleteShader(vert_shader);
-err_2:
-    glXDestroyContext(display.x, g3d->glc_t);
-err_1:
-    return 1;
-}
-
 PP_Resource
 ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int32_t attrib_list[])
 {
@@ -327,12 +188,15 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
 
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
-                                DefaultDepth(display.x, DefaultScreen(display.x)));
+                                32);
     g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
     if (g3d->glx_pixmap == None) {
         trace_error("%s, failed to create GLX pixmap\n", __func__);
         goto err;
     }
+
+    XFlush(display.x);
+    g3d->xr_pict = XRenderCreatePicture(display.x, g3d->pixmap, display.pictfmt_argb32, 0, 0);
 
     int ret = glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     if (!ret) {
@@ -343,21 +207,6 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     // clear surface
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-
-    if (pp_i->is_transparent) {
-        // create texture for plugin content
-        glGenTextures(1, &g3d->tex_front);
-        glBindTexture(GL_TEXTURE_2D, g3d->tex_front);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-        if (create_presentation_glx_context(g3d) != 0) {
-            trace_error("%s, can't create GL context for transparency processing\n", __func__);
-            goto err;
-        }
-    }
 
     glXMakeCurrent(display.x, None, NULL);
 
@@ -377,9 +226,8 @@ void
 ppb_graphics3d_destroy(void *p)
 {
     struct pp_graphics3d_s *g3d = p;
-    struct pp_instance_s *pp_i = g3d->instance;
-    g_hash_table_destroy(g3d->sub_maps);
 
+    g_hash_table_destroy(g3d->sub_maps);
     pthread_mutex_lock(&display.lock);
 
     // bringing context to current thread releases it from any others
@@ -388,14 +236,8 @@ ppb_graphics3d_destroy(void *p)
     glXMakeCurrent(display.x, None, NULL);
 
     glXDestroyPixmap(display.x, g3d->glx_pixmap);
+    XRenderFreePicture(display.x, g3d->xr_pict);
     XFreePixmap(display.x, g3d->pixmap);
-
-    if (pp_i->is_transparent) {
-        glDeleteTextures(1, &g3d->tex_back);
-        glDeleteTextures(1, &g3d->tex_front);
-        glDeleteProgram(g3d->prog.id);
-        glXDestroyContext(display.x, g3d->glc_t);
-    }
 
     glXDestroyContext(display.x, g3d->glc);
     pthread_mutex_unlock(&display.lock);
@@ -443,14 +285,17 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     g3d->height = height;
 
     GLXPixmap old_glx_pixmap = g3d->glx_pixmap;
-    Pixmap old_pixmap = g3d->pixmap;
+    Pixmap    old_pixmap = g3d->pixmap;
+    Picture   old_pict = g3d->xr_pict;
 
     // release possibly bound to other thread g3d->glx_pixmap and bind it to the current one
     pthread_mutex_lock(&display.lock);
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
-                                DefaultDepth(display.x, DefaultScreen(display.x)));
+                                32);
     g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
+    XFlush(display.x);
+    g3d->xr_pict = XRenderCreatePicture(display.x, g3d->pixmap, display.pictfmt_argb32, 0, 0);
 
     // make new g3d->glx_pixmap current to the current thread to allow releasing old_glx_pixmap
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
@@ -461,6 +306,7 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 
     // destroy previous glx and x pixmaps
     glXDestroyPixmap(display.x, old_glx_pixmap);
+    XRenderFreePicture(display.x, old_pict);
     XFreePixmap(display.x, old_pixmap);
 
     pthread_mutex_unlock(&display.lock);
@@ -507,10 +353,6 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     }
 
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
-    if (pp_i->is_transparent) {
-        glBindTexture(GL_TEXTURE_2D, g3d->tex_front);
-        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, g3d->width, g3d->height, 0);
-    }
     glFinish();  // ensure painting is done
     glXMakeCurrent(display.x, None, NULL);
 
