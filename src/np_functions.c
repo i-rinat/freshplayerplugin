@@ -781,28 +781,39 @@ handle_placeholder_graphics_expose_event(NPP npp, void *event)
     cairo_move_to(cr, 0, height);   cairo_line_to(cr, width, 0);
     cairo_stroke(cr);
 
-    // show error text
-    cairo_text_extents_t extents;
+    // compose error text
     gchar *txt;
-
     if (config.quirks.incompatible_npapi_version) {
         txt = g_strdup_printf("NPAPI version too old (%d)", npn.version);
     } else {
-        txt = g_strdup_printf("Failed to load \"%s\"", fpp_config_get_plugin_file_name());
+        const char *plugin_name = fpp_config_get_plugin_file_name();
+        txt = g_strdup_printf(
+            "Failed to load \"%s\".\n"
+            "Freshwrapper is a translation layer which needs\n"
+            "PPAPI plugin backend. Ensure your system have\n"
+            "\"%s\" available.",
+            plugin_name, plugin_name);
     }
-    cairo_set_font_size(cr, 14);
-    cairo_move_to(cr, 10.0, 30.0);
-    cairo_text_extents(cr, txt, &extents);
+
+    const double pos_x = 10.0;
+    const double pos_y = 30.0;
+
+    PangoLayout *layout = pango_cairo_create_layout(cr);
+    pango_layout_set_text(layout, txt, -1);
 
     // prepare background
-    cairo_rectangle(cr, 10.0, 30.0, extents.width + 6, extents.height + 6);
+    PangoRectangle extents;
+    pango_layout_get_pixel_extents(layout, &extents, NULL);
+    cairo_rectangle(cr, pos_x, pos_y, extents.width + 6, extents.height + 6);
     cairo_set_source_rgb(cr, bg_color[0], bg_color[1], bg_color[2]);
     cairo_fill(cr);
 
     // draw text itself
     cairo_set_source_rgb(cr, fg_color[0], fg_color[1], fg_color[2]);
-    cairo_move_to(cr, 10.0 + 3, 30.0 + extents.height);
-    cairo_show_text(cr, txt);
+    cairo_move_to(cr, pos_x + 3, pos_y + 3);
+    pango_cairo_show_layout(cr, layout);
+
+    g_object_unref(layout);
     g_free(txt);
 
     cairo_destroy(cr);
