@@ -34,6 +34,17 @@
 #include "ppb_var.h"
 
 
+static
+const char *
+get_supported_charset_alias(const char *charset)
+{
+    if (strcasecmp(charset, "gb2312-80") == 0) {
+        return "gb2312";
+    } else {
+        return charset;
+    }
+}
+
 char *
 ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,
                                const char *output_char_set,
@@ -47,6 +58,8 @@ ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint
     size_t outbytesleft = output_buffer_length - 1;
     iconv_t cd;
     char *tmp;
+
+    output_char_set = get_supported_charset_alias(output_char_set);
 
     switch (on_error) {
     default:
@@ -104,6 +117,8 @@ ppb_char_set_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t
     size_t inbytesleft = input_len;
     size_t outbytesleft = output_buffer_length - 2;
     iconv_t cd;
+
+    input_char_set = get_supported_charset_alias(input_char_set);
 
     switch (on_error) {
     default:
