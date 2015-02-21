@@ -277,6 +277,12 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         return NPERR_NO_ERROR;
     }
 
+    if (!ppp_get_interface) {
+        // something went terribly wrong
+        trace_error("ppp_get_interface is NULL\n");
+        return NPERR_MODULE_LOAD_FAILED_ERROR;
+    }
+
     pp_i = calloc(sizeof(*pp_i), 1);
     npp->pdata = pp_i;
     if (!pp_i)

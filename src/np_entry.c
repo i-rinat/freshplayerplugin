@@ -124,7 +124,10 @@ load_ppp_module()
 
     if (fpp_config_get_plugin_path()) {
         // have specific path
-        return do_load_ppp_module(fpp_config_get_plugin_path());
+        uintptr_t ret = do_load_ppp_module(fpp_config_get_plugin_path());
+        if (ret != 0)
+            goto failure;
+        return 0;
     }
 
     // try all paths
@@ -138,7 +141,7 @@ load_ppp_module()
         path_list ++;
     }
 
-    // failure
+failure:
     config.quirks.plugin_missing = 1;
     use_fallback_version_strings();
     trace_error("%s, can't find %s\n", __func__, fpp_config_get_plugin_file_name());
