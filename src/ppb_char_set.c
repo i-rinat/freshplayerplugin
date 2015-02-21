@@ -65,6 +65,13 @@ ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint
         break;
     }
 
+    if (cd == (iconv_t)-1) {
+        trace_error("%s, wrong charset %s\n", __func__, output_char_set);
+        memcpy(output, utf16, inbytesleft);
+        *output_length = inbytesleft;
+        return output;
+    }
+
     size_t ret = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
     if (ret == (size_t) -1) {
         if (errno == E2BIG) {
@@ -109,6 +116,13 @@ ppb_char_set_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t
     case PP_CHARSET_CONVERSIONERROR_SUBSTITUTE:
         cd = iconv_open("UTF16LE//TRANSLIT", input_char_set);
         break;
+    }
+
+    if (cd == (iconv_t)-1) {
+        trace_error("%s, wrong charset %s\n", __func__, input_char_set);
+        memcpy(output, input, inbytesleft);
+        *output_length = inbytesleft / 2;
+        return output;
     }
 
     size_t ret = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
