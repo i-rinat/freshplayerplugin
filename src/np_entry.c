@@ -35,11 +35,15 @@
 #include "config.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
+#include <glib.h>
+#include "compat.h"
+#include "np_entry.h"
 
 
 static void *module_dl_handler;
 static gchar *module_version;
 static gchar *module_descr;
+static GList *tried_files = NULL;
 
 static
 void
@@ -49,10 +53,18 @@ use_fallback_version_strings(void)
     module_descr = g_strdup(fpp_config_get_default_plugin_descr());
 }
 
+GList *
+np_entry_get_tried_plugin_files(void)
+{
+    return tried_files;
+}
+
 static
 uintptr_t
 do_load_ppp_module(const char *fname)
 {
+    tried_files = g_list_prepend(tried_files, g_strdup(fname));
+
     module_dl_handler = dlopen(fname, RTLD_LAZY);
     if (!module_dl_handler) {
         trace_info_f("%s, can't open %s\n", __func__, fname);
@@ -122,6 +134,11 @@ load_ppp_module()
 
     fpp_config_initialize();
 
+    if (tried_files) {
+        g_list_free_full_compat(tried_files, g_free);
+        tried_files = NULL;
+    }
+
     if (fpp_config_get_plugin_path()) {
         // have specific path
         uintptr_t ret = do_load_ppp_module(fpp_config_get_plugin_path());
@@ -161,6 +178,10 @@ unload_ppp_module(void)
 
     g_free(module_descr); module_descr = NULL;
     g_free(module_version); module_version = NULL;
+    if (tried_files) {
+        g_list_free_full_compat(tried_files, g_free);
+        tried_files = NULL;
+    }
 
     // call module shutdown handler if exists
     ppp_shutdown_module = dlsym(module_dl_handler, "PPP_ShutdownModule");
