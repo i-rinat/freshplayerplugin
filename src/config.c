@@ -35,7 +35,6 @@ static struct fpp_config_s default_config = {
     .pepperflash_path    =      NULL,
     .flash_command_line  =      "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .enable_3d           =      0,
-    .enable_3d_transparent =    1,
     .quiet =                    0,
     .fullscreen_width    =      0,
     .fullscreen_height   =      0,
@@ -138,9 +137,6 @@ fpp_config_initialize(void)
 
     if (config_lookup_int64(&cfg, "enable_3d", &intval))
         config.enable_3d = intval;
-
-    if (config_lookup_int64(&cfg, "enable_3d_transparent", &intval))
-        config.enable_3d_transparent = intval;
 
     if (config_lookup_int64(&cfg, "quiet", &intval))
         config.quiet = intval;

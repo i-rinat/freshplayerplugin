@@ -25,9 +25,6 @@ flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1"
 # enable 3d and stage 3d
 enable_3d = 0
 
-# enable 3d for wmode=transparent instances
-enable_3d_transparent = 1
-
 # when set to 1, limits output to warnings and errors only
 quiet = 0
 
