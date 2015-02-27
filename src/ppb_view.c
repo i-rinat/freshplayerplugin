@@ -25,6 +25,7 @@
 #include "ppb_view.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "config.h"
 #include "pp_resource.h"
 
 
@@ -90,13 +91,13 @@ ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
 float
 ppb_view_get_device_scale(PP_Resource resource)
 {
-    return 1.0;
+    return config.device_scale;
 }
 
 float
 ppb_view_get_css_scale(PP_Resource resource)
 {
-    return 1.0;
+    return config.device_scale;
 }
 
 

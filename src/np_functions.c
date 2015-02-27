@@ -97,10 +97,10 @@ set_window_comt(void *user_data, int32_t result)
 
     if (v) {
         pthread_mutex_lock(&display.lock);
-        v->rect.point.x = 0; // TODO: pp_i->x;
-        v->rect.point.y = 0; // TODO: pp_i->y;
-        v->rect.size.width = pp_i->width;
-        v->rect.size.height = pp_i->height;
+        v->rect.point.x = 0 / config.device_scale; // TODO: pp_i->x
+        v->rect.point.y = 0 / config.device_scale; // TODO: pp_i->y
+        v->rect.size.width = pp_i->width / config.device_scale;
+        v->rect.size.height = pp_i->height / config.device_scale;
         pp_resource_release(view);
         pthread_mutex_unlock(&display.lock);
 
@@ -928,7 +928,8 @@ handle_enter_leave_event(NPP npp, void *event)
     if (!(PP_INPUTEVENT_CLASS_MOUSE & combined_mask))
         return 0;
 
-    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+    struct PP_Point mouse_position = {.x = ev->x / config.device_scale,
+                                      .y = ev->y / config.device_scale };
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
     PP_InputEvent_Type event_type = (ev->type == EnterNotify) ? PP_INPUTEVENT_TYPE_MOUSEENTER
@@ -957,7 +958,8 @@ handle_motion_event(NPP npp, void *event)
     if (!(PP_INPUTEVENT_CLASS_MOUSE & combined_mask))
         return 0;
 
-    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+    struct PP_Point mouse_position = {.x = ev->x / config.device_scale,
+                                      .y = ev->y / config.device_scale};
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
     PP_Resource pp_event;
@@ -982,7 +984,8 @@ handle_button_press_release_event(NPP npp, void *event)
     if (!pp_i->ppp_input_event)
         return 0;
 
-    struct PP_Point mouse_position = {.x = ev->x, .y = ev->y};
+    struct PP_Point mouse_position = {.x = ev->x / config.device_scale,
+                                      .y = ev->y / config.device_scale };
     struct PP_Point zero_point = {.x = 0, .y = 0};
     unsigned int mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
     float wheel_x = 0.0, wheel_y = 0.0;

@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
+#include "config.h"
 #include "pp_resource.h"
 #include <ppapi/c/ppp_instance.h>
 #include <ppapi/c/pp_errors.h>
@@ -79,11 +80,11 @@ update_instance_view_comt(void *user_data, int32_t result)
         v->rect.point.x = 0;
         v->rect.point.y = 0;
         if (pp_i->is_fullscreen) {
-            v->rect.size.width = pp_i->fs_width;
-            v->rect.size.height = pp_i->fs_height;
+            v->rect.size.width = pp_i->fs_width / config.device_scale;
+            v->rect.size.height = pp_i->fs_height / config.device_scale;
         } else {
-            v->rect.size.width = pp_i->width;
-            v->rect.size.height = pp_i->height;
+            v->rect.size.width = pp_i->width / config.device_scale;
+            v->rect.size.height = pp_i->height / config.device_scale;
         }
         pp_resource_release(view);
 

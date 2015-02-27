@@ -39,6 +39,7 @@ static struct fpp_config_s default_config = {
     .fullscreen_width    =      0,
     .fullscreen_height   =      0,
     .randomize_dns_case =       1,
+    .device_scale        =      1.0,
     .quirks = {
         .switch_buttons_2_3         = 0,
         .dump_resource_histogram    = 0,
@@ -113,6 +114,7 @@ fpp_config_initialize(void)
     config = default_config;
 
     config_init(&cfg);
+    config_set_auto_convert(&cfg, 1);
 
     if (!config_read_file(&cfg, local_config)) {
         if (!config_read_file(&cfg, global_config)) {
@@ -122,6 +124,7 @@ fpp_config_initialize(void)
 
     long long intval;
     const char *stringval;
+    double dblval;
 
     if (config_lookup_int64(&cfg, "audio_buffer_min_ms", &intval))
         config.audio_buffer_min_ms = intval;
@@ -149,6 +152,9 @@ fpp_config_initialize(void)
 
     if (config_lookup_int64(&cfg, "randomize_dns_case", &intval))
         config.randomize_dns_case = intval;
+
+    if (config_lookup_float(&cfg, "device_scale", &dblval))
+        config.device_scale = dblval;
 
     config_destroy(&cfg);
 
