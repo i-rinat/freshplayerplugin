@@ -140,11 +140,29 @@ load_ppp_module()
     }
 
     if (fpp_config_get_plugin_path()) {
-        // have specific path
-        uintptr_t ret = do_load_ppp_module(fpp_config_get_plugin_path());
-        if (ret != 0)
-            goto failure;
-        return 0;
+        const char *ptr = fpp_config_get_plugin_path();
+        const char *last = strchr(ptr, ':');
+        uintptr_t   ret;
+
+        // parse ':'-separated list
+        while (last != NULL) {
+            // try entries one by one
+            char *entry = strndup(ptr, last - ptr);
+            ret = do_load_ppp_module(entry);
+            free(entry);
+            if (ret == 0)
+                return 0;
+
+            ptr = last + 1;
+            last = strchr(ptr, ':');
+        }
+
+        // and the last entry
+        ret = do_load_ppp_module(ptr);
+        if (ret == 0)
+            return 0;
+
+        goto failure;
     }
 
     // try all paths
