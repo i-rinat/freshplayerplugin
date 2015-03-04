@@ -23,7 +23,7 @@ pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
 flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1"
 
 # enable 3d and stage 3d
-enable_3d = 0
+enable_3d = 1
 
 # when set to 1, limits output to warnings and errors only
 quiet = 0
