@@ -23,6 +23,8 @@
  */
 
 #include "ppb_udp_socket.h"
+#include "ppb_core.h"
+#include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -75,7 +77,8 @@ int32_t
 ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *addr,
                     struct PP_CompletionCallback callback)
 {
-    return -1;
+    ppb_core_call_on_main_thread(0, callback, PP_ERROR_FAILED);
+    return PP_OK_COMPLETIONPENDING;
 }
 
 PP_Bool
