@@ -194,6 +194,13 @@ call_plugin_did_create_comt(void *user_data, int32_t result)
 }
 
 static
+void
+call_plugin_did_create_prepare_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_plugin_did_create_comt, user_data), PP_OK);
+}
+
+static
 struct PP_Var
 get_document_url(const struct pp_instance_s *pp_i)
 {
@@ -370,7 +377,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     p->m_loop = ppb_message_loop_get_for_browser_thread();
     p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
     p->pp_i =   pp_i;
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_plugin_did_create_comt, p), PP_OK);
+
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(call_plugin_did_create_prepare_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
 
@@ -413,6 +421,13 @@ destroy_instance_comt(void *user_data, int32_t result)
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
+static
+void
+destroy_instance_prepare_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(destroy_instance_comt, user_data), PP_OK);
+}
+
 NPError
 NPP_Destroy(NPP npp, NPSavedData **save)
 {
@@ -433,7 +448,7 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     p->m_loop = ppb_message_loop_get_current();
     p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(destroy_instance_comt, p), PP_OK);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(destroy_instance_prepare_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
 
