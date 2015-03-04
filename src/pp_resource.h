@@ -251,14 +251,16 @@ struct pp_view_s {
 
 struct pp_graphics3d_s {
     COMMON_STRUCTURE_FIELDS
-    GLXContext      glc;
-    GLXFBConfig     fb_config;
-    Pixmap          pixmap;
-    GLXPixmap       glx_pixmap;
-    Picture         xr_pict;
-    int32_t         width;
-    int32_t         height;
-    GHashTable     *sub_maps;
+    GLXContext          glc;
+    GLXFBConfig         fb_config;
+    int32_t             depth;          ///< depth of the pixmap, 32 for transparent, 24 otherwise
+    Pixmap              pixmap;
+    GLXPixmap           glx_pixmap;
+    Picture             xr_pict;
+    XRenderPictFormat  *xr_pictfmt;
+    int32_t             width;
+    int32_t             height;
+    GHashTable         *sub_maps;
 };
 
 struct pp_image_data_s {

@@ -182,8 +182,21 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         goto err;
     }
 
+    g3d->depth = pp_i->is_transparent ? 32 : DefaultDepth(display.x, screen);
+    switch (g3d->depth) {
+    case 24:
+        g3d->xr_pictfmt = display.pictfmt_rgb24;
+        break;
+    case 32:
+        g3d->xr_pictfmt = display.pictfmt_argb32;
+        break;
+    default:
+        trace_error("%s, unsupported g3d->depth (%d)\n", __func__, g3d->depth);
+        goto err;
+    }
+
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
-                                32);
+                                g3d->depth);
     g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
     if (g3d->glx_pixmap == None) {
         trace_error("%s, failed to create GLX pixmap\n", __func__);
@@ -191,7 +204,7 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
 
     XFlush(display.x);
-    g3d->xr_pict = XRenderCreatePicture(display.x, g3d->pixmap, display.pictfmt_argb32, 0, 0);
+    g3d->xr_pict = XRenderCreatePicture(display.x, g3d->pixmap, g3d->xr_pictfmt, 0, 0);
 
     int ret = glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     if (!ret) {
@@ -287,10 +300,10 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     pthread_mutex_lock(&display.lock);
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
-                                32);
+                                g3d->depth);
     g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
     XFlush(display.x);
-    g3d->xr_pict = XRenderCreatePicture(display.x, g3d->pixmap, display.pictfmt_argb32, 0, 0);
+    g3d->xr_pict = XRenderCreatePicture(display.x, g3d->pixmap, g3d->xr_pictfmt, 0, 0);
 
     // make new g3d->glx_pixmap current to the current thread to allow releasing old_glx_pixmap
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
