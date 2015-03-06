@@ -23,6 +23,8 @@
  */
 
 #include "ppb_var.h"
+#include "ppb_message_loop.h"
+#include "ppb_core.h"
 #include <pthread.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -104,6 +106,57 @@ get_var_s(struct PP_Var var)
     return v;
 }
 
+struct create_np_object_param_s {
+    NPClass        *npclass;
+    NPObject       *res;
+    PP_Resource     m_loop;
+    int32_t         depth;
+};
+
+static
+void
+create_np_object_ptac(void *param)
+{
+    struct create_np_object_param_s *p = param;
+    struct pp_instance_s *pp_i = tables_get_some_pp_instance();
+
+    if (pp_i && pp_i->npp) {
+        p->res = npn.createobject(pp_i->npp, p->npclass);
+    } else {
+        p->res = NULL;
+        trace_error("%s, no alive plugin instance\n", __func__);
+    }
+
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+
+static
+void
+create_np_object_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_browser_thread(create_np_object_ptac, user_data);
+}
+
+static
+NPObject *
+create_np_object(NPClass *npclass)
+{
+    struct create_np_object_param_s *p = g_slice_alloc(sizeof(*p));
+
+    p->npclass = npclass;
+    p->res =     NULL;
+    p->m_loop =  ppb_message_loop_get_current();
+    p->depth =   ppb_message_loop_get_depth(p->m_loop) + 1;
+
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(create_np_object_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
+
+    NPObject *res = p->res;
+    g_slice_free1(sizeof(*p), p);
+    return res;
+}
+
 NPVariant
 pp_var_to_np_variant(struct PP_Var var)
 {
@@ -142,13 +195,17 @@ pp_var_to_np_variant(struct PP_Var var)
             res.value.objectValue = v->obj.data;
             npn.retainobject(res.value.objectValue); // TODO: call on main thread?
         } else {
-            struct np_proxy_object_s *np_proxy_object = malloc(sizeof(struct np_proxy_object_s));
-            res.type = NPVariantType_Object;
-            np_proxy_object->npobj.referenceCount = 1;
-            np_proxy_object->npobj._class = &p2n_proxy_class;
-            np_proxy_object->ppobj = var;
-            res.value.objectValue = (NPObject *)np_proxy_object;
-            ppb_var_add_ref(var);
+            res.value.objectValue = create_np_object(&p2n_proxy_class);
+            if (res.value.objectValue) {
+                struct np_proxy_object_s *np_proxy_object;
+
+                res.type = NPVariantType_Object;
+                np_proxy_object = (struct np_proxy_object_s *)res.value.objectValue;
+                np_proxy_object->ppobj = var;
+                ppb_var_add_ref(var);
+            } else {
+                VOID_TO_NPVARIANT(res);
+            }
         }
         break;
 
