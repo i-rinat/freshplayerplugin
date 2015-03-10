@@ -90,4 +90,7 @@ actual Flash version will be taken from that manifest.
 License
 =======
 
-The MIT License. See LICENSE.MIT for full text.
+The MIT License. See `LICENSE` file for full text.
+
+Directory `3rdparty/` contains source code from 3rd parties which can be
+distributed under other license terms. See source code for details.
