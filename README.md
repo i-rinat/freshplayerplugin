@@ -13,10 +13,10 @@ Pepper Plugin API is an interface promoted by Chromium/Chrome team for
 browser plugins. It's NPAPI-inspired yet significantly different API
 which have every conceivable function plugin may want. Two-dimensional
 graphics, OpenGL ES, font rendering, network access, audio, and so
-on. It's huge, there are 107 groups of functions, called interfaces
-which todays Chromium browser offers to plugins. And specs are not
-final yet. Interfaces are changing, newer versions are arising, older
-ones are getting deleted.
+on. It's huge, there are 112 groups of functions, called interfaces
+which todays Chromium browser offers to plugins. Although specs are not
+final yet, and new interface versions are arising, with some older
+ones getting deleted; rate of change have significantly slowed down.
 
 For various reasons Firefox developers are not interested now in
 implementing PPAPI in Firefox.  However that does not mean it cannot
