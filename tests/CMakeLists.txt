@@ -14,7 +14,6 @@ set(test_list
 
 link_directories(
     ${REQ_LIBRARY_DIRS}
-    ${PULSEAUDIO_LIBRARY_DIRS}
 )
 
 # simplify inclusion of .c sources
@@ -32,7 +31,7 @@ foreach(item ${test_list})
         "-Wl,-z,muldefs"
         dl
         ${REQ_LIBRARIES}
-        ${PULSEAUDIO_LIBRARIES})
+        ${PULSEAUDIO_LIBRARY})
     add_test(${item} ${item})
     add_dependencies(check ${item})
 endforeach()

@@ -46,11 +46,13 @@ pkg_check_modules(REQ
     openssl
     REQUIRED)
 
-pkg_check_modules(PULSEAUDIO libpulse)
+find_package(PulseAudio QUIET)
 
-if (${PULSEAUDIO_FOUND})
+if (PULSEAUDIO_FOUND)
     add_definitions(-DHAVE_PULSEAUDIO=1)
-    set(HAVE_PULSEAUDIO 1)
+    message(STATUS "  found PulseAudio (optional)")
+else()
+    message(STATUS "  no PulseAudio found (optional)")
 endif()
 
 include_directories(${REQ_INCLUDE_DIRS})

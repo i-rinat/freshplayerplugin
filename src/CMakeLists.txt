@@ -75,7 +75,7 @@ set(source_list
     screensaver_control.c
 )
 
-if (${HAVE_PULSEAUDIO})
+if (PULSEAUDIO_FOUND)
     list(APPEND source_list audio_thread_pulseaudio.c)
 endif()
 
@@ -96,13 +96,12 @@ add_library(freshwrapper-pepperflash SHARED
 
 link_directories(
     ${REQ_LIBRARY_DIRS}
-    ${PULSEAUDIO_LIBRARY_DIRS}
 )
 
 target_link_libraries(freshwrapper-pepperflash
     dl
     ${REQ_LIBRARIES}
-    ${PULSEAUDIO_LIBRARIES}
+    ${PULSEAUDIO_LIBRARY}
 )
 
 # target_link_libraries(freshwrapper-nacl
