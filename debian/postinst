@@ -1,0 +1,37 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    configure|reconfigure)
+	## set current pluginversion in manifest file (freshplayerplugin need this)
+	# part for pepperflashplugin-nonfree : begin
+	flashso="/usr/lib/pepperflashplugin-nonfree/libpepflashplayer.so"
+	if [ -f $flashso ]
+	then
+        flashversion=`strings $flashso|grep ^LNX|sed -e "s/^LNX //"|sed -e "s/,/./g"`
+	fi
+	# part for pepperflashplugin-nonfree : end
+	manifestfile="/usr/lib/pepperflashplugin-nonfree/manifest.json"
+	if [ ! -f $manifestfile ]
+	then
+	   ln -s /usr/lib/freshplayerplugin/manifest.json $manifestfile
+	fi
+	sed -i "s/\"version.*\"/\"version\": \"$flashversion\"/" $manifestfile
+	update-alternatives --install /usr/lib/mozilla/plugins/flash-mozilla.so flash-mozilla.so /usr/lib/freshplayerplugin/libfreshwrapper-pepperflash.so 100
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0
+
+

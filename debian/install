@@ -1,0 +1,1 @@
+##update-alternatives --install /usr/lib/mozilla/plugins/flash-mozilla.so flash-mozilla.so /usr/lib/freshplayerplugin/libfreshwrapper-pepperflash.so 100
