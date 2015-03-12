@@ -1,0 +1,14 @@
+Source: freshplayerplugin
+Section: contrib/web
+Priority: optional
+Maintainer: Sebastian Fiedler <basti@unix-solution.de>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.6
+Homepage: https://github.com/i-rinat/freshplayerplugin
+
+Package: freshplayerplugin
+Architecture: i386 amd64
+Depends: pepperflashplugin-nonfree, ${misc:Depends}, ${shlibs:Depends}
+Description: Wrapper to use Pepper Flash Player - browser plugin with NPAPI browsers like Firefox
+ This package will install a wrapper to use PPAPI with NPAPI browsers like Firefox.  The end user
+ license is MIT. See LICENSE file for full text.

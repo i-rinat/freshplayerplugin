@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+#echo "pepperflashplugin-nonfree postrm: $@"
+
+if [ "$1" = "purge" ]
+then
+	rm -rf /var/cache/freshplayerplugin
+	rm -rf /usr/lib/freshplayerplugin
+	rm -rf /etc/freshwrapper.conf
+fi
+
+#DEBHELPER#
+
+exit 0
+
