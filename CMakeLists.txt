@@ -50,7 +50,7 @@ find_package(PulseAudio QUIET)
 
 if (PULSEAUDIO_FOUND)
     add_definitions(-DHAVE_PULSEAUDIO=1)
-    message(STATUS "  found PulseAudio (optional)")
+    message(STATUS "  found PulseAudio ${PULSEAUDIO_VERSION} (optional)")
 else()
     message(STATUS "  no PulseAudio found (optional)")
 endif()
