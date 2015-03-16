@@ -213,6 +213,7 @@ struct pp_url_loader_s {
 };
 
 struct url_loader_read_task_s {
+    PP_Resource                     url_loader;
     void                           *buffer;
     int32_t                         bytes_to_read;
     struct PP_CompletionCallback    ccb;

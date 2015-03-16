@@ -532,6 +532,17 @@ quit:
     return NPERR_NO_ERROR;
 }
 
+static
+void
+url_read_task_wrapper_comt(void *user_data, int32_t result)
+{
+    struct url_loader_read_task_s *rt = user_data;
+
+    rt->ccb.func(rt->ccb.user_data, result);
+    ppb_core_release_resource(rt->url_loader); // release previously held reference
+    g_slice_free1(sizeof(*rt), rt);
+}
+
 NPError
 NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
 {
@@ -577,8 +588,7 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
             ul->read_pos += read_bytes;
 
         pp_resource_release(loader);
-        ppb_core_call_on_main_thread(0, rt->ccb, read_bytes);
-        g_slice_free(struct url_loader_read_task_s, rt);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(url_read_task_wrapper_comt, rt), read_bytes);
         ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
 
@@ -652,8 +662,7 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 
     if (read_bytes > 0) {
         pp_resource_release(loader);
-        ppb_core_call_on_main_thread(0, rt->ccb, read_bytes);
-        g_slice_free(struct url_loader_read_task_s, rt);
+        ppb_core_call_on_main_thread(0, PP_MakeCCB(url_read_task_wrapper_comt, rt), read_bytes);
         return len;
     } else {
         // reschedule task

@@ -530,9 +530,11 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
     if (read_bytes == 0 && !ul->finished_loading) {
         // no data ready, schedule read task
         struct url_loader_read_task_s *rt = g_slice_alloc(sizeof(*rt));
+        rt->url_loader = loader;
         rt->buffer = buffer;
         rt->bytes_to_read = bytes_to_read;
         rt->ccb = callback;
+        ppb_core_add_ref_resource(loader); // keep reference until task runs
 
         ul->read_tasks = g_list_append(ul->read_tasks, rt);
         pp_resource_release(loader);
