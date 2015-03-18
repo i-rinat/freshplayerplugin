@@ -30,8 +30,7 @@ foreach(item ${test_list})
     target_link_libraries(${item}
         "-Wl,-z,muldefs"
         dl
-        ${REQ_LIBRARIES}
-        ${PULSEAUDIO_LIBRARY})
+        ${REQ_LIBRARIES})
     add_test(${item} ${item})
     add_dependencies(check ${item})
 endforeach()

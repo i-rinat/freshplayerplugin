@@ -46,20 +46,23 @@ pkg_check_modules(REQ
     openssl
     REQUIRED)
 
-find_package(PulseAudio QUIET)
+pkg_check_modules(PULSEAUDIO QUIET libpulse)
+set(WITH_PULSEAUDIO TRUE CACHE STRING "enable PulseAudio support")
 
-if (PULSEAUDIO_FOUND)
+if (PULSEAUDIO_FOUND AND WITH_PULSEAUDIO)
     add_definitions(-DHAVE_PULSEAUDIO=1)
-    message(STATUS "  found PulseAudio ${PULSEAUDIO_VERSION} (optional)")
+    message(STATUS "  found libpulse, version ${PULSEAUDIO_VERSION} (optional)")
+    list(APPEND REQ_LIBRARY_DIRS ${PULSEAUDIO_LIBRARY_DIRS})
+    list(APPEND REQ_INCLUDE_DIRS ${PULSEAUDIO_INCLUDE_DIRS})
+    list(APPEND REQ_LIBRARIES    ${PULSEAUDIO_LIBRARIES})
 else()
-    message(STATUS "  no PulseAudio found (optional)")
+    message(STATUS "  no libpulse found (optional)")
 endif()
 
 include_directories(${REQ_INCLUDE_DIRS})
+link_directories(${REQ_LIBRARY_DIRS})
 add_definitions(${REQ_CFLAGS_OTHER})
 add_definitions(-DXP_UNIX)
-link_directories(${REQ_LIBRARY_DIRS})
-
 
 include_directories(3rdparty)
 
