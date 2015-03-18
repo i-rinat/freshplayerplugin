@@ -538,6 +538,8 @@ url_read_task_wrapper_comt(void *user_data, int32_t result)
 {
     struct url_loader_read_task_s *rt = user_data;
 
+    trace_info_f("   calling wrapped callback={.func=%p, .user_data=%p, .flags=%d}, result=%d\n",
+                 rt->ccb.func, rt->ccb.user_data, rt->ccb.flags, result);
     rt->ccb.func(rt->ccb.user_data, result);
     ppb_core_release_resource(rt->url_loader); // release previously held reference
     g_slice_free1(sizeof(*rt), rt);

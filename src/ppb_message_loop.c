@@ -312,6 +312,9 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
                 // run task
                 const struct PP_CompletionCallback ccb = task->ccb;
                 if (ccb.func) {
+                    trace_info_f("   calling callback={.func=%p, .user_data=%p, .flags=%d}, "
+                                 "result=%d\n", ccb.func, ccb.user_data, ccb.flags,
+                                 task->result_to_pass);
                     ccb.func(ccb.user_data, task->result_to_pass);
                 }
 
