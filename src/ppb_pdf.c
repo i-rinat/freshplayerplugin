@@ -140,6 +140,10 @@ ppb_pdf_get_v8_external_snapshot_data(PP_Instance instance, const char **natives
                                       int *natives_size_out, const char **snapshot_data_out,
                                       int *snapshot_size_out)
 {
+    *natives_data_out = NULL;
+    *natives_size_out = 0;
+    *snapshot_data_out = NULL;
+    *snapshot_size_out = 0;
 }
 
 
@@ -309,7 +313,7 @@ trace_ppb_pdf_get_v8_external_snapshot_data(PP_Instance instance, const char **n
                                             int *natives_size_out, const char **snapshot_data_out,
                                             int *snapshot_size_out)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {fake} %s instance=%d\n", __func__+6, instance);
     ppb_pdf_get_v8_external_snapshot_data(instance, natives_data_out, natives_size_out,
                                           snapshot_data_out, snapshot_size_out);
 }
