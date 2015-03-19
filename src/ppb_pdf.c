@@ -122,6 +122,7 @@ ppb_pdf_modal_prompt_for_password(PP_Instance instance, struct PP_Var message)
 PP_Bool
 ppb_pdf_is_out_of_process(PP_Instance instance)
 {
+    // TODO: does it matter?
     return PP_TRUE;
 }
 
@@ -287,7 +288,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_pdf_is_out_of_process(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_pdf_is_out_of_process(instance);
 }
 
@@ -336,7 +337,7 @@ const struct PPB_PDF ppb_pdf_interface = {
     .IsFeatureEnabled =               TWRAPZ(ppb_pdf_is_feature_enabled),
     .GetResourceImageForScale =       TWRAPZ(ppb_pdf_get_resource_image_for_scale),
     .ModalPromptForPassword =         TWRAPZ(ppb_pdf_modal_prompt_for_password),
-    .IsOutOfProcess =                 TWRAPZ(ppb_pdf_is_out_of_process),
+    .IsOutOfProcess =                 TWRAPF(ppb_pdf_is_out_of_process),
     .SetSelectedText =                TWRAPZ(ppb_pdf_set_selected_text),
     .SetLinkUnderCursor =             TWRAPZ(ppb_pdf_set_link_under_cursor),
     .GetV8ExternalSnapshotData =      TWRAPZ(ppb_pdf_get_v8_external_snapshot_data),
