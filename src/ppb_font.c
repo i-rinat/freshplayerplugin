@@ -29,35 +29,13 @@
 #include <pango/pangoft2.h>
 #include "tables.h"
 #include "ppb_var.h"
+#include "font.h"
 
 
 struct PP_Var
 ppb_font_get_font_families(PP_Instance instance)
 {
-    PangoFontFamily **families;
-    int n, k, total_len;
-
-    pango_font_map_list_families(tables_get_pango_font_map(), &families, &n);
-    total_len = 0;
-    for (k = 0; k < n; k ++) {
-        const char *name = pango_font_family_get_name(families[k]);
-        total_len += strlen(name) + 1; // with '\0' at the end
-    }
-
-    char *s = malloc(total_len);
-    char *ptr = s;
-    for (k = 0; k < n; k ++) {
-        const char *name = pango_font_family_get_name(families[k]);
-        const int len = strlen(name);
-        memcpy(ptr, name, len + 1); // with '\0' at the end
-        ptr += len + 1;
-    }
-
-    struct PP_Var var = ppb_var_var_from_utf8(s, total_len);
-    free(s);
-    g_free(families);
-
-    return var;
+    return fpp_font_get_font_families();
 }
 
 PP_Resource
