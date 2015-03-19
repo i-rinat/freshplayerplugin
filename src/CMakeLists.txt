@@ -58,6 +58,7 @@ set(source_list
     ppb_net_address.c
     ppb_network_monitor.c
     ppb_opengles2.c
+    ppb_pdf.c
     ppb_printing.c
     ppb_tcp_socket.c
     ppb_text_input_controller.c

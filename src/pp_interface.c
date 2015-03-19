@@ -72,6 +72,7 @@
 #include <ppapi/c/private/ppb_flash_menu.h>
 #include <ppapi/c/private/ppb_flash_message_loop.h>
 #include <ppapi/c/private/ppb_instance_private.h>
+#include <ppapi/c/private/ppb_pdf.h>
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
 #include <ppapi/c/private/ppb_udp_socket_private.h>
 #include <ppapi/c/private/ppb_nacl_private.h>
@@ -136,6 +137,7 @@ extern const struct PPB_OpenGLES2FramebufferMultisample ppb_opengles2_framebuffe
 extern const struct PPB_OpenGLES2InstancedArrays    ppb_opengles2_instanced_arrays_interface_1_0;
 extern const struct PPB_OpenGLES2Query              ppb_opengles2_query_interface_1_0;
 extern const struct PPB_OpenGLES2                   ppb_opengles2_interface_1_0;
+extern const struct PPB_PDF                         ppb_pdf_interface;
 extern const struct PPB_Printing_Dev_0_7            ppb_printing_dev_interface_0_7;
 extern const struct PPB_TCPSocket_Private_0_4       ppb_tcp_socket_private_interface_0_4;
 extern const struct PPB_TCPSocket_Private_0_5       ppb_tcp_socket_private_interface_0_5;
@@ -233,6 +235,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_OPENGLES2_INSTANCEDARRAYS_INTERFACE_1_0, ppb_opengles2_instanced_arrays_interface_1_0)
     ELSEIFBLOCK(PPB_OPENGLES2_INTERFACE_1_0,            ppb_opengles2_interface_1_0)
     ELSEIFBLOCK(PPB_OPENGLES2_QUERY_INTERFACE_1_0,      ppb_opengles2_query_interface_1_0)
+    ELSEIFBLOCK(PPB_PDF_INTERFACE,                      ppb_pdf_interface)
     ELSEIFBLOCK(PPB_PRINTING_DEV_INTERFACE_0_7,         ppb_printing_dev_interface_0_7)
     ELSEIFBLOCK(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_4,    ppb_tcp_socket_private_interface_0_4)
     ELSEIFBLOCK(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_5,    ppb_tcp_socket_private_interface_0_5)
