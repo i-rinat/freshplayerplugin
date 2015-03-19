@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_tcp_socket.idl modified Fri Sep 20 09:58:19 2013. */
+/* From ppb_tcp_socket.idl modified Mon Dec  8 16:50:44 2014. */
 
 #ifndef PPAPI_C_PPB_TCP_SOCKET_H_
 #define PPAPI_C_PPB_TCP_SOCKET_H_
@@ -18,7 +18,8 @@
 
 #define PPB_TCPSOCKET_INTERFACE_1_0 "PPB_TCPSocket;1.0"
 #define PPB_TCPSOCKET_INTERFACE_1_1 "PPB_TCPSocket;1.1"
-#define PPB_TCPSOCKET_INTERFACE PPB_TCPSOCKET_INTERFACE_1_1
+#define PPB_TCPSOCKET_INTERFACE_1_2 "PPB_TCPSocket;1.2"
+#define PPB_TCPSOCKET_INTERFACE PPB_TCPSOCKET_INTERFACE_1_2
 
 /**
  * @file
@@ -37,13 +38,17 @@ typedef enum {
   /**
    * Disables coalescing of small writes to make TCP segments, and instead
    * delivers data immediately. Value's type is <code>PP_VARTYPE_BOOL</code>.
-   * This option can only be set after a successful <code>Connect()</code> call.
+   * On version 1.1 or earlier, this option can only be set after a successful
+   * <code>Connect()</code> call. On version 1.2 or later, there is no such
+   * limitation.
    */
   PP_TCPSOCKET_OPTION_NO_DELAY = 0,
   /**
    * Specifies the total per-socket buffer space reserved for sends. Value's
    * type should be <code>PP_VARTYPE_INT32</code>.
-   * This option can only be set after a successful <code>Connect()</code> call.
+   * On version 1.1 or earlier, this option can only be set after a successful
+   * <code>Connect()</code> call. On version 1.2 or later, there is no such
+   * limitation.
    *
    * Note: This is only treated as a hint for the browser to set the buffer
    * size. Even if <code>SetOption()</code> succeeds, the browser doesn't
@@ -53,7 +58,9 @@ typedef enum {
   /**
    * Specifies the total per-socket buffer space reserved for receives. Value's
    * type should be <code>PP_VARTYPE_INT32</code>.
-   * This option can only be set after a successful <code>Connect()</code> call.
+   * On version 1.1 or earlier, this option can only be set after a successful
+   * <code>Connect()</code> call. On version 1.2 or later, there is no such
+   * limitation.
    *
    * Note: This is only treated as a hint for the browser to set the buffer
    * size. Even if <code>SetOption()</code> succeeds, the browser doesn't
@@ -79,7 +86,7 @@ PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_TCPSocket_Option, 4);
  * For more details about network communication permissions, please see:
  * http://developer.chrome.com/apps/app_network.html
  */
-struct PPB_TCPSocket_1_1 {
+struct PPB_TCPSocket_1_2 {
   /**
    * Creates a TCP socket resource.
    *
@@ -273,7 +280,7 @@ struct PPB_TCPSocket_1_1 {
                        struct PP_CompletionCallback callback);
 };
 
-typedef struct PPB_TCPSocket_1_1 PPB_TCPSocket;
+typedef struct PPB_TCPSocket_1_2 PPB_TCPSocket;
 
 struct PPB_TCPSocket_1_0 {
   PP_Resource (*Create)(PP_Instance instance);
@@ -291,6 +298,38 @@ struct PPB_TCPSocket_1_0 {
                    const char* buffer,
                    int32_t bytes_to_write,
                    struct PP_CompletionCallback callback);
+  void (*Close)(PP_Resource tcp_socket);
+  int32_t (*SetOption)(PP_Resource tcp_socket,
+                       PP_TCPSocket_Option name,
+                       struct PP_Var value,
+                       struct PP_CompletionCallback callback);
+};
+
+struct PPB_TCPSocket_1_1 {
+  PP_Resource (*Create)(PP_Instance instance);
+  PP_Bool (*IsTCPSocket)(PP_Resource resource);
+  int32_t (*Bind)(PP_Resource tcp_socket,
+                  PP_Resource addr,
+                  struct PP_CompletionCallback callback);
+  int32_t (*Connect)(PP_Resource tcp_socket,
+                     PP_Resource addr,
+                     struct PP_CompletionCallback callback);
+  PP_Resource (*GetLocalAddress)(PP_Resource tcp_socket);
+  PP_Resource (*GetRemoteAddress)(PP_Resource tcp_socket);
+  int32_t (*Read)(PP_Resource tcp_socket,
+                  char* buffer,
+                  int32_t bytes_to_read,
+                  struct PP_CompletionCallback callback);
+  int32_t (*Write)(PP_Resource tcp_socket,
+                   const char* buffer,
+                   int32_t bytes_to_write,
+                   struct PP_CompletionCallback callback);
+  int32_t (*Listen)(PP_Resource tcp_socket,
+                    int32_t backlog,
+                    struct PP_CompletionCallback callback);
+  int32_t (*Accept)(PP_Resource tcp_socket,
+                    PP_Resource* accepted_tcp_socket,
+                    struct PP_CompletionCallback callback);
   void (*Close)(PP_Resource tcp_socket);
   int32_t (*SetOption)(PP_Resource tcp_socket,
                        PP_TCPSocket_Option name,

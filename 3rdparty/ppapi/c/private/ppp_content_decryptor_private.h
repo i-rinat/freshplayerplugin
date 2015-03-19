@@ -4,7 +4,7 @@
  */
 
 /* From private/ppp_content_decryptor_private.idl,
- *   modified Mon Aug 25 14:02:40 2014.
+ *   modified Fri Dec 19 15:58:46 2014.
  */
 
 #ifndef PPAPI_C_PRIVATE_PPP_CONTENT_DECRYPTOR_PRIVATE_H_
@@ -18,10 +18,10 @@
 #include "ppapi/c/pp_var.h"
 #include "ppapi/c/private/pp_content_decryptor.h"
 
-#define PPP_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_12 \
-    "PPP_ContentDecryptor_Private;0.12"
+#define PPP_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_13 \
+    "PPP_ContentDecryptor_Private;0.13"
 #define PPP_CONTENTDECRYPTOR_PRIVATE_INTERFACE \
-    PPP_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_12
+    PPP_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_13
 
 /**
  * @file
@@ -42,7 +42,7 @@
  * Decryption Module (CDM) for Encrypted Media Extensions:
  * http://www.w3.org/TR/encrypted-media/
  */
-struct PPP_ContentDecryptor_Private_0_12 {
+struct PPP_ContentDecryptor_Private_0_13 {
   /**
    * Initialize for the specified key system.
    *
@@ -64,16 +64,20 @@ struct PPP_ContentDecryptor_Private_0_12 {
                                uint32_t promise_id,
                                struct PP_Var server_certificate);
   /**
-   * Creates a session. <code>init_data_type</code> contains the MIME type of
+   * Creates a session and subsequently generates a request for a license.
+   * <code>init_data_type</code> contains the MIME type of
    * <code>init_data</code>. <code>init_data</code> is a data buffer
    * containing data for use in generating the request.
    *
-   * Note: <code>CreateSession()</code> must create a web session ID and provide
-   * it to the browser via <code>SessionCreated()</code> on the
-   * <code>PPB_ContentDecryptor_Private</code> interface.
+   * Note: <code>CreateSessionAndGenerateRequest()</code> must create a web
+   * session ID and provide it to the browser via <code>SessionCreated()</code>
+   * on the <code>PPB_ContentDecryptor_Private</code> interface.
    *
    * @param[in] promise_id A reference for the promise that gets resolved or
    * rejected depending upon the success or failure when creating the session.
+   *
+   * @param[in] session_type A <code>PP_SessionType</code> that indicates the
+   * type of session to be created.
    *
    * @param[in] init_data_type A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the MIME type for init_data.
@@ -81,15 +85,12 @@ struct PPP_ContentDecryptor_Private_0_12 {
    * @param[in] init_data A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_ARRAYBUFFER</code> containing container specific
    * initialization data.
-   *
-   * @param[in] session_type A <code>PP_SessionType</code> that indicates the
-   * type of session to be created.
    */
-  void (*CreateSession)(PP_Instance instance,
-                        uint32_t promise_id,
-                        struct PP_Var init_data_type,
-                        struct PP_Var init_data,
-                        PP_SessionType session_type);
+  void (*CreateSessionAndGenerateRequest)(PP_Instance instance,
+                                          uint32_t promise_id,
+                                          PP_SessionType session_type,
+                                          struct PP_Var init_data_type,
+                                          struct PP_Var init_data);
   /**
    * Loads a session whose web session ID is <code>web_session_id</code>.
    *
@@ -100,12 +101,16 @@ struct PPP_ContentDecryptor_Private_0_12 {
    * @param[in] promise_id A reference for the promise that gets resolved or
    * rejected depending upon the success or failure of loading the session.
    *
+   * @param[in] session_type A <code>PP_SessionType</code> that indicates the
+   * type of session to be loaded.
+   *
    * @param[in] web_session_id A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the web session ID of the session
    * to load.
    */
   void (*LoadSession)(PP_Instance instance,
                       uint32_t promise_id,
+                      PP_SessionType session_type,
                       struct PP_Var web_session_id);
   /**
    * Provides a license or other message to the decryptor.
@@ -163,21 +168,6 @@ struct PPP_ContentDecryptor_Private_0_12 {
   void (*RemoveSession)(PP_Instance instance,
                         uint32_t promise_id,
                         struct PP_Var web_session_id);
-  /**
-   * Get the key IDs for keys in the session that the CDM knows are currently
-   * usable to decrypt media data.
-   *
-   * @param[in] promise_id A reference for the promise that gets resolved or
-   * rejected depending upon the success or failure of obtaining the key IDs.
-   *
-   * @param[in] web_session_id A <code>PP_Var</code> of type
-   * <code>PP_VARTYPE_STRING</code> containing the web session ID of the session
-   * to be queried.
-   *
-   */
-  void (*GetUsableKeyIds)(PP_Instance instance,
-                          uint32_t promise_id,
-                          struct PP_Var web_session_id);
   /**
    * Decrypts the block and returns the unencrypted block via
    * <code>DeliverBlock()</code> on the
@@ -304,7 +294,7 @@ struct PPP_ContentDecryptor_Private_0_12 {
       const struct PP_EncryptedBlockInfo* encrypted_block_info);
 };
 
-typedef struct PPP_ContentDecryptor_Private_0_12 PPP_ContentDecryptor_Private;
+typedef struct PPP_ContentDecryptor_Private_0_13 PPP_ContentDecryptor_Private;
 /**
  * @}
  */

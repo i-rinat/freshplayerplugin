@@ -4,7 +4,7 @@
  */
 
 /* From private/ppb_content_decryptor_private.idl,
- *   modified Mon Aug 25 13:52:39 2014.
+ *   modified Mon Jan 12 17:33:29 2015.
  */
 
 #ifndef PPAPI_C_PRIVATE_PPB_CONTENT_DECRYPTOR_PRIVATE_H_
@@ -19,10 +19,10 @@
 #include "ppapi/c/pp_var.h"
 #include "ppapi/c/private/pp_content_decryptor.h"
 
-#define PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_12 \
-    "PPB_ContentDecryptor_Private;0.12"
+#define PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_13 \
+    "PPB_ContentDecryptor_Private;0.13"
 #define PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE \
-    PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_12
+    PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_13
 
 /**
  * @file
@@ -43,7 +43,7 @@
  * browser side support for the Content Decryption Module (CDM) for Encrypted
  * Media Extensions: http://www.w3.org/TR/encrypted-media/
  */
-struct PPB_ContentDecryptor_Private_0_12 {
+struct PPB_ContentDecryptor_Private_0_13 {
   /**
    * A promise has been resolved by the CDM.
    *
@@ -61,18 +61,6 @@ struct PPB_ContentDecryptor_Private_0_12 {
   void (*PromiseResolvedWithSession)(PP_Instance instance,
                                      uint32_t promise_id,
                                      struct PP_Var web_session_id);
-  /**
-   * A promise that returns a set of key IDs has been resolved by the CDM.
-   *
-   * @param[in] promise_id Identifies the promise that the CDM resolved.
-   *
-   * @param[in] key_ids A <code>PP_Var</code> of type
-   * <code>PP_VARTYPE_ARRAY</code> containing elements of type
-   * <code>PP_VARTYPE_ARRAYBUFFER</code> that are the session's usable key IDs.
-   */
-  void (*PromiseResolvedWithKeyIds)(PP_Instance instance,
-                                    uint32_t promise_id,
-                                    struct PP_Var key_ids_array);
   /**
    * A promise has been rejected by the CDM due to an error.
    *
@@ -109,17 +97,21 @@ struct PPB_ContentDecryptor_Private_0_12 {
    * <code>PP_VARTYPE_STRING</code> containing the ID of a session for
    * which this message is intended.
    *
+   * @param[in] message_type A <code>PP_CdmMessageType</code> containing the
+   * message type.
+   *
    * @param[in] message A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_ARRAY_BUFFER</code> that contains the message.
    *
-   * @param[in] destination_url A <code>PP_Var</code> of type
+   * @param[in] legacy_destination_url A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the destination URL for the
    * message.
    */
   void (*SessionMessage)(PP_Instance instance,
                          struct PP_Var web_session_id,
+                         PP_CdmMessageType message_type,
                          struct PP_Var message,
-                         struct PP_Var destination_url);
+                         struct PP_Var legacy_destination_url);
   /**
    * The keys for a session have changed.
    *
@@ -129,10 +121,18 @@ struct PPB_ContentDecryptor_Private_0_12 {
    *
    * @param[in] has_additional_usable_key A <code>PP_Bool</code> indicating if
    * a new usable key has been added.
+   *
+   * @param[in] key_count The number of arguments contained in
+   * <code>key_information</code>
+   *
+   * @param[in] key_information An array of type <code>PP_KeyInformation</code>
+   * that are the session's key IDs and their status.
    */
   void (*SessionKeysChange)(PP_Instance instance,
                             struct PP_Var web_session_id,
-                            PP_Bool has_additional_usable_key);
+                            PP_Bool has_additional_usable_key,
+                            uint32_t key_count,
+                            const struct PP_KeyInformation key_information[]);
   /**
    * The expiration time for a session has changed.
    *
@@ -147,23 +147,6 @@ struct PPB_ContentDecryptor_Private_0_12 {
   void (*SessionExpirationChange)(PP_Instance instance,
                                   struct PP_Var web_session_id,
                                   PP_Time new_expiry_time);
-  /**
-   * The session is now ready to decrypt the media stream.
-   *
-   * Note: The above describes the most simple case. Depending on the key
-   * system, a series of <code>SessionMessage()</code> calls from the CDM will
-   * be sent to the browser, and then on to the web application. The web
-   * application must then provide more data to the CDM by directing the browser
-   * to pass the data to the CDM via calls to <code>UpdateSession()</code> on
-   * the <code>PPP_ContentDecryptor_Private</code> interface.
-   * The CDM must call <code>SessionReady()</code> when the sequence is
-   * completed, and, in response, the browser must notify the web application.
-   *
-   * @param[in] web_session_id A <code>PP_Var</code> of type
-   * <code>PP_VARTYPE_STRING</code> containing the session's ID attribute of
-   * the session that is now ready.
-   */
-  void (*SessionReady)(PP_Instance instance, struct PP_Var web_session_id);
   /**
    * The session has been closed as the result of a call to the
    * <code>ReleaseSession()</code> method on the
@@ -325,7 +308,7 @@ struct PPB_ContentDecryptor_Private_0_12 {
       const struct PP_DecryptedSampleInfo* decrypted_sample_info);
 };
 
-typedef struct PPB_ContentDecryptor_Private_0_12 PPB_ContentDecryptor_Private;
+typedef struct PPB_ContentDecryptor_Private_0_13 PPB_ContentDecryptor_Private;
 /**
  * @}
  */

@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_udp_socket.idl modified Sat Jun 22 10:56:26 2013. */
+/* From ppb_udp_socket.idl modified Wed Dec 10 04:11:03 2014. */
 
 #ifndef PPAPI_C_PPB_UDP_SOCKET_H_
 #define PPAPI_C_PPB_UDP_SOCKET_H_
@@ -17,7 +17,8 @@
 #include "ppapi/c/pp_var.h"
 
 #define PPB_UDPSOCKET_INTERFACE_1_0 "PPB_UDPSocket;1.0"
-#define PPB_UDPSOCKET_INTERFACE PPB_UDPSOCKET_INTERFACE_1_0
+#define PPB_UDPSOCKET_INTERFACE_1_1 "PPB_UDPSocket;1.1"
+#define PPB_UDPSOCKET_INTERFACE PPB_UDPSOCKET_INTERFACE_1_1
 
 /**
  * @file
@@ -42,13 +43,16 @@ typedef enum {
   /**
    * Allows sending and receiving packets to and from broadcast addresses.
    * Value's type should be <code>PP_VARTYPE_BOOL</code>.
-   * This option can only be set before calling <code>Bind()</code>.
+   * On version 1.0, this option can only be set before calling
+   * <code>Bind()</code>. On version 1.1 or later, there is no such limitation.
    */
   PP_UDPSOCKET_OPTION_BROADCAST = 1,
   /**
    * Specifies the total per-socket buffer space reserved for sends. Value's
    * type should be <code>PP_VARTYPE_INT32</code>.
-   * This option can only be set after a successful <code>Bind()</code> call.
+   * On version 1.0, this option can only be set after a successful
+   * <code>Bind()</code> call. On version 1.1 or later, there is no such
+   * limitation.
    *
    * Note: This is only treated as a hint for the browser to set the buffer
    * size. Even if <code>SetOption()</code> succeeds, the browser doesn't
@@ -58,7 +62,9 @@ typedef enum {
   /**
    * Specifies the total per-socket buffer space reserved for receives. Value's
    * type should be <code>PP_VARTYPE_INT32</code>.
-   * This option can only be set after a successful <code>Bind()</code> call.
+   * On version 1.0, this option can only be set after a successful
+   * <code>Bind()</code> call. On version 1.1 or later, there is no such
+   * limitation.
    *
    * Note: This is only treated as a hint for the browser to set the buffer
    * size. Even if <code>SetOption()</code> succeeds, the browser doesn't
@@ -84,7 +90,7 @@ PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_UDPSocket_Option, 4);
  * For more details about network communication permissions, please see:
  * http://developer.chrome.com/apps/app_network.html
  */
-struct PPB_UDPSocket_1_0 {
+struct PPB_UDPSocket_1_1 {
   /**
    * Creates a UDP socket resource.
    *
@@ -208,7 +214,31 @@ struct PPB_UDPSocket_1_0 {
                        struct PP_CompletionCallback callback);
 };
 
-typedef struct PPB_UDPSocket_1_0 PPB_UDPSocket;
+typedef struct PPB_UDPSocket_1_1 PPB_UDPSocket;
+
+struct PPB_UDPSocket_1_0 {
+  PP_Resource (*Create)(PP_Instance instance);
+  PP_Bool (*IsUDPSocket)(PP_Resource resource);
+  int32_t (*Bind)(PP_Resource udp_socket,
+                  PP_Resource addr,
+                  struct PP_CompletionCallback callback);
+  PP_Resource (*GetBoundAddress)(PP_Resource udp_socket);
+  int32_t (*RecvFrom)(PP_Resource udp_socket,
+                      char* buffer,
+                      int32_t num_bytes,
+                      PP_Resource* addr,
+                      struct PP_CompletionCallback callback);
+  int32_t (*SendTo)(PP_Resource udp_socket,
+                    const char* buffer,
+                    int32_t num_bytes,
+                    PP_Resource addr,
+                    struct PP_CompletionCallback callback);
+  void (*Close)(PP_Resource udp_socket);
+  int32_t (*SetOption)(PP_Resource udp_socket,
+                       PP_UDPSocket_Option name,
+                       struct PP_Var value,
+                       struct PP_CompletionCallback callback);
+};
 /**
  * @}
  */

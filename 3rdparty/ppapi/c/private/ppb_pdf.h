@@ -169,6 +169,14 @@ struct PPB_PDF {
 
   // Sets the link currently under the cursor.
   void (*SetLinkUnderCursor)(PP_Instance instance, const char* url);
+
+  // Gets pointers to both the mmap'd V8 snapshot files and their sizes.
+  // This is needed when loading V8's initial snapshot from external files.
+  void (*GetV8ExternalSnapshotData)(PP_Instance instance,
+                                    const char** natives_data_out,
+                                    int* natives_size_out,
+                                    const char** snapshot_data_out,
+                                    int* snapshot_size_out);
 };
 
 #endif  // PPAPI_C_PRIVATE_PPB_PDF_H_
