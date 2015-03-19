@@ -55,6 +55,7 @@
 #include <gtk/gtk.h>
 #include "audio_thread.h"
 #include <openssl/x509.h>
+#include "font.h"
 
 
 #define free_and_nullify(item)          \
@@ -296,12 +297,7 @@ struct pp_network_monitor_s {
 
 struct pp_browser_font_s {
     COMMON_STRUCTURE_FIELDS
-    PangoFont              *font;
-    PangoFontDescription   *font_desc;
-    PangoLayout            *measure_layout;
-    int32_t                 letter_spacing;
-    int32_t                 word_spacing;
-    int32_t                 family;
+    struct fpp_font         ff;
 };
 
 struct pp_audio_config_s {

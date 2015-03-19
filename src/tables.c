@@ -152,44 +152,6 @@ tables_get_pango_font_map(void)
     return pango_fm;
 }
 
-PangoFontDescription *
-pp_font_desc_to_pango_font_desc(const struct PP_BrowserFont_Trusted_Description *description)
-{
-    PangoFontDescription *font_desc;
-
-    if (description->face.type == PP_VARTYPE_STRING) {
-        const char *s = ppb_var_var_to_utf8(description->face, NULL);
-        font_desc = pango_font_description_from_string(s);
-    } else {
-        font_desc = pango_font_description_new();
-        switch (description->family) {
-        case PP_BROWSERFONT_TRUSTED_FAMILY_SERIF:
-            pango_font_description_set_family(font_desc, "serif");
-            break;
-        case PP_BROWSERFONT_TRUSTED_FAMILY_SANSSERIF:
-            pango_font_description_set_family(font_desc, "sans-serif");
-            break;
-        case PP_BROWSERFONT_TRUSTED_FAMILY_MONOSPACE:
-            pango_font_description_set_family(font_desc, "monospace");
-            break;
-        case PP_BROWSERFONT_TRUSTED_FAMILY_DEFAULT:
-            // fall through
-        default:
-            // do nothing
-            break;
-        }
-    }
-
-    pango_font_description_set_absolute_size(font_desc, description->size * PANGO_SCALE);
-    pango_font_description_set_weight(font_desc, (description->weight + 1) * 100);
-    if (description->italic)
-        pango_font_description_set_style(font_desc, PANGO_STYLE_ITALIC);
-    if (description->small_caps)
-        pango_font_description_set_variant(font_desc, PANGO_VARIANT_SMALL_CAPS);
-
-    return font_desc;
-}
-
 void
 tables_add_npobj_npp_mapping(NPObject *npobj, NPP npp)
 {

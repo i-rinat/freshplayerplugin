@@ -13,6 +13,7 @@ set(source_list
     audio_thread_alsa.c
     config.c
     compat.c
+    font.c
     header_parser.c
     keycodeconvert.c
     np_entry.c

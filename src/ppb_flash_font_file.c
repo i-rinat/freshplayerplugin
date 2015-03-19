@@ -48,7 +48,7 @@ ppb_flash_font_file_create(PP_Instance instance,
         trace_error("%s, resource allocation error\n", __func__);
         return 0;
     }
-    PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
+    PangoFontDescription *font_desc = pp_browser_font_desc_to_pango_font_desc(description);
 
     fff->font = pango_context_load_font(tables_get_pango_ctx(), font_desc);
     pango_font_description_free(font_desc);
