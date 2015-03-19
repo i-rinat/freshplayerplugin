@@ -30,6 +30,7 @@
 #include "tables.h"
 #include "ppb_var.h"
 #include "font.h"
+#include <ppapi/c/pp_errors.h>
 
 
 struct PP_Var
@@ -41,20 +42,53 @@ ppb_font_get_font_families(PP_Instance instance)
 PP_Resource
 ppb_font_create(PP_Instance instance, const struct PP_FontDescription_Dev *description)
 {
-    return 0;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+
+    PP_Resource font = pp_resource_allocate(PP_RESOURCE_FONT, pp_i);
+    struct pp_font_s *f = pp_resource_acquire(font, PP_RESOURCE_FONT);
+    if (!f) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        return 0;
+    }
+
+    fpp_font_init(&f->ff, description);
+
+    pp_resource_release(font);
+    return font;
+}
+
+void
+ppb_font_destroy(void *p)
+{
+    struct pp_font_s *f = p;
+    if (!f)
+        return;
+    fpp_font_destroy(&f->ff);
 }
 
 PP_Bool
 ppb_font_is_font(PP_Resource resource)
 {
-    return PP_TRUE;
+    return PP_RESOURCE_FONT == pp_resource_get_type(resource);
 }
 
 PP_Bool
 ppb_font_describe(PP_Resource font, struct PP_FontDescription_Dev *description,
                   struct PP_FontMetrics_Dev *metrics)
 {
-    return PP_FALSE;
+    struct pp_font_s *f = pp_resource_acquire(font, PP_RESOURCE_FONT);
+    if (!f) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
+
+    PP_Bool ret = fpp_font_describe(&f->ff, description, metrics);
+    pp_resource_release(font);
+    return ret;
 }
 
 PP_Bool
@@ -62,13 +96,30 @@ ppb_font_draw_text_at(PP_Resource font, PP_Resource image_data, const struct PP_
                       const struct PP_Point *position, uint32_t color, const struct PP_Rect *clip,
                       PP_Bool image_data_is_opaque)
 {
-    return PP_FALSE;
+    struct pp_font_s *f = pp_resource_acquire(font, PP_RESOURCE_FONT);
+    if (!f) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
+
+    PP_Bool ret = fpp_font_draw_text_at(&f->ff, image_data, text, position, color, clip,
+                                        image_data_is_opaque);
+    pp_resource_release(font);
+    return ret;
 }
 
 int32_t
 ppb_font_measure_text(PP_Resource font, const struct PP_TextRun_Dev *text)
 {
-    return -1;
+    struct pp_font_s *f = pp_resource_acquire(font, PP_RESOURCE_FONT);
+    if (!f) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_FAILED;
+    }
+
+    int32_t ret = fpp_font_measure_text(&f->ff, text);
+    pp_resource_release(font);
+    return ret;
 }
 
 uint32_t
@@ -100,7 +151,7 @@ PP_Resource
 trace_ppb_font_create(PP_Instance instance, const struct PP_FontDescription_Dev *description)
 {
     gchar *s_face = trace_var_as_string(description->face);
-    trace_info("[PPB] {zilch} %s instance=%d, description={.face=%s, .family=%u, .size=%u, "
+    trace_info("[PPB] {full} %s instance=%d, description={.face=%s, .family=%u, .size=%u, "
                ".weight=%u, .italic=%u, .small_caps=%u, .letter_spacing=%d, .word_spacing=%d}\n",
                __func__+6, instance, s_face, description->family, description->size,
                description->weight, description->italic, description->small_caps,
@@ -113,7 +164,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_font_is_font(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_font_is_font(resource);
 }
 
@@ -122,7 +173,7 @@ PP_Bool
 trace_ppb_font_describe(PP_Resource font, struct PP_FontDescription_Dev *description,
                         struct PP_FontMetrics_Dev *metrics)
 {
-    trace_info("[PPB] {zilch} %s font=%d\n", __func__+6, font);
+    trace_info("[PPB] {full} %s font=%d\n", __func__+6, font);
     return ppb_font_describe(font, description, metrics);
 }
 
@@ -136,7 +187,7 @@ trace_ppb_font_draw_text_at(PP_Resource font, PP_Resource image_data,
     gchar *s_text = trace_var_as_string(text->text);
     gchar *s_position = trace_point_as_string(position);
     gchar *s_clip = trace_rect_as_string(clip);
-    trace_info("[PPB] {zilch} %s font=%d, image_data=%d, text={.text=%s, .rtl=%u, "
+    trace_info("[PPB] {full} %s font=%d, image_data=%d, text={.text=%s, .rtl=%u, "
                ".override_direction=%u}, position=%s, color=0x%08x, clip=%s, "
                "image_data_is_opaque=%u\n", __func__+6, font, image_data, s_text, text->rtl,
                text->override_direction, s_position, color, s_clip, image_data_is_opaque);
@@ -152,7 +203,7 @@ int32_t
 trace_ppb_font_measure_text(PP_Resource font, const struct PP_TextRun_Dev *text)
 {
     gchar *s_text = trace_var_as_string(text->text);
-    trace_info("[PPB] {zilch} %s font=%d, text={.text=%s, .rtl=%u, .override_direction=%u}\n",
+    trace_info("[PPB] {full} %s font=%d, text={.text=%s, .rtl=%u, .override_direction=%u}\n",
                __func__+6, font, s_text, text->rtl, text->override_direction);
     g_free(s_text);
     return ppb_font_measure_text(font, text);
@@ -187,11 +238,11 @@ trace_ppb_font_pixel_offset_for_character(PP_Resource font, const struct PP_Text
 
 const struct PPB_Font_Dev_0_6 ppb_font_dev_interface_0_6 = {
     .GetFontFamilies =          TWRAPF(ppb_font_get_font_families),
-    .Create =                   TWRAPZ(ppb_font_create),
-    .IsFont =                   TWRAPZ(ppb_font_is_font),
-    .Describe =                 TWRAPZ(ppb_font_describe),
-    .DrawTextAt =               TWRAPZ(ppb_font_draw_text_at),
-    .MeasureText =              TWRAPZ(ppb_font_measure_text),
+    .Create =                   TWRAPF(ppb_font_create),
+    .IsFont =                   TWRAPF(ppb_font_is_font),
+    .Describe =                 TWRAPF(ppb_font_describe),
+    .DrawTextAt =               TWRAPF(ppb_font_draw_text_at),
+    .MeasureText =              TWRAPF(ppb_font_measure_text),
     .CharacterOffsetForPixel =  TWRAPZ(ppb_font_character_offset_for_pixel),
     .PixelOffsetForCharacter =  TWRAPZ(ppb_font_pixel_offset_for_character),
 };
