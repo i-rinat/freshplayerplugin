@@ -780,7 +780,16 @@ ppb_var_dictionary_get(struct PP_Var dict, struct PP_Var key)
 PP_Bool
 ppb_var_dictionary_set(struct PP_Var dict, struct PP_Var key, struct PP_Var value)
 {
-    return PP_FALSE;
+    if (dict.type != PP_VARTYPE_DICTIONARY || key.type != PP_VARTYPE_STRING)
+        return PP_FALSE;
+
+    struct var_s *d = get_var_s(dict);
+    char *key_copy = nullsafe_strdup(ppb_var_var_to_utf8(key, NULL));
+    struct PP_Var *value_copy = g_slice_alloc(sizeof(*value_copy));
+    memcpy(value_copy, &value, sizeof(struct PP_Var));
+
+    g_hash_table_replace(d->dict, key_copy, value_copy);
+    return PP_TRUE;
 }
 
 void
@@ -1092,7 +1101,7 @@ trace_ppb_var_dictionary_set(struct PP_Var dict, struct PP_Var key, struct PP_Va
     gchar *s_dict = trace_var_as_string(dict);
     gchar *s_key = trace_var_as_string(key);
     gchar *s_value = trace_var_as_string(value);
-    trace_info("[PPB] {zilch} %s dict=%s, key=%s, value=%s\n", __func__+6, s_dict, s_key, s_value);
+    trace_info("[PPB] {full} %s dict=%s, key=%s, value=%s\n", __func__+6, s_dict, s_key, s_value);
     g_free(s_dict);
     g_free(s_key);
     g_free(s_value);
@@ -1236,7 +1245,7 @@ const struct PPB_VarArrayBuffer_1_0 ppb_var_array_buffer_interface_1_0 = {
 const struct PPB_VarDictionary_1_0 ppb_var_dictionary_interface_1_0 = {
     .Create =   TWRAPF(ppb_var_dictionary_create),
     .Get =      TWRAPZ(ppb_var_dictionary_get),
-    .Set =      TWRAPZ(ppb_var_dictionary_set),
+    .Set =      TWRAPF(ppb_var_dictionary_set),
     .Delete =   TWRAPZ(ppb_var_dictionary_delete),
     .HasKey =   TWRAPZ(ppb_var_dictionary_has_key),
     .GetKeys =  TWRAPZ(ppb_var_dictionary_get_keys),
