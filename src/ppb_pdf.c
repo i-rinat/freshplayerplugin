@@ -24,12 +24,34 @@
 
 #include "ppb_pdf.h"
 #include <stdlib.h>
+#include <libgen.h>
+#include <glib.h>
 #include "trace.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
 #include "ppb_flash_font_file.h"
 #include "ppb_var.h"
+#include "np_entry.h"
 
+
+static GMappedFile  *natives_blob = NULL;
+static GMappedFile  *snapshot_blob = NULL;
+
+
+static
+void
+__attribute__((destructor))
+destructor_ppb_pdf(void)
+{
+    if (natives_blob) {
+        g_mapped_file_unref(natives_blob);
+        natives_blob = NULL;
+    }
+    if (snapshot_blob) {
+        g_mapped_file_unref(snapshot_blob);
+        snapshot_blob = NULL;
+    }
+}
 
 struct PP_Var
 ppb_pdf_get_localized_string(PP_Instance instance, PP_ResourceString string_id)
@@ -157,10 +179,25 @@ ppb_pdf_get_v8_external_snapshot_data(PP_Instance instance, const char **natives
                                       int *natives_size_out, const char **snapshot_data_out,
                                       int *snapshot_size_out)
 {
-    *natives_data_out = NULL;
-    *natives_size_out = 0;
-    *snapshot_data_out = NULL;
-    *snapshot_size_out = 0;
+    if (!natives_blob || !snapshot_blob) {
+        gchar *tmp = g_strdup(np_entry_get_module_file_name());
+        gchar *module_dir = dirname(tmp);
+        gchar *natives_path = g_strdup_printf("%s/natives_blob.bin", module_dir);
+        gchar *snapshot_path = g_strdup_printf("%s/snapshot_blob.bin", module_dir);
+
+        natives_blob = g_mapped_file_new(natives_path, FALSE, NULL);
+        snapshot_blob = g_mapped_file_new(snapshot_path, FALSE, NULL);
+
+        g_free(tmp);
+        g_free(natives_path);
+        g_free(snapshot_path);
+    }
+
+    *natives_data_out = natives_blob ? g_mapped_file_get_contents(natives_blob) : NULL;
+    *natives_size_out = natives_blob ? g_mapped_file_get_length(natives_blob) : 0;
+
+    *snapshot_data_out = snapshot_blob ? g_mapped_file_get_contents(snapshot_blob) : NULL;
+    *snapshot_size_out = snapshot_blob ? g_mapped_file_get_length(snapshot_blob) : 0;
 }
 
 
