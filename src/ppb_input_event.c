@@ -105,7 +105,14 @@ ppb_input_event_get_type(PP_Resource event)
 PP_TimeTicks
 ppb_input_event_get_time_stamp(PP_Resource event)
 {
-    return 0;
+    struct pp_input_event_s *ie = pp_resource_acquire(event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_INPUTEVENT_TYPE_UNDEFINED;
+    }
+    PP_TimeTicks time_stamp = ie->time_stamp;
+    pp_resource_release(event);
+    return time_stamp;
 }
 
 uint32_t
@@ -563,7 +570,7 @@ TRACE_WRAPPER
 PP_TimeTicks
 trace_ppb_input_event_get_time_stamp(PP_Resource event)
 {
-    trace_info("[PPB] {zilch} %s event=%d\n", __func__+6, event);
+    trace_info("[PPB] {full} %s event=%d\n", __func__+6, event);
     return ppb_input_event_get_time_stamp(event);
 }
 
@@ -882,7 +889,7 @@ const struct PPB_InputEvent_1_0 ppb_input_event_interface_1_0 = {
     .ClearInputEventRequest =       TWRAPF(ppb_input_event_clear_input_event_request),
     .IsInputEvent =                 TWRAPF(ppb_input_event_is_input_event),
     .GetType =                      TWRAPF(ppb_input_event_get_type),
-    .GetTimeStamp =                 TWRAPZ(ppb_input_event_get_time_stamp),
+    .GetTimeStamp =                 TWRAPF(ppb_input_event_get_time_stamp),
     .GetModifiers =                 TWRAPF(ppb_input_event_get_modifiers),
 };
 
