@@ -52,4 +52,8 @@ ppb_view_get_device_scale(PP_Resource resource);
 float
 ppb_view_get_css_scale(PP_Resource resource);
 
+PP_Bool
+ppb_view_get_scroll_offset(PP_Resource resource, struct PP_Point *offset);
+
+
 #endif // FPP_PPB_VIEW_H

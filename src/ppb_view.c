@@ -100,6 +100,12 @@ ppb_view_get_css_scale(PP_Resource resource)
     return config.device_scale;
 }
 
+PP_Bool
+ppb_view_get_scroll_offset(PP_Resource resource, struct PP_Point *offset)
+{
+    return PP_FALSE;
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -166,6 +172,16 @@ trace_ppb_view_get_css_scale(PP_Resource resource)
     return ppb_view_get_css_scale(resource);
 }
 
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_view_get_scroll_offset(PP_Resource resource, struct PP_Point *offset)
+{
+    gchar *s_offset = trace_point_as_string(offset);
+    trace_info("[PPB] {zilch} %s resource=%d, offset=%s\n", __func__+6, resource, s_offset);
+    g_free(s_offset);
+    return ppb_view_get_scroll_offset(resource, offset);
+}
+
 
 const struct PPB_View_Dev_0_1 ppb_view_dev_interface_0_1 = {
     .GetDeviceScale =   TWRAPF(ppb_view_get_device_scale),
@@ -190,4 +206,16 @@ const struct PPB_View_1_1 ppb_view_interface_1_1 = {
     .GetClipRect =      TWRAPF(ppb_view_get_clip_rect),
     .GetDeviceScale =   TWRAPF(ppb_view_get_device_scale),
     .GetCSSScale =      TWRAPF(ppb_view_get_css_scale),
+};
+
+const struct PPB_View_1_2 ppb_view_interface_1_2 = {
+    .IsView =           TWRAPF(ppb_view_is_view),
+    .GetRect =          TWRAPF(ppb_view_get_rect),
+    .IsFullscreen =     TWRAPZ(ppb_view_is_fullscreen),
+    .IsVisible =        TWRAPZ(ppb_view_is_visible),
+    .IsPageVisible =    TWRAPZ(ppb_view_is_page_visible),
+    .GetClipRect =      TWRAPF(ppb_view_get_clip_rect),
+    .GetDeviceScale =   TWRAPF(ppb_view_get_device_scale),
+    .GetCSSScale =      TWRAPF(ppb_view_get_css_scale),
+    .GetScrollOffset =  TWRAPZ(ppb_view_get_scroll_offset),
 };

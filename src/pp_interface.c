@@ -169,6 +169,7 @@ extern const struct PPB_VideoDecoder_Dev_0_16       ppb_video_decoder_dev_interf
 extern const struct PPB_View_Dev_0_1                ppb_view_dev_interface_0_1;
 extern const struct PPB_View_1_0                    ppb_view_interface_1_0;
 extern const struct PPB_View_1_1                    ppb_view_interface_1_1;
+extern const struct PPB_View_1_2                    ppb_view_interface_1_2;
 extern const struct PPB_WheelInputEvent_1_0         ppb_wheel_input_event_interface_1_0;
 extern const struct PPB_X509Certificate_Private_0_1 ppb_x509_certificate_interface_0_1;
 
@@ -270,6 +271,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_VIEW_DEV_INTERFACE_0_1,             ppb_view_dev_interface_0_1)
     ELSEIFBLOCK(PPB_VIEW_INTERFACE_1_0,                 ppb_view_interface_1_0)
     ELSEIFBLOCK(PPB_VIEW_INTERFACE_1_1,                 ppb_view_interface_1_1)
+    ELSEIFBLOCK(PPB_VIEW_INTERFACE_1_2,                 ppb_view_interface_1_2)
     ELSEIFBLOCK(PPB_X509CERTIFICATE_PRIVATE_INTERFACE_0_1, ppb_x509_certificate_interface_0_1)
     } else {
         trace_info("not implemented: %s\n", interface_name);
