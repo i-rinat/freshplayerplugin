@@ -191,12 +191,6 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     pthread_mutex_lock(&display.lock);
 
-    if (pp_i->graphics != graphics_2d) {
-        pp_resource_release(graphics_2d);
-        pthread_mutex_unlock(&display.lock);
-        return PP_ERROR_FAILED;
-    }
-
     if (pp_i->graphics_in_progress) {
         pp_resource_release(graphics_2d);
         pthread_mutex_unlock(&display.lock);
@@ -206,6 +200,11 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     pp_i->graphics_ccb = callback;
     pp_i->graphics_in_progress = 1;
     pthread_mutex_unlock(&display.lock);
+
+    if (pp_i->graphics != graphics_2d) {
+        pp_resource_release(graphics_2d);
+        return PP_OK_COMPLETIONPENDING;
+    }
 
     while (g2d->task_list) {
         GList *link = g_list_first(g2d->task_list);
