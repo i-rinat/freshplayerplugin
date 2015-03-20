@@ -176,9 +176,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_get_scroll_offset(PP_Resource resource, struct PP_Point *offset)
 {
-    gchar *s_offset = trace_point_as_string(offset);
-    trace_info("[PPB] {zilch} %s resource=%d, offset=%s\n", __func__+6, resource, s_offset);
-    g_free(s_offset);
+    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_scroll_offset(resource, offset);
 }
 
