@@ -28,12 +28,25 @@
 #include "pp_resource.h"
 #include "reverse_constant.h"
 #include "ppb_flash_font_file.h"
+#include "ppb_var.h"
 
 
 struct PP_Var
 ppb_pdf_get_localized_string(PP_Instance instance, PP_ResourceString string_id)
 {
-    return PP_MakeUndefined();
+    // TODO: localization?
+    switch (string_id) {
+    case PP_RESOURCESTRING_PDFGETPASSWORD:
+        return ppb_var_var_from_utf8_z("Need password");
+    case PP_RESOURCESTRING_PDFLOADING:
+        return ppb_var_var_from_utf8_z("Loading...");
+    case PP_RESOURCESTRING_PDFLOAD_FAILED:
+        return ppb_var_var_from_utf8_z("Load failed");
+    case PP_RESOURCESTRING_PDFPROGRESSLOADING:
+        return ppb_var_var_from_utf8_z("Load progress");
+    default:
+        return ppb_var_var_from_utf8_z("");
+    }
 }
 
 PP_Resource
@@ -156,7 +169,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_pdf_get_localized_string(PP_Instance instance, PP_ResourceString string_id)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, string_id=%s(%u)\n", __func__+6, instance,
+    trace_info("[PPB] {full} %s instance=%d, string_id=%s(%u)\n", __func__+6, instance,
                reverse_resource_string(string_id), string_id);
     return ppb_pdf_get_localized_string(instance, string_id);
 }
@@ -343,7 +356,7 @@ trace_ppb_pdf_get_v8_external_snapshot_data(PP_Instance instance, const char **n
 
 
 const struct PPB_PDF ppb_pdf_interface = {
-    .GetLocalizedString =             TWRAPZ(ppb_pdf_get_localized_string),
+    .GetLocalizedString =             TWRAPF(ppb_pdf_get_localized_string),
     .GetResourceImage =               TWRAPZ(ppb_pdf_get_resource_image),
     .GetFontFileWithFallback =        TWRAPF(ppb_pdf_get_font_file_with_fallback),
     .GetFontTableForPrivateFontFile = TWRAPF(ppb_pdf_get_font_table_for_private_font_file),
