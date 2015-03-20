@@ -27,6 +27,7 @@
 #include "trace.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
+#include "ppb_flash_font_file.h"
 
 
 struct PP_Var
@@ -46,14 +47,14 @@ ppb_pdf_get_font_file_with_fallback(PP_Instance instance,
                                     const struct PP_BrowserFont_Trusted_Description *description,
                                     PP_PrivateFontCharset charset)
 {
-    return 0;
+    return ppb_flash_font_file_create(instance, description, charset);
 }
 
 bool
 ppb_pdf_get_font_table_for_private_font_file(PP_Resource font_file, uint32_t table, void *output,
                                              uint32_t *output_length)
 {
-    return false;
+    return ppb_flash_font_file_get_font_table(font_file, table, output, output_length);
 }
 
 void
@@ -177,7 +178,7 @@ trace_ppb_pdf_get_font_file_with_fallback(PP_Instance instance,
                                           PP_PrivateFontCharset charset)
 {
     gchar *s_face = trace_var_as_string(description->face);
-    trace_info("[PPB] {zilch} %s instance=%d, description={.face=%s, .family=%u, .size=%u, "
+    trace_info("[PPB] {full} %s instance=%d, description={.face=%s, .family=%u, .size=%u, "
                ".weight=%u, .italic=%u, .small_caps=%u, .letter_spacing=%d, .word_spacing=%d}, "
                "charset=%s(%u)\n",
                __func__+6, instance, s_face, description->family, description->size,
@@ -193,7 +194,7 @@ bool
 trace_ppb_pdf_get_font_table_for_private_font_file(PP_Resource font_file, uint32_t table,
                                                    void *output, uint32_t *output_length)
 {
-    trace_info("[PPB] {zilch} %s font_file=%d, table=0x%08x\n", __func__+6, font_file, table);
+    trace_info("[PPB] {full} %s font_file=%d, table=0x%08x\n", __func__+6, font_file, table);
     return ppb_pdf_get_font_table_for_private_font_file(font_file, table, output, output_length);
 }
 
@@ -344,8 +345,8 @@ trace_ppb_pdf_get_v8_external_snapshot_data(PP_Instance instance, const char **n
 const struct PPB_PDF ppb_pdf_interface = {
     .GetLocalizedString =             TWRAPZ(ppb_pdf_get_localized_string),
     .GetResourceImage =               TWRAPZ(ppb_pdf_get_resource_image),
-    .GetFontFileWithFallback =        TWRAPZ(ppb_pdf_get_font_file_with_fallback),
-    .GetFontTableForPrivateFontFile = TWRAPZ(ppb_pdf_get_font_table_for_private_font_file),
+    .GetFontFileWithFallback =        TWRAPF(ppb_pdf_get_font_file_with_fallback),
+    .GetFontTableForPrivateFontFile = TWRAPF(ppb_pdf_get_font_table_for_private_font_file),
     .SearchString =                   TWRAPZ(ppb_pdf_search_string),
     .DidStartLoading =                TWRAPZ(ppb_pdf_did_start_loading),
     .DidStopLoading =                 TWRAPZ(ppb_pdf_did_stop_loading),
