@@ -44,6 +44,7 @@ static void *module_dl_handler;
 static gchar *module_version;
 static gchar *module_descr;
 static GList *tried_files = NULL;
+static gchar *module_file_name = NULL;
 
 static
 void
@@ -57,6 +58,12 @@ GList *
 np_entry_get_tried_plugin_files(void)
 {
     return tried_files;
+}
+
+gchar *
+np_entry_get_module_file_name(void)
+{
+    return module_file_name;
 }
 
 static
@@ -90,6 +97,9 @@ do_load_ppp_module(const char *fname)
         module_dl_handler = NULL;
         return 1;
     }
+
+    // module was loaded, save its name
+    module_file_name = g_strdup(fname);
 
     if (!fpp_config_plugin_has_manifest()) {
         use_fallback_version_strings();
@@ -196,6 +206,7 @@ unload_ppp_module(void)
 
     g_free(module_descr); module_descr = NULL;
     g_free(module_version); module_version = NULL;
+    g_free(module_file_name); module_file_name = NULL;
     if (tried_files) {
         g_list_free_full_compat(tried_files, g_free);
         tried_files = NULL;
