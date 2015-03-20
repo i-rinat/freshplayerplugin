@@ -233,7 +233,20 @@ ppb_mouse_input_event_get_click_count(PP_Resource mouse_event)
 struct PP_Point
 ppb_mouse_input_event_get_movement(PP_Resource mouse_event)
 {
-    return PP_MakePoint(0, 0);
+    struct pp_input_event_s *ie = pp_resource_acquire(mouse_event, PP_RESOURCE_INPUT_EVENT);
+    if (!ie) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_MakePoint(0, 0);
+    }
+    if (ie->event_class != PP_INPUTEVENT_CLASS_MOUSE) {
+        trace_error("%s, not a mouse event\n", __func__);
+        pp_resource_release(mouse_event);
+        return PP_MakePoint(0, 0);
+    }
+
+    struct PP_Point mouse_movement = ie->mouse_movement;
+    pp_resource_release(mouse_event);
+    return mouse_movement;
 }
 
 PP_Resource
@@ -638,7 +651,7 @@ TRACE_WRAPPER
 struct PP_Point
 trace_ppb_mouse_input_event_get_movement(PP_Resource mouse_event)
 {
-    trace_info("[PPB] {zilch} %s mouse_event=%d\n", __func__+6, mouse_event);
+    trace_info("[PPB] {full} %s mouse_event=%d\n", __func__+6, mouse_event);
     return ppb_mouse_input_event_get_movement(mouse_event);
 }
 
@@ -899,7 +912,7 @@ const struct PPB_MouseInputEvent_1_1 ppb_mouse_input_event_interface_1_1 = {
     .GetButton =            TWRAPF(ppb_mouse_input_event_get_button),
     .GetPosition =          TWRAPF(ppb_mouse_input_event_get_position),
     .GetClickCount =        TWRAPF(ppb_mouse_input_event_get_click_count),
-    .GetMovement =          TWRAPZ(ppb_mouse_input_event_get_movement),
+    .GetMovement =          TWRAPF(ppb_mouse_input_event_get_movement),
 };
 
 const struct PPB_WheelInputEvent_1_0 ppb_wheel_input_event_interface_1_0 = {
