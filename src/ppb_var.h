@@ -27,6 +27,7 @@
 
 #include <ppapi/c/ppb_var.h>
 #include <ppapi/c/ppb_var_array_buffer.h>
+#include <ppapi/c/ppb_var_dictionary.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>
 #include <string.h>
 #include <npapi/npapi.h>
@@ -115,5 +116,24 @@ ppb_var_array_buffer_map(struct PP_Var var);
 
 void
 ppb_var_array_buffer_unmap(struct PP_Var var);
+
+struct PP_Var
+ppb_var_dictionary_create(void);
+
+struct PP_Var
+ppb_var_dictionary_get(struct PP_Var dict, struct PP_Var key);
+
+PP_Bool
+ppb_var_dictionary_set(struct PP_Var dict, struct PP_Var key, struct PP_Var value);
+
+void
+ppb_var_dictionary_delete(struct PP_Var dict, struct PP_Var key);
+
+PP_Bool
+ppb_var_dictionary_has_key(struct PP_Var dict, struct PP_Var key);
+
+struct PP_Var
+ppb_var_dictionary_get_keys(struct PP_Var dict);
+
 
 #endif // FPP_PPB_VAR_H

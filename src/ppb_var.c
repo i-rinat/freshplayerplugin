@@ -730,6 +730,41 @@ ppb_var_array_buffer_unmap(struct PP_Var var)
     v->map_addr = NULL;
 }
 
+struct PP_Var
+ppb_var_dictionary_create(void)
+{
+    return PP_MakeUndefined();
+}
+
+struct PP_Var
+ppb_var_dictionary_get(struct PP_Var dict, struct PP_Var key)
+{
+    return PP_MakeUndefined();
+}
+
+PP_Bool
+ppb_var_dictionary_set(struct PP_Var dict, struct PP_Var key, struct PP_Var value)
+{
+    return PP_FALSE;
+}
+
+void
+ppb_var_dictionary_delete(struct PP_Var dict, struct PP_Var key)
+{
+}
+
+PP_Bool
+ppb_var_dictionary_has_key(struct PP_Var dict, struct PP_Var key)
+{
+    return PP_FALSE;
+}
+
+struct PP_Var
+ppb_var_dictionary_get_keys(struct PP_Var dict)
+{
+    return PP_MakeUndefined();
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -965,6 +1000,74 @@ trace_ppb_var_array_buffer_unmap(struct PP_Var var)
     return ppb_var_array_buffer_unmap(var);
 }
 
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_var_dictionary_create(void)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_var_dictionary_create();
+}
+
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_var_dictionary_get(struct PP_Var dict, struct PP_Var key)
+{
+    gchar *s_dict = trace_var_as_string(dict);
+    gchar *s_key = trace_var_as_string(key);
+    trace_info("[PPB] {zilch} %s dict=%s, key=%s\n", __func__+6, s_dict, s_key);
+    g_free(s_dict);
+    g_free(s_key);
+    return ppb_var_dictionary_get(dict, key);
+}
+
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_var_dictionary_set(struct PP_Var dict, struct PP_Var key, struct PP_Var value)
+{
+    gchar *s_dict = trace_var_as_string(dict);
+    gchar *s_key = trace_var_as_string(key);
+    gchar *s_value = trace_var_as_string(value);
+    trace_info("[PPB] {zilch} %s dict=%s, key=%s, value=%s\n", __func__+6, s_dict, s_key, s_value);
+    g_free(s_dict);
+    g_free(s_key);
+    g_free(s_value);
+    return ppb_var_dictionary_set(dict, key, value);
+}
+
+TRACE_WRAPPER
+void
+trace_ppb_var_dictionary_delete(struct PP_Var dict, struct PP_Var key)
+{
+    gchar *s_dict = trace_var_as_string(dict);
+    gchar *s_key = trace_var_as_string(key);
+    trace_info("[PPB] {zilch} %s dict=%s, key=%s\n", __func__+6, s_dict, s_key);
+    g_free(s_dict);
+    g_free(s_key);
+    return ppb_var_dictionary_delete(dict, key);
+}
+
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_var_dictionary_has_key(struct PP_Var dict, struct PP_Var key)
+{
+    gchar *s_dict = trace_var_as_string(dict);
+    gchar *s_key = trace_var_as_string(key);
+    trace_info("[PPB] {zilch} %s dict=%s, key=%s\n", __func__+6, s_dict, s_key);
+    g_free(s_dict);
+    g_free(s_key);
+    return ppb_var_dictionary_has_key(dict, key);
+}
+
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_var_dictionary_get_keys(struct PP_Var dict)
+{
+    gchar *s_dict = trace_var_as_string(dict);
+    trace_info("[PPB] {zilch} %s dict=%s\n", __func__+6, s_dict);
+    g_free(s_dict);
+    return ppb_var_dictionary_get_keys(dict);
+}
+
 
 const struct PPB_Var_1_2 ppb_var_interface_1_2 = {
     .AddRef          = TWRAPF(ppb_var_add_ref),
@@ -1012,4 +1115,13 @@ const struct PPB_VarArrayBuffer_1_0 ppb_var_array_buffer_interface_1_0 = {
     .ByteLength =   TWRAPF(ppb_var_array_buffer_byte_length),
     .Map =          TWRAPF(ppb_var_array_buffer_map),
     .Unmap =        TWRAPF(ppb_var_array_buffer_unmap),
+};
+
+const struct PPB_VarDictionary_1_0 ppb_var_dictionary_interface_1_0 = {
+    .Create =   TWRAPZ(ppb_var_dictionary_create),
+    .Get =      TWRAPZ(ppb_var_dictionary_get),
+    .Set =      TWRAPZ(ppb_var_dictionary_set),
+    .Delete =   TWRAPZ(ppb_var_dictionary_delete),
+    .HasKey =   TWRAPZ(ppb_var_dictionary_has_key),
+    .GetKeys =  TWRAPZ(ppb_var_dictionary_get_keys),
 };
