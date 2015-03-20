@@ -34,6 +34,19 @@
 #include "n2p_proxy_class.h"
 
 
+static
+void
+call_invalidaterect_ptac(void *param)
+{
+    struct pp_instance_s *pp_i = tables_get_pp_instance(GPOINTER_TO_SIZE(param));
+    if (!pp_i)
+        return;
+    NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
+
+    npn.invalidaterect(pp_i->npp, &npr);
+    npn.forceredraw(pp_i->npp);
+}
+
 PP_Bool
 ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 {
@@ -46,6 +59,7 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 
     if (device == 0) {
         // unbind
+        ppb_core_release_resource(pp_i->graphics);
         pthread_mutex_lock(&display.lock);
         pp_i->graphics = 0;
         pthread_mutex_unlock(&display.lock);
@@ -54,6 +68,7 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
 
     struct pp_graphics2d_s *g2d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS2D);
     struct pp_graphics3d_s *g3d = pp_resource_acquire(device, PP_RESOURCE_GRAPHICS3D);
+    int invalidate_area = 0;
 
     if (g2d) {
         if (pp_i != g2d->instance) {
@@ -64,8 +79,10 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
         pthread_mutex_lock(&display.lock);
         pp_i->graphics = device;
         pthread_mutex_unlock(&display.lock);
+        ppb_core_add_ref_resource(device);
         pp_resource_release(device);
         retval = PP_TRUE;
+        invalidate_area = 1;
     } else if (g3d) {
         if (pp_i != g3d->instance) {
             retval = PP_FALSE;
@@ -75,8 +92,10 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
         pthread_mutex_lock(&display.lock);
         pp_i->graphics = device;
         pthread_mutex_unlock(&display.lock);
+        ppb_core_add_ref_resource(device);
         pp_resource_release(device);
         retval = PP_TRUE;
+        invalidate_area = 1;
     } else {
         trace_warning("%s, unsupported graphics resource %d on instance %d\n", __func__,
                       device, instance);
@@ -84,6 +103,12 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
     }
 
 done:
+
+    if (invalidate_area) {
+        // successful binding causes plugin graphics area invalidation
+        ppb_core_call_on_browser_thread(call_invalidaterect_ptac, GSIZE_TO_POINTER(instance));
+    }
+
     return retval;
 }
 
