@@ -115,7 +115,7 @@ trace_var_as_string(struct PP_Var var)
         break;
     case PP_VARTYPE_ARRAY:
         ref_count = ppb_var_get_ref_count(var);
-        res = g_strdup_printf("{ARRAY:%d}", ref_count);
+        res = g_strdup_printf("{ARRAY:%d:%"PRId64"}", ref_count, var.value.as_id);
         break;
     case PP_VARTYPE_DICTIONARY:
         ref_count = ppb_var_get_ref_count(var);
