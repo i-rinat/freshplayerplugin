@@ -54,6 +54,7 @@ struct var_s {
         void                               *data;
     } obj;
     void           *map_addr;
+    GHashTable     *dict;       // string -> struct PP_Var
 };
 
 
@@ -303,6 +304,9 @@ ppb_var_release(struct PP_Var var)
         if (v->map_addr)
             free(v->map_addr);
         v->map_addr = NULL;
+        break;
+    case PP_VARTYPE_DICTIONARY:
+        g_hash_table_unref(v->dict);
         break;
     default:
         // do nothing
@@ -730,10 +734,41 @@ ppb_var_array_buffer_unmap(struct PP_Var var)
     v->map_addr = NULL;
 }
 
+static
+void
+var_dict_key_destroy_func(gpointer data)
+{
+    // it's just a memory block
+    free(data);
+}
+
+static
+void
+var_dict_val_destroy_func(gpointer data)
+{
+    struct PP_Var *var = data;
+    ppb_var_release(*var);
+    g_slice_free(struct PP_Var, var);
+}
+
 struct PP_Var
 ppb_var_dictionary_create(void)
 {
-    return PP_MakeUndefined();
+    struct var_s *v = g_slice_alloc0(sizeof(*v));
+    struct PP_Var var = {};
+
+    var.type = PP_VARTYPE_DICTIONARY;
+    v->ref_count = 1;
+    v->dict = g_hash_table_new_full(g_str_hash, g_str_equal, var_dict_key_destroy_func,
+                                    var_dict_val_destroy_func);
+
+    pthread_mutex_lock(&lock);
+    var.value.as_id = get_new_var_id();
+    pthread_mutex_unlock(&lock);
+
+    v->var = var;
+    g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
+    return var;
 }
 
 struct PP_Var
@@ -1034,7 +1069,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_dictionary_create(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_var_dictionary_create();
 }
 
@@ -1199,7 +1234,7 @@ const struct PPB_VarArrayBuffer_1_0 ppb_var_array_buffer_interface_1_0 = {
 };
 
 const struct PPB_VarDictionary_1_0 ppb_var_dictionary_interface_1_0 = {
-    .Create =   TWRAPZ(ppb_var_dictionary_create),
+    .Create =   TWRAPF(ppb_var_dictionary_create),
     .Get =      TWRAPZ(ppb_var_dictionary_get),
     .Set =      TWRAPZ(ppb_var_dictionary_set),
     .Delete =   TWRAPZ(ppb_var_dictionary_delete),
