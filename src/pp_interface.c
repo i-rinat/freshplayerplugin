@@ -52,6 +52,7 @@
 #include <ppapi/c/ppb_image_data.h>
 #include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppb_instance.h>
+#include <ppapi/c/ppb_messaging.h>
 #include <ppapi/c/ppb_network_monitor.h>
 #include <ppapi/c/ppb_opengles2.h>
 #include <ppapi/c/ppb_text_input_controller.h>
@@ -127,6 +128,8 @@ extern const struct PPB_Instance_Private_0_1        ppb_instance_private_interfa
 extern const struct PPB_KeyboardInputEvent_1_0      ppb_keyboard_input_event_interface_1_0;
 extern const struct PPB_KeyboardInputEvent_1_2      ppb_keyboard_input_event_interface_1_2;
 extern const struct PPB_Memory_Dev_0_1              ppb_memory_dev_interface_0_1;
+extern const struct PPB_Messaging_1_0               ppb_messaging_interface_1_0;
+extern const struct PPB_Messaging_1_2               ppb_messaging_interface_1_2;
 extern const struct PPB_MouseInputEvent_1_1         ppb_mouse_input_event_interface_1_1;
 extern const struct PPB_NaCl_Private_1_0            ppb_nacl_private_interface_1_0;
 extern const struct PPB_NetAddress_Private_1_1      ppb_net_address_private_interface_1_1;
@@ -227,6 +230,8 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_INSTANCE_INTERFACE_1_0,             ppb_instance_interface_1_0)
     ELSEIFBLOCK(PPB_INSTANCE_PRIVATE_INTERFACE_0_1,     ppb_instance_private_interface_0_1)
     ELSEIFBLOCK(PPB_MEMORY_DEV_INTERFACE_0_1,           ppb_memory_dev_interface_0_1)
+    ELSEIFBLOCK(PPB_MESSAGING_INTERFACE_1_0,            ppb_messaging_interface_1_0)
+    ELSEIFBLOCK(PPB_MESSAGING_INTERFACE_1_2,            ppb_messaging_interface_1_2)
     ELSEIFBLOCK(PPB_NACL_PRIVATE_INTERFACE_1_0,         ppb_nacl_private_interface_1_0)
     ELSEIFBLOCK(PPB_NETADDRESS_PRIVATE_INTERFACE_1_1,   ppb_net_address_private_interface_1_1)
     ELSEIFBLOCK(PPB_NETWORKMONITOR_INTERFACE_1_0,       ppb_network_monitor_interface_1_0)
