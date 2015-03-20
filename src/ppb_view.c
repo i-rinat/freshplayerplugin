@@ -103,7 +103,9 @@ ppb_view_get_css_scale(PP_Resource resource)
 PP_Bool
 ppb_view_get_scroll_offset(PP_Resource resource, struct PP_Point *offset)
 {
-    return PP_FALSE;
+    offset->x = 0;
+    offset->y = 0;
+    return PP_TRUE;
 }
 
 
