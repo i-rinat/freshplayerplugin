@@ -765,6 +765,36 @@ ppb_var_dictionary_get_keys(struct PP_Var dict)
     return PP_MakeUndefined();
 }
 
+struct PP_Var
+ppb_var_array_create(void)
+{
+    return PP_MakeUndefined();
+}
+
+struct PP_Var
+ppb_var_array_get(struct PP_Var array, uint32_t index)
+{
+    return PP_MakeUndefined();
+}
+
+PP_Bool
+ppb_var_array_set(struct PP_Var array, uint32_t index, struct PP_Var value)
+{
+    return PP_FALSE;
+}
+
+uint32_t
+ppb_var_array_get_length(struct PP_Var array)
+{
+    return 0;
+}
+
+PP_Bool
+ppb_var_array_set_length(struct PP_Var array, uint32_t length)
+{
+    return PP_FALSE;
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -1068,6 +1098,57 @@ trace_ppb_var_dictionary_get_keys(struct PP_Var dict)
     return ppb_var_dictionary_get_keys(dict);
 }
 
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_var_array_create(void)
+{
+    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    return ppb_var_array_create();
+}
+
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_var_array_get(struct PP_Var array, uint32_t index)
+{
+    gchar *s_array = trace_var_as_string(array);
+    trace_info("[PPB] {zilch} %s array=%s, index=%u\n", __func__+6, s_array, index);
+    g_free(s_array);
+    return ppb_var_array_get(array, index);
+}
+
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_var_array_set(struct PP_Var array, uint32_t index, struct PP_Var value)
+{
+    gchar *s_array = trace_var_as_string(array);
+    gchar *s_value = trace_var_as_string(value);
+    trace_info("[PPB] {zilch} %s array=%s, index=%u, value=%s\n", __func__+6, s_array, index,
+               s_value);
+    g_free(s_array);
+    g_free(s_value);
+    return ppb_var_array_set(array, index, value);
+}
+
+TRACE_WRAPPER
+uint32_t
+trace_ppb_var_array_get_length(struct PP_Var array)
+{
+    gchar *s_array = trace_var_as_string(array);
+    trace_info("[PPB] {zilch} %s array=%s\n", __func__+6, s_array);
+    g_free(s_array);
+    return ppb_var_array_get_length(array);
+}
+
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_var_array_set_length(struct PP_Var array, uint32_t length)
+{
+    gchar *s_array = trace_var_as_string(array);
+    trace_info("[PPB] {zilch} %s array=%s, length=%u\n", __func__+6, s_array, length);
+    g_free(s_array);
+    return ppb_var_array_set_length(array, length);
+}
+
 
 const struct PPB_Var_1_2 ppb_var_interface_1_2 = {
     .AddRef          = TWRAPF(ppb_var_add_ref),
@@ -1124,4 +1205,12 @@ const struct PPB_VarDictionary_1_0 ppb_var_dictionary_interface_1_0 = {
     .Delete =   TWRAPZ(ppb_var_dictionary_delete),
     .HasKey =   TWRAPZ(ppb_var_dictionary_has_key),
     .GetKeys =  TWRAPZ(ppb_var_dictionary_get_keys),
+};
+
+const struct PPB_VarArray_1_0 ppb_var_array_interface_1_0 = {
+    .Create =    TWRAPZ(ppb_var_array_create),
+    .Get =       TWRAPZ(ppb_var_array_get),
+    .Set =       TWRAPZ(ppb_var_array_set),
+    .GetLength = TWRAPZ(ppb_var_array_get_length),
+    .SetLength = TWRAPZ(ppb_var_array_set_length),
 };
