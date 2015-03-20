@@ -55,6 +55,7 @@ struct var_s {
     } obj;
     void           *map_addr;
     GHashTable     *dict;       // string -> struct PP_Var
+    GArray         *array;      // of struct PP_Var
 };
 
 
@@ -307,6 +308,9 @@ ppb_var_release(struct PP_Var var)
         break;
     case PP_VARTYPE_DICTIONARY:
         g_hash_table_unref(v->dict);
+        break;
+    case PP_VARTYPE_ARRAY:
+        g_array_free(v->array, TRUE);
         break;
     default:
         // do nothing
@@ -809,10 +813,32 @@ ppb_var_dictionary_get_keys(struct PP_Var dict)
     return PP_MakeUndefined();
 }
 
+static
+void
+var_array_value_clear_func(gpointer data)
+{
+    struct PP_Var *var = data;
+    ppb_var_release(*var);
+}
+
 struct PP_Var
 ppb_var_array_create(void)
 {
-    return PP_MakeUndefined();
+    struct var_s *v = g_slice_alloc0(sizeof(*v));
+    struct PP_Var var = {};
+
+    var.type = PP_VARTYPE_ARRAY;
+    v->ref_count = 1;
+    v->array = g_array_new(FALSE, TRUE, sizeof(struct PP_Var));
+    g_array_set_clear_func(v->array, var_array_value_clear_func);
+
+    pthread_mutex_lock(&lock);
+    var.value.as_id = get_new_var_id();
+    v->var = var;
+    g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
+    pthread_mutex_unlock(&lock);
+
+    return var;
 }
 
 struct PP_Var
@@ -1146,7 +1172,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_var_array_create(void)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_var_array_create();
 }
 
@@ -1252,7 +1278,7 @@ const struct PPB_VarDictionary_1_0 ppb_var_dictionary_interface_1_0 = {
 };
 
 const struct PPB_VarArray_1_0 ppb_var_array_interface_1_0 = {
-    .Create =    TWRAPZ(ppb_var_array_create),
+    .Create =    TWRAPF(ppb_var_array_create),
     .Get =       TWRAPZ(ppb_var_array_get),
     .Set =       TWRAPZ(ppb_var_array_set),
     .GetLength = TWRAPZ(ppb_var_array_get_length),
