@@ -32,6 +32,7 @@
 #include "config.h"
 #include "pp_resource.h"
 #include "ppb_var.h"
+#include <inttypes.h>
 
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -118,7 +119,7 @@ trace_var_as_string(struct PP_Var var)
         break;
     case PP_VARTYPE_DICTIONARY:
         ref_count = ppb_var_get_ref_count(var);
-        res = g_strdup_printf("{DICTIONARY:%d}", ref_count);
+        res = g_strdup_printf("{DICTIONARY:%d:%"PRId64"}", ref_count, var.value.as_id);
         break;
     case PP_VARTYPE_ARRAY_BUFFER:
         ref_count = ppb_var_get_ref_count(var);
