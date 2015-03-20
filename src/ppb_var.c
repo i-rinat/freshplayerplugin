@@ -768,10 +768,10 @@ ppb_var_dictionary_create(void)
 
     pthread_mutex_lock(&lock);
     var.value.as_id = get_new_var_id();
-    pthread_mutex_unlock(&lock);
-
     v->var = var;
     g_hash_table_insert(var_ht, GSIZE_TO_POINTER(var.value.as_id), v);
+    pthread_mutex_unlock(&lock);
+
     return var;
 }
 
