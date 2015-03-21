@@ -386,7 +386,7 @@ trace_ppb_pdf_get_v8_external_snapshot_data(PP_Instance instance, const char **n
                                             int *natives_size_out, const char **snapshot_data_out,
                                             int *snapshot_size_out)
 {
-    trace_info("[PPB] {fake} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     ppb_pdf_get_v8_external_snapshot_data(instance, natives_data_out, natives_size_out,
                                           snapshot_data_out, snapshot_size_out);
 }
@@ -412,5 +412,5 @@ const struct PPB_PDF ppb_pdf_interface = {
     .IsOutOfProcess =                 TWRAPF(ppb_pdf_is_out_of_process),
     .SetSelectedText =                TWRAPZ(ppb_pdf_set_selected_text),
     .SetLinkUnderCursor =             TWRAPZ(ppb_pdf_set_link_under_cursor),
-    .GetV8ExternalSnapshotData =      TWRAPZ(ppb_pdf_get_v8_external_snapshot_data),
+    .GetV8ExternalSnapshotData =      TWRAPF(ppb_pdf_get_v8_external_snapshot_data),
 };
