@@ -160,8 +160,8 @@ ppb_pdf_modal_prompt_for_password(PP_Instance instance, struct PP_Var message)
 PP_Bool
 ppb_pdf_is_out_of_process(PP_Instance instance)
 {
-    // TODO: does it matter?
-    return PP_TRUE;
+    // TODO: does it matter? Chromium 41 seems to have it hardcoded to PP_FALSE
+    return PP_FALSE;
 }
 
 void
