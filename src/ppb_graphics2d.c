@@ -197,14 +197,11 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         return PP_ERROR_INPROGRESS;
     }
 
-    pp_i->graphics_ccb = callback;
-    pp_i->graphics_in_progress = 1;
-    pthread_mutex_unlock(&display.lock);
-
-    if (pp_i->graphics != graphics_2d) {
-        pp_resource_release(graphics_2d);
-        return PP_OK_COMPLETIONPENDING;
+    if (pp_i->graphics == graphics_2d) {
+        pp_i->graphics_ccb = callback;
+        pp_i->graphics_in_progress = 1;
     }
+    pthread_mutex_unlock(&display.lock);
 
     while (g2d->task_list) {
         GList *link = g_list_first(g2d->task_list);
@@ -300,8 +297,11 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
         ppb_core_call_on_browser_thread(call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
     }
 
-    if (callback.func)
+    if (callback.func) {
+        if (pp_i->graphics != graphics_2d)
+            ppb_core_call_on_main_thread(0, callback, PP_OK);
         return PP_OK_COMPLETIONPENDING;
+    }
 
     pthread_barrier_wait(&pp_i->graphics_barrier);
     return PP_OK;
