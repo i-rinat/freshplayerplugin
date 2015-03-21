@@ -84,33 +84,41 @@ endif()
 
 add_library(freshwrapper-obj OBJECT ${source_list})
 
-add_library(freshwrapper-pepperflash SHARED
-    $<TARGET_OBJECTS:freshwrapper-obj>
-    $<TARGET_OBJECTS:parson-obj>
-    $<TARGET_OBJECTS:uri-parser-obj>
-    config_pepperflash.c
-)
-
-# add_library(freshwrapper-nacl SHARED
-#     $<TARGET_OBJECTS:freshwrapper-obj>
-#     $<TARGET_OBJECTS:parson-obj>
-#     config_nacl.c
-# )
-
-target_link_libraries(freshwrapper-pepperflash
-    dl
-    ${REQ_LIBRARIES}
-)
-
-# target_link_libraries(freshwrapper-nacl
-#     dl
-#     ${REQ_LIBRARIES}
-# )
-
-# ensure libfreshwrapper is linked with all libraries it uses
+# ensure libfreshwrapper-*.so are linked with all libraries they use
 add_executable(dep_check dep_check.c)
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(dep_check freshwrapper-pepperflash)
+
+# wrapper for PepperFlash
+set(WITH_PEPPERFLASH TRUE CACHE STRING "generate wrapper for PepperFlash")
+if (WITH_PEPPERFLASH)
+    add_library(freshwrapper-pepperflash SHARED
+        $<TARGET_OBJECTS:freshwrapper-obj>
+        $<TARGET_OBJECTS:parson-obj>
+        $<TARGET_OBJECTS:uri-parser-obj>
+        config_pepperflash.c
+    )
+    target_link_libraries(freshwrapper-pepperflash
+        dl
+        ${REQ_LIBRARIES}
+    )
+    target_link_libraries(dep_check freshwrapper-pepperflash)
+endif()
+
+# wrapper for Native Client
+set(WITH_NACL FALSE CACHE STRING "generate wrapper for Native Client")
+if (WITH_NACL)
+    add_library(freshwrapper-nacl SHARED
+        $<TARGET_OBJECTS:freshwrapper-obj>
+        $<TARGET_OBJECTS:parson-obj>
+        $<TARGET_OBJECTS:uri-parser-obj>
+        config_nacl.c
+    )
+    target_link_libraries(freshwrapper-nacl
+        dl
+        ${REQ_LIBRARIES}
+    )
+    target_link_libraries(dep_check freshwrapper-nacl)
+endif()
 
 # libpdf wrapper
 set(WITH_LIBPDF FALSE CACHE STRING "generate wrapper for libpdf.so")
@@ -127,4 +135,3 @@ if (WITH_LIBPDF)
     )
     target_link_libraries(dep_check freshwrapper-libpdf)
 endif()
-
