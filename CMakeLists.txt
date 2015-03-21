@@ -64,5 +64,6 @@ add_definitions(-DXP_UNIX)
 include_directories(3rdparty)
 
 add_subdirectory(3rdparty)
+add_subdirectory(resources)
 add_subdirectory(src)
 add_subdirectory(tests)
