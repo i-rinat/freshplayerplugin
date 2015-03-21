@@ -107,7 +107,12 @@ target_link_libraries(freshwrapper-pepperflash
 #     ${REQ_LIBRARIES}
 # )
 
+# ensure libfreshwrapper is linked with all libraries it uses
+add_executable(dep_check dep_check.c)
+link_directories(${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(dep_check freshwrapper-pepperflash)
 
+# libpdf wrapper
 set(WITH_LIBPDF FALSE CACHE STRING "generate wrapper for libpdf.so")
 if (WITH_LIBPDF)
     add_library(freshwrapper-libpdf SHARED
@@ -120,9 +125,6 @@ if (WITH_LIBPDF)
         dl
         ${REQ_LIBRARIES}
     )
+    target_link_libraries(dep_check freshwrapper-libpdf)
 endif()
 
-# ensure libfreshwrapper is linked with all libraries it uses
-add_executable(dep_check dep_check.c)
-link_directories(${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(dep_check freshwrapper-pepperflash)
