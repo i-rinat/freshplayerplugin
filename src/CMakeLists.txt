@@ -79,6 +79,7 @@ set(source_list
     ppb_view.c
     ppb_widget.c
     ppb_x509_certificate.c
+    ppb_zoom.c
     screensaver_control.c
 )
 

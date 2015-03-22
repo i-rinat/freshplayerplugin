@@ -43,6 +43,7 @@
 #include <ppapi/c/dev/ppb_video_decoder_dev.h>
 #include <ppapi/c/dev/ppb_view_dev.h>
 #include <ppapi/c/dev/ppb_widget_dev.h>
+#include <ppapi/c/dev/ppb_zoom_dev.h>
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
 #include <ppapi/c/ppb_core.h>
@@ -177,6 +178,7 @@ extern const struct PPB_WheelInputEvent_1_0         ppb_wheel_input_event_interf
 extern const struct PPB_Widget_Dev_0_3              ppb_widget_dev_interface_0_3;
 extern const struct PPB_Widget_Dev_0_4              ppb_widget_dev_interface_0_4;
 extern const struct PPB_X509Certificate_Private_0_1 ppb_x509_certificate_interface_0_1;
+extern const struct PPB_Zoom_Dev_0_2                ppb_zoom_dev_interface_0_2;
 
 const void *(*ppp_get_interface)(const char *interface_name);
 
@@ -281,6 +283,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_WIDGET_DEV_INTERFACE_0_3,           ppb_widget_dev_interface_0_3)
     ELSEIFBLOCK(PPB_WIDGET_DEV_INTERFACE_0_4,           ppb_widget_dev_interface_0_4)
     ELSEIFBLOCK(PPB_X509CERTIFICATE_PRIVATE_INTERFACE_0_1, ppb_x509_certificate_interface_0_1)
+    ELSEIFBLOCK(PPB_ZOOM_DEV_INTERFACE_0_2,             ppb_zoom_dev_interface_0_2)
     } else {
         trace_info("not implemented: %s\n", interface_name);
         return NULL;
