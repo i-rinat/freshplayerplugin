@@ -133,13 +133,15 @@ create_image_from_resource(PP_Instance instance, const char *name)
     PP_Resource image_data = ppb_image_data_create(instance, PP_IMAGEDATAFORMAT_BGRA_PREMUL,
                                                    &image_size, PP_TRUE);
     struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
-    cairo_t *cr = cairo_create(id->cairo_surf);
-    cairo_set_source_surface(cr, surf, 0, 0);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(cr);
-    cairo_surface_flush(id->cairo_surf);
-    cairo_destroy(cr);
-    pp_resource_release(image_data);
+    if (id) {
+        cairo_t *cr = cairo_create(id->cairo_surf);
+        cairo_set_source_surface(cr, surf, 0, 0);
+        cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+        cairo_paint(cr);
+        cairo_surface_flush(id->cairo_surf);
+        cairo_destroy(cr);
+        pp_resource_release(image_data);
+    }
 
     cairo_surface_destroy(surf);
     return image_data;
