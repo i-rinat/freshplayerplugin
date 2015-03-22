@@ -7,6 +7,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_subdirectory(uri_parser)
 
+include_directories("${GENERATED_INCLUDE_DIRS}")
+
 set(source_list
     async_network.c
     audio_thread.c
@@ -83,6 +85,8 @@ if (PULSEAUDIO_FOUND AND WITH_PULSEAUDIO)
 endif()
 
 add_library(freshwrapper-obj OBJECT ${source_list})
+
+list(APPEND REQ_LIBRARIES img-resources)
 
 # ensure libfreshwrapper-*.so are linked with all libraries they use
 add_executable(dep_check dep_check.c)
