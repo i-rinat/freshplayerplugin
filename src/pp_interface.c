@@ -35,6 +35,7 @@
 #include <ppapi/c/dev/ppb_ime_input_event_dev.h>
 #include <ppapi/c/dev/ppb_memory_dev.h>
 #include <ppapi/c/dev/ppb_printing_dev.h>
+#include <ppapi/c/dev/ppb_scrollbar_dev.h>
 #include <ppapi/c/dev/ppb_text_input_dev.h>
 #include <ppapi/c/dev/ppb_url_util_dev.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>
@@ -144,6 +145,7 @@ extern const struct PPB_OpenGLES2Query              ppb_opengles2_query_interfac
 extern const struct PPB_OpenGLES2                   ppb_opengles2_interface_1_0;
 extern const struct PPB_PDF                         ppb_pdf_interface;
 extern const struct PPB_Printing_Dev_0_7            ppb_printing_dev_interface_0_7;
+extern const struct PPB_Scrollbar_Dev_0_5           ppb_scrollbar_dev_interface_0_5;
 extern const struct PPB_TCPSocket_Private_0_4       ppb_tcp_socket_private_interface_0_4;
 extern const struct PPB_TCPSocket_Private_0_5       ppb_tcp_socket_private_interface_0_5;
 extern const struct PPB_TextInputController_1_0     ppb_text_input_controller_interface_1_0;
@@ -247,6 +249,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_OPENGLES2_QUERY_INTERFACE_1_0,      ppb_opengles2_query_interface_1_0)
     ELSEIFBLOCK(PPB_PDF_INTERFACE,                      ppb_pdf_interface)
     ELSEIFBLOCK(PPB_PRINTING_DEV_INTERFACE_0_7,         ppb_printing_dev_interface_0_7)
+    ELSEIFBLOCK(PPB_SCROLLBAR_DEV_INTERFACE_0_5,        ppb_scrollbar_dev_interface_0_5)
     ELSEIFBLOCK(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_4,    ppb_tcp_socket_private_interface_0_4)
     ELSEIFBLOCK(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_5,    ppb_tcp_socket_private_interface_0_5)
     ELSEIFBLOCK(PPB_TEXTINPUTCONTROLLER_INTERFACE_1_0,  ppb_text_input_controller_interface_1_0)

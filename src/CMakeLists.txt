@@ -63,6 +63,7 @@ set(source_list
     ppb_opengles2.c
     ppb_pdf.c
     ppb_printing.c
+    ppb_scrollbar.c
     ppb_tcp_socket.c
     ppb_text_input_controller.c
     ppb_text_input.c
