@@ -1378,3 +1378,16 @@ reverse_private_font_charset(PP_PrivateFontCharset charset)
         return "UNKNOWNPRIVATEFONTCHARSET";
     }
 }
+
+const char *
+reverse_scrollby(PP_ScrollBy_Dev unit)
+{
+    switch (unit) {
+    CASE(PP_SCROLLBY_PIXEL);
+    CASE(PP_SCROLLBY_LINE);
+    CASE(PP_SCROLLBY_PAGE);
+    CASE(PP_SCROLLBY_DOCUMENT);
+    default:
+        return "UNKNONWSCROLLBY";
+    }
+}

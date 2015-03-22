@@ -37,6 +37,7 @@
 #include <ppapi/c/private/ppb_udp_socket_private.h>
 #include <ppapi/c/dev/pp_video_dev.h>
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
+#include <ppapi/c/dev/ppb_scrollbar_dev.h>
 #include <ppapi/c/private/ppb_x509_certificate_private.h>
 #include <ppapi/c/private/ppb_pdf.h>
 
@@ -64,5 +65,6 @@ const char *reverse_resource_image(PP_ResourceImage resource_image);
 const char *reverse_pdf_feature(PP_PDFFeature feature);
 const char *reverse_resource_string(PP_ResourceString resource_string);
 const char *reverse_private_font_charset(PP_PrivateFontCharset charset);
+const char *reverse_scrollby(PP_ScrollBy_Dev unit);
 
 #endif // FPP_REVERSE_CONSTANT_H
