@@ -541,6 +541,8 @@ url_read_task_wrapper_comt(void *user_data, int32_t result)
     trace_info_f("   calling wrapped callback={.func=%p, .user_data=%p, .flags=%d}, result=%d\n",
                  rt->ccb.func, rt->ccb.user_data, rt->ccb.flags, result);
     rt->ccb.func(rt->ccb.user_data, result);
+    trace_info_f("   returning from wrapped callback={.func=%p, .user_data=%p, .flags=%d}, "
+                 "result=%d\n", rt->ccb.func, rt->ccb.user_data, rt->ccb.flags, result);
     ppb_core_release_resource(rt->url_loader); // release previously held reference
     g_slice_free1(sizeof(*rt), rt);
 }
