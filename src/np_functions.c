@@ -197,7 +197,7 @@ static
 void
 call_plugin_did_create_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_plugin_did_create_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(call_plugin_did_create_comt, user_data), PP_OK);
 }
 
 static
@@ -425,7 +425,7 @@ static
 void
 destroy_instance_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(destroy_instance_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(destroy_instance_comt, user_data), PP_OK);
 }
 
 NPError

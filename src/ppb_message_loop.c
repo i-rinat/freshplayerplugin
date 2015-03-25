@@ -57,7 +57,7 @@ ppb_message_loop_create(PP_Instance instance)
 
     ml->async_q = g_async_queue_new();
     ml->int_q = g_queue_new();
-    ml->depth = 1;
+    ml->depth = 0;  // running loop will always have depth > 0
 
     pp_resource_release(message_loop);
     return message_loop;
@@ -193,6 +193,7 @@ time_compare_func(gconstpointer a, gconstpointer b, gpointer user_data)
 int32_t
 ppb_message_loop_run(PP_Resource message_loop)
 {
+    // first actual depth will be 1.
     return ppb_message_loop_run_int(message_loop, ML_INCREASE_DEPTH);
 }
 
