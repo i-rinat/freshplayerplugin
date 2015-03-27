@@ -291,7 +291,8 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
                 }
 
                 if (task->terminate) {
-                    if (depth > 1) {
+                    // if depth > 1 or loop was reentered with no depth increase, it's a nested loop
+                    if (depth > 1 || !(flags & ML_INCREASE_DEPTH)) {
                         // exit at once, all remaining task will be processed by outer loop
                         g_slice_free(struct message_loop_task_s, task);
                         break;
