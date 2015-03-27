@@ -113,7 +113,7 @@ pulse_available(void)
     pa_context_set_state_callback(context, pulse_context_state_cb, NULL);
 
     if (pa_context_connect(context, NULL, PA_CONTEXT_NOFLAGS, NULL) < 0) {
-        trace_error("%s, can't connect to an audio server\n", __func__);
+        trace_info_f("%s, no PulseAudio server available\n", __func__);
         goto err_3;
     }
 
