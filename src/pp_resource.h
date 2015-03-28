@@ -334,6 +334,12 @@ struct pp_input_event_s {
     uint32_t                    key_code;
     struct PP_Var               character_text;
     struct PP_Var               code;
+    struct PP_Var               text;
+    uint32_t                    segment_number;
+    uint32_t                   *segment_offsets;
+    int32_t                     target_segment;
+    uint32_t                    selection_start;
+    uint32_t                    selection_end;
 };
 
 struct pp_flash_font_file_s {
