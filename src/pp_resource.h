@@ -151,6 +151,8 @@ struct pp_instance_s {
     // geometry
     uint32_t                        width;
     uint32_t                        height;
+    int32_t                         offset_x;   ///< relative to a browser window top left corner
+    int32_t                         offset_y;   ///< relative to a browser window top left corner
 
     int                             argc;
     char                          **argn;
