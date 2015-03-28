@@ -34,7 +34,11 @@
 void
 ppb_input_event_destroy(void *p)
 {
-    // do nothing
+    struct pp_input_event_s *ie = p;
+
+    ppb_var_release(ie->code);
+    ppb_var_release(ie->text);
+    free_and_nullify(ie->segment_offsets);
 }
 
 int32_t
@@ -378,10 +382,8 @@ ppb_keyboard_input_event_create_1_2(PP_Instance instance, PP_InputEvent_Type typ
     ie->time_stamp = time_stamp;
     ie->modifiers = modifiers;
     ie->key_code = key_code;
-    ie->character_text = character_text;
-    ie->code = code;
-    ppb_var_add_ref(character_text);
-    ppb_var_add_ref(code);
+    ie->text = ppb_var_add_ref2(character_text);
+    ie->code = ppb_var_add_ref2(code);
 
     pp_resource_release(input_event);
     return input_event;
@@ -433,8 +435,7 @@ ppb_keyboard_input_event_get_character_text(PP_Resource character_event)
         return PP_MakeUndefined();
     }
 
-    struct PP_Var character_text = ie->character_text;
-    ppb_var_add_ref(character_text);
+    struct PP_Var character_text = ppb_var_add_ref2(ie->text);
     pp_resource_release(character_event);
     return character_text;
 }
