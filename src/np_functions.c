@@ -34,6 +34,8 @@
 #include <cairo-xlib.h>
 #include <GLES2/gl2.h>
 #include <pthread.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkx.h>
 #include "trace.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
@@ -60,6 +62,11 @@
 
 
 #define NPString_literal(str) { .UTF8Characters = str, .UTF8Length = strlen(str) }
+
+static
+void
+ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id);
+
 
 static
 PP_Instance
@@ -337,6 +344,63 @@ get_document_base_url(const struct pp_instance_s *pp_i)
     return base_url;
 }
 
+static
+void
+im_preedit_start(GtkIMContext *im_context, struct pp_instance_s *pp_i)
+{
+    PP_TimeTicks    time_stamp = 0;     // TODO: get real time stamp
+    PP_Resource     event;
+    event = ppb_ime_input_event_create(pp_i->id, PP_INPUTEVENT_TYPE_IME_COMPOSITION_START,
+                                       time_stamp, PP_MakeUndefined(), 0, NULL, 0, 0, 0);
+
+    ppp_handle_input_event_helper(pp_i, event);
+}
+
+static
+void
+im_preedit_changed(GtkIMContext *im_context, struct pp_instance_s *pp_i)
+{
+    PP_TimeTicks    time_stamp = 0;     // TODO: get real time stamp
+    gchar          *preedit_string;
+    size_t          preedit_string_len;
+    gint            cursor_pos;
+    PP_Resource     event;
+    struct PP_Var   text;
+    uint32_t        offsets[2];
+
+    gtk_im_context_get_preedit_string(im_context, &preedit_string, NULL, &cursor_pos);
+    preedit_string_len = strlen(preedit_string);
+    text = ppb_var_var_from_utf8(preedit_string, preedit_string_len);
+    offsets[0] = 0;
+    offsets[1] = preedit_string_len;
+    event = ppb_ime_input_event_create(pp_i->id, PP_INPUTEVENT_TYPE_IME_COMPOSITION_UPDATE,
+                                       time_stamp, text, 1, offsets, -1, preedit_string_len,
+                                       preedit_string_len);
+    ppp_handle_input_event_helper(pp_i, event);
+    ppb_var_release(text);
+    g_free(preedit_string);
+}
+
+static
+void
+im_commit(GtkIMContext *im_context, const gchar *str, struct pp_instance_s *pp_i)
+{
+    PP_TimeTicks    time_stamp = 0;     // TODO: get real time stamp
+    size_t          str_len = str ? strlen(str) : 0;
+    struct PP_Var   text = ppb_var_var_from_utf8(str, str_len);
+    uint32_t        offsets[2] = { 0, str_len };
+    PP_Resource     event;
+
+    event = ppb_ime_input_event_create(pp_i->id, PP_INPUTEVENT_TYPE_IME_COMPOSITION_END,
+                                       time_stamp, text, 1, offsets, 0, str_len, str_len);
+    ppp_handle_input_event_helper(pp_i, event);
+
+    event = ppb_ime_input_event_create(pp_i->id, PP_INPUTEVENT_TYPE_IME_TEXT,
+                                       time_stamp, text, 1, offsets, 0, str_len, str_len);
+    ppp_handle_input_event_helper(pp_i, event);
+    ppb_var_release(text);
+}
+
 NPError
 NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
@@ -376,6 +440,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     if (!pp_i->ppp_instance_1_1)
         return NPERR_GENERIC_ERROR;
     pp_i->ppp_input_event = ppp_get_interface(PPP_INPUT_EVENT_INTERFACE_0_1);
+    pp_i->ppp_text_input_dev = ppp_get_interface(PPP_TEXTINPUT_DEV_INTERFACE_0_1);
 
     pp_i->argc = argc;
     pp_i->argn = malloc(argc * sizeof(char*));
@@ -429,6 +494,20 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     pp_i->document_url = get_document_url(pp_i);
     pp_i->document_base_url = get_document_base_url(pp_i);
+
+    pp_i->textinput_type = PP_TEXTINPUT_TYPE_DEV_NONE;
+    pp_i->im_context_multi = gtk_im_multicontext_new();
+    pp_i->im_context_simple = gtk_im_context_simple_new();
+    pp_i->im_context = NULL;
+
+    g_signal_connect(pp_i->im_context_multi, "commit", G_CALLBACK(im_commit), pp_i);
+    g_signal_connect(pp_i->im_context_simple, "commit", G_CALLBACK(im_commit), pp_i);
+    g_signal_connect(pp_i->im_context_multi, "preedit-changed",
+                     G_CALLBACK(im_preedit_changed), pp_i);
+    g_signal_connect(pp_i->im_context_simple, "preedit-changed",
+                     G_CALLBACK(im_preedit_changed), pp_i);
+    g_signal_connect(pp_i->im_context_multi, "preedit-start", G_CALLBACK(im_preedit_start), pp_i);
+    g_signal_connect(pp_i->im_context_simple, "preedit-start", G_CALLBACK(im_preedit_start), pp_i);
 
     if (ppb_message_loop_get_current() == 0) {
         // allocate message loop for browser thread
@@ -514,6 +593,12 @@ NPP_Destroy(NPP npp, NPSavedData **save)
         XFreeCursor(display.x, pp_i->prev_cursor);
         pthread_mutex_unlock(&display.lock);
     }
+
+    pp_i->im_context = NULL;
+    if (pp_i->im_context_multi)
+        g_object_unref(pp_i->im_context_multi);
+    if (pp_i->im_context_simple)
+        g_object_unref(pp_i->im_context_simple);
 
     struct destroy_instance_param_s *p = g_slice_alloc(sizeof(*p));
     p->pp_i =   npp->pdata;
@@ -1185,6 +1270,67 @@ is_printable_sequence(const char *s, size_t len)
     return 0;
 }
 
+static GdkEvent *
+make_gdk_key_event_from_x_key(XKeyEvent *ev)
+{
+    GdkDisplay *gdpy = gdk_x11_lookup_xdisplay(ev->display);
+    if (!gdpy)
+        gdpy = gdk_display_get_default();
+
+    if (!gdpy) {
+        trace_error("%s, gdpy is NULL\n", __func__);
+        return NULL;
+    }
+
+    KeySym keysym = NoSymbol;
+    guint8 keyboard_group = 0;
+    XLookupString(ev, NULL, 0, &keysym, NULL);
+    GdkKeymap *keymap = gdk_keymap_get_for_display(gdpy);
+    GdkKeymapKey *keys = NULL;
+    guint *keyvals = NULL;
+    gint n_entries = 0;
+    if (keymap &&
+        gdk_keymap_get_entries_for_keycode(keymap, ev->keycode, &keys, &keyvals, &n_entries))
+    {
+        for (gint i = 0; i < n_entries; ++i) {
+            if (keyvals[i] == keysym) {
+                keyboard_group = keys[i].group;
+                break;
+            }
+        }
+    }
+    g_free(keys); keys = NULL;
+    g_free(keyvals); keyvals = NULL;
+
+    // Get a GdkWindow.
+    GdkWindow *gwnd = gdk_x11_window_lookup_for_display(gdpy, ev->window);
+    if (gwnd)
+        g_object_ref(gwnd);
+    else
+        gwnd = gdk_x11_window_foreign_new_for_display(gdpy, ev->window);
+    if (!gwnd) {
+        trace_error("%s, gdpy is NULL (2)\n", __func__);
+        return NULL;
+    }
+
+    // Create a GdkEvent.
+    GdkEventType event_type = ev->type == KeyPress ? GDK_KEY_PRESS : GDK_KEY_RELEASE;
+    GdkEvent *event = gdk_event_new(event_type);
+    event->key.type = event_type;
+    event->key.window = gwnd;
+
+    event->key.send_event = ev->send_event;
+    event->key.time = ev->time;
+    event->key.state = ev->state;
+    event->key.keyval = keysym;
+    event->key.length = 0;
+    event->key.string = NULL;
+    event->key.hardware_keycode = ev->keycode;
+    event->key.group = keyboard_group;
+    event->key.is_modifier = 0; //is_modifier;
+    return event;
+}
+
 int16_t
 handle_key_press_release_event(NPP npp, void *event)
 {
@@ -1220,6 +1366,28 @@ handle_key_press_release_event(NPP npp, void *event)
     event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
                                         : PP_INPUTEVENT_TYPE_KEYUP;
 
+    pp_event = ppb_keyboard_input_event_create_1_0(pp_i->id, event_type, ev->time/1.0e6,
+                                                   mod, pp_keycode, PP_MakeUndefined());
+    ppp_handle_input_event_helper(pp_i, pp_event);
+
+    if (pp_i->im_context && ev->type == KeyPress) {
+        Window browser_window;
+        if (npn.getvalue(npp, NPNVnetscapeWindow, &browser_window) != NPERR_NO_ERROR)
+            browser_window = None;
+        ev->window = browser_window;
+
+        GdkEvent *gev = make_gdk_key_event_from_x_key(ev);
+        // reset custom state flags set by input method
+        gev->key.state &= (ShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask |
+                           Mod4Mask | Mod5Mask);
+        gtk_im_context_set_client_window(pp_i->im_context, gev->key.window);
+
+        gboolean stop = gtk_im_context_filter_keypress(pp_i->im_context, &gev->key);
+        gdk_event_free(gev);
+        if (stop)
+            return 1;
+    }
+
     if (ev->type == KeyPress && is_printable_sequence(buffer, charcount)) {
         struct PP_Var character_text = ppb_var_var_from_utf8(buffer, charcount);
         pp_event = ppb_keyboard_input_event_create_1_0(
@@ -1230,9 +1398,6 @@ handle_key_press_release_event(NPP npp, void *event)
         ppp_handle_input_event_helper(pp_i, pp_event);
     }
 
-    pp_event = ppb_keyboard_input_event_create_1_0(pp_i->id, event_type, ev->time/1.0e6,
-                                                   mod, pp_keycode, PP_MakeUndefined());
-    ppp_handle_input_event_helper(pp_i, pp_event);
     return 1;
 }
 
@@ -1261,6 +1426,12 @@ handle_focus_in_out_event(NPP npp, void *event)
     XFocusChangeEvent *ev = event;
 
     PP_Bool has_focus = (ev->type == FocusIn) ? PP_TRUE : PP_FALSE;
+    if (pp_i->im_context) {
+        if (ev->type == FocusIn)
+            gtk_im_context_focus_in(pp_i->im_context);
+        else
+            gtk_im_context_focus_out(pp_i->im_context);
+    }
 
     ppb_core_call_on_main_thread(0, PP_MakeCCB(call_ppp_did_change_focus_comt, pp_i), has_focus);
     return 1;

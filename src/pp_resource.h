@@ -37,6 +37,8 @@
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
+#include <ppapi/c/dev/ppb_text_input_dev.h>
+#include <ppapi/c/dev/ppp_text_input_dev.h>
 
 #include <stdlib.h>
 #include <X11/Xlib.h>
@@ -124,6 +126,7 @@ struct pp_instance_s {
     const struct PPP_Instance_1_1  *ppp_instance_1_1;
     const struct PPP_InputEvent_0_1 *ppp_input_event;
     const struct PPP_Instance_Private_0_1 *ppp_instance_private;
+    const struct PPP_TextInput_Dev_0_1    *ppp_text_input_dev;
     NPObject                       *scriptable_obj;
     NPObject                       *np_window_obj;
     NPObject                       *np_plugin_element_obj;
@@ -169,6 +172,12 @@ struct pp_instance_s {
     struct PP_CompletionCallback    graphics_ccb;
     pthread_barrier_t               graphics_barrier;
     uint32_t                        graphics_in_progress;
+
+    // input method context
+    PP_TextInput_Type_Dev           textinput_type;
+    GtkIMContext                   *im_context;
+    GtkIMContext                   *im_context_multi;
+    GtkIMContext                   *im_context_simple;
 };
 
 

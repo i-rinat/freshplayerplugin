@@ -26,26 +26,123 @@
 #include <stdlib.h>
 #include <glib.h>
 #include "trace.h"
+#include "tables.h"
+#include "pp_resource.h"
 #include "reverse_constant.h"
+#include <gtk/gtk.h>
+#include "ppb_core.h"
+#include <ppapi/c/pp_errors.h>
 
+
+struct set_text_input_type_param_s {
+    PP_Instance             instance;
+    PP_TextInput_Type_Dev   type;
+};
+
+static
+void
+set_text_input_type_ptac(void *param)
+{
+    struct set_text_input_type_param_s *p = param;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(p->instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return;
+    }
+
+    if (pp_i->im_context)
+        gtk_im_context_focus_out(pp_i->im_context);
+
+    switch (p->type) {
+    case PP_TEXTINPUT_TYPE_DEV_NONE:
+    case PP_TEXTINPUT_TYPE_DEV_PASSWORD:
+        pp_i->im_context = NULL;
+        break;
+    case PP_TEXTINPUT_TYPE_DEV_TEXT:
+        pp_i->im_context = pp_i->im_context_multi;
+        break;
+    default:
+        pp_i->im_context = pp_i->im_context_simple;
+        break;
+    }
+
+    pp_i->textinput_type = p->type;
+    if (pp_i->im_context)
+        gtk_im_context_focus_in(pp_i->im_context);
+
+    g_slice_free1(sizeof(*p), p);
+}
 
 void
 ppb_text_input_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type_Dev type)
 {
-    return;
+    struct set_text_input_type_param_s *p = g_slice_alloc0(sizeof(*p));
+    p->instance =   instance;
+    p->type =       type;
+
+    ppb_core_call_on_browser_thread(set_text_input_type_ptac, p);
+}
+
+struct update_caret_position_param_s {
+    PP_Instance     instance;
+    GdkRectangle    caret;
+};
+
+static
+void
+update_caret_position_ptac(void *param)
+{
+    struct update_caret_position_param_s *p = param;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(p->instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return;
+    }
+
+    p->caret.x += pp_i->offset_x;
+    p->caret.y += pp_i->offset_y;
+
+    if (pp_i->im_context)
+        gtk_im_context_set_cursor_location(pp_i->im_context, &p->caret);
+    g_slice_free1(sizeof(*p), p);
 }
 
 void
 ppb_text_input_interface_update_caret_position(PP_Instance instance, const struct PP_Rect *caret,
                                                const struct PP_Rect *bounding_box)
 {
-    return;
+    if (!caret)
+        return;
+
+    struct update_caret_position_param_s *p = g_slice_alloc0(sizeof(*p));
+    p->instance =     instance;
+    p->caret.x =      caret->point.x;
+    p->caret.y =      caret->point.y;
+    p->caret.width =  caret->size.width;
+    p->caret.height = caret->size.height;
+
+    ppb_core_call_on_browser_thread(update_caret_position_ptac, p);
+}
+
+static
+void
+cancel_composition_text_ptac(void *param)
+{
+    PP_Instance instance = GPOINTER_TO_SIZE(param);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return;
+    }
+
+    if (pp_i->im_context)
+        gtk_im_context_reset(pp_i->im_context);
 }
 
 void
 ppb_text_input_interface_cancel_composition_text(PP_Instance instance)
 {
-    return;
+    ppb_core_call_on_browser_thread(cancel_composition_text_ptac, GSIZE_TO_POINTER(instance));
 }
 
 void
@@ -55,10 +152,26 @@ ppb_text_input_interface_update_surrounding_text(PP_Instance instance, const cha
     return;
 }
 
+static
+void
+selection_changed_comt(void *user_data, int32_t result)
+{
+    PP_Instance instance = GPOINTER_TO_SIZE(user_data);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return;
+    }
+
+    if (pp_i->ppp_text_input_dev)
+        pp_i->ppp_text_input_dev->RequestSurroundingText(pp_i->id, 100);
+}
+
 void
 ppb_text_input_interface_selection_changed(PP_Instance instance)
 {
-    return;
+    ppb_core_call_on_main_thread(0, PP_MakeCCB(selection_changed_comt, GSIZE_TO_POINTER(instance)),
+                                 PP_OK);
 }
 
 
@@ -67,7 +180,7 @@ TRACE_WRAPPER
 void
 trace_ppb_text_input_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type_Dev type)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, type=%s\n", __func__+6, instance,
+    trace_info("[PPB] {full} %s instance=%d, type=%s\n", __func__+6, instance,
                reverse_pp_text_input_type(type));
     ppb_text_input_interface_set_text_input_type(instance, type);
 }
@@ -80,7 +193,7 @@ trace_ppb_text_input_interface_update_caret_position(PP_Instance instance,
 {
     char *caret_str = trace_rect_as_string(caret);
     char *bounding_box_str = trace_rect_as_string(bounding_box);
-    trace_info("[PPB] {zilch} %s instance=%d, caret=%s, bounding_box=%s\n", __func__+6, instance,
+    trace_info("[PPB] {full} %s instance=%d, caret=%s, bounding_box=%s\n", __func__+6, instance,
                caret_str, bounding_box_str);
     g_free(caret_str);
     g_free(bounding_box_str);
@@ -91,7 +204,7 @@ TRACE_WRAPPER
 void
 trace_ppb_text_input_interface_cancel_composition_text(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     ppb_text_input_interface_cancel_composition_text(instance);
 }
 
@@ -109,15 +222,15 @@ TRACE_WRAPPER
 void
 trace_ppb_text_input_interface_selection_changed(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     ppb_text_input_interface_selection_changed(instance);
 }
 
 
 const struct PPB_TextInput_Dev_0_2 ppb_text_input_dev_interface_0_2 = {
-    .SetTextInputType =         TWRAPZ(ppb_text_input_interface_set_text_input_type),
-    .UpdateCaretPosition =      TWRAPZ(ppb_text_input_interface_update_caret_position),
-    .CancelCompositionText =    TWRAPZ(ppb_text_input_interface_cancel_composition_text),
+    .SetTextInputType =         TWRAPF(ppb_text_input_interface_set_text_input_type),
+    .UpdateCaretPosition =      TWRAPF(ppb_text_input_interface_update_caret_position),
+    .CancelCompositionText =    TWRAPF(ppb_text_input_interface_cancel_composition_text),
     .UpdateSurroundingText =    TWRAPZ(ppb_text_input_interface_update_surrounding_text),
-    .SelectionChanged =         TWRAPZ(ppb_text_input_interface_selection_changed),
+    .SelectionChanged =         TWRAPF(ppb_text_input_interface_selection_changed),
 };
