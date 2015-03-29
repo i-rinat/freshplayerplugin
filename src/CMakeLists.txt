@@ -89,8 +89,6 @@ endif()
 
 add_library(freshwrapper-obj OBJECT ${source_list})
 
-list(APPEND REQ_LIBRARIES img-resources)
-
 # ensure libfreshwrapper-*.so are linked with all libraries they use
 add_executable(dep_check dep_check.c)
 link_directories(${CMAKE_CURRENT_BINARY_DIR})

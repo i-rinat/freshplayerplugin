@@ -56,6 +56,8 @@ else()
     message(STATUS "  no libpulse found (optional)")
 endif()
 
+list(APPEND REQ_LIBRARIES img-resources)
+
 include_directories(${REQ_INCLUDE_DIRS})
 link_directories(${REQ_LIBRARY_DIRS})
 add_definitions(${REQ_CFLAGS_OTHER})
