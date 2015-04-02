@@ -642,6 +642,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
     if (ul) {
         struct parsed_headers_s *ph = hp_parse_headers(stream->headers);
         ccb = ul->ccb;
+        ul->ccb = PP_MakeCCB(NULL, 0);  // prevent callback from being called twice
         ul->np_stream = stream;
 
         // handling redirection
@@ -1520,6 +1521,7 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
         return;
 
     struct PP_CompletionCallback ccb = ul->ccb;
+    ul->ccb = PP_MakeCCB(NULL, 0); // prevent callback from being called twice
     pp_resource_release(url_loader);
 
     // notify plugin that download have failed
