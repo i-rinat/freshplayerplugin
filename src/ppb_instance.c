@@ -77,9 +77,15 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
         }
 
         pthread_mutex_lock(&display.lock);
+        const PP_Resource previous_device = pp_i->graphics;
         pp_i->graphics = device;
         pthread_mutex_unlock(&display.lock);
-        ppb_core_add_ref_resource(device);
+
+        if (device != previous_device) {
+            ppb_core_add_ref_resource(device);
+            ppb_core_release_resource(previous_device);
+        }
+
         pp_resource_release(device);
         retval = PP_TRUE;
         invalidate_area = 1;
@@ -90,9 +96,15 @@ ppb_instance_bind_graphics(PP_Instance instance, PP_Resource device)
         }
 
         pthread_mutex_lock(&display.lock);
+        const PP_Resource previous_device = pp_i->graphics;
         pp_i->graphics = device;
         pthread_mutex_unlock(&display.lock);
-        ppb_core_add_ref_resource(device);
+
+        if (device != previous_device) {
+            ppb_core_add_ref_resource(device);
+            ppb_core_release_resource(previous_device);
+        }
+
         pp_resource_release(device);
         retval = PP_TRUE;
         invalidate_area = 1;
