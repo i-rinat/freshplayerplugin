@@ -240,6 +240,14 @@ uri_parser_merge_uris(const char *base_uri, const char *rel_uri)
     GList *m = NULL;    // list of allocated memory blocks
 
     uri_parser_parse_uri(base_uri, &base_c);
+
+    // if base_uri is local file, remove heading slashed from rel_uri to make it relative.
+    // That will emulate webserver root
+    if (base_c.scheme.len > 0 && strncmp(base_uri + base_c.scheme.begin, "file", 4) == 0) {
+        while (rel_uri && *rel_uri == '/')
+            rel_uri ++;
+    }
+
     uri_parser_parse_uri(rel_uri, &rel_c);
 
     // See RFC 3986, 5.2. Relative Resolution
