@@ -77,7 +77,7 @@ int32_t
 ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *addr,
                     struct PP_CompletionCallback callback)
 {
-    ppb_core_call_on_main_thread(0, callback, PP_ERROR_FAILED);
+    ppb_core_call_on_main_thread2(0, callback, PP_ERROR_FAILED, __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 

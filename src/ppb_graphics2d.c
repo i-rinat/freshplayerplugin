@@ -299,7 +299,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     if (callback.func) {
         if (pp_i->graphics != graphics_2d)
-            ppb_core_call_on_main_thread(0, callback, PP_OK);
+            ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
         return PP_OK_COMPLETIONPENDING;
     }
 

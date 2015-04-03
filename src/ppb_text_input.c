@@ -170,8 +170,8 @@ selection_changed_comt(void *user_data, int32_t result)
 void
 ppb_text_input_interface_selection_changed(PP_Instance instance)
 {
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(selection_changed_comt, GSIZE_TO_POINTER(instance)),
-                                 PP_OK);
+    ppb_core_call_on_main_thread2(0, PP_MakeCCB(selection_changed_comt, GSIZE_TO_POINTER(instance)),
+                                  PP_OK, __func__);
 }
 
 

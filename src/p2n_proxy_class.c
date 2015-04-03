@@ -98,7 +98,7 @@ static
 void
 p2n_has_method_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_has_method_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_has_method_comt, user_data), PP_OK, __func__);
 }
 
 bool
@@ -182,7 +182,7 @@ static
 void
 p2n_invoke_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_invoke_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_invoke_comt, user_data), PP_OK, __func__);
 }
 
 bool
@@ -250,7 +250,8 @@ static
 void
 p2n_has_property_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_has_property_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_has_property_comt, user_data), PP_OK,
+                                       __func__);
 }
 
 bool
@@ -311,7 +312,8 @@ static
 void
 p2n_get_property_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_get_property_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_get_property_comt, user_data), PP_OK,
+                                       __func__);
 }
 
 bool
@@ -383,7 +385,7 @@ static
 void
 p2n_enumerate_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_enumerate_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(p2n_enumerate_comt, user_data), PP_OK, __func__);
 }
 
 bool

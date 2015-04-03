@@ -123,7 +123,7 @@ fcd_response_handler(GtkDialog *dialog, gint response_id, gpointer user_data)
     if (!p->dialog_closed)
         gtk_widget_destroy(GTK_WIDGET(dialog));
 
-    ppb_core_call_on_main_thread(0, p->ccb, callback_result);
+    ppb_core_call_on_main_thread2(0, p->ccb, callback_result, __func__);
 
     ppb_core_release_resource(p->chooser_id);
     g_slice_free(struct show_param_s, p);

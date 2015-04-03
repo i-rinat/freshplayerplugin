@@ -62,7 +62,8 @@ ppb_core_get_time_ticks(void)
 }
 
 void
-ppb_core_trampoline_to_main_thread(struct PP_CompletionCallback callback, int32_t result)
+ppb_core_trampoline_to_main_thread(struct PP_CompletionCallback callback, int32_t result,
+                                   const char *origin)
 {
     PP_Resource main_message_loop = ppb_message_loop_get_for_main_thread();
     if (main_message_loop == 0)
@@ -70,19 +71,26 @@ ppb_core_trampoline_to_main_thread(struct PP_CompletionCallback callback, int32_
     const int depth = ppb_message_loop_get_depth(main_message_loop);
     const int32_t delay_in_milliseconds = 0;
     ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
-                                           result, depth);
+                                           result, depth, origin);
 }
 
 void
-ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
-                             int32_t result)
+ppb_core_call_on_main_thread2(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
+                              int32_t result, const char *origin)
 {
     PP_Resource main_message_loop = ppb_message_loop_get_for_main_thread();
     if (main_message_loop == 0)
         trace_error("%s, no main loop\n", __func__);
     const int depth = 1;
     ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
-                                           result, depth);
+                                           result, depth, origin);
+}
+
+void
+ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
+                             int32_t result)
+{
+    return ppb_core_call_on_main_thread2(delay_in_milliseconds, callback, result, __func__);
 }
 
 struct call_on_browser_thread_task_s {

@@ -545,7 +545,7 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
     if (callback.flags & PP_COMPLETIONCALLBACK_FLAG_OPTIONAL)
         return read_bytes;
 
-    ppb_core_call_on_main_thread(0, callback, read_bytes);
+    ppb_core_call_on_main_thread2(0, callback, read_bytes, __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 

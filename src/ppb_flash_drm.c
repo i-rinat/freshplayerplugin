@@ -150,7 +150,7 @@ ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
     }
 
     *id = ppb_var_var_from_utf8(salt, salt_length);
-    ppb_core_call_on_main_thread(0, callback, PP_OK);
+    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 

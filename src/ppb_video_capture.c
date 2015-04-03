@@ -61,7 +61,7 @@ ppb_video_capture_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOu
 {
     output.GetDataBuffer(output.user_data, 0, sizeof(int));
 
-    ppb_core_call_on_main_thread(0, callback, PP_OK);
+    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 

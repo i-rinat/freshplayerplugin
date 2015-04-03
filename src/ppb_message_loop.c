@@ -167,6 +167,7 @@ struct message_loop_task_s {
     struct timespec                 when;
     int                             terminate;
     int                             depth;
+    const char                     *origin;     ///< name of the function that scheduled the task
     struct PP_CompletionCallback    ccb;
     int32_t                         result_to_pass;
     PP_Bool                         should_destroy_ml;
@@ -315,12 +316,12 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
                 const struct PP_CompletionCallback ccb = task->ccb;
                 if (ccb.func) {
                     trace_info_f("   calling callback={.func=%p, .user_data=%p, .flags=%d}, "
-                                 "result=%d\n", ccb.func, ccb.user_data, ccb.flags,
-                                 task->result_to_pass);
+                                 "result=%d, origin=%s\n", ccb.func, ccb.user_data, ccb.flags,
+                                 task->result_to_pass, task->origin);
                     ccb.func(ccb.user_data, task->result_to_pass);
                     trace_info_f("   returning from callback={.func=%p, .user_data=%p, .flags=%d}, "
-                                 "result=%d\n", ccb.func, ccb.user_data, ccb.flags,
-                                 task->result_to_pass);
+                                 "result=%d, origin=%s\n", ccb.func, ccb.user_data, ccb.flags,
+                                 task->result_to_pass, task->origin);
                 }
 
                 // free task
@@ -361,7 +362,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
 int32_t
 ppb_message_loop_post_work_with_result(PP_Resource message_loop,
                                        struct PP_CompletionCallback callback, int64_t delay_ms,
-                                       int32_t result_to_pass, int depth)
+                                       int32_t result_to_pass, int depth, const char *origin)
 {
     if (callback.func == NULL) {
         trace_error("%s, callback.func == NULL\n", __func__);
@@ -386,6 +387,7 @@ ppb_message_loop_post_work_with_result(PP_Resource message_loop,
     task->result_to_pass = result_to_pass;
     task->ccb = callback;
     task->depth = depth;
+    task->origin = origin;
 
     // calculate absolute time callback should be run at
     clock_gettime(CLOCK_REALTIME, &task->when);
@@ -405,7 +407,8 @@ int32_t
 ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
                            int64_t delay_ms)
 {
-    return ppb_message_loop_post_work_with_result(message_loop, callback, delay_ms, PP_OK, 0);
+    return ppb_message_loop_post_work_with_result(message_loop, callback, delay_ms, PP_OK, 0,
+                                                  __func__);
 }
 
 int32_t

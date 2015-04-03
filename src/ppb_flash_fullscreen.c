@@ -257,8 +257,8 @@ fullscreen_window_thread(void *p)
                 pp_i->fs_width = ev.xconfigure.width;
                 pp_i->fs_height = ev.xconfigure.height;
                 pthread_mutex_unlock(&display.lock);
-                ppb_core_call_on_main_thread(0, PP_MakeCCB(update_instance_view_comt, pp_i),
-                                             PP_OK);
+                ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i), PP_OK,
+                                              __func__);
                 handled = 1;
                 break;
 
@@ -292,7 +292,7 @@ quit_and_destroy_fs_wnd:
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XCloseDisplay(dpy);
 
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(update_instance_view_comt, pp_i), PP_OK);
+    ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i), PP_OK, __func__);
     g_slice_free(struct thread_param_s, tp);
     return NULL;
 }

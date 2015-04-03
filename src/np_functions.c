@@ -211,8 +211,8 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         pp_i->height = window->height;
 
         if (g_atomic_int_get(&pp_i->instance_loaded)) {
-            ppb_core_call_on_main_thread(0, PP_MakeCCB(set_window_comt, GINT_TO_POINTER(pp_i->id)),
-                                         PP_OK);
+            ppb_core_call_on_main_thread2(0, PP_MakeCCB(set_window_comt, GINT_TO_POINTER(pp_i->id)),
+                                          PP_OK, __func__);
         }
     }
     pthread_mutex_unlock(&display.lock);
@@ -276,7 +276,8 @@ static
 void
 call_plugin_did_create_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_trampoline_to_main_thread(PP_MakeCCB(call_plugin_did_create_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(call_plugin_did_create_comt, user_data), PP_OK,
+                                       __func__);
 }
 
 static
@@ -576,7 +577,8 @@ static
 void
 destroy_instance_prepare_comt(void *user_data, int32_t result)
 {
-    ppb_core_trampoline_to_main_thread(PP_MakeCCB(destroy_instance_comt, user_data), PP_OK);
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(destroy_instance_comt, user_data), PP_OK,
+                                       __func__);
 }
 
 NPError
@@ -685,7 +687,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
 
 quit:
     if (ccb.func)
-        ppb_core_call_on_main_thread(0, ccb, PP_OK);
+        ppb_core_call_on_main_thread2(0, ccb, PP_OK, __func__);
 
     return NPERR_NO_ERROR;
 }
@@ -750,7 +752,8 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
             ul->read_pos += read_bytes;
 
         pp_resource_release(loader);
-        ppb_core_call_on_main_thread(0, PP_MakeCCB(url_read_task_wrapper_comt, rt), read_bytes);
+        ppb_core_call_on_main_thread2(0, PP_MakeCCB(url_read_task_wrapper_comt, rt), read_bytes,
+                                      __func__);
         ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
 
@@ -758,7 +761,7 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
         struct PP_CompletionCallback ccb = ul->stream_to_file_ccb;
 
         pp_resource_release(loader);
-        ppb_core_call_on_main_thread(0, ccb, PP_OK);
+        ppb_core_call_on_main_thread2(0, ccb, PP_OK, __func__);
         return NPERR_NO_ERROR;
     }
 
@@ -824,7 +827,8 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 
     if (read_bytes > 0) {
         pp_resource_release(loader);
-        ppb_core_call_on_main_thread(0, PP_MakeCCB(url_read_task_wrapper_comt, rt), read_bytes);
+        ppb_core_call_on_main_thread2(0, PP_MakeCCB(url_read_task_wrapper_comt, rt), read_bytes,
+                                      __func__);
         return len;
     } else {
         // reschedule task
@@ -916,7 +920,7 @@ handle_graphics_expose_event(NPP npp, void *event)
     pp_resource_release(pp_i->graphics);
     if (pp_i->graphics_in_progress) {
         if (pp_i->graphics_ccb.func) {
-            ppb_core_call_on_main_thread(0, pp_i->graphics_ccb, PP_OK);
+            ppb_core_call_on_main_thread2(0, pp_i->graphics_ccb, PP_OK, __func__);
         } else {
             pthread_mutex_unlock(&display.lock);
             pthread_barrier_wait(&pp_i->graphics_barrier);
@@ -1096,7 +1100,8 @@ ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id)
     struct call_plugin_handle_input_event_param_s *p = g_slice_alloc0(sizeof(*p));
     p->pp_i = pp_i;
     p->event_id = event_id;
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_ppp_handle_input_event_comt, p), PP_OK);
+    ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_ppp_handle_input_event_comt, p), PP_OK,
+                                  __func__);
 }
 
 static
@@ -1434,7 +1439,8 @@ handle_focus_in_out_event(NPP npp, void *event)
             gtk_im_context_focus_out(pp_i->im_context);
     }
 
-    ppb_core_call_on_main_thread(0, PP_MakeCCB(call_ppp_did_change_focus_comt, pp_i), has_focus);
+    ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_ppp_did_change_focus_comt, pp_i), has_focus,
+                                  __func__);
     return 1;
 }
 
@@ -1526,7 +1532,7 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 
     // notify plugin that download have failed
     if (ccb.func)
-        ppb_core_call_on_main_thread(0, ccb, PP_ERROR_FAILED);
+        ppb_core_call_on_main_thread2(0, ccb, PP_ERROR_FAILED, __func__);
 }
 
 NPError

@@ -75,7 +75,7 @@ ppb_message_loop_run_nested(PP_Resource message_loop);
 int32_t
 ppb_message_loop_post_work_with_result(PP_Resource message_loop,
                                        struct PP_CompletionCallback callback, int64_t delay_ms,
-                                       int32_t result_to_pass, int depth);
+                                       int32_t result_to_pass, int depth, const char *origin);
 
 int32_t
 ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,

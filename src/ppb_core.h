@@ -42,11 +42,16 @@ PP_TimeTicks
 ppb_core_get_time_ticks(void);
 
 void
-ppb_core_trampoline_to_main_thread(struct PP_CompletionCallback callback, int32_t result);
+ppb_core_trampoline_to_main_thread(struct PP_CompletionCallback callback, int32_t result,
+                                   const char *origin);
 
 void
 ppb_core_call_on_main_thread(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                              int32_t result);
+
+void
+ppb_core_call_on_main_thread2(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
+                              int32_t result, const char *origin);
 
 void
 ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data);

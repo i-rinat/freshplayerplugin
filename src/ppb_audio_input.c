@@ -59,7 +59,7 @@ ppb_audio_input_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput
                                   struct PP_CompletionCallback callback)
 {
     output.GetDataBuffer(output.user_data, 0, 4);
-    ppb_core_call_on_main_thread(0, callback, PP_OK);
+    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
     return PP_OK;
 }
 
