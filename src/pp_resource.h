@@ -170,7 +170,6 @@ struct pp_instance_s {
     // graphics2d and graphics3d
     PP_Resource                     graphics;
     struct PP_CompletionCallback    graphics_ccb;
-    pthread_barrier_t               graphics_barrier;
     uint32_t                        graphics_in_progress;
 
     // input method context

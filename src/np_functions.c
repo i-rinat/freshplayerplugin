@@ -919,15 +919,11 @@ handle_graphics_expose_event(NPP npp, void *event)
 
     pp_resource_release(pp_i->graphics);
     if (pp_i->graphics_in_progress) {
-        if (pp_i->graphics_ccb.func) {
+        if (pp_i->graphics_ccb.func)
             ppb_core_call_on_main_thread2(0, pp_i->graphics_ccb, PP_OK, __func__);
-        } else {
-            pthread_mutex_unlock(&display.lock);
-            pthread_barrier_wait(&pp_i->graphics_barrier);
-            pthread_mutex_lock(&display.lock);
-        }
     }
 
+    pp_i->graphics_ccb = PP_MakeCCB(NULL, NULL);
     pp_i->graphics_in_progress = 0;
     retval = 1;
 

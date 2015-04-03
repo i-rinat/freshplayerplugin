@@ -368,8 +368,6 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
 
     pp_i->graphics_ccb = callback;
     pp_i->graphics_in_progress = 1;
-    if (!callback.func)
-        pthread_barrier_init(&pp_i->graphics_barrier, NULL, 2);
 
     if (pp_i->is_fullscreen) {
         XGraphicsExposeEvent ev = {
@@ -390,7 +388,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     if (callback.func)
         return PP_OK_COMPLETIONPENDING;
 
-    pthread_barrier_wait(&pp_i->graphics_barrier);
+    trace_error("%s, callback.func==NULL branch not implemented\n", __func__);
     return PP_OK;
 }
 

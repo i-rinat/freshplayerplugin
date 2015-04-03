@@ -279,8 +279,6 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     pp_resource_release(graphics_2d);
 
     pthread_mutex_lock(&display.lock);
-    if (!callback.func)
-        pthread_barrier_init(&pp_i->graphics_barrier, NULL, 2);
     if (pp_i->is_fullscreen) {
         XGraphicsExposeEvent ev = {
             .type = GraphicsExpose,
@@ -298,12 +296,13 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     }
 
     if (callback.func) {
+        // invoke callback as soon as possible if graphics device is not bound to an instance
         if (pp_i->graphics != graphics_2d)
             ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
         return PP_OK_COMPLETIONPENDING;
     }
 
-    pthread_barrier_wait(&pp_i->graphics_barrier);
+    trace_error("%s, callback.func==NULL branch not implemented\n", __func__);
     return PP_OK;
 }
 
