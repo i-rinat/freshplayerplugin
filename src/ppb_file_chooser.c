@@ -214,7 +214,8 @@ ppb_file_chooser_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
     p->chooser_id =             chooser;
 
     ppb_core_add_ref_resource(chooser);
-    ppb_core_call_on_browser_thread(show_without_user_guesture_ptac, p);
+    if (p->pp_i->npp)
+        npn.pluginthreadasynccall(p->pp_i->npp, show_without_user_guesture_ptac, p);
 
     pp_resource_release(chooser);
     return PP_OK_COMPLETIONPENDING;

@@ -118,7 +118,10 @@ done:
 
     if (invalidate_area) {
         // successful binding causes plugin graphics area invalidation
-        ppb_core_call_on_browser_thread(call_invalidaterect_ptac, GSIZE_TO_POINTER(instance));
+        if (pp_i->npp) {
+            npn.pluginthreadasynccall(pp_i->npp, call_invalidaterect_ptac,
+                                      GSIZE_TO_POINTER(instance));
+        }
     }
 
     return retval;

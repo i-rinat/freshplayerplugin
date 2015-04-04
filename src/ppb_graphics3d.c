@@ -398,7 +398,10 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         pthread_mutex_unlock(&display.lock);
     } else {
         pthread_mutex_unlock(&display.lock);
-        ppb_core_call_on_browser_thread(call_invalidaterect_ptac, GSIZE_TO_POINTER(pp_i->id));
+        if (pp_i->npp) {
+            npn.pluginthreadasynccall(pp_i->npp, call_invalidaterect_ptac,
+                                      GSIZE_TO_POINTER(pp_i->id));
+        }
     }
 
     if (callback.func)
