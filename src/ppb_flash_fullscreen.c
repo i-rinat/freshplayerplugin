@@ -37,7 +37,10 @@
 #include <X11/Xutil.h>
 
 
-static volatile gint events_inflight = 0;
+static volatile gint        currently_fullscreen = 0;
+static GAsyncQueue         *fullscreen_transition_queue = NULL;
+static volatile gint        run_fullscreen_thread = 1;
+static pthread_barrier_t    cross_thread_call_barrier;
 
 struct handle_event_comt_param_s {
     PP_Instance instance_id;
@@ -46,11 +49,26 @@ struct handle_event_comt_param_s {
 
 struct thread_param_s {
     struct pp_instance_s   *pp_i;
-    pthread_barrier_t       startup_barrier;
     Window                  browser_window;
-    pthread_barrier_t       browser_window_barrier;
 };
 
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_fullscreen(void)
+{
+    pthread_barrier_init(&cross_thread_call_barrier, NULL, 2);
+}
+
+static
+void
+__attribute__((destructor))
+destructor_ppb_flash_fullscreen(void)
+{
+    g_async_queue_unref(fullscreen_transition_queue);
+    g_atomic_int_set(&run_fullscreen_thread, 0);
+}
 
 PP_Bool
 ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
@@ -69,28 +87,33 @@ update_instance_view_comt(void *user_data, int32_t result)
 {
     struct pp_instance_s *pp_i = user_data;
 
-    if (g_atomic_int_get(&pp_i->instance_loaded)) {
-        PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
-        struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
-        if (!v) {
-            trace_error("%s, resource allocation failure\n", __func__);
-            return;
-        }
-
-        v->rect.point.x = 0;
-        v->rect.point.y = 0;
-        if (pp_i->is_fullscreen) {
-            v->rect.size.width = pp_i->fs_width / config.device_scale;
-            v->rect.size.height = pp_i->fs_height / config.device_scale;
-        } else {
-            v->rect.size.width = pp_i->width / config.device_scale;
-            v->rect.size.height = pp_i->height / config.device_scale;
-        }
-        pp_resource_release(view);
-
-        pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
-        ppb_core_release_resource(view);
+    if (!g_atomic_int_get(&pp_i->instance_loaded)) {
+        goto done;
     }
+
+    PP_Resource view = pp_resource_allocate(PP_RESOURCE_VIEW, pp_i);
+    struct pp_view_s *v = pp_resource_acquire(view, PP_RESOURCE_VIEW);
+    if (!v) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        goto done;
+    }
+
+    v->rect.point.x = 0;
+    v->rect.point.y = 0;
+    if (pp_i->is_fullscreen) {
+        v->rect.size.width = pp_i->fs_width / config.device_scale;
+        v->rect.size.height = pp_i->fs_height / config.device_scale;
+    } else {
+        v->rect.size.width = pp_i->width / config.device_scale;
+        v->rect.size.height = pp_i->height / config.device_scale;
+    }
+    pp_resource_release(view);
+
+    pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
+    ppb_core_release_resource(view);
+
+done:
+    pthread_barrier_wait(&cross_thread_call_barrier);
 }
 
 static
@@ -103,7 +126,7 @@ handle_event_ptac(void *p)
         NPP_HandleEvent(pp_i->npp, &params->ev);
     }
     g_slice_free(struct handle_event_comt_param_s, params);
-    g_atomic_int_add(&events_inflight, -1);
+    pthread_barrier_wait(&cross_thread_call_barrier);
 }
 
 static
@@ -115,7 +138,7 @@ get_browser_window(void *p)
     if (npn.getvalue(tp->pp_i->npp, NPNVnetscapeWindow, &tp->browser_window) != NPERR_NO_ERROR)
         tp->browser_window = None;
 
-    pthread_barrier_wait(&tp->browser_window_barrier);
+    pthread_barrier_wait(&cross_thread_call_barrier);
 }
 
 static
@@ -146,11 +169,9 @@ done:
 }
 
 static
-void *
-fullscreen_window_thread(void *p)
+void
+fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 {
-    struct thread_param_s *tp = p;
-    Display *dpy = XOpenDisplay(NULL);
     struct pp_instance_s *pp_i = tp->pp_i;
     int             px, py;
     Window          root, child;
@@ -219,10 +240,8 @@ fullscreen_window_thread(void *p)
 
     // round trip to browser thread to get browser window
     tp->browser_window = None;
-    pthread_barrier_init(&tp->browser_window_barrier, NULL, 2);
-    ppb_core_call_on_browser_thread(get_browser_window, tp);
-    pthread_barrier_wait(&tp->browser_window_barrier);
-    pthread_barrier_destroy(&tp->browser_window_barrier);
+    npn.pluginthreadasynccall(pp_i->npp, get_browser_window, tp);
+    pthread_barrier_wait(&cross_thread_call_barrier);
 
     // set window transient for browser window
     if (tp->browser_window != None)
@@ -233,8 +252,6 @@ fullscreen_window_thread(void *p)
     pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 1;
     pthread_mutex_unlock(&display.lock);
-
-    pthread_barrier_wait(&tp->startup_barrier);
 
     while (1) {
         XEvent  ev;
@@ -261,6 +278,7 @@ fullscreen_window_thread(void *p)
                 pthread_mutex_unlock(&display.lock);
                 ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i), PP_OK,
                                               __func__);
+                pthread_barrier_wait(&cross_thread_call_barrier);
                 handled = 1;
                 break;
 
@@ -275,29 +293,46 @@ fullscreen_window_thread(void *p)
             struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
             params->instance_id =   pp_i->id;
             params->ev =            ev;
-            g_atomic_int_add(&events_inflight, 1);
-            ppb_core_call_on_browser_thread(handle_event_ptac, params);
+            npn.pluginthreadasynccall(pp_i->npp, handle_event_ptac, params);
+            pthread_barrier_wait(&cross_thread_call_barrier);
         }
     }
 
 quit_and_destroy_fs_wnd:
-
-    // wait for all events to be processed
-    while (g_atomic_int_get(&events_inflight)) {
-        usleep(10);
-    }
 
     pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 0;
     pthread_mutex_unlock(&display.lock);
 
     XDestroyWindow(dpy, pp_i->fs_wnd);
-    XCloseDisplay(dpy);
+    XFlush(dpy);
 
     ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i), PP_OK, __func__);
-    g_slice_free(struct thread_param_s, tp);
+    pthread_barrier_wait(&cross_thread_call_barrier);
 
+    g_slice_free(struct thread_param_s, tp);
     trace_info_f("%s terminated\n", __func__);
+}
+
+static
+void *
+fullscreen_window_thread(void *p)
+{
+    GAsyncQueue *async_q = fullscreen_transition_queue;
+    Display *dpy = XOpenDisplay(NULL);
+
+    g_async_queue_ref(async_q);
+    while (g_atomic_int_get(&run_fullscreen_thread)) {
+        struct thread_param_s *tp = g_async_queue_pop(async_q);
+
+        g_atomic_int_set(&currently_fullscreen, 1);
+        fullscreen_window_thread_int(dpy, tp);
+        g_atomic_int_set(&currently_fullscreen, 0);
+    }
+
+    pthread_barrier_destroy(&cross_thread_call_barrier);
+    g_async_queue_unref(async_q);
+    XCloseDisplay(dpy);
     return NULL;
 }
 
@@ -316,16 +351,23 @@ ppb_flash_fullscreen_set_fullscreen(PP_Instance instance, PP_Bool fullscreen)
     if (in_same_state)
         return PP_FALSE;
 
+    if (!fullscreen_transition_queue) {
+        pthread_t t;
+        fullscreen_transition_queue = g_async_queue_new();
+        pthread_create(&t, NULL, fullscreen_window_thread, NULL);
+        pthread_detach(t);
+    }
+
     if (fullscreen) {
+        if (g_atomic_int_get(&currently_fullscreen)) {
+            // can't go fullscreen -- other instance is still fullscreen
+            return PP_FALSE;
+        }
+
         struct thread_param_s *tparams = g_slice_alloc(sizeof(*tparams));
         tparams->pp_i = pp_i;
-
-        pthread_barrier_init(&tparams->startup_barrier, NULL, 2);
-        pthread_create(&pp_i->fs_thread, NULL, fullscreen_window_thread, tparams);
-        pthread_detach(pp_i->fs_thread);
-        pthread_barrier_wait(&tparams->startup_barrier);
-        pthread_barrier_destroy(&tparams->startup_barrier);
-    } else {
+        g_async_queue_push(fullscreen_transition_queue, tparams);
+    } else if (g_atomic_int_get(&currently_fullscreen)) {
         pthread_mutex_lock(&display.lock);
         pp_i->is_fullscreen = 0;
         XKeyEvent ev = {
