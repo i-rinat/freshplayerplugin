@@ -335,6 +335,29 @@ call_invalidaterect_ptac(void *param)
     npn.forceredraw(pp_i->npp);
 }
 
+static
+void
+call_xsendevent_ptac(void *param)
+{
+    struct pp_instance_s *pp_i = tables_get_pp_instance(GPOINTER_TO_SIZE(param));
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return;
+    }
+
+    XGraphicsExposeEvent ev = {
+        .type =     GraphicsExpose,
+        .drawable = pp_i->fs_wnd,
+        .width =    pp_i->fs_width,
+        .height =   pp_i->fs_height,
+    };
+
+    pthread_mutex_lock(&display.lock);
+    XSendEvent(display.x, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
+    XFlush(display.x);
+    pthread_mutex_unlock(&display.lock);
+}
+
 int32_t
 ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback)
 {
@@ -370,15 +393,8 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     pp_i->graphics_in_progress = 1;
 
     if (pp_i->is_fullscreen) {
-        XGraphicsExposeEvent ev = {
-            .type = GraphicsExpose,
-            .drawable = pp_i->fs_wnd,
-            .width =    pp_i->fs_width,
-            .height =   pp_i->fs_height,
-        };
-
-        XSendEvent(display.x, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
-        XFlush(display.x);
+        if (pp_i->npp)
+            npn.pluginthreadasynccall(pp_i->npp, call_xsendevent_ptac, GSIZE_TO_POINTER(pp_i->id));
         pthread_mutex_unlock(&display.lock);
     } else {
         pthread_mutex_unlock(&display.lock);
