@@ -158,6 +158,8 @@ fullscreen_window_thread(void *p)
     unsigned int    mask;
     const int       wnd_size = 10;
 
+    trace_info_f("%s started\n", __func__);
+
     // get current mouse pointer position
     XQueryPointer(dpy, DefaultRootWindow(dpy), &root, &child, &px, &py, &rel_x, &rel_y, &mask);
 
@@ -294,6 +296,8 @@ quit_and_destroy_fs_wnd:
 
     ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i), PP_OK, __func__);
     g_slice_free(struct thread_param_s, tp);
+
+    trace_info_f("%s terminated\n", __func__);
     return NULL;
 }
 
