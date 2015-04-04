@@ -122,7 +122,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_get_rect(PP_Resource resource, struct PP_Rect *rect)
 {
-    trace_info("[PPB] {full} %s resource=%d, rect=%p\n", __func__+6, resource, rect);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_rect(resource, rect);
 }
 
@@ -154,7 +154,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_view_get_clip_rect(PP_Resource resource, struct PP_Rect *clip)
 {
-    trace_info("[PPB] {full} %s resource=%d, clip=%p\n", __func__+6, resource, clip);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_view_get_clip_rect(resource, clip);
 }
 
