@@ -66,7 +66,8 @@ void
 __attribute__((destructor))
 destructor_ppb_flash_fullscreen(void)
 {
-    g_async_queue_unref(fullscreen_transition_queue);
+    if (fullscreen_transition_queue)
+        g_async_queue_unref(fullscreen_transition_queue);
     g_atomic_int_set(&run_fullscreen_thread, 0);
 }
 
