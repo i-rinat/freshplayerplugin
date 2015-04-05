@@ -362,8 +362,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
 int32_t
 ppb_message_loop_post_work_with_result(PP_Resource message_loop,
                                        struct PP_CompletionCallback callback, int64_t delay_ms,
-                                       int32_t result_to_pass, int depth, const char *origin,
-                                       uint32_t flags)
+                                       int32_t result_to_pass, int depth, const char *origin)
 {
     if (callback.func == NULL) {
         trace_error("%s, callback.func == NULL\n", __func__);
@@ -376,7 +375,9 @@ ppb_message_loop_post_work_with_result(PP_Resource message_loop,
         return PP_ERROR_BADRESOURCE;
     }
 
-    if (!(flags & ML_IGNORE_TEARDOWN)) {
+    // forbid pushing task when message loop is in teardown state,
+    // but only if it's not a browser thread message loop
+    if (message_loop != ppb_message_loop_get_for_browser_thread()) {
         if (ml->running && ml->teardown) {
             // message loop is in a teardown state
             pp_resource_release(message_loop);
@@ -412,7 +413,7 @@ ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallbac
                            int64_t delay_ms)
 {
     return ppb_message_loop_post_work_with_result(message_loop, callback, delay_ms, PP_OK, 0,
-                                                  __func__, 0);
+                                                  __func__);
 }
 
 int32_t

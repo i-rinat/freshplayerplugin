@@ -72,7 +72,7 @@ ppb_core_trampoline_to_main_thread(struct PP_CompletionCallback callback, int32_
     const int depth = ppb_message_loop_get_depth(main_message_loop);
     const int32_t delay_in_milliseconds = 0;
     ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
-                                           result, depth, origin, 0);
+                                           result, depth, origin);
 }
 
 void
@@ -84,7 +84,7 @@ ppb_core_call_on_main_thread2(int32_t delay_in_milliseconds, struct PP_Completio
         trace_error("%s, no main loop\n", __func__);
     const int depth = 1;
     ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
-                                           result, depth, origin, 0);
+                                           result, depth, origin);
 }
 
 void
@@ -138,7 +138,7 @@ ppb_core_call_on_browser_thread(PP_Instance instance, void (*func)(void *), void
     // nested loop on browser thread.
     PP_Resource m_loop = ppb_message_loop_get_for_browser_thread();
     ppb_message_loop_post_work_with_result(m_loop, PP_MakeCCB(call_on_browser_thread_comt, task), 0,
-                                           PP_OK, 0, __func__, ML_IGNORE_TEARDOWN);
+                                           PP_OK, 0, __func__);
 
     struct pp_instance_s *pp_i = instance ? tables_get_pp_instance(instance)
                                           : tables_get_some_pp_instance();
