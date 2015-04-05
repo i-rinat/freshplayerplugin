@@ -205,7 +205,7 @@ NPP_SetWindow(NPP npp, NPWindow *window)
     calculate_absolute_offset(npp, pp_i);
 
     pthread_mutex_lock(&display.lock);
-    if (pp_i && !pp_i->is_fullscreen) {
+    if (!pp_i->is_fullscreen) {
         pp_i->wnd = (Window)window->window;
         pp_i->width = window->width;
         pp_i->height = window->height;
