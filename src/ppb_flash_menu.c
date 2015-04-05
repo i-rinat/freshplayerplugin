@@ -161,13 +161,11 @@ void
 ppb_flash_menu_destroy(void *p)
 {
     struct pp_flash_menu_s *fm = p;
-    struct pp_instance_s *pp_i = fm->instance;
 
     g_object_ref_sink(fm->menu);
 
     // actual menu destroy can make something X-related, call in on browser thread
-    if (pp_i->npp)
-        npn.pluginthreadasynccall(pp_i->npp, destroy_flash_menu_ptac, fm->menu);
+    ppb_core_call_on_browser_thread(fm->instance->id, destroy_flash_menu_ptac, fm->menu);
 }
 
 PP_Bool
@@ -212,8 +210,7 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
     pp_i->ignore_focus_events_cnt = 2;
     pthread_mutex_unlock(&display.lock);
 
-    if (pp_i->npp)
-        npn.pluginthreadasynccall(pp_i->npp, menu_popup_ptac, fm->menu);
+    ppb_core_call_on_browser_thread(pp_i->id, menu_popup_ptac, fm->menu);
 
     pp_resource_release(menu_id);
     return PP_OK_COMPLETIONPENDING;

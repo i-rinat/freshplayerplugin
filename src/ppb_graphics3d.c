@@ -391,17 +391,13 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
 
     pp_i->graphics_ccb = callback;
     pp_i->graphics_in_progress = 1;
+    pthread_mutex_unlock(&display.lock);
 
     if (pp_i->is_fullscreen) {
-        if (pp_i->npp)
-            npn.pluginthreadasynccall(pp_i->npp, call_xsendevent_ptac, GSIZE_TO_POINTER(pp_i->id));
-        pthread_mutex_unlock(&display.lock);
+        ppb_core_call_on_browser_thread(pp_i->id, call_xsendevent_ptac, GSIZE_TO_POINTER(pp_i->id));
     } else {
-        pthread_mutex_unlock(&display.lock);
-        if (pp_i->npp) {
-            npn.pluginthreadasynccall(pp_i->npp, call_invalidaterect_ptac,
-                                      GSIZE_TO_POINTER(pp_i->id));
-        }
+        ppb_core_call_on_browser_thread(pp_i->id, call_invalidaterect_ptac,
+                                        GSIZE_TO_POINTER(pp_i->id));
     }
 
     if (callback.func)

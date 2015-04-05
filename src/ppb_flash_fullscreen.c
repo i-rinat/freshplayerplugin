@@ -241,7 +241,7 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 
     // round trip to browser thread to get browser window
     tp->browser_window = None;
-    npn.pluginthreadasynccall(pp_i->npp, get_browser_window, tp);
+    ppb_core_call_on_browser_thread(pp_i->id, get_browser_window, tp);
     pthread_barrier_wait(&cross_thread_call_barrier);
 
     // set window transient for browser window
@@ -294,7 +294,7 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
             struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
             params->instance_id =   pp_i->id;
             params->ev =            ev;
-            npn.pluginthreadasynccall(pp_i->npp, handle_event_ptac, params);
+            ppb_core_call_on_browser_thread(pp_i->id, handle_event_ptac, params);
             pthread_barrier_wait(&cross_thread_call_barrier);
         }
     }

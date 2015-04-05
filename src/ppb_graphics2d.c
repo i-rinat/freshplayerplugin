@@ -301,17 +301,11 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     pp_resource_release(graphics_2d);
 
-    pthread_mutex_lock(&display.lock);
     if (pp_i->is_fullscreen) {
-        if (pp_i->npp)
-            npn.pluginthreadasynccall(pp_i->npp, call_xsendevent_ptac, GSIZE_TO_POINTER(pp_i->id));
-        pthread_mutex_unlock(&display.lock);
+        ppb_core_call_on_browser_thread(pp_i->id, call_xsendevent_ptac, GSIZE_TO_POINTER(pp_i->id));
     } else {
-        pthread_mutex_unlock(&display.lock);
-        if (pp_i->npp) {
-            npn.pluginthreadasynccall(pp_i->npp, call_invalidaterect_ptac,
-                                      GSIZE_TO_POINTER(pp_i->id));
-        }
+        ppb_core_call_on_browser_thread(pp_i->id, call_invalidaterect_ptac,
+                                        GSIZE_TO_POINTER(pp_i->id));
     }
 
     if (callback.func) {

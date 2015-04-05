@@ -217,19 +217,13 @@ ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
         break;
     }
 
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i) {
-        trace_error("%s, bad instance\n", __func__);
-        return PP_FALSE;
-    }
     struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
 
     comt_params->instance_id =  instance;
     comt_params->xtype =        xtype;
     comt_params->hide_cursor =  hide_cursor;
 
-    if (pp_i->npp)
-        npn.pluginthreadasynccall(pp_i->npp, set_cursor_ptac, comt_params);
+    ppb_core_call_on_browser_thread(instance, set_cursor_ptac, comt_params);
 
     return PP_TRUE;
 }

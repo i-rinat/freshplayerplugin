@@ -76,18 +76,11 @@ set_text_input_type_ptac(void *param)
 void
 ppb_text_input_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type_Dev type)
 {
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i) {
-        trace_error("%s, bad instance\n", __func__);
-        return;
-    }
-
     struct set_text_input_type_param_s *p = g_slice_alloc0(sizeof(*p));
     p->instance =   instance;
     p->type =       type;
 
-    if (pp_i->npp)
-        npn.pluginthreadasynccall(pp_i->npp, set_text_input_type_ptac, p);
+    ppb_core_call_on_browser_thread(instance, set_text_input_type_ptac, p);
 }
 
 struct update_caret_position_param_s {
@@ -118,12 +111,6 @@ void
 ppb_text_input_interface_update_caret_position(PP_Instance instance, const struct PP_Rect *caret,
                                                const struct PP_Rect *bounding_box)
 {
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i) {
-        trace_error("%s, bad instance\n", __func__);
-        return;
-    }
-
     if (!caret)
         return;
 
@@ -134,8 +121,7 @@ ppb_text_input_interface_update_caret_position(PP_Instance instance, const struc
     p->caret.width =  caret->size.width;
     p->caret.height = caret->size.height;
 
-    if (pp_i->npp)
-        npn.pluginthreadasynccall(pp_i->npp, update_caret_position_ptac, p);
+    ppb_core_call_on_browser_thread(instance, update_caret_position_ptac, p);
 }
 
 static
@@ -156,16 +142,8 @@ cancel_composition_text_ptac(void *param)
 void
 ppb_text_input_interface_cancel_composition_text(PP_Instance instance)
 {
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i) {
-        trace_error("%s, bad instance\n", __func__);
-        return;
-    }
-
-    if (pp_i->npp) {
-        npn.pluginthreadasynccall(pp_i->npp, cancel_composition_text_ptac,
-                                  GSIZE_TO_POINTER(instance));
-    }
+    ppb_core_call_on_browser_thread(instance, cancel_composition_text_ptac,
+                                    GSIZE_TO_POINTER(instance));
 }
 
 void
