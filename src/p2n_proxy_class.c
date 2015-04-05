@@ -417,11 +417,19 @@ p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
             const char *s = ppb_var_var_to_utf8(p->values[k], &len);
 
             // make zero-terminated string
-            tmpbuf = realloc(tmpbuf, len + 1);
+            char *ptr = realloc(tmpbuf, len + 1);
+            if (!ptr) {
+                free(tmpbuf);
+                result = false;
+                goto err;
+            }
+            tmpbuf = ptr;
             memcpy(tmpbuf, s, len);
             tmpbuf[len] = 0;
             value[k] = npn.getstringidentifier(tmpbuf);
         }
+
+    err:
         free(tmpbuf);
         g_slice_free1(sizeof(*p), p);
 
