@@ -217,7 +217,7 @@ void
 execute_script_comt(void *user_data, int32_t result)
 {
     struct execute_script_param_s *esp = user_data;
-    ppb_core_call_on_browser_thread(execute_script_ptac, esp);
+    ppb_core_call_on_browser_thread(0, execute_script_ptac, esp);
 }
 
 struct PP_Var

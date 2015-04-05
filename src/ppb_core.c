@@ -116,7 +116,7 @@ activate_browser_thread_ml_ptac(void *param)
 }
 
 void
-ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data)
+ppb_core_call_on_browser_thread(PP_Instance instance, void (*func)(void *), void *user_data)
 {
     struct call_on_browser_thread_task_s *task = g_slice_alloc(sizeof(*task));
     task->func = func;
@@ -125,7 +125,8 @@ ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data)
     PP_Resource m_loop = ppb_message_loop_get_for_browser_thread();
     ppb_message_loop_post_work(m_loop, PP_MakeCCB(call_on_browser_thread_comt, task), 0);
 
-    struct pp_instance_s *pp_i = tables_get_some_pp_instance();
+    struct pp_instance_s *pp_i = instance ? tables_get_pp_instance(instance)
+                                          : tables_get_some_pp_instance();
     if (!pp_i) {
         trace_error("%s, no alive instance available\n", __func__);
         return;

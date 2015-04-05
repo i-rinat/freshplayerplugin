@@ -221,7 +221,7 @@ static
 void
 clipboard_is_format_available_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_browser_thread(clipboard_is_format_available_ptac, user_data);
+    ppb_core_call_on_browser_thread(0, clipboard_is_format_available_ptac, user_data);
 }
 
 PP_Bool
@@ -296,7 +296,7 @@ static
 void
 clipboard_read_data_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_browser_thread(clipboard_read_data_ptac, user_data);
+    ppb_core_call_on_browser_thread(0, clipboard_read_data_ptac, user_data);
 }
 
 struct PP_Var
@@ -483,7 +483,7 @@ static
 void
 clipboard_write_data_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_browser_thread(clipboard_write_data_ptac, user_data);
+    ppb_core_call_on_browser_thread(0, clipboard_write_data_ptac, user_data);
 }
 
 int32_t

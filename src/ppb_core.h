@@ -53,8 +53,11 @@ void
 ppb_core_call_on_main_thread2(int32_t delay_in_milliseconds, struct PP_CompletionCallback callback,
                               int32_t result, const char *origin);
 
+/// schedule task for execution on browser thread
+///
+/// @param instance is optional, pass 0 if there are no instance id available
 void
-ppb_core_call_on_browser_thread(void (*func)(void *), void *user_data);
+ppb_core_call_on_browser_thread(PP_Instance instance, void (*func)(void *), void *user_data);
 
 PP_Bool
 ppb_core_is_main_thread(void);

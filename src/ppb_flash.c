@@ -165,7 +165,7 @@ static
 void
 get_proxy_for_url_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_browser_thread(get_proxy_for_url_ptac, user_data);
+    ppb_core_call_on_browser_thread(0, get_proxy_for_url_ptac, user_data);
 }
 
 struct PP_Var

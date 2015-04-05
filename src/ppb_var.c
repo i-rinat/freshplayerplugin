@@ -137,7 +137,7 @@ static
 void
 create_np_object_comt(void *user_data, int32_t result)
 {
-    ppb_core_call_on_browser_thread(create_np_object_ptac, user_data);
+    ppb_core_call_on_browser_thread(0, create_np_object_ptac, user_data);
 }
 
 static
