@@ -116,7 +116,9 @@ p2n_has_method(NPObject *npobj, NPIdentifier name)
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_has_method_prepare_comt, p), 0);
+        ppb_message_loop_post_work_with_result(p->m_loop,
+                                               PP_MakeCCB(p2n_has_method_prepare_comt, p), 0, PP_OK,
+                                               0, __func__, ML_IGNORE_TEARDOWN);
         ppb_message_loop_run_nested(p->m_loop);
 
         bool result = p->result;
@@ -204,7 +206,8 @@ p2n_invoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t a
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_invoke_prepare_comt, p), 0);
+        ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(p2n_invoke_prepare_comt, p),
+                                               0, PP_OK, 0, __func__, ML_IGNORE_TEARDOWN);
         ppb_message_loop_run_nested(p->m_loop);
         bool result = p->result;
         npn.memfree(p->name);
@@ -269,7 +272,9 @@ p2n_has_property(NPObject *npobj, NPIdentifier name)
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_has_property_prepare_comt, p), 0);
+        ppb_message_loop_post_work_with_result(p->m_loop,
+                                               PP_MakeCCB(p2n_has_property_prepare_comt, p), 0,
+                                               PP_OK, 0, __func__, ML_IGNORE_TEARDOWN);
         ppb_message_loop_run_nested(p->m_loop);
 
         bool result = p->result;
@@ -332,7 +337,9 @@ p2n_get_property(NPObject *npobj, NPIdentifier name, NPVariant *np_result)
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_get_property_prepare_comt, p), 0);
+        ppb_message_loop_post_work_with_result(p->m_loop,
+                                               PP_MakeCCB(p2n_get_property_prepare_comt, p), 0,
+                                               PP_OK, 0, __func__, ML_IGNORE_TEARDOWN);
         ppb_message_loop_run_nested(p->m_loop);
         bool result = p->result;
         npn.memfree(p->name);
@@ -397,7 +404,8 @@ p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
         p->m_loop =     ppb_message_loop_get_for_browser_thread();
         p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-        ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(p2n_enumerate_prepare_comt, p), 0);
+        ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(p2n_enumerate_prepare_comt, p),
+                                               0, PP_OK, 0, __func__, ML_IGNORE_TEARDOWN);
         ppb_message_loop_run_nested(p->m_loop);
         bool result = p->result;
         *count = p->count;
