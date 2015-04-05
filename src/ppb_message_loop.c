@@ -362,7 +362,8 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
 int32_t
 ppb_message_loop_post_work_with_result(PP_Resource message_loop,
                                        struct PP_CompletionCallback callback, int64_t delay_ms,
-                                       int32_t result_to_pass, int depth, const char *origin)
+                                       int32_t result_to_pass, int depth, const char *origin,
+                                       uint32_t flags)
 {
     if (callback.func == NULL) {
         trace_error("%s, callback.func == NULL\n", __func__);
@@ -375,11 +376,14 @@ ppb_message_loop_post_work_with_result(PP_Resource message_loop,
         return PP_ERROR_BADRESOURCE;
     }
 
-    if (ml->running && ml->teardown) {
-        // message loop is in a teardown state
-        pp_resource_release(message_loop);
-        trace_error("%s, quit request received, no additional work could be posted\n", __func__);
-        return PP_ERROR_FAILED;
+    if (!(flags & ML_IGNORE_TEARDOWN)) {
+        if (ml->running && ml->teardown) {
+            // message loop is in a teardown state
+            pp_resource_release(message_loop);
+            trace_error("%s, quit request received, no additional work could be posted\n",
+                        __func__);
+            return PP_ERROR_FAILED;
+        }
     }
 
     struct message_loop_task_s *task = g_slice_alloc0(sizeof(*task));
@@ -408,7 +412,7 @@ ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallbac
                            int64_t delay_ms)
 {
     return ppb_message_loop_post_work_with_result(message_loop, callback, delay_ms, PP_OK, 0,
-                                                  __func__);
+                                                  __func__, 0);
 }
 
 int32_t

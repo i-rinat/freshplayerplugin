@@ -31,6 +31,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "ppb_message_loop.h"
+#include <ppapi/c/pp_errors.h>
 
 
 void
@@ -71,7 +72,7 @@ ppb_core_trampoline_to_main_thread(struct PP_CompletionCallback callback, int32_
     const int depth = ppb_message_loop_get_depth(main_message_loop);
     const int32_t delay_in_milliseconds = 0;
     ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
-                                           result, depth, origin);
+                                           result, depth, origin, 0);
 }
 
 void
@@ -83,7 +84,7 @@ ppb_core_call_on_main_thread2(int32_t delay_in_milliseconds, struct PP_Completio
         trace_error("%s, no main loop\n", __func__);
     const int depth = 1;
     ppb_message_loop_post_work_with_result(main_message_loop, callback, delay_in_milliseconds,
-                                           result, depth, origin);
+                                           result, depth, origin, 0);
 }
 
 void
@@ -111,10 +112,17 @@ static
 void
 activate_browser_thread_ml_ptac(void *param)
 {
+    // If task was already executed and queue is empty, ppb_message_loop_run_int() will return
+    // without waiting.
     PP_Resource m_loop = ppb_message_loop_get_for_browser_thread();
     ppb_message_loop_run_int(m_loop, ML_INCREASE_DEPTH | ML_EXIT_ON_EMPTY | ML_NESTED);
 }
 
+// Schedules task for execution on browser thread.
+//
+// Since there is no access to browser event loop, we start a nested event loop which is terminated
+// as long as there is no tasks left. That way we can implement waiting as entering a nested loop
+// and thus avoid deadlocks.
 void
 ppb_core_call_on_browser_thread(PP_Instance instance, void (*func)(void *), void *user_data)
 {
@@ -122,8 +130,15 @@ ppb_core_call_on_browser_thread(PP_Instance instance, void (*func)(void *), void
     task->func = func;
     task->user_data = user_data;
 
+    // Push task into queue. The only purpose is to put task into queue even if message loop
+    // is currenly terminating (in teardown state), so we are ignoring that. There are three
+    // possible loop states. Message loop is either running, stopped, or terminating. If it's
+    // still running, task will be executed in the context of that loop. If it's stopped or
+    // stopping right now, task will be pushed to a queue. After that code below will schedule
+    // nested loop on browser thread.
     PP_Resource m_loop = ppb_message_loop_get_for_browser_thread();
-    ppb_message_loop_post_work(m_loop, PP_MakeCCB(call_on_browser_thread_comt, task), 0);
+    ppb_message_loop_post_work_with_result(m_loop, PP_MakeCCB(call_on_browser_thread_comt, task), 0,
+                                           PP_OK, 0, __func__, ML_IGNORE_TEARDOWN);
 
     struct pp_instance_s *pp_i = instance ? tables_get_pp_instance(instance)
                                           : tables_get_some_pp_instance();
@@ -132,6 +147,7 @@ ppb_core_call_on_browser_thread(PP_Instance instance, void (*func)(void *), void
         return;
     }
 
+    // Schedule activation routine.
     pthread_mutex_lock(&display.lock);
     if (pp_i->npp)
         npn.pluginthreadasynccall(pp_i->npp, activate_browser_thread_ml_ptac, user_data);

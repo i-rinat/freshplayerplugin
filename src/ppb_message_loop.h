@@ -33,6 +33,7 @@ enum ppb_message_loop_flags_e {
     ML_NESTED =             (1 << 0),
     ML_INCREASE_DEPTH =     (1 << 1),
     ML_EXIT_ON_EMPTY =      (1 << 2),
+    ML_IGNORE_TEARDOWN =    (1 << 3),
 };
 
 
@@ -75,7 +76,8 @@ ppb_message_loop_run_nested(PP_Resource message_loop);
 int32_t
 ppb_message_loop_post_work_with_result(PP_Resource message_loop,
                                        struct PP_CompletionCallback callback, int64_t delay_ms,
-                                       int32_t result_to_pass, int depth, const char *origin);
+                                       int32_t result_to_pass, int depth, const char *origin,
+                                       uint32_t flags);
 
 int32_t
 ppb_message_loop_post_work(PP_Resource message_loop, struct PP_CompletionCallback callback,
