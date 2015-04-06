@@ -1379,9 +1379,6 @@ handle_key_press_release_event(NPP npp, void *event)
         ev->window = browser_window;
 
         GdkEvent *gev = make_gdk_key_event_from_x_key(ev);
-        // reset custom state flags set by input method
-        gev->key.state &= (ShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask |
-                           Mod4Mask | Mod5Mask);
         gtk_im_context_set_client_window(pp_i->im_context, gev->key.window);
 
         gboolean stop = gtk_im_context_filter_keypress(pp_i->im_context, &gev->key);
