@@ -204,6 +204,8 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     // update windows state properties
     Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", False);
     Atom state_atoms[] = {
+        XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False),// fill horizontal space
+        XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False),// fill vertical space
         XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False),    // go fullscreen
         XInternAtom(dpy, "_NET_WM_STATE_SKIP_PAGER", False),    // do not appear in pager
         XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", False),  // do not appear in taskbar
