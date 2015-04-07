@@ -1379,12 +1379,13 @@ handle_key_press_release_event(NPP npp, void *event)
         ev->window = browser_window;
 
         GdkEvent *gev = make_gdk_key_event_from_x_key(ev);
-        gtk_im_context_set_client_window(pp_i->im_context, gev->key.window);
-
-        gboolean stop = gtk_im_context_filter_keypress(pp_i->im_context, &gev->key);
-        gdk_event_free(gev);
-        if (stop)
-            return 1;
+        if (gev) {
+            gtk_im_context_set_client_window(pp_i->im_context, gev->key.window);
+            gboolean stop = gtk_im_context_filter_keypress(pp_i->im_context, &gev->key);
+            gdk_event_free(gev);
+            if (stop)
+                return 1;
+        }
     }
 
     if (ev->type == KeyPress && is_printable_sequence(buffer, charcount)) {
