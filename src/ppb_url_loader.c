@@ -211,8 +211,8 @@ err:
     }
 
 quit:
-    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
     ppb_core_release_resource(p->loader);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
 static
