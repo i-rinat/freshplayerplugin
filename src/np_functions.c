@@ -698,12 +698,18 @@ url_read_task_wrapper_comt(void *user_data, int32_t result)
 {
     struct url_loader_read_task_s *rt = user_data;
 
+    if (pp_resource_get_type(rt->url_loader) != PP_RESOURCE_URL_LOADER) {
+        trace_info_f("   url_loader gone (=%d)\n", rt->url_loader);
+        goto err;
+    }
+
     trace_info_f("   calling wrapped callback={.func=%p, .user_data=%p, .flags=%d}, result=%d\n",
                  rt->ccb.func, rt->ccb.user_data, rt->ccb.flags, result);
     rt->ccb.func(rt->ccb.user_data, result);
     trace_info_f("   returning from wrapped callback={.func=%p, .user_data=%p, .flags=%d}, "
                  "result=%d\n", rt->ccb.func, rt->ccb.user_data, rt->ccb.flags, result);
-    ppb_core_release_resource(rt->url_loader); // release previously held reference
+
+err:
     g_slice_free1(sizeof(*rt), rt);
 }
 

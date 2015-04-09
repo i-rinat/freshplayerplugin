@@ -88,6 +88,14 @@ ppb_url_loader_destroy(void *p)
 
     post_data_free(ul->post_data);
     ul->post_data = NULL;
+
+    while (ul->read_tasks) {
+        GList *llink = g_list_first(ul->read_tasks);
+        struct url_loader_read_task_s *rt = llink->data;
+        ul->read_tasks = g_list_delete_link(ul->read_tasks, llink);
+
+        g_slice_free1(sizeof(*rt), rt);
+    }
 }
 
 PP_Bool
@@ -534,7 +542,6 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
         rt->buffer = buffer;
         rt->bytes_to_read = bytes_to_read;
         rt->ccb = callback;
-        ppb_core_add_ref_resource(loader); // keep reference until task runs
 
         ul->read_tasks = g_list_append(ul->read_tasks, rt);
         pp_resource_release(loader);
