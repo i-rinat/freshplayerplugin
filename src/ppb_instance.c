@@ -144,17 +144,55 @@ ppb_instance_is_full_frame(PP_Instance instance)
         return PP_FALSE;
 }
 
+struct get_window_object_param_s {
+    PP_Instance     instance;
+    struct PP_Var   result;
+    PP_Resource     m_loop;
+    int             depth;
+};
+
+static
+void
+get_window_object_ptac(void *param)
+{
+    struct get_window_object_param_s *p = param;
+
+    struct pp_instance_s *pp_i = tables_get_pp_instance(p->instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        p->result = PP_MakeUndefined();
+        goto done;
+    }
+
+    npn.retainobject(pp_i->np_window_obj);
+    p->result = ppb_var_create_object(p->instance, &n2p_proxy_class, pp_i->np_window_obj);
+
+done:
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+get_window_object_comt(void *user_data, int32_t result)
+{
+    struct get_window_object_param_s *p = user_data;
+    ppb_core_call_on_browser_thread(0, get_window_object_ptac, p);
+}
+
 struct PP_Var
 ppb_instance_get_window_object(PP_Instance instance)
 {
-    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
-    if (!pp_i) {
-        trace_error("%s, bad instance\n", __func__);
-        return PP_MakeUndefined();
-    }
+    struct get_window_object_param_s *p = g_slice_alloc(sizeof(*p));
+    p->instance =   instance;
+    p->m_loop =     ppb_message_loop_get_current();
+    p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    npn.retainobject(pp_i->np_window_obj); // TODO: call on browser thread?
-    return ppb_var_create_object(instance, &n2p_proxy_class, pp_i->np_window_obj);
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(get_window_object_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
+
+    struct PP_Var result = p->result;
+    g_slice_free1(sizeof(*p), p);
+    return result;
 }
 
 struct PP_Var
