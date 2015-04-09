@@ -348,15 +348,50 @@ n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *e
     return result;
 }
 
+struct deallocate_param_s {
+    void               *object;
+    PP_Resource         m_loop;
+    int                 depth;
+};
+
+static
+void
+n2p_deallocate_ptac(void *param)
+{
+    struct deallocate_param_s *p = param;
+
+    NPObject *np_object = p->object;
+    uint32_t ref_cnt = np_object->referenceCount;
+
+    npn.releaseobject(p->object);
+
+    if (ref_cnt <= 1)
+        tables_remove_npobj_npp_mapping(p->object);
+
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+n2p_deallocate_comt(void *user_data, int32_t result)
+{
+    struct deallocate_param_s *p = user_data;
+    ppb_core_call_on_browser_thread(0, n2p_deallocate_ptac, p);
+}
+
 static
 void
 n2p_deallocate(void *object)
 {
-    NPObject *np_object = object;
-    uint32_t ref_cnt = np_object->referenceCount;
-    npn.releaseobject(object);
-    if (ref_cnt <= 1)
-        tables_remove_npobj_npp_mapping(object);
+    struct deallocate_param_s *p = g_slice_alloc(sizeof(*p));
+    p->object = object;
+    p->m_loop = ppb_message_loop_get_current();
+    p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
+
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_deallocate_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
+
+    g_slice_free1(sizeof(*p), p);
 }
 
 
