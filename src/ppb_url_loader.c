@@ -516,6 +516,7 @@ int32_t
 ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t bytes_to_read,
                                   struct PP_CompletionCallback callback)
 {
+    struct url_loader_read_task_s *rt;
     int32_t read_bytes = PP_ERROR_FAILED;
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     if (!ul) {
@@ -523,29 +524,31 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
         return PP_ERROR_BADRESOURCE;
     }
 
-    if (ul->fd >= 0) {
-        read_bytes = -1;
-        off_t ofs = lseek(ul->fd, ul->read_pos, SEEK_SET);
-        if (ofs != (off_t)-1)
-            read_bytes = RETRY_ON_EINTR(read(ul->fd, buffer, bytes_to_read));
-
-        if (read_bytes < 0)
-            read_bytes = PP_ERROR_FAILED;
-        else
-            ul->read_pos += read_bytes;
+    if (ul->fd == -1) {
+        trace_error("%s, fd==-1\n", __func__);
+        pp_resource_release(loader);
+        return PP_ERROR_FAILED;
     }
+
+    if (ul->read_tasks) {
+        // schedule task instead of immediate reading if there is another task
+        // in the queue already
+        goto schedule_read_task;
+    }
+
+    read_bytes = -1;
+    off_t ofs = lseek(ul->fd, ul->read_pos, SEEK_SET);
+    if (ofs != (off_t)-1)
+        read_bytes = RETRY_ON_EINTR(read(ul->fd, buffer, bytes_to_read));
+
+    if (read_bytes < 0)
+        read_bytes = PP_ERROR_FAILED;
+    else
+        ul->read_pos += read_bytes;
 
     if (read_bytes == 0 && !ul->finished_loading) {
         // no data ready, schedule read task
-        struct url_loader_read_task_s *rt = g_slice_alloc(sizeof(*rt));
-        rt->url_loader = loader;
-        rt->buffer = buffer;
-        rt->bytes_to_read = bytes_to_read;
-        rt->ccb = callback;
-
-        ul->read_tasks = g_list_append(ul->read_tasks, rt);
-        pp_resource_release(loader);
-        return PP_OK_COMPLETIONPENDING;
+        goto schedule_read_task;
     }
 
     pp_resource_release(loader);
@@ -553,6 +556,17 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
         return read_bytes;
 
     ppb_core_call_on_main_thread2(0, callback, read_bytes, __func__);
+    return PP_OK_COMPLETIONPENDING;
+
+schedule_read_task:
+    rt = g_slice_alloc(sizeof(*rt));
+    rt->url_loader =    loader;
+    rt->buffer =        buffer;
+    rt->bytes_to_read = bytes_to_read;
+    rt->ccb =           callback;
+
+    ul->read_tasks = g_list_append(ul->read_tasks, rt);
+    pp_resource_release(loader);
     return PP_OK_COMPLETIONPENDING;
 }
 
