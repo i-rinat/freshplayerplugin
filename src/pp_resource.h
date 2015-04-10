@@ -161,7 +161,8 @@ struct pp_instance_s {
     char                          **argn;
     char                          **argv;
 
-    struct PP_Var                   instance_url;
+    struct PP_Var                   instance_url;           ///< absolute instance url
+    struct PP_Var                   instance_relative_url;  ///< instance url as in "src" parameter
     struct PP_Var                   document_url;
     struct PP_Var                   document_base_url;
     pthread_t                       main_thread;

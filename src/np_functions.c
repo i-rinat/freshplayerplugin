@@ -54,6 +54,7 @@
 #include "ppb_core.h"
 #include "ppb_message_loop.h"
 #include "ppb_flash_fullscreen.h"
+#include "ppb_url_util.h"
 #include "header_parser.h"
 #include "keycodeconvert.h"
 #include "eintr_retry.h"
@@ -450,9 +451,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pp_i->argn[k] = strdup(argn[k] ? argn[k] : "");
         pp_i->argv[k] = strdup(argv[k] ? argv[k] : "");
 
-        if (strcasecmp(argn[k], "src") == 0) {
-            pp_i->instance_url = ppb_var_var_from_utf8_z(argv[k]);
-        }
+        if (strcasecmp(argn[k], "src") == 0)
+            pp_i->instance_relative_url = ppb_var_var_from_utf8_z(argv[k]);
 
         if (strcasecmp(argn[k], "wmode") == 0)
             if (strcasecmp(argv[k], "transparent") == 0)
@@ -495,6 +495,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     pp_i->document_url = get_document_url(pp_i);
     pp_i->document_base_url = get_document_base_url(pp_i);
+    pp_i->instance_url = ppb_url_util_resolve_relative_to_url(pp_i->document_base_url,
+                                                              pp_i->instance_relative_url, NULL);
 
     pp_i->textinput_type = PP_TEXTINPUT_TYPE_DEV_NONE;
     pp_i->im_context_multi = gtk_im_multicontext_new();
