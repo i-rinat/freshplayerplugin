@@ -28,11 +28,18 @@ extern audio_stream_ops audio_alsa;
 #if HAVE_PULSEAUDIO
 extern audio_stream_ops audio_pulse;
 #endif
+#if HAVE_JACK
+extern audio_stream_ops audio_jack;
+#endif
 
 
 audio_stream_ops *
 audio_select_implementation(void)
 {
+#if HAVE_JACK
+    if (audio_jack.available())
+        return &audio_jack;
+#endif
 #if HAVE_PULSEAUDIO
     if (audio_pulse.available())
         return &audio_pulse;

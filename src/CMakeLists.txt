@@ -87,6 +87,10 @@ if (PULSEAUDIO_FOUND AND WITH_PULSEAUDIO)
     list(APPEND source_list audio_thread_pulseaudio.c)
 endif()
 
+if (JACK_FOUND AND SOXR_FOUND AND WITH_JACK)
+    list(APPEND source_list audio_thread_jack.c)
+endif()
+
 add_library(freshwrapper-obj OBJECT ${source_list})
 
 # ensure libfreshwrapper-*.so are linked with all libraries they use
