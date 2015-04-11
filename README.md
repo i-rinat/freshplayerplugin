@@ -69,6 +69,7 @@ Project is using cmake (>=2.8.8) build system.
            libxrender-dev
 ```
 * (optional) To enable PulseAudio support, install `libpulse-dev`.
+* (optional) To enable JACK support, install `libjack-jackd2-dev` and `libsoxr-dev`
 
 * Create a `build` subdirectory in the root directory, from that folder, call
 ```
