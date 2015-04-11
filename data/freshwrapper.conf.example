@@ -16,6 +16,10 @@ audio_buffer_min_ms = 20
 # higher bound of audio buffer size, in milliseconds
 audio_buffer_max_ms = 500
 
+# output sound through JACK. If enabled, only JACK will be tried, and if
+# your machine doesn't have it, there would be no sound, and no sync
+audio_use_jack = 0
+
 # Path to the Pepper Flash plugin
 pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
 

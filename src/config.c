@@ -32,6 +32,7 @@
 static struct fpp_config_s default_config = {
     .audio_buffer_min_ms =      20,
     .audio_buffer_max_ms =      500,
+    .audio_use_jack      =      0,
     .pepperflash_path    =      NULL,
     .flash_command_line  =      "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .enable_3d           =      1,
@@ -131,6 +132,9 @@ fpp_config_initialize(void)
 
     if (config_lookup_int64(&cfg, "audio_buffer_max_ms", &intval))
         config.audio_buffer_max_ms = intval;
+
+    if (config_lookup_int64(&cfg, "audio_use_jack", &intval))
+        config.audio_use_jack = intval;
 
     if (config_lookup_string(&cfg, "pepperflash_path", &stringval))
         config.pepperflash_path = strdup(stringval);
