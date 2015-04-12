@@ -25,30 +25,41 @@
 #include "audio_thread.h"
 #include <pthread.h>
 #include <jack/jack.h>
+#include <jack/ringbuffer.h>
 #include <soxr.h>
 #include <glib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "trace.h"
 #include "config.h"
 
 #define CLIENT_NAME     "freshwrapper"
+
+#define CMD_RESAMPLE_NEXT_CHUNK     ((void *)1)
+#define CMD_TERMINATE               ((void *)2)
 
 
 struct audio_stream_s {
     audio_stream_playback_cb_f *playback_cb;
     void                       *cb_user_data;
 
-    jack_client_t  *client;
-    jack_port_t    *output_port_1;
-    jack_port_t    *output_port_2;
-    size_t          sample_rate;
-    size_t          sample_frame_count;
-    size_t          jack_sample_rate;
-    volatile int    paused;
-    soxr_t          resampler;
-    char           *input_buf;
-    size_t          input_buf_available_frames;
+    GAsyncQueue        *async_q;
+    pthread_t           resampler_thread;
+    jack_client_t      *client;
+    jack_port_t        *output_port_1;
+    jack_port_t        *output_port_2;
+    size_t              sample_rate;
+    size_t              sample_frame_count;
+    size_t              jack_sample_rate;
+    size_t              jack_sample_frame_count;
+    void               *input_buf;
+    size_t              input_buf_size;
+    void               *output_bufs[2];
+    size_t              output_buf_size;
+    volatile int        paused;
+    soxr_t              resampler;
+    jack_ringbuffer_t  *rb_out[2];
 };
 
 static
@@ -59,51 +70,60 @@ ja_available(void)
 }
 
 static
+void *
+ja_resampler_thread_func(void *param)
+{
+    audio_stream *as = param;
+
+    while (1) {
+        while (jack_ringbuffer_read_space(as->rb_out[0]) < as->output_buf_size / 2) {
+            if (g_atomic_int_get(&as->paused)) {
+                memset(as->input_buf, 0, as->input_buf_size);
+            } else {
+                as->playback_cb(as->input_buf, as->input_buf_size, 0, as->cb_user_data);
+            }
+
+            size_t idone = 0, odone = 0;
+            soxr_process(as->resampler, as->input_buf, as->sample_frame_count, &idone,
+                         as->output_bufs, as->output_buf_size / sizeof(float), &odone);
+
+            size_t wr1, wr2;
+            wr1 = jack_ringbuffer_write(as->rb_out[0], as->output_bufs[0], odone * sizeof(float));
+            wr2 = jack_ringbuffer_write(as->rb_out[1], as->output_bufs[1], odone * sizeof(float));
+            if (wr1 != odone * sizeof(float) || wr2 != odone * sizeof(float))
+                trace_error("%s, ringbuffer overrun\n", __func__);
+        }
+
+        void *ptr = NULL;
+        while (ptr == NULL)
+            ptr = g_async_queue_timeout_pop(as->async_q, 500 * 1000 /* ms */);
+
+        // termination condition
+        if (ptr == CMD_TERMINATE)
+            break;
+    }
+
+    return NULL;
+}
+
+static
 int
 ja_process_cb(jack_nframes_t nframes, void *param)
 {
-    audio_stream   *as = param;
+    audio_stream *as = param;
 
-    jack_default_audio_sample_t *out[2] = {
+    void *out[2] = {
         jack_port_get_buffer(as->output_port_1, nframes),
         jack_port_get_buffer(as->output_port_2, nframes),
     };
 
-    if (g_atomic_int_get(&as->paused)) {
-        memset(out[0], 0, nframes * sizeof(jack_default_audio_sample_t));
-        memset(out[1], 0, nframes * sizeof(jack_default_audio_sample_t));
-        return 0;
-    }
+    size_t wr1 = jack_ringbuffer_read(as->rb_out[0], out[0], nframes * sizeof(float));
+    size_t wr2 = jack_ringbuffer_read(as->rb_out[1], out[1], nframes * sizeof(float));
 
-    size_t frames_to_write = nframes;
-    while (frames_to_write > 0) {
-        const size_t frame_size = 2 * sizeof(int16_t);
+    if (wr1 != nframes * sizeof(float) || wr2 != nframes * sizeof(float))
+        trace_error("%s, ringbuffer underrun\n", __func__);
 
-        // ensure input buffer is at least half-filled
-        if (as->input_buf_available_frames <= as->sample_frame_count) {
-            // amount of data in the buffer will always be smaller than (2 * sample_frame_count)
-            as->playback_cb(as->input_buf + frame_size * as->input_buf_available_frames,
-                            frame_size * as->sample_frame_count, 0, as->cb_user_data);
-            as->input_buf_available_frames += as->sample_frame_count;
-        }
-
-        // resample and deinterleave
-        size_t idone = 0;
-        size_t odone = 0;
-        soxr_process(as->resampler, as->input_buf, as->input_buf_available_frames, &idone,
-                     out, frames_to_write, &odone);
-
-        // move remaining data in input buffer to its beginning
-        as->input_buf_available_frames -= idone;
-        memmove(as->input_buf, as->input_buf + frame_size * idone,
-                frame_size * as->input_buf_available_frames);
-
-        // advance pointers
-        out[0] += odone;
-        out[1] += odone;
-        frames_to_write -= odone;
-    }
-
+    g_async_queue_push(as->async_q, CMD_RESAMPLE_NEXT_CHUNK);
     return 0;
 }
 
@@ -117,32 +137,47 @@ ja_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_co
     const char     *server_name = NULL; // TODO: make server name configurable
 
     audio_stream *as = calloc(1, sizeof(*as));
-    if (!as)
+    if (!as) {
+        trace_error("%s, memory allocation failure, point 1\n", __func__);
         goto err_1;
+    }
 
-    // allocate buffer for (2 * sample_frame_count) frames
-    as->input_buf =  malloc(2 * sizeof(int16_t) * 2 * sample_frame_count);
-    as->input_buf_available_frames = 0;
-
-    if (!as->input_buf)
-        goto err_2;
-
-    as->playback_cb =   cb;
-    as->cb_user_data =  cb_user_data;
-    as->sample_frame_count = sample_frame_count;
+    as->playback_cb = cb;
+    as->cb_user_data = cb_user_data;
+    g_atomic_int_set(&as->paused, 1);
 
     as->client = jack_client_open(CLIENT_NAME, options, &status, server_name);
     if (!as->client) {
         trace_error("%s, jack_client_open() failed with status=0x%x\n", __func__, status);
-        if (status & JackServerFailed) {
+        if (status & JackServerFailed)
             trace_error("%s, can't connect to JACK server\n", __func__);
-        }
 
-        goto err_3;
+        goto err_2;
     }
 
-    as->sample_rate =      sample_rate;
-    as->jack_sample_rate = jack_get_sample_rate(as->client);
+    as->sample_rate =             sample_rate;
+    as->sample_frame_count =      sample_frame_count;
+    as->jack_sample_rate =        jack_get_sample_rate(as->client);
+    as->jack_sample_frame_count = ceil(1.0 * as->jack_sample_rate / as->sample_rate *
+                                       as->sample_frame_count);
+
+    // allocate buffer for sample_frame_count frames
+    as->input_buf_size = 2 * sizeof(int16_t) * sample_frame_count;
+    as->input_buf = malloc(as->input_buf_size);
+
+    // allocate room for twice as long (in seconds) buffer as as->input_buf
+    as->output_buf_size = (2 * as->jack_sample_frame_count) * sizeof(float);
+    as->output_bufs[0] = malloc(as->output_buf_size);
+    as->output_bufs[1] = malloc(as->output_buf_size);
+    as->rb_out[0] = jack_ringbuffer_create(as->output_buf_size);
+    as->rb_out[1] = jack_ringbuffer_create(as->output_buf_size);
+
+    if (!as->input_buf || !as->output_bufs[0] || !as->output_bufs[1]
+        || !as->rb_out[0] || !as->rb_out[1])
+    {
+        trace_error("%s, memory allocation failure, point 2\n", __func__);
+        goto err_3;
+    }
 
     soxr_quality_spec_t quality_spec = soxr_quality_spec(SOXR_QQ, 0);
     soxr_io_spec_t      io_spec = soxr_io_spec(SOXR_INT16_I, SOXR_FLOAT32_S);
@@ -152,8 +187,19 @@ ja_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_co
         quality_spec = soxr_quality_spec(SOXR_QQ, 0);
     }
 
-    as->resampler = soxr_create(as->sample_rate, as->jack_sample_rate, 2, NULL, &io_spec,
+    soxr_error_t soxr_err;
+    as->resampler = soxr_create(as->sample_rate, as->jack_sample_rate, 2, &soxr_err, &io_spec,
                                 &quality_spec, NULL);
+    if (soxr_err != NULL) {
+        trace_error("%s, can't create resampler: %s\n", __func__, soxr_strerror(soxr_err));
+        goto err_3;
+    }
+
+    as->async_q = g_async_queue_new();
+    if (!as->async_q) {
+        trace_error("%s, can't create GAsyncQueue\n", __func__);
+        goto err_4;
+    }
 
     jack_set_process_callback(as->client, ja_process_cb, as);
 
@@ -164,19 +210,21 @@ ja_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_co
 
     if (!as->output_port_1 || !as->output_port_2) {
         trace_error("%s, can't register output ports\n", __func__);
-        goto err_4;
+        goto err_5;
     }
+
+    pthread_create(&as->resampler_thread, NULL, ja_resampler_thread_func, as);
 
     if (jack_activate(as->client) != 0) {
         trace_error("%s, can't activate client\n", __func__);
-        goto err_4;
+        goto err_6;
     }
 
     const char **ports = jack_get_ports(as->client, NULL, NULL,
                                         JackPortIsPhysical | JackPortIsInput);
     if (!ports) {
         trace_error("%s, no physical playback ports\n", __func__);
-        goto err_4;
+        goto err_6;
     }
 
     if (jack_connect(as->client, jack_port_name(as->output_port_1), ports[0]) != 0)
@@ -187,10 +235,23 @@ ja_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_co
     jack_free(ports);
     return as;
 
+err_6:
+    g_async_queue_push(as->async_q, CMD_TERMINATE);
+    pthread_join(as->resampler_thread, NULL);
+err_5:
+    g_async_queue_unref(as->async_q);
 err_4:
-    jack_client_close(as->client);
+    soxr_delete(as->resampler);
 err_3:
+    if (as->rb_out[0])
+        jack_ringbuffer_free(as->rb_out[0]);
+    if (as->rb_out[1])
+        jack_ringbuffer_free(as->rb_out[1]);
     free(as->input_buf);
+    free(as->output_bufs[0]);
+    free(as->output_bufs[1]);
+
+    jack_client_close(as->client);
 err_2:
     free(as);
 err_1:
@@ -230,6 +291,9 @@ void
 ja_destroy_stream(audio_stream *as)
 {
     jack_client_close(as->client);
+    g_async_queue_push(as->async_q, CMD_TERMINATE);
+    pthread_join(as->resampler_thread, NULL);
+    g_async_queue_unref(as->async_q);
     soxr_delete(as->resampler);
     free(as->input_buf);
 }
