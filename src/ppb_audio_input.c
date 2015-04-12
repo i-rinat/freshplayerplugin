@@ -23,6 +23,8 @@
  */
 
 #include "ppb_audio_input.h"
+#include "ppb_device_ref.h"
+#include "ppb_var.h"
 #include <stdlib.h>
 #include <ppapi/c/pp_errors.h>
 #include "ppb_core.h"
@@ -40,6 +42,15 @@ ppb_audio_input_create(PP_Instance instance)
         return 0;
     }
     PP_Resource audio_input = pp_resource_allocate(PP_RESOURCE_AUDIO_INPUT, pp_i);
+    struct pp_audio_input_s *ai = pp_resource_acquire(audio_input, PP_RESOURCE_AUDIO_INPUT);
+    if (!ai) {
+        trace_error("%s, resource allocation failed\n", __func__);
+        return 0;
+    }
+
+    ai->stream_ops = audio_select_implementation();
+
+    pp_resource_release(audio_input);
     return audio_input;
 }
 
@@ -58,9 +69,27 @@ int32_t
 ppb_audio_input_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput output,
                                   struct PP_CompletionCallback callback)
 {
-    output.GetDataBuffer(output.user_data, 0, 4);
+    struct pp_audio_input_s *ai = pp_resource_acquire(audio_input, PP_RESOURCE_AUDIO_INPUT);
+    if (!ai) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_FAILED;
+    }
+
+    char **list = ai->stream_ops->enumerate_capture_devices();
+    size_t cnt = 0;
+    while (list && list[cnt])
+        cnt ++;
+
+    PP_Resource *refs = output.GetDataBuffer(output.user_data, cnt, sizeof(PP_Resource));
+    for (uintptr_t k = 0; k < cnt; k ++) {
+        refs[k] = ppb_device_ref_create(ai->instance->id, ppb_var_var_from_utf8_z(list[k]),
+                                        PP_DEVICETYPE_DEV_AUDIOCAPTURE);
+    }
+
+    audio_capture_device_list_free(list);
     ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
-    return PP_OK;
+    pp_resource_release(audio_input);
+    return PP_OK_COMPLETIONPENDING;
 }
 
 int32_t
@@ -206,7 +235,7 @@ trace_ppb_audio_input_close(PP_Resource audio_input)
 const struct PPB_AudioInput_Dev_0_3 ppb_audio_input_dev_interface_0_3 = {
     .Create =               TWRAPF(ppb_audio_input_create),
     .IsAudioInput =         TWRAPF(ppb_audio_input_is_audio_input),
-    .EnumerateDevices =     TWRAPZ(ppb_audio_input_enumerate_devices),
+    .EnumerateDevices =     TWRAPF(ppb_audio_input_enumerate_devices),
     .MonitorDeviceChange =  TWRAPZ(ppb_audio_input_monitor_device_change),
     .Open =                 TWRAPZ(ppb_audio_input_open_0_3),
     .GetCurrentConfig =     TWRAPZ(ppb_audio_input_get_current_config),
@@ -218,7 +247,7 @@ const struct PPB_AudioInput_Dev_0_3 ppb_audio_input_dev_interface_0_3 = {
 const struct PPB_AudioInput_Dev_0_4 ppb_audio_input_dev_interface_0_4 = {
     .Create =               TWRAPF(ppb_audio_input_create),
     .IsAudioInput =         TWRAPF(ppb_audio_input_is_audio_input),
-    .EnumerateDevices =     TWRAPZ(ppb_audio_input_enumerate_devices),
+    .EnumerateDevices =     TWRAPF(ppb_audio_input_enumerate_devices),
     .MonitorDeviceChange =  TWRAPZ(ppb_audio_input_monitor_device_change),
     .Open =                 TWRAPZ(ppb_audio_input_open),
     .GetCurrentConfig =     TWRAPZ(ppb_audio_input_get_current_config),

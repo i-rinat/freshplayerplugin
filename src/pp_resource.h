@@ -371,6 +371,7 @@ struct pp_video_capture_s {
 
 struct pp_audio_input_s {
     COMMON_STRUCTURE_FIELDS
+    audio_stream_ops       *stream_ops;
 };
 
 struct pp_flash_menu_s {
