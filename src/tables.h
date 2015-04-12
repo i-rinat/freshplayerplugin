@@ -33,6 +33,9 @@
 #include <npapi/npfunctions.h>
 
 
+#define NPString_literal(str) { .UTF8Characters = str, .UTF8Length = strlen(str) }
+
+
 typedef GLXContext
 (*glx_create_context_attribs_arb_f)(Display *dpy, GLXFBConfig config,
                                     GLXContext share_context, Bool direct,

@@ -62,8 +62,6 @@
 #include "np_entry.h"
 
 
-#define NPString_literal(str) { .UTF8Characters = str, .UTF8Length = strlen(str) }
-
 static
 void
 ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id);

@@ -238,10 +238,91 @@ ppb_flash_preload_font_win(const void *logfontw)
     return;
 }
 
+struct topmost_rect_param_s {
+    PP_Instance     instance;
+    struct PP_Rect  rect;
+    PP_Bool         result;
+    PP_Resource     m_loop;
+    int             depth;
+};
+
+static
+void
+topmost_rect_ptac(void *param)
+{
+    struct topmost_rect_param_s *p = param;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(p->instance);
+    if (!pp_i) {
+        trace_error("%s, no instance\n", __func__);
+        goto err_1;
+    }
+
+    p->result = PP_FALSE;
+
+    NPString topmost_func_src = NPString_literal(
+        "(function(elem, x, y) {"
+            "var r = elem.getBoundingClientRect();"
+            "return document.elementFromPoint(x + r.x, y + r.y) == elem;"
+        "})");
+    NPVariant topmost_func;
+
+    if (!npn.evaluate(pp_i->npp, pp_i->np_window_obj, &topmost_func_src, &topmost_func))
+        goto err_1;
+
+    if (!NPVARIANT_IS_OBJECT(topmost_func))
+        goto err_1;
+
+    NPObject *topmost_func_obj = NPVARIANT_TO_OBJECT(topmost_func);
+
+    NPVariant is_topmost;
+    NPVariant args[3];
+
+    OBJECT_TO_NPVARIANT(pp_i->np_plugin_element_obj, args[0]);
+    INT32_TO_NPVARIANT(p->rect.point.x + p->rect.size.width / 2, args[1]);
+    INT32_TO_NPVARIANT(p->rect.point.y + p->rect.size.height / 2, args[2]);
+
+    if (!npn.invokeDefault(pp_i->npp, topmost_func_obj, args, 3, &is_topmost))
+        goto err_2;
+
+    if (!NPVARIANT_IS_BOOLEAN(is_topmost))
+        goto err_3;
+
+    p->result = NPVARIANT_TO_BOOLEAN(is_topmost);
+
+err_3:
+    npn.releasevariantvalue(&is_topmost);
+err_2:
+    npn.releasevariantvalue(&topmost_func);
+err_1:
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+topmost_rect_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_browser_thread(0, topmost_rect_ptac, user_data);
+}
+
 PP_Bool
 ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect)
 {
-    return PP_TRUE;
+    if (!rect)
+        return PP_FALSE;
+
+    struct topmost_rect_param_s *p = g_slice_alloc(sizeof(*p));
+    p->instance =       instance;
+    p->rect =          *rect;
+    p->m_loop =         ppb_message_loop_get_current();
+    p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
+
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(topmost_rect_comt, p), PP_OK);
+    ppb_message_loop_run_nested(p->m_loop);
+
+    PP_Bool result = p->result;
+    g_slice_free1(sizeof(*p), p);
+
+    return result;
 }
 
 void
@@ -455,7 +536,7 @@ PP_Bool
 trace_ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect)
 {
     char *rect_str = trace_rect_as_string(rect);
-    trace_info("[PPB] {zilch} %s instance=%d, rect=%s\n", __func__+6, instance, rect_str);
+    trace_info("[PPB] {full} %s instance=%d, rect=%s\n", __func__+6, instance, rect_str);
     g_free(rect_str);
     return ppb_flash_is_rect_topmost(instance, rect);
 }
@@ -549,7 +630,7 @@ const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .GetLocalTimeZoneOffset =       TWRAPF(ppb_flash_get_local_time_zone_offset),
     .GetCommandLineArgs =           TWRAPF(ppb_flash_get_command_line_args),
     .PreloadFontWin =               TWRAPZ(ppb_flash_preload_font_win),
-    .IsRectTopmost =                TWRAPZ(ppb_flash_is_rect_topmost),
+    .IsRectTopmost =                TWRAPF(ppb_flash_is_rect_topmost),
     .UpdateActivity =               TWRAPF(ppb_flash_update_activity),
     .GetSetting =                   TWRAPF(ppb_flash_get_setting),
     .SetCrashData =                 TWRAPF(ppb_flash_set_crash_data),
@@ -566,7 +647,7 @@ const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
     .GetLocalTimeZoneOffset =       TWRAPF(ppb_flash_get_local_time_zone_offset),
     .GetCommandLineArgs =           TWRAPF(ppb_flash_get_command_line_args),
     .PreloadFontWin =               TWRAPZ(ppb_flash_preload_font_win),
-    .IsRectTopmost =                TWRAPZ(ppb_flash_is_rect_topmost),
+    .IsRectTopmost =                TWRAPF(ppb_flash_is_rect_topmost),
     .InvokePrinting =               TWRAPZ(ppb_flash_invoke_printing),
     .UpdateActivity =               TWRAPF(ppb_flash_update_activity),
     .GetDeviceID =                  TWRAPZ(ppb_flash_get_device_id),
