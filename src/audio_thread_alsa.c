@@ -320,6 +320,8 @@ alsa_create_stream(audio_stream_direction type, unsigned int sample_rate,
     if (!as)
         goto err;
 
+    g_atomic_int_set(&as->paused, 1);
+
 #define CHECK_A(funcname, params)                                                       \
     do {                                                                                \
         int errcode___ = funcname params;                                               \
