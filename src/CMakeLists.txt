@@ -37,6 +37,7 @@ set(source_list
     ppb_char_set.c
     ppb_crypto.c
     ppb_cursor_control.c
+    ppb_device_ref.c
     ppb_file_chooser.c
     ppb_file_io.c
     ppb_file_ref.c

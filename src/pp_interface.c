@@ -30,6 +30,7 @@
 #include <ppapi/c/dev/ppb_char_set_dev.h>
 #include <ppapi/c/dev/ppb_crypto_dev.h>
 #include <ppapi/c/dev/ppb_cursor_control_dev.h>
+#include <ppapi/c/dev/ppb_device_ref_dev.h>
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
 #include <ppapi/c/dev/ppb_font_dev.h>
 #include <ppapi/c/dev/ppb_ime_input_event_dev.h>
@@ -100,6 +101,7 @@ extern const struct PPB_Buffer_Dev_0_4              ppb_buffer_dev_interface_0_4
 extern const struct PPB_CharSet_Dev_0_4             ppb_char_set_dev_interface_0_4;
 extern const struct PPB_Crypto_Dev_0_1              ppb_crypto_dev_interface_0_1;
 extern const struct PPB_CursorControl_Dev_0_4       ppb_cursor_control_dev_interface_0_4;
+extern const struct PPB_DeviceRef_Dev_0_1           ppb_device_ref_dev_interface_0_1;
 extern const struct PPB_FileChooser_Dev_0_6         ppb_file_chooser_dev_interface_0_6;
 extern const struct PPB_FileChooserTrusted_0_6      ppb_file_chooser_trusted_interface_0_6;
 extern const struct PPB_FileIO_1_0                  ppb_file_io_interface_1_0;
@@ -205,6 +207,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_CHAR_SET_DEV_INTERFACE_0_4,         ppb_char_set_dev_interface_0_4)
     ELSEIFBLOCK(PPB_CRYPTO_DEV_INTERFACE_0_1,           ppb_crypto_dev_interface_0_1)
     ELSEIFBLOCK(PPB_CURSOR_CONTROL_DEV_INTERFACE_0_4,   ppb_cursor_control_dev_interface_0_4)
+    ELSEIFBLOCK(PPB_DEVICEREF_DEV_INTERFACE_0_1,        ppb_device_ref_dev_interface_0_1)
     ELSEIFBLOCK(PPB_FILECHOOSER_DEV_INTERFACE_0_6,      ppb_file_chooser_dev_interface_0_6)
     ELSEIFBLOCK(PPB_FILECHOOSER_TRUSTED_INTERFACE_0_6,  ppb_file_chooser_trusted_interface_0_6)
     ELSEIFBLOCK(PPB_FILEIO_PRIVATE_INTERFACE_0_1,       ppb_file_io_private_interface_0_1)
