@@ -52,6 +52,12 @@ typedef audio_stream *
 (audio_create_capture_stream_f)(unsigned int sample_rate, unsigned int sample_frame_count,
                                 audio_stream_capture_cb_f *cb, void *cb_user_data);
 
+/// returns NULL-terminated array of device names
+///
+/// caller should free memory by calling audio_capture_device_list_free()
+typedef char **
+(audio_enumerate_capture_devices_f)(void);
+
 typedef void
 (audio_pause_stream_f)(audio_stream *s, int enabled);
 
@@ -59,16 +65,20 @@ typedef void
 (audio_destroy_stream_f)(audio_stream *s);
 
 typedef struct {
-    audio_available_f              *available;
-    audio_create_playback_stream_f *create_playback_stream;
-    audio_create_capture_stream_f  *create_capture_stream;
-    audio_pause_stream_f           *pause;
-    audio_destroy_stream_f         *destroy;
+    audio_available_f                  *available;
+    audio_create_playback_stream_f     *create_playback_stream;
+    audio_create_capture_stream_f      *create_capture_stream;
+    audio_enumerate_capture_devices_f  *enumerate_capture_devices;
+    audio_pause_stream_f               *pause;
+    audio_destroy_stream_f             *destroy;
 } audio_stream_ops;
 
 
 audio_stream_ops *
 audio_select_implementation(void);
+
+void
+audio_capture_device_list_free(char **list);
 
 
 #endif // FPP_AUDIO_THREAD_H

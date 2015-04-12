@@ -417,6 +417,56 @@ alsa_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_c
 }
 
 static
+char **
+alsa_enumerate_capture_devices(void)
+{
+    int     rcard;
+
+    // count cards
+    size_t cnt = 0;
+    rcard = -1;
+    while (1) {
+        int err = snd_card_next(&rcard);
+        if (err != 0)
+            break;
+        if (rcard == -1)
+            break;
+        cnt ++;
+    }
+
+    if (cnt == 0)
+        return NULL;
+
+    char **list = malloc(sizeof(char *) * (cnt + 1));
+    if (!list)
+        return NULL;
+
+    // fill the list
+    uintptr_t idx = 0;
+    rcard = -1;
+    while (1) {
+        int err = snd_card_next(&rcard);
+        if (err != 0)
+            break;
+        if (rcard == -1)
+            break;
+
+        char *name;
+        if (snd_card_get_name(rcard, &name) == 0 && name != NULL) {
+            list[idx] = name;
+            idx ++;
+            if (idx >= cnt)
+                break;
+        }
+    }
+
+    // terminate list
+    list[idx] = NULL;
+
+    return list;
+}
+
+static
 void
 alsa_pause_stream(audio_stream *as, int enabled)
 {
@@ -441,9 +491,10 @@ alsa_available(void)
 }
 
 audio_stream_ops audio_alsa = {
-    .available =                alsa_available,
-    .create_playback_stream =   alsa_create_playback_stream,
-    .create_capture_stream =    alsa_create_capture_stream,
-    .pause =                    alsa_pause_stream,
-    .destroy =                  alsa_destroy_stream,
+    .available =                    alsa_available,
+    .create_playback_stream =       alsa_create_playback_stream,
+    .create_capture_stream =        alsa_create_capture_stream,
+    .enumerate_capture_devices =    alsa_enumerate_capture_devices,
+    .pause =                        alsa_pause_stream,
+    .destroy =                      alsa_destroy_stream,
 };

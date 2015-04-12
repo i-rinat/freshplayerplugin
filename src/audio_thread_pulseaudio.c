@@ -267,6 +267,18 @@ pulse_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_
 }
 
 static
+char **
+pulse_enumerate_capture_devices(void)
+{
+    char **list = malloc(sizeof(char *) * 2);
+    if (!list)
+        return NULL;
+    list[0] = strdup("PulseAudio capture device");
+    list[1] = NULL;
+    return list;
+}
+
+static
 void
 pulse_pause_stream(audio_stream *as, int enabled)
 {
@@ -315,9 +327,10 @@ pulse_destroy_stream(audio_stream *as)
 
 
 audio_stream_ops audio_pulse = {
-    .available =                pulse_available,
-    .create_playback_stream =   pulse_create_playback_stream,
-    .create_capture_stream =    pulse_create_capture_stream,
-    .pause =                    pulse_pause_stream,
-    .destroy =                  pulse_destroy_stream,
+    .available =                    pulse_available,
+    .create_playback_stream =       pulse_create_playback_stream,
+    .create_capture_stream =        pulse_create_capture_stream,
+    .enumerate_capture_devices =    pulse_enumerate_capture_devices,
+    .pause =                        pulse_pause_stream,
+    .destroy =                      pulse_destroy_stream,
 };

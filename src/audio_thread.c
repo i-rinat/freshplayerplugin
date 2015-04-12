@@ -23,6 +23,7 @@
  */
 
 #include "audio_thread.h"
+#include <stdlib.h>
 
 extern audio_stream_ops audio_alsa;
 #if HAVE_PULSEAUDIO
@@ -46,4 +47,15 @@ audio_select_implementation(void)
 #endif
 
     return &audio_alsa;
+}
+
+void
+audio_capture_device_list_free(char **list)
+{
+    if (!list)
+        return;
+
+    for (uintptr_t k = 0; list[k] != NULL; k ++)
+        free(list[k]);
+    free(list);
 }
