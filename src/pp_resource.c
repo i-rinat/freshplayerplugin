@@ -39,6 +39,7 @@
 #include "ppb_browser_font.h"
 #include "ppb_audio_config.h"
 #include "ppb_audio.h"
+#include "ppb_device_ref.h"
 #include "ppb_input_event.h"
 #include "ppb_flash_font_file.h"
 #include "ppb_flash_menu.h"
@@ -273,6 +274,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_FONT:
             ppb_font_destroy(ptr);
+            break;
+        case PP_RESOURCE_DEVICE_REF:
+            ppb_device_ref_destroy(ptr);
             break;
         default:
             break;

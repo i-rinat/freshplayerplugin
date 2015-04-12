@@ -25,8 +25,15 @@
 #ifndef FPP_PPB_DEVICE_REF_H
 #define FPP_PPB_DEVICE_REF_H
 
+#include <ppapi/c/pp_instance.h>
 #include <ppapi/c/dev/ppb_device_ref_dev.h>
 
+
+PP_Resource
+ppb_device_ref_create(PP_Instance instance, struct PP_Var name, PP_DeviceType_Dev type);
+
+void
+ppb_device_ref_destroy(void *ptr);
 
 PP_Bool
 ppb_device_ref_is_device_ref(PP_Resource resource);
