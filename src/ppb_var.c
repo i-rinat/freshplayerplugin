@@ -144,6 +144,12 @@ static
 NPObject *
 create_np_object(NPClass *npclass)
 {
+    if (ppb_message_loop_get_current() == ppb_message_loop_get_for_browser_thread()) {
+        // already on browser thread, no need to jump there
+        struct pp_instance_s *pp_i = tables_get_some_pp_instance();
+        return (pp_i && pp_i->npp) ? npn.createobject(pp_i->npp, npclass) : NULL;
+    }
+
     struct create_np_object_param_s *p = g_slice_alloc(sizeof(*p));
 
     p->npclass = npclass;
