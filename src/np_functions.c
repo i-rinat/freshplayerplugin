@@ -559,17 +559,8 @@ destroy_instance_comt(void *user_data, int32_t result)
     p->pp_i->npp = NULL;
     pthread_mutex_unlock(&display.lock);
 
-    npn.releaseobject(p->pp_i->np_window_obj);
-    npn.releaseobject(p->pp_i->np_plugin_element_obj);
-    npn.releaseobject(p->pp_i->scriptable_obj);
-
-    tables_remove_npobj_npp_mapping(p->pp_i->np_window_obj);
-    tables_remove_npobj_npp_mapping(p->pp_i->np_plugin_element_obj);
-    tables_remove_npobj_npp_mapping(p->pp_i->scriptable_obj);
-
     ppb_var_release(p->pp_i->instance_url);
     ppb_var_release(p->pp_i->document_url);
-    free(p->pp_i);
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
@@ -610,6 +601,16 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(destroy_instance_prepare_comt, p), 0);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
+
+    npn.releaseobject(pp_i->np_window_obj);
+    npn.releaseobject(pp_i->np_plugin_element_obj);
+    npn.releaseobject(pp_i->scriptable_obj);
+
+    tables_remove_npobj_npp_mapping(pp_i->np_window_obj);
+    tables_remove_npobj_npp_mapping(pp_i->np_plugin_element_obj);
+    tables_remove_npobj_npp_mapping(pp_i->scriptable_obj);
+
+    free(pp_i);
 
     if (save)
         *save = NULL;
