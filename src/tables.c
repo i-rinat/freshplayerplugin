@@ -224,9 +224,10 @@ tables_open_display(void)
     screensaver_connect();
     display.screensaver_types = screensaver_type_detect(display.x);
 
-    gchar *s = g_strdup_printf("screensavers found:%s%s%s%s",
+    gchar *s = g_strdup_printf("screensavers found:%s%s%s%s%s",
         (display.screensaver_types & SST_XSCREENSAVER) ? " XScreenSaver" : "",
         (display.screensaver_types & SST_FDO_SCREENSAVER) ? " fd.o-screensaver" : "",
+        (display.screensaver_types & SST_CINNAMON_SCREENSAVER) ? " cinnamon-screensaver" : "",
         (display.screensaver_types & SST_GNOME_SCREENSAVER) ? " gnome-screensaver" : "",
         (display.screensaver_types & SST_KDE_SCREENSAVER) ? " kscreensaver" : "");
     trace_info_f("%s\n", s);

@@ -44,6 +44,10 @@
 #define KS_PATH         "/ScreenSaver"
 #define KS_INTERFACE    "org.kde.screensaver"
 
+#define CINNAMON_SERVICE    "org.cinnamon.ScreenSaver"
+#define CINNAMON_PATH       "/"
+#define CINNAMON_INTERFACE  "org.cinnamon.ScreenSaver"
+
 
 #if HAVE_GLIB_DBUS
 static GDBusConnection *connection = NULL;
@@ -182,6 +186,9 @@ screensaver_deactivate(Display *dpy, uint32_t types)
 
     if (types & SST_KDE_SCREENSAVER)
         deactivate_dbus_based_screensaver(KS_SERVICE, KS_PATH, KS_INTERFACE);
+
+    if (types & SST_CINNAMON_SCREENSAVER)
+        deactivate_dbus_based_screensaver(CINNAMON_SERVICE, CINNAMON_PATH, CINNAMON_INTERFACE);
 #endif // HAVE_GLIB_DBUS
 }
 
@@ -239,6 +246,9 @@ detect_dbus_based_screensavers(void)
 
         if (strcmp(str, FDOS_SERVICE) == 0)
             flags |= SST_FDO_SCREENSAVER;
+
+        if (strcmp(str, CINNAMON_SERVICE) == 0)
+            flags |= SST_CINNAMON_SCREENSAVER;
     }
     g_variant_iter_free(iter);
     ret = flags;
