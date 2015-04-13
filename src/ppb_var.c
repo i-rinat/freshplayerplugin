@@ -165,6 +165,50 @@ create_np_object(NPClass *npclass)
     return res;
 }
 
+struct retain_np_object_param_s {
+    NPObject           *np_object;
+    PP_Resource         m_loop;
+    int                 depth;
+};
+
+static
+void
+retain_np_object_ptac(void *param)
+{
+    struct retain_np_object_param_s *p = param;
+    npn.retainobject(p->np_object);
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+retain_np_object_comt(void *user_data, int32_t result)
+{
+    ppb_core_call_on_browser_thread(0, retain_np_object_ptac, user_data);
+}
+
+static
+void
+retain_np_object(NPObject *np_object)
+{
+    if (ppb_message_loop_get_current() == ppb_message_loop_get_for_browser_thread()) {
+        // already on browser thread, no need to jump there
+        npn.retainobject(np_object);
+        return;
+    }
+
+    struct retain_np_object_param_s *p = g_slice_alloc(sizeof(*p));
+
+    p->np_object = np_object;
+    p->m_loop =    ppb_message_loop_get_current();
+    p->depth =     ppb_message_loop_get_depth(p->m_loop) + 1;
+
+    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(retain_np_object_comt, p), 0);
+    ppb_message_loop_run_nested(p->m_loop);
+
+    g_slice_free1(sizeof(*p), p);
+}
+
 NPVariant
 pp_var_to_np_variant(struct PP_Var var)
 {
@@ -201,7 +245,7 @@ pp_var_to_np_variant(struct PP_Var var)
         if (v->obj._class == &n2p_proxy_class) {
             res.type = NPVariantType_Object;
             res.value.objectValue = v->obj.data;
-            npn.retainobject(res.value.objectValue); // TODO: call on main thread?
+            retain_np_object(res.value.objectValue);
         } else {
             res.value.objectValue = create_np_object(&p2n_proxy_class);
             if (res.value.objectValue) {
