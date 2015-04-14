@@ -177,6 +177,9 @@ screensaver_deactivate(Display *dpy, uint32_t types)
     if (types & SST_XSCREENSAVER)
         deactivate_xscreensaver(dpy);
 
+    // reset internal X screen saver timer
+    XResetScreenSaver(dpy);
+
 #if HAVE_GLIB_DBUS
     if (types & SST_FDO_SCREENSAVER)
         deactivate_dbus_based_screensaver(FDOS_SERVICE, FDOS_PATH, FDOS_INTERFACE);
