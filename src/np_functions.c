@@ -530,7 +530,9 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
     p->pp_i =   pp_i;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(call_plugin_did_create_prepare_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop,
+                                           PP_MakeCCB(call_plugin_did_create_prepare_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
 
@@ -598,7 +600,8 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     p->m_loop = ppb_message_loop_get_current();
     p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(destroy_instance_prepare_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(destroy_instance_prepare_comt, p),
+                                           0, PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
 

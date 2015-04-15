@@ -35,6 +35,7 @@
 #include "ppb_core.h"
 #include "ppb_var.h"
 #include "ppb_message_loop.h"
+#include <ppapi/c/pp_errors.h>
 
 
 struct has_property_param_s {
@@ -87,7 +88,8 @@ n2p_has_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p->m_loop =     ppb_message_loop_get_current();
     p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_has_property_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(n2p_has_property_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     bool result = p->result;
@@ -162,7 +164,8 @@ n2p_get_property(void *object, struct PP_Var name, struct PP_Var *exception)
     p->m_loop =     ppb_message_loop_get_current();
     p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_get_property_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(n2p_get_property_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -266,7 +269,8 @@ n2p_call(void *object, struct PP_Var method_name, uint32_t argc, struct PP_Var *
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_call_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(n2p_call_comt, p), 0, PP_OK,
+                                           p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -339,7 +343,8 @@ n2p_construct(void *object, uint32_t argc, struct PP_Var *argv, struct PP_Var *e
     p->m_loop =     ppb_message_loop_get_current();
     p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_construct_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(n2p_construct_comt, p), 0, PP_OK,
+                                           p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -388,7 +393,8 @@ n2p_deallocate(void *object)
     p->m_loop = ppb_message_loop_get_current();
     p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(n2p_deallocate_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(n2p_deallocate_comt, p), 0, PP_OK,
+                                           p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     g_slice_free1(sizeof(*p), p);

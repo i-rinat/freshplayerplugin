@@ -33,6 +33,7 @@
 #include "tables.h"
 #include <ppapi/c/dev/ppb_var_deprecated.h>
 #include <ppapi/c/dev/ppp_class_deprecated.h>
+#include <ppapi/c/pp_errors.h>
 #include "n2p_proxy_class.h"
 #include "p2n_proxy_class.h"
 #include "config.h"
@@ -157,7 +158,8 @@ create_np_object(NPClass *npclass)
     p->m_loop =  ppb_message_loop_get_current();
     p->depth =   ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(create_np_object_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(create_np_object_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     NPObject *res = p->res;
@@ -203,7 +205,8 @@ retain_np_object(NPObject *np_object)
     p->m_loop =    ppb_message_loop_get_current();
     p->depth =     ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(retain_np_object_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(retain_np_object_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     g_slice_free1(sizeof(*p), p);

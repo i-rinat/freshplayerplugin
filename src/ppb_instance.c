@@ -32,6 +32,7 @@
 #include "ppb_core.h"
 #include "ppb_message_loop.h"
 #include "n2p_proxy_class.h"
+#include <ppapi/c/pp_errors.h>
 
 
 static
@@ -187,7 +188,8 @@ ppb_instance_get_window_object(PP_Instance instance)
     p->m_loop =     ppb_message_loop_get_current();
     p->depth =      ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(get_window_object_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(get_window_object_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -278,7 +280,8 @@ ppb_instance_execute_script(PP_Instance instance, struct PP_Var script, struct P
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
     ppb_var_add_ref(script);
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(execute_script_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(execute_script_comt, p), 0, PP_OK,
+                                           p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
     ppb_var_release(script);
 

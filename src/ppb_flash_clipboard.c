@@ -237,7 +237,9 @@ ppb_flash_clipboard_is_format_available(PP_Instance instance_id,
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(clipboard_is_format_available_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop,
+                                           PP_MakeCCB(clipboard_is_format_available_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     PP_Bool result = p->result;
@@ -312,7 +314,8 @@ ppb_flash_clipboard_read_data(PP_Instance instance_id, PP_Flash_Clipboard_Type c
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(clipboard_read_data_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(clipboard_read_data_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -504,7 +507,8 @@ ppb_flash_clipboard_write_data(PP_Instance instance_id, PP_Flash_Clipboard_Type 
     p->m_loop =             ppb_message_loop_get_current();
     p->depth =              ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(clipboard_write_data_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(clipboard_write_data_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     int32_t result = p->result;

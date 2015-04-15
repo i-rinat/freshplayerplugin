@@ -177,7 +177,8 @@ ppb_flash_get_proxy_for_url(PP_Instance instance, const char *url)
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(get_proxy_for_url_comt, p), 0);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(get_proxy_for_url_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     struct PP_Var result = p->result;
@@ -316,7 +317,8 @@ ppb_flash_is_rect_topmost(PP_Instance instance, const struct PP_Rect *rect)
     p->m_loop =         ppb_message_loop_get_current();
     p->depth =          ppb_message_loop_get_depth(p->m_loop) + 1;
 
-    ppb_message_loop_post_work(p->m_loop, PP_MakeCCB(topmost_rect_comt, p), PP_OK);
+    ppb_message_loop_post_work_with_result(p->m_loop, PP_MakeCCB(topmost_rect_comt, p), 0, PP_OK,
+                                           p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
 
     PP_Bool result = p->result;
