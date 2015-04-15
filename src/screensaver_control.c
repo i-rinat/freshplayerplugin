@@ -29,6 +29,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 #include "trace.h"
+#include "config.h"
 #include "compat.h"
 
 
@@ -157,6 +158,21 @@ deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
         trace_error("%s, can't send message, %s\n", __func__, error->message);
         g_clear_error(&error);
         goto err;
+    }
+
+    // workaround Plasma 5 issue by calling GetSessionIdleTime after SimulateUserActivity
+    if (config.quirks.plasma5_screensaver) {
+        msg = g_dbus_message_new_method_call(d_service, d_path, d_interface, "GetSessionIdleTime");
+
+        error = NULL;
+        g_dbus_connection_send_message(connection, msg, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL,
+                                       &error);
+
+        if (error != NULL) {
+            trace_error("%s, can't send message, %s\n", __func__, error->message);
+            g_clear_error(&error);
+            goto err;
+        }
     }
 
     g_dbus_connection_flush_sync(connection, NULL, &error);

@@ -48,3 +48,8 @@ randomize_dns_case = 1
 # scaling factor used to convert screen pixels to device independent
 # pixels. You may need it for displays with high DPI
 device_scale = 1
+
+# method org.freedesktop.ScreenSaver.SimulateUserActivity() in KDE 5 seems
+# to have no effect unless GetSessionIdleTime() called afterwards. Set
+# parameter to 1 to call latter
+quirk_plasma5_screensaver = 0

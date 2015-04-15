@@ -45,6 +45,7 @@ static struct fpp_config_s default_config = {
         .switch_buttons_2_3         = 0,
         .dump_resource_histogram    = 0,
         .dump_variables             = 0,
+        .plasma5_screensaver        = 0,
         .plugin_missing             = 0,
         .incompatible_npapi_version = 0,
         .x_synchronize              = 0,
@@ -159,6 +160,9 @@ fpp_config_initialize(void)
 
     if (config_lookup_float(&cfg, "device_scale", &dblval))
         config.device_scale = dblval;
+
+    if (config_lookup_int64(&cfg, "quirk_plasma5_screensaver", &intval))
+        config.quirks.plasma5_screensaver = intval;
 
     config_destroy(&cfg);
 
