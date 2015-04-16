@@ -30,19 +30,20 @@
 #endif
 #define VER(major, minor)       ((major) << 16 | (minor) << 8)
 
+
+#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) < VER(2, 32))
 gpointer
-g_async_queue_timeout_pop_compat(GAsyncQueue *queue, guint64 timeout)
+g_async_queue_timeout_pop(GAsyncQueue *queue, guint64 timeout)
 {
-#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= VER(2, 32))
-    return g_async_queue_timeout_pop(queue, timeout);
-#else
     GTimeVal end_time;
     g_get_current_time(&end_time);
     g_time_val_add(&end_time, timeout);
     return g_async_queue_timed_pop(queue, &end_time);
-#endif
 }
+#endif
 
+
+#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) < VER(2, 28))
 static
 void
 call_destroy_notify(gpointer data, gpointer user_data)
@@ -52,14 +53,9 @@ call_destroy_notify(gpointer data, gpointer user_data)
 }
 
 void
-g_list_free_full_compat(GList *list, GDestroyNotify free_func)
+g_list_free_full(GList *list, GDestroyNotify free_func)
 {
-    (void)call_destroy_notify; // inhibit Wunused-function
-
-#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) >= VER(2, 28))
-    g_list_free_full(list, free_func);
-#else
     g_list_foreach(list, call_destroy_notify, free_func);
     g_list_free(list);
-#endif
 }
+#endif

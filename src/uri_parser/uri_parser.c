@@ -309,7 +309,7 @@ uri_parser_merge_uris(const char *base_uri, const char *rel_uri)
         fragment.len, fragment.data);
 
     // free temporary strings
-    g_list_free_full_compat(m, g_free);
+    g_list_free_full(m, g_free);
 
     return res;
 }

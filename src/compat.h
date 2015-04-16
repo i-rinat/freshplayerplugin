@@ -39,12 +39,16 @@
 #define HAVE_GLIB_DBUS 0
 #endif
 
-#undef VER
-
+#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) < VER(2, 32))
 gpointer
-g_async_queue_timeout_pop_compat(GAsyncQueue *queue, guint64 timeout);
+g_async_queue_timeout_pop(GAsyncQueue *queue, guint64 timeout);
+#endif
 
+#if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) < VER(2, 28))
 void
-g_list_free_full_compat(GList *list, GDestroyNotify free_func);
+g_list_free_full(GList *list, GDestroyNotify free_func);
+#endif
+
+#undef VER
 
 #endif // FPP_COMPAT_H

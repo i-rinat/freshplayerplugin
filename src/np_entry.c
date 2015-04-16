@@ -145,7 +145,7 @@ load_ppp_module()
     fpp_config_initialize();
 
     if (tried_files) {
-        g_list_free_full_compat(tried_files, g_free);
+        g_list_free_full(tried_files, g_free);
         tried_files = NULL;
     }
 
@@ -208,7 +208,7 @@ unload_ppp_module(void)
     g_free(module_version); module_version = NULL;
     g_free(module_file_name); module_file_name = NULL;
     if (tried_files) {
-        g_list_free_full_compat(tried_files, g_free);
+        g_list_free_full(tried_files, g_free);
         tried_files = NULL;
     }
 
