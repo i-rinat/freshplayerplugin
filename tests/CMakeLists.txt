@@ -29,7 +29,6 @@ foreach(item ${test_list})
         common.c)
     target_link_libraries(${item}
         "-Wl,-z,muldefs"
-        dl
         ${REQ_LIBRARIES})
     add_test(${item} ${item})
     add_dependencies(check ${item})

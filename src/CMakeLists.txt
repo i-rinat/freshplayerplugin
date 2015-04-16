@@ -108,7 +108,6 @@ if (WITH_PEPPERFLASH)
         config_pepperflash.c
     )
     target_link_libraries(freshwrapper-pepperflash
-        dl
         ${REQ_LIBRARIES}
     )
     target_link_libraries(dep_check freshwrapper-pepperflash)
@@ -124,7 +123,6 @@ if (WITH_NACL)
         config_nacl.c
     )
     target_link_libraries(freshwrapper-nacl
-        dl
         ${REQ_LIBRARIES}
     )
     target_link_libraries(dep_check freshwrapper-nacl)
@@ -140,7 +138,6 @@ if (WITH_LIBPDF)
         config_libpdf.c
     )
     target_link_libraries(freshwrapper-libpdf
-        dl
         ${REQ_LIBRARIES}
     )
     target_link_libraries(dep_check freshwrapper-libpdf)

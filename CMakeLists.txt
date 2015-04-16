@@ -43,6 +43,9 @@ pkg_check_modules(REQ
     openssl
     REQUIRED)
 
+# libdl.so and libm.so
+list(APPEND REQ_LIBRARIES dl m)
+
 pkg_check_modules(PULSEAUDIO QUIET libpulse)
 pkg_check_modules(JACK QUIET jack)
 pkg_check_modules(SOXR QUIET soxr)
