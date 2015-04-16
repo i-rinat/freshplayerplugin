@@ -98,47 +98,32 @@ add_library(freshwrapper-obj OBJECT ${source_list})
 add_executable(dep_check dep_check.c)
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+set(COMMON_OBJ_LIST
+    $<TARGET_OBJECTS:freshwrapper-obj>
+    $<TARGET_OBJECTS:parson-obj>
+    $<TARGET_OBJECTS:uri-parser-obj>
+)
+
 # wrapper for PepperFlash
 set(WITH_PEPPERFLASH TRUE CACHE STRING "generate wrapper for PepperFlash")
 if (WITH_PEPPERFLASH)
-    add_library(freshwrapper-pepperflash SHARED
-        $<TARGET_OBJECTS:freshwrapper-obj>
-        $<TARGET_OBJECTS:parson-obj>
-        $<TARGET_OBJECTS:uri-parser-obj>
-        config_pepperflash.c
-    )
-    target_link_libraries(freshwrapper-pepperflash
-        ${REQ_LIBRARIES}
-    )
+    add_library(freshwrapper-pepperflash SHARED ${COMMON_OBJ_LIST} config_pepperflash.c)
+    target_link_libraries(freshwrapper-pepperflash ${REQ_LIBRARIES})
     target_link_libraries(dep_check freshwrapper-pepperflash)
 endif()
 
 # wrapper for Native Client
 set(WITH_NACL FALSE CACHE STRING "generate wrapper for Native Client")
 if (WITH_NACL)
-    add_library(freshwrapper-nacl SHARED
-        $<TARGET_OBJECTS:freshwrapper-obj>
-        $<TARGET_OBJECTS:parson-obj>
-        $<TARGET_OBJECTS:uri-parser-obj>
-        config_nacl.c
-    )
-    target_link_libraries(freshwrapper-nacl
-        ${REQ_LIBRARIES}
-    )
+    add_library(freshwrapper-nacl SHARED ${COMMON_OBJ_LIST} config_nacl.c)
+    target_link_libraries(freshwrapper-nacl ${REQ_LIBRARIES})
     target_link_libraries(dep_check freshwrapper-nacl)
 endif()
 
 # libpdf wrapper
 set(WITH_LIBPDF FALSE CACHE STRING "generate wrapper for libpdf.so")
 if (WITH_LIBPDF)
-    add_library(freshwrapper-libpdf SHARED
-        $<TARGET_OBJECTS:freshwrapper-obj>
-        $<TARGET_OBJECTS:parson-obj>
-        $<TARGET_OBJECTS:uri-parser-obj>
-        config_libpdf.c
-    )
-    target_link_libraries(freshwrapper-libpdf
-        ${REQ_LIBRARIES}
-    )
+    add_library(freshwrapper-libpdf SHARED ${COMMON_OBJ_LIST} config_libpdf.c)
+    target_link_libraries(freshwrapper-libpdf ${REQ_LIBRARIES})
     target_link_libraries(dep_check freshwrapper-libpdf)
 endif()
