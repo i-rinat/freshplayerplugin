@@ -26,6 +26,9 @@
 #define FPP_COMPAT_H
 
 #include <glib.h>
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+#include <X11/Xlib.h>
 
 #ifdef VER
 #error macro name collision
@@ -47,6 +50,14 @@ g_async_queue_timeout_pop(GAsyncQueue *queue, guint64 timeout);
 #if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) < VER(2, 28))
 void
 g_list_free_full(GList *list, GDestroyNotify free_func);
+#endif
+
+#if (GTK_MAJOR_VERSION * 1000 + GTK_MINOR_VERSION < 2 * 1000 + 24)
+GdkWindow *
+gdk_x11_window_lookup_for_display(GdkDisplay *gdpy, Window wnd);
+
+GdkWindow *
+gdk_x11_window_foreign_new_for_display(GdkDisplay *gdpy, Window wnd);
 #endif
 
 #undef VER

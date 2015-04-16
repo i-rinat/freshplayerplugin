@@ -59,3 +59,17 @@ g_list_free_full(GList *list, GDestroyNotify free_func)
     g_list_free(list);
 }
 #endif
+
+#if (GTK_MAJOR_VERSION * 1000 + GTK_MINOR_VERSION < 2 * 1000 + 24)
+GdkWindow *
+gdk_x11_window_lookup_for_display(GdkDisplay *gdpy, Window wnd)
+{
+    return gdk_window_lookup_for_display(gdpy, wnd);
+}
+
+GdkWindow *
+gdk_x11_window_foreign_new_for_display(GdkDisplay *gdpy, Window wnd)
+{
+    return gdk_window_foreign_new_for_display(gdpy, wnd);
+}
+#endif

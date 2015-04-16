@@ -60,6 +60,7 @@
 #include "eintr_retry.h"
 #include "main_thread.h"
 #include "np_entry.h"
+#include "compat.h"
 
 
 static
