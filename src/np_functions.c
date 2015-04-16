@@ -245,12 +245,9 @@ call_plugin_did_create_comt(void *user_data, int32_t result)
 
     pp_i->ppp_instance_private = ppp_get_interface(PPP_INSTANCE_PRIVATE_INTERFACE_0_1);
     if (pp_i->ppp_instance_private && pp_i->ppp_instance_private->GetInstanceObject) {
-        struct PP_Var ppobj = pp_i->ppp_instance_private->GetInstanceObject(pp_i->id);
-        NPVariant np_var = pp_var_to_np_variant(ppobj);
-        ppb_var_release(ppobj);
-
-        pp_i->scriptable_obj = np_var.value.objectValue;
-        tables_add_npobj_npp_mapping(np_var.value.objectValue, pp_i->npp);
+        pp_i->scriptable_pp_obj = pp_i->ppp_instance_private->GetInstanceObject(pp_i->id);
+    } else {
+        pp_i->scriptable_pp_obj = PP_MakeUndefined();
     }
 
     if (pp_i->is_fullframe) {
@@ -607,12 +604,11 @@ NPP_Destroy(NPP npp, NPSavedData **save)
 
     npn.releaseobject(pp_i->np_window_obj);
     npn.releaseobject(pp_i->np_plugin_element_obj);
-    npn.releaseobject(pp_i->scriptable_obj);
 
     tables_remove_npobj_npp_mapping(pp_i->np_window_obj);
     tables_remove_npobj_npp_mapping(pp_i->np_plugin_element_obj);
-    tables_remove_npobj_npp_mapping(pp_i->scriptable_obj);
 
+    ppb_var_release(pp_i->scriptable_pp_obj);
     free(pp_i);
 
     if (save)
@@ -1588,7 +1584,12 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
         break;
     case NPPVpluginScriptableNPObject:
         trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
-        *(void **)value = pp_i->scriptable_obj;
+        do {
+            NPVariant np_var = pp_var_to_np_variant(pp_i->scriptable_pp_obj);
+
+            *(void **)value = np_var.value.objectValue;
+            tables_add_npobj_npp_mapping(np_var.value.objectValue, npp);
+        } while (0);
         break;
     case NPPVformValue:
         trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);

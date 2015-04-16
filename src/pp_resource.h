@@ -129,7 +129,7 @@ struct pp_instance_s {
     const struct PPP_InputEvent_0_1 *ppp_input_event;
     const struct PPP_Instance_Private_0_1 *ppp_instance_private;
     const struct PPP_TextInput_Dev_0_1    *ppp_text_input_dev;
-    NPObject                       *scriptable_obj;
+    struct PP_Var                   scriptable_pp_obj;
     NPObject                       *np_window_obj;
     NPObject                       *np_plugin_element_obj;
     uint32_t                        event_mask;
