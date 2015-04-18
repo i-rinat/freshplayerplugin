@@ -270,6 +270,7 @@ ppb_wheel_input_event_create(PP_Instance instance, PP_TimeTicks time_stamp, uint
         return 0;
     }
     ie->event_class = PP_INPUTEVENT_CLASS_WHEEL;
+    ie->type = PP_INPUTEVENT_TYPE_WHEEL;
     ie->time_stamp = time_stamp;
     ie->modifiers = modifiers;
     ie->wheel_delta.x = wheel_delta ? wheel_delta->x : 0;
