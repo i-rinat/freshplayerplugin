@@ -1235,11 +1235,11 @@ handle_button_press_release_event(NPP npp, void *event)
         break;
 
     case 4: // wheel up
-        wheel_y = -1;
+        wheel_y = 1;
         event_class = PP_INPUTEVENT_CLASS_WHEEL;
         break;
     case 5: // wheel down
-        wheel_y = 1;
+        wheel_y = -1;
         event_class = PP_INPUTEVENT_CLASS_WHEEL;
         break;
     case 6: // wheel left
@@ -1285,12 +1285,9 @@ handle_button_press_release_event(NPP npp, void *event)
                                              .y = wheel_y * scroll_by_tick };
         struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
 
-        // pp_event = ppb_wheel_input_event_create(
-        //                 pp_i->id, ev->time/1.0e6, mod,
-        //                 &wheel_delta, &wheel_ticks, PP_FALSE);
-        (void)wheel_delta;
-        (void)wheel_ticks;
-        return 0;
+        PP_Resource pp_event = ppb_wheel_input_event_create(pp_i->id, ev->time/1.0e6, mod,
+                                                            &wheel_delta, &wheel_ticks, PP_FALSE);
+        ppp_handle_input_event_helper(pp_i, pp_event);
     }
 
     return 1;
