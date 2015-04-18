@@ -1114,6 +1114,10 @@ handle_enter_leave_event(NPP npp, void *event)
     XCrossingEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
 
+    // ignore NotifyGrab and NotifyUngrab
+    if (ev->mode != NotifyNormal)
+        return 0;
+
     // quit if plugin doesn't handle input events
     if (!pp_i->ppp_input_event)
         return 0;
