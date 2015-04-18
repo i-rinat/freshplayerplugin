@@ -324,20 +324,7 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 
 static
 void
-call_invalidaterect_ptac(void *param)
-{
-    struct pp_instance_s *pp_i = tables_get_pp_instance(GPOINTER_TO_SIZE(param));
-    if (!pp_i)
-        return;
-    NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
-
-    npn.invalidaterect(pp_i->npp, &npr);
-    npn.forceredraw(pp_i->npp);
-}
-
-static
-void
-call_xsendevent_ptac(void *param)
+call_forceredraw_ptac(void *param)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(GPOINTER_TO_SIZE(param));
     if (!pp_i) {
@@ -345,17 +332,25 @@ call_xsendevent_ptac(void *param)
         return;
     }
 
-    XGraphicsExposeEvent ev = {
-        .type =     GraphicsExpose,
-        .drawable = pp_i->fs_wnd,
-        .width =    pp_i->fs_width,
-        .height =   pp_i->fs_height,
-    };
+    if (pp_i->is_fullscreen || pp_i->windowed_mode) {
+        XEvent ev = {
+            .xgraphicsexpose = {
+                .type =     GraphicsExpose,
+                .drawable = pp_i->is_fullscreen ? pp_i->fs_wnd : pp_i->wnd,
+                .width =    pp_i->is_fullscreen ? pp_i->fs_width : pp_i->width,
+                .height =   pp_i->is_fullscreen ? pp_i->fs_height : pp_i->height,
+            }
+        };
 
-    pthread_mutex_lock(&display.lock);
-    XSendEvent(display.x, pp_i->fs_wnd, True, ExposureMask, (void *)&ev);
-    XFlush(display.x);
-    pthread_mutex_unlock(&display.lock);
+        pthread_mutex_lock(&display.lock);
+        XSendEvent(display.x, ev.xgraphicsexpose.drawable, True, ExposureMask, &ev);
+        XFlush(display.x);
+        pthread_mutex_unlock(&display.lock);
+    } else {
+        NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
+        npn.invalidaterect(pp_i->npp, &npr);
+        npn.forceredraw(pp_i->npp);
+    }
 }
 
 int32_t
@@ -393,12 +388,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     pp_i->graphics_in_progress = 1;
     pthread_mutex_unlock(&display.lock);
 
-    if (pp_i->is_fullscreen) {
-        ppb_core_call_on_browser_thread(pp_i->id, call_xsendevent_ptac, GSIZE_TO_POINTER(pp_i->id));
-    } else {
-        ppb_core_call_on_browser_thread(pp_i->id, call_invalidaterect_ptac,
-                                        GSIZE_TO_POINTER(pp_i->id));
-    }
+    ppb_core_call_on_browser_thread(pp_i->id, call_forceredraw_ptac, GSIZE_TO_POINTER(pp_i->id));
 
     if (callback.func)
         return PP_OK_COMPLETIONPENDING;

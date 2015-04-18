@@ -140,6 +140,8 @@ struct pp_instance_s {
     uint32_t                        is_fullframe;
     uint32_t                        is_fullscreen;
     uint32_t                        is_transparent;
+    uint32_t                        windowed_mode;
+    uint32_t                        use_xembed;
     uint32_t                        incognito_mode;
     volatile gint                   instance_loaded;
     uint32_t                        ignore_focus_events_cnt; ///< number of focus events to ignore

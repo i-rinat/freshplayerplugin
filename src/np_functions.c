@@ -61,6 +61,7 @@
 #include "main_thread.h"
 #include "np_entry.h"
 #include "compat.h"
+#include "x11_event_thread.h"
 
 
 static
@@ -197,14 +198,19 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         return NPERR_NO_ERROR;
     }
 
+    pp_i->wnd = (Window)window->window;
+    pp_i->width = window->width;
+    pp_i->height = window->height;
+
+    if (pp_i->windowed_mode) {
+        pp_i->wnd = x11et_register_window(pp_i->id, (Window)window->window, NPP_HandleEvent,
+                                          pp_i->use_xembed);
+    }
+
     calculate_absolute_offset(npp, pp_i);
 
     pthread_mutex_lock(&display.lock);
     if (!pp_i->is_fullscreen) {
-        pp_i->wnd = (Window)window->window;
-        pp_i->width = window->width;
-        pp_i->height = window->height;
-
         if (g_atomic_int_get(&pp_i->instance_loaded)) {
             ppb_core_call_on_main_thread2(0, PP_MakeCCB(set_window_comt, GINT_TO_POINTER(pp_i->id)),
                                           PP_OK, __func__);
@@ -436,9 +442,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     for (k = 0; k < argc; k ++)
         trace_info_f("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
-    // request windowless operation
-    npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
-
     if (config.quirks.plugin_missing) {
         trace_info_z("plugin missing, using placeholder\n");
         return NPERR_NO_ERROR;
@@ -465,6 +468,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->ppp_input_event = ppp_get_interface(PPP_INPUT_EVENT_INTERFACE_0_1);
     pp_i->ppp_text_input_dev = ppp_get_interface(PPP_TEXTINPUT_DEV_INTERFACE_0_1);
 
+    pp_i->windowed_mode = 1;
     pp_i->argc = argc;
     pp_i->argn = malloc(argc * sizeof(char*));
     pp_i->argv = malloc(argc * sizeof(char*));
@@ -475,10 +479,31 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         if (strcasecmp(argn[k], "src") == 0)
             pp_i->instance_relative_url = ppb_var_var_from_utf8_z(argv[k]);
 
-        if (strcasecmp(argn[k], "wmode") == 0)
-            if (strcasecmp(argv[k], "transparent") == 0)
+        if (strcasecmp(argn[k], "wmode") == 0) {
+            if (strcasecmp(argv[k], "transparent") == 0) {
                 pp_i->is_transparent = 1;
+                pp_i->windowed_mode = 0; // wmode=transparent movies should use windowless mode
+            }
+
+            if (strcasecmp(argv[k], "opaque") == 0)
+                pp_i->windowed_mode = 0; // wmode=opaque movies should use windowless mode
+        }
     }
+
+    if (pp_i->windowed_mode) {
+        // ask windowed mode
+        npn.setvalue(npp, NPPVpluginWindowBool, (void*)1);
+    } else {
+        // ask windowsless mode
+        npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
+    }
+
+    // determine whenever XEmbed is used
+    NPBool browser_supports_xembed = false;
+    npn.getvalue(npp, NPNVSupportsXEmbedBool, &browser_supports_xembed);
+    pp_i->use_xembed = browser_supports_xembed;
+    trace_info_f("      XEmbed is %s\n", browser_supports_xembed ? "supported" : "not supported");
+    trace_info_f("      XEmbed is %s\n", pp_i->use_xembed ? "used" : "not used");
 
     // set transparency mode
     npn.setvalue(npp, NPPVpluginTransparentBool, (void*)(size_t)pp_i->is_transparent);
@@ -605,6 +630,9 @@ NPP_Destroy(NPP npp, NPSavedData **save)
 
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
+
+    if (pp_i->windowed_mode)
+        x11et_unregister_window(pp_i->wnd);
 
     if (pp_i->have_prev_cursor) {
         pthread_mutex_lock(&display.lock);
@@ -1581,7 +1609,7 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
         break;
     case NPPVpluginNeedsXEmbed:
         trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
-        *(int *)value = 0;
+        *(NPBool *)value = pp_i->use_xembed;
         break;
     case NPPVpluginScriptableNPObject:
         trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
