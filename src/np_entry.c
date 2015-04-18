@@ -269,6 +269,17 @@ x_error_handler(Display *dpy, XErrorEvent *ee)
     return 0;
 }
 
+static
+int
+x_io_error_hanlder(Display *dpy)
+{
+    // IO errors can't be ignored, they always terminate program.
+    // Let's crash here to get core file!
+    trace_error("[NP] got Xlib IO error\n");
+    abort();
+    return 0;
+}
+
 __attribute__((visibility("default")))
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
@@ -279,6 +290,7 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     // set logging-only error handler.
     // Ignore a previous one, we have no plans to restore it
     (void)XSetErrorHandler(x_error_handler);
+    (void)XSetIOErrorHandler(x_io_error_hanlder);
 
     memset(&npn, 0, sizeof(npn));
     memcpy(&npn, aNPNFuncs, sizeof(npn) < aNPNFuncs->size ? sizeof(npn) : aNPNFuncs->size);
