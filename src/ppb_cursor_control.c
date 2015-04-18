@@ -50,6 +50,9 @@ set_cursor_ptac(void *user_data)
     if (!pp_i)
         goto quit;
 
+    if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) != NPERR_NO_ERROR)
+        wnd = None;
+
     pthread_mutex_lock(&display.lock);
 
     cursor = params->hide_cursor ? display.transparent_cursor
@@ -58,7 +61,7 @@ set_cursor_ptac(void *user_data)
         XDefineCursor(display.x, pp_i->fs_wnd, cursor);
         XFlush(display.x);
     } else {
-        if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) == NPERR_NO_ERROR) {
+        if (wnd != None) {
             XDefineCursor(display.x, wnd, cursor);
             XFlush(display.x);
         }
