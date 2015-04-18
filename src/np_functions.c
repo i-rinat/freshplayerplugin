@@ -64,11 +64,6 @@
 
 
 static
-void
-ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id);
-
-
-static
 PP_Instance
 generate_new_pp_instance_id(void)
 {
@@ -340,6 +335,35 @@ get_document_base_url(const struct pp_instance_s *pp_i)
     }
 
     return base_url;
+}
+
+struct call_plugin_handle_input_event_param_s {
+    struct pp_instance_s       *pp_i;
+    PP_Resource                 event_id;
+};
+
+static
+void
+call_ppp_handle_input_event_comt(void *user_data, int32_t result)
+{
+    struct call_plugin_handle_input_event_param_s *p = user_data;
+
+    if (p->pp_i->ppp_input_event)
+        p->pp_i->ppp_input_event->HandleInputEvent(p->pp_i->id, p->event_id);
+
+    ppb_core_release_resource(p->event_id);
+    g_slice_free(struct call_plugin_handle_input_event_param_s, p);
+}
+
+static
+void
+ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id)
+{
+    struct call_plugin_handle_input_event_param_s *p = g_slice_alloc0(sizeof(*p));
+    p->pp_i = pp_i;
+    p->event_id = event_id;
+    ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_ppp_handle_input_event_comt, p), PP_OK,
+                                  __func__);
 }
 
 static
@@ -1076,35 +1100,6 @@ x_state_mask_to_pp_inputevent_modifier(unsigned int state)
     }
 
     return mod;
-}
-
-struct call_plugin_handle_input_event_param_s {
-    struct pp_instance_s       *pp_i;
-    PP_Resource                 event_id;
-};
-
-static
-void
-call_ppp_handle_input_event_comt(void *user_data, int32_t result)
-{
-    struct call_plugin_handle_input_event_param_s *p = user_data;
-
-    if (p->pp_i->ppp_input_event)
-        p->pp_i->ppp_input_event->HandleInputEvent(p->pp_i->id, p->event_id);
-
-    ppb_core_release_resource(p->event_id);
-    g_slice_free(struct call_plugin_handle_input_event_param_s, p);
-}
-
-static
-void
-ppp_handle_input_event_helper(struct pp_instance_s *pp_i, PP_Resource event_id)
-{
-    struct call_plugin_handle_input_event_param_s *p = g_slice_alloc0(sizeof(*p));
-    p->pp_i = pp_i;
-    p->event_id = event_id;
-    ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_ppp_handle_input_event_comt, p), PP_OK,
-                                  __func__);
 }
 
 static
