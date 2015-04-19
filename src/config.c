@@ -103,6 +103,33 @@ get_global_config_path(const char *file_name)
     return g_strdup_printf("/etc/%s", file_name);
 }
 
+static
+void
+get_int(const config_t *cfg, const char *name, int *result)
+{
+    long long intval;
+    if (config_lookup_int64(cfg, name, &intval))
+        *result = intval;
+}
+
+static
+void
+get_string(const config_t *cfg, const char *name, char **result)
+{
+    const char *stringval;
+    if (config_lookup_string(cfg, name, &stringval))
+        *result = strdup(stringval);
+}
+
+static
+void
+get_double(const config_t *cfg, const char *name, double *result)
+{
+    double doubleval;
+    if (config_lookup_float(cfg, name, &doubleval))
+        *result = doubleval;
+}
+
 void
 fpp_config_initialize(void)
 {
@@ -124,45 +151,20 @@ fpp_config_initialize(void)
         }
     }
 
-    long long intval;
-    const char *stringval;
-    double dblval;
+    get_int(&cfg, "audio_buffer_min_ms", &config.audio_buffer_min_ms);
+    get_int(&cfg, "audio_buffer_max_ms", &config.audio_buffer_max_ms);
+    get_int(&cfg, "audio_use_jack", &config.audio_use_jack);
+    get_int(&cfg, "enable_3d", &config.enable_3d);
+    get_int(&cfg, "quiet", &config.quiet);
+    get_int(&cfg, "fullscreen_width", &config.fullscreen_width);
+    get_int(&cfg, "fullscreen_height", &config.fullscreen_height);
+    get_int(&cfg, "randomize_dns_case", &config.randomize_dns_case);
+    get_int(&cfg, "quirk_plasma5_screensaver", &config.quirks.plasma5_screensaver);
 
-    if (config_lookup_int64(&cfg, "audio_buffer_min_ms", &intval))
-        config.audio_buffer_min_ms = intval;
+    get_string(&cfg, "pepperflash_path", &config.pepperflash_path);
+    get_string(&cfg, "flash_command_line", &config.flash_command_line);
 
-    if (config_lookup_int64(&cfg, "audio_buffer_max_ms", &intval))
-        config.audio_buffer_max_ms = intval;
-
-    if (config_lookup_int64(&cfg, "audio_use_jack", &intval))
-        config.audio_use_jack = intval;
-
-    if (config_lookup_string(&cfg, "pepperflash_path", &stringval))
-        config.pepperflash_path = strdup(stringval);
-
-    if (config_lookup_string(&cfg, "flash_command_line", &stringval))
-        config.flash_command_line = strdup(stringval);
-
-    if (config_lookup_int64(&cfg, "enable_3d", &intval))
-        config.enable_3d = intval;
-
-    if (config_lookup_int64(&cfg, "quiet", &intval))
-        config.quiet = intval;
-
-    if (config_lookup_int64(&cfg, "fullscreen_width", &intval))
-        config.fullscreen_width = intval;
-
-    if (config_lookup_int64(&cfg, "fullscreen_height", &intval))
-        config.fullscreen_height = intval;
-
-    if (config_lookup_int64(&cfg, "randomize_dns_case", &intval))
-        config.randomize_dns_case = intval;
-
-    if (config_lookup_float(&cfg, "device_scale", &dblval))
-        config.device_scale = dblval;
-
-    if (config_lookup_int64(&cfg, "quirk_plasma5_screensaver", &intval))
-        config.quirks.plasma5_screensaver = intval;
+    get_double(&cfg, "device_scale", &config.device_scale);
 
     config_destroy(&cfg);
 
