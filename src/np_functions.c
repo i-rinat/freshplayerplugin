@@ -468,7 +468,10 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->ppp_input_event = ppp_get_interface(PPP_INPUT_EVENT_INTERFACE_0_1);
     pp_i->ppp_text_input_dev = ppp_get_interface(PPP_TEXTINPUT_DEV_INTERFACE_0_1);
 
-    pp_i->windowed_mode = 1;
+    // windowed mode will only be used if enabled in config file. If used, it will be disabled
+    // for instances with wmode equal to either "transparent" or "opaque"
+    pp_i->windowed_mode = config.enable_windowed_mode;
+
     pp_i->argc = argc;
     pp_i->argn = malloc(argc * sizeof(char*));
     pp_i->argv = malloc(argc * sizeof(char*));
@@ -501,7 +504,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     // determine whenever XEmbed is used
     NPBool browser_supports_xembed = false;
     npn.getvalue(npp, NPNVSupportsXEmbedBool, &browser_supports_xembed);
-    pp_i->use_xembed = browser_supports_xembed;
+    pp_i->use_xembed = browser_supports_xembed && config.enable_xembed;
     trace_info_f("      XEmbed is %s\n", browser_supports_xembed ? "supported" : "not supported");
     trace_info_f("      XEmbed is %s\n", pp_i->use_xembed ? "used" : "not used");
 

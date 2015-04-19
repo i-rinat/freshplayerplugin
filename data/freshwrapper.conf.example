@@ -53,3 +53,9 @@ device_scale = 1
 # to have no effect unless GetSessionIdleTime() called afterwards. Set
 # parameter to 1 to call latter
 quirk_plasma5_screensaver = 0
+
+# whenever to use windowed plugin mode
+enable_windowed_mode = 0
+
+# whenever XEmbed used in windowed mode (if browser advertise its support)
+enable_xembed = 1

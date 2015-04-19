@@ -40,6 +40,8 @@ struct fpp_config_s {
     int     fullscreen_height;
     int     randomize_dns_case;
     double  device_scale;
+    int     enable_windowed_mode;
+    int     enable_xembed;
     struct {
         int   switch_buttons_2_3;
         int   dump_resource_histogram;

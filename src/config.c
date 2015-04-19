@@ -41,6 +41,8 @@ static struct fpp_config_s default_config = {
     .fullscreen_height   =      0,
     .randomize_dns_case =       1,
     .device_scale        =      1.0,
+    .enable_windowed_mode   =   0,
+    .enable_xembed          =   1,
     .quirks = {
         .switch_buttons_2_3         = 0,
         .dump_resource_histogram    = 0,
@@ -160,6 +162,8 @@ fpp_config_initialize(void)
     get_int(&cfg, "fullscreen_height", &config.fullscreen_height);
     get_int(&cfg, "randomize_dns_case", &config.randomize_dns_case);
     get_int(&cfg, "quirk_plasma5_screensaver", &config.quirks.plasma5_screensaver);
+    get_int(&cfg, "enable_windowed_mode", &config.enable_windowed_mode);
+    get_int(&cfg, "enable_xembed", &config.enable_xembed);
 
     get_string(&cfg, "pepperflash_path", &config.pepperflash_path);
     get_string(&cfg, "flash_command_line", &config.flash_command_line);
