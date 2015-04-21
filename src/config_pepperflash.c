@@ -34,6 +34,7 @@ const char *pepperflash_path_list[] = {
     "/usr/lib64/PepperFlash",                   // chromium-pepperflash-plugin (Slackware)
     "/usr/lib/chromium-browser/PepperFlash",    // chrome-binary-plugins (Gentoo/Sabayon)
     "/usr/lib64/chromium-browser/PepperFlash",  // chrome-binary-plugins (Gentoo/Sabayon)
+    "/usr/lib/adobe-flashplugin",               // adobe-flashplugin (Ubuntu)
     NULL,
 };
 
