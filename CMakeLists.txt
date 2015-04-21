@@ -39,12 +39,27 @@ pkg_check_modules(REQ
     pangocairo
     pangoft2
     freetype2
-    gtk+-2.0
     openssl
     REQUIRED)
 
 # libdl.so and libm.so
 list(APPEND REQ_LIBRARIES dl m)
+
+# select GTK+ version
+set(WITH_GTK 2 CACHE INTEGER "select GTK+ major version to link with (2 or 3)")
+if (WITH_GTK EQUAL 2)
+    pkg_check_modules(GTK gtk+-2.0 REQUIRED)
+elseif (WITH_GTK EQUAL 3)
+    pkg_check_modules(GTK gtk+-3.0 REQUIRED)
+else()
+    message(FATAL_ERROR "Unsupported GTK+ version ${GTK_VERSION}")
+endif()
+list(APPEND REQ_LIBRARY_DIRS ${GTK_LIBRARY_DIRS})
+list(APPEND REQ_INCLUDE_DIRS ${GTK_INCLUDE_DIRS})
+list(APPEND REQ_LIBRARIES    ${GTK_LIBRARIES})
+
+# optional dependencies
+message(STATUS "checking for optional dependencies")
 
 pkg_check_modules(PULSEAUDIO QUIET libpulse)
 pkg_check_modules(JACK QUIET jack)
