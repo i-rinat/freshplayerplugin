@@ -64,6 +64,9 @@
 #include "x11_event_thread.h"
 
 
+int16_t
+handle_key_press_release_event(NPP npp, void *event);
+
 static
 PP_Instance
 generate_new_pp_instance_id(void)
@@ -430,6 +433,54 @@ im_commit(GtkIMContext *im_context, const gchar *str, struct pp_instance_s *pp_i
     ppb_var_release(text);
 }
 
+static
+int
+is_printable_sequence(const char *s, size_t len)
+{
+    const unsigned char *u = (const unsigned char *)s;
+
+    if (len == 1 && 0x20 <= u[0] && u[0] <= 0x7e)
+        return 1;
+
+    // all sequences of two and more bytes are considired printable
+    if (len > 1)
+        return 1;
+    return 0;
+}
+
+// Due to asynchronous operation IME can give back key press event by inserting it into GTK+
+// event queue. Auxiliary catcher widget is used to catch such events and pass them to processing
+// routine again.
+static
+gboolean
+catcher_key_press(GtkWidget *widget, GdkEvent *event, struct pp_instance_s *pp_i)
+{
+    char           buffer[20];
+    KeySym         keysym;
+    XComposeStatus compose_status;
+    int            charcount;
+
+    XEvent ev = {
+        .xkey = {
+            .type =     KeyPress,
+            .display =  GDK_WINDOW_XDISPLAY(event->key.window),
+            .keycode =  event->key.hardware_keycode,
+            .time =     event->key.time,
+            .state =    event->key.state,
+        }
+    };
+
+    // untie GdkWindow from auxiliary widget
+    gdk_window_set_user_data(event->key.window, NULL);
+
+    // call back only for printable sequences, as non-printable were already processed
+    charcount = XLookupString(&ev.xkey, buffer, sizeof(buffer), &keysym, &compose_status);
+    if (is_printable_sequence(buffer, charcount))
+        handle_key_press_release_event(pp_i->npp, &ev);
+
+    return TRUE;
+}
+
 NPError
 NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
@@ -547,6 +598,11 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->instance_url = ppb_url_util_resolve_relative_to_url(pp_i->document_base_url,
                                                               pp_i->instance_relative_url, NULL);
 
+    // prepare GTK+ widget for catching keypress events returned by IME
+    pp_i->catcher_widget = gtk_label_new("");
+    gtk_widget_set_realized(pp_i->catcher_widget, TRUE);
+    g_signal_connect(pp_i->catcher_widget, "key-press-event", G_CALLBACK(catcher_key_press), pp_i);
+
     pp_i->textinput_type = PP_TEXTINPUT_TYPE_DEV_NONE;
     pp_i->im_context_multi = gtk_im_multicontext_new();
     pp_i->im_context_simple = gtk_im_context_simple_new();
@@ -658,6 +714,8 @@ NPP_Destroy(NPP npp, NPSavedData **save)
                                            0, PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
+
+    g_object_ref_sink(pp_i->catcher_widget);
 
     npn.releaseobject(pp_i->np_window_obj);
     npn.releaseobject(pp_i->np_plugin_element_obj);
@@ -1296,17 +1354,6 @@ handle_button_press_release_event(NPP npp, void *event)
     return 1;
 }
 
-int
-is_printable_sequence(const char *s, size_t len)
-{
-    const unsigned char *u = (const unsigned char *)s;
-    if (len == 1 && 0x20 <= u[0] && u[0] <= 0x7e)
-        return 1;
-    if (len > 1)
-        return 1;
-    return 0;
-}
-
 static GdkEvent *
 make_gdk_key_event_from_x_key(XKeyEvent *ev)
 {
@@ -1415,8 +1462,18 @@ handle_key_press_release_event(NPP npp, void *event)
 
         GdkEvent *gev = make_gdk_key_event_from_x_key(ev);
         if (gev) {
+            // tie catcher_widget to GdkWindow
+            gdk_window_set_user_data(gev->key.window, pp_i->catcher_widget);
+
             gtk_im_context_set_client_window(pp_i->im_context, gev->key.window);
             gboolean stop = gtk_im_context_filter_keypress(pp_i->im_context, &gev->key);
+
+            if (!stop) {
+                // stop == 0 means gev and its GdkWindow is no longer needed and will be freed
+                // by subsequent gdk_event_free, therefore we untie auxiliary widget, just in case.
+                gdk_window_set_user_data(gev->key.window, NULL);
+            }
+
             gdk_event_free(gev);
             if (stop)
                 return 1;
