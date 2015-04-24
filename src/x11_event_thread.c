@@ -27,6 +27,9 @@
 #include <pthread.h>
 #include "pp_resource.h"
 #include "tables.h"
+#include "xembed.h"
+#include "reverse_constant.h"
+#include "trace.h"
 
 
 static GHashTable        *ht = NULL;  // Window -> struct ht_entry_s
@@ -37,6 +40,8 @@ static pthread_t          thread;
 static uint32_t           thread_started = 0;
 static pthread_barrier_t  task_pass_barrier;
 static Atom               freshwrapper_x11et_cmd_atom;
+static Atom               xembed_atom;
+static Atom               xembed_info_atom;
 static Window             task_pass_wnd;
 
 struct ht_entry_s {
@@ -44,6 +49,12 @@ struct ht_entry_s {
     NPP_HandleEventProcPtr  proc;
     uint32_t                is_xembed;
     Window                  plug_wnd;
+};
+
+enum cmd_e {
+    X11ET_CMD_UNDEFINED         = 0,
+    X11ET_CMD_REGISTER_WINDOW   = 1,
+    X11ET_CMD_UNREGISTER_WINDOW = 2,
 };
 
 
@@ -72,6 +83,26 @@ destructor_x11_event_thread(void)
     g_hash_table_unref(ht);
     g_hash_table_unref(socket_ht);
     pthread_barrier_destroy(&task_pass_barrier);
+}
+
+static
+void
+send_xembed_message(Display *dpy, Window receiver, long int message, long int detail)
+{
+    XEvent ev = {
+        .xclient = {
+            .type =         ClientMessage,
+            .window =       receiver,
+            .message_type = xembed_atom,
+            .format =       32,
+            .data.l[0] =    CurrentTime,
+            .data.l[1] =    message,
+            .data.l[2] =    detail,
+        }
+    };
+
+    XSendEvent(dpy, receiver, False, NoEventMask, &ev);
+    XFlush(dpy);
 }
 
 static
@@ -106,26 +137,117 @@ x11_event_thread_func(void *param)
         XEvent *ev = g_slice_alloc0(sizeof(*ev));
 
         XNextEvent(dpy, ev);
-        if (ev->type == ClientMessage && ev->xclient.message_type == freshwrapper_x11et_cmd_atom) {
-            XSelectInput(dpy, (Window)ev->xclient.data.l[0], ev->xclient.data.l[1]);
-            XFlush(dpy);
 
+        if (ev->type == ClientMessage && ev->xclient.message_type == freshwrapper_x11et_cmd_atom) {
+            Window              socket_wnd = (Window)ev->xclient.data.l[0];
+            enum cmd_e          cmd = ev->xclient.data.l[1];
+            struct ht_entry_s  *entry;
+
+            pthread_mutex_lock(&lock);
+            entry = g_hash_table_lookup(ht, GSIZE_TO_POINTER(socket_wnd));
+            pthread_mutex_unlock(&lock);
+
+            if (!entry)
+                continue;
+
+            switch (cmd) {
+            case X11ET_CMD_REGISTER_WINDOW:
+                if (entry->is_xembed) {
+                    entry->plug_wnd = XCreateSimpleWindow(dpy, socket_wnd, 0, 0,
+                                                          200, 200, 0, 0, 0x000000);
+
+                    unsigned long buffer[2] = { 1, XEMBED_MAPPED };
+
+                    XChangeProperty(dpy, entry->plug_wnd, xembed_info_atom, xembed_info_atom, 32,
+                                    PropModeReplace, (unsigned char *)buffer, 2);
+                }
+
+                pthread_mutex_lock(&lock);
+                g_hash_table_insert(socket_ht, GSIZE_TO_POINTER(entry->plug_wnd),
+                                    GSIZE_TO_POINTER(socket_wnd));
+                pthread_mutex_unlock(&lock);
+
+                const long event_mask = KeyPressMask | KeyReleaseMask | ButtonPressMask
+                                        | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask
+                                        | PointerMotionMask | ExposureMask | FocusChangeMask;
+                XSelectInput(dpy, entry->plug_wnd, event_mask);
+                break;
+
+            case X11ET_CMD_UNREGISTER_WINDOW:
+                XSelectInput(dpy, entry->plug_wnd, 0);
+                XFlush(dpy);
+                if (entry->is_xembed)
+                    XDestroyWindow(dpy, entry->plug_wnd);
+
+                pthread_mutex_lock(&lock);
+                g_hash_table_remove(socket_ht, GSIZE_TO_POINTER(entry->plug_wnd));
+                pthread_mutex_unlock(&lock);
+                break;
+
+            default:
+                // should not happen
+                break;
+            }
+
+            g_slice_free1(sizeof(*ev), ev);
+            XFlush(dpy);
             pthread_barrier_wait(&task_pass_barrier);
             continue;
         }
 
-        Window socket_wnd;
-        socket_wnd = GPOINTER_TO_SIZE(g_hash_table_lookup(socket_ht,
-                                                          GSIZE_TO_POINTER(ev->xany.window)));
+        Window plug_wnd = ev->xany.window;
+        Window socket_wnd = GPOINTER_TO_SIZE(g_hash_table_lookup(socket_ht,
+                                                                 GSIZE_TO_POINTER(plug_wnd)));
 
         struct ht_entry_s *d = g_hash_table_lookup(ht, GSIZE_TO_POINTER(socket_wnd));
-        if (socket_wnd != ev->xany.window) {
-            if (ev->type == ClientMessage) {
-                printf("xembed: ClientMessage\n");
+        int skip_event = 0;
+        if (d && d->is_xembed) {
+            switch (ev->type) {
+            case ClientMessage:
+                switch (ev->xclient.data.l[1]) {
+                case XEMBED_EMBEDDED_NOTIFY:
+                    skip_event = 1;
+                    break;
+
+                case XEMBED_WINDOW_ACTIVATE:
+                case XEMBED_WINDOW_DEACTIVATE:
+                case XEMBED_MODALITY_ON:
+                case XEMBED_MODALITY_OFF:
+                    // not handled
+                    skip_event = 1;
+                    break;
+
+                case XEMBED_FOCUS_IN:
+                    memset(ev, 0, sizeof(*ev));
+                    ev->xfocus.type =   FocusIn;
+                    ev->xfocus.window = plug_wnd;
+                    ev->xfocus.mode =   NotifyNormal;
+                    ev->xfocus.detail = NotifyDetailNone;
+                    break;
+
+                case XEMBED_FOCUS_OUT:
+                    memset(ev, 0, sizeof(*ev));
+                    ev->xfocus.type =   FocusOut;
+                    ev->xfocus.window = plug_wnd;
+                    ev->xfocus.mode =   NotifyNormal;
+                    ev->xfocus.detail = NotifyDetailNone;
+                    break;
+
+                default:
+                    trace_error("%s, unknown XEmbed message %d\n", __func__,
+                                (int)ev->xclient.data.l[1]);
+                    skip_event = 1;
+                    break;
+                }
+                break;
+
+            case ButtonPress:
+                send_xembed_message(dpy, socket_wnd, XEMBED_REQUEST_FOCUS, 0);
+                break;
             }
         }
 
-        if (d) {
+        if (d && !skip_event) {
             struct pp_instance_s *pp_i = tables_get_pp_instance(d->instance);
             if (pp_i && pp_i->npp)
                 npn.pluginthreadasynccall(pp_i->npp, call_handle_event_ptac, ev);
@@ -136,23 +258,31 @@ x11_event_thread_func(void *param)
     return NULL;
 }
 
+static
+void
+x11et_start_thread(void)
+{
+    dpy = XOpenDisplay(NULL);
+    freshwrapper_x11et_cmd_atom = XInternAtom(dpy, "FRESHWRAPPER_X11ET_CMD", False);
+    xembed_atom =                 XInternAtom(dpy, "_XEMBED", False);
+    xembed_info_atom =            XInternAtom(dpy, "_XEMBED_INFO", False);
+
+    // create helper window to pass tasks to the event thread
+    task_pass_wnd = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, 10, 10, 0, 0,
+                                        0x000000);
+    XSelectInput(dpy, task_pass_wnd, NoEventMask);
+    XFlush(dpy);
+    pthread_create(&thread, NULL, x11_event_thread_func, NULL);
+    pthread_detach(thread);
+}
+
 Window
 x11et_register_window(PP_Instance instance, Window wnd, NPP_HandleEventProcPtr handle_event_cb,
                       uint32_t is_xembed)
 {
     pthread_mutex_lock(&lock);
     if (!thread_started) {
-        dpy = XOpenDisplay(NULL);
-        freshwrapper_x11et_cmd_atom = XInternAtom(dpy, "FRESHWRAPPER_X11ET_CMD", False);
-
-        // create helper window to pass tasks to the event thread
-        task_pass_wnd = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, 10, 10, 0, 0,
-                                            0x000000);
-        XSelectInput(dpy, task_pass_wnd, StructureNotifyMask); // which mask?
-        XFlush(dpy);
-
-        pthread_create(&thread, NULL, x11_event_thread_func, NULL);
-        pthread_detach(thread);
+        x11et_start_thread();
         thread_started = 1;
     }
 
@@ -170,42 +300,28 @@ x11et_register_window(PP_Instance instance, Window wnd, NPP_HandleEventProcPtr h
     entry->is_xembed =  is_xembed;
     entry->plug_wnd =   wnd;
 
-    pthread_mutex_lock(&display.lock);
-    if (is_xembed) {
-        entry->plug_wnd = XCreateSimpleWindow(display.x, DefaultRootWindow(display.x), 0, 0,
-                                              200, 200, 0, 0, 0x000000);
-        XReparentWindow(display.x, entry->plug_wnd, wnd, 0, 0);
-
-        Atom xembed_info_atom = XInternAtom(display.x, "_XEMBED_INFO", False);
-        unsigned long buffer[2] = { 1, 1 }; // version 1, flag (1 << 0)
-
-        XChangeProperty(display.x, entry->plug_wnd, xembed_info_atom, xembed_info_atom, 32,
-                        PropModeReplace, (unsigned char *)buffer, 2);
-    }
+    pthread_mutex_lock(&lock);
+    g_hash_table_insert(ht, GSIZE_TO_POINTER(wnd), entry);
+    pthread_mutex_unlock(&lock);
 
     XEvent ev = {
         .xclient = {
             .type =         ClientMessage,
             .message_type = freshwrapper_x11et_cmd_atom,
             .format =       32,
-            .data.l[0] =    entry->plug_wnd,
-            .data.l[1] =    KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
-                            | EnterWindowMask | LeaveWindowMask | PointerMotionMask | ExposureMask
-                            | FocusChangeMask,
+            .data.l[0] =    wnd,
+            .data.l[1] =    X11ET_CMD_REGISTER_WINDOW,
         }
     };
 
-    XSendEvent(display.x, task_pass_wnd, True, 0, &ev);
+    pthread_mutex_lock(&display.lock);
+    XSendEvent(display.x, task_pass_wnd, False, NoEventMask, &ev);
     XFlush(display.x);
     pthread_mutex_unlock(&display.lock);
 
-    pthread_mutex_lock(&lock);
-    g_hash_table_insert(ht, GSIZE_TO_POINTER(wnd), entry);
-    g_hash_table_insert(socket_ht, GSIZE_TO_POINTER(entry->plug_wnd), GSIZE_TO_POINTER(wnd));
-    pthread_mutex_unlock(&lock);
-
     pthread_barrier_wait(&task_pass_barrier);
 
+    // entry->plug_wnd here will contain plug window if XEmbed is used
     return entry->plug_wnd;
 }
 
@@ -224,22 +340,19 @@ x11et_unregister_window(Window wnd)
             .type =         ClientMessage,
             .message_type = freshwrapper_x11et_cmd_atom,
             .format =       32,
-            .data.l[0] =    entry->plug_wnd,
-            .data.l[1] =    0,
+            .data.l[0] =    wnd,
+            .data.l[1] =    X11ET_CMD_UNREGISTER_WINDOW,
         }
     };
 
     pthread_mutex_lock(&display.lock);
-    XSendEvent(display.x, task_pass_wnd, True, 0, &ev);
+    XSendEvent(display.x, task_pass_wnd, False, NoEventMask, &ev);
     XFlush(display.x);
-    if (entry->is_xembed)
-        XDestroyWindow(display.x, entry->plug_wnd);
     pthread_mutex_unlock(&display.lock);
 
     pthread_barrier_wait(&task_pass_barrier);
 
     pthread_mutex_lock(&lock);
-    g_hash_table_remove(socket_ht, GSIZE_TO_POINTER(entry->plug_wnd));
     g_hash_table_remove(ht, GSIZE_TO_POINTER(wnd));
     pthread_mutex_unlock(&lock);
 }
