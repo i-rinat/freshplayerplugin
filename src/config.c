@@ -44,7 +44,6 @@ static struct fpp_config_s default_config = {
     .enable_windowed_mode   =   1,
     .enable_xembed          =   1,
     .quirks = {
-        .switch_buttons_2_3         = 0,
         .dump_resource_histogram    = 0,
         .dump_variables             = 0,
         .plasma5_screensaver        = 0,
@@ -67,18 +66,6 @@ static
 void
 initialize_quirks(void)
 {
-    FILE *fp = fopen("/proc/self/cmdline", "r");
-    if (fp) {
-        char cmdline[2048];
-        size_t len = fread(cmdline, 1, sizeof(cmdline) - 1, fp);
-        cmdline[len] = 0;
-        if (strstr(cmdline, "operapluginwrapper")) {
-            // Opera calls right mouse button "2" instead of correct "3"
-            config.quirks.switch_buttons_2_3 = 1;
-        }
-
-        fclose(fp);
-    }
 }
 
 static

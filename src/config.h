@@ -43,7 +43,6 @@ struct fpp_config_s {
     int     enable_windowed_mode;
     int     enable_xembed;
     struct {
-        int   switch_buttons_2_3;
         int   dump_resource_histogram;
         int   dump_variables;
         int   plasma5_screensaver;

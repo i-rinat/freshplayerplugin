@@ -1274,13 +1274,6 @@ handle_button_press_release_event(NPP npp, void *event)
     float wheel_x = 0.0, wheel_y = 0.0;
     int ev_button = ev->button;
 
-    if (config.quirks.switch_buttons_2_3) {
-        if (ev_button == 2)
-            ev_button = 3;
-        else if (ev_button == 3)
-            ev_button = 2;
-    }
-
     switch (ev_button) {
     case 1:
         mouse_button = PP_INPUTEVENT_MOUSEBUTTON_LEFT;
