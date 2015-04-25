@@ -244,6 +244,12 @@ x11_event_thread_func(void *param)
             case ButtonPress:
                 send_xembed_message(dpy, socket_wnd, XEMBED_REQUEST_FOCUS, 0);
                 break;
+
+            case FocusIn:
+            case FocusOut:
+                // native focus events should be skipped if XEmbed is in use
+                skip_event = 1;
+                break;
             }
         }
 
