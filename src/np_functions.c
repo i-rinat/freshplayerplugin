@@ -455,11 +455,6 @@ static
 gboolean
 catcher_key_press(GtkWidget *widget, GdkEvent *event, struct pp_instance_s *pp_i)
 {
-    char           buffer[20];
-    KeySym         keysym;
-    XComposeStatus compose_status;
-    int            charcount;
-
     XEvent ev = {
         .xkey = {
             .type =     KeyPress,
@@ -473,11 +468,7 @@ catcher_key_press(GtkWidget *widget, GdkEvent *event, struct pp_instance_s *pp_i
     // untie GdkWindow from auxiliary widget
     gdk_window_set_user_data(event->key.window, NULL);
 
-    // call back only for printable sequences, as non-printable were already processed
-    charcount = XLookupString(&ev.xkey, buffer, sizeof(buffer), &keysym, &compose_status);
-    if (is_printable_sequence(buffer, charcount))
-        handle_key_press_release_event(pp_i->npp, &ev);
-
+    handle_key_press_release_event(pp_i->npp, &ev);
     return TRUE;
 }
 
@@ -1423,30 +1414,6 @@ handle_key_press_release_event(NPP npp, void *event)
     if (!(PP_INPUTEVENT_CLASS_KEYBOARD & combined_mask))
         return 0;
 
-    char           buffer[20];
-    KeySym         keysym;
-    XComposeStatus compose_status;
-    int            charcount;
-    int            pp_keycode;
-    PP_Resource    pp_event;
-    unsigned int   mod;
-
-    charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
-    pp_keycode = xkeycode_to_pp_keycode(keysym);
-    mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
-    mod = mod | get_left_right_pp_flag(keysym);
-
-    // left flag is always set, it needs to be dropped if there is right flag
-    if (mod & PP_INPUTEVENT_MODIFIER_ISRIGHT)
-        mod = mod & (~(unsigned)PP_INPUTEVENT_MODIFIER_ISLEFT);
-
-    event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
-                                        : PP_INPUTEVENT_TYPE_KEYUP;
-
-    pp_event = ppb_keyboard_input_event_create_1_0(pp_i->id, event_type, ev->time/1.0e6,
-                                                   mod, pp_keycode, PP_MakeUndefined());
-    ppp_handle_input_event_helper(pp_i, pp_event);
-
     if (pp_i->im_context && ev->type == KeyPress) {
         Window browser_window;
         if (npn.getvalue(npp, NPNVnetscapeWindow, &browser_window) != NPERR_NO_ERROR)
@@ -1472,6 +1439,30 @@ handle_key_press_release_event(NPP npp, void *event)
                 return 1;
         }
     }
+
+    char            buffer[20];
+    KeySym          keysym;
+    XComposeStatus  compose_status;
+    int             charcount;
+    int             pp_keycode;
+    PP_Resource     pp_event;
+    unsigned int    mod;
+
+    charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
+    pp_keycode = xkeycode_to_pp_keycode(keysym);
+    mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
+    mod = mod | get_left_right_pp_flag(keysym);
+
+    // left flag is always set, it needs to be dropped if there is right flag
+    if (mod & PP_INPUTEVENT_MODIFIER_ISRIGHT)
+        mod = mod & (~(unsigned)PP_INPUTEVENT_MODIFIER_ISLEFT);
+
+    event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
+                                        : PP_INPUTEVENT_TYPE_KEYUP;
+
+    pp_event = ppb_keyboard_input_event_create_1_0(pp_i->id, event_type, ev->time/1.0e6,
+                                                   mod, pp_keycode, PP_MakeUndefined());
+    ppp_handle_input_event_helper(pp_i, pp_event);
 
     if (ev->type == KeyPress && is_printable_sequence(buffer, charcount)) {
         struct PP_Var character_text = ppb_var_var_from_utf8(buffer, charcount);
