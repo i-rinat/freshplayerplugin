@@ -20,7 +20,11 @@ audio_buffer_max_ms = 500
 # your machine doesn't have it, there would be no sound, and no sync
 audio_use_jack = 0
 
-# Path to the Pepper Flash plugin
+# Path to the Pepper Flash plugin.
+# If the option is absent, freshwrapper will search for Pepper Flash in
+# a number of location where it could be. Usually that's enough, but if
+# not, you should manually enter the right path. Multiple paths could
+# be specified, separated by colon.
 pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
 
 # "Command-line" arguments for Flash
@@ -45,8 +49,9 @@ fullscreen_height = 0
 # support this trick. Set parameter to 0 if you have an affected model
 randomize_dns_case = 1
 
-# scaling factor used to convert screen pixels to device independent
-# pixels. You may need it for displays with high DPI
+# scaling factor (floating point value) used to convert screen pixels
+# to device independent pixels. You may need it for displays with
+# high DPI
 device_scale = 1
 
 # method org.freedesktop.ScreenSaver.SimulateUserActivity() in KDE 5 seems
@@ -55,7 +60,7 @@ device_scale = 1
 quirk_plasma5_screensaver = 0
 
 # whenever to use windowed plugin mode
-enable_windowed_mode = 0
+enable_windowed_mode = 1
 
-# whenever XEmbed used in windowed mode (if browser advertise its support)
+# whenever XEmbed used in windowed mode (if browser advertises its support)
 enable_xembed = 1
