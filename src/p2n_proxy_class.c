@@ -419,7 +419,6 @@ p2n_enumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count)
             // make zero-terminated string
             char *ptr = realloc(tmpbuf, len + 1);
             if (!ptr) {
-                free(tmpbuf);
                 result = false;
                 goto err;
             }
