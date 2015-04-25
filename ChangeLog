@@ -1,5 +1,6 @@
 2015-04-25  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
+	* release: v0.2.4
 	* graphics: use XRender for presentation, enable 3d by default
 	* graphics: high DPI support (device_scale)
 	* graphics: add inhibition for cinnamon-screensaver
