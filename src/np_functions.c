@@ -394,20 +394,28 @@ im_preedit_changed(GtkIMContext *im_context, struct pp_instance_s *pp_i)
 {
     PP_TimeTicks    time_stamp = 0;     // TODO: get real time stamp
     gchar          *preedit_string;
+    gchar          *ptr;
     size_t          preedit_string_len;
     gint            cursor_pos;
+    gint            cursor_pos_bytes;
     PP_Resource     event;
     struct PP_Var   text;
     uint32_t        offsets[2];
 
     gtk_im_context_get_preedit_string(im_context, &preedit_string, NULL, &cursor_pos);
+
+    ptr = preedit_string;
+    for (int k = 0; k < cursor_pos; k ++)
+        ptr = g_utf8_next_char(ptr);
+    cursor_pos_bytes = ptr - preedit_string;
+
     preedit_string_len = strlen(preedit_string);
     text = ppb_var_var_from_utf8(preedit_string, preedit_string_len);
     offsets[0] = 0;
     offsets[1] = preedit_string_len;
     event = ppb_ime_input_event_create(pp_i->id, PP_INPUTEVENT_TYPE_IME_COMPOSITION_UPDATE,
-                                       time_stamp, text, 1, offsets, -1, preedit_string_len,
-                                       preedit_string_len);
+                                       time_stamp, text, 1, offsets, -1, cursor_pos_bytes,
+                                       cursor_pos_bytes);
     ppp_handle_input_event_helper(pp_i, event);
     ppb_var_release(text);
     g_free(preedit_string);
