@@ -1,3 +1,16 @@
+2015-04-25  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* graphics: use XRender for presentation, enable 3d by default
+	* graphics: high DPI support (device_scale)
+	* graphics: add inhibition for cinnamon-screensaver
+	* graphics: add inhibition for X internal screen saver
+	* core: prefer UTF8 when putting text to clipboard
+	* core: support windowed plugin mode, both direct and XEmbed
+	* core: support Input Method Editors
+	* core: enable mouse wheel events
+	* core: make GTK+ major version selectable
+	* audio: support playing audio through JACK
+
 2015-02-16  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.2.3
