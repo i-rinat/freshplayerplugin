@@ -208,7 +208,7 @@ convert_asn1_time_to_pp_var(ASN1_TIME *asn1_time)
         if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
             goto parse_error;
         int tz_minutes = (s[0] - '0') * 10 + (s[1] - '0');
-        len -= 2; s += 2;
+        // keep as reminder: len -= 2; s += 2;
 
         return convert_tm_to_pp_var(&t, subsec, tz_sign * tz_hours, tz_minutes);
     } else if (asn1_time->type == V_ASN1_UTCTIME) {
@@ -270,7 +270,7 @@ convert_asn1_time_to_pp_var(ASN1_TIME *asn1_time)
         if (len < 2 || !isdigit(s[0]) || !isdigit(s[1]))
             goto parse_error;
         int tz_minutes = (s[0] - '0') * 10 + (s[1] - '0');
-        len -= 2; s += 2;
+        // keep as reminder: len -= 2; s += 2;
 
         return convert_tm_to_pp_var(&t, 0, tz_sign * tz_hours, tz_minutes);
     } else {
