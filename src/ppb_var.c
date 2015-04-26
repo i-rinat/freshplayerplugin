@@ -434,7 +434,12 @@ ppb_var_var_from_utf8(const char *data, uint32_t len)
     var.type = PP_VARTYPE_STRING;
     v->str.len = len;
     v->str.data = malloc(len + 1);
-    memcpy(v->str.data, data, len);
+
+    if (data)
+        memcpy(v->str.data, data, len);
+    else
+        memset(v->str.data, 0, len);
+
     v->str.data[len] = 0;       // ensure all strings are zero terminated
     v->ref_count = 1;
 
