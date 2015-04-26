@@ -63,6 +63,7 @@ main(int argc, char *argv[])
         FILE *tmp = fopen(fname, "rb");
         if (!tmp) {
             printf("can't open %s\n", fname);
+            free(fname);
             goto err_1;
         }
         while (!feof(tmp)) {
