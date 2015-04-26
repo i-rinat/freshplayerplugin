@@ -57,6 +57,9 @@ ppb_audio_input_create(PP_Instance instance)
 void
 ppb_audio_input_destroy(void *ptr)
 {
+    struct pp_audio_input_s *ai = ptr;
+    if (ai->stream)
+        ai->stream_ops->destroy(ai->stream);
 }
 
 PP_Bool
@@ -99,12 +102,73 @@ ppb_audio_input_monitor_device_change(PP_Resource audio_input,
     return 0;
 }
 
+static
+void
+capture_cb(const void *buf, uint32_t sz, double latency, void *user_data)
+{
+    struct pp_audio_input_s *ai = user_data;
+
+    if (ai->cb_0_3) {
+        ai->cb_0_3(buf, sz, ai->cb_user_data);
+    } else if (ai->cb_0_4) {
+        ai->cb_0_4(buf, sz, latency, ai->cb_user_data);
+    }
+}
+
+static
+int32_t
+do_ppb_audio_input_open(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
+                        PPB_AudioInput_Callback_0_3 audio_input_callback_0_3,
+                        PPB_AudioInput_Callback audio_input_callback_0_4, void *user_data,
+                        struct PP_CompletionCallback callback)
+{
+    // TODO: find actual device from device_ref
+    int32_t retval = PP_ERROR_FAILED;
+
+    struct pp_audio_input_s *ai = pp_resource_acquire(audio_input, PP_RESOURCE_AUDIO_INPUT);
+    if (!ai) {
+        trace_error("%s, bad resource\n", __func__);
+        goto err_1;
+    }
+
+    struct pp_audio_config_s *ac = pp_resource_acquire(config, PP_RESOURCE_AUDIO_CONFIG);
+    if (!ac) {
+        trace_error("%s, bad audio config\n", __func__);
+        goto err_2;
+    }
+
+    ai->sample_rate = ac->sample_rate;
+    ai->sample_frame_count = ac->sample_frame_count;
+
+    ai->cb_0_3 = audio_input_callback_0_3;
+    ai->cb_0_4 = audio_input_callback_0_4;
+    ai->cb_user_data = user_data;
+
+    ai->stream = ai->stream_ops->create_capture_stream(ai->sample_rate, ai->sample_frame_count,
+                                                       capture_cb, ai);
+    if (!ai->stream) {
+        trace_error("%s, can't create capture stream\n", __func__);
+        goto err_3;
+    }
+
+    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
+    retval = PP_OK_COMPLETIONPENDING;
+
+err_3:
+    pp_resource_release(config);
+err_2:
+    pp_resource_release(audio_input);
+err_1:
+    return retval;
+}
+
 int32_t
 ppb_audio_input_open_0_3(PP_Resource audio_input, PP_Resource device_ref, PP_Resource config,
                          PPB_AudioInput_Callback_0_3 audio_input_callback, void *user_data,
                          struct PP_CompletionCallback callback)
 {
-    return 0;
+    return do_ppb_audio_input_open(audio_input, device_ref, config, audio_input_callback, NULL,
+                                   user_data, callback);
 }
 
 int32_t
@@ -112,7 +176,8 @@ ppb_audio_input_open(PP_Resource audio_input, PP_Resource device_ref, PP_Resourc
                      PPB_AudioInput_Callback audio_input_callback, void *user_data,
                      struct PP_CompletionCallback callback)
 {
-    return 0;
+    return do_ppb_audio_input_open(audio_input, device_ref, config, NULL, audio_input_callback,
+                                   user_data, callback);
 }
 
 PP_Resource
@@ -124,13 +189,31 @@ ppb_audio_input_get_current_config(PP_Resource audio_input)
 PP_Bool
 ppb_audio_input_start_capture(PP_Resource audio_input)
 {
-    return 0;
+    struct pp_audio_input_s *ai = pp_resource_acquire(audio_input, PP_RESOURCE_AUDIO_INPUT);
+    if (!ai) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
+
+    if (ai->stream)
+        ai->stream_ops->pause(ai->stream, 0);
+    pp_resource_release(audio_input);
+    return PP_TRUE;
 }
 
 PP_Bool
 ppb_audio_input_stop_capture(PP_Resource audio_input)
 {
-    return 0;
+    struct pp_audio_input_s *ai = pp_resource_acquire(audio_input, PP_RESOURCE_AUDIO_INPUT);
+    if (!ai) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
+
+    if (ai->stream)
+        ai->stream_ops->pause(ai->stream, 1);
+    pp_resource_release(audio_input);
+    return PP_TRUE;
 }
 
 void
@@ -183,7 +266,7 @@ trace_ppb_audio_input_open_0_3(PP_Resource audio_input, PP_Resource device_ref, 
                                PPB_AudioInput_Callback_0_3 audio_input_callback, void *user_data,
                                struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_input_open_0_3(audio_input, device_ref, config, audio_input_callback,
                                     user_data, callback);
 }
@@ -194,7 +277,7 @@ trace_ppb_audio_input_open(PP_Resource audio_input, PP_Resource device_ref, PP_R
                            PPB_AudioInput_Callback audio_input_callback, void *user_data,
                            struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_input_open(audio_input, device_ref, config, audio_input_callback, user_data,
                                 callback);
 }
@@ -211,7 +294,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_input_start_capture(PP_Resource audio_input)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_input_start_capture(audio_input);
 }
 
@@ -219,7 +302,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_input_stop_capture(PP_Resource audio_input)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_audio_input_stop_capture(audio_input);
 }
 
@@ -237,10 +320,10 @@ const struct PPB_AudioInput_Dev_0_3 ppb_audio_input_dev_interface_0_3 = {
     .IsAudioInput =         TWRAPF(ppb_audio_input_is_audio_input),
     .EnumerateDevices =     TWRAPF(ppb_audio_input_enumerate_devices),
     .MonitorDeviceChange =  TWRAPZ(ppb_audio_input_monitor_device_change),
-    .Open =                 TWRAPZ(ppb_audio_input_open_0_3),
+    .Open =                 TWRAPF(ppb_audio_input_open_0_3),
     .GetCurrentConfig =     TWRAPZ(ppb_audio_input_get_current_config),
-    .StartCapture =         TWRAPZ(ppb_audio_input_start_capture),
-    .StopCapture =          TWRAPZ(ppb_audio_input_stop_capture),
+    .StartCapture =         TWRAPF(ppb_audio_input_start_capture),
+    .StopCapture =          TWRAPF(ppb_audio_input_stop_capture),
     .Close =                TWRAPF(ppb_audio_input_close),
 };
 
@@ -249,9 +332,9 @@ const struct PPB_AudioInput_Dev_0_4 ppb_audio_input_dev_interface_0_4 = {
     .IsAudioInput =         TWRAPF(ppb_audio_input_is_audio_input),
     .EnumerateDevices =     TWRAPF(ppb_audio_input_enumerate_devices),
     .MonitorDeviceChange =  TWRAPZ(ppb_audio_input_monitor_device_change),
-    .Open =                 TWRAPZ(ppb_audio_input_open),
+    .Open =                 TWRAPF(ppb_audio_input_open),
     .GetCurrentConfig =     TWRAPZ(ppb_audio_input_get_current_config),
-    .StartCapture =         TWRAPZ(ppb_audio_input_start_capture),
-    .StopCapture =          TWRAPZ(ppb_audio_input_stop_capture),
+    .StartCapture =         TWRAPF(ppb_audio_input_start_capture),
+    .StopCapture =          TWRAPF(ppb_audio_input_stop_capture),
     .Close =                TWRAPF(ppb_audio_input_close),
 };

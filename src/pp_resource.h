@@ -36,6 +36,7 @@
 #include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppb_audio_config.h>
 #include <ppapi/c/ppb_audio.h>
+#include <ppapi/c/dev/ppb_audio_input_dev.h>
 #include <ppapi/c/dev/ppb_device_ref_dev.h>
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
 #include <ppapi/c/dev/ppb_text_input_dev.h>
@@ -374,7 +375,13 @@ struct pp_video_capture_s {
 
 struct pp_audio_input_s {
     COMMON_STRUCTURE_FIELDS
-    audio_stream_ops       *stream_ops;
+    uint32_t                    sample_rate;
+    uint32_t                    sample_frame_count;
+    PPB_AudioInput_Callback_0_3 cb_0_3;
+    PPB_AudioInput_Callback     cb_0_4;
+    void                       *cb_user_data;
+    audio_stream_ops           *stream_ops;
+    audio_stream               *stream;
 };
 
 struct pp_flash_menu_s {
