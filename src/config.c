@@ -34,7 +34,7 @@ static struct fpp_config_s default_config = {
     .audio_buffer_max_ms =      500,
     .audio_use_jack      =      0,
     .pepperflash_path    =      NULL,
-    .flash_command_line  =      "enable_hw_video_decode=1,enable_stagevideo_auto=1",
+    .flash_command_line  =      "", // "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .enable_3d           =      1,
     .quiet =                    0,
     .fullscreen_width    =      0,
