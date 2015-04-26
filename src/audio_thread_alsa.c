@@ -217,14 +217,30 @@ audio_thread(void *param)
 
             if (revents & (POLLIN | POLLOUT)) {
                 int                 paused = g_atomic_int_get(&as->paused);
-                const size_t        frame_size = 2 * sizeof(int16_t);
+                snd_pcm_sframes_t   frame_count = snd_pcm_avail(as->pcm);
 
-                snd_pcm_sframes_t frame_count = snd_pcm_avail(as->pcm);
-                size_t sz = MIN(frame_count * frame_size, sizeof(buf));
 
                 if (revents & POLLIN) {
-                    // TODO: implement POLLIN
+                    const size_t frame_size = 1 * sizeof(int16_t); // mono 16-bit
+                    size_t sz = MIN(frame_count * frame_size, sizeof(buf));
+
+                    // POLLIN
+                    if (!paused && as->capture_cb) {
+                        snd_pcm_sframes_t frames_read;
+
+                        frames_read = snd_pcm_readi(as->pcm, buf, sz / frame_size);
+                        if (frames_read >= 0) {
+                            as->capture_cb(buf, frames_read * frame_size, 0, as->cb_user_data);
+                        } else {
+                            trace_warning("%s, snd_pcm_readi error %d\n", __func__,
+                                          (int)frames_read);
+                            recover_pcm(as->pcm);
+                        }
+                    }
                 } else {
+                    const size_t frame_size = 2 * sizeof(int16_t); // stereo 16-bit
+                    size_t sz = MIN(frame_count * frame_size, sizeof(buf));
+
                     // POLLOUT
                     if (paused || !as->playback_cb)
                         memset(buf, 0, sz);
@@ -303,8 +319,8 @@ wakeup_audio_thread(void)
 
 static
 audio_stream *
-alsa_create_stream(audio_stream_direction type, unsigned int sample_rate,
-                    unsigned int sample_frame_count)
+alsa_create_stream(audio_stream_direction direction, unsigned int sample_rate,
+                   unsigned int sample_frame_count)
 {
     audio_stream *as;
     snd_pcm_hw_params_t *hw_params;
@@ -332,8 +348,11 @@ alsa_create_stream(audio_stream_direction type, unsigned int sample_rate,
     } while (0)
 
     // TODO: select device
-    // TODO: create capture stream
-    CHECK_A(snd_pcm_open, (&as->pcm, "default", SND_PCM_STREAM_PLAYBACK, 0));
+    if (direction == STREAM_PLAYBACK)
+        CHECK_A(snd_pcm_open, (&as->pcm, "default", SND_PCM_STREAM_PLAYBACK, 0));
+    else
+        CHECK_A(snd_pcm_open, (&as->pcm, "default", SND_PCM_STREAM_CAPTURE, 0));
+
     CHECK_A(snd_pcm_hw_params_malloc, (&hw_params));
     CHECK_A(snd_pcm_hw_params_any, (as->pcm, hw_params));
     CHECK_A(snd_pcm_hw_params_set_access, (as->pcm, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED));
@@ -341,7 +360,9 @@ alsa_create_stream(audio_stream_direction type, unsigned int sample_rate,
     dir = 0;
     unsigned int rate = sample_rate;
     CHECK_A(snd_pcm_hw_params_set_rate_near, (as->pcm, hw_params, &rate, &dir));
-    CHECK_A(snd_pcm_hw_params_set_channels, (as->pcm, hw_params, 2));
+
+    const int channel_count = (direction == STREAM_PLAYBACK) ? 2 : 1;
+    CHECK_A(snd_pcm_hw_params_set_channels, (as->pcm, hw_params, channel_count));
 
     unsigned int period_time = (long long)sample_frame_count * 1000 * 1000 / sample_rate;
     period_time = CLAMP(period_time,
@@ -366,6 +387,9 @@ alsa_create_stream(audio_stream_direction type, unsigned int sample_rate,
     snd_pcm_sw_params_free(sw_params);
 
     CHECK_A(snd_pcm_prepare, (as->pcm));
+
+    if (direction == STREAM_CAPTURE)
+        CHECK_A(snd_pcm_start, (as->pcm));
 
     as->nfds = snd_pcm_poll_descriptors_count(as->pcm);
     as->fds = calloc(as->nfds, sizeof(struct pollfd));
