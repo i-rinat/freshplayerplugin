@@ -229,7 +229,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_audio_input_create(PP_Instance instance)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_audio_input_create(instance);
 }
 
@@ -237,7 +237,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_input_is_audio_input(PP_Resource resource)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_audio_input_is_audio_input(resource);
 }
 
@@ -246,7 +246,10 @@ int32_t
 trace_ppb_audio_input_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput output,
                                         struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {fake} %s\n", __func__+6);
+    trace_info("[PPB] {fake} %s audio_input=%d, output={.GetDataBuffer=%p, .user_data=%p}, "
+               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, audio_input,
+               output.GetDataBuffer, output.user_data, callback.func, callback.user_data,
+               callback.flags);
     return ppb_audio_input_enumerate_devices(audio_input, output, callback);
 }
 
@@ -256,7 +259,8 @@ trace_ppb_audio_input_monitor_device_change(PP_Resource audio_input,
                                             PP_MonitorDeviceChangeCallback callback,
                                             void *user_data)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s audio_input=%d, callback=%p, user_data=%p\n", __func__+6,
+               audio_input, callback, user_data);
     return ppb_audio_input_monitor_device_change(audio_input, callback, user_data);
 }
 
@@ -266,7 +270,10 @@ trace_ppb_audio_input_open_0_3(PP_Resource audio_input, PP_Resource device_ref, 
                                PPB_AudioInput_Callback_0_3 audio_input_callback, void *user_data,
                                struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s audio_input=%d, device_ref=%d, config=%d, audio_input_callback=%p, "
+               "user_data=%p, callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6,
+               audio_input, device_ref, config, audio_input_callback, user_data, callback.func,
+               callback.user_data, callback.flags);
     return ppb_audio_input_open_0_3(audio_input, device_ref, config, audio_input_callback,
                                     user_data, callback);
 }
@@ -277,7 +284,10 @@ trace_ppb_audio_input_open(PP_Resource audio_input, PP_Resource device_ref, PP_R
                            PPB_AudioInput_Callback audio_input_callback, void *user_data,
                            struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s audio_input=%d, device_ref=%d, config=%d, audio_input_callback=%p, "
+               "user_data=%p, callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6,
+               audio_input, device_ref, config, audio_input_callback, user_data, callback.func,
+               callback.user_data, callback.flags);
     return ppb_audio_input_open(audio_input, device_ref, config, audio_input_callback, user_data,
                                 callback);
 }
@@ -286,7 +296,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_audio_input_get_current_config(PP_Resource audio_input)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s audio_input=%d\n", __func__+6, audio_input);
     return ppb_audio_input_get_current_config(audio_input);
 }
 
@@ -294,7 +304,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_input_start_capture(PP_Resource audio_input)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s audio_input=%d\n", __func__+6, audio_input);
     return ppb_audio_input_start_capture(audio_input);
 }
 
@@ -302,7 +312,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_audio_input_stop_capture(PP_Resource audio_input)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s audio_input=%d\n", __func__+6, audio_input);
     return ppb_audio_input_stop_capture(audio_input);
 }
 
@@ -310,7 +320,7 @@ TRACE_WRAPPER
 void
 trace_ppb_audio_input_close(PP_Resource audio_input)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s audio_input=%d\n", __func__+6, audio_input);
     ppb_audio_input_close(audio_input);
 }
 
