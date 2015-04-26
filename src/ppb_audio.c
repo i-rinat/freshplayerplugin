@@ -139,18 +139,22 @@ ppb_audio_get_current_config(PP_Resource audio)
         trace_error("%s, bad resource\n", __func__);
         return 0;
     }
+
     PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, a->instance);
     struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
     if (!ac) {
         trace_error("%s, resource allocation failure\n", __func__);
-        return 0;
+        audio_config = 0;
+        goto err;
     }
 
     ac->sample_rate = a->sample_rate;
     ac->sample_frame_count = a->sample_frame_count;
-    pp_resource_release(audio);
+
     pp_resource_release(audio_config);
 
+err:
+    pp_resource_release(audio);
     return audio_config;
 }
 
