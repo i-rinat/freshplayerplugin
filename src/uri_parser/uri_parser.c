@@ -98,6 +98,8 @@ uri_parser_parse_uri(const char *s, struct PP_URLComponents_Dev *components)
     (void)uri_parser_error;
     (void)uri_parser_first_final;
 
+    (void)end_password;
+    (void)end_username;
 }
 
 static inline int
