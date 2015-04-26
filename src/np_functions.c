@@ -529,16 +529,16 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         pp_i->argn[k] = strdup(argn[k] ? argn[k] : "");
         pp_i->argv[k] = strdup(argv[k] ? argv[k] : "");
 
-        if (strcasecmp(argn[k], "src") == 0)
-            pp_i->instance_relative_url = ppb_var_var_from_utf8_z(argv[k]);
+        if (strcasecmp(pp_i->argn[k], "src") == 0)
+            pp_i->instance_relative_url = ppb_var_var_from_utf8_z(pp_i->argv[k]);
 
-        if (strcasecmp(argn[k], "wmode") == 0) {
-            if (strcasecmp(argv[k], "transparent") == 0) {
+        if (strcasecmp(pp_i->argn[k], "wmode") == 0) {
+            if (strcasecmp(pp_i->argv[k], "transparent") == 0) {
                 pp_i->is_transparent = 1;
                 pp_i->windowed_mode = 0; // wmode=transparent movies should use windowless mode
             }
 
-            if (strcasecmp(argv[k], "opaque") == 0)
+            if (strcasecmp(pp_i->argv[k], "opaque") == 0)
                 pp_i->windowed_mode = 0; // wmode=opaque movies should use windowless mode
         }
     }
