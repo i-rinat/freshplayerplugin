@@ -238,12 +238,16 @@ uri_parser_merge_uris(const char *base_uri, const char *rel_uri)
     str_t query = {};
     str_t fragment = {};
     GList *m = NULL;    // list of allocated memory blocks
+    int scheme_is_file = 0;
 
     uri_parser_parse_uri(base_uri, &base_c);
 
     // if base_uri is local file, remove heading slashed from rel_uri to make it relative.
     // That will emulate webserver root
-    if (base_c.scheme.len > 0 && strncmp(base_uri + base_c.scheme.begin, "file", 4) == 0) {
+    if (base_c.scheme.len > 0 && strncmp(base_uri + base_c.scheme.begin, "file", 4) == 0
+        && base_c.scheme.len == 4)
+    {
+        scheme_is_file = 1;
         while (rel_uri && *rel_uri == '/')
             rel_uri ++;
     }
@@ -300,7 +304,7 @@ uri_parser_merge_uris(const char *base_uri, const char *rel_uri)
         "%.*s", // fragment
         scheme.len, scheme.data,
         scheme.len > 0 ? ":" : "",
-        authority.len > 0 ? "//" : "",
+        (authority.len > 0 || scheme_is_file) ? "//" : "",
         authority.len, authority.data,
         path.len, path.data,
         query.len > 0 ? "?" : "",
