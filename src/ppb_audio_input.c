@@ -183,7 +183,28 @@ ppb_audio_input_open(PP_Resource audio_input, PP_Resource device_ref, PP_Resourc
 PP_Resource
 ppb_audio_input_get_current_config(PP_Resource audio_input)
 {
-    return 123005;
+    struct pp_audio_input_s *ai = pp_resource_acquire(audio_input, PP_RESOURCE_AUDIO_INPUT);
+    if (!ai) {
+        trace_error("%s, bad resource\n", __func__);
+        return 0;
+    }
+
+    PP_Resource audio_config = pp_resource_allocate(PP_RESOURCE_AUDIO_CONFIG, ai->instance);
+    struct pp_audio_config_s *ac = pp_resource_acquire(audio_config, PP_RESOURCE_AUDIO_CONFIG);
+    if (!ac) {
+        trace_error("%s, resource allocation failure\n", __func__);
+        audio_config = 0;
+        goto err;
+    }
+
+    ac->sample_rate =        ai->sample_rate;
+    ac->sample_frame_count = ai->sample_frame_count;
+
+    pp_resource_release(audio_config);
+
+err:
+    pp_resource_release(audio_input);
+    return audio_config;
 }
 
 PP_Bool
@@ -296,7 +317,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_audio_input_get_current_config(PP_Resource audio_input)
 {
-    trace_info("[PPB] {zilch} %s audio_input=%d\n", __func__+6, audio_input);
+    trace_info("[PPB] {full} %s audio_input=%d\n", __func__+6, audio_input);
     return ppb_audio_input_get_current_config(audio_input);
 }
 
@@ -331,7 +352,7 @@ const struct PPB_AudioInput_Dev_0_3 ppb_audio_input_dev_interface_0_3 = {
     .EnumerateDevices =     TWRAPF(ppb_audio_input_enumerate_devices),
     .MonitorDeviceChange =  TWRAPZ(ppb_audio_input_monitor_device_change),
     .Open =                 TWRAPF(ppb_audio_input_open_0_3),
-    .GetCurrentConfig =     TWRAPZ(ppb_audio_input_get_current_config),
+    .GetCurrentConfig =     TWRAPF(ppb_audio_input_get_current_config),
     .StartCapture =         TWRAPF(ppb_audio_input_start_capture),
     .StopCapture =          TWRAPF(ppb_audio_input_stop_capture),
     .Close =                TWRAPF(ppb_audio_input_close),
@@ -343,7 +364,7 @@ const struct PPB_AudioInput_Dev_0_4 ppb_audio_input_dev_interface_0_4 = {
     .EnumerateDevices =     TWRAPF(ppb_audio_input_enumerate_devices),
     .MonitorDeviceChange =  TWRAPZ(ppb_audio_input_monitor_device_change),
     .Open =                 TWRAPF(ppb_audio_input_open),
-    .GetCurrentConfig =     TWRAPZ(ppb_audio_input_get_current_config),
+    .GetCurrentConfig =     TWRAPF(ppb_audio_input_get_current_config),
     .StartCapture =         TWRAPF(ppb_audio_input_start_capture),
     .StopCapture =          TWRAPF(ppb_audio_input_stop_capture),
     .Close =                TWRAPF(ppb_audio_input_close),
