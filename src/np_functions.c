@@ -1531,7 +1531,7 @@ NPP_HandleEvent(NPP npp, void *event)
     if (config.quirks.plugin_missing) {
         if (xaev->type == GraphicsExpose)
             handle_placeholder_graphics_expose_event(npp, event);
-        return NPERR_NO_ERROR;
+        return 0;
     }
 
     if (!pp_i)
