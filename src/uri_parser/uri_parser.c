@@ -234,13 +234,9 @@ gchar *
 uri_parser_merge_uris(const char *base_uri, const char *rel_uri)
 {
     struct PP_URLComponents_Dev base_c, rel_c;
-    str_t scheme = {};
-    str_t authority = {};
-    str_t path = {};
-    str_t query = {};
-    str_t fragment = {};
-    GList *m = NULL;    // list of allocated memory blocks
-    int scheme_is_file = 0;
+    str_t                       scheme, authority, path, query, fragment;
+    GList                      *m = NULL;    // list of allocated memory blocks
+    int                         scheme_is_file = 0;
 
     uri_parser_parse_uri(base_uri, &base_c);
 
