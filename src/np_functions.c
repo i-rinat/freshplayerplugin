@@ -1534,9 +1534,11 @@ NPP_HandleEvent(NPP npp, void *event)
         return NPERR_NO_ERROR;
     }
 
-    if (pp_i && pp_i->is_fullscreen && pp_i->fs_wnd != xaev->window) {
+    if (!pp_i)
         return 0;
-    }
+
+    if (pp_i->is_fullscreen && pp_i->fs_wnd != xaev->window)
+        return 0;
 
 #define TRACE_HELPER(implstatus, f)                                                     \
     trace_info_##f("[NPP] " implstatus " %s npp=%p, event={.type=%s, .serial=%lu, "     \
