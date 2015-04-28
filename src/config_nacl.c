@@ -82,3 +82,8 @@ fpp_config_plugin_has_manifest(void)
 {
     return 0;
 }
+
+void
+fpp_config_detect_plugin_specific_quirks(void)
+{
+}

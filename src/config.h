@@ -98,4 +98,7 @@ fpp_config_get_pepper_data_dir(void);
 const char *
 fpp_config_get_pepper_salt_file_name(void);
 
+void
+fpp_config_detect_plugin_specific_quirks(void);
+
 #endif // FPP_CONFIG_H

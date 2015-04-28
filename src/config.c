@@ -66,6 +66,7 @@ static
 void
 initialize_quirks(void)
 {
+    fpp_config_detect_plugin_specific_quirks();
 }
 
 static
