@@ -90,4 +90,5 @@ fpp_config_plugin_has_manifest(void)
 void
 fpp_config_detect_plugin_specific_quirks(void)
 {
+    config.quirks.connect_first_loader_to_unrequested_stream = 1;
 }

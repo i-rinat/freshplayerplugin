@@ -44,6 +44,7 @@ static struct fpp_config_s default_config = {
     .enable_windowed_mode   =   1,
     .enable_xembed          =   1,
     .quirks = {
+        .connect_first_loader_to_unrequested_stream = 0,
         .dump_resource_histogram    = 0,
         .dump_variables             = 0,
         .plasma5_screensaver        = 0,
