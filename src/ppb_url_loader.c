@@ -40,6 +40,7 @@
 #include "tables.h"
 #include "eintr_retry.h"
 #include "ppb_url_request_info.h"
+#include "config.h"
 
 
 PP_Resource
@@ -321,6 +322,14 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
 
     ppb_var_release(full_url);
     pp_resource_release(request_info);
+
+    if (config.quirks.connect_first_loader_to_unrequested_stream) {
+        if (ul->instance->content_url_loader == 0) {
+            ul->instance->content_url_loader = loader;
+            pp_resource_release(loader);
+            return PP_OK_COMPLETIONPENDING;
+        }
+    }
 
     struct url_loader_open_param_s *p = g_slice_alloc(sizeof(*p));
     p->url =                ul->url;

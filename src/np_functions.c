@@ -739,10 +739,21 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
                  stream->lastmodified, (unsigned)(size_t)stream->notifyData, stream->headers,
                  seekable);
 
+    struct pp_instance_s *pp_i = npp->pdata;
+
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
 
+    int rewrite_url_in_loader = 0;
     PP_Resource loader = (size_t)stream->notifyData;
+
+    if (!loader && pp_i->content_url_loader != 0 && ! pp_i->content_url_loader_used) {
+        // this is unrequested stream from browser, so it must be the stream we are waiting for
+        loader = pp_i->content_url_loader;
+        rewrite_url_in_loader = 1;
+        pp_i->content_url_loader_used = 1;
+    }
+
     if (!loader) {
         // ignoring unrequested streams
         stream->pdata = NULL;
@@ -760,6 +771,16 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         ccb = ul->ccb;
         ul->ccb = PP_MakeCCB(NULL, NULL);  // prevent callback from being called twice
         ul->np_stream = stream;
+
+        if (rewrite_url_in_loader) {
+            free(ul->url);
+            ul->url = nullsafe_strdup(stream->url);
+
+            // rewriting is only performed for the stream with plugin content, so it's new URL of
+            // the instance
+            ppb_var_release(pp_i->instance_url);
+            pp_i->instance_url = ppb_var_var_from_utf8_z(ul->url);
+        }
 
         // handling redirection
         if (ph->http_code >= 300 && ph->http_code <= 307 && ul->redirect_url) {

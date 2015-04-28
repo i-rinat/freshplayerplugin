@@ -147,6 +147,8 @@ struct pp_instance_s {
     uint32_t                        incognito_mode;
     volatile gint                   instance_loaded;
     uint32_t                        ignore_focus_events_cnt; ///< number of focus events to ignore
+    PP_Resource                     content_url_loader;
+    uint32_t                        content_url_loader_used;
 
     Cursor                          prev_cursor;
     int                             have_prev_cursor;
