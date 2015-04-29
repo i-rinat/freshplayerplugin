@@ -36,6 +36,7 @@
 #include <ppapi/c/pp_errors.h>
 #include "n2p_proxy_class.h"
 #include "p2n_proxy_class.h"
+#include "compat.h"
 #include "config.h"
 
 
