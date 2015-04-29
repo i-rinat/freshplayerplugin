@@ -33,27 +33,20 @@
 struct PP_Var
 fpp_font_get_font_families(void)
 {
+    GString *builder;
     PangoFontFamily **families;
-    int n, k, total_len;
+    int n;
 
     pango_font_map_list_families(tables_get_pango_font_map(), &families, &n);
-    total_len = 0;
-    for (k = 0; k < n; k ++) {
-        const char *name = pango_font_family_get_name(families[k]);
-        total_len += strlen(name) + 1; // with '\0' at the end
+
+    builder = g_string_new(NULL);
+    for (int k = 0; k < n; k ++) {
+        g_string_append(builder, pango_font_family_get_name(families[k]));
+        g_string_append_c(builder, 0);
     }
 
-    char *s = malloc(total_len);
-    char *ptr = s;
-    for (k = 0; k < n; k ++) {
-        const char *name = pango_font_family_get_name(families[k]);
-        const int len = strlen(name);
-        memcpy(ptr, name, len + 1); // with '\0' at the end
-        ptr += len + 1;
-    }
-
-    struct PP_Var var = ppb_var_var_from_utf8(s, total_len);
-    free(s);
+    struct PP_Var var = ppb_var_var_from_utf8(builder->str, builder->len);
+    g_string_free(builder, TRUE);
     g_free(families);
 
     return var;
