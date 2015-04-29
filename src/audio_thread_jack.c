@@ -377,8 +377,10 @@ ja_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_co
 static
 audio_stream *
 ja_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_count,
-                         audio_stream_capture_cb_f *cb, void *cb_user_data)
+                         audio_stream_capture_cb_f *cb, void *cb_user_data,
+                         const char *longname)
 {
+    (void)longname; // have no meaning here. JACK itself selects appropriate sound device
     return ja_do_create_stream(sample_rate, sample_frame_count, NULL, cb, cb_user_data,
                                STREAM_CAPTURE);
 }

@@ -55,7 +55,8 @@ typedef audio_stream *
 
 typedef audio_stream *
 (audio_create_capture_stream_f)(unsigned int sample_rate, unsigned int sample_frame_count,
-                                audio_stream_capture_cb_f *cb, void *cb_user_data);
+                                audio_stream_capture_cb_f *cb, void *cb_user_data,
+                                const char *device_longname);
 
 /// returns NULL-terminated array of device names
 ///

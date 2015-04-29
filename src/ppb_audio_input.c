@@ -123,8 +123,12 @@ do_ppb_audio_input_open(PP_Resource audio_input, PP_Resource device_ref, PP_Reso
                         PPB_AudioInput_Callback audio_input_callback_0_4, void *user_data,
                         struct PP_CompletionCallback callback)
 {
-    // TODO: find actual device from device_ref
-    int32_t retval = PP_ERROR_FAILED;
+    int32_t         retval = PP_ERROR_FAILED;
+    const char     *longname = NULL;
+    struct PP_Var   longname_var = ppb_device_ref_get_longname(device_ref);
+
+    if (longname_var.type == PP_VARTYPE_STRING)
+        longname = ppb_var_var_to_utf8(longname_var, NULL);
 
     struct pp_audio_input_s *ai = pp_resource_acquire(audio_input, PP_RESOURCE_AUDIO_INPUT);
     if (!ai) {
@@ -146,7 +150,7 @@ do_ppb_audio_input_open(PP_Resource audio_input, PP_Resource device_ref, PP_Reso
     ai->cb_user_data = user_data;
 
     ai->stream = ai->stream_ops->create_capture_stream(ai->sample_rate, ai->sample_frame_count,
-                                                       capture_cb, ai);
+                                                       capture_cb, ai, longname);
     if (!ai->stream) {
         trace_error("%s, can't create capture stream\n", __func__);
         goto err_3;
