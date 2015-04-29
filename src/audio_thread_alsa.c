@@ -320,7 +320,7 @@ wakeup_audio_thread(void)
 static
 audio_stream *
 alsa_create_stream(audio_stream_direction direction, unsigned int sample_rate,
-                   unsigned int sample_frame_count)
+                   unsigned int sample_frame_count, const char *pcm_name)
 {
     audio_stream *as;
     snd_pcm_hw_params_t *hw_params;
@@ -347,11 +347,10 @@ alsa_create_stream(audio_stream_direction direction, unsigned int sample_rate,
         }                                                                               \
     } while (0)
 
-    // TODO: select device
     if (direction == STREAM_PLAYBACK)
-        CHECK_A(snd_pcm_open, (&as->pcm, "default", SND_PCM_STREAM_PLAYBACK, 0));
+        CHECK_A(snd_pcm_open, (&as->pcm, pcm_name, SND_PCM_STREAM_PLAYBACK, 0));
     else
-        CHECK_A(snd_pcm_open, (&as->pcm, "default", SND_PCM_STREAM_CAPTURE, 0));
+        CHECK_A(snd_pcm_open, (&as->pcm, pcm_name, SND_PCM_STREAM_CAPTURE, 0));
 
     CHECK_A(snd_pcm_hw_params_malloc, (&hw_params));
     CHECK_A(snd_pcm_hw_params_any, (as->pcm, hw_params));
@@ -418,7 +417,8 @@ audio_stream *
 alsa_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_count,
                             audio_stream_playback_cb_f *cb, void *cb_user_data)
 {
-    audio_stream *as = alsa_create_stream(STREAM_PLAYBACK, sample_rate, sample_frame_count);
+    audio_stream *as = alsa_create_stream(STREAM_PLAYBACK, sample_rate, sample_frame_count,
+                                          "default");
     if (!as)
         return NULL;
 
@@ -428,13 +428,71 @@ alsa_create_playback_stream(unsigned int sample_rate, unsigned int sample_frame_
 }
 
 static
+char *
+find_pcm_name(const char *device_longname)
+{
+    char *pcm_name = NULL;
+    int   card = -1;
+    int   done = 0;
+
+    if (!device_longname)
+        return strdup("default");
+
+    while (!done) {
+        int err = snd_card_next(&card);
+        if (err != 0)
+            break;
+        if (card == -1)
+            break;
+
+        char *longname = NULL;
+        if (snd_card_get_longname(card, &longname) != 0)
+            goto next_0;
+
+        if (!longname)
+            goto next_0;
+
+        if (strcmp(device_longname, longname) != 0)
+            goto next_2;
+
+        void **hints;
+        if (snd_device_name_hint(card, "pcm", &hints) != 0)
+            goto next_2;
+
+        for (int k = 0; hints[k] != NULL; k ++) {
+            pcm_name = snd_device_name_get_hint(hints[k], "NAME");
+            if (strncmp(pcm_name, "default:", strlen("default:")) == 0) {
+                done = 1;
+                goto next_3;
+            }
+            free(pcm_name);
+            pcm_name = NULL;
+        }
+
+    next_3:
+        snd_device_name_free_hint(hints);
+    next_2:
+        free(longname);
+    next_0:
+        continue;
+    }
+
+    if (!pcm_name)
+        pcm_name = strdup("default");
+
+    return pcm_name;
+}
+
+static
 audio_stream *
 alsa_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_count,
                            audio_stream_capture_cb_f *cb, void *cb_user_data,
                            const char *longname)
 {
-    // TODO: implement card selection
-    audio_stream *as = alsa_create_stream(STREAM_CAPTURE, sample_rate, sample_frame_count);
+    char *pcm_name = find_pcm_name(longname);
+    audio_stream *as = alsa_create_stream(STREAM_CAPTURE, sample_rate, sample_frame_count,
+                                          pcm_name);
+    free(pcm_name);
 
     if (!as)
         return NULL;
