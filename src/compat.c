@@ -42,10 +42,16 @@ g_async_queue_timeout_pop(GAsyncQueue *queue, guint64 timeout)
 }
 
 void
+<<<<<<< HEAD
+g_array_set_clear_func (GArray *array, GDestroyNotify clear_func)
+{
+   //  Only for compatibility.
+=======
 g_array_set_clear_func(GArray *array, GDestroyNotify clear_func)
 {
    //  Only for compatibility.
    // TODO: memory leaks?
+>>>>>>> upstream/master
 } 
 #endif
 

@@ -45,9 +45,14 @@
 #if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) < VER(2, 32))
 gpointer
 g_async_queue_timeout_pop(GAsyncQueue *queue, guint64 timeout);
+<<<<<<< HEAD
+void
+g_array_set_clear_func (GArray *array, GDestroyNotify clear_func);
+=======
 
 void
 g_array_set_clear_func(GArray *array, GDestroyNotify clear_func);
+>>>>>>> upstream/master
 #endif
 
 #if (VER(GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION) < VER(2, 28))
