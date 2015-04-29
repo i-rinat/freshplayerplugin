@@ -484,12 +484,13 @@ NPError
 NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[],
         char *argv[], NPSavedData *saved)
 {
-    int k;
-    struct pp_instance_s *pp_i;
     trace_info_f("[NPP] {full} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                  pluginType, npp, mode, argc, saved);
 
-    for (k = 0; k < argc; k ++)
+    struct pp_instance_s *pp_i;
+    struct PP_Var         instance_relative_url = PP_MakeUndefined();
+
+    for (int k = 0; k < argc; k ++)
         trace_info_f("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
     if (config.quirks.plugin_missing) {
@@ -525,12 +526,12 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->argc = argc;
     pp_i->argn = malloc(argc * sizeof(char*));
     pp_i->argv = malloc(argc * sizeof(char*));
-    for (k = 0; k < argc; k ++) {
+    for (int k = 0; k < argc; k ++) {
         pp_i->argn[k] = strdup(argn[k] ? argn[k] : "");
         pp_i->argv[k] = strdup(argv[k] ? argv[k] : "");
 
         if (strcasecmp(pp_i->argn[k], "src") == 0)
-            pp_i->instance_relative_url = ppb_var_var_from_utf8_z(pp_i->argv[k]);
+            instance_relative_url = ppb_var_var_from_utf8_z(pp_i->argv[k]);
 
         if (strcasecmp(pp_i->argn[k], "wmode") == 0) {
             if (strcasecmp(pp_i->argv[k], "transparent") == 0) {
@@ -595,7 +596,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->document_url = get_document_url(pp_i);
     pp_i->document_base_url = get_document_base_url(pp_i);
     pp_i->instance_url = ppb_url_util_resolve_relative_to_url(pp_i->document_base_url,
-                                                              pp_i->instance_relative_url, NULL);
+                                                              instance_relative_url, NULL);
+    ppb_var_release(instance_relative_url);
 
     // prepare GTK+ widget for catching keypress events returned by IME
     pp_i->catcher_widget = gtk_label_new("");

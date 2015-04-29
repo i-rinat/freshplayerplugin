@@ -263,7 +263,7 @@ topmost_rect_ptac(void *param)
     NPString topmost_func_src = NPString_literal(
         "(function(elem, x, y) {"
             "var r = elem.getBoundingClientRect();"
-            "return document.elementFromPoint(x + r.x, y + r.y) == elem;"
+            "return document.elementFromPoint(x + r.left, y + r.top) == elem;"
         "})");
     NPVariant topmost_func;
 
