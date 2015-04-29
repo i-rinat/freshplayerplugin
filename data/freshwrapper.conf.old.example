@@ -1,4 +1,4 @@
-# Configuration options for FreshPlayerPlugin with libconfig9
+# Configuration options for FreshPlayerPlugin with libconfig8
 
 # This configuration file is optional. Wrapper will search for it first
 # in ~/.config/freshwrapper.conf, then in /etc/freshwrapper.conf.
@@ -11,56 +11,56 @@
 # on its own, but you may override bounds here
 
 # lower bound for audio buffer size, in milliseconds
-audio_buffer_min_ms = 20
+audio_buffer_min_ms = 20 ;
 
 # higher bound of audio buffer size, in milliseconds
-audio_buffer_max_ms = 500
+audio_buffer_max_ms = 500 ;
 
 # output sound through JACK. If enabled, only JACK will be tried, and if
 # your machine doesn't have it, there would be no sound, and no sync
-audio_use_jack = 0
+audio_use_jack = 0 ;
 
 # Path to the Pepper Flash plugin.
 # If the option is absent, freshwrapper will search for Pepper Flash in
 # a number of location where it could be. Usually that's enough, but if
 # not, you should manually enter the right path. Multiple paths could
 # be specified, separated by colon.
-pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
+pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so" ;
 
 # "Command-line" arguments for Flash
-flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1"
+flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1" ;
 
 # enable 3d and stage 3d
-enable_3d = 1
+enable_3d = 1 ;
 
 # when set to 1, limits output to warnings and errors only
-quiet = 0
+quiet = 0 ;
 
 # When multiple monitors with different resolutions are used, size
 # of fullscreen window can vary. But some Flash movies request these
 # parameters once at startup and rely on them to be correct. By default,
 # if zeros are used here, freshwrapper will select minimal width and
 # height across all monitors.
-fullscreen_width = 0
-fullscreen_height = 0
+fullscreen_width = 0 ;
+fullscreen_height = 0 ;
 
 # Enables DNS query case randomization to partially protect against DNS
 # poisoning attacks. It was reported that some Mikrotik routers do not
 # support this trick. Set parameter to 0 if you have an affected model
-randomize_dns_case = 1
+randomize_dns_case = 1 ;
 
 # scaling factor (floating point value) used to convert screen pixels
 # to device independent pixels. You may need it for displays with
 # high DPI
-device_scale = 1
+device_scale = 1 ;
 
 # method org.freedesktop.ScreenSaver.SimulateUserActivity() in KDE 5 seems
 # to have no effect unless GetSessionIdleTime() called afterwards. Set
 # parameter to 1 to call latter
-quirk_plasma5_screensaver = 0
+quirk_plasma5_screensaver = 0 ;
 
 # whenever to use windowed plugin mode
-enable_windowed_mode = 1
+enable_windowed_mode = 1 ;
 
 # whenever XEmbed used in windowed mode (if browser advertises its support)
-enable_xembed = 1
+enable_xembed = 1 ;
