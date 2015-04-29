@@ -443,7 +443,7 @@ alsa_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_c
 }
 
 static
-char **
+audio_device_name *
 alsa_enumerate_capture_devices(void)
 {
     int     rcard;
@@ -463,7 +463,7 @@ alsa_enumerate_capture_devices(void)
     if (cnt == 0)
         return NULL;
 
-    char **list = malloc(sizeof(char *) * (cnt + 1));
+    audio_device_name *list = calloc(sizeof(audio_device_name), cnt + 1);
     if (!list)
         return NULL;
 
@@ -479,7 +479,12 @@ alsa_enumerate_capture_devices(void)
 
         char *name;
         if (snd_card_get_name(rcard, &name) == 0 && name != NULL) {
-            list[idx] = name;
+            list[idx].name = name;
+
+            char *longname;
+            if (snd_card_get_longname(rcard, &longname) == 0 && longname != NULL)
+                list[idx].longname = longname;
+
             idx ++;
             if (idx >= cnt)
                 break;
@@ -487,7 +492,8 @@ alsa_enumerate_capture_devices(void)
     }
 
     // terminate list
-    list[idx] = NULL;
+    list[idx].name = NULL;
+    list[idx].longname = NULL;
 
     return list;
 }

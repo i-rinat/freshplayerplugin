@@ -78,14 +78,15 @@ ppb_audio_input_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput
         return PP_ERROR_FAILED;
     }
 
-    char **list = ai->stream_ops->enumerate_capture_devices();
+    audio_device_name *list = ai->stream_ops->enumerate_capture_devices();
     size_t cnt = 0;
-    while (list && list[cnt])
+    while (list && list[cnt].name)
         cnt ++;
 
     PP_Resource *refs = output.GetDataBuffer(output.user_data, cnt, sizeof(PP_Resource));
     for (uintptr_t k = 0; k < cnt; k ++) {
-        refs[k] = ppb_device_ref_create(ai->instance->id, ppb_var_var_from_utf8_z(list[k]),
+        refs[k] = ppb_device_ref_create(ai->instance->id, ppb_var_var_from_utf8_z(list[k].name),
+                                        ppb_var_var_from_utf8_z(list[k].longname),
                                         PP_DEVICETYPE_DEV_AUDIOCAPTURE);
     }
 

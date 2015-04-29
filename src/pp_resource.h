@@ -466,6 +466,7 @@ struct pp_font_s {
 struct pp_device_ref_s {
     COMMON_STRUCTURE_FIELDS
     struct PP_Var           name;
+    struct PP_Var           longname;
     PP_DeviceType_Dev       type;
 };
 

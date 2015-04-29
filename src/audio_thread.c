@@ -50,12 +50,14 @@ audio_select_implementation(void)
 }
 
 void
-audio_capture_device_list_free(char **list)
+audio_capture_device_list_free(audio_device_name *list)
 {
     if (!list)
         return;
 
-    for (uintptr_t k = 0; list[k] != NULL; k ++)
-        free(list[k]);
+    for (uintptr_t k = 0; list[k].name != NULL; k ++) {
+        free(list[k].name);
+        free(list[k].longname);
+    }
     free(list);
 }

@@ -33,6 +33,11 @@ typedef enum {
     STREAM_CAPTURE,
 } audio_stream_direction;
 
+typedef struct {
+    char *name;
+    char *longname;
+} audio_device_name;
+
 typedef struct audio_stream_s audio_stream;
 
 typedef void
@@ -55,7 +60,7 @@ typedef audio_stream *
 /// returns NULL-terminated array of device names
 ///
 /// caller should free memory by calling audio_capture_device_list_free()
-typedef char **
+typedef audio_device_name *
 (audio_enumerate_capture_devices_f)(void);
 
 typedef void
@@ -78,7 +83,7 @@ audio_stream_ops *
 audio_select_implementation(void);
 
 void
-audio_capture_device_list_free(char **list);
+audio_capture_device_list_free(audio_device_name *list);
 
 
 #endif // FPP_AUDIO_THREAD_H

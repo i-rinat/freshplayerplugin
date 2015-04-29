@@ -30,7 +30,8 @@
 
 
 PP_Resource
-ppb_device_ref_create(PP_Instance instance, struct PP_Var name, PP_DeviceType_Dev type);
+ppb_device_ref_create(PP_Instance instance, struct PP_Var name, struct PP_Var longname,
+                      PP_DeviceType_Dev type);
 
 void
 ppb_device_ref_destroy(void *ptr);
@@ -43,5 +44,8 @@ ppb_device_ref_get_type(PP_Resource device_ref);
 
 struct PP_Var
 ppb_device_ref_get_name(PP_Resource device_ref);
+
+struct PP_Var
+ppb_device_ref_get_longname(PP_Resource device_ref);
 
 #endif // FPP_PPB_DEVICE_REF_H

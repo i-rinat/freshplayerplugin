@@ -384,14 +384,19 @@ ja_create_capture_stream(unsigned int sample_rate, unsigned int sample_frame_cou
 }
 
 static
-char **
+audio_device_name *
 ja_enumerate_capture_devices(void)
 {
-    char **list = malloc(sizeof(char *) * 2);
+    audio_device_name *list = malloc(sizeof(audio_device_name) * 2);
     if (!list)
         return NULL;
-    list[0] = strdup("JACK capture device");
-    list[1] = NULL;
+
+    list[0].name = strdup("JACK capture device");
+    list[0].longname = strdup(list[0].name);
+
+    list[1].name = NULL;
+    list[1].longname = NULL;
+
     return list;
 }
 

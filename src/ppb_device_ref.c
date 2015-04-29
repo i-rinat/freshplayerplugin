@@ -30,7 +30,8 @@
 
 
 PP_Resource
-ppb_device_ref_create(PP_Instance instance, struct PP_Var name, PP_DeviceType_Dev type)
+ppb_device_ref_create(PP_Instance instance, struct PP_Var name, struct PP_Var longname,
+                      PP_DeviceType_Dev type)
 {
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
     if (!pp_i) {
@@ -47,6 +48,7 @@ ppb_device_ref_create(PP_Instance instance, struct PP_Var name, PP_DeviceType_De
 
     // no type checking is perfomed as it's an internal function
     dr->name = ppb_var_add_ref2(name);
+    dr->longname = ppb_var_add_ref2(longname);
     dr->type = type;
 
     pp_resource_release(device_ref);
@@ -92,6 +94,21 @@ ppb_device_ref_get_name(PP_Resource device_ref)
     }
 
     struct PP_Var name = ppb_var_add_ref2(dr->name);
+
+    pp_resource_release(device_ref);
+    return name;
+}
+
+struct PP_Var
+ppb_device_ref_get_longname(PP_Resource device_ref)
+{
+    struct pp_device_ref_s *dr = pp_resource_acquire(device_ref, PP_RESOURCE_DEVICE_REF);
+    if (!dr) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    struct PP_Var name = ppb_var_add_ref2(dr->longname);
 
     pp_resource_release(device_ref);
     return name;
