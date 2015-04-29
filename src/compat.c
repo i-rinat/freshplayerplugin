@@ -40,6 +40,12 @@ g_async_queue_timeout_pop(GAsyncQueue *queue, guint64 timeout)
     g_time_val_add(&end_time, timeout);
     return g_async_queue_timed_pop(queue, &end_time);
 }
+
+void
+g_array_set_clear_func (GArray *array, GDestroyNotify clear_func)
+{
+   //  Only for compatibility.
+} 
 #endif
 
 
