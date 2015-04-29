@@ -63,8 +63,10 @@ hp_parse_headers(const char *headers)
 
     // parse headers to name and value
     headers_copy = strdup(headers);
-    ph->name = malloc(sizeof(char *) * ph->cnt);
-    ph->value = malloc(sizeof(char *) * ph->cnt);
+    if (ph->cnt > 0) {
+        ph->name = malloc(sizeof(char *) * ph->cnt);
+        ph->value = malloc(sizeof(char *) * ph->cnt);
+    }
     part = strtok_r(headers_copy, delimiter, &saveptr);
 
     // save status line
@@ -75,7 +77,7 @@ hp_parse_headers(const char *headers)
 
     // save headers
     k = 0;
-    while (part) {
+    while (part && k < ph->cnt) {
         char *colon = strchr(part, ':');
         if (colon) {
             *colon = 0;
