@@ -1356,14 +1356,17 @@ handle_button_press_release_event(NPP npp, void *event)
             ppp_handle_input_event_helper(pp_i, pp_event);
         }
     } else { // event_class == PP_INPUTEVENT_CLASS_WHEEL
-        const float scroll_by_tick = 10.0;
-        struct PP_FloatPoint wheel_delta = { .x = wheel_x * scroll_by_tick,
-                                             .y = wheel_y * scroll_by_tick };
-        struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
+        if (ev->type == ButtonPress) {
+            const float scroll_by_tick = 10.0;
+            struct PP_FloatPoint wheel_delta = { .x = wheel_x * scroll_by_tick,
+                                                 .y = wheel_y * scroll_by_tick };
+            struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
 
-        PP_Resource pp_event = ppb_wheel_input_event_create(pp_i->id, ev->time/1.0e6, mod,
-                                                            &wheel_delta, &wheel_ticks, PP_FALSE);
-        ppp_handle_input_event_helper(pp_i, pp_event);
+            PP_Resource pp_event = ppb_wheel_input_event_create(pp_i->id, ev->time/1.0e6, mod,
+                                                                &wheel_delta, &wheel_ticks,
+                                                                PP_FALSE);
+            ppp_handle_input_event_helper(pp_i, pp_event);
+        }
     }
 
     return 1;
