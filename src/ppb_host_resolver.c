@@ -27,6 +27,7 @@
 #include "trace.h"
 #include "tables.h"
 #include <ppapi/c/pp_errors.h>
+#include "async_network.h"
 
 
 
@@ -47,6 +48,9 @@ ppb_host_resolver_create(PP_Instance instance)
 void
 ppb_host_resolver_destroy(void *ptr)
 {
+    struct pp_host_resolver_s *hr = ptr;
+
+    free_and_nullify(hr->addrs);
 }
 
 PP_Bool
@@ -60,7 +64,25 @@ ppb_host_resolver_resolve(PP_Resource host_resolver, const char *host, uint16_t 
                           const struct PP_HostResolver_Private_Hint *hint,
                           struct PP_CompletionCallback callback)
 {
-    return PP_ERROR_FAILED;
+    struct pp_host_resolver_s *hr = pp_resource_acquire(host_resolver, PP_RESOURCE_HOST_RESOLVER);
+    if (!hr) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    struct async_network_task_s *task = async_network_task_create();
+
+    task->type =        ASYNC_NETWORK_HOST_RESOLVE;
+    task->resource =    host_resolver;
+    task->instance =    hr->instance;
+    task->host =        nullsafe_strdup(host);
+    task->port =        port;
+    task->callback =    callback;
+
+    pp_resource_release(host_resolver);
+    async_network_task_push(task);
+
+    return PP_OK_COMPLETIONPENDING;
 }
 
 struct PP_Var
@@ -106,7 +128,7 @@ trace_ppb_host_resolver_resolve(PP_Resource host_resolver, const char *host, uin
                                 const struct PP_HostResolver_Private_Hint *hint,
                                 struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s host_resolver=%d, host=%s, port=%u, hint=%p, callback={.func=%p, "
+    trace_info("[PPB] {full} %s host_resolver=%d, host=%s, port=%u, hint=%p, callback={.func=%p, "
                ".user_data=%p, .flags=%u}\n", __func__+6, host_resolver, host, (unsigned int)port,
                hint, callback.func, callback.user_data, callback.flags);
     return ppb_host_resolver_resolve(host_resolver, host, port, hint, callback);
@@ -141,7 +163,7 @@ trace_ppb_host_resolver_get_net_address(PP_Resource host_resolver, uint32_t inde
 const struct PPB_HostResolver_Private_0_1 ppb_host_resolver_private_interface_0_1 = {
     .Create =           TWRAPF(ppb_host_resolver_create),
     .IsHostResolver =   TWRAPF(ppb_host_resolver_is_host_resolver),
-    .Resolve =          TWRAPZ(ppb_host_resolver_resolve),
+    .Resolve =          TWRAPF(ppb_host_resolver_resolve),
     .GetCanonicalName = TWRAPZ(ppb_host_resolver_get_canonical_name),
     .GetSize =          TWRAPZ(ppb_host_resolver_get_size),
     .GetNetAddress =    TWRAPZ(ppb_host_resolver_get_net_address),

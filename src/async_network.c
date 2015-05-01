@@ -36,6 +36,7 @@
 #include <event2/dns.h>
 #include <event2/thread.h>
 #include <ppapi/c/pp_errors.h>
+#include <ppapi/c/private/ppb_net_address_private.h>
 #include "pp_resource.h"
 #include "ppb_core.h"
 #include "trace.h"
@@ -448,6 +449,95 @@ handle_udp_recv_stage1(struct async_network_task_s *task)
 }
 
 static
+void
+handle_host_resolve_stage2(int result, char type, int count, int ttl, void *addresses, void *arg)
+{
+    struct async_network_task_s *task = arg;
+
+    if (result != DNS_ERR_NONE || count < 1) {
+        trace_warning("%s, evdns returned code %d, count = %d (%s:%u)\n", __func__, result, count,
+                      task->host, (unsigned int)task->port);
+        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED, __func__);
+        task_destroy(task);
+        return;
+    }
+
+    struct pp_host_resolver_s *hr = pp_resource_acquire(task->resource, PP_RESOURCE_HOST_RESOLVER);
+    if (!hr) {
+        trace_error("%s, bad resource\n", __func__);
+        task_destroy(task);
+        return;
+    }
+
+    hr->addr_count = count;
+    hr->addrs = calloc(count, sizeof(struct PP_NetAddress_Private));
+
+    if (type == DNS_IPv4_A) {
+        struct in_addr *ipv4_addrs = addresses;
+
+        for (int k = 0; k < count; k ++) {
+            struct sockaddr_in sai = {
+                .sin_family = AF_INET,
+                .sin_port =   task->port,
+            };
+
+            memcpy(&sai.sin_addr, &ipv4_addrs[k], sizeof(struct in_addr));
+
+            hr->addrs[k].size = sizeof(struct sockaddr_in);
+            memcpy(hr->addrs[k].data, &sai, sizeof(sai));
+        }
+
+        ppb_core_call_on_main_thread2(0, task->callback, PP_OK, __func__);
+
+    } else if (type == DNS_IPv6_AAAA) {
+        struct in6_addr *ipv6_addrs = addresses;
+
+        for (int k = 0; k < count; k ++) {
+            struct sockaddr_in6 sai6 = {
+                .sin6_family = AF_INET6,
+                .sin6_port =   task->port,
+            };
+
+            memcpy(&sai6.sin6_addr, &ipv6_addrs[k], sizeof(struct in6_addr));
+
+            hr->addrs[k].size = sizeof(struct sockaddr_in6);
+            memcpy(hr->addrs[k].data, &sai6, sizeof(sai6));
+        }
+
+        ppb_core_call_on_main_thread2(0, task->callback, PP_OK, __func__);
+
+    } else {
+        trace_error("%s, bad evdns type %d (%s:%u)\n", __func__, type, task->host,
+                    (unsigned int)task->port);
+        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_FAILED, __func__);
+
+    }
+
+    pp_resource_release(task->resource);
+    task_destroy(task);
+}
+
+static
+void
+handle_host_resolve_stage1(struct async_network_task_s *task)
+{
+    struct evdns_request *req;
+
+    // queue DNS request
+    req = evdns_base_resolve_ipv4(evdns_b, task->host, DNS_QUERY_NO_SEARCH,
+                                  handle_host_resolve_stage2, task);
+    // TODO: what about ipv6?
+
+    if (!req) {
+        trace_warning("%s, early dns resolution failure (%s:%u)\n", __func__, task->host,
+                      (unsigned int)task->port);
+        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED, __func__);
+        task_destroy(task);
+        return;
+    }
+}
+
+static
 void *
 network_worker_thread(void *param)
 {
@@ -494,6 +584,9 @@ async_network_task_push(struct async_network_task_s *task)
         break;
     case ASYNC_NETWORK_UDP_RECV:
         handle_udp_recv_stage1(task);
+        break;
+    case ASYNC_NETWORK_HOST_RESOLVE:
+        handle_host_resolve_stage1(task);
         break;
     }
 }
