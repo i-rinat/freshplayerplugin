@@ -333,7 +333,11 @@ ja_do_create_stream(unsigned int sample_rate, unsigned int sample_frame_count,
 
         if (ports[0]) {
             if (jack_connect(as->client, ports[0], jack_port_name(as->input_port)) != 0)
-                trace_error("%s, can't connect input port\n", __func__);
+                trace_error("%s, can't connect input port 1\n", __func__);
+            if (ports[1]) {
+                if (jack_connect(as->client, ports[1], jack_port_name(as->input_port)) != 0)
+                    trace_error("%s, can't connect input port 2\n", __func__);
+            }
         }
     }
 
