@@ -373,7 +373,7 @@ handle_tcp_write_stage1(struct async_network_task_s *task)
 
 static
 void
-handle_tcp_disconnect_stage2(int sock, short event_flags, void *arg)
+handle_disconnect_stage2(int sock, short event_flags, void *arg)
 {
     struct async_network_task_s *task = arg;
     GHashTableIter iter;
@@ -400,9 +400,9 @@ handle_tcp_disconnect_stage2(int sock, short event_flags, void *arg)
 
 static
 void
-handle_tcp_disconnect_stage1(struct async_network_task_s *task)
+handle_disconnect_stage1(struct async_network_task_s *task)
 {
-    struct event *ev = evtimer_new(event_b, handle_tcp_disconnect_stage2, task);
+    struct event *ev = evtimer_new(event_b, handle_disconnect_stage2, task);
     struct timeval timeout = {.tv_sec = 0};
     add_event_mapping(task, ev);
     event_add(ev, &timeout);
@@ -483,8 +483,8 @@ async_network_task_push(struct async_network_task_s *task)
     case ASYNC_NETWORK_TCP_CONNECT_WITH_NETADDRESS:
         handle_tcp_connect_with_net_address(task);
         break;
-    case ASYNC_NETWORK_TCP_DISCONNECT:
-        handle_tcp_disconnect_stage1(task);
+    case ASYNC_NETWORK_DISCONNECT:
+        handle_disconnect_stage1(task);
         break;
     case ASYNC_NETWORK_TCP_READ:
         handle_tcp_read_stage1(task);

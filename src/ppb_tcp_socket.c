@@ -64,7 +64,7 @@ ppb_tcp_socket_destroy(void *ptr)
         ts->destroyed = 1;
         ts->is_connected = 0;
 
-        task->type = ASYNC_NETWORK_TCP_DISCONNECT;
+        task->type = ASYNC_NETWORK_DISCONNECT;
         task->resource = ts->self_id;
         task->instance = ts->instance;
         task->sock = ts->sock;
