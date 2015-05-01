@@ -155,6 +155,14 @@ ppb_net_address_get_address(const struct PP_NetAddress_Private *addr, void *addr
 uint32_t
 ppb_net_address_get_scope_id(const struct PP_NetAddress_Private *addr)
 {
+    if (addr->size == sizeof(struct sockaddr_in6)) {
+        struct sockaddr_in6 sai6;
+
+        memcpy(&sai6, addr->data, sizeof(sai6));
+        return sai6.sin6_scope_id;
+    }
+
+    // it's IPv4, function should return 0
     return 0;
 }
 
@@ -246,7 +254,7 @@ TRACE_WRAPPER
 uint32_t
 trace_ppb_net_address_get_scope_id(const struct PP_NetAddress_Private *addr)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s addr=%p\n", __func__+6, addr);
     return ppb_net_address_get_scope_id(addr);
 }
 
@@ -279,7 +287,7 @@ const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = 
     .GetFamily =             TWRAPF(ppb_net_address_get_family),
     .GetPort =               TWRAPF(ppb_net_address_get_port),
     .GetAddress =            TWRAPF(ppb_net_address_get_address),
-    .GetScopeID =            TWRAPZ(ppb_net_address_get_scope_id),
+    .GetScopeID =            TWRAPF(ppb_net_address_get_scope_id),
     .CreateFromIPv4Address = TWRAPZ(ppb_net_address_create_from_ipv4_address),
     .CreateFromIPv6Address = TWRAPZ(ppb_net_address_create_from_ipv6_address),
 };
