@@ -94,7 +94,16 @@ ppb_host_resolver_get_canonical_name(PP_Resource host_resolver)
 uint32_t
 ppb_host_resolver_get_size(PP_Resource host_resolver)
 {
-    return 0;
+    struct pp_host_resolver_s *hr = pp_resource_acquire(host_resolver, PP_RESOURCE_HOST_RESOLVER);
+    if (!hr) {
+        trace_error("%s, bad resource\n", __func__);
+        return 0;
+    }
+
+    uint32_t count = hr->addr_count;
+
+    pp_resource_release(host_resolver);
+    return count;
 }
 
 PP_Bool
@@ -146,7 +155,7 @@ TRACE_WRAPPER
 uint32_t
 trace_ppb_host_resolver_get_size(PP_Resource host_resolver)
 {
-    trace_info("[PPB] {zilch} %s host_resolver=%d\n", __func__+6, host_resolver);
+    trace_info("[PPB] {full} %s host_resolver=%d\n", __func__+6, host_resolver);
     return ppb_host_resolver_get_size(host_resolver);
 }
 
@@ -165,6 +174,6 @@ const struct PPB_HostResolver_Private_0_1 ppb_host_resolver_private_interface_0_
     .IsHostResolver =   TWRAPF(ppb_host_resolver_is_host_resolver),
     .Resolve =          TWRAPF(ppb_host_resolver_resolve),
     .GetCanonicalName = TWRAPZ(ppb_host_resolver_get_canonical_name),
-    .GetSize =          TWRAPZ(ppb_host_resolver_get_size),
+    .GetSize =          TWRAPF(ppb_host_resolver_get_size),
     .GetNetAddress =    TWRAPZ(ppb_host_resolver_get_net_address),
 };
