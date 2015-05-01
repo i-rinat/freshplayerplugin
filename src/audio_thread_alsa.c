@@ -38,6 +38,7 @@ struct audio_stream_s {
     snd_pcm_t                  *pcm;
     struct pollfd              *fds;
     size_t                      nfds;
+    size_t                      sample_frame_count;
     audio_stream_capture_cb_f  *capture_cb;
     audio_stream_playback_cb_f *playback_cb;
     void                       *cb_user_data;
@@ -219,38 +220,57 @@ audio_thread(void *param)
                 int                 paused = g_atomic_int_get(&as->paused);
                 snd_pcm_sframes_t   frame_count = snd_pcm_avail(as->pcm);
 
-
                 if (revents & POLLIN) {
-                    const size_t frame_size = 1 * sizeof(int16_t); // mono 16-bit
-                    size_t sz = MIN(frame_count * frame_size, sizeof(buf));
-
                     // POLLIN
-                    if (!paused && as->capture_cb) {
-                        snd_pcm_sframes_t frames_read;
+                    const size_t frame_size = 1 * sizeof(int16_t); // mono 16-bit
+                    const size_t max_segment_length = MIN(as->sample_frame_count * frame_size,
+                                                          sizeof(buf));
+                    size_t       to_process = frame_count * frame_size;
 
-                        frames_read = snd_pcm_readi(as->pcm, buf, sz / frame_size);
-                        if (frames_read >= 0) {
-                            as->capture_cb(buf, frames_read * frame_size, 0, as->cb_user_data);
-                        } else {
+                    while (to_process > 0) {
+                        snd_pcm_sframes_t frames_read;
+                        const size_t segment_length = MIN(to_process, max_segment_length);
+
+                        frames_read = snd_pcm_readi(as->pcm, buf, segment_length / frame_size);
+                        if (frames_read < 0) {
                             trace_warning("%s, snd_pcm_readi error %d\n", __func__,
                                           (int)frames_read);
                             recover_pcm(as->pcm);
+                            continue;
                         }
+
+                        if (!paused && as->capture_cb)
+                            as->capture_cb(buf, frames_read * frame_size, 0, as->cb_user_data);
+
+                        to_process -= frames_read * frame_size;
                     }
+
                 } else {
-                    const size_t frame_size = 2 * sizeof(int16_t); // stereo 16-bit
-                    size_t sz = MIN(frame_count * frame_size, sizeof(buf));
-
                     // POLLOUT
-                    if (paused || !as->playback_cb)
-                        memset(buf, 0, sz);
-                    else
-                        as->playback_cb(buf, sz, 0, as->cb_user_data);
+                    const size_t frame_size = 2 * sizeof(int16_t); // stereo 16-bit
+                    const size_t max_segment_length = MIN(as->sample_frame_count * frame_size,
+                                                          sizeof(buf));
+                    size_t       to_process = frame_count * frame_size;
 
-                    snd_pcm_sframes_t written = snd_pcm_writei(as->pcm, buf, sz / frame_size);
-                    if (written < 0) {
-                        trace_warning("%s, snd_pcm_writei error %d\n", __func__, (int)written);
-                        recover_pcm(as->pcm);
+                    while (to_process > 0) {
+                        snd_pcm_sframes_t frames_written;
+                        const size_t segment_length = MIN(to_process, max_segment_length);
+
+                        if (paused || !as->playback_cb)
+                            memset(buf, 0, segment_length);
+                        else
+                            as->playback_cb(buf, segment_length, 0, as->cb_user_data);
+
+                        frames_written = snd_pcm_writei(as->pcm, buf, segment_length / frame_size);
+
+                        if (frames_written < 0) {
+                            trace_warning("%s, snd_pcm_writei error %d\n", __func__,
+                                          (int)frames_written);
+                            recover_pcm(as->pcm);
+                            continue;
+                        }
+
+                        to_process -= frames_written * frame_size;
                     }
                 }
             }
@@ -336,6 +356,7 @@ alsa_create_stream(audio_stream_direction direction, unsigned int sample_rate,
     if (!as)
         goto err;
 
+    as->sample_frame_count = sample_frame_count;
     g_atomic_int_set(&as->paused, 1);
 
 #define CHECK_A(funcname, params)                                                       \
