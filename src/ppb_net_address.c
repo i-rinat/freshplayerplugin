@@ -170,12 +170,26 @@ void
 ppb_net_address_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
                                          struct PP_NetAddress_Private *addr_out)
 {
+    struct sockaddr_in sai = { .sin_port = port };
+
+    memcpy(&sai.sin_addr, ip, sizeof(sai.sin_addr));
+    memset(addr_out, 0, sizeof(struct PP_NetAddress_Private));
+
+    addr_out->size = sizeof(sai);
+    memcpy(addr_out->data, &sai, sizeof(sai));
 }
 
 void
 ppb_net_address_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id, uint16_t port,
                                          struct PP_NetAddress_Private *addr_out)
 {
+    struct sockaddr_in6 sai6 = { .sin6_port = port, .sin6_scope_id = scope_id };
+
+    memcpy(&sai6.sin6_addr, ip, sizeof(sai6.sin6_addr));
+    memset(addr_out, 0, sizeof(struct PP_NetAddress_Private));
+
+    addr_out->size = sizeof(sai6);
+    memcpy(addr_out->data, &sai6, sizeof(sai6));
 }
 
 
@@ -263,7 +277,7 @@ void
 trace_ppb_net_address_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
                                                struct PP_NetAddress_Private *addr_out)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_net_address_create_from_ipv4_address(ip, port, addr_out);
 }
 
@@ -273,7 +287,7 @@ trace_ppb_net_address_create_from_ipv6_address(const uint8_t ip[16], uint32_t sc
                                                uint16_t port,
                                                struct PP_NetAddress_Private *addr_out)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_net_address_create_from_ipv6_address(ip, scope_id, port, addr_out);
 }
 
@@ -288,6 +302,6 @@ const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = 
     .GetPort =               TWRAPF(ppb_net_address_get_port),
     .GetAddress =            TWRAPF(ppb_net_address_get_address),
     .GetScopeID =            TWRAPF(ppb_net_address_get_scope_id),
-    .CreateFromIPv4Address = TWRAPZ(ppb_net_address_create_from_ipv4_address),
-    .CreateFromIPv6Address = TWRAPZ(ppb_net_address_create_from_ipv6_address),
+    .CreateFromIPv4Address = TWRAPF(ppb_net_address_create_from_ipv4_address),
+    .CreateFromIPv6Address = TWRAPF(ppb_net_address_create_from_ipv6_address),
 };
