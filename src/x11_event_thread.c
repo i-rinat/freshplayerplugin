@@ -153,8 +153,16 @@ x11_event_thread_func(void *param)
             switch (cmd) {
             case X11ET_CMD_REGISTER_WINDOW:
                 if (entry->is_xembed) {
-                    entry->plug_wnd = XCreateSimpleWindow(dpy, socket_wnd, 0, 0,
-                                                          200, 200, 0, 0, 0x000000);
+                    const int screen = DefaultScreen(dpy);
+                    XSetWindowAttributes attrs = {
+                        .background_pixel = 0x000000,
+                        .backing_store =    Always,
+                    };
+
+                    entry->plug_wnd = XCreateWindow(dpy, socket_wnd, 0, 0, 200, 200, 0,
+                                                    DefaultDepth(dpy, screen),
+                                                    InputOutput, DefaultVisual(dpy, screen),
+                                                    CWBackPixel | CWBackingStore, &attrs);
 
                     unsigned long buffer[2] = { 1, XEMBED_MAPPED };
 
