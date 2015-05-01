@@ -31,6 +31,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
+#include "async_network.h"
 
 
 PP_Resource
@@ -122,7 +123,25 @@ int32_t
 ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes,
                          struct PP_CompletionCallback callback)
 {
-    return -1;
+    struct pp_udp_socket_s *us = pp_resource_acquire(udp_socket, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    struct async_network_task_s *task = async_network_task_create();
+
+    task->type = ASYNC_NETWORK_UDP_RECV;
+    task->resource = udp_socket;
+    task->instance = us->instance;
+    task->buffer =   buffer;
+    task->bufsize =  num_bytes;
+    task->callback = callback;
+
+    pp_resource_release(udp_socket);
+    async_network_task_push(task);
+
+    return PP_OK_COMPLETIONPENDING;
 }
 
 PP_Bool
@@ -198,7 +217,7 @@ int32_t
 trace_ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes,
                                struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s udp_socket=%d, buffer=%p, num_bytes=%d, callback={.func=%p, "
+    trace_info("[PPB] {full} %s udp_socket=%d, buffer=%p, num_bytes=%d, callback={.func=%p, "
                ".user_data=%p, .flags=%u}\n", __func__+6, udp_socket, buffer, num_bytes,
                callback.func, callback.user_data, callback.flags);
     return ppb_udp_socket_recv_from(udp_socket, buffer, num_bytes, callback);
@@ -240,7 +259,7 @@ const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
     .SetSocketFeature =     TWRAPZ(ppb_udp_socket_set_socket_feature),
     .Bind =                 TWRAPF(ppb_udp_socket_bind),
     .GetBoundAddress =      TWRAPF(ppb_udp_socket_get_bound_address),
-    .RecvFrom =             TWRAPZ(ppb_udp_socket_recv_from),
+    .RecvFrom =             TWRAPF(ppb_udp_socket_recv_from),
     .GetRecvFromAddress =   TWRAPZ(ppb_udp_socket_get_recv_from_address),
     .SendTo =               TWRAPZ(ppb_udp_socket_send_to),
     .Close =                TWRAPZ(ppb_udp_socket_close),

@@ -37,6 +37,7 @@ enum async_network_task_type_e {
     ASYNC_NETWORK_TCP_DISCONNECT,
     ASYNC_NETWORK_TCP_READ,
     ASYNC_NETWORK_TCP_WRITE,
+    ASYNC_NETWORK_UDP_RECV,
 };
 
 struct async_network_task_s {

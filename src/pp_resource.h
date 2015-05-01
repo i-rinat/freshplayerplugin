@@ -451,6 +451,7 @@ struct pp_udp_socket_s {
     COMMON_STRUCTURE_FIELDS
     int                             sock;
     int                             bound;
+    int                             seen_eof;
     struct PP_NetAddress_Private    addr;
 };
 
