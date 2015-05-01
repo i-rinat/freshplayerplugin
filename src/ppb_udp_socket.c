@@ -77,7 +77,20 @@ int32_t
 ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *addr,
                     struct PP_CompletionCallback callback)
 {
-    ppb_core_call_on_main_thread2(0, callback, PP_ERROR_FAILED, __func__);
+    struct pp_udp_socket_s *us = pp_resource_acquire(udp_socket, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    if (bind(us->sock, (struct sockaddr *)addr->data, addr->size) != 0) {
+        trace_warning("%s, bind failed\n", __func__);
+        pp_resource_release(udp_socket);
+        return PP_ERROR_FAILED;
+    }
+
+    pp_resource_release(udp_socket);
+    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 
@@ -148,7 +161,7 @@ int32_t
 trace_ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *addr,
                           struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s udp_socket=%d, addr=%p, callback={.func=%p, .user_data=%p, "
+    trace_info("[PPB] {full} %s udp_socket=%d, addr=%p, callback={.func=%p, .user_data=%p, "
                ".flags=%u}\n", __func__+6, udp_socket, addr, callback.func, callback.user_data,
                callback.flags);
     return ppb_udp_socket_bind(udp_socket, addr, callback);
@@ -207,7 +220,7 @@ const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
     .Create =               TWRAPF(ppb_udp_socket_create),
     .IsUDPSocket =          TWRAPF(ppb_udp_socket_is_udp_socket),
     .SetSocketFeature =     TWRAPZ(ppb_udp_socket_set_socket_feature),
-    .Bind =                 TWRAPZ(ppb_udp_socket_bind),
+    .Bind =                 TWRAPF(ppb_udp_socket_bind),
     .GetBoundAddress =      TWRAPZ(ppb_udp_socket_get_bound_address),
     .RecvFrom =             TWRAPZ(ppb_udp_socket_recv_from),
     .GetRecvFromAddress =   TWRAPZ(ppb_udp_socket_get_recv_from_address),
