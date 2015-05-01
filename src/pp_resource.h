@@ -32,6 +32,7 @@
 #include <ppapi/c/pp_rect.h>
 #include <ppapi/c/pp_resource.h>
 #include <ppapi/c/private/pp_private_font_charset.h>
+#include <ppapi/c/private/ppb_net_address_private.h>
 #include <ppapi/c/ppb_image_data.h>
 #include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppb_audio_config.h>
@@ -448,7 +449,9 @@ struct pp_file_chooser_s {
 
 struct pp_udp_socket_s {
     COMMON_STRUCTURE_FIELDS
-    int             sock;
+    int                             sock;
+    int                             bound;
+    struct PP_NetAddress_Private    addr;
 };
 
 struct pp_x509_certificate_s {
