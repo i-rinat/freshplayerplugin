@@ -57,6 +57,7 @@
 #include "ppb_udp_socket.h"
 #include "ppb_x509_certificate.h"
 #include "ppb_font.h"
+#include "ppb_host_resolver.h"
 
 
 static GHashTable      *res_tbl;
@@ -277,6 +278,9 @@ pp_resource_unref(PP_Resource resource)
             break;
         case PP_RESOURCE_DEVICE_REF:
             ppb_device_ref_destroy(ptr);
+            break;
+        case PP_RESOURCE_HOST_RESOLVER:
+            ppb_host_resolver_destroy(ptr);
             break;
         default:
             break;

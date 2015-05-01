@@ -33,7 +33,15 @@
 PP_Resource
 ppb_host_resolver_create(PP_Instance instance)
 {
-    return 0;
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+
+    PP_Resource host_resolver = pp_resource_allocate(PP_RESOURCE_HOST_RESOLVER, pp_i);
+
+    return host_resolver;
 }
 
 void
@@ -44,7 +52,7 @@ ppb_host_resolver_destroy(void *ptr)
 PP_Bool
 ppb_host_resolver_is_host_resolver(PP_Resource resource)
 {
-    return PP_FALSE;
+    return pp_resource_get_type(resource) == PP_RESOURCE_HOST_RESOLVER;
 }
 
 int32_t
@@ -80,7 +88,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_host_resolver_create(PP_Instance instance)
 {
-    trace_info("[PPB] {zilch} %s instance=%d\n", __func__+6, instance);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_host_resolver_create(instance);
 }
 
@@ -88,7 +96,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_host_resolver_is_host_resolver(PP_Resource resource)
 {
-    trace_info("[PPB] {zilch} %s resource=%d\n", __func__+6, resource);
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
     return ppb_host_resolver_is_host_resolver(resource);
 }
 
@@ -131,8 +139,8 @@ trace_ppb_host_resolver_get_net_address(PP_Resource host_resolver, uint32_t inde
 
 
 const struct PPB_HostResolver_Private_0_1 ppb_host_resolver_private_interface_0_1 = {
-    .Create =           TWRAPZ(ppb_host_resolver_create),
-    .IsHostResolver =   TWRAPZ(ppb_host_resolver_is_host_resolver),
+    .Create =           TWRAPF(ppb_host_resolver_create),
+    .IsHostResolver =   TWRAPF(ppb_host_resolver_is_host_resolver),
     .Resolve =          TWRAPZ(ppb_host_resolver_resolve),
     .GetCanonicalName = TWRAPZ(ppb_host_resolver_get_canonical_name),
     .GetSize =          TWRAPZ(ppb_host_resolver_get_size),
