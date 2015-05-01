@@ -58,7 +58,18 @@ void
 ppb_udp_socket_destroy(void *p)
 {
     struct pp_udp_socket_s *us = p;
-    (void)us;
+
+    if (!us->destroyed) {
+        struct async_network_task_s *task = async_network_task_create();
+
+        us->destroyed = 1;
+
+        task->type = ASYNC_NETWORK_DISCONNECT;
+        task->resource = us->self_id;
+        task->instance = us->instance;
+        task->sock =     us->sock;
+        async_network_task_push(task);
+    }
 }
 
 PP_Bool
@@ -161,6 +172,14 @@ ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t num_b
 void
 ppb_udp_socket_close(PP_Resource udp_socket)
 {
+    struct pp_udp_socket_s *us = pp_resource_acquire(udp_socket, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        return;
+    }
+
+    ppb_udp_socket_destroy(us);
+    pp_resource_release(udp_socket);
 }
 
 
@@ -248,7 +267,7 @@ TRACE_WRAPPER
 void
 trace_ppb_udp_socket_close(PP_Resource udp_socket)
 {
-    trace_info("[PPB] {zilch} %s udp_socket=%d\n", __func__+6, udp_socket);
+    trace_info("[PPB] {full} %s udp_socket=%d\n", __func__+6, udp_socket);
     return ppb_udp_socket_close(udp_socket);
 }
 
@@ -262,5 +281,5 @@ const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
     .RecvFrom =             TWRAPF(ppb_udp_socket_recv_from),
     .GetRecvFromAddress =   TWRAPZ(ppb_udp_socket_get_recv_from_address),
     .SendTo =               TWRAPZ(ppb_udp_socket_send_to),
-    .Close =                TWRAPZ(ppb_udp_socket_close),
+    .Close =                TWRAPF(ppb_udp_socket_close),
 };

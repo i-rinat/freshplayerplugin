@@ -452,6 +452,7 @@ struct pp_udp_socket_s {
     int                             sock;
     int                             bound;
     int                             seen_eof;
+    int                             destroyed;
     struct PP_NetAddress_Private    addr;
 };
 
