@@ -78,6 +78,7 @@
 #include <ppapi/c/private/ppb_flash.h>
 #include <ppapi/c/private/ppb_flash_menu.h>
 #include <ppapi/c/private/ppb_flash_message_loop.h>
+#include <ppapi/c/private/ppb_host_resolver_private.h>
 #include <ppapi/c/private/ppb_instance_private.h>
 #include <ppapi/c/private/ppb_pdf.h>
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
@@ -125,6 +126,7 @@ extern const struct PPB_Font_Dev_0_6                ppb_font_dev_interface_0_6;
 extern const struct PPB_Graphics2D_1_0              ppb_graphics2d_interface_1_0;
 extern const struct PPB_Graphics2D_1_1              ppb_graphics2d_interface_1_1;
 extern const struct PPB_Graphics3D_1_0              ppb_graphics3d_interface_1_0;
+extern const struct PPB_HostResolver_Private_0_1    ppb_host_resolver_private_interface_0_1;
 extern const struct PPB_ImageData_1_0               ppb_image_data_interface_1_0;
 extern const struct PPB_IMEInputEvent_1_0           ppb_ime_input_event_interface_1_0;
 extern const struct PPB_IMEInputEvent_Dev_0_2       ppb_ime_input_event_dev_interface_0_2;
@@ -231,6 +233,7 @@ ppb_get_interface(const char *interface_name)
     ELSEIFBLOCK(PPB_GRAPHICS_2D_INTERFACE_1_0,          ppb_graphics2d_interface_1_0)
     ELSEIFBLOCK(PPB_GRAPHICS_2D_INTERFACE_1_1,          ppb_graphics2d_interface_1_1)
     ELSEIFBLOCK(PPB_GRAPHICS_3D_INTERFACE_1_0,          ppb_graphics3d_interface_1_0)
+    ELSEIFBLOCK(PPB_HOSTRESOLVER_PRIVATE_INTERFACE_0_1, ppb_host_resolver_private_interface_0_1)
     ELSEIFBLOCK(PPB_IMAGEDATA_INTERFACE_1_0,            ppb_image_data_interface_1_0)
     ELSEIFBLOCK(PPB_IME_INPUT_EVENT_DEV_INTERFACE_0_2,  ppb_ime_input_event_dev_interface_0_2)
     ELSEIFBLOCK(PPB_INPUT_EVENT_INTERFACE_1_0,          ppb_input_event_interface_1_0)

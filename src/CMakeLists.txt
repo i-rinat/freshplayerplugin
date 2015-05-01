@@ -52,6 +52,7 @@ set(source_list
     ppb_font.c
     ppb_graphics2d.c
     ppb_graphics3d.c
+    ppb_host_resolver.c
     ppb_image_data.c
     ppb_input_event.c
     ppb_instance.c
