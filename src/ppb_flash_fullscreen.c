@@ -179,6 +179,7 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     int             rel_x, rel_y;
     unsigned int    mask;
     const int       wnd_size = 10;
+    const int       screen = DefaultScreen(dpy);
 
     trace_info_f("%s started\n", __func__);
 
@@ -186,9 +187,15 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     XQueryPointer(dpy, DefaultRootWindow(dpy), &root, &child, &px, &py, &rel_x, &rel_y, &mask);
 
     // create tiny window where mouse pointer is
-    pp_i->fs_wnd = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy),
-                                       px - wnd_size / 2, py - wnd_size / 2, wnd_size, wnd_size,
-                                       0, 0, 0x000000);
+    XSetWindowAttributes attrs = {
+        .background_pixel = 0x000000,
+        .backing_store =    Always,
+    };
+    pp_i->fs_wnd = XCreateWindow(dpy, DefaultRootWindow(dpy),
+                                 px - wnd_size / 2, py - wnd_size / 2, wnd_size, wnd_size,
+                                 0, DefaultDepth(dpy, screen), InputOutput,
+                                 DefaultVisual(dpy, screen), CWBackPixel | CWBackingStore, &attrs);
+
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
                                     ButtonReleaseMask | PointerMotionMask | ExposureMask |
                                     StructureNotifyMask);
