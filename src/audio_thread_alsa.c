@@ -54,6 +54,7 @@ static volatile int     terminate_thread = 0;
 static int              notification_pipe[2];
 static pthread_t        audio_thread_id;
 static pthread_mutex_t  lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_barrier_t stream_list_update_barrier;
 
 
 static
@@ -176,15 +177,14 @@ audio_thread(void *param)
 
     ppb_message_loop_mark_thread_unsuitable();
 
+    nfds = do_rebuild_fds(&fds);
+    pthread_barrier_wait(&stream_list_update_barrier);
+    if (nfds == 0)
+        goto quit;
+
     while (1) {
         if (g_atomic_int_get(&terminate_thread))
             goto quit;
-
-        if (g_atomic_int_get(&rebuild_fds)) {
-            nfds = do_rebuild_fds(&fds);
-            if (nfds == 0)
-                goto quit;
-        }
 
         int res = poll(fds, nfds, 10 * 1000);
         if (res == -1) {
@@ -199,6 +199,13 @@ audio_thread(void *param)
 
         if (fds[0].revents)
             drain_wakeup_pipe(fds[0].fd);
+
+        if (g_atomic_int_get(&rebuild_fds)) {
+            nfds = do_rebuild_fds(&fds);
+            pthread_barrier_wait(&stream_list_update_barrier);
+            if (nfds == 0)
+                goto quit;
+        }
 
         for (uintptr_t k = 1; k < nfds; k ++) {
             unsigned short revents = 0;
@@ -308,8 +315,6 @@ constructor_audio_thread_alsa(void)
 
     make_nonblock(notification_pipe[0]);
     make_nonblock(notification_pipe[1]);
-
-    g_atomic_int_set(&rebuild_fds, 1);
 }
 
 static
@@ -335,6 +340,7 @@ wakeup_audio_thread(void)
 {
     g_atomic_int_set(&rebuild_fds, 1);
     RETRY_ON_EINTR(write(notification_pipe[1], "+", 1));
+    pthread_barrier_wait(&stream_list_update_barrier);
 }
 
 static
@@ -348,8 +354,10 @@ alsa_create_stream(audio_stream_direction direction, unsigned int sample_rate,
     int dir;
 
     if (!g_atomic_int_get(&audio_thread_started)) {
+        pthread_barrier_init(&stream_list_update_barrier, NULL, 2);
         pthread_create(&audio_thread_id, NULL, audio_thread, NULL);
         g_atomic_int_set(&audio_thread_started, 1);
+        pthread_barrier_wait(&stream_list_update_barrier);
     }
 
     as = calloc(1, sizeof(*as));
@@ -592,8 +600,9 @@ alsa_destroy_stream(audio_stream *as)
 {
     pthread_mutex_lock(&lock);
     streams_to_delete = g_list_prepend(streams_to_delete, as);
-    wakeup_audio_thread();
     pthread_mutex_unlock(&lock);
+
+    wakeup_audio_thread();
 }
 
 static
