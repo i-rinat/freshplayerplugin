@@ -479,6 +479,7 @@ struct pp_device_ref_s {
 
 struct pp_host_resolver_s {
     COMMON_STRUCTURE_FIELDS
+    char                           *host;
     struct PP_NetAddress_Private   *addrs;
     uint32_t                        addr_count;
 };

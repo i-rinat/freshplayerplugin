@@ -28,6 +28,7 @@
 #include "tables.h"
 #include <ppapi/c/pp_errors.h>
 #include "async_network.h"
+#include "ppb_var.h"
 
 
 
@@ -70,6 +71,8 @@ ppb_host_resolver_resolve(PP_Resource host_resolver, const char *host, uint16_t 
         return PP_ERROR_BADRESOURCE;
     }
 
+    hr->host = nullsafe_strdup(host);
+
     struct async_network_task_s *task = async_network_task_create();
 
     task->type =        ASYNC_NETWORK_HOST_RESOLVE;
@@ -88,7 +91,16 @@ ppb_host_resolver_resolve(PP_Resource host_resolver, const char *host, uint16_t 
 struct PP_Var
 ppb_host_resolver_get_canonical_name(PP_Resource host_resolver)
 {
-    return PP_MakeUndefined();
+    // TODO: implement
+    struct pp_host_resolver_s *hr = pp_resource_acquire(host_resolver, PP_RESOURCE_HOST_RESOLVER);
+    if (!hr) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    struct PP_Var var = ppb_var_var_from_utf8_z(hr->host);
+    pp_resource_release(host_resolver);
+    return var;
 }
 
 uint32_t
