@@ -66,7 +66,6 @@ ppb_udp_socket_destroy(void *p)
 
         task->type = ASYNC_NETWORK_DISCONNECT;
         task->resource = us->self_id;
-        task->instance = us->instance;
         task->sock =     us->sock;
         async_network_task_push(task);
     }
@@ -144,7 +143,6 @@ ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes
 
     task->type = ASYNC_NETWORK_UDP_RECV;
     task->resource = udp_socket;
-    task->instance = us->instance;
     task->buffer =   buffer;
     task->bufsize =  num_bytes;
     task->callback = callback;
@@ -192,7 +190,6 @@ ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t num_b
     struct async_network_task_s *task = async_network_task_create();
     task->type =     ASYNC_NETWORK_UDP_SEND;
     task->resource = udp_socket;
-    task->instance = us->instance;
     task->buffer =   (char *)buffer;
     task->bufsize =  num_bytes;
     task->callback = callback;

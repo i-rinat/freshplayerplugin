@@ -46,7 +46,6 @@ struct async_network_task_s {
     enum async_network_task_type_e  type;
     struct PP_CompletionCallback    callback;
     PP_Resource                     resource;
-    struct pp_instance_s           *instance;
     char                           *host;
     uint16_t                        port;
     struct PP_NetAddress_Private    netaddr;

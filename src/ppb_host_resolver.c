@@ -77,7 +77,6 @@ ppb_host_resolver_resolve(PP_Resource host_resolver, const char *host, uint16_t 
 
     task->type =        ASYNC_NETWORK_HOST_RESOLVE;
     task->resource =    host_resolver;
-    task->instance =    hr->instance;
     task->host =        nullsafe_strdup(host);
     task->port =        port;
     task->callback =    callback;

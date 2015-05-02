@@ -66,7 +66,6 @@ ppb_tcp_socket_destroy(void *ptr)
 
         task->type = ASYNC_NETWORK_DISCONNECT;
         task->resource = ts->self_id;
-        task->instance = ts->instance;
         task->sock = ts->sock;
         async_network_task_push(task);
     }
@@ -91,7 +90,6 @@ ppb_tcp_socket_connect(PP_Resource tcp_socket, const char *host, uint16_t port,
 
     task->type = ASYNC_NETWORK_TCP_CONNECT;
     task->resource = tcp_socket;
-    task->instance = ts->instance;
     task->sock = ts->sock;
     task->host = nullsafe_strdup(host);
     task->port = port;
@@ -115,7 +113,6 @@ ppb_tcp_socket_connect_with_net_address(PP_Resource tcp_socket,
     struct async_network_task_s *task = async_network_task_create();
 
     task->type = ASYNC_NETWORK_TCP_CONNECT_WITH_NETADDRESS;
-    task->instance = ts->instance;
     task->resource = tcp_socket;
     task->sock = ts->sock;
     task->netaddr = *addr;
@@ -226,7 +223,6 @@ ppb_tcp_socket_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
 
     task->type = ASYNC_NETWORK_TCP_READ;
     task->resource = tcp_socket;
-    task->instance = ts->instance;
     task->buffer = buffer;
     task->bufsize = bytes_to_read;
     task->callback = callback;
@@ -264,7 +260,6 @@ ppb_tcp_socket_write(PP_Resource tcp_socket, const char *buffer, int32_t bytes_t
 
     task->type = ASYNC_NETWORK_TCP_WRITE;
     task->resource = tcp_socket;
-    task->instance = ts->instance;
     task->buffer = (char *)buffer;
     task->bufsize = bytes_to_write;
     task->callback = callback;
