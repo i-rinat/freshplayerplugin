@@ -450,6 +450,50 @@ handle_udp_recv_stage1(struct async_network_task_s *task)
 
 static
 void
+handle_udp_send_stage2(int sock, short event_flags, void *arg)
+{
+    struct async_network_task_s *task = arg;
+
+    int retval = sendto(sock, task->buffer, task->bufsize, MSG_NOSIGNAL,
+                        (struct sockaddr *)task->netaddr.data, task->netaddr.size);
+    if (retval < 0)
+        retval = get_pp_errno();
+
+    ppb_core_call_on_main_thread2(0, task->callback, retval, __func__);
+    task_destroy(task);
+}
+
+static
+void
+handle_udp_send_stage1(struct async_network_task_s *task)
+{
+    struct pp_udp_socket_s *us = pp_resource_acquire(task->resource, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        task_destroy(task);
+        return;
+    }
+
+    // try to send immediately, but don't wait
+    int retval = sendto(us->sock, task->buffer, task->bufsize, MSG_DONTWAIT | MSG_NOSIGNAL,
+                        (struct sockaddr *)task->netaddr.data, task->netaddr.size);
+    pp_resource_release(task->resource);
+
+    if (retval >= 0) {
+        // successfully sent
+        ppb_core_call_on_main_thread2(0, task->callback, retval, __func__);
+        task_destroy(task);
+        return;
+    }
+
+    // need to wait
+    struct event *ev = event_new(event_b, us->sock, EV_READ, handle_udp_send_stage2, task);
+    add_event_mapping(task, ev);
+    event_add(ev, NULL);
+}
+
+static
+void
 handle_host_resolve_stage2(int result, char type, int count, int ttl, void *addresses, void *arg)
 {
     struct async_network_task_s *task = arg;
@@ -584,6 +628,9 @@ async_network_task_push(struct async_network_task_s *task)
         break;
     case ASYNC_NETWORK_UDP_RECV:
         handle_udp_recv_stage1(task);
+        break;
+    case ASYNC_NETWORK_UDP_SEND:
+        handle_udp_send_stage1(task);
         break;
     case ASYNC_NETWORK_HOST_RESOLVE:
         handle_host_resolve_stage1(task);

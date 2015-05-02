@@ -166,7 +166,27 @@ ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t num_b
                        const struct PP_NetAddress_Private *addr,
                        struct PP_CompletionCallback callback)
 {
-    return -1;
+    struct pp_udp_socket_s *us = pp_resource_acquire(udp_socket, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    num_bytes = MIN(num_bytes, 128 * 1024);
+
+    struct async_network_task_s *task = async_network_task_create();
+    task->type =     ASYNC_NETWORK_UDP_SEND;
+    task->resource = udp_socket;
+    task->instance = us->instance;
+    task->buffer =   (char *)buffer;
+    task->bufsize =  num_bytes;
+    task->callback = callback;
+    memcpy(&task->netaddr, addr, sizeof(*addr));
+
+    pp_resource_release(udp_socket);
+    async_network_task_push(task);
+
+    return PP_OK_COMPLETIONPENDING;
 }
 
 void
@@ -257,7 +277,7 @@ trace_ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t
                              const struct PP_NetAddress_Private *addr,
                              struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s udp_socket=%d, buffer=%p, num_bytes=%d, addr=%p, callback={"
+    trace_info("[PPB] {full} %s udp_socket=%d, buffer=%p, num_bytes=%d, addr=%p, callback={"
                ".func=%p, .user_data=%p, .flags=%u}\n", __func__+6, udp_socket, buffer, num_bytes,
                addr, callback.func, callback.user_data, callback.flags);
     return ppb_udp_socket_send_to(udp_socket, buffer, num_bytes, addr, callback);
@@ -280,6 +300,6 @@ const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
     .GetBoundAddress =      TWRAPF(ppb_udp_socket_get_bound_address),
     .RecvFrom =             TWRAPF(ppb_udp_socket_recv_from),
     .GetRecvFromAddress =   TWRAPZ(ppb_udp_socket_get_recv_from_address),
-    .SendTo =               TWRAPZ(ppb_udp_socket_send_to),
+    .SendTo =               TWRAPF(ppb_udp_socket_send_to),
     .Close =                TWRAPF(ppb_udp_socket_close),
 };
