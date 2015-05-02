@@ -455,6 +455,7 @@ struct pp_udp_socket_s {
     int                             seen_eof;
     int                             destroyed;
     struct PP_NetAddress_Private    addr;
+    struct PP_NetAddress_Private    addr_from;
 };
 
 struct pp_x509_certificate_s {

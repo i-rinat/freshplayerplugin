@@ -158,7 +158,22 @@ ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes
 PP_Bool
 ppb_udp_socket_get_recv_from_address(PP_Resource udp_socket, struct PP_NetAddress_Private *addr)
 {
-    return PP_FALSE;
+    struct pp_udp_socket_s *us = pp_resource_acquire(udp_socket, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
+
+    if (!us->addr_from.size) {
+        // size should be larger than zero, otherwise there is no address
+        pp_resource_release(udp_socket);
+        return PP_FALSE;
+    }
+
+    memcpy(addr, &us->addr_from, sizeof(struct PP_NetAddress_Private));
+
+    pp_resource_release(udp_socket);
+    return PP_TRUE;
 }
 
 int32_t
@@ -267,7 +282,7 @@ PP_Bool
 trace_ppb_udp_socket_get_recv_from_address(PP_Resource udp_socket,
                                            struct PP_NetAddress_Private *addr)
 {
-    trace_info("[PPB] {zilch} %s udp_socket=%d, addr=%p\n", __func__+6, udp_socket, addr);
+    trace_info("[PPB] {full} %s udp_socket=%d, addr=%p\n", __func__+6, udp_socket, addr);
     return ppb_udp_socket_get_recv_from_address(udp_socket, addr);
 }
 
@@ -299,7 +314,7 @@ const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
     .Bind =                 TWRAPF(ppb_udp_socket_bind),
     .GetBoundAddress =      TWRAPF(ppb_udp_socket_get_bound_address),
     .RecvFrom =             TWRAPF(ppb_udp_socket_recv_from),
-    .GetRecvFromAddress =   TWRAPZ(ppb_udp_socket_get_recv_from_address),
+    .GetRecvFromAddress =   TWRAPF(ppb_udp_socket_get_recv_from_address),
     .SendTo =               TWRAPF(ppb_udp_socket_send_to),
     .Close =                TWRAPF(ppb_udp_socket_close),
 };

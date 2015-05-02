@@ -414,19 +414,26 @@ void
 handle_udp_recv_stage2(int sock, short event_flags, void *arg)
 {
     struct async_network_task_s *task = arg;
-    int32_t retval;
 
-    retval = recv(sock, task->buffer, task->bufsize, 0);
+    struct pp_udp_socket_s *us = pp_resource_acquire(task->resource, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        task_destroy(task);
+        return;
+    }
+
+    socklen_t len = 0;
+    int32_t retval = recvfrom(sock, task->buffer, task->bufsize, 0,
+                              (struct sockaddr *)us->addr_from.data, &len);
+    us->addr_from.size = len;
+
     if (retval < 0)
         retval = get_pp_errno();
     else if (retval == 0) {
-        struct pp_udp_socket_s *us = pp_resource_acquire(task->resource, PP_RESOURCE_UDP_SOCKET);
-        if (us) {
-            us->seen_eof = 1;   // TODO: is it needed?
-            pp_resource_release(task->resource);
-        }
+        us->seen_eof = 1;   // TODO: is it needed?
     }
 
+    pp_resource_release(task->resource);
     ppb_core_call_on_main_thread2(0, task->callback, retval, __func__);
     task_destroy(task);
 }
@@ -441,6 +448,8 @@ handle_udp_recv_stage1(struct async_network_task_s *task)
         task_destroy(task);
         return;
     }
+
+    memset(&us->addr_from, 0, sizeof(us->addr_from));
 
     struct event *ev = event_new(event_b, us->sock, EV_READ, handle_udp_recv_stage2, task);
     pp_resource_release(task->resource);
