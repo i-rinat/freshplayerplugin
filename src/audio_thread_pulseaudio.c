@@ -394,7 +394,7 @@ pulse_destroy_stream(audio_stream *as)
 {
     pa_threaded_mainloop_lock(mainloop);
 
-    pa_operation *op = pa_stream_flush(as->stream, pulse_stream_success_cb, mainloop);
+    pa_operation *op = pa_stream_cork(as->stream, 1, pulse_stream_success_cb, mainloop);
     pulse_wait_for_completion(op, mainloop);
 
     pa_stream_disconnect(as->stream);
