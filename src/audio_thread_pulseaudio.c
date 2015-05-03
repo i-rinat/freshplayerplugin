@@ -192,7 +192,6 @@ pulse_stream_write_cb(pa_stream *s, size_t length, void *user_data)
     }
 
     pa_stream_write(as->stream, buf, length, NULL, 0, PA_SEEK_RELATIVE);
-    pa_threaded_mainloop_signal(mainloop, 0);
 }
 
 static
@@ -223,7 +222,6 @@ pulse_stream_read_cb(pa_stream *s, size_t length, void *user_data)
     }
 
     pa_stream_drop(s);
-    pa_threaded_mainloop_signal(mainloop, 0);
 }
 
 static
