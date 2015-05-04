@@ -531,7 +531,7 @@ handle_host_resolve_stage2(int result, char type, int count, int ttl, void *addr
         for (int k = 0; k < count; k ++) {
             struct sockaddr_in sai = {
                 .sin_family = AF_INET,
-                .sin_port =   task->port,
+                .sin_port =   htons(task->port),
             };
 
             memcpy(&sai.sin_addr, &ipv4_addrs[k], sizeof(struct in_addr));
@@ -548,7 +548,7 @@ handle_host_resolve_stage2(int result, char type, int count, int ttl, void *addr
         for (int k = 0; k < count; k ++) {
             struct sockaddr_in6 sai6 = {
                 .sin6_family = AF_INET6,
-                .sin6_port =   task->port,
+                .sin6_port =   htons(task->port),
             };
 
             memcpy(&sai6.sin6_addr, &ipv6_addrs[k], sizeof(struct in6_addr));

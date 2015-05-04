@@ -170,7 +170,7 @@ void
 ppb_net_address_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
                                          struct PP_NetAddress_Private *addr_out)
 {
-    struct sockaddr_in sai = { .sin_port = port };
+    struct sockaddr_in sai = { .sin_port = htons(port) };
 
     memcpy(&sai.sin_addr, ip, sizeof(sai.sin_addr));
     memset(addr_out, 0, sizeof(struct PP_NetAddress_Private));
@@ -183,7 +183,7 @@ void
 ppb_net_address_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id, uint16_t port,
                                          struct PP_NetAddress_Private *addr_out)
 {
-    struct sockaddr_in6 sai6 = { .sin6_port = port, .sin6_scope_id = scope_id };
+    struct sockaddr_in6 sai6 = { .sin6_port = htons(port), .sin6_scope_id = htonl(scope_id) };
 
     memcpy(&sai6.sin6_addr, ip, sizeof(sai6.sin6_addr));
     memset(addr_out, 0, sizeof(struct PP_NetAddress_Private));
