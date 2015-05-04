@@ -422,7 +422,7 @@ handle_udp_recv_stage2(int sock, short event_flags, void *arg)
         return;
     }
 
-    socklen_t len = 0;
+    socklen_t len = sizeof(us->addr_from.data);
     int32_t retval = recvfrom(sock, task->buffer, task->bufsize, 0,
                               (struct sockaddr *)us->addr_from.data, &len);
     us->addr_from.size = len;
