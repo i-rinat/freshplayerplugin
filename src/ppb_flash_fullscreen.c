@@ -261,6 +261,8 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 
     pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 1;
+    pp_i->fs_width =      wnd_size;
+    pp_i->fs_height =     wnd_size;
     pthread_mutex_unlock(&display.lock);
 
     while (1) {
@@ -282,21 +284,23 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
                 break;
 
             case ConfigureNotify:
-                // ignore ConfigureNotify events for (wnd_size x wnd_size)
-                if (ev.xconfigure.width != wnd_size || ev.xconfigure.height != wnd_size) {
-                    pthread_mutex_lock(&display.lock);
-                    pp_i->fs_width =  ev.xconfigure.width;
-                    pp_i->fs_height = ev.xconfigure.height;
-                    pthread_mutex_unlock(&display.lock);
-                    ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i),
-                                                  PP_OK, __func__);
-                    pthread_barrier_wait(&cross_thread_call_barrier);
-                }
+                // memorize window geometry
+                pthread_mutex_lock(&display.lock);
+                pp_i->fs_width =  ev.xconfigure.width;
+                pp_i->fs_height = ev.xconfigure.height;
+                pthread_mutex_unlock(&display.lock);
                 handled = 1;
                 break;
 
             case ReparentNotify:
+                handled = 1;
+                break;
+
             case MapNotify:
+                // issue DidChangeView with current geometry
+                ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i),
+                                              PP_OK, __func__);
+                pthread_barrier_wait(&cross_thread_call_barrier);
                 handled = 1;
                 break;
         }
