@@ -277,7 +277,8 @@ void
 trace_ppb_net_address_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
                                                struct PP_NetAddress_Private *addr_out)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s ip=%u.%u.%u.%u, port=%u\n", __func__+6, ip[0], ip[1], ip[2], ip[3],
+               port);
     return ppb_net_address_create_from_ipv4_address(ip, port, addr_out);
 }
 
@@ -287,7 +288,10 @@ trace_ppb_net_address_create_from_ipv6_address(const uint8_t ip[16], uint32_t sc
                                                uint16_t port,
                                                struct PP_NetAddress_Private *addr_out)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s ip=[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:"
+               "%02x%02x], scope_id=%u, port=%u\n", __func__+6, ip[0], ip[1], ip[2], ip[3], ip[4],
+               ip[5], ip[6], ip[7], ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15],
+               scope_id, port);
     return ppb_net_address_create_from_ipv6_address(ip, scope_id, port, addr_out);
 }
 
