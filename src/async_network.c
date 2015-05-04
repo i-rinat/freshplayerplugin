@@ -496,7 +496,7 @@ handle_udp_send_stage1(struct async_network_task_s *task)
     }
 
     // need to wait
-    struct event *ev = event_new(event_b, us->sock, EV_READ, handle_udp_send_stage2, task);
+    struct event *ev = event_new(event_b, us->sock, EV_WRITE, handle_udp_send_stage2, task);
     add_event_mapping(task, ev);
     event_add(ev, NULL);
 }
