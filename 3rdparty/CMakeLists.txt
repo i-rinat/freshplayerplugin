@@ -1,1 +1,1 @@
-add_library(parson-obj OBJECT parson/parson.c)
+add_subdirectory(parson)
