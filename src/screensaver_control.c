@@ -169,6 +169,58 @@ deactivate_xscreensaver(Display *dpy)
 
 #if HAVE_GLIB_DBUS
 static
+int
+is_dbus_based_screensaver_active(const char *d_service, const char *d_path,
+                                 const char *d_interface)
+{
+    GDBusMessage *msg = NULL;
+    GDBusMessage *reply = NULL;
+    uint32_t ret = 0;
+
+    assert(connection);
+
+    // detect is screen saver already active
+    msg = g_dbus_message_new_method_call(d_service, d_path, d_interface, "GetActive");
+    if (!msg) {
+        trace_error("%s, can't allocate GDBusMessage\n", __func__);
+        goto err;
+    }
+
+    GError *error = NULL;
+    reply = g_dbus_connection_send_message_with_reply_sync(connection, msg,
+                                                           G_DBUS_SEND_MESSAGE_FLAGS_NONE, -1,
+                                                           NULL, NULL, &error);
+    if (error) {
+        trace_error("%s, can't send message, %s\n", __func__, error->message);
+        g_clear_error(&error);
+        goto err;
+    }
+
+    g_dbus_connection_flush_sync(connection, NULL, &error);
+    if (error != NULL) {
+        trace_error("%s, can't flush dbus connection, %s\n", __func__, error->message);
+        g_clear_error(&error);
+        goto err;
+    }
+
+    GVariant *v = g_dbus_message_get_body(reply);
+    v = g_variant_get_child_value(v, 0);
+    ret = g_variant_get_boolean(v);
+
+err:
+    if (reply)
+        g_object_unref(reply);
+
+    if (msg)
+        g_object_unref(msg);
+
+    return ret;
+}
+
+#endif // HAVE_GLIB_DBUS
+
+#if HAVE_GLIB_DBUS
+static
 void
 deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
                                   const char *d_interface)
@@ -178,6 +230,11 @@ deactivate_dbus_based_screensaver(const char *d_service, const char *d_path,
 
     if (!connection)
         return;
+
+    if (is_dbus_based_screensaver_active(d_service, d_path, d_interface)) {
+        // screen saver is active already, deactivating timer makes no sense
+        return;
+    }
 
     GDBusMessage *msg = g_dbus_message_new_method_call(d_service, d_path, d_interface,
                                                        "SimulateUserActivity");
