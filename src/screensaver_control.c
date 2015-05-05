@@ -101,6 +101,34 @@ done:
 }
 
 static
+int
+is_xscreensaver_active(Display *dpy)
+{
+    Atom           XA_SCREENSAVER_STATUS = XInternAtom(dpy, "_SCREENSAVER_STATUS", False);
+    Atom           type;
+    Atom          *data;
+    int            format;
+    unsigned long  nitems, bytesafter;
+    Status         status;
+    int            screen = 0;  // XScreenSaver always uses screen 0
+
+    status = XGetWindowProperty(dpy, RootWindow(dpy, screen), XA_SCREENSAVER_STATUS, 0, 200, False,
+                                XA_INTEGER, &type, &format, &nitems, &bytesafter,
+                                (unsigned char **)&data);
+
+    if (status == Success && type == XA_INTEGER && nitems >= 3) {
+        if (data[0] != 0) {
+            // is active if data[0] equals XA_BLANK or XA_LOCK
+            return 1;
+        }
+
+        return 0;
+    }
+
+    return 0;
+}
+
+static
 void
 deactivate_xscreensaver(Display *dpy)
 {
@@ -108,6 +136,11 @@ deactivate_xscreensaver(Display *dpy)
 
     if (!xssw) {
         trace_warning("%s, no XScreenSaver's window found\n", __func__);
+        return;
+    }
+
+    if (is_xscreensaver_active(dpy)) {
+        // XScreenSaver already active, deactivating timer makes no sense
         return;
     }
 
