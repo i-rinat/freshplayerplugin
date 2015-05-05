@@ -42,8 +42,8 @@ pkg_check_modules(REQ
     openssl
     REQUIRED)
 
-# libdl.so and libm.so
-list(APPEND REQ_LIBRARIES dl m)
+# libdl.so, librt.so, and libm.so
+list(APPEND REQ_LIBRARIES dl rt m)
 
 # select GTK+ version
 set(WITH_GTK 2 CACHE INTEGER "select GTK+ major version to link with (2 or 3)")
