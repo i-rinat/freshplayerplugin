@@ -71,7 +71,7 @@ find_xscreensaver_window(Display *dpy)
         return 0;
     }
 
-    Atom XA_SCREENSAVER_VERSION = XInternAtom (dpy, "_SCREENSAVER_VERSION", False);
+    Atom XA_SCREENSAVER_VERSION = XInternAtom(dpy, "_SCREENSAVER_VERSION", False);
 
     wnd = None;
     for (unsigned int k = 0; k < nchildren; k ++) {
