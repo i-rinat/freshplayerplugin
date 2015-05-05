@@ -4,18 +4,18 @@
  */
 
 /* From private/ppb_camera_capabilities_private.idl,
- *   modified Fri Aug 22 11:08:14 2014.
+ *   modified Thu Feb 19 09:06:18 2015.
  */
 
 #ifndef PPAPI_C_PRIVATE_PPB_CAMERA_CAPABILITIES_PRIVATE_H_
 #define PPAPI_C_PRIVATE_PPB_CAMERA_CAPABILITIES_PRIVATE_H_
 
 #include "ppapi/c/pp_bool.h"
-#include "ppapi/c/pp_instance.h"
 #include "ppapi/c/pp_macros.h"
 #include "ppapi/c/pp_resource.h"
 #include "ppapi/c/pp_size.h"
 #include "ppapi/c/pp_stdint.h"
+#include "ppapi/c/private/pp_video_capture_format.h"
 
 #define PPB_CAMERACAPABILITIES_PRIVATE_INTERFACE_0_1 \
     "PPB_CameraCapabilities_Private;0.1"
@@ -40,16 +40,6 @@
  */
 struct PPB_CameraCapabilities_Private_0_1 {
   /**
-   * Creates a PPB_CameraCapabilities_Private resource.
-   *
-   * @param[in] instance A <code>PP_Instance</code> identifying one instance of
-   * a module.
-   *
-   * @return A <code>PP_Resource</code> corresponding to a
-   * PPB_CameraCapabilities_Private resource if successful, 0 if failed.
-   */
-  PP_Resource (*Create)(PP_Instance instance);
-  /**
    * IsCameraCapabilities() determines if the given resource is a
    * <code>PPB_CameraCapabilities_Private</code>.
    *
@@ -62,38 +52,22 @@ struct PPB_CameraCapabilities_Private_0_1 {
    */
   PP_Bool (*IsCameraCapabilities)(PP_Resource resource);
   /**
-   * GetSupportedPreviewSizes() returns the supported preview sizes for the
-   * given <code>PPB_CameraCapabilities_Private</code>.
+   * GetSupportedVideoCaptureFormats() returns the supported video capture
+   * formats for the given <code>PPB_CameraCapabilities_Private</code>.
    *
    * @param[in] capabilities A <code>PP_Resource</code> corresponding to an
    * image capture capabilities resource.
    * @param[out] array_size The size of preview size array.
-   * @param[out] preview_sizes An array of <code>PP_Size</code> corresponding
-   * to the supported preview sizes in pixels. The ownership of the array
-   * belongs to <code>PPB_CameraCapabilities_Private</code> and the caller
-   * should not free it. When a PPB_CameraCapabilities_Private is deleted,
-   * the array returning from this is no longer valid.
-   */
-  void (*GetSupportedPreviewSizes)(PP_Resource capabilities,
-                                   int32_t* array_size,
-                                   struct PP_Size** preview_sizes);
-  /**
-   * GetSupportedJpegSize() returns the supported JPEG sizes for the given
-   * <code>PPB_CameraCapabilities_Private</code>.
-   *
-   * @param[in] capabilities A <code>PP_Resource</code> corresponding to an
-   * image capture capabilities resource.
-   * @param[out] array_size The size of JPEG size array. If the output of this
-   * is 0, the camera has no support for generating JPEG images.
-   * @param[out] jpeg_sizes An array of <code>PP_Size</code> corresponding to
-   * the supported JPEG image sizes in pixels. The ownership of the array
-   * belongs to <code>PPB_CameraCapabilities_Private</code> and the caller
+   * @param[out] formats An array of <code>PP_VideoCaptureFormat</code>
+   * corresponding to the supported video capture formats. The ownership of the
+   * array belongs to <code>PPB_CameraCapabilities_Private</code> and the caller
    * should not free it. When a PPB_CameraCapabilities_Private is deleted, the
    * array returning from this is no longer valid.
    */
-  void (*GetSupportedJpegSizes)(PP_Resource capabilities,
-                                int32_t* array_size,
-                                struct PP_Size** jpeg_sizes);
+  void (*GetSupportedVideoCaptureFormats)(
+      PP_Resource capabilities,
+      uint32_t* array_size,
+      struct PP_VideoCaptureFormat** formats);
 };
 
 typedef struct PPB_CameraCapabilities_Private_0_1

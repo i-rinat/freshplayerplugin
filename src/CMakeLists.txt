@@ -59,7 +59,6 @@ set(source_list
     ppb_memory.c
     ppb_message_loop.c
     ppb_messaging.c
-    ppb_nacl.c
     ppb_net_address.c
     ppb_network_monitor.c
     ppb_opengles2.c

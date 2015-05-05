@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From dev/pp_print_settings_dev.idl modified Wed Jun 13 09:14:31 2012. */
+/* From dev/pp_print_settings_dev.idl modified Fri Jan 16 13:30:14 2015. */
 
 #ifndef PPAPI_C_DEV_PP_PRINT_SETTINGS_DEV_H_
 #define PPAPI_C_DEV_PP_PRINT_SETTINGS_DEV_H_
@@ -47,14 +47,6 @@ typedef enum {
   PP_PRINTSCALINGOPTION_SOURCE_SIZE = 2
 } PP_PrintScalingOption_Dev;
 PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_PrintScalingOption_Dev, 4);
-
-typedef enum {
-  PP_PRINTDUPLEXMODE_NONE = 0,
-  PP_PRINTDUPLEXMODE_SIMPLEX = 1,
-  PP_PRINTDUPLEXMODE_LONG_EDGE = 2,
-  PP_PRINTDUPLEXMODE_SHORT_EDGE = 3
-} PP_PrintDuplexMode_Dev;
-PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_PrintDuplexMode_Dev, 4);
 /**
  * @}
  */
@@ -76,12 +68,6 @@ struct PP_PrintSettings_Dev {
   PP_PrintOutputFormat_Dev format;
 };
 PP_COMPILE_ASSERT_STRUCT_SIZE_IN_BYTES(PP_PrintSettings_Dev, 60);
-
-struct PP_PrintRange_Dev {
-  int32_t from;
-  int32_t to;
-};
-PP_COMPILE_ASSERT_STRUCT_SIZE_IN_BYTES(PP_PrintRange_Dev, 8);
 /**
  * @}
  */

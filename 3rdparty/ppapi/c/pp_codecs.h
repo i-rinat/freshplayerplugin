@@ -3,11 +3,12 @@
  * found in the LICENSE file.
  */
 
-/* From pp_codecs.idl modified Wed Nov  5 13:38:52 2014. */
+/* From pp_codecs.idl modified Wed Feb  4 05:24:21 2015. */
 
 #ifndef PPAPI_C_PP_CODECS_H_
 #define PPAPI_C_PP_CODECS_H_
 
+#include "ppapi/c/pp_bool.h"
 #include "ppapi/c/pp_macros.h"
 #include "ppapi/c/pp_point.h"
 #include "ppapi/c/pp_rect.h"
@@ -129,6 +130,52 @@ struct PP_VideoPicture_0_1 {
    * Dimensions of the texture holding the decoded picture.
    */
   struct PP_Size texture_size;
+};
+
+/**
+ * Supported video profile information. See the PPB_VideoEncoder function
+ * GetSupportedProfiles() for more details.
+ */
+struct PP_VideoProfileDescription {
+  /**
+   * The codec profile.
+   */
+  PP_VideoProfile profile;
+  /**
+   * Dimensions of the maximum resolution of video frames, in pixels.
+   */
+  struct PP_Size max_resolution;
+  /**
+   * The numerator of the maximum frame rate.
+   */
+  uint32_t max_framerate_numerator;
+  /**
+   * The denominator of the maximum frame rate.
+   */
+  uint32_t max_framerate_denominator;
+  /**
+   * A value indicating if the profile is available in hardware, software, or
+   * both.
+   */
+  PP_HardwareAcceleration acceleration;
+};
+
+/**
+ * Struct describing a bitstream buffer.
+ */
+struct PP_BitstreamBuffer {
+  /**
+   * The size, in bytes, of the bitstream data.
+   */
+  uint32_t size;
+  /**
+   * The base address of the bitstream data.
+   */
+  void* buffer;
+  /**
+   * Whether the buffer represents a key frame.
+   */
+  PP_Bool key_frame;
 };
 /**
  * @}

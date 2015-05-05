@@ -28,15 +28,8 @@ struct PP_PdfPrintPresetOptions_Dev {
 
   // Number of copies to be printed.
   int32_t copies;
-
-  // DuplexMode to be used for printing.
-  PP_PrintDuplexMode_Dev duplex;
-
-  // Page range to be used for printing.
-  struct PP_PrintRange_Dev page_range;
-  int32_t page_range_count;
 };
-PP_COMPILE_ASSERT_STRUCT_SIZE_IN_BYTES(PP_PdfPrintPresetOptions_Dev, 24);
+PP_COMPILE_ASSERT_STRUCT_SIZE_IN_BYTES(PP_PdfPrintPresetOptions_Dev, 8);
 
 struct PPP_Pdf_1_1 {
   // Returns an absolute URL if the position is over a link.

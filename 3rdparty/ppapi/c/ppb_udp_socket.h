@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_udp_socket.idl modified Wed Dec 10 04:11:03 2014. */
+/* From ppb_udp_socket.idl modified Wed Jan 14 13:13:19 2015. */
 
 #ifndef PPAPI_C_PPB_UDP_SOCKET_H_
 #define PPAPI_C_PPB_UDP_SOCKET_H_
@@ -174,6 +174,9 @@ struct PPB_UDPSocket_1_1 {
    * been sent; otherwise, an error code from <code>pp_errors.h</code>.
    * <code>PP_ERROR_NOACCESS</code> will be returned if the caller doesn't have
    * required permissions.
+   * <code>PP_ERROR_INPROGRESS</code> will be returned if the socket is busy
+   * sending. The caller should wait until a pending send completes before
+   * retrying.
    */
   int32_t (*SendTo)(PP_Resource udp_socket,
                     const char* buffer,

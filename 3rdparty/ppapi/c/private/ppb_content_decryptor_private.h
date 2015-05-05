@@ -55,12 +55,12 @@ struct PPB_ContentDecryptor_Private_0_13 {
    *
    * @param[in] promise_id Identifies the promise that the CDM resolved.
    *
-   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * @param[in] session_id A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the session's ID attribute.
    */
   void (*PromiseResolvedWithSession)(PP_Instance instance,
                                      uint32_t promise_id,
-                                     struct PP_Var web_session_id);
+                                     struct PP_Var session_id);
   /**
    * A promise has been rejected by the CDM due to an error.
    *
@@ -93,7 +93,7 @@ struct PPB_ContentDecryptor_Private_0_13 {
    * of <code>UpdateSession()</code> and <code>SessionMessage()</code> calls
    * required to prepare for decryption.
    *
-   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * @param[in] session_id A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the ID of a session for
    * which this message is intended.
    *
@@ -108,14 +108,14 @@ struct PPB_ContentDecryptor_Private_0_13 {
    * message.
    */
   void (*SessionMessage)(PP_Instance instance,
-                         struct PP_Var web_session_id,
+                         struct PP_Var session_id,
                          PP_CdmMessageType message_type,
                          struct PP_Var message,
                          struct PP_Var legacy_destination_url);
   /**
    * The keys for a session have changed.
    *
-   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * @param[in] session_id A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the ID of the session that has
    * a change in keys.
    *
@@ -129,14 +129,14 @@ struct PPB_ContentDecryptor_Private_0_13 {
    * that are the session's key IDs and their status.
    */
   void (*SessionKeysChange)(PP_Instance instance,
-                            struct PP_Var web_session_id,
+                            struct PP_Var session_id,
                             PP_Bool has_additional_usable_key,
                             uint32_t key_count,
                             const struct PP_KeyInformation key_information[]);
   /**
    * The expiration time for a session has changed.
    *
-   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * @param[in] session_id A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the ID of the session that has
    * a new expiration time.
    *
@@ -145,7 +145,7 @@ struct PPB_ContentDecryptor_Private_0_13 {
    * since the Epoch (00:00:00 UTC, January 1, 1970).
    */
   void (*SessionExpirationChange)(PP_Instance instance,
-                                  struct PP_Var web_session_id,
+                                  struct PP_Var session_id,
                                   PP_Time new_expiry_time);
   /**
    * The session has been closed as the result of a call to the
@@ -153,16 +153,16 @@ struct PPB_ContentDecryptor_Private_0_13 {
    * <code>PPP_ContentDecryptor_Private</code> interface, or due to other
    * factors as determined by the CDM.
    *
-   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * @param[in] session_id A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the session's ID attribute of
    * the session that is now closed.
    */
-  void (*SessionClosed)(PP_Instance instance, struct PP_Var web_session_id);
+  void (*SessionClosed)(PP_Instance instance, struct PP_Var session_id);
   /**
    * An error occurred in a <code>PPP_ContentDecryptor_Private</code> method,
    * or within the plugin implementing the interface.
    *
-   * @param[in] web_session_id A <code>PP_Var</code> of type
+   * @param[in] session_id A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the session's ID attribute of
    * the session that caused the error.
    *
@@ -175,7 +175,7 @@ struct PPB_ContentDecryptor_Private_0_13 {
    * <code>PP_VARTYPE_STRING</code> containing the error description.
    */
   void (*SessionError)(PP_Instance instance,
-                       struct PP_Var web_session_id,
+                       struct PP_Var session_id,
                        PP_CdmExceptionCode exception_code,
                        uint32_t system_code,
                        struct PP_Var error_description);
