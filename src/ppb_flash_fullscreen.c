@@ -210,15 +210,28 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 
     // update windows state properties
     Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", False);
-    Atom state_atoms[] = {
-        XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False),// fill horizontal space
-        XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False),// fill vertical space
-        XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False),    // go fullscreen
-        XInternAtom(dpy, "_NET_WM_STATE_SKIP_PAGER", False),    // do not appear in pager
-        XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", False),  // do not appear in taskbar
-    };
-    XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
-                    (unsigned char *)&state_atoms, sizeof(state_atoms)/sizeof(state_atoms[0]));
+
+
+    if (config.tie_fullscreen_window_to_browser) {
+        Atom state_atoms[] = {
+            XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False),// fill horizontal space
+            XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False),// fill vertical space
+            XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False),    // go fullscreen
+            XInternAtom(dpy, "_NET_WM_STATE_SKIP_PAGER", False),    // do not appear in pager
+            XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", False),  // do not appear in taskbar
+        };
+        XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
+                        (unsigned char *)&state_atoms, sizeof(state_atoms)/sizeof(state_atoms[0]));
+    } else {
+
+        Atom state_atoms[] = {
+            XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False),// fill horizontal space
+            XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False),// fill vertical space
+            XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False),    // go fullscreen
+        };
+        XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
+                        (unsigned char *)&state_atoms, sizeof(state_atoms)/sizeof(state_atoms[0]));
+    }
 
     // give window a name
     const char *fs_window_name = "freshwrapper fullscreen window";
@@ -254,10 +267,12 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     pthread_barrier_wait(&cross_thread_call_barrier);
 
     // set window transient for browser window
-    if (tp->browser_window != None)
-        XSetTransientForHint(dpy, pp_i->fs_wnd, tp->browser_window);
-    else
-        trace_error("%s, can't get tp->browser_window\n", __func__);
+    if (config.tie_fullscreen_window_to_browser) {
+        if (tp->browser_window != None)
+            XSetTransientForHint(dpy, pp_i->fs_wnd, tp->browser_window);
+        else
+            trace_error("%s, can't get tp->browser_window\n", __func__);
+    }
 
     pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 1;
