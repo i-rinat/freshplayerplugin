@@ -265,6 +265,7 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     pp_i->fs_height =     wnd_size;
     pthread_mutex_unlock(&display.lock);
 
+    int seen_expose_event = 0;
     while (1) {
         XEvent  ev;
         int     handled = 0;
@@ -284,20 +285,32 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
                 break;
 
             case ConfigureNotify:
+                pthread_mutex_lock(&display.lock);
+                pp_i->fs_width =  ev.xconfigure.width;
+                pp_i->fs_height = ev.xconfigure.height;
+                pthread_mutex_unlock(&display.lock);
+
+                if (seen_expose_event) {
+                    ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i),
+                                                  PP_OK, __func__);
+                    pthread_barrier_wait(&cross_thread_call_barrier);
+                }
+
+                handled = 1;
+                break;
+
             case ReparentNotify:
             case MapNotify:
                 handled = 1;
                 break;
 
             case Expose:
-                pthread_mutex_lock(&display.lock);
-                pp_i->fs_width =  ev.xexpose.width;
-                pp_i->fs_height = ev.xexpose.height;
-                pthread_mutex_unlock(&display.lock);
-
-                ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i),
-                                              PP_OK, __func__);
-                pthread_barrier_wait(&cross_thread_call_barrier);
+                if (!seen_expose_event) {
+                    ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt, pp_i),
+                                                  PP_OK, __func__);
+                    pthread_barrier_wait(&cross_thread_call_barrier);
+                }
+                seen_expose_event = 1;
                 handled = 0;
                 break;
         }
