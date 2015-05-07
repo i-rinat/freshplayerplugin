@@ -64,3 +64,7 @@ enable_windowed_mode = 1
 
 # whenever XEmbed used in windowed mode (if browser advertises its support)
 enable_xembed = 1
+
+# if set to 1, fullscreen window will be kept always above browser, and hidden
+# from taskbar and pager
+tie_fullscreen_window_to_browser = 1
