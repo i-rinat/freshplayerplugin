@@ -189,7 +189,8 @@ int32_t
 trace_ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
                                   struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s drm=%d, callback={.func=%p, .user_data=%p, .flags=%u}\n",
+               __func__+6, drm, callback.func, callback.user_data, callback.flags);
     return ppb_flash_drm_get_device_id(drm, id, callback);
 }
 
@@ -197,7 +198,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_flash_drm_get_hmonitor(PP_Resource drm, int64_t *hmonitor)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s drm=%d\n", __func__+6, drm);
     return ppb_flash_drm_get_hmonitor(drm, hmonitor);
 }
 
@@ -206,7 +207,8 @@ int32_t
 trace_ppb_flash_drm_get_voucher_file(PP_Resource drm, PP_Resource *file_ref,
                                      struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s drm=%d, callback={.func=%p, .user_data=%p, .flags=%u}\n",
+               __func__+6, drm, callback.func, callback.user_data, callback.flags);
     return ppb_flash_drm_get_voucher_file(drm, file_ref, callback);
 }
 
@@ -215,7 +217,8 @@ int32_t
 trace_ppb_flash_drm_monitor_is_external(PP_Resource drm, PP_Bool *is_external,
                                         struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s drm=%d, callback={.func=%p, .user_data=%p, .flags=%u}\n",
+               __func__+6, drm, callback.func, callback.user_data, callback.flags);
     return ppb_flash_drm_monitor_is_external(drm, is_external, callback);
 }
 
