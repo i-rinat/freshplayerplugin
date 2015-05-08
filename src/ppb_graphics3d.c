@@ -165,7 +165,7 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     g3d->fb_config = fb_cfgs[0];
     XFree(fb_cfgs);
 
-    // create context implementing OpenGL ES 2.0
+    // create context implementing OpenGL 2.0
     const int ctx_attrs[] = {
         GLX_RENDER_TYPE,                GLX_RGBA_TYPE,
         GLX_CONTEXT_MAJOR_VERSION_ARB,  2,
