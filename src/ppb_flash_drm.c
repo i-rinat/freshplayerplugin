@@ -189,7 +189,7 @@ int32_t
 trace_ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
                                   struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_flash_drm_get_device_id(drm, id, callback);
 }
 
@@ -222,7 +222,7 @@ trace_ppb_flash_drm_monitor_is_external(PP_Resource drm, PP_Bool *is_external,
 
 const struct PPB_Flash_DRM_1_1 ppb_flash_drm_interface_1_1 = {
     .Create =               TWRAPF(ppb_flash_drm_create),
-    .GetDeviceID =          TWRAPZ(ppb_flash_drm_get_device_id),
+    .GetDeviceID =          TWRAPF(ppb_flash_drm_get_device_id),
     .GetHmonitor =          TWRAPZ(ppb_flash_drm_get_hmonitor),
     .GetVoucherFile =       TWRAPZ(ppb_flash_drm_get_voucher_file),
     .MonitorIsExternal =    TWRAPZ(ppb_flash_drm_monitor_is_external),
@@ -230,7 +230,7 @@ const struct PPB_Flash_DRM_1_1 ppb_flash_drm_interface_1_1 = {
 
 const struct PPB_Flash_DRM_1_0 ppb_flash_drm_interface_1_0 = {
     .Create =           TWRAPF(ppb_flash_drm_create),
-    .GetDeviceID =      TWRAPZ(ppb_flash_drm_get_device_id),
+    .GetDeviceID =      TWRAPF(ppb_flash_drm_get_device_id),
     .GetHmonitor =      TWRAPZ(ppb_flash_drm_get_hmonitor),
     .GetVoucherFile =   TWRAPZ(ppb_flash_drm_get_voucher_file),
 };
