@@ -92,3 +92,6 @@ add_library(shader_translator STATIC
     src/compiler/translator/timing/RestrictVertexShaderTiming.cpp
     src/third_party/compiler/ArrayBoundsClamper.cpp
 )
+
+add_executable(st samples/shader_translator/shader_translator.cpp)
+target_link_libraries(st shader_translator)
