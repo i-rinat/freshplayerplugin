@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
+#include <X11/Xcursor/Xcursor.h>
 #include <pthread.h>
 #include "pp_resource.h"
 #include "ppb_core.h"
@@ -37,12 +38,40 @@ struct comt_param_s {
     PP_Instance     instance_id;
     int             xtype;
     int             hide_cursor;
+    PP_Resource     custom_image;
+    int             hotspot_x;
+    int             hotspot_y;
 };
+
+
+static
+Cursor
+create_cursor_from_image_data_resource(Display *dpy, Window wnd, PP_Resource image_data,
+                                       int hotspot_x, int hotspot_y)
+{
+    struct pp_image_data_s *id = pp_resource_acquire(image_data, PP_RESOURCE_IMAGE_DATA);
+    if (!id) {
+        trace_warning("%s, bad resource\n", __func__);
+        return None;
+    }
+
+    XcursorImage *cursor_image = XcursorImageCreate(id->width, id->height);
+    cursor_image->xhot = hotspot_x;
+    cursor_image->yhot = hotspot_y;
+
+    memcpy(cursor_image->pixels, id->data, id->stride * id->height);
+
+    Cursor cursor = XcursorImageLoadCursor(dpy, cursor_image);
+    XcursorImageDestroy(cursor_image);
+
+    pp_resource_release(image_data);
+    return cursor;
+}
 
 void
 set_cursor_ptac(void *user_data)
 {
-    Window wnd;
+    Window wnd = None;
     Cursor cursor;
     struct comt_param_s *params = user_data;
     struct pp_instance_s *pp_i = tables_get_pp_instance(params->instance_id);
@@ -50,26 +79,36 @@ set_cursor_ptac(void *user_data)
     if (!pp_i)
         goto quit;
 
-    if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) != NPERR_NO_ERROR)
-        wnd = None;
+    if (pp_i->is_fullscreen) {
+        wnd = pp_i->fs_wnd;
+    } else if (pp_i->windowed_mode) {
+        wnd = pp_i->wnd;
+    } else {
+        if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) != NPERR_NO_ERROR)
+            wnd = None;
+    }
 
     pthread_mutex_lock(&display.lock);
 
-    cursor = params->hide_cursor ? display.transparent_cursor
-                                 : XCreateFontCursor(display.x, params->xtype);
-    if (pp_i->is_fullscreen) {
-        XDefineCursor(display.x, pp_i->fs_wnd, cursor);
-        XFlush(display.x);
+    if (params->hide_cursor) {
+        cursor = display.transparent_cursor;
     } else {
-        if (wnd != None) {
-            XDefineCursor(display.x, wnd, cursor);
-            XFlush(display.x);
+        if (params->custom_image != 0) {
+            cursor = create_cursor_from_image_data_resource(display.x, wnd, params->custom_image,
+                                                            params->hotspot_x, params->hotspot_y);
+        } else {
+            cursor = XCreateFontCursor(display.x, params->xtype);
         }
     }
 
-    // remember to free cursor unless we hid it
-    pp_i->have_prev_cursor = !params->hide_cursor;
-    pp_i->prev_cursor = cursor;
+    if (wnd != None && cursor != None) {
+        XDefineCursor(display.x, wnd, cursor);
+        XFlush(display.x);
+
+        // remember to free cursor unless we hid it
+        pp_i->have_prev_cursor = !params->hide_cursor;
+        pp_i->prev_cursor = cursor;
+    }
 
     pthread_mutex_unlock(&display.lock);
 
@@ -85,7 +124,6 @@ ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
     int hide_cursor = 0;
     switch (type) {
     case PP_CURSORTYPE_CUSTOM:
-        trace_warning("%s, custom cursors not implemented\n", __func__);
         xtype = XC_arrow;
         break;
     case PP_CURSORTYPE_POINTER:
@@ -220,11 +258,17 @@ ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
         break;
     }
 
-    struct comt_param_s *comt_params = g_slice_alloc(sizeof(*comt_params));
+    struct comt_param_s *comt_params = g_slice_alloc0(sizeof(*comt_params));
 
     comt_params->instance_id =  instance;
     comt_params->xtype =        xtype;
     comt_params->hide_cursor =  hide_cursor;
+    comt_params->custom_image = (type == PP_CURSORTYPE_CUSTOM) ? custom_image : 0;
+
+    if (hot_spot) {
+        comt_params->hotspot_x = hot_spot->x;
+        comt_params->hotspot_y = hot_spot->y;
+    }
 
     ppb_core_call_on_browser_thread(instance, set_cursor_ptac, comt_params);
 

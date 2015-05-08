@@ -33,6 +33,7 @@ pkg_check_modules(REQ
     x11
     xrandr
     xrender
+    xcursor
     gl
     libconfig
     libevent
