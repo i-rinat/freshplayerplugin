@@ -34,7 +34,6 @@ pkg_check_modules(REQ
     xrandr
     xrender
     gl
-    glesv2
     libconfig
     libevent
     libevent_pthreads

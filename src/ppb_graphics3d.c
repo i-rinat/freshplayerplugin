@@ -172,7 +172,6 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         GLX_RENDER_TYPE,                GLX_RGBA_TYPE,
         GLX_CONTEXT_MAJOR_VERSION_ARB,  2,
         GLX_CONTEXT_MINOR_VERSION_ARB,  0,
-        GLX_CONTEXT_PROFILE_MASK_ARB,   GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
         None,
     };
     // TODO: support shared_context

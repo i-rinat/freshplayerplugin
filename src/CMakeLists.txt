@@ -82,6 +82,7 @@ set(source_list
     ppb_x509_certificate.c
     ppb_zoom.c
     screensaver_control.c
+    shader_translator.cc
     x11_event_thread.c
 )
 
