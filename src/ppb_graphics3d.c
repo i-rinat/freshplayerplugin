@@ -54,11 +54,9 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
 
     // check for required GLX extensions
-    if (!display.glx_arb_create_context || !display.glx_arb_create_context_profile ||
-        !display.glx_ext_create_context_es2_profile)
-    {
-        trace_warning("%s, some of GLX_ARB_create_context, GLX_ARB_create_context_profile, "
-                      "GLX_EXT_create_context_es2_profile missing\n", __func__);
+    if (!display.glx_arb_create_context || !display.glx_arb_create_context_profile) {
+        trace_warning("%s, some of GLX_ARB_create_context, GLX_ARB_create_context_profile "
+                      "missing\n", __func__);
         return 0;
     }
 
