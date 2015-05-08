@@ -94,6 +94,7 @@ if (JACK_FOUND AND SOXR_FOUND AND WITH_JACK)
 endif()
 
 add_library(freshwrapper-obj OBJECT ${source_list})
+add_dependencies(freshwrapper-obj img-resources)
 
 # ensure libfreshwrapper-*.so are linked with all libraries they use
 add_executable(dep_check dep_check.c)
