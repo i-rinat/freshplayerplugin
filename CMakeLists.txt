@@ -6,6 +6,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -fPIC -fvisibility=hidden -pthrea
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=format-security")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -fvisibility=hidden -pthread")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror=format-security")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=implicit-function-declaration")
+
 # add missing NDEBUG in RelWithDebugInfo
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG -g3")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG -g3")
@@ -93,6 +97,7 @@ else()
 endif()
 
 list(APPEND REQ_LIBRARIES img-resources)
+list(APPEND REQ_LIBRARIES shader_translator)
 
 include_directories(${REQ_INCLUDE_DIRS})
 link_directories(${REQ_LIBRARY_DIRS})
@@ -100,6 +105,7 @@ add_definitions(${REQ_CFLAGS_OTHER})
 add_definitions(-DXP_UNIX)
 
 include_directories(3rdparty)
+include_directories(3rdparty/angle/include)
 
 add_subdirectory(3rdparty)
 add_subdirectory(resources)
