@@ -63,9 +63,9 @@ Project is using cmake (>=2.8.8) build system.
 
 * Install prerequisites.
 ```
-    $ sudo apt-get install cmake pkg-config ragel libasound2-dev libssl-dev \
-           libglib2.0-dev libconfig-dev libpango1.0-dev libgl1-mesa-dev     \
-           libevent-dev libgtk+2.0-dev libgles2-mesa-dev libxrandr-dev g++  \
+    $ sudo apt-get install cmake gcc g++ pkg-config ragel libasound2-dev \
+           libssl-dev libglib2.0-dev libconfig-dev libpango1.0-dev       \
+           libgl1-mesa-dev libevent-dev libgtk+2.0-dev libxrandr-dev     \
            libxrender-dev
 ```
 * (optional) To enable PulseAudio support, install `libpulse-dev`.
