@@ -29,6 +29,8 @@
 #include "ppb_core.h"
 #include "trace.h"
 #include "tables.h"
+#include "ppb_device_ref.h"
+#include "ppb_var.h"
 
 
 
@@ -59,7 +61,26 @@ int32_t
 ppb_video_capture_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOutput output,
                                     struct PP_CompletionCallback callback)
 {
-    output.GetDataBuffer(output.user_data, 0, sizeof(int));
+    struct pp_video_capture_s *vc = pp_resource_acquire(video_capture, PP_RESOURCE_VIDEO_CAPTURE);
+    if (!vc) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    PP_Resource *devs = output.GetDataBuffer(output.user_data, 1, sizeof(PP_Resource));
+    if (!devs) {
+        pp_resource_release(video_capture);
+        return PP_ERROR_FAILED;
+    }
+
+    // TODO: enumerate all capture devices
+    // TODO: use real name, returned by driver; put device path into longname field
+    devs[0] = ppb_device_ref_create(vc->instance->id,
+                                    ppb_var_var_from_utf8_z("Default capture device"),
+                                    ppb_var_var_from_utf8_z("Longname of default capture device"),
+                                    PP_DEVICETYPE_DEV_VIDEOCAPTURE);
+
+    pp_resource_release(video_capture);
 
     ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
     return PP_OK_COMPLETIONPENDING;
@@ -128,7 +149,7 @@ trace_ppb_video_capture_enumerate_devices(PP_Resource video_capture,
                                           struct PP_ArrayOutput output,
                                           struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {fake} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s\n", __func__+6);
     return ppb_video_capture_enumerate_devices(video_capture, output, callback);
 }
 
@@ -189,7 +210,7 @@ trace_ppb_video_capture_close(PP_Resource video_capture)
 const struct PPB_VideoCapture_Dev_0_3 ppb_video_capture_dev_interface_0_3 = {
     .Create =               TWRAPF(ppb_video_capture_create),
     .IsVideoCapture =       TWRAPF(ppb_video_capture_is_video_capture),
-    .EnumerateDevices =     TWRAPZ(ppb_video_capture_enumerate_devices),
+    .EnumerateDevices =     TWRAPF(ppb_video_capture_enumerate_devices),
     .MonitorDeviceChange =  TWRAPZ(ppb_video_capture_monitor_device_change),
     .Open =                 TWRAPZ(ppb_video_capture_open),
     .StartCapture =         TWRAPZ(ppb_video_capture_start_capture),
