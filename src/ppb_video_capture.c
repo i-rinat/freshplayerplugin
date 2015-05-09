@@ -131,7 +131,7 @@ TRACE_WRAPPER
 PP_Resource
 trace_ppb_video_capture_create(PP_Instance instance)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s instance=%d\n", __func__+6, instance);
     return ppb_video_capture_create(instance);
 }
 
@@ -139,7 +139,7 @@ TRACE_WRAPPER
 PP_Bool
 trace_ppb_video_capture_is_video_capture(PP_Resource video_capture)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s video_capture=%d\n", __func__+6, video_capture);
     return ppb_video_capture_is_video_capture(video_capture);
 }
 
@@ -149,7 +149,10 @@ trace_ppb_video_capture_enumerate_devices(PP_Resource video_capture,
                                           struct PP_ArrayOutput output,
                                           struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s video_capture=%d, output={.GetDataBuffer=%p, .user_data=%p}, "
+               "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, video_capture,
+               output.GetDataBuffer, output.user_data, callback.func, callback.user_data,
+               callback.flags);
     return ppb_video_capture_enumerate_devices(video_capture, output, callback);
 }
 
@@ -159,7 +162,8 @@ trace_ppb_video_capture_monitor_device_change(PP_Resource video_capture,
                                               PP_MonitorDeviceChangeCallback callback,
                                               void *user_data)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s video_capture=%d, callback=%p, user_data=%p\n", __func__+6,
+               video_capture, callback, user_data);
     return ppb_video_capture_monitor_device_change(video_capture, callback, user_data);
 }
 
@@ -169,7 +173,21 @@ trace_ppb_video_capture_open(PP_Resource video_capture, PP_Resource device_ref,
                              const struct PP_VideoCaptureDeviceInfo_Dev *requested_info,
                              uint32_t buffer_count, struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    gchar *s_requested_info;
+    if (requested_info) {
+        s_requested_info = g_strdup_printf("{.width=%u, .height=%u, .frames_per_second=%u}",
+                                           requested_info->width, requested_info->height,
+                                           requested_info->frames_per_second);
+    } else {
+        s_requested_info = g_strdup("(nil)");
+    }
+
+    trace_info("[PPB] {zilch} %s video_capture=%d, device_ref=%d, request_info=%s, buffer_count=%u,"
+               " callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, video_capture,
+               device_ref, s_requested_info, buffer_count, callback.func, callback.user_data,
+               callback.flags);
+    g_free(s_requested_info);
+
     return ppb_video_capture_open(video_capture, device_ref, requested_info, buffer_count,
                                   callback);
 }
@@ -178,7 +196,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_start_capture(PP_Resource video_capture)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s video_capture=%d\n", __func__+6, video_capture);
     return ppb_video_capture_start_capture(video_capture);
 }
 
@@ -186,7 +204,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_reuse_buffer(PP_Resource video_capture, uint32_t buffer)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s video_capture=%d, buffer=%u\n", __func__+6, video_capture, buffer);
     return ppb_video_capture_reuse_buffer(video_capture, buffer);
 }
 
@@ -194,7 +212,7 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_video_capture_stop_capture(PP_Resource video_capture)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {zilch} %s video_capture=%d\n", __func__+6, video_capture);
     return ppb_video_capture_stop_capture(video_capture);
 }
 
@@ -202,7 +220,7 @@ TRACE_WRAPPER
 void
 trace_ppb_video_capture_close(PP_Resource video_capture)
 {
-    trace_info("[PPB] {fake} %s\n", __func__+6);
+    trace_info("[PPB] {fake} %s video_capture=%d\n", __func__+6, video_capture);
     ppb_video_capture_close(video_capture);
 }
 
