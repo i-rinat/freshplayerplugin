@@ -63,6 +63,18 @@ list(APPEND REQ_LIBRARY_DIRS ${GTK_LIBRARY_DIRS})
 list(APPEND REQ_INCLUDE_DIRS ${GTK_INCLUDE_DIRS})
 list(APPEND REQ_LIBRARIES    ${GTK_LIBRARIES})
 
+# OpenGL ES 2
+set(WITH_GLES2 TRUE CACHE STRING "use system libGLESv2")
+if (WITH_GLES2)
+    pkg_check_modules(GLES2 glesv2 REQUIRED)
+    add_definitions(-DHAVE_GLES2=1)
+    list(APPEND REQ_LIBRARY_DIRS ${GLES2_LIBRARY_DIRS})
+    list(APPEND REQ_INCLUDE_DIRS ${GLES2_INCLUDE_DIRS})
+    list(APPEND REQ_LIBRARIES    ${GLES2_LIBRARIES})
+else()
+    # otherwise ANGLE will be used for shader translation
+endif()
+
 # optional dependencies
 message(STATUS "checking for optional dependencies")
 
@@ -98,7 +110,6 @@ else()
 endif()
 
 list(APPEND REQ_LIBRARIES img-resources)
-list(APPEND REQ_LIBRARIES shader_translator)
 
 include_directories(${REQ_INCLUDE_DIRS})
 link_directories(${REQ_LIBRARY_DIRS})
@@ -106,7 +117,10 @@ add_definitions(${REQ_CFLAGS_OTHER})
 add_definitions(-DXP_UNIX)
 
 include_directories(3rdparty)
-include_directories(3rdparty/angle/include)
+if (NOT WITH_GLES2)
+    include_directories(3rdparty/angle/include)
+    list(APPEND REQ_LIBRARIES shader_translator)
+endif()
 
 add_subdirectory(3rdparty)
 add_subdirectory(resources)

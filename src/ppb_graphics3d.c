@@ -54,11 +54,21 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
 
     // check for required GLX extensions
+#if HAVE_GLES2
+    if (!display.glx_arb_create_context || !display.glx_arb_create_context_profile ||
+        !display.glx_ext_create_context_es2_profile)
+    {
+        trace_warning("%s, some of GLX_ARB_create_context, GLX_ARB_create_context_profile, "
+                      "GLX_EXT_create_context_es2_profile missing\n", __func__);
+        return 0;
+    }
+#else
     if (!display.glx_arb_create_context || !display.glx_arb_create_context_profile) {
         trace_warning("%s, some of GLX_ARB_create_context, GLX_ARB_create_context_profile "
                       "missing\n", __func__);
         return 0;
     }
+#endif
 
     PP_Resource context = pp_resource_allocate(PP_RESOURCE_GRAPHICS3D, pp_i);
     struct pp_graphics3d_s *g3d = pp_resource_acquire(context, PP_RESOURCE_GRAPHICS3D);
@@ -165,14 +175,28 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     g3d->fb_config = fb_cfgs[0];
     XFree(fb_cfgs);
 
+    // TODO: support shared_context
+
+#if HAVE_GLES2
+    // create context implementing OpenGL ES 2.0
+    const int ctx_attrs[] = {
+        GLX_RENDER_TYPE,                GLX_RGBA_TYPE,
+        GLX_CONTEXT_MAJOR_VERSION_ARB,  2,
+        GLX_CONTEXT_MINOR_VERSION_ARB,  0,
+        GLX_CONTEXT_PROFILE_MASK_ARB,   GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
+        None,
+    };
+#else
     // create context implementing OpenGL 2.0
+    // OpenGL ES 2.0 will be emulated with help of shader translator
     const int ctx_attrs[] = {
         GLX_RENDER_TYPE,                GLX_RGBA_TYPE,
         GLX_CONTEXT_MAJOR_VERSION_ARB,  2,
         GLX_CONTEXT_MINOR_VERSION_ARB,  0,
         None,
     };
-    // TODO: support shared_context
+#endif
+
     g3d->glc = display.glXCreateContextAttribsARB(display.x, g3d->fb_config, NULL, True, ctx_attrs);
     if (!g3d->glc) {
         trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);

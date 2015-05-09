@@ -82,7 +82,6 @@ set(source_list
     ppb_x509_certificate.c
     ppb_zoom.c
     screensaver_control.c
-    shader_translator.cc
     x11_event_thread.c
 )
 
@@ -92,6 +91,10 @@ endif()
 
 if (JACK_FOUND AND SOXR_FOUND AND WITH_JACK)
     list(APPEND source_list audio_thread_jack.c)
+endif()
+
+if (NOT WITH_GLES2)
+    list(APPEND source_list shader_translator.cc)
 endif()
 
 add_library(freshwrapper-obj OBJECT ${source_list})

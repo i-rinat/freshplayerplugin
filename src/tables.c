@@ -188,6 +188,8 @@ check_glx_extensions(void)
     display.glx_arb_create_context = !!strstr(glx_ext_str, "GLX_ARB_create_context");
     display.glx_arb_create_context_profile = !!strstr(glx_ext_str,
                                                       "GLX_ARB_create_context_profile");
+    display.glx_ext_create_context_es2_profile = !!strstr(glx_ext_str,
+                                                          "GLX_EXT_create_context_es2_profile");
     display.glXCreateContextAttribsARB = (glx_create_context_attribs_arb_f)
         glXGetProcAddressARB((const GLubyte *)"glXCreateContextAttribsARB");
 }

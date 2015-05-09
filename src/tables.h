@@ -53,6 +53,7 @@ struct display_s {
     glx_create_context_attribs_arb_f    glXCreateContextAttribsARB;
     uint32_t                            glx_arb_create_context;
     uint32_t                            glx_arb_create_context_profile;
+    uint32_t                            glx_ext_create_context_es2_profile;
 };
 
 extern NPNetscapeFuncs  npn;
