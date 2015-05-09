@@ -44,6 +44,7 @@ pkg_check_modules(REQ
     pangoft2
     freetype2
     openssl
+    libv4l2
     REQUIRED)
 
 # libdl.so, librt.so, and libm.so

@@ -42,6 +42,7 @@
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
 #include <ppapi/c/dev/ppb_text_input_dev.h>
 #include <ppapi/c/dev/ppp_text_input_dev.h>
+#include <ppapi/c/dev/ppp_video_capture_dev.h>
 
 #include <stdlib.h>
 #include <X11/Xlib.h>
@@ -374,6 +375,18 @@ struct pp_printing_s {
 
 struct pp_video_capture_s {
     COMMON_STRUCTURE_FIELDS
+    int                 fd;
+    uint32_t            width;
+    uint32_t            height;
+    uint32_t            fps;
+    size_t              buffer_size;
+    uint32_t            buffer_count;
+    PP_Resource        *buffers;
+    char               *buffer_is_free;
+    pthread_t           thread;
+    uint32_t            thread_started;
+    uint32_t            terminate_thread;
+    const struct PPP_VideoCapture_Dev_0_1 *ppp_video_capture_dev;
 };
 
 struct pp_audio_input_s {
