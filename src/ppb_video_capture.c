@@ -36,6 +36,7 @@
 #include <libv4l2.h>
 #include "pp_interface.h"
 #include "eintr_retry.h"
+#include <dirent.h>
 
 
 const char *default_capture_device = "/dev/video0";
@@ -96,33 +97,98 @@ ppb_video_capture_is_video_capture(PP_Resource video_capture)
     return pp_resource_get_type(video_capture) == PP_RESOURCE_VIDEO_CAPTURE;
 }
 
+static
+int
+video_device_is_usable(const char *dev, char **shortname)
+{
+    int fd = v4l2_open(dev, O_RDWR);
+    if (fd < 0)
+        return 0;
+
+    struct v4l2_capability caps;
+    if (v4l2_ioctl(fd, VIDIOC_QUERYCAP, &caps) != 0)
+        goto err_1;
+
+    const uint32_t device_caps = (caps.capabilities & V4L2_CAP_DEVICE_CAPS) ? caps.device_caps
+                                                                            : caps.capabilities;
+
+    if (!(device_caps & V4L2_CAP_VIDEO_CAPTURE))
+        goto err_1;
+
+    if (!(device_caps & V4L2_CAP_READWRITE))
+        goto err_1;
+
+    *shortname = g_strdup((char *)caps.card);
+
+    v4l2_close(fd);
+    return 1;
+
+err_1:
+    v4l2_close(fd);
+    return 0;
+}
+
 int32_t
 ppb_video_capture_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOutput output,
                                     struct PP_CompletionCallback callback)
 {
+    int32_t retval;
     struct pp_video_capture_s *vc = pp_resource_acquire(video_capture, PP_RESOURCE_VIDEO_CAPTURE);
     if (!vc) {
         trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
     }
 
-    PP_Resource *devs = output.GetDataBuffer(output.user_data, 1, sizeof(PP_Resource));
-    if (!devs) {
-        pp_resource_release(video_capture);
-        return PP_ERROR_FAILED;
+    GArray *vc_devices = g_array_new(FALSE, TRUE, sizeof(PP_Resource));
+
+    struct dirent **namelist;
+    int n = scandir("/dev/v4l/by-path", &namelist, NULL, NULL);
+    if (n >= 0) {
+        for (int k = 0; k < n; k ++) {
+            if (strcmp(namelist[k]->d_name, ".") == 0)
+                continue;
+            if (strcmp(namelist[k]->d_name, "..") == 0)
+                continue;
+
+            char *fullpath = g_strdup_printf("/dev/v4l/by-path/%s", namelist[k]->d_name);
+            char *shortname = NULL;
+            if (video_device_is_usable(fullpath, &shortname)) {
+                PP_Resource device;
+
+                device = ppb_device_ref_create(vc->instance->id,
+                                               ppb_var_var_from_utf8_z(shortname),
+                                               ppb_var_var_from_utf8_z(fullpath),
+                                               PP_DEVICETYPE_DEV_VIDEOCAPTURE);
+                g_array_append_val(vc_devices, device);
+                free(shortname);
+            }
+            g_free(fullpath);
+        }
+
+        for (int k = 0; k < n; k ++)
+            free(namelist[k]);
+        free(namelist);
     }
 
-    // TODO: enumerate all capture devices
-    // TODO: use real name, returned by driver; put device path into longname field
-    devs[0] = ppb_device_ref_create(vc->instance->id,
-                                    ppb_var_var_from_utf8_z("Default capture device"),
-                                    ppb_var_var_from_utf8_z("/dev/video0"),
-                                    PP_DEVICETYPE_DEV_VIDEOCAPTURE);
+    PP_Resource *devs = output.GetDataBuffer(output.user_data, vc_devices->len,
+                                             sizeof(PP_Resource));
+    if (!devs) {
+        retval = PP_ERROR_FAILED;
+        for (int k = 0; k < vc_devices->len; k ++)
+            ppb_core_release_resource(g_array_index(vc_devices, PP_Resource, k));
+        goto err;
+    }
 
-    pp_resource_release(video_capture);
+    for (int k = 0; k < vc_devices->len; k ++)
+        devs[k] = g_array_index(vc_devices, PP_Resource, k);
 
+    retval = PP_OK_COMPLETIONPENDING;
     ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
-    return PP_OK_COMPLETIONPENDING;
+
+err:
+    pp_resource_release(video_capture);
+    g_array_free(vc_devices, TRUE);
+    return retval;
 }
 
 int32_t
