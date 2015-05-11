@@ -62,10 +62,9 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
                       "GLX_EXT_create_context_es2_profile missing\n", __func__);
         return 0;
     }
-#else
-    if (!display.glx_arb_create_context || !display.glx_arb_create_context_profile) {
-        trace_warning("%s, some of GLX_ARB_create_context, GLX_ARB_create_context_profile "
-                      "missing\n", __func__);
+
+    if (!display.glXCreateContextAttribsARB) {
+        trace_warning("%s, no glXCreateContextAttribsARB found\n", __func__);
         return 0;
     }
 #endif
@@ -197,10 +196,20 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     };
 #endif
 
-    g3d->glc = display.glXCreateContextAttribsARB(display.x, g3d->fb_config, NULL, True, ctx_attrs);
-    if (!g3d->glc) {
-        trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
-        goto err;
+    if (display.glXCreateContextAttribsARB) {
+        g3d->glc = display.glXCreateContextAttribsARB(display.x, g3d->fb_config, NULL, True,
+                                                      ctx_attrs);
+        if (!g3d->glc) {
+            trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
+            goto err;
+        }
+    } else {
+        // if no glXCreateContextAttribsARB, request any GL context
+        g3d->glc = glXCreateNewContext(display.x, g3d->fb_config, GLX_RGBA_TYPE, NULL, True);
+        if (!g3d->glc) {
+            trace_error("%s, glXCreateNewContext returned NULL\n", __func__);
+            goto err;
+        }
     }
 
     g3d->depth = pp_i->is_transparent ? 32 : DefaultDepth(display.x, screen);
