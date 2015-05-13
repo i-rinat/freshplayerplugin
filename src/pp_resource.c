@@ -189,8 +189,17 @@ pp_resource_unref(PP_Resource resource)
 
     pthread_mutex_lock(&res_tbl_lock);
     struct pp_resource_generic_s *ptr = g_hash_table_lookup(res_tbl, GINT_TO_POINTER(resource));
-    if (ptr)
+    if (ptr) {
         ref_cnt = --ptr->ref_cnt;
+
+        // reference count should always be non-negative
+        if (ref_cnt < 0)
+            trace_error("%s, logic error, ref count gone negative\n", __func__);
+
+        // prevent from being destroyed twice
+        if (ref_cnt <= 0)
+            g_hash_table_remove(res_tbl, GINT_TO_POINTER(resource));
+    }
     pthread_mutex_unlock(&res_tbl_lock);
 
     if (!ptr)
@@ -287,8 +296,9 @@ pp_resource_unref(PP_Resource resource)
         }
     }
 
+    // finally, free memory occupied by resource
     if (ref_cnt <= 0)
-        pp_resource_expunge(resource);
+        g_slice_free1(sizeof(union pp_largest_u), ptr);
 
     if (config.quirks.dump_resource_histogram) {
         time_t current_time = time(NULL);
