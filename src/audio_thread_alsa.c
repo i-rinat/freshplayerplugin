@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include "trace.h"
 #include "config.h"
+#include "utils.h"
 #include "eintr_retry.h"
 #include "ppb_message_loop.h"
 
@@ -287,15 +288,6 @@ audio_thread(void *param)
 quit:
     free(fds);
     return NULL;
-}
-
-static
-void
-make_nonblock(int fd)
-{
-    int flags;
-    flags = fcntl(fd, F_GETFL, 0) | O_NONBLOCK;
-    (void)fcntl(fd, F_SETFL, flags);
 }
 
 static
