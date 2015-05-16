@@ -30,6 +30,9 @@
 #include "xembed.h"
 #include "reverse_constant.h"
 #include "trace.h"
+#include "utils.h"
+#include "eintr_retry.h"
+#include <poll.h>
 
 
 static GHashTable        *ht = NULL;  // Window -> struct ht_entry_s
@@ -42,7 +45,7 @@ static pthread_barrier_t  task_pass_barrier;
 static Atom               freshwrapper_x11et_cmd_atom;
 static Atom               xembed_atom;
 static Atom               xembed_info_atom;
-static Window             task_pass_wnd;
+static int                task_pipe[2];
 
 struct ht_entry_s {
     PP_Instance             instance;
@@ -55,6 +58,11 @@ enum cmd_e {
     X11ET_CMD_UNDEFINED         = 0,
     X11ET_CMD_REGISTER_WINDOW   = 1,
     X11ET_CMD_UNREGISTER_WINDOW = 2,
+};
+
+struct task_s {
+    Window          socket_wnd;
+    enum cmd_e      cmd;
 };
 
 
@@ -130,144 +138,178 @@ call_handle_event_ptac(void *param)
 }
 
 static
-void *
-x11_event_thread_func(void *param)
+void
+x11et_handle_task(struct task_s *task)
 {
-    while (1) {
-        XEvent *ev = g_slice_alloc0(sizeof(*ev));
+    struct ht_entry_s  *entry;
 
-        XNextEvent(dpy, ev);
+    pthread_mutex_lock(&lock);
+    entry = g_hash_table_lookup(ht, GSIZE_TO_POINTER(task->socket_wnd));
+    pthread_mutex_unlock(&lock);
 
-        if (ev->type == ClientMessage && ev->xclient.message_type == freshwrapper_x11et_cmd_atom) {
-            Window              socket_wnd = (Window)ev->xclient.data.l[0];
-            enum cmd_e          cmd = ev->xclient.data.l[1];
-            struct ht_entry_s  *entry;
+    if (!entry)
+        return;
 
-            pthread_mutex_lock(&lock);
-            entry = g_hash_table_lookup(ht, GSIZE_TO_POINTER(socket_wnd));
-            pthread_mutex_unlock(&lock);
+    switch (task->cmd) {
+    case X11ET_CMD_REGISTER_WINDOW:
+        if (entry->is_xembed) {
+            const int screen = DefaultScreen(dpy);
+            XSetWindowAttributes attrs = {
+                .background_pixel = 0x000000,
+                .backing_store =    Always,
+            };
 
-            if (!entry)
-                continue;
+            entry->plug_wnd = XCreateWindow(dpy, task->socket_wnd, 0, 0, 200, 200, 0,
+                                            DefaultDepth(dpy, screen),
+                                            InputOutput, DefaultVisual(dpy, screen),
+                                            CWBackPixel | CWBackingStore, &attrs);
 
-            switch (cmd) {
-            case X11ET_CMD_REGISTER_WINDOW:
-                if (entry->is_xembed) {
-                    const int screen = DefaultScreen(dpy);
-                    XSetWindowAttributes attrs = {
-                        .background_pixel = 0x000000,
-                        .backing_store =    Always,
-                    };
+            unsigned long buffer[2] = { 1, XEMBED_MAPPED };
 
-                    entry->plug_wnd = XCreateWindow(dpy, socket_wnd, 0, 0, 200, 200, 0,
-                                                    DefaultDepth(dpy, screen),
-                                                    InputOutput, DefaultVisual(dpy, screen),
-                                                    CWBackPixel | CWBackingStore, &attrs);
+            XChangeProperty(dpy, entry->plug_wnd, xembed_info_atom, xembed_info_atom, 32,
+                            PropModeReplace, (unsigned char *)buffer, 2);
+        }
 
-                    unsigned long buffer[2] = { 1, XEMBED_MAPPED };
+        pthread_mutex_lock(&lock);
+        g_hash_table_insert(socket_ht, GSIZE_TO_POINTER(entry->plug_wnd),
+                            GSIZE_TO_POINTER(task->socket_wnd));
+        pthread_mutex_unlock(&lock);
 
-                    XChangeProperty(dpy, entry->plug_wnd, xembed_info_atom, xembed_info_atom, 32,
-                                    PropModeReplace, (unsigned char *)buffer, 2);
-                }
+        const long event_mask = KeyPressMask | KeyReleaseMask | ButtonPressMask
+                                | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask
+                                | PointerMotionMask | ExposureMask | FocusChangeMask;
+        XSelectInput(dpy, entry->plug_wnd, event_mask);
+        break;
 
-                pthread_mutex_lock(&lock);
-                g_hash_table_insert(socket_ht, GSIZE_TO_POINTER(entry->plug_wnd),
-                                    GSIZE_TO_POINTER(socket_wnd));
-                pthread_mutex_unlock(&lock);
+    case X11ET_CMD_UNREGISTER_WINDOW:
+        XSelectInput(dpy, entry->plug_wnd, 0);
+        XFlush(dpy);
+        if (entry->is_xembed)
+            XDestroyWindow(dpy, entry->plug_wnd);
 
-                const long event_mask = KeyPressMask | KeyReleaseMask | ButtonPressMask
-                                        | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask
-                                        | PointerMotionMask | ExposureMask | FocusChangeMask;
-                XSelectInput(dpy, entry->plug_wnd, event_mask);
+        pthread_mutex_lock(&lock);
+        g_hash_table_remove(socket_ht, GSIZE_TO_POINTER(entry->plug_wnd));
+        pthread_mutex_unlock(&lock);
+        break;
+
+    default:
+        // should not happen
+        break;
+    }
+
+    XFlush(dpy);
+}
+
+static
+void
+x11et_handle_xevent(void)
+{
+    XEvent *ev = g_slice_alloc0(sizeof(*ev));
+    XNextEvent(dpy, ev);
+
+    Window plug_wnd = ev->xany.window;
+    Window socket_wnd = GPOINTER_TO_SIZE(g_hash_table_lookup(socket_ht,
+                                                             GSIZE_TO_POINTER(plug_wnd)));
+
+    struct ht_entry_s *d = g_hash_table_lookup(ht, GSIZE_TO_POINTER(socket_wnd));
+    int skip_event = 0;
+    if (d && d->is_xembed) {
+        switch (ev->type) {
+        case ClientMessage:
+            switch (ev->xclient.data.l[1]) {
+            case XEMBED_EMBEDDED_NOTIFY:
+                skip_event = 1;
                 break;
 
-            case X11ET_CMD_UNREGISTER_WINDOW:
-                XSelectInput(dpy, entry->plug_wnd, 0);
-                XFlush(dpy);
-                if (entry->is_xembed)
-                    XDestroyWindow(dpy, entry->plug_wnd);
+            case XEMBED_WINDOW_ACTIVATE:
+            case XEMBED_WINDOW_DEACTIVATE:
+            case XEMBED_MODALITY_ON:
+            case XEMBED_MODALITY_OFF:
+                // not handled
+                skip_event = 1;
+                break;
 
-                pthread_mutex_lock(&lock);
-                g_hash_table_remove(socket_ht, GSIZE_TO_POINTER(entry->plug_wnd));
-                pthread_mutex_unlock(&lock);
+            case XEMBED_FOCUS_IN:
+                memset(ev, 0, sizeof(*ev));
+                ev->xfocus.type =   FocusIn;
+                ev->xfocus.window = plug_wnd;
+                ev->xfocus.mode =   NotifyNormal;
+                ev->xfocus.detail = NotifyDetailNone;
+                break;
+
+            case XEMBED_FOCUS_OUT:
+                memset(ev, 0, sizeof(*ev));
+                ev->xfocus.type =   FocusOut;
+                ev->xfocus.window = plug_wnd;
+                ev->xfocus.mode =   NotifyNormal;
+                ev->xfocus.detail = NotifyDetailNone;
                 break;
 
             default:
-                // should not happen
+                trace_error("%s, unknown XEmbed message %d\n", __func__,
+                            (int)ev->xclient.data.l[1]);
+                skip_event = 1;
                 break;
             }
+            break;
 
-            g_slice_free1(sizeof(*ev), ev);
-            XFlush(dpy);
+        case ButtonPress:
+            send_xembed_message(dpy, socket_wnd, XEMBED_REQUEST_FOCUS, 0);
+            break;
+
+        case FocusIn:
+        case FocusOut:
+            // native focus events should be skipped if XEmbed is in use
+            skip_event = 1;
+            break;
+        }
+    }
+
+    if (d && !skip_event) {
+        struct pp_instance_s *pp_i = tables_get_pp_instance(d->instance);
+        if (pp_i && pp_i->npp)
+            npn.pluginthreadasynccall(pp_i->npp, call_handle_event_ptac, ev);
+    } else {
+        g_slice_free1(sizeof(*ev), ev);
+    }
+}
+
+static
+void *
+x11_event_thread_func(void *param)
+{
+    int x11_fd = ConnectionNumber(dpy);
+
+    struct pollfd fds[2] = {
+        { .fd = task_pipe[0], .events = POLLIN, },
+        { .fd = x11_fd,       .events = POLLIN, },
+    };
+
+    while (1) {
+        int ret = poll(fds, sizeof(fds)/sizeof(fds[0]), -1);
+
+        if (fds[0].revents & POLLIN) {
+            // task has come
+            struct task_s       task;
+
+            ret = RETRY_ON_EINTR(read(task_pipe[0], &task, sizeof(task)));
+            if (ret != sizeof(task))
+                trace_error("%s, read wrong number of bytes from task_fd\n", __func__);
+
+            x11et_handle_task(&task);
             pthread_barrier_wait(&task_pass_barrier);
             continue;
         }
 
-        Window plug_wnd = ev->xany.window;
-        Window socket_wnd = GPOINTER_TO_SIZE(g_hash_table_lookup(socket_ht,
-                                                                 GSIZE_TO_POINTER(plug_wnd)));
-
-        struct ht_entry_s *d = g_hash_table_lookup(ht, GSIZE_TO_POINTER(socket_wnd));
-        int skip_event = 0;
-        if (d && d->is_xembed) {
-            switch (ev->type) {
-            case ClientMessage:
-                switch (ev->xclient.data.l[1]) {
-                case XEMBED_EMBEDDED_NOTIFY:
-                    skip_event = 1;
-                    break;
-
-                case XEMBED_WINDOW_ACTIVATE:
-                case XEMBED_WINDOW_DEACTIVATE:
-                case XEMBED_MODALITY_ON:
-                case XEMBED_MODALITY_OFF:
-                    // not handled
-                    skip_event = 1;
-                    break;
-
-                case XEMBED_FOCUS_IN:
-                    memset(ev, 0, sizeof(*ev));
-                    ev->xfocus.type =   FocusIn;
-                    ev->xfocus.window = plug_wnd;
-                    ev->xfocus.mode =   NotifyNormal;
-                    ev->xfocus.detail = NotifyDetailNone;
-                    break;
-
-                case XEMBED_FOCUS_OUT:
-                    memset(ev, 0, sizeof(*ev));
-                    ev->xfocus.type =   FocusOut;
-                    ev->xfocus.window = plug_wnd;
-                    ev->xfocus.mode =   NotifyNormal;
-                    ev->xfocus.detail = NotifyDetailNone;
-                    break;
-
-                default:
-                    trace_error("%s, unknown XEmbed message %d\n", __func__,
-                                (int)ev->xclient.data.l[1]);
-                    skip_event = 1;
-                    break;
-                }
-                break;
-
-            case ButtonPress:
-                send_xembed_message(dpy, socket_wnd, XEMBED_REQUEST_FOCUS, 0);
-                break;
-
-            case FocusIn:
-            case FocusOut:
-                // native focus events should be skipped if XEmbed is in use
-                skip_event = 1;
-                break;
-            }
+        if (fds[1].revents & POLLIN) {
+            x11et_handle_xevent();
+            continue;
         }
-
-        if (d && !skip_event) {
-            struct pp_instance_s *pp_i = tables_get_pp_instance(d->instance);
-            if (pp_i && pp_i->npp)
-                npn.pluginthreadasynccall(pp_i->npp, call_handle_event_ptac, ev);
-        } else
-            g_slice_free1(sizeof(*ev), ev);
     }
+
+    // TODO: do we need to shutdown thread?
+    close(task_pipe[0]); task_pipe[0] = -1;
+    close(task_pipe[1]); task_pipe[1] = -1;
 
     return NULL;
 }
@@ -281,11 +323,15 @@ x11et_start_thread(void)
     xembed_atom =                 XInternAtom(dpy, "_XEMBED", False);
     xembed_info_atom =            XInternAtom(dpy, "_XEMBED_INFO", False);
 
-    // create helper window to pass tasks to the event thread
-    task_pass_wnd = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, 10, 10, 0, 0,
-                                        0x000000);
-    XSelectInput(dpy, task_pass_wnd, NoEventMask);
-    XFlush(dpy);
+    if (pipe(task_pipe) == 0) {
+        make_nonblock(task_pipe[0]);
+        make_nonblock(task_pipe[1]);
+    } else {
+        trace_error("%s, can't create pipe\n", __func__);
+        task_pipe[0] = -1;
+        task_pipe[1] = -1;
+    }
+
     pthread_create(&thread, NULL, x11_event_thread_func, NULL);
     pthread_detach(thread);
 }
@@ -318,22 +364,20 @@ x11et_register_window(PP_Instance instance, Window wnd, NPP_HandleEventProcPtr h
     g_hash_table_insert(ht, GSIZE_TO_POINTER(wnd), entry);
     pthread_mutex_unlock(&lock);
 
-    XEvent ev = {
-        .xclient = {
-            .type =         ClientMessage,
-            .message_type = freshwrapper_x11et_cmd_atom,
-            .format =       32,
-            .data.l[0] =    wnd,
-            .data.l[1] =    X11ET_CMD_REGISTER_WINDOW,
-        }
+    struct task_s task = {
+        .socket_wnd =   wnd,
+        .cmd =          X11ET_CMD_REGISTER_WINDOW,
     };
 
-    pthread_mutex_lock(&display.lock);
-    XSendEvent(display.x, task_pass_wnd, False, NoEventMask, &ev);
-    XFlush(display.x);
-    pthread_mutex_unlock(&display.lock);
+    if (task_pipe[1] >= 0) {
+        int ret = RETRY_ON_EINTR(write(task_pipe[1], &task, sizeof(task)));
+        if (ret != sizeof(task))
+            trace_error("%s, can't write to task_pipe\n", __func__);
 
-    pthread_barrier_wait(&task_pass_barrier);
+        pthread_barrier_wait(&task_pass_barrier);
+    } else {
+        trace_warning("%s, no pipe to send message\n", __func__);
+    }
 
     // entry->plug_wnd here will contain plug window if XEmbed is used
     return entry->plug_wnd;
@@ -349,22 +393,20 @@ x11et_unregister_window(Window wnd)
     if (!entry)
         return;
 
-    XEvent ev = {
-        .xclient = {
-            .type =         ClientMessage,
-            .message_type = freshwrapper_x11et_cmd_atom,
-            .format =       32,
-            .data.l[0] =    wnd,
-            .data.l[1] =    X11ET_CMD_UNREGISTER_WINDOW,
-        }
+    struct task_s task = {
+        .socket_wnd =   wnd,
+        .cmd =          X11ET_CMD_UNREGISTER_WINDOW,
     };
 
-    pthread_mutex_lock(&display.lock);
-    XSendEvent(display.x, task_pass_wnd, False, NoEventMask, &ev);
-    XFlush(display.x);
-    pthread_mutex_unlock(&display.lock);
+    if (task_pipe[1] >= 0) {
+        int ret = RETRY_ON_EINTR(write(task_pipe[1], &task, sizeof(task)));
+        if (ret != sizeof(task))
+            trace_error("%s, can't write to task_pipe\n", __func__);
 
-    pthread_barrier_wait(&task_pass_barrier);
+        pthread_barrier_wait(&task_pass_barrier);
+    } else {
+        trace_warning("%s, no pipe to send message\n", __func__);
+    }
 
     pthread_mutex_lock(&lock);
     g_hash_table_remove(ht, GSIZE_TO_POINTER(wnd));
