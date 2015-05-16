@@ -130,14 +130,18 @@ tables_get_some_pp_instance(void)
 {
     GHashTableIter iter;
     gpointer key, value;
+    gpointer result = NULL;
 
     pthread_mutex_lock(&lock);
     g_hash_table_iter_init (&iter, pp_to_np_ht);
-    if (!g_hash_table_iter_next(&iter, &key, &value))
-        value = NULL;
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        struct pp_instance_s *pp_i = value;
+        if (pp_i && pp_i->npp)
+            result = value;
+    }
     pthread_mutex_unlock(&lock);
 
-    return value;
+    return result;
 }
 
 PangoContext *
