@@ -109,8 +109,12 @@ video_device_is_usable(const char *dev, char **shortname)
     if (v4l2_ioctl(fd, VIDIOC_QUERYCAP, &caps) != 0)
         goto err_1;
 
+#ifdef V4L2_CAP_DEVICE_CAPS
     const uint32_t device_caps = (caps.capabilities & V4L2_CAP_DEVICE_CAPS) ? caps.device_caps
                                                                             : caps.capabilities;
+#else
+    const uint32_t device_caps = caps.capabilities;
+#endif // V4L2_CAP_DEVICE_CAPS
 
     if (!(device_caps & V4L2_CAP_VIDEO_CAPTURE))
         goto err_1;
@@ -231,8 +235,12 @@ ppb_video_capture_open(PP_Resource video_capture, PP_Resource device_ref,
         goto point_2;
     }
 
+#ifdef V4L2_CAP_DEVICE_CAPS
     const uint32_t device_caps = (caps.capabilities & V4L2_CAP_DEVICE_CAPS) ? caps.device_caps
                                                                             : caps.capabilities;
+#else
+    const uint32_t device_caps = caps.capabilities;
+#endif // V4L2_CAP_DEVICE_CAPS
 
     if (!(device_caps & V4L2_CAP_VIDEO_CAPTURE)) {
         trace_error("%s, device can't capture\n", __func__);
