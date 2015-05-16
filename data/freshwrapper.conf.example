@@ -47,7 +47,7 @@ fullscreen_height = 0
 # Enables DNS query case randomization to partially protect against DNS
 # poisoning attacks. It was reported that some Mikrotik routers do not
 # support this trick. Set parameter to 0 if you have an affected model
-randomize_dns_case = 1
+randomize_dns_case = 0
 
 # scaling factor (floating point value) used to convert screen pixels
 # to device independent pixels. You may need it for displays with
