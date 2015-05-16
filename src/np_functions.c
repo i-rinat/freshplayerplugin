@@ -68,20 +68,6 @@ int16_t
 handle_key_press_release_event(NPP npp, void *event);
 
 static
-PP_Instance
-generate_new_pp_instance_id(void)
-{
-    static int32_t instance_id = 10;
-    static pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
-
-    pthread_mutex_lock(&m);
-    int32_t result = instance_id++;
-    pthread_mutex_unlock(&m);
-
-    return result;
-}
-
-static
 void
 do_nothing(void *user_data, int32_t result)
 {
@@ -563,7 +549,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     npn.setvalue(npp, NPPVpluginTransparentBool, (void*)(size_t)pp_i->is_transparent);
 
     pp_i->is_fullframe = (mode == NP_FULL);
-    pp_i->id = generate_new_pp_instance_id();
+    pp_i->id = tables_generate_new_pp_instance_id();
     tables_add_pp_instance(pp_i->id, pp_i);
 
     pp_i->incognito_mode = 0;

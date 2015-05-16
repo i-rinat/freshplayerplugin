@@ -65,6 +65,7 @@ struct pp_instance_s   *tables_get_pp_instance(PP_Instance instance);
 void                    tables_add_pp_instance(PP_Instance instance, struct pp_instance_s *pp_i);
 void                    tables_remove_pp_instance(PP_Instance instance);
 struct pp_instance_s   *tables_get_some_pp_instance(void);
+PP_Instance             tables_generate_new_pp_instance_id(void);
 
 PangoContext   *tables_get_pango_ctx(void);
 PangoFontMap   *tables_get_pango_font_map(void);

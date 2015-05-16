@@ -290,3 +290,15 @@ tables_close_display(void)
     pthread_mutex_unlock(&display.lock);
     pthread_mutex_destroy(&display.lock);
 }
+
+PP_Instance
+tables_generate_new_pp_instance_id(void)
+{
+    static int32_t instance_id = 10;
+
+    pthread_mutex_lock(&lock);
+    int32_t result = instance_id++;
+    pthread_mutex_unlock(&lock);
+
+    return result;
+}
