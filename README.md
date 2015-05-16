@@ -13,7 +13,7 @@ Pepper Plugin API is an interface promoted by Chromium/Chrome team for
 browser plugins. It's NPAPI-inspired yet significantly different API
 which have every conceivable function plugin may want. Two-dimensional
 graphics, OpenGL ES, font rendering, network access, audio, and so
-on. It's huge, there are 112 groups of functions, called interfaces
+on. It's huge, there are 111 groups of functions, called interfaces
 which todays Chromium browser offers to plugins. Although specs are not
 final yet, and new interface versions are arising, with some older
 ones getting deleted; rate of change have significantly slowed down.
@@ -39,7 +39,7 @@ project. It will benefit other browsers too, not only Firefox.
 Status
 ======
 
-Mostly works, but some essential APIs are still to be implemented.
+Mostly works. Looks like all essential APIs are implemented.
 
 Known issues
 ============
@@ -54,7 +54,8 @@ assertions of enhanced security due to active sandboxing usage. It's
 worth to note, that API itself doesn't make any sandboxing, it's only
 allows sandboxed implementations. This particular implementation
 **doesn't implement any sandbox**. That means if any malicious code breaks
-through plugin security, there is no additional barriers.
+through plugin security, there is no additional barriers. This is the
+same level of security as NPAPI Flash have.
 
 Install
 =======

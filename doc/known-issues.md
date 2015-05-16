@@ -6,6 +6,7 @@
 You see fine example of
 [programmer art](http://en.wikipedia.org/wiki/Programmer_art)
 on a screen instead of a Flash movie:
+
 ![missing libpepflashplayer.so](img-missing-pepflash.png)
 
 That means you either have no `libpepflashplayer.so` or its location
@@ -48,13 +49,15 @@ It's a bug. [Create an issue](https://github.com/i-rinat/freshplayerplugin/issue
 about this. I need a scenario which can be used to reproduce an issue. It
 would be nice if you search through open issues to avoid duplicates.
 
-## 3d applications are slow
 
-3d is not enabled by default, as it causes rendering issues on some machines.
-It can be enabled by adding `enable_3d = 1` line to `~/.config/freshwrapper.conf`
-If transparency-enabled instances have no graphics, add `enable_3d_transparent = 0`
-to `~/.config/freshwrapper.conf`, that will selectively disable 3d for transparent
-plugin instances.
+## Black screen with sound only
+
+3d is enabled by default at the moment, and requiring working OpenGL ES 2.0. With
+some video adapters 3d doesn't work as intended for some reason. If you have the
+issue, disable 3d by adding `enable_3d = 0` line to `~/.config/freshwrapper.conf`.
+If 3d generally works, but fails only for some instances, try to disable 3d
+for transparent movies by adding `enable_3d_transparent = 0` to
+`~/.config/freshwrapper.conf`.
 
 ## DRM doesn't work
 
@@ -73,7 +76,8 @@ image), add or update `pepperflash_path` parameter in configuration file
 
 ## Random network downloads fail
 
-Some routers forcefully lowercase DNS queries, which makes libevent2's DNS client very
-sad. Add `randomize_dns_case = 0` parameter to `~/.config/freshwrapper.conf` to disable
-case randomization in DNS queries. (See
-[dns0x20](https://tools.ietf.org/html/draft-vixie-dnsext-dns0x20-00) for details).
+Some routers forcefully lowercase DNS queries, which interferes with dns0x20 security
+trick used by libevent2's DNS client. Configuration parameter `randomize_dns_case` is
+used to control whenever that trick is used. If you've enabled it, and have network
+issues, turn it off again.
+(See [dns0x20](https://tools.ietf.org/html/draft-vixie-dnsext-dns0x20-00) for details).
