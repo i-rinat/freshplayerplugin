@@ -27,6 +27,7 @@
 #include <npapi/npfunctions.h>
 #include <string.h>
 #include <ppapi/c/ppb.h>
+#include <ppapi/c/pp_errors.h>
 #include <ppapi/c/pp_module.h>
 #include <parson/parson.h>
 #include <libgen.h>
@@ -38,6 +39,10 @@
 #include <glib.h>
 #include "compat.h"
 #include "np_entry.h"
+#include "ppb_message_loop.h"
+#include "tables.h"
+#include "main_thread.h"
+#include "ppb_core.h"
 
 
 static void *module_dl_handler;
@@ -45,6 +50,7 @@ static gchar *module_version;
 static gchar *module_descr;
 static GList *tried_files = NULL;
 static gchar *module_file_name = NULL;
+static struct pp_instance_s *aux_instance = NULL;
 
 static
 void
@@ -64,6 +70,35 @@ gchar *
 np_entry_get_module_file_name(void)
 {
     return module_file_name;
+}
+
+struct call_plugin_init_module_param_s {
+    PP_Resource     m_loop;
+    int             depth;
+    int32_t       (*ppp_initialize_module)(PP_Module module_id,
+                                           PPB_GetInterface get_browser_interface);
+    int             result;
+};
+
+static
+void
+call_plugin_init_module_comt(void *user_data, int32_t result)
+{
+    struct call_plugin_init_module_param_s *p = user_data;
+
+    // TODO: make module ids distinct
+    p->result = p->ppp_initialize_module(42, ppb_get_interface);
+
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+
+static
+void
+call_plugin_init_module_prepare_comt(void *user_data, int32_t result)
+{
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(call_plugin_init_module_comt, user_data), PP_OK,
+                                       __func__);
 }
 
 static
@@ -89,16 +124,30 @@ do_load_ppp_module(const char *fname)
         return 1;
     }
 
-    // TODO: make module ids distinct
-    int res = ppp_initialize_module(42, ppb_get_interface);
-    if (0 != res) {
-        trace_error("%s, PPP_InitializeModule returned %d\n", __func__, res);
-        dlclose(module_dl_handler);
-        module_dl_handler = NULL;
-        return 1;
+    if (!aux_instance) {
+        aux_instance = calloc(1, sizeof(*aux_instance));
+        if (!aux_instance)
+            return 1;
+
+        aux_instance->id = tables_generate_new_pp_instance_id();
+        tables_add_pp_instance(aux_instance->id, aux_instance);
     }
 
-    // module was loaded, save its name
+    if (ppb_message_loop_get_current() == 0) {
+        // allocate message loop for browser thread
+        PP_Resource message_loop = ppb_message_loop_create(aux_instance->id);
+        ppb_message_loop_attach_to_current_thread(message_loop);
+        ppb_message_loop_proclaim_this_thread_browser();
+    }
+
+    if (ppb_message_loop_get_for_main_thread() == 0) {
+        pthread_barrier_init(&aux_instance->main_thread_barrier, NULL, 2);
+        pthread_create(&aux_instance->main_thread, NULL, fresh_wrapper_main_thread, aux_instance);
+        pthread_detach(aux_instance->main_thread);
+        pthread_barrier_wait(&aux_instance->main_thread_barrier);
+        pthread_barrier_destroy(&aux_instance->main_thread_barrier);
+    }
+
     module_file_name = g_strdup(fname);
 
     if (!fpp_config_plugin_has_manifest()) {
@@ -331,6 +380,23 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     }
 
     load_ppp_module();
+
+    struct call_plugin_init_module_param_s *p = g_slice_alloc(sizeof(*p));
+    p->m_loop = ppb_message_loop_get_for_browser_thread();
+    p->depth =  ppb_message_loop_get_depth(p->m_loop) + 1;
+    p->ppp_initialize_module = dlsym(module_dl_handler, "PPP_InitializeModule");
+
+    ppb_message_loop_post_work_with_result(p->m_loop,
+                                           PP_MakeCCB(call_plugin_init_module_prepare_comt, p), 0,
+                                           PP_OK, p->depth, __func__);
+    ppb_message_loop_run_nested(p->m_loop);
+    int res = p->result;
+    g_slice_free1(sizeof(*p), p);
+
+    if (res != 0) {
+        trace_error("%s, PPP_InitializeModule returned %d\n", __func__, res);
+        return NPERR_GENERIC_ERROR;
+    }
 
     return NPERR_NO_ERROR;
 }

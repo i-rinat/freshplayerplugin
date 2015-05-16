@@ -58,7 +58,6 @@
 #include "header_parser.h"
 #include "keycodeconvert.h"
 #include "eintr_retry.h"
-#include "main_thread.h"
 #include "np_entry.h"
 #include "compat.h"
 #include "x11_event_thread.h"
@@ -605,18 +604,13 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     g_signal_connect(pp_i->im_context_simple, "preedit-start", G_CALLBACK(im_preedit_start), pp_i);
 
     if (ppb_message_loop_get_current() == 0) {
-        // allocate message loop for browser thread
-        PP_Resource message_loop = ppb_message_loop_create(pp_i->id);
-        ppb_message_loop_attach_to_current_thread(message_loop);
-        ppb_message_loop_proclaim_this_thread_browser();
+        trace_error("%s, no browser thread\n", __func__);
+        return NPERR_GENERIC_ERROR;
     }
 
     if (ppb_message_loop_get_for_main_thread() == 0) {
-        pthread_barrier_init(&pp_i->main_thread_barrier, NULL, 2);
-        pthread_create(&pp_i->main_thread, NULL, fresh_wrapper_main_thread, pp_i);
-        pthread_detach(pp_i->main_thread);
-        pthread_barrier_wait(&pp_i->main_thread_barrier);
-        pthread_barrier_destroy(&pp_i->main_thread_barrier);
+        trace_error("%s, no plugin thread\n", __func__);
+        return NPERR_GENERIC_ERROR;
     }
 
     struct call_plugin_did_create_param_s *p = g_slice_alloc(sizeof(*p));
