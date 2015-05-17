@@ -480,6 +480,7 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     if (config.quirks.plugin_missing) {
         trace_info_z("plugin missing, using placeholder\n");
+        npn.setvalue(npp, NPPVpluginWindowBool, (void*)0); // ask windowsless mode
         return NPERR_NO_ERROR;
     }
 
