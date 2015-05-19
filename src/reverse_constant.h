@@ -62,5 +62,6 @@ const char *reverse_pdf_feature(PP_PDFFeature feature);
 const char *reverse_resource_string(PP_ResourceString resource_string);
 const char *reverse_private_font_charset(PP_PrivateFontCharset charset);
 const char *reverse_scrollby(PP_ScrollBy_Dev unit);
+const char *reverse_graphics3d_attribute(int32_t attr);
 
 #endif // FPP_REVERSE_CONSTANT_H

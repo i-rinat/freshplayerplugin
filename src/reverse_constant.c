@@ -24,6 +24,7 @@
 
 #include "reverse_constant.h"
 #include <X11/Xlib.h>
+#include <ppapi/c/pp_graphics_3d.h>
 
 
 #define CASE(q) case q: return #q
@@ -1280,5 +1281,27 @@ reverse_scrollby(PP_ScrollBy_Dev unit)
     CASE(PP_SCROLLBY_DOCUMENT);
     default:
         return "UNKNONWSCROLLBY";
+    }
+}
+
+const char *
+reverse_graphics3d_attribute(int32_t attr)
+{
+    switch (attr) {
+    CASE(PP_GRAPHICS3DATTRIB_ALPHA_SIZE);
+    CASE(PP_GRAPHICS3DATTRIB_BLUE_SIZE);
+    CASE(PP_GRAPHICS3DATTRIB_GREEN_SIZE);
+    CASE(PP_GRAPHICS3DATTRIB_RED_SIZE);
+    CASE(PP_GRAPHICS3DATTRIB_DEPTH_SIZE);
+    CASE(PP_GRAPHICS3DATTRIB_STENCIL_SIZE);
+    CASE(PP_GRAPHICS3DATTRIB_SAMPLES);
+    CASE(PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS);
+    CASE(PP_GRAPHICS3DATTRIB_NONE);
+    CASE(PP_GRAPHICS3DATTRIB_HEIGHT);
+    CASE(PP_GRAPHICS3DATTRIB_WIDTH);
+    CASE(PP_GRAPHICS3DATTRIB_SWAP_BEHAVIOR);
+    CASE(PP_GRAPHICS3DATTRIB_GPU_PREFERENCE);
+    default:
+        return "UNKNOWNATTRIBUTE";
     }
 }
