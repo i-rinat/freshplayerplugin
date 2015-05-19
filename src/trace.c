@@ -33,6 +33,8 @@
 #include "pp_resource.h"
 #include "ppb_var.h"
 #include <inttypes.h>
+#include <ppapi/c/pp_graphics_3d.h>
+#include <glib.h>
 
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -250,4 +252,101 @@ trace_event_classes_as_string(uint32_t ec)
         res[strlen(res) - 1] = 0;
 
     return res;
+}
+
+char *
+trace_graphics3d_attributes_as_string(const int32_t attrib_list[])
+{
+    GString *s = g_string_new("{");
+    int k = 0;
+    int done = 0;
+
+    while (!done) {
+        switch (attrib_list[k]) {
+        case PP_GRAPHICS3DATTRIB_ALPHA_SIZE:
+            g_string_append_printf(s, "ALPHA=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_BLUE_SIZE:
+            g_string_append_printf(s, "BLUE=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_GREEN_SIZE:
+            g_string_append_printf(s, "GREEN=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_RED_SIZE:
+            g_string_append_printf(s, "RED=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_DEPTH_SIZE:
+            g_string_append_printf(s, "DEPTH=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_STENCIL_SIZE:
+            g_string_append_printf(s, "STENCIL=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_SAMPLES:
+            g_string_append_printf(s, "SAMPLES=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS:
+            g_string_append_printf(s, "SAMPLE_BUFFERS=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_NONE:
+            done = 1;
+            break;
+        case PP_GRAPHICS3DATTRIB_HEIGHT:
+            g_string_append_printf(s, "HEIGHT=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_WIDTH:
+            g_string_append_printf(s, "WIDTH=%d, ", attrib_list[k + 1]);
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_SWAP_BEHAVIOR:
+            switch (attrib_list[k + 1]) {
+            case PP_GRAPHICS3DATTRIB_BUFFER_PRESERVED:
+                g_string_append(s, "SWAP_BEHAVIOR=BUFFER_PRESERVED, ");
+                break;
+            case PP_GRAPHICS3DATTRIB_BUFFER_DESTROYED:
+                g_string_append(s, "SWAP_BEHAVIOR=BUFFER_DESTROYED, ");
+                break;
+            default:
+                g_string_append_printf(s, "SWAP_BEHAVIOR=unknown(0x%04x), ", attrib_list[k + 1]);
+                break;
+            }
+            k += 2;
+            break;
+        case PP_GRAPHICS3DATTRIB_GPU_PREFERENCE:
+            switch (attrib_list[k + 1]) {
+            case PP_GRAPHICS3DATTRIB_GPU_PREFERENCE_LOW_POWER:
+                g_string_append(s, "GPU_PREFERENCE=LOW_POWER, ");
+                break;
+            case PP_GRAPHICS3DATTRIB_GPU_PREFERENCE_PERFORMANCE:
+                g_string_append(s, "GPU_PREFERENCE=PERFORMANCE, ");
+                break;
+            default:
+                g_string_append_printf(s, "GPU_PREFERENCE=unknown(0x%04x), ", attrib_list[k + 1]);
+                break;
+            }
+            k += 2;
+            break;
+        default:
+            g_string_append_printf(s, "unknown(0x%04x), ", attrib_list[k]);
+            k += 1;
+            break;
+        }
+    }
+
+    // delete trailing
+    if (s->len >= 3)
+        g_string_truncate(s, s->len - 2);
+
+    g_string_append(s, "}");
+
+    // return combined string
+    return g_string_free(s, FALSE);
 }

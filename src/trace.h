@@ -64,5 +64,6 @@ char   *trace_float_point_as_string(const struct PP_FloatPoint *point);
 char   *trace_touch_point_as_string(const struct PP_TouchPoint *point);
 char   *trace_event_classes_as_string(uint32_t event_classes);
 char   *trace_np_window_as_string(const NPWindow *window);
+char   *trace_graphics3d_attributes_as_string(const int32_t attrib_list[]);
 
 #endif // FPP_TRACE_H
