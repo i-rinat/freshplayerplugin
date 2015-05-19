@@ -36,6 +36,7 @@
 #include "ppb_core.h"
 #include "ppb_opengles2.h"
 #include "config.h"
+#include "reverse_constant.h"
 
 
 int32_t
@@ -433,7 +434,8 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t *value)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, attribute=%d\n", __func__+6, instance, attribute);
+    trace_info("[PPB] {zilch} %s instance=%d, attribute=%s(0x%04x)\n", __func__+6, instance,
+               reverse_graphics3d_attribute(attribute), attribute);
     return ppb_graphics3d_get_attrib_max_value(instance, attribute, value);
 }
 
@@ -442,8 +444,10 @@ PP_Resource
 trace_ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context,
                             const int32_t attrib_list[])
 {
-    trace_info("[PPB] {full} %s intance=%d, share_context=%d, attrib_list={TODO}\n", __func__+6,
-               instance, share_context);
+    gchar *s_attrib_list = trace_graphics3d_attributes_as_string(attrib_list);
+    trace_info("[PPB] {full} %s intance=%d, share_context=%d, attrib_list=%s\n", __func__+6,
+               instance, share_context, s_attrib_list);
+    g_free(s_attrib_list);
     return ppb_graphics3d_create(instance, share_context, attrib_list);
 }
 
@@ -467,7 +471,9 @@ TRACE_WRAPPER
 int32_t
 trace_ppb_graphics3d_set_attribs(PP_Resource context, const int32_t attrib_list[])
 {
-    trace_info("[PPB] {zilch} %s context=%d, attrib_list={TODO}\n", __func__+6, context);
+    gchar *s_attrib_list = trace_graphics3d_attributes_as_string(attrib_list);
+    trace_info("[PPB] {zilch} %s context=%d, attrib_list=%s\n", __func__+6, context, s_attrib_list);
+    g_free(s_attrib_list);
     return ppb_graphics3d_set_attribs(context, attrib_list);
 }
 
