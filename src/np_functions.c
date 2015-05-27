@@ -222,6 +222,18 @@ call_plugin_did_create_comt(void *user_data, int32_t result)
     struct call_plugin_did_create_param_s *p = user_data;
     struct pp_instance_s *pp_i = p->pp_i;
 
+    pp_i->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
+    if (!pp_i->ppp_instance_1_1) {
+        trace_error("%s, failed to get required %s\n", __func__, PPP_INSTANCE_INTERFACE_1_1);
+        goto done;
+    }
+
+    pp_i->ppp_input_event = ppp_get_interface(PPP_INPUT_EVENT_INTERFACE_0_1);
+    if (!pp_i->ppp_input_event) {
+        trace_error("%s, failed to get required %s\n", __func__, PPP_INPUT_EVENT_INTERFACE_0_1);
+        goto done;
+    }
+
     pp_i->ppp_instance_1_1->DidCreate(pp_i->id, pp_i->argc, (const char **)pp_i->argn,
                                       (const char **)pp_i->argv);
 
@@ -255,6 +267,7 @@ call_plugin_did_create_comt(void *user_data, int32_t result)
         pp_i->ppp_instance_1_1->HandleDocumentLoad(pp_i->id, url_loader);
     }
 
+done:
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
 }
 
@@ -499,12 +512,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->npp = npp;
     pthread_mutex_unlock(&display.lock);
 
-    pp_i->ppp_instance_1_1 = ppp_get_interface(PPP_INSTANCE_INTERFACE_1_1);
-    if (!pp_i->ppp_instance_1_1)
-        return NPERR_GENERIC_ERROR;
-    pp_i->ppp_input_event = ppp_get_interface(PPP_INPUT_EVENT_INTERFACE_0_1);
-    pp_i->ppp_text_input_dev = ppp_get_interface(PPP_TEXTINPUT_DEV_INTERFACE_0_1);
-
     // windowed mode will only be used if enabled in config file. If used, it will be disabled
     // for instances with wmode equal to either "transparent" or "opaque"
     pp_i->windowed_mode = config.enable_windowed_mode;
@@ -624,6 +631,12 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
                                            PP_OK, p->depth, __func__);
     ppb_message_loop_run_nested(p->m_loop);
     g_slice_free1(sizeof(*p), p);
+
+    if (!pp_i->ppp_instance_1_1 || !pp_i->ppp_input_event) {
+        trace_error("%s, one of required plugin interfaces is missing\n", __func__);
+        // TODO: cleanup?
+        return NPERR_GENERIC_ERROR;
+    }
 
     g_atomic_int_set(&pp_i->instance_loaded, 1);
 

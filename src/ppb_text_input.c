@@ -32,6 +32,7 @@
 #include <gtk/gtk.h>
 #include "ppb_core.h"
 #include <ppapi/c/pp_errors.h>
+#include "pp_interface.h"
 
 
 struct set_text_input_type_param_s {
@@ -197,6 +198,9 @@ selection_changed_comt(void *user_data, int32_t result)
         trace_error("%s, bad instance\n", __func__);
         return;
     }
+
+    if (!pp_i->ppp_text_input_dev)
+        pp_i->ppp_text_input_dev = ppp_get_interface(PPP_TEXTINPUT_DEV_INTERFACE_0_1);
 
     if (pp_i->ppp_text_input_dev)
         pp_i->ppp_text_input_dev->RequestSurroundingText(pp_i->id, 100);
