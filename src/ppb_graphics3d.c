@@ -45,6 +45,20 @@ ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int
     return 0;
 }
 
+GLXContext
+peek_gl_context(PP_Resource graphics3d)
+{
+    struct pp_graphics3d_s *g3d = pp_resource_acquire(graphics3d, PP_RESOURCE_GRAPHICS3D);
+    if (!g3d) {
+        trace_error("%s, bad resource\n", __func__);
+        return NULL;
+    }
+
+    GLXContext glc = g3d->glc;
+    pp_resource_release(graphics3d);
+    return glc;
+}
+
 PP_Resource
 ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int32_t attrib_list[])
 {
@@ -175,8 +189,6 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     g3d->fb_config = fb_cfgs[0];
     XFree(fb_cfgs);
 
-    // TODO: support shared_context
-
 #if HAVE_GLES2
     // create context implementing OpenGL ES 2.0
     const int ctx_attrs[] = {
@@ -197,8 +209,11 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     };
 #endif
 
+    GLXContext share_glc = (share_context == 0) ? NULL
+                                                : peek_gl_context(share_context);
+
     if (display.glXCreateContextAttribsARB) {
-        g3d->glc = display.glXCreateContextAttribsARB(display.x, g3d->fb_config, NULL, True,
+        g3d->glc = display.glXCreateContextAttribsARB(display.x, g3d->fb_config, share_glc, True,
                                                       ctx_attrs);
         if (!g3d->glc) {
             trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
@@ -206,7 +221,7 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         }
     } else {
         // if no glXCreateContextAttribsARB, request any GL context
-        g3d->glc = glXCreateNewContext(display.x, g3d->fb_config, GLX_RGBA_TYPE, NULL, True);
+        g3d->glc = glXCreateNewContext(display.x, g3d->fb_config, GLX_RGBA_TYPE, share_glc, True);
         if (!g3d->glc) {
             trace_error("%s, glXCreateNewContext returned NULL\n", __func__);
             goto err;
