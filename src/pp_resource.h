@@ -539,7 +539,7 @@ void                    pp_resource_expunge(PP_Resource resource);
 void                   *pp_resource_acquire(PP_Resource resource, enum pp_resource_type_e type);
 void                    pp_resource_release(PP_Resource resource);
 enum pp_resource_type_e pp_resource_get_type(PP_Resource resource);
-void                    pp_resource_ref(PP_Resource resource);
+PP_Resource             pp_resource_ref(PP_Resource resource);
 void                    pp_resource_unref(PP_Resource resource);
 
 

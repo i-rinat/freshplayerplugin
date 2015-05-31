@@ -156,7 +156,7 @@ pp_resource_get_type(PP_Resource resource)
     return type;
 }
 
-void
+PP_Resource
 pp_resource_ref(PP_Resource resource)
 {
     pthread_mutex_lock(&res_tbl_lock);
@@ -167,6 +167,7 @@ pp_resource_ref(PP_Resource resource)
         trace_warning("%s, no such resource %d\n", __func__, resource);
     }
     pthread_mutex_unlock(&res_tbl_lock);
+    return resource;
 }
 
 static
