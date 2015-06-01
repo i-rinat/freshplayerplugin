@@ -196,6 +196,10 @@ check_glx_extensions(void)
                                                           "GLX_EXT_create_context_es2_profile");
     display.glXCreateContextAttribsARB = (glx_create_context_attribs_arb_f)
         glXGetProcAddressARB((const GLubyte *)"glXCreateContextAttribsARB");
+    display.glXBindTexImageEXT = (glx_bind_tex_image_ext_f)
+        glXGetProcAddress((GLubyte *)"glXBindTexImageEXT");
+    display.glXReleaseTexImageEXT = (glx_release_tex_image_ext_f)
+        glXGetProcAddress((GLubyte *)"glXReleaseTexImageEXT");
 }
 
 int

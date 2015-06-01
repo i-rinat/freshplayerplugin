@@ -41,6 +41,13 @@ typedef GLXContext
                                     GLXContext share_context, Bool direct,
                                     const int *attrib_list);
 
+typedef void
+(*glx_bind_tex_image_ext_f)(Display *dpy, GLXDrawable drawable, int buffer, const int *attrib_list);
+
+typedef void
+(*glx_release_tex_image_ext_f)(Display *dpy, GLXDrawable drawable, int buffer);
+
+
 struct display_s {
     Display                            *x;
     Cursor                              transparent_cursor;
@@ -51,6 +58,8 @@ struct display_s {
     uint32_t                            min_height; ///< smallest screen height
     uint32_t                            screensaver_types;
     glx_create_context_attribs_arb_f    glXCreateContextAttribsARB;
+    glx_bind_tex_image_ext_f            glXBindTexImageEXT;
+    glx_release_tex_image_ext_f         glXReleaseTexImageEXT;
     uint32_t                            glx_arb_create_context;
     uint32_t                            glx_arb_create_context_profile;
     uint32_t                            glx_ext_create_context_es2_profile;
