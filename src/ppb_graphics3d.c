@@ -165,6 +165,16 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
             cfg_attrs[k2++] = attrib_list[k1 + 1];
             k1 += 2;
             break;
+        case GLX_Y_INVERTED_EXT:
+            cfg_attrs[k2++] = GLX_Y_INVERTED_EXT;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
+            k1 += 2;
+            break;
+        case GLX_BIND_TO_TEXTURE_RGBA_EXT:
+            cfg_attrs[k2++] = GLX_BIND_TO_TEXTURE_RGBA_EXT;
+            cfg_attrs[k2++] = attrib_list[k1 + 1];
+            k1 += 2;
+            break;
         default:
             // skip unknown attribute
             trace_error("%s, unknown attribute 0x%x\n", __func__, attrib_list[k1]);
