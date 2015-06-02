@@ -31,6 +31,8 @@
 #include "pp_resource.h"
 #include <npapi/npruntime.h>
 #include <npapi/npfunctions.h>
+#include <va/va.h>
+#include <va/va_x11.h>
 
 
 #define NPString_literal(str) { .UTF8Characters = str, .UTF8Length = strlen(str) }
@@ -50,6 +52,8 @@ typedef void
 
 struct display_s {
     Display                            *x;
+    VADisplay                           va;
+    int                                 va_available;
     Cursor                              transparent_cursor;
     pthread_mutex_t                     lock;
     XRenderPictFormat                  *pictfmt_rgb24;

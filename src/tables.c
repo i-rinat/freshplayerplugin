@@ -206,6 +206,7 @@ int
 tables_open_display(void)
 {
     int retval = 0;
+    int major, minor;
 
     pthread_mutex_init(&display.lock, NULL);
     pthread_mutex_lock(&display.lock);
@@ -219,7 +220,17 @@ tables_open_display(void)
     if (config.quirks.x_synchronize)
         XSynchronize(display.x, True);
 
-    int major, minor;
+    display.va = vaGetDisplay(display.x);
+    VAStatus status = vaInitialize(display.va, &major, &minor);
+    if (status == VA_STATUS_SUCCESS) {
+        trace_info_f("libva version %d.%d\n", major, minor);
+        display.va_available = 1;
+    } else {
+        // TODO: remember?
+        trace_info_f("no libva\n");
+        display.va_available = 0;
+    }
+
     if (!glXQueryVersion(display.x, &major, &minor)) {
         trace_error("%s, glXQueryVersion returned False\n", __func__);
     } else {

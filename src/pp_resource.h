@@ -43,6 +43,7 @@
 #include <ppapi/c/dev/ppb_text_input_dev.h>
 #include <ppapi/c/dev/ppp_text_input_dev.h>
 #include <ppapi/c/dev/ppp_video_capture_dev.h>
+#include <ppapi/c/dev/ppp_video_decoder_dev.h>
 
 #include <stdlib.h>
 #include <X11/Xlib.h>
@@ -61,7 +62,13 @@
 #include <gtk/gtk.h>
 #include "audio_thread.h"
 #include <openssl/x509.h>
+#include <libavcodec/avcodec.h>
+#include <libavcodec/vaapi.h>
+#include <va/va.h>
 #include "font.h"
+
+
+#define MAX_VIDEO_SURFACES              21  // H.264: 1 current and up to 20 references
 
 
 #define free_and_nullify(item)          \
@@ -447,6 +454,30 @@ struct pp_flash_drm_s {
 
 struct pp_video_decoder_s {
     COMMON_STRUCTURE_FIELDS
+    const struct PPP_VideoDecoder_Dev_0_11 *ppp_video_decoder_dev;
+    PP_Resource             orig_graphics3d;
+    PP_Resource             graphics3d;
+    int                     codec_id;
+    AVCodec                *avcodec;
+    AVCodecContext         *avctx;
+    AVCodecParserContext   *avparser;
+    AVFrame                *avframe;
+    uint32_t                width;
+    uint32_t                height;
+    size_t                  buffer_count;
+    int                     buffers_were_requested;
+    struct {
+        int32_t     id;
+        uint32_t    width;
+        uint32_t    height;
+        uint32_t    texture_id;
+        uint32_t    used;
+        Pixmap      pixmap;
+        GLXPixmap   glx_pixmap;
+    } *buffers;
+    struct vaapi_context    va_context;
+    VASurfaceID             surfaces[MAX_VIDEO_SURFACES];
+    int                     surface_used[MAX_VIDEO_SURFACES];
 };
 
 struct pp_buffer_s {
