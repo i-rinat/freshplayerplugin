@@ -38,6 +38,7 @@
 
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static __thread struct timespec tictoc_ts;
 
 
 void
@@ -349,4 +350,18 @@ trace_graphics3d_attributes_as_string(const int32_t attrib_list[])
 
     // return combined string
     return g_string_free(s, FALSE);
+}
+
+void
+trace_duration_tic(void)
+{
+    clock_gettime(CLOCK_REALTIME, &tictoc_ts);
+}
+
+double
+trace_duration_toc(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (ts.tv_sec - tictoc_ts.tv_sec) + 1e-9 * (ts.tv_nsec - tictoc_ts.tv_nsec);
 }
