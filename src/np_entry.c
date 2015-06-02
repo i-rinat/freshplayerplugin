@@ -272,17 +272,57 @@ failure:
     return 1;
 }
 
+struct call_plugin_shutdown_module_param_s {
+    PP_Resource m_loop;
+    int         depth;
+    void      (*ppp_shutdown_module)(void);
+};
+
+static
+void
+call_plugin_shutdown_module_comt(void *user_data, int32_t result)
+{
+    struct call_plugin_shutdown_module_param_s *p = user_data;
+    p->ppp_shutdown_module();   // p->ppp_shutdown_module is always non-NULL
+    ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
+}
+
+static
+void
+call_plugin_shutdown_module_prepare_comt(void *user_data, int32_t result)
+{
+    ppb_core_trampoline_to_main_thread(PP_MakeCCB(call_plugin_shutdown_module_comt, user_data),
+                                       PP_OK, __func__);
+}
+
+static
+void
+call_plugin_shutdown_module(void)
+{
+    if (!module_dl_handler)
+        return;
+
+    void (*ppp_shutdown_module)(void);
+    ppp_shutdown_module = dlsym(module_dl_handler, "PPP_ShutdownModule");
+    if (!ppp_shutdown_module)
+        return;
+
+    struct call_plugin_shutdown_module_param_s *p = g_slice_alloc(sizeof(*p));
+    p->m_loop =              ppb_message_loop_get_for_browser_thread();
+    p->depth =               ppb_message_loop_get_depth(p->m_loop) + 1;
+    p->ppp_shutdown_module = ppp_shutdown_module;
+
+    ppb_message_loop_post_work_with_result(p->m_loop,
+                                           PP_MakeCCB(call_plugin_shutdown_module_prepare_comt, p),
+                                           0, PP_OK, p->depth, __func__);
+    ppb_message_loop_run_nested(p->m_loop);
+    g_slice_free1(sizeof(*p), p);
+}
+
 static
 void
 unload_ppp_module(void)
 {
-    void (*ppp_shutdown_module)(void);
-
-    if (!module_dl_handler) {
-        // module not loaded
-        return;
-    }
-
     g_free(module_descr); module_descr = NULL;
     g_free(module_version); module_version = NULL;
     g_free(module_file_name); module_file_name = NULL;
@@ -292,9 +332,7 @@ unload_ppp_module(void)
     }
 
     // call module shutdown handler if exists
-    ppp_shutdown_module = dlsym(module_dl_handler, "PPP_ShutdownModule");
-    if (ppp_shutdown_module)
-        ppp_shutdown_module();
+    call_plugin_shutdown_module();
 
     dlclose(module_dl_handler);
     module_dl_handler = NULL;
