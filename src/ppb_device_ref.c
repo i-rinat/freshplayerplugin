@@ -61,6 +61,7 @@ ppb_device_ref_destroy(void *ptr)
     struct pp_device_ref_s *dr = ptr;
 
     ppb_var_release(dr->name);
+    ppb_var_release(dr->longname);
 }
 
 PP_Bool
