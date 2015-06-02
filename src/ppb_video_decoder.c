@@ -294,12 +294,6 @@ ppb_video_decoder_destroy_priv(void *p)
     if (vd->avframe)
         av_frame_free(&vd->avframe);
 
-    for (uintptr_t k = 0; k < vd->buffer_count; k ++) {
-        vd->ppp_video_decoder_dev->DismissPictureBuffer(vd->instance->id, vd->self_id,
-                                                        vd->buffers[k].id);
-    }
-    vd->buffer_count = 0;
-
     if (vd->va_context.context_id) {
         vaDestroyContext(display.va, vd->va_context.context_id);
         vd->va_context.context_id = 0;
