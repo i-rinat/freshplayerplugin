@@ -268,6 +268,8 @@ x11et_handle_xevent(void)
         struct pp_instance_s *pp_i = tables_get_pp_instance(d->instance);
         if (pp_i && pp_i->npp)
             npn.pluginthreadasynccall(pp_i->npp, call_handle_event_ptac, ev);
+        else
+            g_slice_free1(sizeof(*ev), ev);
     } else {
         g_slice_free1(sizeof(*ev), ev);
     }
