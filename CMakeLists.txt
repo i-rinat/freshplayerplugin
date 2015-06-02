@@ -45,7 +45,7 @@ pkg_check_modules(REQ
     freetype2
     openssl
     libv4l2
-    libavcodec >= 54.39.0
+    libavcodec>=54.39.0
     libva
     libva-x11
     REQUIRED)
