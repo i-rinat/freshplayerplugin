@@ -304,6 +304,8 @@ tables_close_display(void)
 {
     pthread_mutex_lock(&display.lock);
     screensaver_disconnect();
+    if (display.va)
+        vaTerminate(display.va);
     XFreeCursor(display.x, display.transparent_cursor);
     XCloseDisplay(display.x);
     pthread_mutex_unlock(&display.lock);
