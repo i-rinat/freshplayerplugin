@@ -157,14 +157,15 @@ ppb_video_capture_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOu
             char *fullpath = g_strdup_printf("/dev/v4l/by-path/%s", namelist[k]->d_name);
             char *shortname = NULL;
             if (video_device_is_usable(fullpath, &shortname)) {
-                PP_Resource device;
-
-                device = ppb_device_ref_create(vc->instance->id,
-                                               ppb_var_var_from_utf8_z(shortname),
-                                               ppb_var_var_from_utf8_z(fullpath),
-                                               PP_DEVICETYPE_DEV_VIDEOCAPTURE);
+                struct PP_Var v_shortname = ppb_var_var_from_utf8_z(shortname);
+                struct PP_Var v_fullpath = ppb_var_var_from_utf8_z(fullpath);
+                PP_Resource device = ppb_device_ref_create(vc->instance->id, v_shortname,
+                                                           v_fullpath,
+                                                           PP_DEVICETYPE_DEV_VIDEOCAPTURE);
                 g_array_append_val(vc_devices, device);
                 free(shortname);
+                ppb_var_release(v_shortname);
+                ppb_var_release(v_fullpath);
             }
             g_free(fullpath);
         }
