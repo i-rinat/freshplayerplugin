@@ -94,9 +94,9 @@ ppb_browser_font_describe(PP_Resource font,
     PP_Bool ret = fpp_font_describe(&bf->ff, &font_descr, &font_metrics);
 
     description->face =             font_descr.face;
-    description->family =           font_descr.family;
+    description->family =           (PP_BrowserFont_Trusted_Family)font_descr.family;
     description->size =             font_descr.size;
-    description->weight =           font_descr.weight;
+    description->weight =           (PP_BrowserFont_Trusted_Weight)font_descr.weight;
     description->italic =           font_descr.italic;
     description->small_caps =       font_descr.small_caps;
     description->letter_spacing =   font_descr.letter_spacing;

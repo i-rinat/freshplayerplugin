@@ -234,9 +234,9 @@ pp_browser_font_desc_to_pp_font_desc(const struct PP_BrowserFont_Trusted_Descrip
 {
     struct PP_FontDescription_Dev font_descr = {
         .face =             descr->face,
-        .family =           descr->family,
+        .family =           (PP_FontFamily_Dev)descr->family,
         .size =             descr->size,
-        .weight =           descr->weight,
+        .weight =           (PP_FontWeight_Dev)descr->weight,
         .italic =           descr->italic,
         .small_caps =       descr->small_caps,
         .letter_spacing =   descr->letter_spacing,
