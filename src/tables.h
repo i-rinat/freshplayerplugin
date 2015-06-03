@@ -31,8 +31,11 @@
 #include "pp_resource.h"
 #include <npapi/npruntime.h>
 #include <npapi/npfunctions.h>
+
+#if HAVE_HWDEC
 #include <va/va.h>
 #include <va/va_x11.h>
+#endif // HAVE_HWDEC
 
 
 #define NPString_literal(str) { .UTF8Characters = str, .UTF8Length = strlen(str) }
@@ -52,8 +55,10 @@ typedef void
 
 struct display_s {
     Display                            *x;
+#if HAVE_HWDEC
     VADisplay                           va;
     int                                 va_available;
+#endif // HAVE_HWDEC
     Cursor                              transparent_cursor;
     pthread_mutex_t                     lock;
     XRenderPictFormat                  *pictfmt_rgb24;

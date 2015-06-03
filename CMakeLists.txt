@@ -45,9 +45,6 @@ pkg_check_modules(REQ
     freetype2
     openssl
     libv4l2
-    libavcodec>=54.39.0
-    libva
-    libva-x11
     REQUIRED)
 
 # libdl.so, librt.so, and libm.so
@@ -110,6 +107,15 @@ if (JACK_FOUND AND WITH_JACK)
     endif()
 else()
     message(STATUS "  no jack found (optional)")
+endif()
+
+# hw accelerated decoding
+set(WITH_HWDEC TRUE CACHE STRING "enable hw accelerated decoding")
+if (WITH_HWDEC)
+    pkg_check_modules(HWDEC libavcodec>=54.39.0 libva libva-x11 REQUIRED)
+    list(APPEND REQ_LIBRARY_DIRS ${HWDEC_LIBRARY_DIRS})
+    list(APPEND REQ_INCLUDE_DIRS ${HWDEC_INCLUDE_DIRS})
+    list(APPEND REQ_LIBRARIES    ${HWDEC_LIBRARIES})
 endif()
 
 list(APPEND REQ_LIBRARIES img-resources)

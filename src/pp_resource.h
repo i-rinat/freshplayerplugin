@@ -62,10 +62,13 @@
 #include <gtk/gtk.h>
 #include "audio_thread.h"
 #include <openssl/x509.h>
+#include "font.h"
+
+#if HAVE_HWDEC
 #include <libavcodec/avcodec.h>
 #include <libavcodec/vaapi.h>
 #include <va/va.h>
-#include "font.h"
+#endif // HAVE_HWDEC
 
 
 #define MAX_VIDEO_SURFACES              21  // H.264: 1 current and up to 20 references
@@ -454,6 +457,7 @@ struct pp_flash_drm_s {
 
 struct pp_video_decoder_s {
     COMMON_STRUCTURE_FIELDS
+#if HAVE_HWDEC
     const struct PPP_VideoDecoder_Dev_0_11 *ppp_video_decoder_dev;
     PP_Resource             orig_graphics3d;
     PP_Resource             graphics3d;
@@ -478,6 +482,7 @@ struct pp_video_decoder_s {
     struct vaapi_context    va_context;
     VASurfaceID             surfaces[MAX_VIDEO_SURFACES];
     int                     surface_used[MAX_VIDEO_SURFACES];
+#endif // HAVE_HWDEC
 };
 
 struct pp_buffer_s {

@@ -76,7 +76,6 @@ set(source_list
     ppb_url_util.c
     ppb_var.c
     ppb_video_capture.c
-    ppb_video_decoder.c
     ppb_view.c
     ppb_widget.c
     ppb_x509_certificate.c
@@ -95,6 +94,13 @@ endif()
 
 if (NOT WITH_GLES2)
     list(APPEND source_list shader_translator.cc)
+endif()
+
+if (WITH_HWDEC)
+    add_definitions(-DHAVE_HWDEC=1)
+    list(APPEND source_list ppb_video_decoder.c)
+else()
+    add_definitions(-DHAVE_HWDEC=0)
 endif()
 
 add_library(freshwrapper-obj OBJECT ${source_list})

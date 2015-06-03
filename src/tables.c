@@ -220,6 +220,7 @@ tables_open_display(void)
     if (config.quirks.x_synchronize)
         XSynchronize(display.x, True);
 
+#if HAVE_HWDEC
     display.va = vaGetDisplay(display.x);
     VAStatus status = vaInitialize(display.va, &major, &minor);
     if (status == VA_STATUS_SUCCESS) {
@@ -230,6 +231,7 @@ tables_open_display(void)
         trace_info_f("no libva\n");
         display.va_available = 0;
     }
+#endif // HAVE_HWDEC
 
     if (!glXQueryVersion(display.x, &major, &minor)) {
         trace_error("%s, glXQueryVersion returned False\n", __func__);
@@ -304,8 +306,12 @@ tables_close_display(void)
 {
     pthread_mutex_lock(&display.lock);
     screensaver_disconnect();
+
+#if HAVE_HWDEC
     if (display.va)
         vaTerminate(display.va);
+#endif // HAVE_HWDEC
+
     XFreeCursor(display.x, display.transparent_cursor);
     XCloseDisplay(display.x);
     pthread_mutex_unlock(&display.lock);
