@@ -30,6 +30,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
+#include "pp_interface.h"
 #include "ppb_message_loop.h"
 #include <ppapi/c/pp_errors.h>
 
@@ -222,3 +223,11 @@ const struct PPB_Core_1_0 ppb_core_interface_1_0 = {
     .CallOnMainThread = TWRAPF(ppb_core_call_on_main_thread),
     .IsMainThread =     TWRAPF(ppb_core_is_main_thread),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_core(void)
+{
+    register_interface(PPB_CORE_INTERFACE_1_0, &ppb_core_interface_1_0);
+}

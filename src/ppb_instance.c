@@ -33,6 +33,7 @@
 #include "ppb_message_loop.h"
 #include "n2p_proxy_class.h"
 #include <ppapi/c/pp_errors.h>
+#include "pp_interface.h"
 
 
 static
@@ -347,3 +348,12 @@ const struct PPB_Instance_Private_0_1 ppb_instance_private_interface_0_1 = {
     .GetOwnerElementObject =    TWRAPZ(ppb_instance_get_owner_element_object),
     .ExecuteScript =            TWRAPF(ppb_instance_execute_script),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_instance(void)
+{
+    register_interface(PPB_INSTANCE_INTERFACE_1_0, &ppb_instance_interface_1_0);
+    register_interface(PPB_INSTANCE_PRIVATE_INTERFACE_0_1, &ppb_instance_private_interface_0_1);
+}

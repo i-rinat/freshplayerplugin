@@ -27,6 +27,7 @@
 #include "trace.h"
 #include <glib.h>
 #include <ppapi/c/pp_errors.h>
+#include "pp_interface.h"
 
 
 void
@@ -90,3 +91,12 @@ const struct PPB_Messaging_1_2 ppb_messaging_interface_1_2 = {
 const struct PPB_Messaging_1_0 ppb_messaging_interface_1_0 = {
     .PostMessage =              TWRAPZ(ppb_messaging_post_message),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_messaging(void)
+{
+    register_interface(PPB_MESSAGING_INTERFACE_1_0, &ppb_messaging_interface_1_0);
+    register_interface(PPB_MESSAGING_INTERFACE_1_2, &ppb_messaging_interface_1_2);
+}

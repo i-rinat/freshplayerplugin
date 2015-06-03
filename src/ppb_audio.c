@@ -31,6 +31,7 @@
 #include "tables.h"
 #include "config.h"
 #include "pp_resource.h"
+#include "pp_interface.h"
 #include "ppb_message_loop.h"
 #include "eintr_retry.h"
 #include "audio_thread.h"
@@ -256,3 +257,12 @@ const struct PPB_Audio_1_1 ppb_audio_interface_1_1 = {
     .StartPlayback =    TWRAPF(ppb_audio_start_playback),
     .StopPlayback =     TWRAPF(ppb_audio_stop_playback),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_audio(void)
+{
+    register_interface(PPB_AUDIO_INTERFACE_1_0, &ppb_audio_interface_1_0);
+    register_interface(PPB_AUDIO_INTERFACE_1_1, &ppb_audio_interface_1_1);
+}

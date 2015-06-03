@@ -30,6 +30,7 @@
 #include "reverse_constant.h"
 #include <openssl/x509.h>
 #include <ctype.h>
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -462,3 +463,12 @@ const struct PPB_X509Certificate_Private_0_1 ppb_x509_certificate_interface_0_1 
     .Initialize =               TWRAPF(ppb_x509_certificate_initialize),
     .GetField =                 TWRAPF(ppb_x509_certificate_get_field),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_x509_certificate(void)
+{
+    register_interface(PPB_X509CERTIFICATE_PRIVATE_INTERFACE_0_1,
+                       &ppb_x509_certificate_interface_0_1);
+}

@@ -25,6 +25,7 @@
 #include "ppb_uma.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "pp_interface.h"
 
 
 void
@@ -95,3 +96,11 @@ const struct PPB_UMA_Private_0_3 ppb_uma_private_interface_0_3 = {
     .HistogramEnumeration =     TWRAPZ(ppb_uma_histogram_enumeration),
     .IsCrashReportingEnabled =  TWRAPZ(ppb_uma_is_crash_reporting_enabled),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_uma(void)
+{
+    register_interface(PPB_UMA_PRIVATE_INTERFACE_0_3, &ppb_uma_private_interface_0_3);
+}

@@ -32,6 +32,7 @@
 #include "pp_resource.h"
 #include <ppapi/c/pp_errors.h>
 #include <gtk/gtk.h>
+#include "pp_interface.h"
 
 
 static int32_t                     *popup_menu_result = NULL;
@@ -296,3 +297,11 @@ const struct PPB_Flash_Menu_0_2 ppb_flash_menu_interface_0_2 = {
     .IsFlashMenu =  TWRAPF(ppb_flash_menu_is_flash_menu),
     .Show =         TWRAPF(ppb_flash_menu_show),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_menu(void)
+{
+    register_interface(PPB_FLASH_MENU_INTERFACE_0_2, &ppb_flash_menu_interface_0_2);
+}

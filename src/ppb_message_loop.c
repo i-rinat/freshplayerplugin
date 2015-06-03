@@ -31,6 +31,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "compat.h"
+#include "pp_interface.h"
 
 
 static __thread PP_Resource this_thread_message_loop = 0;
@@ -517,3 +518,11 @@ const struct PPB_MessageLoop_1_0 ppb_message_loop_interface_1_0 = {
     .PostWork =              TWRAPF(ppb_message_loop_post_work),
     .PostQuit =              TWRAPF(ppb_message_loop_post_quit),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_message_loop(void)
+{
+    register_interface(PPB_MESSAGELOOP_INTERFACE_1_0, &ppb_message_loop_interface_1_0);
+}

@@ -31,6 +31,7 @@
 #include "tables.h"
 #include "config.h"
 #include "pp_resource.h"
+#include "pp_interface.h"
 
 
 struct g2d_paint_task_s {
@@ -463,3 +464,12 @@ const struct PPB_Graphics2D_1_1 ppb_graphics2d_interface_1_1 = {
     .SetScale =         TWRAPF(ppb_graphics2d_set_scale),
     .GetScale =         TWRAPF(ppb_graphics2d_get_scale),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_graphics2d(void)
+{
+    register_interface(PPB_GRAPHICS_2D_INTERFACE_1_0, &ppb_graphics2d_interface_1_0);
+    register_interface(PPB_GRAPHICS_2D_INTERFACE_1_1, &ppb_graphics2d_interface_1_1);
+}

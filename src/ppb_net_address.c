@@ -27,6 +27,7 @@
 #include <string.h>
 #include <netinet/in.h>
 #include "trace.h"
+#include "pp_interface.h"
 
 
 PP_Bool
@@ -309,3 +310,12 @@ const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = 
     .CreateFromIPv4Address = TWRAPF(ppb_net_address_create_from_ipv4_address),
     .CreateFromIPv6Address = TWRAPF(ppb_net_address_create_from_ipv6_address),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_net_address(void)
+{
+    register_interface(PPB_NETADDRESS_PRIVATE_INTERFACE_1_1,
+                       &ppb_net_address_private_interface_1_1);
+}

@@ -636,3 +636,11 @@ const struct PPB_VideoCapture_Dev_0_3 ppb_video_capture_dev_interface_0_3 = {
     .StopCapture =          TWRAPF(ppb_video_capture_stop_capture),
     .Close =                TWRAPF(ppb_video_capture_close),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_video_capture(void)
+{
+    register_interface(PPB_VIDEOCAPTURE_DEV_INTERFACE_0_3, &ppb_video_capture_dev_interface_0_3);
+}

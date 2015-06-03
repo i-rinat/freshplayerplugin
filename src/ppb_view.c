@@ -27,6 +27,7 @@
 #include "trace.h"
 #include "config.h"
 #include "pp_resource.h"
+#include "pp_interface.h"
 
 
 PP_Bool
@@ -219,3 +220,14 @@ const struct PPB_View_1_2 ppb_view_interface_1_2 = {
     .GetCSSScale =      TWRAPF(ppb_view_get_css_scale),
     .GetScrollOffset =  TWRAPZ(ppb_view_get_scroll_offset),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_view(void)
+{
+    register_interface(PPB_VIEW_DEV_INTERFACE_0_1, &ppb_view_dev_interface_0_1);
+    register_interface(PPB_VIEW_INTERFACE_1_0, &ppb_view_interface_1_0);
+    register_interface(PPB_VIEW_INTERFACE_1_1, &ppb_view_interface_1_1);
+    register_interface(PPB_VIEW_INTERFACE_1_2, &ppb_view_interface_1_2);
+}

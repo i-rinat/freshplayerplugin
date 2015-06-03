@@ -33,6 +33,7 @@
 #if !HAVE_GLES2
 #include "shader_translator.h"
 #endif
+#include "pp_interface.h"
 
 
 #define PROLOGUE(g3d, escape_statement)                                                 \
@@ -55,17 +56,6 @@ static GHashTable  *shader_type_ht = NULL;      // shader id -> shader type
 static GHashTable  *shader_source_ht = NULL;    // shader id -> original shader source
 #endif
 
-
-static
-void
-__attribute__((constructor))
-constructor_ppb_opengles2(void)
-{
-#if !HAVE_GLES2
-    shader_type_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
-    shader_source_ht = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
-#endif
-}
 
 static
 void
@@ -3233,3 +3223,27 @@ const struct PPB_OpenGLES2Query ppb_opengles2_query_interface_1_0 = {
     .GetQueryivEXT =        TWRAPZ(ppb_opengles2_query_get_queryiv_ext),
     .GetQueryObjectuivEXT = TWRAPZ(ppb_opengles2_query_get_query_objectuiv_ext),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_opengles2(void)
+{
+#if !HAVE_GLES2
+    shader_type_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+    shader_source_ht = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+#endif
+
+    register_interface(PPB_OPENGLES2_CHROMIUMENABLEFEATURE_INTERFACE_1_0,
+                       &ppb_opengles2_chromium_enable_feature_interface_1_0);
+    register_interface(PPB_OPENGLES2_CHROMIUMMAPSUB_INTERFACE_1_0,
+                       &ppb_opengles2_chromium_map_sub_interface_1_0);
+    register_interface(PPB_OPENGLES2_FRAMEBUFFERBLIT_INTERFACE_1_0,
+                       &ppb_opengles2_framebuffer_blit_interface_1_0);
+    register_interface(PPB_OPENGLES2_FRAMEBUFFERMULTISAMPLE_INTERFACE_1_0,
+                       &ppb_opengles2_framebuffer_multisample_interface_1_0);
+    register_interface(PPB_OPENGLES2_INSTANCEDARRAYS_INTERFACE_1_0,
+                       &ppb_opengles2_instanced_arrays_interface_1_0);
+    register_interface(PPB_OPENGLES2_INTERFACE_1_0, &ppb_opengles2_interface_1_0);
+    register_interface(PPB_OPENGLES2_QUERY_INTERFACE_1_0, &ppb_opengles2_query_interface_1_0);
+}

@@ -31,6 +31,7 @@
 #include "ppb_var.h"
 #include "font.h"
 #include <ppapi/c/pp_errors.h>
+#include "pp_interface.h"
 
 
 struct PP_Var
@@ -246,3 +247,11 @@ const struct PPB_Font_Dev_0_6 ppb_font_dev_interface_0_6 = {
     .CharacterOffsetForPixel =  TWRAPZ(ppb_font_character_offset_for_pixel),
     .PixelOffsetForCharacter =  TWRAPZ(ppb_font_pixel_offset_for_character),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_font(void)
+{
+    register_interface(PPB_FONT_DEV_INTERFACE_0_6, &ppb_font_dev_interface_0_6);
+}

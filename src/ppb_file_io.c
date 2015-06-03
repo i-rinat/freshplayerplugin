@@ -30,6 +30,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "ppb_core.h"
+#include "pp_interface.h"
 
 
 int32_t
@@ -337,3 +338,13 @@ const struct PPB_FileIO_1_0 ppb_file_io_interface_1_0 = {
     .Flush =        TWRAPZ(ppb_file_io_flush),
     .Close =        TWRAPZ(ppb_file_io_close),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_file_io(void)
+{
+    register_interface(PPB_FILEIO_PRIVATE_INTERFACE_0_1, &ppb_file_io_private_interface_0_1);
+    register_interface(PPB_FILEIO_INTERFACE_1_0, &ppb_file_io_interface_1_0);
+    register_interface(PPB_FILEIO_INTERFACE_1_1, &ppb_file_io_interface_1_1);
+}

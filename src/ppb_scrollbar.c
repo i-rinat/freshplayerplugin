@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "reverse_constant.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -167,3 +168,11 @@ const struct PPB_Scrollbar_Dev_0_5 ppb_scrollbar_dev_interface_0_5 = {
     .SetTickMarks =     TWRAPZ(ppb_scrollbar_set_tick_marks),
     .ScrollBy =         TWRAPZ(ppb_scrollbar_scroll_by),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_scrollbar(void)
+{
+    register_interface(PPB_SCROLLBAR_DEV_INTERFACE_0_5, &ppb_scrollbar_dev_interface_0_5);
+}

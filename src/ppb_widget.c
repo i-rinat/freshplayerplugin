@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include <glib.h>
+#include "pp_interface.h"
 
 
 PP_Bool
@@ -134,3 +135,12 @@ const struct PPB_Widget_Dev_0_4 ppb_widget_dev_interface_0_4 = {
     .SetLocation =  TWRAPZ(ppb_widget_set_location),
     .SetScale =     TWRAPZ(ppb_widget_set_scale),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_widget(void)
+{
+    register_interface(PPB_WIDGET_DEV_INTERFACE_0_3, &ppb_widget_dev_interface_0_3);
+    register_interface(PPB_WIDGET_DEV_INTERFACE_0_4, &ppb_widget_dev_interface_0_4);
+}

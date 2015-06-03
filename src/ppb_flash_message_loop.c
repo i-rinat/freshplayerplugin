@@ -29,6 +29,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "ppb_message_loop.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -143,3 +144,11 @@ const struct PPB_Flash_MessageLoop_0_1 ppb_flash_message_loop_interface_0_1 = {
     .Run =                  TWRAPF(ppb_flash_message_loop_run),
     .Quit =                 TWRAPF(ppb_flash_message_loop_quit),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_message_loop(void)
+{
+    register_interface(PPB_FLASH_MESSAGELOOP_INTERFACE_0_1, &ppb_flash_message_loop_interface_0_1);
+}

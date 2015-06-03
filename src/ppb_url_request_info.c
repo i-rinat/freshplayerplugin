@@ -39,6 +39,7 @@
 #include "ppb_flash_file.h"
 #include "ppb_core.h"
 #include "eintr_retry.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -446,3 +447,11 @@ const struct PPB_URLRequestInfo_1_0 ppb_url_request_info_interface_1_0 = {
     .AppendDataToBody = TWRAPF(ppb_url_request_info_append_data_to_body),
     .AppendFileToBody = TWRAPF(ppb_url_request_info_append_file_to_body),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_url_request_info(void)
+{
+    register_interface(PPB_URLREQUESTINFO_INTERFACE_1_0, &ppb_url_request_info_interface_1_0);
+}

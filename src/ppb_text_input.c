@@ -273,3 +273,11 @@ const struct PPB_TextInput_Dev_0_2 ppb_text_input_dev_interface_0_2 = {
     .UpdateSurroundingText =    TWRAPF(ppb_text_input_interface_update_surrounding_text),
     .SelectionChanged =         TWRAPF(ppb_text_input_interface_selection_changed),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_text_input(void)
+{
+    register_interface(PPB_TEXTINPUT_DEV_INTERFACE_0_2, &ppb_text_input_dev_interface_0_2);
+}

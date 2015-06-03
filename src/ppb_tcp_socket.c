@@ -32,6 +32,7 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "async_network.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -443,3 +444,12 @@ const struct PPB_TCPSocket_Private_0_4 ppb_tcp_socket_private_interface_0_4 = {
     .Write =                        TWRAPF(ppb_tcp_socket_write),
     .Disconnect =                   TWRAPF(ppb_tcp_socket_disconnect),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_tcp_socket(void)
+{
+    register_interface(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_4, &ppb_tcp_socket_private_interface_0_4);
+    register_interface(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_5, &ppb_tcp_socket_private_interface_0_5);
+}

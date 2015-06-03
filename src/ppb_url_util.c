@@ -31,6 +31,7 @@
 #include "uri_parser/uri_parser.h"
 #include "trace.h"
 #include "tables.h"
+#include "pp_interface.h"
 
 
 struct PP_Var
@@ -235,3 +236,12 @@ const struct PPB_URLUtil_Dev_0_7 ppb_url_util_dev_interface_0_7 = {
     .GetPluginInstanceURL =         TWRAPF(ppb_url_util_get_plugin_instance_url),
     .GetPluginReferrerURL =         TWRAPZ(ppb_url_util_get_plugin_referrer_url),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_url_util(void)
+{
+    register_interface(PPB_URLUTIL_DEV_INTERFACE_0_6, &ppb_url_util_dev_interface_0_6);
+    register_interface(PPB_URLUTIL_DEV_INTERFACE_0_7, &ppb_url_util_dev_interface_0_7);
+}

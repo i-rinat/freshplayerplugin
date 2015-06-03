@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -146,3 +147,11 @@ const struct PPB_DeviceRef_Dev_0_1 ppb_device_ref_dev_interface_0_1 = {
     .GetType =      TWRAPF(ppb_device_ref_get_type),
     .GetName =      TWRAPF(ppb_device_ref_get_name),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_device_ref(void)
+{
+    register_interface(PPB_DEVICEREF_DEV_INTERFACE_0_1, &ppb_device_ref_dev_interface_0_1);
+}

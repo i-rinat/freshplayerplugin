@@ -35,21 +35,6 @@
 #include "ppb_graphics3d.h"
 
 
-static
-void
-__attribute__((constructor))
-constructor_ppb_video_decoder(void)
-{
-    avcodec_register_all();
-}
-
-static
-void
-__attribute__((destructor))
-destructor_ppb_video_decoder(void)
-{
-}
-
 enum AVPixelFormat
 get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
 {
@@ -694,3 +679,13 @@ const struct PPB_VideoDecoder_Dev_0_16 ppb_video_decoder_dev_interface_0_16 = {
     .Reset =                TWRAPF(ppb_video_decoder_reset),
     .Destroy =              TWRAPZ(ppb_video_decoder_destroy),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_video_decoder(void)
+{
+    avcodec_register_all();
+
+    register_interface(PPB_VIDEODECODER_DEV_INTERFACE_0_16, &ppb_video_decoder_dev_interface_0_16);
+}

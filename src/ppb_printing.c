@@ -26,6 +26,7 @@
 #include "pp_resource.h"
 #include "trace.h"
 #include "tables.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -74,3 +75,11 @@ const struct PPB_Printing_Dev_0_7 ppb_printing_dev_interface_0_7 = {
     .Create =                   TWRAPF(ppb_printing_create),
     .GetDefaultPrintSettings =  TWRAPZ(ppb_printing_get_default_print_settings),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_printing(void)
+{
+    register_interface(PPB_PRINTING_DEV_INTERFACE_0_7, &ppb_printing_dev_interface_0_7);
+}

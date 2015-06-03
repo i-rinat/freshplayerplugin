@@ -27,6 +27,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_resource.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -172,3 +173,11 @@ const struct PPB_AudioConfig_1_1 ppb_audio_config_interface_1_1 = {
     .GetSampleFrameCount =          TWRAPF(ppb_audio_config_get_sample_frame_count),
     .RecommendSampleRate =          TWRAPF(ppb_audio_config_recommend_sample_rate),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_audio_config(void)
+{
+    register_interface(PPB_AUDIO_CONFIG_INTERFACE_1_1, &ppb_audio_config_interface_1_1);
+}

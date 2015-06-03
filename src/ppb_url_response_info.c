@@ -31,6 +31,7 @@
 #include "reverse_constant.h"
 #include "pp_resource.h"
 #include "ppb_var.h"
+#include "pp_interface.h"
 
 
 PP_Bool
@@ -145,3 +146,11 @@ const struct PPB_URLResponseInfo_1_0 ppb_url_response_info_interface_1_0 = {
     .GetProperty =          TWRAPF(ppb_url_response_info_get_property),
     .GetBodyAsFileRef =     TWRAPF(ppb_url_response_info_get_body_as_file_ref),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_url_response_info(void)
+{
+    register_interface(PPB_URLRESPONSEINFO_INTERFACE_1_0, &ppb_url_response_info_interface_1_0);
+}

@@ -33,6 +33,7 @@
 #include "reverse_constant.h"
 #include <ppapi/c/pp_errors.h>
 #include <gdk/gdkx.h>
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -282,3 +283,13 @@ const struct PPB_FileChooser_Dev_0_6 ppb_file_chooser_dev_interface_0_6 = {
 const struct PPB_FileChooserTrusted_0_6 ppb_file_chooser_trusted_interface_0_6 = {
     .ShowWithoutUserGesture = TWRAPF(ppb_file_chooser_show_without_user_gesture),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_file_chooser(void)
+{
+    register_interface(PPB_FILECHOOSER_DEV_INTERFACE_0_6, &ppb_file_chooser_dev_interface_0_6);
+    register_interface(PPB_FILECHOOSER_TRUSTED_INTERFACE_0_6,
+                       &ppb_file_chooser_trusted_interface_0_6);
+}

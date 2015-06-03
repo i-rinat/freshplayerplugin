@@ -30,6 +30,7 @@
 #include <string.h>
 #include <ppapi/c/pp_errors.h>
 #include "pp_resource.h"
+#include "pp_interface.h"
 #include "font.h"
 
 
@@ -290,3 +291,12 @@ const struct PPB_BrowserFont_Trusted_1_0 ppb_browser_font_trusted_interface_1_0 
     .CharacterOffsetForPixel =  TWRAPZ(ppb_browser_font_character_offset_for_pixel),
     .PixelOffsetForCharacter =  TWRAPZ(ppb_browser_font_pixel_offset_for_character),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_browser_font(void)
+{
+    register_interface(PPB_BROWSERFONT_TRUSTED_INTERFACE_1_0,
+                       &ppb_browser_font_trusted_interface_1_0);
+}

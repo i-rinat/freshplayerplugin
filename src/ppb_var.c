@@ -38,6 +38,7 @@
 #include "p2n_proxy_class.h"
 #include "compat.h"
 #include "config.h"
+#include "pp_interface.h"
 
 
 static GHashTable      *var_ht;
@@ -60,15 +61,6 @@ struct var_s {
     GArray         *array;      // of struct PP_Var
 };
 
-
-static
-void
-__attribute__((constructor))
-constructor_ppb_var(void)
-{
-    var_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
-    pthread_mutex_init(&lock, NULL);
-}
 
 static
 void
@@ -1353,3 +1345,20 @@ const struct PPB_VarArray_1_0 ppb_var_array_interface_1_0 = {
     .GetLength = TWRAPZ(ppb_var_array_get_length),
     .SetLength = TWRAPZ(ppb_var_array_set_length),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_var(void)
+{
+    var_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+    pthread_mutex_init(&lock, NULL);
+
+    register_interface(PPB_VAR_INTERFACE_1_0, &ppb_var_interface_1_0);
+    register_interface(PPB_VAR_INTERFACE_1_1, &ppb_var_interface_1_1);
+    register_interface(PPB_VAR_INTERFACE_1_2, &ppb_var_interface_1_2);
+    register_interface(PPB_VAR_ARRAY_BUFFER_INTERFACE_1_0, &ppb_var_array_buffer_interface_1_0);
+    register_interface(PPB_VAR_ARRAY_INTERFACE_1_0, &ppb_var_array_interface_1_0);
+    register_interface(PPB_VAR_DICTIONARY_INTERFACE_1_0, &ppb_var_dictionary_interface_1_0);
+    register_interface(PPB_VAR_DEPRECATED_INTERFACE_0_3, &ppb_var_deprecated_interface_0_3);
+}

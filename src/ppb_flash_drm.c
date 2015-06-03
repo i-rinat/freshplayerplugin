@@ -33,6 +33,7 @@
 #include "tables.h"
 #include "config.h"
 #include "static_assert.h"
+#include "pp_interface.h"
 
 
 #define salt_length             32
@@ -237,3 +238,12 @@ const struct PPB_Flash_DRM_1_0 ppb_flash_drm_interface_1_0 = {
     .GetHmonitor =      TWRAPZ(ppb_flash_drm_get_hmonitor),
     .GetVoucherFile =   TWRAPZ(ppb_flash_drm_get_voucher_file),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_drm(void)
+{
+    register_interface(PPB_FLASH_DRM_INTERFACE_1_0, &ppb_flash_drm_interface_1_0);
+    register_interface(PPB_FLASH_DRM_INTERFACE_1_1, &ppb_flash_drm_interface_1_1);
+}

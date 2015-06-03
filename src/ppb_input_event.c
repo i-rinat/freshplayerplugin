@@ -29,6 +29,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "ppb_var.h"
+#include "pp_interface.h"
 
 
 void
@@ -1079,3 +1080,21 @@ const struct PPB_IMEInputEvent_1_0 ppb_ime_input_event_interface_1_0 = {
     .GetTargetSegment = TWRAPF(ppb_ime_input_event_get_target_segment),
     .GetSelection =     TWRAPF(ppb_ime_input_event_get_selection),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_input_event(void)
+{
+    register_interface(PPB_IME_INPUT_EVENT_DEV_INTERFACE_0_2,
+                       &ppb_ime_input_event_dev_interface_0_2);
+    register_interface(PPB_INPUT_EVENT_INTERFACE_1_0, &ppb_input_event_interface_1_0);
+    register_interface(PPB_MOUSE_INPUT_EVENT_INTERFACE_1_1, &ppb_mouse_input_event_interface_1_1);
+    register_interface(PPB_WHEEL_INPUT_EVENT_INTERFACE_1_0, &ppb_wheel_input_event_interface_1_0);
+    register_interface(PPB_KEYBOARD_INPUT_EVENT_INTERFACE_1_0,
+                       &ppb_keyboard_input_event_interface_1_0);
+    register_interface(PPB_KEYBOARD_INPUT_EVENT_INTERFACE_1_2,
+                       &ppb_keyboard_input_event_interface_1_2);
+    register_interface(PPB_TOUCH_INPUT_EVENT_INTERFACE_1_0, &ppb_touch_input_event_interface_1_0);
+    register_interface(PPB_IME_INPUT_EVENT_INTERFACE_1_0, &ppb_ime_input_event_interface_1_0);
+}

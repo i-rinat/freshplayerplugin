@@ -25,6 +25,7 @@
 #include "ppb_zoom.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "pp_interface.h"
 
 
 void
@@ -61,3 +62,11 @@ const struct PPB_Zoom_Dev_0_2 ppb_zoom_dev_interface_0_2 = {
     .ZoomChanged =          TWRAPZ(ppb_zoom_zoom_changed),
     .ZoomLimitsChanged =    TWRAPZ(ppb_zoom_zoom_limits_changed),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_zoom(void)
+{
+    register_interface(PPB_ZOOM_DEV_INTERFACE_0_2, &ppb_zoom_dev_interface_0_2);
+}

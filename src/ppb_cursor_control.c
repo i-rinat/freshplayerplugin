@@ -32,6 +32,7 @@
 #include "ppb_core.h"
 #include "tables.h"
 #include "trace.h"
+#include "pp_interface.h"
 
 
 struct comt_param_s {
@@ -353,3 +354,11 @@ const struct PPB_CursorControl_Dev_0_4 ppb_cursor_control_dev_interface_0_4 = {
     .HasCursorLock =    TWRAPZ(ppb_cursor_control_has_cursor_lock),
     .CanLockCursor =    TWRAPZ(ppb_cursor_control_can_lock_cursor),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_cursor_control(void)
+{
+    register_interface(PPB_CURSOR_CONTROL_DEV_INTERFACE_0_4, &ppb_cursor_control_dev_interface_0_4);
+}

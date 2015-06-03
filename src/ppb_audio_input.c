@@ -29,6 +29,7 @@
 #include <ppapi/c/pp_errors.h>
 #include "ppb_core.h"
 #include "pp_resource.h"
+#include "pp_interface.h"
 #include "trace.h"
 #include "tables.h"
 
@@ -377,3 +378,12 @@ const struct PPB_AudioInput_Dev_0_4 ppb_audio_input_dev_interface_0_4 = {
     .StopCapture =          TWRAPF(ppb_audio_input_stop_capture),
     .Close =                TWRAPF(ppb_audio_input_close),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_audio_input(void)
+{
+    register_interface(PPB_AUDIO_INPUT_DEV_INTERFACE_0_3, &ppb_audio_input_dev_interface_0_3);
+    register_interface(PPB_AUDIO_INPUT_DEV_INTERFACE_0_4, &ppb_audio_input_dev_interface_0_4);
+}

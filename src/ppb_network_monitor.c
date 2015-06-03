@@ -28,6 +28,7 @@
 #include "pp_resource.h"
 #include "trace.h"
 #include "tables.h"
+#include "pp_interface.h"
 
 PP_Resource
 ppb_network_monitor_create(PP_Instance instance)
@@ -88,3 +89,11 @@ const struct PPB_NetworkMonitor_1_0 ppb_network_monitor_interface_1_0 = {
     .UpdateNetworkList =    TWRAPZ(ppb_network_monitor_update_network_list),
     .IsNetworkMonitor =     TWRAPF(ppb_network_monitor_is_network_monitor),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_network_monitor(void)
+{
+    register_interface(PPB_NETWORKMONITOR_INTERFACE_1_0, &ppb_network_monitor_interface_1_0);
+}

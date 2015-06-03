@@ -29,7 +29,7 @@
 #include <ppapi/c/pp_errors.h>
 #include "async_network.h"
 #include "ppb_var.h"
-
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -202,3 +202,12 @@ const struct PPB_HostResolver_Private_0_1 ppb_host_resolver_private_interface_0_
     .GetSize =          TWRAPF(ppb_host_resolver_get_size),
     .GetNetAddress =    TWRAPF(ppb_host_resolver_get_net_address),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_host_resolver(void)
+{
+    register_interface(PPB_HOSTRESOLVER_PRIVATE_INTERFACE_0_1,
+                       &ppb_host_resolver_private_interface_0_1);
+}

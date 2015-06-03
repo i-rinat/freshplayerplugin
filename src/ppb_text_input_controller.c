@@ -25,6 +25,7 @@
 #include "ppb_text_input_controller.h"
 #include <stdlib.h>
 #include "trace.h"
+#include "pp_interface.h"
 
 
 void
@@ -90,3 +91,12 @@ const struct PPB_TextInputController_1_0 ppb_text_input_controller_interface_1_0
     .CancelCompositionText =    TWRAPZ(ppb_text_input_controller_cancel_composition_text),
     .UpdateSurroundingText =    TWRAPZ(ppb_text_input_controller_update_surrounding_text),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_text_input_controller(void)
+{
+    register_interface(PPB_TEXTINPUTCONTROLLER_INTERFACE_1_0,
+                       &ppb_text_input_controller_interface_1_0);
+}

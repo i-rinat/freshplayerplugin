@@ -41,6 +41,7 @@
 #include "eintr_retry.h"
 #include "ppb_url_request_info.h"
 #include "config.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -763,3 +764,12 @@ const struct PPB_URLLoaderTrusted_0_3 ppb_url_loader_trusted_interface_0_3 = {
     .GrantUniversalAccess =     TWRAPF(ppb_url_loader_grant_universal_access),
     .RegisterStatusCallback =   TWRAPZ(ppb_url_loader_register_status_callback),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_url_loader(void)
+{
+    register_interface(PPB_URLLOADER_INTERFACE_1_0, &ppb_url_loader_interface_1_0);
+    register_interface(PPB_URLLOADERTRUSTED_INTERFACE_0_3, &ppb_url_loader_trusted_interface_0_3);
+}

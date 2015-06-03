@@ -35,6 +35,7 @@
 #include "reverse_constant.h"
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
+#include "pp_interface.h"
 
 
 static volatile gint        currently_fullscreen = 0;
@@ -52,14 +53,6 @@ struct thread_param_s {
     Window                  browser_window;
 };
 
-
-static
-void
-__attribute__((constructor))
-constructor_ppb_flash_fullscreen(void)
-{
-    pthread_barrier_init(&cross_thread_call_barrier, NULL, 2);
-}
 
 static
 void
@@ -474,3 +467,12 @@ const struct PPB_FlashFullscreen_1_0 ppb_flash_fullscreen_interface_1_0 = {
     .SetFullscreen =    TWRAPF(ppb_flash_fullscreen_set_fullscreen),
     .GetScreenSize =    TWRAPF(ppb_flash_fullscreen_get_screen_size),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_fullscreen(void)
+{
+    pthread_barrier_init(&cross_thread_call_barrier, NULL, 2);
+    register_interface(PPB_FLASHFULLSCREEN_INTERFACE_1_0, &ppb_flash_fullscreen_interface_1_0);
+}

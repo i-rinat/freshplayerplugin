@@ -34,6 +34,7 @@
 #include "ppb_core.h"
 #include <ppapi/c/pp_errors.h>
 #include <glib.h>
+#include "pp_interface.h"
 
 
 static GHashTable      *format_id_ht;       ///< maps name to id
@@ -46,46 +47,6 @@ void
 free_data_block(gpointer data)
 {
     g_free(data);
-}
-
-static
-void
-__attribute__((constructor))
-constructor_ppb_flash_clipboard(void)
-{
-    pthread_mutex_init(&lock, NULL);
-
-    pthread_mutex_lock(&lock);
-    format_id_ht = g_hash_table_new_full(g_str_hash, g_str_equal, free_data_block, NULL);
-    format_name_ht = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free_data_block);
-
-    g_hash_table_insert(format_id_ht, g_strdup("TEXT"),
-                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
-
-    g_hash_table_insert(format_id_ht, g_strdup("STRING"),
-                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
-
-    g_hash_table_insert(format_id_ht, g_strdup("UTF8_STRING"),
-                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
-
-    g_hash_table_insert(format_id_ht, g_strdup("COMPOUND_TEXT"),
-                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
-
-    g_hash_table_insert(format_id_ht, g_strdup("text/html"),
-                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_HTML));
-
-    g_hash_table_insert(format_id_ht, g_strdup("text/rtf"),
-                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_RTF));
-
-    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT),
-                        g_strdup("STRING"));
-
-    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_HTML),
-                        g_strdup("text/html"));
-
-    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_RTF),
-                        g_strdup("text/rtf"));
-    pthread_mutex_unlock(&lock);
 }
 
 static
@@ -600,3 +561,46 @@ const struct PPB_Flash_Clipboard_5_0 ppb_flash_clipboard_interface_5_0 = {
     .ReadData =             TWRAPF(ppb_flash_clipboard_read_data),
     .WriteData =            TWRAPF(ppb_flash_clipboard_write_data),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_clipboard(void)
+{
+    pthread_mutex_init(&lock, NULL);
+
+    pthread_mutex_lock(&lock);
+    format_id_ht = g_hash_table_new_full(g_str_hash, g_str_equal, free_data_block, NULL);
+    format_name_ht = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free_data_block);
+
+    g_hash_table_insert(format_id_ht, g_strdup("TEXT"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
+
+    g_hash_table_insert(format_id_ht, g_strdup("STRING"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
+
+    g_hash_table_insert(format_id_ht, g_strdup("UTF8_STRING"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
+
+    g_hash_table_insert(format_id_ht, g_strdup("COMPOUND_TEXT"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT));
+
+    g_hash_table_insert(format_id_ht, g_strdup("text/html"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_HTML));
+
+    g_hash_table_insert(format_id_ht, g_strdup("text/rtf"),
+                        GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_RTF));
+
+    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT),
+                        g_strdup("STRING"));
+
+    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_HTML),
+                        g_strdup("text/html"));
+
+    g_hash_table_insert(format_name_ht, GINT_TO_POINTER(PP_FLASH_CLIPBOARD_FORMAT_RTF),
+                        g_strdup("text/rtf"));
+    pthread_mutex_unlock(&lock);
+
+    register_interface(PPB_FLASH_CLIPBOARD_INTERFACE_5_0, &ppb_flash_clipboard_interface_5_0);
+    register_interface(PPB_FLASH_CLIPBOARD_INTERFACE_5_1, &ppb_flash_clipboard_interface_5_1);
+}

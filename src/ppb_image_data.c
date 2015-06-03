@@ -30,6 +30,8 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
+#include "pp_interface.h"
+
 
 PP_ImageDataFormat
 ppb_image_data_get_native_image_data_format(void)
@@ -222,3 +224,11 @@ const struct PPB_ImageData_1_0 ppb_image_data_interface_1_0 = {
     .Map =                          TWRAPF(ppb_image_data_map),
     .Unmap =                        TWRAPF(ppb_image_data_unmap),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_image_data(void)
+{
+    register_interface(PPB_IMAGEDATA_INTERFACE_1_0, &ppb_image_data_interface_1_0);
+}

@@ -37,6 +37,7 @@
 #include "ppb_opengles2.h"
 #include "config.h"
 #include "reverse_constant.h"
+#include "pp_interface.h"
 
 
 int32_t
@@ -539,3 +540,11 @@ const struct PPB_Graphics3D_1_0 ppb_graphics3d_interface_1_0 = {
     .ResizeBuffers =        TWRAPF(ppb_graphics3d_resize_buffers),
     .SwapBuffers =          TWRAPF(ppb_graphics3d_swap_buffers),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_graphics3d(void)
+{
+    register_interface(PPB_GRAPHICS_3D_INTERFACE_1_0, &ppb_graphics3d_interface_1_0);
+}

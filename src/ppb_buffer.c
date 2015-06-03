@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -150,3 +151,11 @@ const struct PPB_Buffer_Dev_0_4 ppb_buffer_dev_interface_0_4 = {
     .Map =      TWRAPF(ppb_buffer_map),
     .Unmap =    TWRAPF(ppb_buffer_unmap),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_buffer(void)
+{
+    register_interface(PPB_BUFFER_DEV_INTERFACE_0_4, &ppb_buffer_dev_interface_0_4);
+}

@@ -30,6 +30,7 @@
 #include "tables.h"
 #include "eintr_retry.h"
 #include "ppb_var.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -302,3 +303,12 @@ const struct PPB_FileRef_1_0 ppb_file_ref_interface_1_0 = {
     .Delete =               TWRAPZ(ppb_file_ref_delete),
     .Rename =               TWRAPZ(ppb_file_ref_rename),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_file_ref(void)
+{
+    register_interface(PPB_FILEREF_INTERFACE_1_0, &ppb_file_ref_interface_1_0);
+    register_interface(PPB_FILEREF_INTERFACE_1_1, &ppb_file_ref_interface_1_1);
+}

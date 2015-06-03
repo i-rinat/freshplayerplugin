@@ -43,6 +43,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "config.h"
+#include "pp_interface.h"
 
 
 /// resolve pp module local path to absolute one
@@ -568,3 +569,13 @@ const struct PPB_Flash_File_ModuleLocal_3_0 ppb_flash_file_modulelocal_interface
     .FreeDirContents =      TWRAPF(ppb_flash_file_modulelocal_free_dir_contents),
     .CreateTemporaryFile =  TWRAPF(ppb_flash_file_modulelocal_create_temporary_file),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_file(void)
+{
+    register_interface(PPB_FLASH_FILE_FILEREF_INTERFACE, &ppb_flash_file_file_ref_interface_2_0);
+    register_interface(PPB_FLASH_FILE_MODULELOCAL_INTERFACE_3_0,
+                       &ppb_flash_file_modulelocal_interface_3_0);
+}

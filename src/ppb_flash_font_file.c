@@ -30,6 +30,7 @@
 #include <ft2build.h>
 #include FT_TRUETYPE_TABLES_H
 #include <arpa/inet.h>      // for htonl()
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -154,3 +155,11 @@ const struct PPB_Flash_FontFile_0_1 ppb_flash_font_file_interface_0_1 = {
     .IsFlashFontFile =  TWRAPF(ppb_flash_font_file_is_flash_font_file),
     .GetFontTable =     TWRAPF(ppb_flash_font_file_get_font_table),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash_font_file(void)
+{
+    register_interface(PPB_FLASH_FONTFILE_INTERFACE_0_1, &ppb_flash_font_file_interface_0_1);
+}

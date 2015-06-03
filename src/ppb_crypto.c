@@ -31,6 +31,7 @@
 #include <time.h>
 #include "trace.h"
 #include "tables.h"
+#include "pp_interface.h"
 
 
 void
@@ -58,3 +59,11 @@ trace_ppb_crypto_get_random_bytes(char *buffer, uint32_t num_bytes)
 const struct PPB_Crypto_Dev_0_1 ppb_crypto_dev_interface_0_1 = {
     .GetRandomBytes = TWRAPF(ppb_crypto_get_random_bytes),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_crypto(void)
+{
+    register_interface(PPB_CRYPTO_DEV_INTERFACE_0_1, &ppb_crypto_dev_interface_0_1);
+}

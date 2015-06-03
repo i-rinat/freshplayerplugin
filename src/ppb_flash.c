@@ -38,6 +38,7 @@
 #include <ppapi/c/dev/ppb_font_dev.h>
 #include <ppapi/c/pp_errors.h>
 #include "screensaver_control.h"
+#include "pp_interface.h"
 
 
 void
@@ -658,3 +659,12 @@ const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
     .SetCrashData =                 TWRAPF(ppb_flash_set_crash_data),
     .EnumerateVideoCaptureDevices = TWRAPZ(ppb_flash_enumerate_video_capture_devices),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_flash(void)
+{
+    register_interface(PPB_FLASH_INTERFACE_12_6, &ppb_flash_interface_12_6);
+    register_interface(PPB_FLASH_INTERFACE_13_0, &ppb_flash_interface_13_0);
+}

@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "trace.h"
 #include "tables.h"
+#include "pp_interface.h"
 
 
 void *
@@ -63,3 +64,11 @@ const struct PPB_Memory_Dev_0_1 ppb_memory_dev_interface_0_1 = {
     .MemAlloc = TWRAPF(ppb_memory_mem_alloc),
     .MemFree =  TWRAPF(ppb_memory_mem_free),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_memory(void)
+{
+    register_interface(PPB_MEMORY_DEV_INTERFACE_0_1, &ppb_memory_dev_interface_0_1);
+}

@@ -32,6 +32,7 @@
 #include "tables.h"
 #include "reverse_constant.h"
 #include "async_network.h"
+#include "pp_interface.h"
 
 
 PP_Resource
@@ -315,3 +316,11 @@ const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
     .SendTo =               TWRAPF(ppb_udp_socket_send_to),
     .Close =                TWRAPF(ppb_udp_socket_close),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_udp_socket(void)
+{
+    register_interface(PPB_UDPSOCKET_PRIVATE_INTERFACE_0_4, &ppb_udp_socket_private_interface_0_4);
+}

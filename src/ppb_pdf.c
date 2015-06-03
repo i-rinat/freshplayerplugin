@@ -34,25 +34,13 @@
 #include "ppb_var.h"
 #include "np_entry.h"
 #include "img_resources.h"
+#include "pp_interface.h"
 
 
 static GMappedFile  *natives_blob = NULL;
 static GMappedFile  *snapshot_blob = NULL;
 static GHashTable   *resource_images_ht = NULL;
 
-
-static
-void
-__attribute__((constructor))
-constructor_ppb_pdf(void)
-{
-    resource_images_ht = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-
-    for (uintptr_t k = 0; k < resource_image_count; k ++) {
-        g_hash_table_replace(resource_images_ht, g_strdup(resource_image[k].name),
-                             GSIZE_TO_POINTER(k));
-    }
-}
 
 static
 void
@@ -585,3 +573,18 @@ const struct PPB_PDF ppb_pdf_interface = {
     .SetLinkUnderCursor =             TWRAPZ(ppb_pdf_set_link_under_cursor),
     .GetV8ExternalSnapshotData =      TWRAPF(ppb_pdf_get_v8_external_snapshot_data),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_pdf(void)
+{
+    resource_images_ht = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+
+    for (uintptr_t k = 0; k < resource_image_count; k ++) {
+        g_hash_table_replace(resource_images_ht, g_strdup(resource_image[k].name),
+                             GSIZE_TO_POINTER(k));
+    }
+
+    register_interface(PPB_PDF_INTERFACE, &ppb_pdf_interface);
+}

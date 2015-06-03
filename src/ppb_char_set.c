@@ -32,6 +32,7 @@
 #include "tables.h"
 #include "reverse_constant.h"
 #include "ppb_var.h"
+#include "pp_interface.h"
 
 
 static
@@ -211,3 +212,11 @@ const struct PPB_CharSet_Dev_0_4 ppb_char_set_dev_interface_0_4 = {
     .CharSetToUTF16 =       TWRAPF(ppb_char_set_char_set_to_utf16),
     .GetDefaultCharSet =    TWRAPF(ppb_char_set_get_default_char_set),
 };
+
+static
+void
+__attribute__((constructor))
+constructor_ppb_char_set(void)
+{
+    register_interface(PPB_CHAR_SET_DEV_INTERFACE_0_4, &ppb_char_set_dev_interface_0_4);
+}
