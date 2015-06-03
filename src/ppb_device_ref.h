@@ -33,9 +33,6 @@ PP_Resource
 ppb_device_ref_create(PP_Instance instance, struct PP_Var name, struct PP_Var longname,
                       PP_DeviceType_Dev type);
 
-void
-ppb_device_ref_destroy(void *ptr);
-
 PP_Bool
 ppb_device_ref_is_device_ref(PP_Resource resource);
 

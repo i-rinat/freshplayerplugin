@@ -31,9 +31,6 @@
 PP_Resource
 ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool is_always_opaque);
 
-void
-ppb_graphics2d_destroy(void *p);
-
 PP_Bool
 ppb_graphics2d_is_graphics2d(PP_Resource resource);
 

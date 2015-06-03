@@ -32,6 +32,7 @@
 #include "pp_interface.h"
 
 
+static
 void
 ppb_input_event_destroy(void *p)
 {
@@ -1097,4 +1098,5 @@ constructor_ppb_input_event(void)
                        &ppb_keyboard_input_event_interface_1_2);
     register_interface(PPB_TOUCH_INPUT_EVENT_INTERFACE_1_0, &ppb_touch_input_event_interface_1_0);
     register_interface(PPB_IME_INPUT_EVENT_INTERFACE_1_0, &ppb_ime_input_event_interface_1_0);
+    register_resource(PP_RESOURCE_INPUT_EVENT, ppb_input_event_destroy);
 }

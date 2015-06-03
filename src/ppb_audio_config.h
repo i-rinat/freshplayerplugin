@@ -32,9 +32,6 @@ PP_Resource
 ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                       uint32_t sample_frame_count);
 
-void
-ppb_audio_config_destroy(void *ptr);
-
 uint32_t
 ppb_audio_config_recommend_sample_frame_count(PP_Instance instance, PP_AudioSampleRate sample_rate,
                                               uint32_t requested_sample_frame_count);

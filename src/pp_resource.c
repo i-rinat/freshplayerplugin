@@ -30,44 +30,17 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "ppb_graphics2d.h"
-#include "ppb_graphics3d.h"
-#include "ppb_image_data.h"
-#include "ppb_url_loader.h"
-#include "ppb_url_request_info.h"
-#include "ppb_url_response_info.h"
-#include "ppb_browser_font.h"
-#include "ppb_audio_config.h"
-#include "ppb_audio.h"
-#include "ppb_device_ref.h"
-#include "ppb_input_event.h"
-#include "ppb_flash_font_file.h"
-#include "ppb_flash_menu.h"
-#include "ppb_video_capture.h"
-#include "ppb_audio_input.h"
-#include "ppb_flash_drm.h"
-#include "ppb_flash_message_loop.h"
-#include "ppb_tcp_socket.h"
-#include "ppb_file_ref.h"
-#include "ppb_file_io.h"
-#include "ppb_message_loop.h"
-#include "ppb_video_decoder.h"
-#include "ppb_buffer.h"
-#include "ppb_file_chooser.h"
-#include "ppb_udp_socket.h"
-#include "ppb_x509_certificate.h"
-#include "ppb_font.h"
-#include "ppb_host_resolver.h"
 
 
 static GHashTable      *res_tbl;
+static GHashTable      *destructors_ht = NULL;
 static int              res_tbl_next = 0;
 static pthread_mutex_t  res_tbl_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static
 __attribute__((constructor))
 void
-pp_resource_constructor(void)
+constructor_pp_resource(void)
 {
     pthread_mutex_lock(&res_tbl_lock);
     res_tbl = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -186,6 +159,7 @@ count_resources_cb(gpointer key, gpointer value, gpointer user_data)
 void
 pp_resource_unref(PP_Resource resource)
 {
+    void (*resource_destructor)(void *) = NULL;
     int ref_cnt = 0;
 
     pthread_mutex_lock(&res_tbl_lock);
@@ -200,6 +174,10 @@ pp_resource_unref(PP_Resource resource)
         // prevent from being destroyed twice
         if (ref_cnt <= 0)
             g_hash_table_remove(res_tbl, GINT_TO_POINTER(resource));
+
+        // find destructor
+        resource_destructor = g_hash_table_lookup(destructors_ht,
+                                                  GSIZE_TO_POINTER(ptr->resource_type));
     }
     pthread_mutex_unlock(&res_tbl_lock);
 
@@ -207,99 +185,14 @@ pp_resource_unref(PP_Resource resource)
         return;
 
     if (ref_cnt <= 0) {
-        switch (ptr->resource_type) {
-        case PP_RESOURCE_URL_LOADER:
-            ppb_url_loader_destroy(ptr);
-            break;
-        case PP_RESOURCE_URL_RESPONSE_INFO:
-            ppb_url_response_info_destroy(ptr);
-            break;
-        case PP_RESOURCE_URL_REQUEST_INFO:
-            ppb_url_request_info_destroy(ptr);
-            break;
-        case PP_RESOURCE_IMAGE_DATA:
-            ppb_image_data_destroy(ptr);
-            break;
-        case PP_RESOURCE_GRAPHICS2D:
-            ppb_graphics2d_destroy(ptr);
-            break;
-        case PP_RESOURCE_GRAPHICS3D:
-            ppb_graphics3d_destroy(ptr);
-            break;
-        case PP_RESOURCE_BROWSER_FONT:
-            ppb_browser_font_destroy(ptr);
-            break;
-        case PP_RESOURCE_AUDIO_CONFIG:
-            ppb_audio_config_destroy(ptr);
-            break;
-        case PP_RESOURCE_AUDIO:
-            ppb_audio_destroy(ptr);
-            break;
-        case PP_RESOURCE_INPUT_EVENT:
-            ppb_input_event_destroy(ptr);
-            break;
-        case PP_RESOURCE_FLASH_FONT_FILE:
-            ppb_flash_font_file_destroy(ptr);
-            break;
-        case PP_RESOURCE_VIDEO_CAPTURE:
-            ppb_video_capture_destroy(ptr);
-            break;
-        case PP_RESOURCE_AUDIO_INPUT:
-            ppb_audio_input_destroy(ptr);
-            break;
-        case PP_RESOURCE_FLASH_MENU:
-            ppb_flash_menu_destroy(ptr);
-            break;
-        case PP_RESOURCE_FLASH_MESSAGE_LOOP:
-            ppb_flash_message_loop_destroy(ptr);
-            break;
-        case PP_RESOURCE_TCP_SOCKET:
-            ppb_tcp_socket_destroy(ptr);
-            break;
-        case PP_RESOURCE_FILE_REF:
-            ppb_file_ref_destroy(ptr);
-            break;
-        case PP_RESOURCE_FILE_IO:
-            ppb_file_io_destroy(ptr);
-            break;
-        case PP_RESOURCE_MESSAGE_LOOP:
-            ppb_message_loop_destroy(ptr);
-            break;
-        case PP_RESOURCE_FLASH_DRM:
-            ppb_flash_drm_destroy(ptr);
-            break;
-        case PP_RESOURCE_VIDEO_DECODER:
-            ppb_video_decoder_destroy_priv(ptr);
-            break;
-        case PP_RESOURCE_BUFFER:
-            ppb_buffer_destroy(ptr);
-            break;
-        case PP_RESOURCE_FILE_CHOOSER:
-            ppb_file_chooser_destroy(ptr);
-            break;
-        case PP_RESOURCE_UDP_SOCKET:
-            ppb_udp_socket_destroy(ptr);
-            break;
-        case PP_RESOURCE_X509_CERTIFICATE:
-            ppb_x509_certificate_destroy(ptr);
-            break;
-        case PP_RESOURCE_FONT:
-            ppb_font_destroy(ptr);
-            break;
-        case PP_RESOURCE_DEVICE_REF:
-            ppb_device_ref_destroy(ptr);
-            break;
-        case PP_RESOURCE_HOST_RESOLVER:
-            ppb_host_resolver_destroy(ptr);
-            break;
-        default:
-            break;
-        }
-    }
+        if (resource_destructor)
+            resource_destructor(ptr);
+        else
+            trace_error("%s, no destructor for type %d\n", __func__, ptr->resource_type);
 
-    // finally, free memory occupied by resource
-    if (ref_cnt <= 0)
+        // finally, free memory occupied by resource
         g_slice_free1(sizeof(union pp_largest_u), ptr);
+    }
 
     if (config.quirks.dump_resource_histogram) {
         time_t current_time = time(NULL);
@@ -327,4 +220,26 @@ pp_resource_unref(PP_Resource resource)
             throttling = 0;
         }
     }
+}
+
+void
+register_resource(enum pp_resource_type_e type, void (*destructor)(void *ptr))
+{
+    pthread_mutex_lock(&res_tbl_lock);
+
+    if (!destructors_ht)
+        destructors_ht = g_hash_table_new(g_direct_hash, g_direct_equal);
+
+    g_hash_table_insert(destructors_ht, GSIZE_TO_POINTER(type), (void *)destructor);
+
+    pthread_mutex_unlock(&res_tbl_lock);
+}
+
+static
+void
+__attribute__((destructor))
+destructor_pp_resource(void)
+{
+    g_hash_table_unref(destructors_ht);
+    destructors_ht = NULL;
 }

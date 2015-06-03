@@ -31,9 +31,6 @@
 PP_Resource
 ppb_tcp_socket_create(PP_Instance instance);
 
-void
-ppb_tcp_socket_destroy(void *ptr);
-
 PP_Bool
 ppb_tcp_socket_is_tcp_socket(PP_Resource resource);
 

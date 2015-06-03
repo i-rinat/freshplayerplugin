@@ -59,6 +59,7 @@ ppb_flash_drm_create(PP_Instance instance)
     return flash_drm;
 }
 
+static
 void
 ppb_flash_drm_destroy(void *p)
 {
@@ -246,4 +247,5 @@ constructor_ppb_flash_drm(void)
 {
     register_interface(PPB_FLASH_DRM_INTERFACE_1_0, &ppb_flash_drm_interface_1_0);
     register_interface(PPB_FLASH_DRM_INTERFACE_1_1, &ppb_flash_drm_interface_1_1);
+    register_resource(PP_RESOURCE_FLASH_DRM, ppb_flash_drm_destroy);
 }

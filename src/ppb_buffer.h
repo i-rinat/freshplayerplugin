@@ -31,9 +31,6 @@
 PP_Resource
 ppb_buffer_create(PP_Instance instance, uint32_t size_in_bytes);
 
-void
-ppb_buffer_destroy(void *p);
-
 PP_Bool
 ppb_buffer_is_buffer(PP_Resource resource);
 

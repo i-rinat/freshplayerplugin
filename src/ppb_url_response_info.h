@@ -31,9 +31,6 @@
 PP_Bool
 ppb_url_response_info_is_url_response_info(PP_Resource resource);
 
-void
-ppb_url_response_info_destroy(void *p);
-
 struct PP_Var
 ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty property);
 

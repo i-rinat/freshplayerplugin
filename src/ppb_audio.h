@@ -36,9 +36,6 @@ PP_Resource
 ppb_audio_create_1_1(PP_Instance instance, PP_Resource audio_config,
                      PPB_Audio_Callback audio_callback, void *user_data);
 
-void
-ppb_audio_destroy(void *p);
-
 PP_Bool
 ppb_audio_is_audio(PP_Resource resource);
 

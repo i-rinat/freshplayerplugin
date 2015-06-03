@@ -45,6 +45,7 @@ ppb_x509_certificate_create(PP_Instance instance)
     return x509;
 }
 
+static
 void
 ppb_x509_certificate_destroy(void *ptr)
 {
@@ -471,4 +472,5 @@ constructor_ppb_x509_certificate(void)
 {
     register_interface(PPB_X509CERTIFICATE_PRIVATE_INTERFACE_0_1,
                        &ppb_x509_certificate_interface_0_1);
+    register_resource(PP_RESOURCE_X509_CERTIFICATE, ppb_x509_certificate_destroy);
 }

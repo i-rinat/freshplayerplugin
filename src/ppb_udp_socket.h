@@ -31,9 +31,6 @@
 PP_Resource
 ppb_udp_socket_create(PP_Instance instance_id);
 
-void
-ppb_udp_socket_destroy(void *p);
-
 PP_Bool
 ppb_udp_socket_is_udp_socket(PP_Resource resource_id);
 

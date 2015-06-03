@@ -56,6 +56,7 @@ ppb_device_ref_create(PP_Instance instance, struct PP_Var name, struct PP_Var lo
     return device_ref;
 }
 
+static
 void
 ppb_device_ref_destroy(void *ptr)
 {
@@ -154,4 +155,5 @@ __attribute__((constructor))
 constructor_ppb_device_ref(void)
 {
     register_interface(PPB_DEVICEREF_DEV_INTERFACE_0_1, &ppb_device_ref_dev_interface_0_1);
+    register_resource(PP_RESOURCE_DEVICE_REF, ppb_device_ref_destroy);
 }

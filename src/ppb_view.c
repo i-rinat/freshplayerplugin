@@ -36,6 +36,12 @@ ppb_view_is_view(PP_Resource resource)
     return pp_resource_get_type(resource) == PP_RESOURCE_VIEW;
 }
 
+static
+void
+ppb_view_destroy(void *ptr)
+{
+}
+
 PP_Bool
 ppb_view_get_rect(PP_Resource resource, struct PP_Rect *rect)
 {
@@ -230,4 +236,5 @@ constructor_ppb_view(void)
     register_interface(PPB_VIEW_INTERFACE_1_0, &ppb_view_interface_1_0);
     register_interface(PPB_VIEW_INTERFACE_1_1, &ppb_view_interface_1_1);
     register_interface(PPB_VIEW_INTERFACE_1_2, &ppb_view_interface_1_2);
+    register_resource(PP_RESOURCE_VIEW, ppb_view_destroy);
 }

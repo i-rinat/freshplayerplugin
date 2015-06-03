@@ -60,6 +60,7 @@ ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
     return file_chooser;
 }
 
+static
 void
 ppb_file_chooser_destroy(void *p)
 {
@@ -292,4 +293,5 @@ constructor_ppb_file_chooser(void)
     register_interface(PPB_FILECHOOSER_DEV_INTERFACE_0_6, &ppb_file_chooser_dev_interface_0_6);
     register_interface(PPB_FILECHOOSER_TRUSTED_INTERFACE_0_6,
                        &ppb_file_chooser_trusted_interface_0_6);
+    register_resource(PP_RESOURCE_FILE_CHOOSER, ppb_file_chooser_destroy);
 }

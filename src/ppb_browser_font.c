@@ -64,6 +64,7 @@ ppb_browser_font_create(PP_Instance instance,
     return font;
 }
 
+static
 void
 ppb_browser_font_destroy(void *p)
 {
@@ -299,4 +300,5 @@ constructor_ppb_browser_font(void)
 {
     register_interface(PPB_BROWSERFONT_TRUSTED_INTERFACE_1_0,
                        &ppb_browser_font_trusted_interface_1_0);
+    register_resource(PP_RESOURCE_BROWSER_FONT, ppb_browser_font_destroy);
 }

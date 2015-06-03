@@ -55,6 +55,7 @@ ppb_udp_socket_create(PP_Instance instance_id)
     return udp_socket;
 }
 
+static
 void
 ppb_udp_socket_destroy(void *p)
 {
@@ -323,4 +324,5 @@ __attribute__((constructor))
 constructor_ppb_udp_socket(void)
 {
     register_interface(PPB_UDPSOCKET_PRIVATE_INTERFACE_0_4, &ppb_udp_socket_private_interface_0_4);
+    register_resource(PP_RESOURCE_UDP_SOCKET, ppb_udp_socket_destroy);
 }

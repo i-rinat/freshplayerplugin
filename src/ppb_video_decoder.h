@@ -32,9 +32,6 @@ PP_Resource
 ppb_video_decoder_create(PP_Instance instance, PP_Resource context,
                          PP_VideoDecoder_Profile profile);
 
-void
-ppb_video_decoder_destroy_priv(void *p);
-
 PP_Bool
 ppb_video_decoder_is_video_decoder(PP_Resource resource);
 

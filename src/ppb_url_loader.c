@@ -68,6 +68,7 @@ ppb_url_loader_create(PP_Instance instance)
     return url_loader;
 }
 
+static
 void
 ppb_url_loader_destroy(void *p)
 {
@@ -772,4 +773,5 @@ constructor_ppb_url_loader(void)
 {
     register_interface(PPB_URLLOADER_INTERFACE_1_0, &ppb_url_loader_interface_1_0);
     register_interface(PPB_URLLOADERTRUSTED_INTERFACE_0_3, &ppb_url_loader_trusted_interface_0_3);
+    register_resource(PP_RESOURCE_URL_LOADER, ppb_url_loader_destroy);
 }

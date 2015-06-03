@@ -72,6 +72,7 @@ ppb_video_capture_create(PP_Instance instance)
     return video_capture;
 }
 
+static
 void
 ppb_video_capture_destroy(void *p)
 {
@@ -643,4 +644,5 @@ __attribute__((constructor))
 constructor_ppb_video_capture(void)
 {
     register_interface(PPB_VIDEOCAPTURE_DEV_INTERFACE_0_3, &ppb_video_capture_dev_interface_0_3);
+    register_resource(PP_RESOURCE_VIDEO_CAPTURE, ppb_video_capture_destroy);
 }

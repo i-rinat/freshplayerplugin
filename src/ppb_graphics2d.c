@@ -88,6 +88,7 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
     return graphics_2d;
 }
 
+static
 void
 ppb_graphics2d_destroy(void *p)
 {
@@ -472,4 +473,5 @@ constructor_ppb_graphics2d(void)
 {
     register_interface(PPB_GRAPHICS_2D_INTERFACE_1_0, &ppb_graphics2d_interface_1_0);
     register_interface(PPB_GRAPHICS_2D_INTERFACE_1_1, &ppb_graphics2d_interface_1_1);
+    register_resource(PP_RESOURCE_GRAPHICS2D, ppb_graphics2d_destroy);
 }

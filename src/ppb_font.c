@@ -62,6 +62,7 @@ ppb_font_create(PP_Instance instance, const struct PP_FontDescription_Dev *descr
     return font;
 }
 
+static
 void
 ppb_font_destroy(void *p)
 {
@@ -254,4 +255,5 @@ __attribute__((constructor))
 constructor_ppb_font(void)
 {
     register_interface(PPB_FONT_DEV_INTERFACE_0_6, &ppb_font_dev_interface_0_6);
+    register_resource(PP_RESOURCE_FONT, ppb_font_destroy);
 }

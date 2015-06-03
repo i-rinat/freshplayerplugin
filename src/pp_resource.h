@@ -573,5 +573,7 @@ enum pp_resource_type_e pp_resource_get_type(PP_Resource resource);
 PP_Resource             pp_resource_ref(PP_Resource resource);
 void                    pp_resource_unref(PP_Resource resource);
 
+void                    register_resource(enum pp_resource_type_e type,
+                                          void (*destructor)(void *ptr));
 
 #endif // FPP_PP_RESOURCE_H

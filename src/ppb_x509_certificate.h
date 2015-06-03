@@ -31,9 +31,6 @@
 PP_Resource
 ppb_x509_certificate_create(PP_Instance instance);
 
-void
-ppb_x509_certificate_destroy(void *ptr);
-
 PP_Bool
 ppb_x509_certificate_is_x509_certificate_private(PP_Resource resource);
 

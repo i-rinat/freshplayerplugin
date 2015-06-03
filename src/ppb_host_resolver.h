@@ -31,9 +31,6 @@
 PP_Resource
 ppb_host_resolver_create(PP_Instance instance);
 
-void
-ppb_host_resolver_destroy(void *ptr);
-
 PP_Bool
 ppb_host_resolver_is_host_resolver(PP_Resource resource);
 

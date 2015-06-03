@@ -46,6 +46,7 @@ ppb_host_resolver_create(PP_Instance instance)
     return host_resolver;
 }
 
+static
 void
 ppb_host_resolver_destroy(void *ptr)
 {
@@ -210,4 +211,5 @@ constructor_ppb_host_resolver(void)
 {
     register_interface(PPB_HOSTRESOLVER_PRIVATE_INTERFACE_0_1,
                        &ppb_host_resolver_private_interface_0_1);
+    register_resource(PP_RESOURCE_HOST_RESOLVER, ppb_host_resolver_destroy);
 }

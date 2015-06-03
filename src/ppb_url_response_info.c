@@ -40,6 +40,7 @@ ppb_url_response_info_is_url_response_info(PP_Resource resource)
     return pp_resource_get_type(resource) == PP_RESOURCE_URL_RESPONSE_INFO;
 }
 
+static
 void
 ppb_url_response_info_destroy(void *p)
 {
@@ -153,4 +154,5 @@ __attribute__((constructor))
 constructor_ppb_url_response_info(void)
 {
     register_interface(PPB_URLRESPONSEINFO_INTERFACE_1_0, &ppb_url_response_info_interface_1_0);
+    register_resource(PP_RESOURCE_URL_RESPONSE_INFO, ppb_url_response_info_destroy);
 }

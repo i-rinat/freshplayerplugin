@@ -31,9 +31,6 @@
 PP_Resource
 ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_data);
 
-void
-ppb_flash_menu_destroy(void *p);
-
 PP_Bool
 ppb_flash_menu_is_flash_menu(PP_Resource resource_id);
 

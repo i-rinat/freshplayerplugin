@@ -38,9 +38,6 @@ PP_Resource
 ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
                       const struct PP_Size *size, PP_Bool init_to_zero);
 
-void
-ppb_image_data_destroy(void *p);
-
 PP_Bool
 ppb_image_data_is_image_data(PP_Resource image_data);
 

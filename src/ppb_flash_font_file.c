@@ -59,6 +59,7 @@ ppb_flash_font_file_create(PP_Instance instance,
     return font_file;
 }
 
+static
 void
 ppb_flash_font_file_destroy(void *ptr)
 {
@@ -162,4 +163,5 @@ __attribute__((constructor))
 constructor_ppb_flash_font_file(void)
 {
     register_interface(PPB_FLASH_FONTFILE_INTERFACE_0_1, &ppb_flash_font_file_interface_0_1);
+    register_resource(PP_RESOURCE_FLASH_FONT_FILE, ppb_flash_font_file_destroy);
 }

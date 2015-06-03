@@ -31,9 +31,6 @@
 PP_Resource
 ppb_flash_message_loop_create(PP_Instance instance);
 
-void
-ppb_flash_message_loop_destroy(void *p);
-
 PP_Bool
 ppb_flash_message_loop_is_flash_message_loop(PP_Resource resource);
 

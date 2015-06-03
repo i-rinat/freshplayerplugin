@@ -78,6 +78,7 @@ ppb_url_request_info_create(PP_Instance instance)
     return request_info;
 }
 
+static
 void
 ppb_url_request_info_destroy(void *p)
 {
@@ -454,4 +455,5 @@ __attribute__((constructor))
 constructor_ppb_url_request_info(void)
 {
     register_interface(PPB_URLREQUESTINFO_INTERFACE_1_0, &ppb_url_request_info_interface_1_0);
+    register_resource(PP_RESOURCE_URL_REQUEST_INFO, ppb_url_request_info_destroy);
 }

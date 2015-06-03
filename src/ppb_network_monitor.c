@@ -42,6 +42,12 @@ ppb_network_monitor_create(PP_Instance instance)
     return network_monitor;
 }
 
+static
+void
+ppb_network_monitor_destroy(void *ptr)
+{
+}
+
 int32_t
 ppb_network_monitor_update_network_list(PP_Resource network_monitor, PP_Resource *network_list,
                                         struct PP_CompletionCallback callback)
@@ -96,4 +102,5 @@ __attribute__((constructor))
 constructor_ppb_network_monitor(void)
 {
     register_interface(PPB_NETWORKMONITOR_INTERFACE_1_0, &ppb_network_monitor_interface_1_0);
+    register_resource(PP_RESOURCE_NETWORK_MONITOR, ppb_network_monitor_destroy);
 }

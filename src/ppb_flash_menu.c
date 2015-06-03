@@ -200,6 +200,7 @@ destroy_flash_menu_ptac(void *param)
     g_object_unref(menu);
 }
 
+static
 void
 ppb_flash_menu_destroy(void *p)
 {
@@ -304,4 +305,5 @@ __attribute__((constructor))
 constructor_ppb_flash_menu(void)
 {
     register_interface(PPB_FLASH_MENU_INTERFACE_0_2, &ppb_flash_menu_interface_0_2);
+    register_resource(PP_RESOURCE_FLASH_MENU, ppb_flash_menu_destroy);
 }

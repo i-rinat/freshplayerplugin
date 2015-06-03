@@ -54,6 +54,7 @@ ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate s
     return audio_config;
 }
 
+static
 void
 ppb_audio_config_destroy(void *ptr)
 {
@@ -180,4 +181,5 @@ __attribute__((constructor))
 constructor_ppb_audio_config(void)
 {
     register_interface(PPB_AUDIO_CONFIG_INTERFACE_1_1, &ppb_audio_config_interface_1_1);
+    register_resource(PP_RESOURCE_AUDIO_CONFIG, ppb_audio_config_destroy);
 }

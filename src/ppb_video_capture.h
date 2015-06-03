@@ -31,9 +31,6 @@
 PP_Resource
 ppb_video_capture_create(PP_Instance instance);
 
-void
-ppb_video_capture_destroy(void *p);
-
 PP_Bool
 ppb_video_capture_is_video_capture(PP_Resource video_capture);
 

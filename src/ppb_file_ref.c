@@ -57,6 +57,7 @@ ppb_file_ref_create_unrestricted(const char *path, int read_only)
     return file_ref;
 }
 
+static
 void
 ppb_file_ref_destroy(void *p)
 {
@@ -311,4 +312,5 @@ constructor_ppb_file_ref(void)
 {
     register_interface(PPB_FILEREF_INTERFACE_1_0, &ppb_file_ref_interface_1_0);
     register_interface(PPB_FILEREF_INTERFACE_1_1, &ppb_file_ref_interface_1_1);
+    register_resource(PP_RESOURCE_FILE_REF, ppb_file_ref_destroy);
 }

@@ -88,6 +88,7 @@ ppb_image_data_create(PP_Instance instance, PP_ImageDataFormat format,
     return image_data;
 }
 
+static
 void
 ppb_image_data_destroy(void *p)
 {
@@ -231,4 +232,5 @@ __attribute__((constructor))
 constructor_ppb_image_data(void)
 {
     register_interface(PPB_IMAGEDATA_INTERFACE_1_0, &ppb_image_data_interface_1_0);
+    register_resource(PP_RESOURCE_IMAGE_DATA, ppb_image_data_destroy);
 }

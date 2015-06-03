@@ -36,9 +36,6 @@ ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
 PP_Resource
 ppb_file_io_create(PP_Instance instance);
 
-void
-ppb_file_io_destroy(void *p);
-
 PP_Bool
 ppb_file_io_is_file_io(PP_Resource resource);
 

@@ -55,6 +55,7 @@ ppb_tcp_socket_create(PP_Instance instance)
     return tcp_socket;
 }
 
+static
 void
 ppb_tcp_socket_destroy(void *ptr)
 {
@@ -452,4 +453,5 @@ constructor_ppb_tcp_socket(void)
 {
     register_interface(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_4, &ppb_tcp_socket_private_interface_0_4);
     register_interface(PPB_TCPSOCKET_PRIVATE_INTERFACE_0_5, &ppb_tcp_socket_private_interface_0_5);
+    register_resource(PP_RESOURCE_TCP_SOCKET, ppb_tcp_socket_destroy);
 }

@@ -287,6 +287,7 @@ err:
     return 0;
 }
 
+static
 void
 ppb_graphics3d_destroy(void *p)
 {
@@ -547,4 +548,5 @@ __attribute__((constructor))
 constructor_ppb_graphics3d(void)
 {
     register_interface(PPB_GRAPHICS_3D_INTERFACE_1_0, &ppb_graphics3d_interface_1_0);
+    register_resource(PP_RESOURCE_GRAPHICS3D, ppb_graphics3d_destroy);
 }

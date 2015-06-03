@@ -32,9 +32,6 @@
 PP_Resource
 ppb_url_loader_create(PP_Instance instance);
 
-void
-ppb_url_loader_destroy(void *p);
-
 PP_Bool
 ppb_url_loader_is_url_loader(PP_Resource resource);
 

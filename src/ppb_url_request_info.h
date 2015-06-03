@@ -60,9 +60,6 @@ post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp);
 PP_Resource
 ppb_url_request_info_create(PP_Instance instance);
 
-void
-ppb_url_request_info_destroy(void *p);
-
 PP_Bool
 ppb_url_request_info_is_url_request_info(PP_Resource resource);
 

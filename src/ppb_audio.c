@@ -119,6 +119,7 @@ ppb_audio_create_1_1(PP_Instance instance, PP_Resource audio_config,
     return do_ppb_audio_create(instance, audio_config, NULL, audio_callback_1_1, user_data);
 }
 
+static
 void
 ppb_audio_destroy(void *p)
 {
@@ -265,4 +266,5 @@ constructor_ppb_audio(void)
 {
     register_interface(PPB_AUDIO_INTERFACE_1_0, &ppb_audio_interface_1_0);
     register_interface(PPB_AUDIO_INTERFACE_1_1, &ppb_audio_interface_1_1);
+    register_resource(PP_RESOURCE_AUDIO, ppb_audio_destroy);
 }

@@ -55,6 +55,7 @@ ppb_audio_input_create(PP_Instance instance)
     return audio_input;
 }
 
+static
 void
 ppb_audio_input_destroy(void *ptr)
 {
@@ -386,4 +387,5 @@ constructor_ppb_audio_input(void)
 {
     register_interface(PPB_AUDIO_INPUT_DEV_INTERFACE_0_3, &ppb_audio_input_dev_interface_0_3);
     register_interface(PPB_AUDIO_INPUT_DEV_INTERFACE_0_4, &ppb_audio_input_dev_interface_0_4);
+    register_resource(PP_RESOURCE_AUDIO_INPUT, ppb_audio_input_destroy);
 }

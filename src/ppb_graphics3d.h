@@ -34,9 +34,6 @@ ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int
 PP_Resource
 ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int32_t attrib_list[]);
 
-void
-ppb_graphics3d_destroy(void *p);
-
 PP_Bool
 ppb_graphics3d_is_graphics3d(PP_Resource resource);
 

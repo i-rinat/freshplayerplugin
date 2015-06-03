@@ -44,6 +44,7 @@ ppb_flash_message_loop_create(PP_Instance instance)
     return message_loop;
 }
 
+static
 void
 ppb_flash_message_loop_destroy(void *p)
 {
@@ -151,4 +152,5 @@ __attribute__((constructor))
 constructor_ppb_flash_message_loop(void)
 {
     register_interface(PPB_FLASH_MESSAGELOOP_INTERFACE_0_1, &ppb_flash_message_loop_interface_0_1);
+    register_resource(PP_RESOURCE_FLASH_MESSAGE_LOOP, ppb_flash_message_loop_destroy);
 }

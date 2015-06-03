@@ -64,6 +64,7 @@ ppb_message_loop_create(PP_Instance instance)
     return message_loop;
 }
 
+static
 void
 ppb_message_loop_destroy(void *p)
 {
@@ -525,4 +526,5 @@ __attribute__((constructor))
 constructor_ppb_message_loop(void)
 {
     register_interface(PPB_MESSAGELOOP_INTERFACE_1_0, &ppb_message_loop_interface_1_0);
+    register_resource(PP_RESOURCE_MESSAGE_LOOP, ppb_message_loop_destroy);
 }

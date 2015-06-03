@@ -32,9 +32,6 @@ PP_Resource
 ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,
                         struct PP_Var accept_types);
 
-void
-ppb_file_chooser_destroy(void *p);
-
 PP_Bool
 ppb_file_chooser_is_file_chooser(PP_Resource resource);
 

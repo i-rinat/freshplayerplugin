@@ -39,9 +39,6 @@ enum ppb_message_loop_flags_e {
 PP_Resource
 ppb_message_loop_create(PP_Instance instance);
 
-void
-ppb_message_loop_destroy(void *p);
-
 PP_Resource
 ppb_message_loop_get_for_main_thread(void);
 

@@ -41,6 +41,12 @@ ppb_printing_create(PP_Instance instance)
     return printing;
 }
 
+static
+void
+ppb_printing_destroy(void *ptr)
+{
+}
+
 int32_t
 ppb_printing_get_default_print_settings(PP_Resource resource,
                                         struct PP_PrintSettings_Dev *print_settings,
@@ -82,4 +88,5 @@ __attribute__((constructor))
 constructor_ppb_printing(void)
 {
     register_interface(PPB_PRINTING_DEV_INTERFACE_0_7, &ppb_printing_dev_interface_0_7);
+    register_resource(PP_RESOURCE_PRINTING, ppb_printing_destroy);
 }

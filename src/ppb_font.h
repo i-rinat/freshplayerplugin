@@ -34,9 +34,6 @@ ppb_font_get_font_families(PP_Instance instance);
 PP_Resource
 ppb_font_create(PP_Instance instance, const struct PP_FontDescription_Dev *description);
 
-void
-ppb_font_destroy(void *p);
-
 PP_Bool
 ppb_font_is_font(PP_Resource resource);
 

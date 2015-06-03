@@ -52,6 +52,7 @@ ppb_buffer_create(PP_Instance instance, uint32_t size_in_bytes)
     return buffer;
 }
 
+static
 void
 ppb_buffer_destroy(void *p)
 {
@@ -158,4 +159,5 @@ __attribute__((constructor))
 constructor_ppb_buffer(void)
 {
     register_interface(PPB_BUFFER_DEV_INTERFACE_0_4, &ppb_buffer_dev_interface_0_4);
+    register_resource(PP_RESOURCE_BUFFER, ppb_buffer_destroy);
 }

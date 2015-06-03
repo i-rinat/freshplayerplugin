@@ -71,6 +71,7 @@ ppb_file_io_create(PP_Instance instance)
     return file_io;
 }
 
+static
 void
 ppb_file_io_destroy(void *p)
 {
@@ -347,4 +348,5 @@ constructor_ppb_file_io(void)
     register_interface(PPB_FILEIO_PRIVATE_INTERFACE_0_1, &ppb_file_io_private_interface_0_1);
     register_interface(PPB_FILEIO_INTERFACE_1_0, &ppb_file_io_interface_1_0);
     register_interface(PPB_FILEIO_INTERFACE_1_1, &ppb_file_io_interface_1_1);
+    register_resource(PP_RESOURCE_FILE_IO, ppb_file_io_destroy);
 }
