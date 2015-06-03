@@ -216,6 +216,26 @@ ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDeco
     vd->orig_graphics3d = pp_resource_ref(context);
     vd->ppp_video_decoder_dev = ppp_video_decoder_dev;
 
+    // create auxiliary GL context
+    int32_t attribs[] = {
+        PP_GRAPHICS3DATTRIB_WIDTH,      32,     // dimensions can be arbitrary
+        PP_GRAPHICS3DATTRIB_HEIGHT,     32,
+        PP_GRAPHICS3DATTRIB_RED_SIZE,   8,
+        PP_GRAPHICS3DATTRIB_GREEN_SIZE, 8,
+        PP_GRAPHICS3DATTRIB_BLUE_SIZE,  8,
+        PP_GRAPHICS3DATTRIB_ALPHA_SIZE, 8,
+        PP_GRAPHICS3DATTRIB_DEPTH_SIZE, 16,
+        GLX_Y_INVERTED_EXT,             True,
+        GLX_BIND_TO_TEXTURE_RGBA_EXT,   True,
+        PP_GRAPHICS3DATTRIB_NONE,
+    };
+
+    vd->graphics3d = ppb_graphics3d_create(vd->instance->id, vd->orig_graphics3d, attribs);
+    if (!vd->graphics3d) {
+        trace_error("%s, can't create graphics3d context\n", __func__);
+        goto err_1;
+    }
+
     vd->codec_id = AV_CODEC_ID_H264;        // TODO: other codecs
     vd->avcodec = avcodec_find_decoder(vd->codec_id);
     if (!vd->avcodec) {
@@ -338,24 +358,6 @@ request_buffers(struct pp_video_decoder_s *vd)
     const PP_Instance instance = vd->instance->id;
     const struct PP_Size dimensions = { .width = vd->avctx->width,
                                         .height = vd->avctx->height };
-
-    // create auxiliary GL context
-    int32_t attribs[] = {
-        PP_GRAPHICS3DATTRIB_WIDTH,      vd->avctx->width,
-        PP_GRAPHICS3DATTRIB_HEIGHT,     vd->avctx->height,
-        PP_GRAPHICS3DATTRIB_RED_SIZE,   8,
-        PP_GRAPHICS3DATTRIB_GREEN_SIZE, 8,
-        PP_GRAPHICS3DATTRIB_BLUE_SIZE,  8,
-        PP_GRAPHICS3DATTRIB_ALPHA_SIZE, 8,
-        PP_GRAPHICS3DATTRIB_DEPTH_SIZE, 16,
-        GLX_Y_INVERTED_EXT,             True,
-        GLX_BIND_TO_TEXTURE_RGBA_EXT,   True,
-        PP_GRAPHICS3DATTRIB_NONE,
-    };
-
-    vd->graphics3d = ppb_graphics3d_create(vd->instance->id, vd->orig_graphics3d, attribs);
-    if (!vd->graphics3d)
-        trace_error("%s, can't create graphics3d context\n", __func__);
 
     pp_resource_release(vd->self_id);
     // TODO: how many surfaces do we need?
