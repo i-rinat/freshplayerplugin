@@ -302,8 +302,10 @@ ppb_video_capture_open(PP_Resource video_capture, PP_Resource device_ref,
     for (unsigned int k = 0; k < vc->buffer_count; k ++) {
         vc->buffer_is_free[k] = 1;
         vc->buffers[k] = ppb_buffer_create(vc->instance->id, vc->buffer_size);
-        if (vc->buffers[k] == 0)
+        if (vc->buffers[k] == 0) {
+            result = PP_ERROR_FAILED;
             goto point_4;
+        }
     }
 
     struct PP_VideoCaptureDeviceInfo_Dev info = {
