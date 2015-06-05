@@ -90,6 +90,16 @@ It should be enough to get it running, but if it doesn't, specify full path in
 It's better to have `manifest.json` alongside with `libpepflashplayer.so`,
 actual Flash version will be taken from that manifest.
 
+Hardware-accelerated video decoding code requires relatively new version of libavcodec
+(January 2013, version 54.39.0). If you don't have it yet, code won't compile unless
+you disable hwdec by `WITH_HWDEC=0`. To do so, change configuration step command to:
+```
+    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_HWDEC=0 ..
+```
+
+Note, even if built, hardware-accelerated video decoding is still disabled by default.
+You need to explicitly enable it in configuration file.
+
 License
 =======
 
