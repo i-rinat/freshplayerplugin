@@ -35,6 +35,7 @@ struct fpp_config_s {
     char   *pepperflash_path;
     char   *flash_command_line;
     int     enable_3d;
+    int     enable_hwdec;
     int     quiet;
     int     fullscreen_width;
     int     fullscreen_height;

@@ -33,6 +33,9 @@ flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1"
 # enable 3d and stage 3d
 enable_3d = 1
 
+# enable hardware-accelerated video decoding. Requires 3d to really work
+enable_hwdec = 0
+
 # when set to 1, limits output to warnings and errors only
 quiet = 0
 

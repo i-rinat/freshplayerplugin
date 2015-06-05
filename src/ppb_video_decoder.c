@@ -33,6 +33,7 @@
 #include "ppb_core.h"
 #include "ppb_opengles2.h"
 #include "ppb_graphics3d.h"
+#include "config.h"
 
 
 static
@@ -145,6 +146,11 @@ get_buffer2(struct AVCodecContext *s, AVFrame *pic, int flags)
 PP_Resource
 ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDecoder_Profile profile)
 {
+    if (!config.enable_hwdec) {
+        trace_info_f("      hardware-accelerated decoding was disabled in config file\n");
+        return 0;
+    }
+
     if (!display.va_available) {
         trace_info_f("      no hw acceleration available\n");
         return 0;

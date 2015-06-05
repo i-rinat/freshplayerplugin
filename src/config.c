@@ -36,6 +36,7 @@ static struct fpp_config_s default_config = {
     .pepperflash_path    =      NULL,
     .flash_command_line  =      "", // "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .enable_3d           =      1,
+    .enable_hwdec        =      0,
     .quiet =                    0,
     .fullscreen_width    =      0,
     .fullscreen_height   =      0,
@@ -147,6 +148,7 @@ fpp_config_initialize(void)
     get_int(&cfg, "audio_buffer_max_ms", &config.audio_buffer_max_ms);
     get_int(&cfg, "audio_use_jack", &config.audio_use_jack);
     get_int(&cfg, "enable_3d", &config.enable_3d);
+    get_int(&cfg, "enable_hwdec", &config.enable_hwdec);
     get_int(&cfg, "quiet", &config.quiet);
     get_int(&cfg, "fullscreen_width", &config.fullscreen_width);
     get_int(&cfg, "fullscreen_height", &config.fullscreen_height);
