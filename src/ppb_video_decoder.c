@@ -373,10 +373,11 @@ find_free_buffer(struct pp_video_decoder_s *vd)
 
 static
 void
-issue_frame(struct pp_video_decoder_s *vd, int32_t bitstream_buffer_id)
+issue_frame(struct pp_video_decoder_s *vd)
 {
     AVFrame *frame = vd->avframe;
     uint32_t idx = find_free_buffer(vd);
+    int32_t  bitstream_buffer_id = (int32_t)frame->pkt_pts;
 
     if (idx == (uint32_t)-1) {
         trace_warning("%s, no free buffer available\n", __func__);
@@ -426,6 +427,7 @@ decode_frame(struct pp_video_decoder_s *vd, uint8_t *data, size_t data_len,
     av_init_packet(&packet);
     packet.data = data;
     packet.size = data_len;
+    packet.pts = bitstream_buffer_id;
 
     // libavcodec can call hw functions, which in turn can call Xlib functions,
     // therefore we need to lock
@@ -444,7 +446,7 @@ decode_frame(struct pp_video_decoder_s *vd, uint8_t *data, size_t data_len,
             vd->buffers_were_requested = 1;
         }
 
-        issue_frame(vd, bitstream_buffer_id);
+        issue_frame(vd);
     }
 }
 
@@ -475,11 +477,12 @@ ppb_video_decoder_decode(PP_Resource video_decoder,
         int len = av_parser_parse2(vd->avparser, vd->avctx, &outbuf, &outbuf_sz,
                                    inbuf, inbuf_sz, 0, 0, AV_NOPTS_VALUE);
         if (outbuf_sz > 0)
-            decode_frame(vd, outbuf, outbuf_sz, bitstream_buffer->id);
+            decode_frame(vd, outbuf, outbuf_sz, vd->last_consumed_bitstream_buffer_id);
         inbuf += len;
         inbuf_sz -= len;
     }
 
+    vd->last_consumed_bitstream_buffer_id = bitstream_buffer->id;
     ppb_buffer_unmap(bitstream_buffer->data);
 
     pp_resource_release(video_decoder);
