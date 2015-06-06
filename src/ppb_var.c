@@ -829,7 +829,17 @@ ppb_var_dictionary_create(void)
 struct PP_Var
 ppb_var_dictionary_get(struct PP_Var dict, struct PP_Var key)
 {
-    return PP_MakeUndefined();
+    if (dict.type != PP_VARTYPE_DICTIONARY || key.type != PP_VARTYPE_STRING)
+        return PP_MakeUndefined();
+
+    struct var_s *d = get_var_s(dict);
+    const char *s_key = ppb_var_var_to_utf8(key, NULL);
+    struct PP_Var *val = g_hash_table_lookup(d->dict, s_key);
+
+    if (!val)
+        return PP_MakeUndefined();
+
+    return ppb_var_add_ref2(*val);
 }
 
 PP_Bool
@@ -1176,7 +1186,7 @@ trace_ppb_var_dictionary_get(struct PP_Var dict, struct PP_Var key)
 {
     gchar *s_dict = trace_var_as_string(dict);
     gchar *s_key = trace_var_as_string(key);
-    trace_info("[PPB] {zilch} %s dict=%s, key=%s\n", __func__+6, s_dict, s_key);
+    trace_info("[PPB] {full} %s dict=%s, key=%s\n", __func__+6, s_dict, s_key);
     g_free(s_dict);
     g_free(s_key);
     return ppb_var_dictionary_get(dict, key);
@@ -1332,7 +1342,7 @@ const struct PPB_VarArrayBuffer_1_0 ppb_var_array_buffer_interface_1_0 = {
 
 const struct PPB_VarDictionary_1_0 ppb_var_dictionary_interface_1_0 = {
     .Create =   TWRAPF(ppb_var_dictionary_create),
-    .Get =      TWRAPZ(ppb_var_dictionary_get),
+    .Get =      TWRAPF(ppb_var_dictionary_get),
     .Set =      TWRAPF(ppb_var_dictionary_set),
     .Delete =   TWRAPZ(ppb_var_dictionary_delete),
     .HasKey =   TWRAPZ(ppb_var_dictionary_has_key),
