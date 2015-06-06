@@ -844,6 +844,7 @@ ppb_var_dictionary_set(struct PP_Var dict, struct PP_Var key, struct PP_Var valu
     memcpy(value_copy, &value, sizeof(struct PP_Var));
 
     g_hash_table_replace(d->dict, key_copy, value_copy);
+    ppb_var_add_ref(value);
     return PP_TRUE;
 }
 
