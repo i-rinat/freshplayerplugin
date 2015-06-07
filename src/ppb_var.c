@@ -906,7 +906,15 @@ ppb_var_array_create(void)
 struct PP_Var
 ppb_var_array_get(struct PP_Var array, uint32_t index)
 {
-    return PP_MakeUndefined();
+    if (array.type != PP_VARTYPE_ARRAY)
+        return PP_MakeUndefined();
+
+    struct var_s *v = get_var_s(array);
+    if (index >= v->array->len)
+        return PP_MakeUndefined();
+
+    struct PP_Var var = g_array_index(v->array, struct PP_Var, index);
+    return ppb_var_add_ref2(var);
 }
 
 PP_Bool
@@ -1257,7 +1265,7 @@ struct PP_Var
 trace_ppb_var_array_get(struct PP_Var array, uint32_t index)
 {
     gchar *s_array = trace_var_as_string(array);
-    trace_info("[PPB] {zilch} %s array=%s, index=%u\n", __func__+6, s_array, index);
+    trace_info("[PPB] {full} %s array=%s, index=%u\n", __func__+6, s_array, index);
     g_free(s_array);
     return ppb_var_array_get(array, index);
 }
@@ -1355,7 +1363,7 @@ const struct PPB_VarDictionary_1_0 ppb_var_dictionary_interface_1_0 = {
 
 const struct PPB_VarArray_1_0 ppb_var_array_interface_1_0 = {
     .Create =    TWRAPF(ppb_var_array_create),
-    .Get =       TWRAPZ(ppb_var_array_get),
+    .Get =       TWRAPF(ppb_var_array_get),
     .Set =       TWRAPF(ppb_var_array_set),
     .GetLength = TWRAPF(ppb_var_array_get_length),
     .SetLength = TWRAPZ(ppb_var_array_set_length),
