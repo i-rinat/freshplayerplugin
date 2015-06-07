@@ -928,7 +928,11 @@ ppb_var_array_set(struct PP_Var array, uint32_t index, struct PP_Var value)
 uint32_t
 ppb_var_array_get_length(struct PP_Var array)
 {
-    return 0;
+    if (array.type != PP_VARTYPE_ARRAY)
+        return 0;
+
+    struct var_s *v = get_var_s(array);
+    return v->array->len;
 }
 
 PP_Bool
@@ -1276,7 +1280,7 @@ uint32_t
 trace_ppb_var_array_get_length(struct PP_Var array)
 {
     gchar *s_array = trace_var_as_string(array);
-    trace_info("[PPB] {zilch} %s array=%s\n", __func__+6, s_array);
+    trace_info("[PPB] {full} %s array=%s\n", __func__+6, s_array);
     g_free(s_array);
     return ppb_var_array_get_length(array);
 }
@@ -1353,7 +1357,7 @@ const struct PPB_VarArray_1_0 ppb_var_array_interface_1_0 = {
     .Create =    TWRAPF(ppb_var_array_create),
     .Get =       TWRAPZ(ppb_var_array_get),
     .Set =       TWRAPF(ppb_var_array_set),
-    .GetLength = TWRAPZ(ppb_var_array_get_length),
+    .GetLength = TWRAPF(ppb_var_array_get_length),
     .SetLength = TWRAPZ(ppb_var_array_set_length),
 };
 
