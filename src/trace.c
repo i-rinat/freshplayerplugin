@@ -85,12 +85,47 @@ trace_error(const char *fmt, ...)
     pthread_mutex_unlock(&lock);
 }
 
+static
+char *
+dictionary_var_to_string(struct PP_Var dict)
+{
+    if (dict.type != PP_VARTYPE_DICTIONARY)
+        return g_strdup("{}");
+
+    GString *s = g_string_new("{");
+
+    int first = 1;
+    struct PP_Var keys = ppb_var_dictionary_get_keys(dict);
+    const uint32_t count = ppb_var_array_get_length(keys);
+    for (uint32_t k = 0; k < count; k ++) {
+        struct PP_Var key = ppb_var_array_get(keys, k);
+        struct PP_Var val = ppb_var_dictionary_get(dict, key);
+
+        if (!first)
+            g_string_append(s, ",");
+        first = 0;
+
+        char *s_key = trace_var_as_string(key);
+        char *s_val = trace_var_as_string(val);
+        g_string_append_printf(s, "%s:%s", s_key, s_val);
+        g_free(s_key);
+        g_free(s_val);
+
+        ppb_var_release(key);
+        ppb_var_release(val);
+    }
+
+    g_string_append(s, "}");
+    return g_string_free(s, FALSE);
+}
+
 char *
 trace_var_as_string(struct PP_Var var)
 {
-    char *res = NULL;
+    char       *res = NULL;
     const char *tmp;
-    int ref_count;
+    char       *s_dict;
+    int         ref_count;
 
     switch (var.type) {
     case PP_VARTYPE_UNDEFINED:
@@ -121,8 +156,10 @@ trace_var_as_string(struct PP_Var var)
         res = g_strdup_printf("{ARRAY:%d:%"PRId64"}", ref_count, var.value.as_id);
         break;
     case PP_VARTYPE_DICTIONARY:
+        s_dict = dictionary_var_to_string(var);
         ref_count = ppb_var_get_ref_count(var);
-        res = g_strdup_printf("{DICTIONARY:%d:%"PRId64"}", ref_count, var.value.as_id);
+        res = g_strdup_printf("{DICTIONARY:%d:%"PRId64":%s}", ref_count, var.value.as_id, s_dict);
+        g_free(s_dict);
         break;
     case PP_VARTYPE_ARRAY_BUFFER:
         ref_count = ppb_var_get_ref_count(var);
