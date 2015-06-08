@@ -69,6 +69,8 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         return 0;
     }
 
+    GLXContext share_glc = (share_context == 0) ? NULL
+                                                : peek_gl_context(share_context);
     // check for required GLX extensions
 #if HAVE_GLES2
     if (!display.glx_arb_create_context || !display.glx_arb_create_context_profile ||
@@ -219,9 +221,6 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         None,
     };
 #endif
-
-    GLXContext share_glc = (share_context == 0) ? NULL
-                                                : peek_gl_context(share_context);
 
     if (display.glXCreateContextAttribsARB) {
         g3d->glc = display.glXCreateContextAttribsARB(display.x, g3d->fb_config, share_glc, True,
