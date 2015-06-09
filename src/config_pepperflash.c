@@ -35,10 +35,10 @@ const char *pepperflash_path_list[] = {
     "/usr/lib/chromium-browser/PepperFlash",    // chrome-binary-plugins (Gentoo/Sabayon)
     "/usr/lib64/chromium-browser/PepperFlash",  // chrome-binary-plugins (Gentoo/Sabayon)
     "/usr/lib/adobe-flashplugin",               // adobe-flashplugin (Ubuntu)
-    "/usr/lib/chromium//PepperFlash",           // chromium-pepper-flash (Old Build) (CentOS/Read Hat/Fedora)
-    "/usr/lib64/chromium//PepperFlash",         // chromium-pepper-flash (Old Build) (CentOS/Read Hat/Fedora)
-    "/opt/chromium//PepperFlash",               // chromium-pepper-flash (New Build) (CentOS/Read Hat/Fedora)
-    "/usr/lib/pepflashplugin-installer/",       // pepflashplugin-installer (Ubuntu)
+    "/usr/lib/chromium/PepperFlash",            // chromium-pepper-flash (Old Build) (CentOS/Read Hat/Fedora)
+    "/usr/lib64/chromium/PepperFlash",          // chromium-pepper-flash (Old Build) (CentOS/Read Hat/Fedora)
+    "/opt/chromium/PepperFlash",                // chromium-pepper-flash (New Build) (CentOS/Read Hat/Fedora)
+    "/usr/lib/pepflashplugin-installer",        // pepflashplugin-installer (Ubuntu)
     NULL,
 };
 
