@@ -1,3 +1,14 @@
+2015-06-10  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.3.0
+	* audio: add audio capture support
+	* network: implement UDP sockets and host resolver interfaces
+	* core: stop postponing already started screen saver
+	* graphics: implement custom cursors
+	* graphics: add GLES2 shader translator from ANGLE
+	* graphics: add video capture support
+	* graphics: add H.264 video decode via VA-API
+
 2015-04-25  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.2.4
