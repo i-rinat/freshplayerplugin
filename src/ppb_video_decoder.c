@@ -36,6 +36,53 @@
 #include "config.h"
 
 
+// ffmpeg/libav API changes over time
+#if (LIBAVUTIL_VERSION_INT < AV_VERSION_INT(51, 42, 0)) || \
+    (LIBAVUTIL_VERSION_INT == AV_VERSION_INT(51, 73, 101))
+
+#define AV_PIX_FMT_NONE         PIX_FMT_NONE
+#define AV_PIX_FMT_YUV420P      PIX_FMT_YUV420P
+#define AV_PIX_FMT_VAAPI_VLD    PIX_FMT_VAAPI_VLD
+#define AV_PIX_FMT_VDPAU        (-2)                // doesn't exist at all in older versions
+
+#define AV_CODEC_ID_H264        CODEC_ID_H264
+
+#define AVPixelFormat           PixelFormat
+
+#endif
+
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(52, 8, 0)
+static inline AVFrame *
+av_frame_alloc(void)
+{
+    return avcodec_alloc_frame();
+}
+
+static inline void
+av_frame_free(AVFrame **frame)
+{
+    free(*frame);
+    *frame = NULL;
+}
+#endif
+
+#if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(54, 41, 1)
+#define AVCTX_HAVE_REFCOUNTED_BUFFERS   1
+#else
+#define AVCTX_HAVE_REFCOUNTED_BUFFERS   0
+#endif
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 52, 0)
+static
+void
+avcodec_free_context(AVCodecContext **pavctx)
+{
+    avcodec_close(*pavctx);
+    av_freep(pavctx);
+}
+#endif
+
+
 static
 void
 ppb_video_decoder_destroy_priv(void *p);
@@ -99,7 +146,7 @@ get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
 
 static
 void
-release_buffer(void *opaque, uint8_t *data)
+release_buffer2(void *opaque, uint8_t *data)
 {
     struct pp_video_decoder_s *vd = opaque;
     VASurfaceID surface = GPOINTER_TO_SIZE(data);
@@ -131,17 +178,44 @@ get_buffer2(struct AVCodecContext *s, AVFrame *pic, int flags)
     pic->data[2] = NULL;
     pic->data[3] = GSIZE_TO_POINTER(surface);
 
+#if AVCTX_HAVE_REFCOUNTED_BUFFERS == 0
+    pic->type = FF_BUFFER_TYPE_USER;
+    pic->pkt_pts = s->pkt->pts;
+#endif
+
     if (surface == VA_INVALID_SURFACE)
         return -1;
 
-    AVBufferRef *buf = av_buffer_create(pic->data[3], 0, release_buffer, vd, 0);
+#if AVCTX_HAVE_REFCOUNTED_BUFFERS
+    AVBufferRef *buf = av_buffer_create(pic->data[3], 0, release_buffer2, vd, 0);
     if (!buf)
         return -1;
     pic->buf[0] = buf;
     pic->reordered_opaque = s->reordered_opaque;
+#endif
 
     return 0;
 }
+
+#if AVCTX_HAVE_REFCOUNTED_BUFFERS == 0
+static
+int
+get_buffer(struct AVCodecContext *s, AVFrame *pic)
+{
+    return get_buffer2(s, pic, 0);
+}
+
+static
+void
+release_buffer(struct AVCodecContext *avctx, AVFrame *pic)
+{
+    release_buffer2(avctx->opaque, pic->data[0]);
+    pic->data[0] = NULL;
+    pic->data[1] = NULL;
+    pic->data[2] = NULL;
+    pic->data[3] = NULL;
+}
+#endif
 
 PP_Resource
 ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDecoder_Profile profile)
@@ -257,10 +331,16 @@ ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDeco
     }
 
     vd->avctx->opaque = vd;
-    vd->avctx->refcounted_frames = 1;
-    vd->avctx->thread_count = 1;            // TODO: why?
+    vd->avctx->thread_count = 1;
     vd->avctx->get_format = get_format;
+
+#if AVCTX_HAVE_REFCOUNTED_BUFFERS
     vd->avctx->get_buffer2 = get_buffer2;
+    vd->avctx->refcounted_frames = 1;
+#else
+    vd->avctx->get_buffer = get_buffer;
+    vd->avctx->release_buffer = release_buffer;
+#endif
 
     if (avcodec_open2(vd->avctx, vd->avcodec, NULL) < 0) {
         trace_error("%s, can't open codec\n", __func__);
