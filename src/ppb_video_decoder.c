@@ -85,8 +85,61 @@ avcodec_free_context(AVCodecContext **pavctx)
 
 static
 void
-ppb_video_decoder_destroy_priv(void *p);
+ppb_video_decoder_destroy_priv(void *p)
+{
+    struct pp_video_decoder_s *vd = p;
 
+    if (vd->orig_graphics3d) {
+        pp_resource_unref(vd->orig_graphics3d);
+        vd->orig_graphics3d = 0;
+    }
+
+    if (vd->graphics3d) {
+        pp_resource_unref(vd->graphics3d);
+        vd->graphics3d = 0;
+    }
+
+    if (vd->avparser) {
+        av_parser_close(vd->avparser);
+        vd->avparser = NULL;
+    }
+
+    if (vd->avctx)
+        avcodec_free_context(&vd->avctx);
+
+    if (vd->avframe)
+        av_frame_free(&vd->avframe);
+
+    if (vd->va_context.context_id) {
+        vaDestroyContext(display.va, vd->va_context.context_id);
+        vd->va_context.context_id = 0;
+    }
+
+    if (vd->va_context.config_id) {
+        vaDestroyConfig(display.va, vd->va_context.config_id);
+        vd->va_context.config_id = 0;
+    }
+
+    vaDestroySurfaces(display.va, vd->surfaces, MAX_VIDEO_SURFACES);
+    for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+        vd->surfaces[k] = VA_INVALID_SURFACE;
+        vd->surface_used[k] = 0;
+
+    }
+
+    for (uintptr_t k = 0; k < vd->buffer_count; k ++) {
+        vd->ppp_video_decoder_dev->DismissPictureBuffer(vd->instance->id, vd->self_id,
+                                                        vd->buffers[k].id);
+        pthread_mutex_lock(&display.lock);
+        glXDestroyPixmap(display.x, vd->buffers[k].glx_pixmap);
+        XFreePixmap(display.x, vd->buffers[k].pixmap);
+        pthread_mutex_unlock(&display.lock);
+    }
+
+    vd->buffer_count = 0;
+    vd->buffers_were_requested = 0;
+    free_and_nullify(vd->buffers);
+}
 
 enum AVPixelFormat
 get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
@@ -362,64 +415,6 @@ err_1:
     pp_resource_release(video_decoder);
     pp_resource_expunge(video_decoder);
     return 0;
-}
-
-static
-void
-ppb_video_decoder_destroy_priv(void *p)
-{
-    struct pp_video_decoder_s *vd = p;
-
-    if (vd->orig_graphics3d) {
-        pp_resource_unref(vd->orig_graphics3d);
-        vd->orig_graphics3d = 0;
-    }
-
-    if (vd->graphics3d) {
-        pp_resource_unref(vd->graphics3d);
-        vd->graphics3d = 0;
-    }
-
-    if (vd->avparser) {
-        av_parser_close(vd->avparser);
-        vd->avparser = NULL;
-    }
-
-    if (vd->avctx)
-        avcodec_free_context(&vd->avctx);
-
-    if (vd->avframe)
-        av_frame_free(&vd->avframe);
-
-    if (vd->va_context.context_id) {
-        vaDestroyContext(display.va, vd->va_context.context_id);
-        vd->va_context.context_id = 0;
-    }
-
-    if (vd->va_context.config_id) {
-        vaDestroyConfig(display.va, vd->va_context.config_id);
-        vd->va_context.config_id = 0;
-    }
-
-    vaDestroySurfaces(display.va, vd->surfaces, MAX_VIDEO_SURFACES);
-    for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
-        vd->surfaces[k] = VA_INVALID_SURFACE;
-        vd->surface_used[k] = 0;
-
-    }
-
-    for (uintptr_t k = 0; k < vd->buffer_count; k ++) {
-        vd->ppp_video_decoder_dev->DismissPictureBuffer(vd->instance->id, vd->self_id,
-                                                        vd->buffers[k].id);
-        pthread_mutex_lock(&display.lock);
-        glXDestroyPixmap(display.x, vd->buffers[k].glx_pixmap);
-        XFreePixmap(display.x, vd->buffers[k].pixmap);
-        pthread_mutex_unlock(&display.lock);
-    }
-
-    vd->buffer_count = 0;
-    vd->buffers_were_requested = 0;
-    free_and_nullify(vd->buffers);
 }
 
 PP_Bool
