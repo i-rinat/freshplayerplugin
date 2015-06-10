@@ -471,6 +471,7 @@ struct pp_video_decoder_s {
     int32_t                 last_consumed_bitstream_buffer_id;
     size_t                  buffer_count;
     int                     buffers_were_requested;
+    int                     failed_state;
     struct {
         int32_t     id;
         uint32_t    width;

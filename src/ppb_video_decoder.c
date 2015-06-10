@@ -154,8 +154,10 @@ prepare_vaapi_context(struct pp_video_decoder_s *vd, int width, int height)
     // function is called from libavcodec internals which were already protected by mutex
     status = vaCreateConfig(display.va, VAProfileH264High, VAEntrypointVLD, NULL, 0,
                             &vd->va_context.config_id);
-    if (status != VA_STATUS_SUCCESS)
+    if (status != VA_STATUS_SUCCESS) {
         trace_error("%s, can't create VA config\n", __func__);
+        goto err;
+    }
 
 #if VA_CHECK_VERSION(0, 34, 0)
     status = vaCreateSurfaces(display.va, VA_RT_FORMAT_YUV420, width, height,
@@ -164,17 +166,27 @@ prepare_vaapi_context(struct pp_video_decoder_s *vd, int width, int height)
     status = vaCreateSurfaces(display.va, width, height, VA_RT_FORMAT_YUV420,
                               MAX_VIDEO_SURFACES, vd->surfaces);
 #endif
-    if (status != VA_STATUS_SUCCESS)
+    if (status != VA_STATUS_SUCCESS) {
         trace_error("%s, can't create VA surfaces\n", __func__);
+        goto err;
+    }
 
     status = vaCreateContext(display.va, vd->va_context.config_id, width, height,
                              VA_PROGRESSIVE, vd->surfaces, MAX_VIDEO_SURFACES,
                              &vd->va_context.context_id);
-    if (status != VA_STATUS_SUCCESS)
+    if (status != VA_STATUS_SUCCESS) {
         trace_error("%s, can't create VA context\n", __func__);
+        goto err;
+    }
 
     vd->avctx->hwaccel_context = &vd->va_context;
     return AV_PIX_FMT_VAAPI_VLD;
+
+err:
+    vd->failed_state = 1;
+    vd->ppp_video_decoder_dev->NotifyError(vd->instance->id, vd->self_id,
+                                           PP_VIDEODECODERERROR_UNREADABLE_INPUT);
+    return AV_PIX_FMT_NONE;
 }
 
 enum AVPixelFormat
@@ -547,6 +559,12 @@ ppb_video_decoder_decode(PP_Resource video_decoder,
     if (!vd) {
         trace_error("%s, bad resource\n", __func__);
         return PP_ERROR_BADRESOURCE;
+    }
+
+    if (vd->failed_state) {
+        trace_warning("%s, there were errors before, giving up\n", __func__);
+        pp_resource_release(video_decoder);
+        return PP_ERROR_FAILED;
     }
 
     void *rawdata = ppb_buffer_map(bitstream_buffer->data);
