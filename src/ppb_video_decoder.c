@@ -141,6 +141,42 @@ ppb_video_decoder_destroy_priv(void *p)
     free_and_nullify(vd->buffers);
 }
 
+static
+enum AVPixelFormat
+prepare_vaapi_context(struct pp_video_decoder_s *vd, int width, int height)
+{
+    VAStatus status;
+
+    vd->va_context.display = display.va;
+    vd->va_context.config_id = VA_INVALID_ID;
+    vd->va_context.context_id = VA_INVALID_ID;
+
+    // function is called from libavcodec internals which were already protected by mutex
+    status = vaCreateConfig(display.va, VAProfileH264High, VAEntrypointVLD, NULL, 0,
+                            &vd->va_context.config_id);
+    if (status != VA_STATUS_SUCCESS)
+        trace_error("%s, can't create VA config\n", __func__);
+
+#if VA_CHECK_VERSION(0, 34, 0)
+    status = vaCreateSurfaces(display.va, VA_RT_FORMAT_YUV420, width, height,
+                              vd->surfaces, MAX_VIDEO_SURFACES, NULL, 0);
+#else
+    status = vaCreateSurfaces(display.va, width, height, VA_RT_FORMAT_YUV420,
+                              MAX_VIDEO_SURFACES, vd->surfaces);
+#endif
+    if (status != VA_STATUS_SUCCESS)
+        trace_error("%s, can't create VA surfaces\n", __func__);
+
+    status = vaCreateContext(display.va, vd->va_context.config_id, width, height,
+                             VA_PROGRESSIVE, vd->surfaces, MAX_VIDEO_SURFACES,
+                             &vd->va_context.context_id);
+    if (status != VA_STATUS_SUCCESS)
+        trace_error("%s, can't create VA context\n", __func__);
+
+    vd->avctx->hwaccel_context = &vd->va_context;
+    return AV_PIX_FMT_VAAPI_VLD;
+}
+
 enum AVPixelFormat
 get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
 {
@@ -159,36 +195,7 @@ get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
     trace_info_f("      VA-API: %s\n", have_vaapi ? "present" : "not present");
 
     if (have_vaapi) {
-        VAStatus status;
-
-        vd->va_context.display = display.va;
-        vd->va_context.config_id = VA_INVALID_ID;
-        vd->va_context.context_id = VA_INVALID_ID;
-
-        // function is called from libavcodec internals which were already protected by mutex
-        status = vaCreateConfig(display.va, VAProfileH264High, VAEntrypointVLD, NULL, 0,
-                                &vd->va_context.config_id);
-        if (status != VA_STATUS_SUCCESS)
-            trace_error("%s, can't create VA config\n", __func__);
-
-#if VA_CHECK_VERSION(0, 34, 0)
-        status = vaCreateSurfaces(display.va, VA_RT_FORMAT_YUV420, s->width, s->height,
-                                  vd->surfaces, MAX_VIDEO_SURFACES, NULL, 0);
-#else
-        status = vaCreateSurfaces(display.va, s->width, s->height, VA_RT_FORMAT_YUV420,
-                                  MAX_VIDEO_SURFACES, vd->surfaces);
-#endif
-        if (status != VA_STATUS_SUCCESS)
-            trace_error("%s, can't create VA surfaces\n", __func__);
-
-        status = vaCreateContext(display.va, vd->va_context.config_id, s->width, s->height,
-                                 VA_PROGRESSIVE, vd->surfaces, MAX_VIDEO_SURFACES,
-                                 &vd->va_context.context_id);
-        if (status != VA_STATUS_SUCCESS)
-            trace_error("%s, can't create VA context\n", __func__);
-
-        vd->avctx->hwaccel_context = &vd->va_context;
-        return AV_PIX_FMT_VAAPI_VLD;
+        return prepare_vaapi_context(vd, s->width, s->height);
     }
 
     (void)have_vdpau; // TODO: VDPAU support
