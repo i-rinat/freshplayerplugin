@@ -225,12 +225,16 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     if (display.glXCreateContextAttribsARB) {
         g3d->glc = display.glXCreateContextAttribsARB(display.x, g3d->fb_config, share_glc, True,
                                                       ctx_attrs);
-        if (!g3d->glc) {
-            trace_error("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
-            goto err;
-        }
+        if (!g3d->glc)
+            trace_warning("%s, glXCreateContextAttribsARB returned NULL\n", __func__);
+
     } else {
-        // if no glXCreateContextAttribsARB, request any GL context
+        g3d->glc = NULL;
+    }
+
+    if (!g3d->glc) {
+        // if glXCreateContextAttribsARB is not present or returned NULL,
+        // request any GL context
         g3d->glc = glXCreateNewContext(display.x, g3d->fb_config, GLX_RGBA_TYPE, share_glc, True);
         if (!g3d->glc) {
             trace_error("%s, glXCreateNewContext returned NULL\n", __func__);
