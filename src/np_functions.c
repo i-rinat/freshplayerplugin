@@ -1448,6 +1448,7 @@ handle_key_press_release_event(NPP npp, void *event)
             browser_window = None;
         ev->window = browser_window;
 
+        pthread_mutex_lock(&display.lock);
         GdkEvent *gev = make_gdk_key_event_from_x_key(ev);
         if (gev) {
             // tie catcher_widget to GdkWindow
@@ -1463,9 +1464,12 @@ handle_key_press_release_event(NPP npp, void *event)
             }
 
             gdk_event_free(gev);
-            if (stop)
+            if (stop) {
+                pthread_mutex_unlock(&display.lock);
                 return 1;
+            }
         }
+        pthread_mutex_unlock(&display.lock);
     }
 
     char            buffer[20];
@@ -1476,7 +1480,10 @@ handle_key_press_release_event(NPP npp, void *event)
     PP_Resource     pp_event;
     unsigned int    mod;
 
+    pthread_mutex_lock(&display.lock);
     charcount = XLookupString(ev, buffer, sizeof(buffer), &keysym, &compose_status);
+    pthread_mutex_unlock(&display.lock);
+
     pp_keycode = xkeycode_to_pp_keycode(keysym);
     mod = x_state_mask_to_pp_inputevent_modifier(ev->state);
     mod = mod | get_left_right_pp_flag(keysym);
