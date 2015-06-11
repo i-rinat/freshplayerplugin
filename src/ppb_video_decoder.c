@@ -34,45 +34,46 @@
 #include "ppb_opengles2.h"
 #include "ppb_graphics3d.h"
 #include "config.h"
+#include "ffmpeg-compat.h"      // generated
 
 
-// ffmpeg/libav API changes over time
-#if (LIBAVUTIL_VERSION_INT < AV_VERSION_INT(51, 42, 0)) || \
-    (LIBAVUTIL_VERSION_INT == AV_VERSION_INT(51, 73, 101))
-
+// compatibilty definitions
+#if !HAVE_AVPixelFormat
+#define AVPixelFormat           PixelFormat
 #define AV_PIX_FMT_NONE         PIX_FMT_NONE
 #define AV_PIX_FMT_YUV420P      PIX_FMT_YUV420P
 #define AV_PIX_FMT_VAAPI_VLD    PIX_FMT_VAAPI_VLD
 #define AV_PIX_FMT_VDPAU        (-2)                // doesn't exist at all in older versions
+#endif // !HAVE_AVPixelFormat
 
+#if !HAVE_AVCodecID
 #define AV_CODEC_ID_H264        CODEC_ID_H264
+#endif // !HAVE_AVCodecID
 
-#define AVPixelFormat           PixelFormat
-
-#endif
-
-#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(52, 8, 0)
+#if !HAVE_av_frame_alloc
 static inline AVFrame *
 av_frame_alloc(void)
 {
     return avcodec_alloc_frame();
 }
+#endif // !HAVE_av_frame_alloc
 
+#if !HAVE_av_frame_free
 static inline void
 av_frame_free(AVFrame **frame)
 {
-    free(*frame);
+    av_free(*frame);
     *frame = NULL;
 }
-#endif
+#endif // !HAVE_av_frame_free
 
-#if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(54, 41, 1)
+#if HAVE_AVCodecContext_get_buffer2
 #define AVCTX_HAVE_REFCOUNTED_BUFFERS   1
 #else
 #define AVCTX_HAVE_REFCOUNTED_BUFFERS   0
-#endif
+#endif // HAVE_AVCodecContext_get_buffer2
 
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 52, 0)
+#if !HAVE_avcodec_free_context
 static
 void
 avcodec_free_context(AVCodecContext **pavctx)
@@ -81,7 +82,7 @@ avcodec_free_context(AVCodecContext **pavctx)
     av_free(*pavctx);
     *pavctx = NULL;
 }
-#endif
+#endif // !HAVE_avcodec_free_context
 
 
 static

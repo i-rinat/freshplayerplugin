@@ -116,6 +116,8 @@ if (WITH_HWDEC)
     list(APPEND REQ_LIBRARY_DIRS ${HWDEC_LIBRARY_DIRS})
     list(APPEND REQ_INCLUDE_DIRS ${HWDEC_INCLUDE_DIRS})
     list(APPEND REQ_LIBRARIES    ${HWDEC_LIBRARIES})
+    add_subdirectory(cmake/ffmpeg-compat)
+    include_directories("${CMAKE_BINARY_DIR}")
 endif()
 
 list(APPEND REQ_LIBRARIES img-resources)
