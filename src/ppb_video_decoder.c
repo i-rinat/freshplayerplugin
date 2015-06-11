@@ -78,7 +78,8 @@ void
 avcodec_free_context(AVCodecContext **pavctx)
 {
     avcodec_close(*pavctx);
-    av_freep(pavctx);
+    av_free(*pavctx);
+    *pavctx = NULL;
 }
 #endif
 
