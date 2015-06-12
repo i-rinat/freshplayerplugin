@@ -66,6 +66,7 @@
 
 #if HAVE_HWDEC
 #include <libavcodec/avcodec.h>
+#include <libavutil/avutil.h>
 #include <libavcodec/vaapi.h>
 #include <va/va.h>
 #endif // HAVE_HWDEC
