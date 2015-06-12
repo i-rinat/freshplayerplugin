@@ -43,8 +43,11 @@
 #define AV_PIX_FMT_NONE         PIX_FMT_NONE
 #define AV_PIX_FMT_YUV420P      PIX_FMT_YUV420P
 #define AV_PIX_FMT_VAAPI_VLD    PIX_FMT_VAAPI_VLD
-#define AV_PIX_FMT_VDPAU        (-2)                // doesn't exist at all in older versions
 #endif // !HAVE_AVPixelFormat
+
+#if !HAVE_AV_PIX_FMT_VDPAU
+#define AV_PIX_FMT_VDPAU        (-2)
+#endif // !HAVE_AV_PIX_FMT_VDPAU
 
 #if !HAVE_AVCodecID
 #define AV_CODEC_ID_H264        CODEC_ID_H264

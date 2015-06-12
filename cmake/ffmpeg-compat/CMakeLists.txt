@@ -12,6 +12,12 @@ if (NOT HAVE_AVPixelFormat)
     set(HAVE_AVPixelFormat 0)
 endif()
 
+file(READ cfg_av_pix_fmt_vdpau.c C_SRC)
+CHECK_C_SOURCE_COMPILES("${C_SRC}" HAVE_AV_PIX_FMT_VDPAU)
+if (NOT HAVE_AV_PIX_FMT_VDPAU)
+    set(HAVE_AV_PIX_FMT_VDPAU 0)
+endif()
+
 file(READ cfg_avcodecid.c C_SRC)
 CHECK_C_SOURCE_COMPILES("${C_SRC}" HAVE_AVCodecID)
 if (NOT HAVE_AVCodecID)
