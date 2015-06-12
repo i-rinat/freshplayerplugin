@@ -456,9 +456,9 @@ request_buffers(struct pp_video_decoder_s *vd)
                                         .height = vd->avctx->height };
 
     pp_resource_release(vd->self_id);
-    // TODO: how many surfaces do we need?
-    vd->ppp_video_decoder_dev->ProvidePictureBuffers(instance, vd->self_id, 21, &dimensions,
-                                                     GL_TEXTURE_2D);
+
+    vd->ppp_video_decoder_dev->ProvidePictureBuffers(instance, vd->self_id, MAX_VIDEO_SURFACES,
+                                                     &dimensions, GL_TEXTURE_2D);
     pp_resource_acquire(vd->self_id, PP_RESOURCE_VIDEO_DECODER);
 }
 
