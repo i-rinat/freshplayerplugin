@@ -5,6 +5,7 @@ include(CheckSymbolExists)
 include(CheckCSourceCompiles)
 
 set(CMAKE_REQUIRED_LIBRARIES "${REQ_LIBRARIES}")
+set(CMAKE_REQUIRED_INCLUDES  "${REQ_INCLUDE_DIRS}")
 
 macro(MACRO_C_SOURCE_CHECK FILE_NAME HAVE_variable)
     unset(${HAVE_variable} CACHE)
