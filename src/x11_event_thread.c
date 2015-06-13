@@ -160,7 +160,7 @@ x11et_handle_task(struct task_s *task)
 
             entry->plug_wnd = XCreateWindow(dpy, task->socket_wnd, 0, 0, 200, 200, 0,
                                             DefaultDepth(dpy, screen),
-                                            InputOutput, DefaultVisual(dpy, screen),
+                                            InputOutput, CopyFromParent,
                                             CWBackPixel | CWBackingStore, &attrs);
 
             unsigned long buffer[2] = { 1, XEMBED_MAPPED };
