@@ -84,6 +84,20 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
                             CAIRO_FORMAT_ARGB32, g2d->width, g2d->height, g2d->stride);
     g2d->task_list = NULL;
 
+    if (pp_i->is_transparent) {
+        // we need XRender picture (which in turn requires X Pixmap) to alpha blend
+        // our images with existing pixmap provided by the browser. This is only needed
+        // is instance is transparent, therefore depth is always 32-bit.
+        pthread_mutex_lock(&display.lock);
+        g2d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g2d->scaled_width,
+                                    g2d->scaled_height, 32);
+        XFlush(display.x);
+        g2d->xr_pict = XRenderCreatePicture(display.x, g2d->pixmap, display.pictfmt_argb32, 0, 0);
+        g2d->gc = XCreateGC(display.x, g2d->pixmap, 0, 0);
+        XFlush(display.x);
+        pthread_mutex_unlock(&display.lock);
+    }
+
     pp_resource_release(graphics_2d);
     return graphics_2d;
 }
@@ -100,6 +114,14 @@ ppb_graphics2d_destroy(void *p)
     if (g2d->cairo_surf) {
         cairo_surface_destroy(g2d->cairo_surf);
         g2d->cairo_surf = NULL;
+    }
+
+    if (g2d->instance->is_transparent) {
+        pthread_mutex_lock(&display.lock);
+        XRenderFreePicture(display.x, g2d->xr_pict);
+        XFreePixmap(display.x, g2d->pixmap);
+        XFreeGC(display.x, g2d->gc);
+        pthread_mutex_unlock(&display.lock);
     }
 }
 

@@ -323,6 +323,9 @@ struct pp_graphics2d_s {
     char               *second_buffer;
     cairo_surface_t    *cairo_surf;
     GList              *task_list;
+    Pixmap              pixmap;
+    Picture             xr_pict;
+    GC                  gc;
 };
 
 struct pp_network_monitor_s {

@@ -1000,46 +1000,46 @@ handle_graphics_expose_event(NPP npp, void *event)
     Display *dpy = ev->display;
     Drawable drawable = ev->drawable;
     int screen = DefaultScreen(dpy);
-    cairo_surface_t *src_surf, *dst_surf;
-    cairo_t *cr;
     int retval;
 
     pthread_mutex_lock(&display.lock);
     if (g2d) {
-        if (pp_i->is_transparent) {
-            XVisualInfo vi;
-            struct {
-                Window root;
-                int x, y;
-                unsigned int width, height, border, depth;
-            } d = {};
+        Visual *visual = DefaultVisual(dpy, screen);
+        const int depth = pp_i->is_transparent ? 32 : 24;
+        XVisualInfo vi_template = { .depth = depth, };
 
-            XGetGeometry(dpy, drawable, &d.root, &d.x, &d.y, &d.width, &d.height, &d.border,
-                         &d.depth);
-            if (XMatchVisualInfo(dpy, screen, d.depth, TrueColor, &vi)) {
-                dst_surf = cairo_xlib_surface_create(dpy, drawable, vi.visual, d.width, d.height);
-                src_surf = cairo_image_surface_create_for_data((unsigned char *)g2d->second_buffer,
-                    CAIRO_FORMAT_ARGB32, g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride);
-                cr = cairo_create(dst_surf);
-                cairo_set_source_surface(cr, src_surf, 0, 0);
-                cairo_rectangle(cr, ev->x, ev->y, MIN(g2d->scaled_width, ev->width),
-                                MIN(g2d->scaled_height, ev->height));
-                cairo_fill(cr);
-                cairo_destroy(cr);
-                cairo_surface_destroy(dst_surf);
-                cairo_surface_destroy(src_surf);
-                XFlush(dpy);
-            }
+        int nitems = 0;
+        XVisualInfo *vi = XGetVisualInfo(display.x, VisualDepthMask, &vi_template, &nitems);
+
+        if (vi && nitems >= 1) {
+            visual = vi[0].visual;
+            XFree(vi);
         } else {
-            XImage *xi = XCreateImage(dpy, DefaultVisual(dpy, screen), 24, ZPixmap, 0,
-                                      g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
-                                      g2d->scaled_stride);
-
-            XPutImage(dpy, drawable, DefaultGC(dpy, screen), xi, 0, 0,
-                      ev->x, ev->y,
-                      MIN(g2d->scaled_width, ev->width), MIN(g2d->scaled_height, ev->height));
-            XFree(xi);
+            trace_warning("%s, can't get visual for depth %d, using default\n", __func__, depth);
         }
+
+        XImage *xi = XCreateImage(dpy, visual, depth, ZPixmap, 0,
+                                  g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
+                                  g2d->scaled_stride);
+
+        XPutImage(dpy,
+                  pp_i->is_transparent ? g2d->pixmap : drawable,
+                  pp_i->is_transparent ? g2d->gc : DefaultGC(dpy, screen),
+                  xi, 0, 0, ev->x, ev->y,
+                  MIN(g2d->scaled_width, ev->width), MIN(g2d->scaled_height, ev->height));
+
+        if (pp_i->is_transparent) {
+            Picture dst_pict = XRenderCreatePicture(dpy, drawable, display.pictfmt_rgb24, 0, 0);
+            XRenderComposite(dpy, PictOpOver,
+                             g2d->xr_pict, None, dst_pict,
+                             ev->x, ev->y, 0, 0,
+                             ev->x, ev->y, ev->width, ev->height);
+            XRenderFreePicture(dpy, dst_pict);
+        }
+
+        XFree(xi);
+        XFlush(dpy);
+
     } else if (g3d) {
         Picture dst_pict = XRenderCreatePicture(dpy, drawable, display.pictfmt_rgb24, 0, 0);
         XRenderComposite(dpy,
