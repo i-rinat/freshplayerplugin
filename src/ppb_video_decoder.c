@@ -115,21 +115,27 @@ ppb_video_decoder_destroy_priv(void *p)
     if (vd->avframe)
         av_frame_free(&vd->avframe);
 
-    if (vd->va_context.context_id) {
-        vaDestroyContext(display.va, vd->va_context.context_id);
-        vd->va_context.context_id = 0;
-    }
+    switch (vd->hwdec_api) {
+    case HWDEC_VAAPI:
+        if (vd->va_context.context_id) {
+            vaDestroyContext(display.va, vd->va_context.context_id);
+            vd->va_context.context_id = 0;
+        }
 
-    if (vd->va_context.config_id) {
-        vaDestroyConfig(display.va, vd->va_context.config_id);
-        vd->va_context.config_id = 0;
-    }
+        if (vd->va_context.config_id) {
+            vaDestroyConfig(display.va, vd->va_context.config_id);
+            vd->va_context.config_id = 0;
+        }
 
-    vaDestroySurfaces(display.va, vd->surfaces, MAX_VIDEO_SURFACES);
-    for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
-        vd->surfaces[k] = VA_INVALID_SURFACE;
-        vd->surface_used[k] = 0;
-
+        vaDestroySurfaces(display.va, vd->surfaces, MAX_VIDEO_SURFACES);
+        for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+            vd->surfaces[k] = VA_INVALID_SURFACE;
+            vd->surface_used[k] = 0;
+        }
+        break;
+    default:
+        trace_error("%s, not reached\n", __func__);
+        break;
     }
 
     for (uintptr_t k = 0; k < vd->buffer_count; k ++) {
@@ -185,6 +191,7 @@ prepare_vaapi_context(struct pp_video_decoder_s *vd, int width, int height)
     }
 
     vd->avctx->hwaccel_context = &vd->va_context;
+    vd->hwdec_api = HWDEC_VAAPI;
     return AV_PIX_FMT_VAAPI_VLD;
 
 err:
@@ -243,27 +250,38 @@ get_buffer2(struct AVCodecContext *s, AVFrame *pic, int flags)
 {
     struct pp_video_decoder_s *vd = s->opaque;
 
-    VASurfaceID surface = VA_INVALID_SURFACE;
-    for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
-        if (!vd->surface_used[k]) {
-            surface = vd->surfaces[k];
-            vd->surface_used[k] = 1;
-            break;
-        }
-    }
-
-    pic->data[0] = GSIZE_TO_POINTER(surface);
-    pic->data[1] = NULL;
-    pic->data[2] = NULL;
-    pic->data[3] = GSIZE_TO_POINTER(surface);
-
 #if AVCTX_HAVE_REFCOUNTED_BUFFERS == 0
     pic->type = FF_BUFFER_TYPE_USER;
     pic->pkt_pts = s->pkt->pts;
 #endif
 
-    if (surface == VA_INVALID_SURFACE)
-        return -1;
+    switch (vd->hwdec_api) {
+    case HWDEC_VAAPI:
+        {
+            VASurfaceID surface = VA_INVALID_SURFACE;
+            for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+                if (!vd->surface_used[k]) {
+                    surface = vd->surfaces[k];
+                    vd->surface_used[k] = 1;
+                    break;
+                }
+            }
+
+            pic->data[0] = GSIZE_TO_POINTER(surface);
+            pic->data[1] = NULL;
+            pic->data[2] = NULL;
+            pic->data[3] = GSIZE_TO_POINTER(surface);
+
+            if (surface == VA_INVALID_SURFACE) {
+                trace_error("%s, can't find free VA surface\n", __func__);
+                return -1;
+            }
+        }
+        break;
+    default:
+        trace_error("%s, not reached\n", __func__);
+        break;
+    }
 
 #if AVCTX_HAVE_REFCOUNTED_BUFFERS
     AVBufferRef *buf = av_buffer_create(pic->data[3], 0, release_buffer2, vd, 0);
@@ -385,6 +403,7 @@ ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDeco
         goto err_1;
     }
 
+    vd->hwdec_api = HWDEC_NONE;
     vd->codec_id = AV_CODEC_ID_H264;        // TODO: other codecs
     vd->avcodec = avcodec_find_decoder(vd->codec_id);
     if (!vd->avcodec) {
@@ -497,17 +516,27 @@ issue_frame(struct pp_video_decoder_s *vd)
         return;
     }
 
-    VASurfaceID va_surf = GPOINTER_TO_SIZE(frame->data[3]);
-
     pthread_mutex_lock(&display.lock);
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     glBindTexture(GL_TEXTURE_2D, vd->buffers[idx].texture_id);
     display.glXBindTexImageEXT(display.x, vd->buffers[idx].glx_pixmap, GLX_FRONT_EXT, NULL);
     XFlush(display.x);
-    vaPutSurface(display.va, va_surf, vd->buffers[idx].pixmap,
-                 0, 0, frame->width, frame->height,
-                 0, 0, frame->width, frame->height,
-                 NULL, 0, VA_FRAME_PICTURE);
+
+    switch (vd->hwdec_api) {
+    case HWDEC_VAAPI:
+        {
+            VASurfaceID va_surf = GPOINTER_TO_SIZE(frame->data[3]);
+            vaPutSurface(display.va, va_surf, vd->buffers[idx].pixmap,
+                         0, 0, frame->width, frame->height,
+                         0, 0, frame->width, frame->height,
+                         NULL, 0, VA_FRAME_PICTURE);
+        }
+        break;
+    default:
+        trace_error("%s, not reached\n", __func__);
+        break;
+    }
+
     XFlush(display.x);
     glXMakeCurrent(display.x, None, NULL);
     pthread_mutex_unlock(&display.lock);

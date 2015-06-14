@@ -460,6 +460,12 @@ struct pp_flash_drm_s {
     COMMON_STRUCTURE_FIELDS
 };
 
+enum hwdec_api_e {
+    HWDEC_NONE = 0,
+    HWDEC_VAAPI,
+    HWDEC_VDPAU,
+};
+
 struct pp_video_decoder_s {
     COMMON_STRUCTURE_FIELDS
 #if HAVE_HWDEC
@@ -475,8 +481,6 @@ struct pp_video_decoder_s {
     uint32_t                height;
     int32_t                 last_consumed_bitstream_buffer_id;
     size_t                  buffer_count;
-    int                     buffers_were_requested;
-    int                     failed_state;
     struct {
         int32_t     id;
         uint32_t    width;
@@ -489,6 +493,10 @@ struct pp_video_decoder_s {
     struct vaapi_context    va_context;
     VASurfaceID             surfaces[MAX_VIDEO_SURFACES];
     int                     surface_used[MAX_VIDEO_SURFACES];
+
+    unsigned int            buffers_were_requested : 1;
+    unsigned int            failed_state : 1;
+    enum hwdec_api_e        hwdec_api;  ///< HW decoding API used by this resource
 #endif // HAVE_HWDEC
 };
 
