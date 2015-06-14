@@ -217,8 +217,10 @@ get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
 
     (void)have_vdpau; // TODO: VDPAU support
 
-    // nothing found, using default
-    return fmt[0];
+    // nothing found, report error
+    vd->ppp_video_decoder_dev->NotifyError(vd->instance->id, vd->self_id,
+                                           PP_VIDEODECODERERROR_UNREADABLE_INPUT);
+    return AV_PIX_FMT_NONE;
 }
 
 static
