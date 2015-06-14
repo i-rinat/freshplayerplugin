@@ -109,8 +109,10 @@ ppb_video_decoder_destroy_priv(void *p)
         vd->avparser = NULL;
     }
 
-    if (vd->avctx)
+    if (vd->avctx) {
+        avcodec_close(vd->avctx);
         avcodec_free_context(&vd->avctx);
+    }
 
     if (vd->avframe)
         av_frame_free(&vd->avframe);
