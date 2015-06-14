@@ -129,7 +129,7 @@ deinitialize_decoder(struct pp_video_decoder_s *vd)
         }
         break;
     default:
-        trace_error("%s, not reached\n", __func__);
+        // no-op
         break;
     }
 
