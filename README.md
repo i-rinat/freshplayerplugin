@@ -68,7 +68,7 @@ Project is using cmake (>=2.8.8) build system.
            libssl-dev libglib2.0-dev libconfig-dev libpango1.0-dev       \
            libgl1-mesa-dev libevent-dev libgtk2.0-dev libxrandr-dev      \
            libxrender-dev libxcursor-dev libv4l-dev libgles2-mesa-dev    \
-           libavcodec-dev libva-dev
+           libavcodec-dev libva-dev libvdpau-dev
 ```
 * (optional) To enable PulseAudio support, install `libpulse-dev`.
 * (optional) To enable JACK support, install `libjack-jackd2-dev` and `libsoxr-dev`
