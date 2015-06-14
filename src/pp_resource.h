@@ -494,6 +494,7 @@ struct pp_video_decoder_s {
     VASurfaceID             surfaces[MAX_VIDEO_SURFACES];
     int                     surface_used[MAX_VIDEO_SURFACES];
 
+    unsigned int            initialized : 1;
     unsigned int            buffers_were_requested : 1;
     unsigned int            failed_state : 1;
     enum hwdec_api_e        hwdec_api;  ///< HW decoding API used by this resource

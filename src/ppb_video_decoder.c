@@ -90,15 +90,8 @@ avcodec_free_context(AVCodecContext **pavctx)
 
 static
 void
-ppb_video_decoder_destroy_priv(void *p)
+deinitialize_decoder(struct pp_video_decoder_s *vd)
 {
-    struct pp_video_decoder_s *vd = p;
-
-    if (vd->orig_graphics3d) {
-        pp_resource_unref(vd->orig_graphics3d);
-        vd->orig_graphics3d = 0;
-    }
-
     if (vd->graphics3d) {
         pp_resource_unref(vd->graphics3d);
         vd->graphics3d = 0;
@@ -152,6 +145,21 @@ ppb_video_decoder_destroy_priv(void *p)
     vd->buffer_count = 0;
     vd->buffers_were_requested = 0;
     free_and_nullify(vd->buffers);
+}
+
+static
+void
+ppb_video_decoder_destroy_priv(void *p)
+{
+    struct pp_video_decoder_s *vd = p;
+
+    if (vd->orig_graphics3d) {
+        pp_resource_unref(vd->orig_graphics3d);
+        vd->orig_graphics3d = 0;
+    }
+
+    deinitialize_decoder(vd);
+    vd->initialized = 0;
 }
 
 static
@@ -316,6 +324,85 @@ release_buffer(struct AVCodecContext *avctx, AVFrame *pic)
 }
 #endif
 
+static
+int
+initialize_decoder(struct pp_video_decoder_s *vd)
+{
+    // create auxiliary GL context
+    int32_t attribs[] = {
+        PP_GRAPHICS3DATTRIB_WIDTH,      32,     // dimensions can be arbitrary
+        PP_GRAPHICS3DATTRIB_HEIGHT,     32,
+        PP_GRAPHICS3DATTRIB_RED_SIZE,   8,
+        PP_GRAPHICS3DATTRIB_GREEN_SIZE, 8,
+        PP_GRAPHICS3DATTRIB_BLUE_SIZE,  8,
+        PP_GRAPHICS3DATTRIB_ALPHA_SIZE, 8,
+        PP_GRAPHICS3DATTRIB_DEPTH_SIZE, 16,
+        GLX_Y_INVERTED_EXT,             True,
+        GLX_BIND_TO_TEXTURE_RGBA_EXT,   True,
+        PP_GRAPHICS3DATTRIB_NONE,
+    };
+
+    vd->graphics3d = ppb_graphics3d_create(vd->instance->id, vd->orig_graphics3d, attribs);
+    if (!vd->graphics3d) {
+        trace_error("%s, can't create graphics3d context\n", __func__);
+        goto err;
+    }
+
+    vd->hwdec_api = HWDEC_NONE;
+    vd->avcodec = avcodec_find_decoder(vd->codec_id);
+    if (!vd->avcodec) {
+        trace_error("%s, can't create codec\n", __func__);
+        goto err;
+    }
+
+    vd->avparser = av_parser_init(vd->codec_id);
+    if (!vd->avparser) {
+        trace_error("%s, can't create parser\n", __func__);
+        goto err;
+    }
+
+    vd->avctx = avcodec_alloc_context3(vd->avcodec);
+    if (!vd->avctx) {
+        trace_error("%s, can't create codec context\n", __func__);
+        goto err;
+    }
+
+    if (vd->avcodec->capabilities & CODEC_CAP_TRUNCATED) {
+        trace_info("%s, codec have CODEC_CAP_TRUNCATED\n", __func__);
+        vd->avctx->flags |= CODEC_FLAG_TRUNCATED;
+    }
+
+    vd->avctx->opaque = vd;
+    vd->avctx->thread_count = 1;
+    vd->avctx->get_format = get_format;
+
+#if AVCTX_HAVE_REFCOUNTED_BUFFERS
+    vd->avctx->get_buffer2 = get_buffer2;
+    vd->avctx->refcounted_frames = 1;
+#else
+    vd->avctx->get_buffer = get_buffer;
+    vd->avctx->release_buffer = release_buffer;
+#endif
+
+    if (avcodec_open2(vd->avctx, vd->avcodec, NULL) < 0) {
+        trace_error("%s, can't open codec\n", __func__);
+        goto err;
+    }
+
+    vd->avframe = av_frame_alloc();
+    if (!vd->avframe) {
+        trace_error("%s, can't alloc frame\n", __func__);
+        goto err;
+    }
+
+    vd->initialized = 1;
+    return 0;
+
+err:
+    deinitialize_decoder(vd);
+    return -1;
+}
+
 PP_Resource
 ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDecoder_Profile profile)
 {
@@ -384,84 +471,10 @@ ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDeco
 
     vd->orig_graphics3d = pp_resource_ref(context);
     vd->ppp_video_decoder_dev = ppp_video_decoder_dev;
-
-    // create auxiliary GL context
-    int32_t attribs[] = {
-        PP_GRAPHICS3DATTRIB_WIDTH,      32,     // dimensions can be arbitrary
-        PP_GRAPHICS3DATTRIB_HEIGHT,     32,
-        PP_GRAPHICS3DATTRIB_RED_SIZE,   8,
-        PP_GRAPHICS3DATTRIB_GREEN_SIZE, 8,
-        PP_GRAPHICS3DATTRIB_BLUE_SIZE,  8,
-        PP_GRAPHICS3DATTRIB_ALPHA_SIZE, 8,
-        PP_GRAPHICS3DATTRIB_DEPTH_SIZE, 16,
-        GLX_Y_INVERTED_EXT,             True,
-        GLX_BIND_TO_TEXTURE_RGBA_EXT,   True,
-        PP_GRAPHICS3DATTRIB_NONE,
-    };
-
-    vd->graphics3d = ppb_graphics3d_create(vd->instance->id, vd->orig_graphics3d, attribs);
-    if (!vd->graphics3d) {
-        trace_error("%s, can't create graphics3d context\n", __func__);
-        goto err_1;
-    }
-
-    vd->hwdec_api = HWDEC_NONE;
     vd->codec_id = AV_CODEC_ID_H264;        // TODO: other codecs
-    vd->avcodec = avcodec_find_decoder(vd->codec_id);
-    if (!vd->avcodec) {
-        trace_error("%s, can't create codec\n", __func__);
-        goto err_1;
-    }
-
-    vd->avparser = av_parser_init(vd->codec_id);
-    if (!vd->avparser) {
-        trace_error("%s, can't create parser\n", __func__);
-        goto err_1;
-    }
-
-    vd->avctx = avcodec_alloc_context3(vd->avcodec);
-    if (!vd->avctx) {
-        trace_error("%s, can't create codec context\n", __func__);
-        goto err_1;
-    }
-
-    if (vd->avcodec->capabilities & CODEC_CAP_TRUNCATED) {
-        trace_info("%s, codec have CODEC_CAP_TRUNCATED\n", __func__);
-        vd->avctx->flags |= CODEC_FLAG_TRUNCATED;
-    }
-
-    vd->avctx->opaque = vd;
-    vd->avctx->thread_count = 1;
-    vd->avctx->get_format = get_format;
-
-#if AVCTX_HAVE_REFCOUNTED_BUFFERS
-    vd->avctx->get_buffer2 = get_buffer2;
-    vd->avctx->refcounted_frames = 1;
-#else
-    vd->avctx->get_buffer = get_buffer;
-    vd->avctx->release_buffer = release_buffer;
-#endif
-
-    if (avcodec_open2(vd->avctx, vd->avcodec, NULL) < 0) {
-        trace_error("%s, can't open codec\n", __func__);
-        goto err_1;
-    }
-
-    vd->avframe = av_frame_alloc();
-    if (!vd->avframe) {
-        trace_error("%s, can't alloc frame\n", __func__);
-        goto err_1;
-    }
 
     pp_resource_release(video_decoder);
     return video_decoder;
-
-err_1:
-    ppb_video_decoder_destroy_priv(vd);
-
-    pp_resource_release(video_decoder);
-    pp_resource_expunge(video_decoder);
-    return 0;
 }
 
 PP_Bool
@@ -605,6 +618,17 @@ ppb_video_decoder_decode(PP_Resource video_decoder,
         return PP_ERROR_FAILED;
     }
 
+    if (!vd->initialized) {
+        int err = initialize_decoder(vd);
+        if (err != 0) {
+            vd->failed_state = 1;
+            vd->ppp_video_decoder_dev->NotifyError(vd->instance->id, vd->self_id,
+                                                   PP_VIDEODECODERERROR_PLATFORM_FAILURE);
+            pp_resource_release(video_decoder);
+            return PP_ERROR_FAILED;
+        }
+    }
+
     void *rawdata = ppb_buffer_map(bitstream_buffer->data);
     if (!rawdata) {
         trace_error("%s, bad bitstream buffer\n", __func__);
@@ -733,7 +757,7 @@ ppb_video_decoder_reset(PP_Resource video_decoder, struct PP_CompletionCallback 
         return PP_ERROR_BADRESOURCE;
     }
 
-    avcodec_flush_buffers(vd->avctx);
+    deinitialize_decoder(vd);
 
     pp_resource_release(video_decoder);
     ppb_core_call_on_main_thread(0, callback, PP_OK);
