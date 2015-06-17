@@ -562,7 +562,7 @@ ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDeco
         return 0;
     }
 
-    if (!display.va_available) {
+    if (!display.va_available && !display.vdpau_available) {
         trace_info_f("      no hw acceleration available\n");
         return 0;
     }
