@@ -69,7 +69,9 @@
 #include <libavutil/avutil.h>
 #include <libavutil/common.h>
 #include <libavcodec/vaapi.h>
+#include <libavcodec/vdpau.h>
 #include <va/va.h>
+#include <vdpau/vdpau.h>
 #endif // HAVE_HWDEC
 
 
@@ -489,10 +491,17 @@ struct pp_video_decoder_s {
         uint32_t    used;
         Pixmap      pixmap;
         GLXPixmap   glx_pixmap;
+        VdpPresentationQueueTarget  vdp_presentation_queue_target;
+        VdpPresentationQueue        vdp_presentation_queue;
+        VdpOutputSurface            vdp_output_surface;
     } *buffers;
     struct vaapi_context    va_context;
+    struct AVVDPAUContext   vdpau_context;
     VASurfaceID             surfaces[MAX_VIDEO_SURFACES];
+    VdpVideoSurface         vdp_video_surfaces[MAX_VIDEO_SURFACES];
     int                     surface_used[MAX_VIDEO_SURFACES];
+
+    VdpVideoMixer           vdp_video_mixer;
 
     unsigned int            initialized : 1;
     unsigned int            buffers_were_requested : 1;

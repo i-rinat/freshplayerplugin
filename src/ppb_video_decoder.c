@@ -90,6 +90,17 @@ avcodec_free_context(AVCodecContext **pavctx)
 
 static
 void
+report_vdpau_error(VdpStatus st, const char *what, const char *where)
+{
+    if (st == VDP_STATUS_OK)
+        return;
+
+    trace_error("%s, %s failed: %d, %s\n", where, what, (int)st, display.vdp_get_error_string(st));
+}
+
+
+static
+void
 deinitialize_decoder(struct pp_video_decoder_s *vd)
 {
     if (vd->graphics3d) {
@@ -128,6 +139,45 @@ deinitialize_decoder(struct pp_video_decoder_s *vd)
             vd->surface_used[k] = 0;
         }
         break;
+
+    case HWDEC_VDPAU:
+        if (vd->vdpau_context.decoder != VDP_INVALID_HANDLE) {
+            display.vdp_decoder_destroy(vd->vdpau_context.decoder);
+            vd->vdpau_context.decoder = VDP_INVALID_HANDLE;
+        }
+
+        if (vd->vdp_video_mixer != VDP_INVALID_HANDLE) {
+            display.vdp_video_mixer_destroy(vd->vdp_video_mixer);
+            vd->vdp_video_mixer = VDP_INVALID_HANDLE;
+        }
+
+        for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+            if (vd->vdp_video_surfaces[k] != VDP_INVALID_HANDLE) {
+                display.vdp_video_surface_destroy(vd->vdp_video_surfaces[k]);
+                vd->vdp_video_surfaces[k] = VDP_INVALID_HANDLE;
+                vd->surface_used[k] = 0;
+            }
+        }
+
+        for (uintptr_t k = 0; k < vd->buffer_count; k ++) {
+            if (vd->buffers[k].vdp_output_surface != VDP_INVALID_HANDLE) {
+                display.vdp_output_surface_destroy(vd->buffers[k].vdp_output_surface);
+                vd->buffers[k].vdp_output_surface = VDP_INVALID_HANDLE;
+            }
+
+            if (vd->buffers[k].vdp_presentation_queue != VDP_INVALID_HANDLE) {
+                display.vdp_presentation_queue_destroy(vd->buffers[k].vdp_presentation_queue);
+                vd->buffers[k].vdp_presentation_queue = VDP_INVALID_HANDLE;
+            }
+
+            if (vd->buffers[k].vdp_presentation_queue_target != VDP_INVALID_HANDLE) {
+                display.vdp_presentation_queue_target_destroy(vd->buffers[k]
+                                                              .vdp_presentation_queue_target);
+                vd->buffers[k].vdp_presentation_queue_target = VDP_INVALID_HANDLE;
+            }
+        }
+        break;
+
     default:
         // no-op
         break;
@@ -137,8 +187,14 @@ deinitialize_decoder(struct pp_video_decoder_s *vd)
         vd->ppp_video_decoder_dev->DismissPictureBuffer(vd->instance->id, vd->self_id,
                                                         vd->buffers[k].id);
         pthread_mutex_lock(&display.lock);
-        glXDestroyPixmap(display.x, vd->buffers[k].glx_pixmap);
-        XFreePixmap(display.x, vd->buffers[k].pixmap);
+        if (vd->buffers[k].glx_pixmap != None) {
+            glXDestroyPixmap(display.x, vd->buffers[k].glx_pixmap);
+            vd->buffers[k].glx_pixmap = None;
+        }
+        if (vd->buffers[k].pixmap != None) {
+            XFreePixmap(display.x, vd->buffers[k].pixmap);
+            vd->buffers[k].pixmap = None;
+        }
         pthread_mutex_unlock(&display.lock);
     }
 
@@ -211,6 +267,55 @@ err:
     return AV_PIX_FMT_NONE;
 }
 
+static
+enum AVPixelFormat
+prepare_vdpau_context(struct pp_video_decoder_s *vd, int width, int height)
+{
+    VdpStatus st;
+
+    vd->hwdec_api = HWDEC_VDPAU;
+    vd->vdpau_context.decoder = VDP_INVALID_HANDLE;
+    vd->vdp_video_mixer = VDP_INVALID_HANDLE;
+
+    for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++)
+        vd->vdp_video_surfaces[k] = VDP_INVALID_HANDLE;
+
+    st = display.vdp_decoder_create(display.vdp_device, VDP_DECODER_PROFILE_H264_HIGH, width,
+                                    height, MAX_VIDEO_SURFACES, &vd->vdpau_context.decoder);
+    if (st != VDP_STATUS_OK) {
+        report_vdpau_error(st, "VdpDecoderCreate", __func__);
+        goto err;
+    }
+
+    for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+        st = display.vdp_video_surface_create(display.vdp_device, VDP_CHROMA_TYPE_420,
+                                              width, height, &vd->vdp_video_surfaces[k]);
+        if (st != VDP_STATUS_OK) {
+            report_vdpau_error(st, "VdpVideoSurfaceCreate", __func__);
+            goto err;
+        }
+    }
+
+    st = display.vdp_video_mixer_create(display.vdp_device, 0, NULL, 0, NULL, NULL,
+                                        &vd->vdp_video_mixer);
+    if (st != VDP_STATUS_OK) {
+        report_vdpau_error(st, "VdpVideoMixerCreate", __func__);
+        goto err;
+    }
+
+    vd->vdpau_context.render = display.vdp_decoder_render;
+    vd->avctx->hwaccel_context = &vd->vdpau_context;
+    return AV_PIX_FMT_VDPAU;
+
+err:
+    vd->failed_state = 1;
+    deinitialize_decoder(vd);
+    vd->ppp_video_decoder_dev->NotifyError(vd->instance->id, vd->self_id,
+                                           PP_VIDEODECODERERROR_UNREADABLE_INPUT);
+    return AV_PIX_FMT_NONE;
+}
+
+static
 enum AVPixelFormat
 get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
 {
@@ -232,7 +337,9 @@ get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
         return prepare_vaapi_context(vd, s->width, s->height);
     }
 
-    (void)have_vdpau; // TODO: VDPAU support
+    if (have_vdpau) {
+        return prepare_vdpau_context(vd, s->width, s->height);
+    }
 
     // nothing found, report error
     vd->ppp_video_decoder_dev->NotifyError(vd->instance->id, vd->self_id,
@@ -245,12 +352,32 @@ void
 release_buffer2(void *opaque, uint8_t *data)
 {
     struct pp_video_decoder_s *vd = opaque;
-    VASurfaceID surface = GPOINTER_TO_SIZE(data);
 
-    for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
-        if (surface == vd->surfaces[k]) {
-            vd->surface_used[k] = 0;
+    switch (vd->hwdec_api) {
+    case HWDEC_VAAPI:
+        {
+            VASurfaceID surface = GPOINTER_TO_SIZE(data);
+            for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+                if (surface == vd->surfaces[k]) {
+                    vd->surface_used[k] = 0;
+                }
+            }
         }
+        break;
+
+    case HWDEC_VDPAU:
+        {
+            VdpVideoSurface surface = GPOINTER_TO_SIZE(data);
+            for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+                if (surface == vd->vdp_video_surfaces[k]) {
+                    vd->surface_used[k] = 0;
+                }
+            }
+        }
+
+    default:
+        // no-op
+        break;
     }
 }
 
@@ -288,6 +415,30 @@ get_buffer2(struct AVCodecContext *s, AVFrame *pic, int flags)
             }
         }
         break;
+
+    case HWDEC_VDPAU:
+        {
+            VdpVideoSurface surface = VDP_INVALID_HANDLE;
+            for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+                if (!vd->surface_used[k]) {
+                    surface = vd->vdp_video_surfaces[k];
+                    vd->surface_used[k] = 1;
+                    break;
+                }
+            }
+
+            pic->data[0] = GSIZE_TO_POINTER(surface);
+            pic->data[1] = NULL;
+            pic->data[2] = NULL;
+            pic->data[3] = GSIZE_TO_POINTER(surface);
+
+            if (surface == VDP_INVALID_HANDLE) {
+                trace_error("%s, can't find free VDP surface\n", __func__);
+                return -1;
+            }
+        }
+        break;
+
     default:
         trace_error("%s, not reached\n", __func__);
         break;
@@ -472,6 +623,7 @@ ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDeco
     vd->orig_graphics3d = pp_resource_ref(context);
     vd->ppp_video_decoder_dev = ppp_video_decoder_dev;
     vd->codec_id = AV_CODEC_ID_H264;        // TODO: other codecs
+    vd->hwdec_api = HWDEC_NONE;
 
     pp_resource_release(video_decoder);
     return video_decoder;
@@ -545,6 +697,24 @@ issue_frame(struct pp_video_decoder_s *vd)
                          0, 0, frame->width, frame->height,
                          0, 0, frame->width, frame->height,
                          NULL, 0, VA_FRAME_PICTURE);
+        }
+        break;
+    case HWDEC_VDPAU:
+        {
+            VdpStatus st;
+            VdpVideoSurface vdp_surf = GPOINTER_TO_SIZE(frame->data[3]);
+            st = display.vdp_video_mixer_render(vd->vdp_video_mixer, VDP_INVALID_HANDLE, NULL,
+                                                VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME,
+                                                0, NULL, vdp_surf, 0, NULL, NULL,
+                                                vd->buffers[idx].vdp_output_surface, NULL, NULL,
+                                                0, NULL);
+            report_vdpau_error(st, "VdpVideoMixerRender", __func__);
+
+            st = display.vdp_presentation_queue_display(vd->buffers[idx].vdp_presentation_queue,
+                                                        vd->buffers[idx].vdp_output_surface,
+                                                        vd->buffers[idx].width,
+                                                        vd->buffers[idx].height, 0);
+            report_vdpau_error(st, "VdpPresentationQueueDisplay", __func__);
         }
         break;
     default:
@@ -704,6 +874,32 @@ ppb_video_decoder_assign_picture_buffers(PP_Resource video_decoder, uint32_t no_
         if (vd->buffers[k].glx_pixmap == None) {
             trace_error("%s, failed to create GLX pixmap\n", __func__);
             goto err_3;
+            // TODO: proper resource cleanup in case of an error
+        }
+
+        if (vd->hwdec_api == HWDEC_VDPAU) {
+            VdpStatus st;
+
+            pthread_mutex_lock(&display.lock);
+            vd->buffers[k].vdp_presentation_queue_target = VDP_INVALID_HANDLE;
+            vd->buffers[k].vdp_presentation_queue = VDP_INVALID_HANDLE;
+            vd->buffers[k].vdp_output_surface = VDP_INVALID_HANDLE;
+
+            st = display.vdp_presentation_queue_target_create_x11(
+                                                    display.vdp_device, vd->buffers[k].pixmap,
+                                                    &vd->buffers[k].vdp_presentation_queue_target);
+            report_vdpau_error(st, "VdpPresentationQueueTargetCreateX11", __func__);
+
+            st = display.vdp_presentation_queue_create(display.vdp_device,
+                                                       vd->buffers[k].vdp_presentation_queue_target,
+                                                       &vd->buffers[k].vdp_presentation_queue);
+            report_vdpau_error(st, "VdpPresentationQueueCreate", __func__);
+
+            st = display.vdp_output_surface_create(display.vdp_device, VDP_RGBA_FORMAT_B8G8R8A8,
+                                                   vd->buffers[k].width, vd->buffers[k].height,
+                                                   &vd->buffers[k].vdp_output_surface);
+            report_vdpau_error(st, "VdpOutputSurfaceCreate", __func__);
+            pthread_mutex_unlock(&display.lock);
         }
     }
 
