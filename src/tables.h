@@ -63,6 +63,8 @@ struct display_s {
     unsigned int                        vdpau_available;
     VdpDevice                           vdp_device;
     VdpGetProcAddress                  *vdp_get_proc_address;
+    VdpGetInformationString            *vdp_get_information_string;
+    VdpDeviceDestroy                   *vdp_device_destroy;
     VdpGetErrorString                  *vdp_get_error_string;
     VdpDecoderCreate                   *vdp_decoder_create;
     VdpDecoderDestroy                  *vdp_decoder_destroy;
