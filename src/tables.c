@@ -202,6 +202,19 @@ check_glx_extensions(void)
         glXGetProcAddress((GLubyte *)"glXReleaseTexImageEXT");
 }
 
+static
+void *
+get_proc_helper(VdpFuncId func_id)
+{
+    void *func = NULL;
+    if (display.vdp_get_proc_address(display.vdp_device, func_id, &func) != VDP_STATUS_OK) {
+        trace_error("%s, can't get VDPAU function %d address\n", __func__, (int)func_id);
+        func = NULL;
+    }
+
+    return func;
+}
+
 int
 tables_open_display(void)
 {
@@ -220,6 +233,9 @@ tables_open_display(void)
     if (config.quirks.x_synchronize)
         XSynchronize(display.x, True);
 
+    display.va_available = 0;
+    display.vdpau_available = 0;
+
 #if HAVE_HWDEC
     display.va = vaGetDisplay(display.x);
     VAStatus status = vaInitialize(display.va, &major, &minor);
@@ -227,10 +243,54 @@ tables_open_display(void)
         trace_info_f("libva version %d.%d\n", major, minor);
         display.va_available = 1;
     } else {
-        // TODO: remember?
-        trace_info_f("no libva\n");
-        display.va_available = 0;
+        trace_info_f("%s, failed to initialize VA device, no VA-API available\n", __func__);
     }
+
+    VdpStatus vdp_status;
+    vdp_status = vdp_device_create_x11(display.x, DefaultScreen(display.x), &display.vdp_device,
+                                       &display.vdp_get_proc_address);
+    if (vdp_status == VDP_STATUS_OK && display.vdp_get_proc_address) {
+        display.vdp_get_error_string = get_proc_helper(VDP_FUNC_ID_GET_ERROR_STRING);
+        display.vdp_decoder_create = get_proc_helper(VDP_FUNC_ID_DECODER_CREATE);
+        display.vdp_decoder_destroy = get_proc_helper(VDP_FUNC_ID_DECODER_DESTROY);
+        display.vdp_decoder_render = get_proc_helper(VDP_FUNC_ID_DECODER_RENDER);
+        display.vdp_video_surface_create = get_proc_helper(VDP_FUNC_ID_VIDEO_SURFACE_CREATE);
+        display.vdp_video_surface_destroy = get_proc_helper(VDP_FUNC_ID_VIDEO_SURFACE_DESTROY);
+        display.vdp_presentation_queue_target_create_x11 =
+                                get_proc_helper(VDP_FUNC_ID_PRESENTATION_QUEUE_TARGET_CREATE_X11);
+        display.vdp_presentation_queue_target_destroy =
+                                    get_proc_helper(VDP_FUNC_ID_PRESENTATION_QUEUE_TARGET_DESTROY);
+        display.vdp_presentation_queue_create =
+                                            get_proc_helper(VDP_FUNC_ID_PRESENTATION_QUEUE_CREATE);
+        display.vdp_presentation_queue_destroy =
+                                            get_proc_helper(VDP_FUNC_ID_PRESENTATION_QUEUE_DESTROY);
+        display.vdp_presentation_queue_display =
+                                            get_proc_helper(VDP_FUNC_ID_PRESENTATION_QUEUE_DISPLAY);
+        display.vdp_output_surface_create = get_proc_helper(VDP_FUNC_ID_OUTPUT_SURFACE_CREATE);
+        display.vdp_output_surface_destroy = get_proc_helper(VDP_FUNC_ID_OUTPUT_SURFACE_DESTROY);
+        display.vdp_video_mixer_create = get_proc_helper(VDP_FUNC_ID_VIDEO_MIXER_CREATE);
+        display.vdp_video_mixer_destroy = get_proc_helper(VDP_FUNC_ID_VIDEO_MIXER_DESTROY);
+        display.vdp_video_mixer_render = get_proc_helper(VDP_FUNC_ID_VIDEO_MIXER_RENDER);
+
+        if (display.vdp_get_error_string && display.vdp_decoder_create &&
+            display.vdp_decoder_destroy && display.vdp_decoder_render &&
+            display.vdp_video_surface_create && display.vdp_video_surface_destroy &&
+            display.vdp_presentation_queue_target_create_x11 &&
+            display.vdp_presentation_queue_target_destroy &&
+            display.vdp_presentation_queue_create && display.vdp_presentation_queue_destroy &&
+            display.vdp_presentation_queue_display && display.vdp_output_surface_create &&
+            display.vdp_output_surface_destroy && display.vdp_video_mixer_create &&
+            display.vdp_video_mixer_destroy && display.vdp_video_mixer_render)
+        {
+            display.vdpau_available = 1;
+        } else {
+            trace_error("%s, some essential VDPAU functions missing\n", __func__);
+        }
+
+     } else {
+         trace_info_f("%s, failed to initialize VDPAU device, no VDPAU available\n", __func__);
+     }
+
 #endif // HAVE_HWDEC
 
     if (!glXQueryVersion(display.x, &major, &minor)) {

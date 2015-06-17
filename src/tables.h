@@ -35,6 +35,8 @@
 #if HAVE_HWDEC
 #include <va/va.h>
 #include <va/va_x11.h>
+#include <vdpau/vdpau.h>
+#include <vdpau/vdpau_x11.h>
 #endif // HAVE_HWDEC
 
 
@@ -56,8 +58,28 @@ typedef void
 struct display_s {
     Display                            *x;
 #if HAVE_HWDEC
+    unsigned int                        va_available;
     VADisplay                           va;
-    int                                 va_available;
+    unsigned int                        vdpau_available;
+    VdpDevice                           vdp_device;
+    VdpGetProcAddress                  *vdp_get_proc_address;
+    VdpGetErrorString                  *vdp_get_error_string;
+    VdpDecoderCreate                   *vdp_decoder_create;
+    VdpDecoderDestroy                  *vdp_decoder_destroy;
+    VdpDecoderRender                   *vdp_decoder_render;
+    VdpVideoSurfaceCreate              *vdp_video_surface_create;
+    VdpVideoSurfaceDestroy             *vdp_video_surface_destroy;
+    VdpPresentationQueueTargetCreateX11 *vdp_presentation_queue_target_create_x11;
+    VdpPresentationQueueTargetDestroy  *vdp_presentation_queue_target_destroy;
+    VdpPresentationQueueCreate         *vdp_presentation_queue_create;
+    VdpPresentationQueueDestroy        *vdp_presentation_queue_destroy;
+    VdpPresentationQueueDisplay        *vdp_presentation_queue_display;
+    VdpOutputSurfaceCreate             *vdp_output_surface_create;
+    VdpOutputSurfaceDestroy            *vdp_output_surface_destroy;
+    VdpVideoMixerCreate                *vdp_video_mixer_create;
+    VdpVideoMixerDestroy               *vdp_video_mixer_destroy;
+    VdpVideoMixerRender                *vdp_video_mixer_render;
+
 #endif // HAVE_HWDEC
     Cursor                              transparent_cursor;
     pthread_mutex_t                     lock;
