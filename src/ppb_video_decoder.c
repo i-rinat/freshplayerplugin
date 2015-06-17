@@ -885,6 +885,7 @@ ppb_video_decoder_assign_picture_buffers(PP_Resource video_decoder, uint32_t no_
             vd->buffers[k].vdp_presentation_queue = VDP_INVALID_HANDLE;
             vd->buffers[k].vdp_output_surface = VDP_INVALID_HANDLE;
 
+            XSync(display.x, False);
             st = display.vdp_presentation_queue_target_create_x11(
                                                     display.vdp_device, vd->buffers[k].pixmap,
                                                     &vd->buffers[k].vdp_presentation_queue_target);
