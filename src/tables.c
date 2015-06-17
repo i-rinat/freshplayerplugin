@@ -202,6 +202,7 @@ check_glx_extensions(void)
         glXGetProcAddress((GLubyte *)"glXReleaseTexImageEXT");
 }
 
+#if HAVE_HWDEC
 static
 void *
 get_proc_helper(VdpFuncId func_id)
@@ -316,6 +317,7 @@ deinitialize_vdpau(void)
         display.vdp_device = VDP_INVALID_HANDLE;
     }
 }
+#endif // HAVE_HWDEC
 
 int
 tables_open_display(void)
@@ -335,10 +337,10 @@ tables_open_display(void)
     if (config.quirks.x_synchronize)
         XSynchronize(display.x, True);
 
+#if HAVE_HWDEC
+
     display.va_available = 0;
     display.vdpau_available = 0;
-
-#if HAVE_HWDEC
 
     if (config.enable_vaapi)
         initialize_vaapi();
