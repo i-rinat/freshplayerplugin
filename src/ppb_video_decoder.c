@@ -327,7 +327,7 @@ get_format(struct AVCodecContext *s, const enum AVPixelFormat *fmt)
         if (fmt[k] == AV_PIX_FMT_VAAPI_VLD)
             have_vaapi = display.va_available;
         if (fmt[k] == AV_PIX_FMT_VDPAU)
-            have_vdpau = 1;
+            have_vdpau = display.vdpau_available;
     }
 
     trace_info_f("      VDPAU:  %s\n", have_vdpau ? "present" : "not present");
