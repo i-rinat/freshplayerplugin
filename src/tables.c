@@ -340,8 +340,11 @@ tables_open_display(void)
 
 #if HAVE_HWDEC
 
-    initialize_vaapi();
-    initialize_vdpau();
+    if (config.enable_vaapi)
+        initialize_vaapi();
+
+    if (config.enable_vdpau)
+        initialize_vdpau();
 
 #endif // HAVE_HWDEC
 
@@ -421,8 +424,11 @@ tables_close_display(void)
 
 #if HAVE_HWDEC
 
-    deinitialize_vaapi();
-    deinitialize_vdpau();
+    if (config.enable_vaapi)
+        deinitialize_vaapi();
+
+    if (config.enable_vdpau)
+        deinitialize_vdpau();
 
 #endif // HAVE_HWDEC
 

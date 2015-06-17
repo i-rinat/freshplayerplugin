@@ -71,3 +71,9 @@ enable_xembed = 1
 # if set to 1, fullscreen window will be kept always above browser, and hidden
 # from taskbar and pager
 tie_fullscreen_window_to_browser = 1
+
+# enable using of VA-API for hardware accelerated video decoding
+enable_vaapi = 1
+
+# enable using of VDPAU for hardware accelerated video decoding
+enable_vdpau = 1

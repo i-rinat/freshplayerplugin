@@ -43,6 +43,8 @@ struct fpp_config_s {
     double  device_scale;
     int     enable_windowed_mode;
     int     enable_xembed;
+    int     enable_vaapi;
+    int     enable_vdpau;
     int     tie_fullscreen_window_to_browser;
     struct {
         int   connect_first_loader_to_unrequested_stream;

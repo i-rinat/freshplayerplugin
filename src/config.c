@@ -44,6 +44,8 @@ static struct fpp_config_s default_config = {
     .device_scale        =      1.0,
     .enable_windowed_mode   =   1,
     .enable_xembed          =   1,
+    .enable_vaapi =             1,
+    .enable_vdpau =             1,
     .tie_fullscreen_window_to_browser = 1,
     .quirks = {
         .connect_first_loader_to_unrequested_stream = 0,
@@ -156,6 +158,8 @@ fpp_config_initialize(void)
     get_int(&cfg, "quirk_plasma5_screensaver", &config.quirks.plasma5_screensaver);
     get_int(&cfg, "enable_windowed_mode", &config.enable_windowed_mode);
     get_int(&cfg, "enable_xembed", &config.enable_xembed);
+    get_int(&cfg, "enable_vaapi", &config.enable_vaapi);
+    get_int(&cfg, "enable_vdpau", &config.enable_vdpau);
     get_int(&cfg, "tie_fullscreen_window_to_browser", &config.tie_fullscreen_window_to_browser);
 
     get_string(&cfg, "pepperflash_path", &config.pepperflash_path);
