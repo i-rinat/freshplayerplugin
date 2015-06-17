@@ -1516,7 +1516,13 @@ static
 void
 call_ppp_did_change_focus_comt(void *user_data, int32_t result)
 {
-    struct pp_instance_s *pp_i = user_data;
+    PP_Instance instance = GPOINTER_TO_INT(user_data);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+
+    // check if instance is still alive
+    if (!pp_i)
+        return;
+
     PP_Bool has_focus = result;
 
     // determine whenever we should pass focus event to the plugin instance
@@ -1544,8 +1550,8 @@ handle_focus_in_out_event(NPP npp, void *event)
             gtk_im_context_focus_out(pp_i->im_context);
     }
 
-    ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_ppp_did_change_focus_comt, pp_i), has_focus,
-                                  __func__);
+    ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_ppp_did_change_focus_comt,
+                                                GINT_TO_POINTER(pp_i->id)), has_focus, __func__);
     return 1;
 }
 
