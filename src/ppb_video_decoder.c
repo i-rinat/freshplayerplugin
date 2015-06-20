@@ -296,8 +296,21 @@ prepare_vdpau_context(struct pp_video_decoder_s *vd, int width, int height)
         }
     }
 
-    st = display.vdp_video_mixer_create(display.vdp_device, 0, NULL, 0, NULL, NULL,
-                                        &vd->vdp_video_mixer);
+    const VdpVideoMixerParameter param_names[] = {
+        VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH,
+        VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_HEIGHT,
+        VDP_VIDEO_MIXER_PARAMETER_CHROMA_TYPE,
+    };
+
+    const void * const param_values[] = {
+        &(uint32_t){width},
+        &(uint32_t){height},
+        &(VdpChromaType){VDP_CHROMA_TYPE_420},
+    };
+
+    st = display.vdp_video_mixer_create(display.vdp_device, 0, NULL,
+                                        sizeof(param_names)/sizeof(param_names[0]),
+                                        param_names, param_values, &vd->vdp_video_mixer);
     if (st != VDP_STATUS_OK) {
         report_vdpau_error(st, "VdpVideoMixerCreate", __func__);
         goto err;
