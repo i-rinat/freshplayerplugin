@@ -84,6 +84,7 @@ struct display_s {
 
 #endif // HAVE_HWDEC
     Cursor                              transparent_cursor;
+    pthread_mutexattr_t                 mutex_attr_recursive;
     pthread_mutex_t                     lock;
     XRenderPictFormat                  *pictfmt_rgb24;
     XRenderPictFormat                  *pictfmt_argb32;

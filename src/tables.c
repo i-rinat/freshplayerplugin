@@ -325,7 +325,10 @@ tables_open_display(void)
     int retval = 0;
     int major, minor;
 
-    pthread_mutex_init(&display.lock, NULL);
+    pthread_mutexattr_init(&display.mutex_attr_recursive);
+    pthread_mutexattr_settype(&display.mutex_attr_recursive, PTHREAD_MUTEX_RECURSIVE);
+
+    pthread_mutex_init(&display.lock, &display.mutex_attr_recursive);
     pthread_mutex_lock(&display.lock);
     display.x = XOpenDisplay(NULL);
     if (!display.x) {
@@ -438,6 +441,7 @@ tables_close_display(void)
     XCloseDisplay(display.x);
     pthread_mutex_unlock(&display.lock);
     pthread_mutex_destroy(&display.lock);
+    pthread_mutexattr_destroy(&display.mutex_attr_recursive);
 }
 
 PP_Instance
