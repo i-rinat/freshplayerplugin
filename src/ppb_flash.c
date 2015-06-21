@@ -39,6 +39,7 @@
 #include <ppapi/c/pp_errors.h>
 #include "screensaver_control.h"
 #include "pp_interface.h"
+#include "ppb_video_capture.h"
 
 
 void
@@ -418,7 +419,12 @@ int32_t
 ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resource video_capture,
                                           struct PP_ArrayOutput devices)
 {
-    return 0;
+    int32_t ret = ppb_video_capture_enumerate_devices(video_capture, devices,
+                                                      PP_MakeCCB(nop_callback, NULL));
+    if (ret == PP_OK || ret == PP_OK_COMPLETIONPENDING)
+        return PP_OK;
+
+    return ret;
 }
 
 void
@@ -577,7 +583,7 @@ int32_t
 trace_ppb_flash_enumerate_video_capture_devices(PP_Instance instance, PP_Resource video_capture,
                                                 struct PP_ArrayOutput devices)
 {
-    trace_info("[PPB] {zilch} %s instance=%d, video_capture=%d, "
+    trace_info("[PPB] {full} %s instance=%d, video_capture=%d, "
                "devices={.GetDataBuffer=%p, .user_data=%p}\n", __func__+6, instance, video_capture,
                devices.GetDataBuffer, devices.user_data);
     return ppb_flash_enumerate_video_capture_devices(instance, video_capture, devices);
@@ -637,7 +643,7 @@ const struct PPB_Flash_13_0 ppb_flash_interface_13_0 = {
     .UpdateActivity =               TWRAPF(ppb_flash_update_activity),
     .GetSetting =                   TWRAPF(ppb_flash_get_setting),
     .SetCrashData =                 TWRAPF(ppb_flash_set_crash_data),
-    .EnumerateVideoCaptureDevices = TWRAPZ(ppb_flash_enumerate_video_capture_devices),
+    .EnumerateVideoCaptureDevices = TWRAPF(ppb_flash_enumerate_video_capture_devices),
 };
 
 const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
@@ -657,7 +663,7 @@ const struct PPB_Flash_12_6 ppb_flash_interface_12_6 = {
     .GetSettingInt =                TWRAPZ(ppb_flash_get_setting_int),
     .GetSetting =                   TWRAPF(ppb_flash_get_setting),
     .SetCrashData =                 TWRAPF(ppb_flash_set_crash_data),
-    .EnumerateVideoCaptureDevices = TWRAPZ(ppb_flash_enumerate_video_capture_devices),
+    .EnumerateVideoCaptureDevices = TWRAPF(ppb_flash_enumerate_video_capture_devices),
 };
 
 static
