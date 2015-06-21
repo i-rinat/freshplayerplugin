@@ -51,6 +51,7 @@ static gchar *module_descr;
 static GList *tried_files = NULL;
 static gchar *module_file_name = NULL;
 static struct pp_instance_s *aux_instance = NULL;
+static int np_initialize_was_called = 0;
 
 static
 void
@@ -403,6 +404,13 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
     trace_info_f("[NP] %s aNPNFuncs=%p, aNPPFuncs=%p, browser API version = %u\n", __func__,
                  aNPNFuncs, aNPPFuncs, aNPNFuncs->version);
+
+    if (np_initialize_was_called) {
+        trace_warning("NP_Initialize was called more than once\n");
+        return NPERR_NO_ERROR;
+    }
+
+    np_initialize_was_called = 1;
 
     // set logging-only error handler.
     // Ignore a previous one, we have no plans to restore it
