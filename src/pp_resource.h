@@ -72,6 +72,7 @@
 #include <libavcodec/vdpau.h>
 #include <va/va.h>
 #include <vdpau/vdpau.h>
+#include "ffmpeg-compat.h"
 #endif // HAVE_HWDEC
 
 
@@ -467,6 +468,16 @@ enum hwdec_api_e {
     HWDEC_VAAPI,
     HWDEC_VDPAU,
 };
+
+#if HAVE_HWDEC
+#if !HAVE_AVVDPAUContext
+struct AVVDPAUContext {
+    VdpDecoder decoder;
+    VdpDecoderRender *render;
+    char reserved[256];
+};
+#endif // !HAVE_AVVDPAUContext
+#endif // HAVE_HWDEC
 
 struct pp_video_decoder_s {
     COMMON_STRUCTURE_FIELDS

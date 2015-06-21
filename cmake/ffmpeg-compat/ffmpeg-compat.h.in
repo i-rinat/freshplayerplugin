@@ -5,3 +5,4 @@
 #define HAVE_av_frame_alloc             (@HAVE_av_frame_alloc@)
 #define HAVE_av_frame_free              (@HAVE_av_frame_free@)
 #define HAVE_avcodec_free_context       (@HAVE_avcodec_free_context@)
+#define HAVE_AVVDPAUContext             (@HAVE_AVVDPAUContext@)

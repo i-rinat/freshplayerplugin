@@ -28,6 +28,7 @@ MACRO_C_SOURCE_CHECK(cfg_avpixelformat.c HAVE_AVPixelFormat)
 MACRO_C_SOURCE_CHECK(cfg_av_pix_fmt_vdpau.c HAVE_AV_PIX_FMT_VDPAU)
 MACRO_C_SOURCE_CHECK(cfg_avcodecid.c HAVE_AVCodecID)
 MACRO_C_SOURCE_CHECK(cfg_avcodeccontext_get_buffer2.c HAVE_AVCodecContext_get_buffer2)
+MACRO_C_SOURCE_CHECK(cfg_AVVDPAUContext.c HAVE_AVVDPAUContext)
 
 MACRO_SYMBOL_CHECK(av_frame_alloc "libavcodec/avcodec.h" HAVE_av_frame_alloc)
 MACRO_SYMBOL_CHECK(av_frame_free "libavcodec/avcodec.h" HAVE_av_frame_free)
