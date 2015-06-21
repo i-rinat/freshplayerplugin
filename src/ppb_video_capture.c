@@ -33,13 +33,47 @@
 #include "ppb_var.h"
 #include "ppb_buffer.h"
 #include <linux/videodev2.h>
-#include <libv4l2.h>
 #include "pp_interface.h"
 #include "eintr_retry.h"
 #include <dirent.h>
+#include <sys/ioctl.h>
+#if HAVE_LIBV4L2
+#include <libv4l2.h>
+#endif // HAVE_LIBV4L2
 
 
 const char *default_capture_device = "/dev/video0";
+
+#if !HAVE_LIBV4L2
+// define simple wrappers, if libv4l2 is not used
+static
+ssize_t
+v4l2_read(int fd, void *buffer, size_t n)
+{
+    return read(fd, buffer, n);
+}
+
+static
+int
+v4l2_open(const char *filename, int oflag)
+{
+    return open(filename, oflag);
+}
+
+static
+int
+v4l2_close(int fd)
+{
+    return close(fd);
+}
+
+static
+int
+v4l2_ioctl(int fd, unsigned long int request, void *data)
+{
+    return ioctl(fd, request, data);
+}
+#endif // !HAVE_LIBV4L2
 
 
 PP_Resource

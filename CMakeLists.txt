@@ -44,7 +44,6 @@ pkg_check_modules(REQ
     pangoft2
     freetype2
     openssl
-    libv4l2
     REQUIRED)
 
 # libdl.so, librt.so, and libm.so
@@ -118,6 +117,18 @@ if (WITH_HWDEC)
     list(APPEND REQ_LIBRARIES    ${HWDEC_LIBRARIES})
     add_subdirectory(cmake/ffmpeg-compat)
     include_directories("${CMAKE_BINARY_DIR}")
+endif()
+
+# using libv4l2 for colorspace conversion
+set(WITH_LIBV4L2 TRUE CACHE STRING "use libv4l2 for colorspace conversion")
+if (WITH_LIBV4L2)
+    add_definitions(-DHAVE_LIBV4L2=1)
+    pkg_check_modules(LIBV4L2 libv4l2 REQUIRED)
+    list(APPEND REQ_LIBRARY_DIRS ${LIBV4L2_LIBRARY_DIRS})
+    list(APPEND REQ_INCLUDE_DIRS ${LIBV4L2_INCLUDE_DIRS})
+    list(APPEND REQ_LIBRARIES    ${LIBV4L2_LIBRARIES})
+else()
+    add_definitions(-DHAVE_LIBV4L2=0)
 endif()
 
 list(APPEND REQ_LIBRARIES img-resources)
