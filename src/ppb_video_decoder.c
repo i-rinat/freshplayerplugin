@@ -322,7 +322,6 @@ prepare_vdpau_context(struct pp_video_decoder_s *vd, int width, int height)
 
 err:
     vd->failed_state = 1;
-    deinitialize_decoder(vd);
     vd->ppp_video_decoder_dev->NotifyError(vd->instance->id, vd->self_id,
                                            PP_VIDEODECODERERROR_UNREADABLE_INPUT);
     return AV_PIX_FMT_NONE;
