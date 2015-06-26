@@ -133,8 +133,8 @@ deinitialize_decoder(struct pp_video_decoder_s *vd)
             vd->va_context.config_id = 0;
         }
 
-        vaDestroySurfaces(display.va, vd->surfaces, MAX_VIDEO_SURFACES);
-        for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+        vaDestroySurfaces(display.va, vd->surfaces, MAX_VA_SURFACES);
+        for (uintptr_t k = 0; k < MAX_VA_SURFACES; k ++) {
             vd->surfaces[k] = VA_INVALID_SURFACE;
             vd->surface_used[k] = 0;
         }
@@ -151,7 +151,7 @@ deinitialize_decoder(struct pp_video_decoder_s *vd)
             vd->vdp_video_mixer = VDP_INVALID_HANDLE;
         }
 
-        for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+        for (uintptr_t k = 0; k < MAX_VDP_SURFACES; k ++) {
             if (vd->vdp_video_surfaces[k] != VDP_INVALID_HANDLE) {
                 display.vdp_video_surface_destroy(vd->vdp_video_surfaces[k]);
                 vd->vdp_video_surfaces[k] = VDP_INVALID_HANDLE;
@@ -238,10 +238,10 @@ prepare_vaapi_context(struct pp_video_decoder_s *vd, int width, int height)
 
 #if VA_CHECK_VERSION(0, 34, 0)
     status = vaCreateSurfaces(display.va, VA_RT_FORMAT_YUV420, width, height,
-                              vd->surfaces, MAX_VIDEO_SURFACES, NULL, 0);
+                              vd->surfaces, MAX_VA_SURFACES, NULL, 0);
 #else
     status = vaCreateSurfaces(display.va, width, height, VA_RT_FORMAT_YUV420,
-                              MAX_VIDEO_SURFACES, vd->surfaces);
+                              MAX_VA_SURFACES, vd->surfaces);
 #endif
     if (status != VA_STATUS_SUCCESS) {
         trace_error("%s, can't create VA surfaces\n", __func__);
@@ -249,7 +249,7 @@ prepare_vaapi_context(struct pp_video_decoder_s *vd, int width, int height)
     }
 
     status = vaCreateContext(display.va, vd->va_context.config_id, width, height,
-                             VA_PROGRESSIVE, vd->surfaces, MAX_VIDEO_SURFACES,
+                             VA_PROGRESSIVE, vd->surfaces, MAX_VA_SURFACES,
                              &vd->va_context.context_id);
     if (status != VA_STATUS_SUCCESS) {
         trace_error("%s, can't create VA context\n", __func__);
@@ -277,17 +277,17 @@ prepare_vdpau_context(struct pp_video_decoder_s *vd, int width, int height)
     vd->vdpau_context.decoder = VDP_INVALID_HANDLE;
     vd->vdp_video_mixer = VDP_INVALID_HANDLE;
 
-    for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++)
+    for (uintptr_t k = 0; k < MAX_VDP_SURFACES; k ++)
         vd->vdp_video_surfaces[k] = VDP_INVALID_HANDLE;
 
     st = display.vdp_decoder_create(display.vdp_device, VDP_DECODER_PROFILE_H264_HIGH, width,
-                                    height, MAX_VIDEO_SURFACES, &vd->vdpau_context.decoder);
+                                    height, MAX_VDP_SURFACES, &vd->vdpau_context.decoder);
     if (st != VDP_STATUS_OK) {
         report_vdpau_error(st, "VdpDecoderCreate", __func__);
         goto err;
     }
 
-    for (uintptr_t k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+    for (uintptr_t k = 0; k < MAX_VDP_SURFACES; k ++) {
         st = display.vdp_video_surface_create(display.vdp_device, VDP_CHROMA_TYPE_420,
                                               width, height, &vd->vdp_video_surfaces[k]);
         if (st != VDP_STATUS_OK) {
@@ -369,7 +369,7 @@ release_buffer2(void *opaque, uint8_t *data)
     case HWDEC_VAAPI:
         {
             VASurfaceID surface = GPOINTER_TO_SIZE(data);
-            for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+            for (int k = 0; k < MAX_VA_SURFACES; k ++) {
                 if (surface == vd->surfaces[k]) {
                     vd->surface_used[k] = 0;
                 }
@@ -380,7 +380,7 @@ release_buffer2(void *opaque, uint8_t *data)
     case HWDEC_VDPAU:
         {
             VdpVideoSurface surface = GPOINTER_TO_SIZE(data);
-            for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+            for (int k = 0; k < MAX_VDP_SURFACES; k ++) {
                 if (surface == vd->vdp_video_surfaces[k]) {
                     vd->surface_used[k] = 0;
                 }
@@ -408,7 +408,7 @@ get_buffer2(struct AVCodecContext *s, AVFrame *pic, int flags)
     case HWDEC_VAAPI:
         {
             VASurfaceID surface = VA_INVALID_SURFACE;
-            for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+            for (int k = 0; k < MAX_VA_SURFACES; k ++) {
                 if (!vd->surface_used[k]) {
                     surface = vd->surfaces[k];
                     vd->surface_used[k] = 1;
@@ -431,7 +431,7 @@ get_buffer2(struct AVCodecContext *s, AVFrame *pic, int flags)
     case HWDEC_VDPAU:
         {
             VdpVideoSurface surface = VDP_INVALID_HANDLE;
-            for (int k = 0; k < MAX_VIDEO_SURFACES; k ++) {
+            for (int k = 0; k < MAX_VDP_SURFACES; k ++) {
                 if (!vd->surface_used[k]) {
                     surface = vd->vdp_video_surfaces[k];
                     vd->surface_used[k] = 1;
@@ -651,13 +651,20 @@ static
 void
 request_buffers(struct pp_video_decoder_s *vd)
 {
+    int requested_buffer_count;
     const PP_Instance instance = vd->instance->id;
     const struct PP_Size dimensions = { .width = vd->avctx->width,
                                         .height = vd->avctx->height };
 
+    switch (vd->hwdec_api) {
+    case HWDEC_VAAPI:   requested_buffer_count = MAX_VA_SURFACES; break;
+    case HWDEC_VDPAU:   requested_buffer_count = MAX_VDP_SURFACES; break;
+    default:            requested_buffer_count = 5; break; // just a number, no particular reason
+    }
+
     pp_resource_release(vd->self_id);
 
-    vd->ppp_video_decoder_dev->ProvidePictureBuffers(instance, vd->self_id, MAX_VIDEO_SURFACES,
+    vd->ppp_video_decoder_dev->ProvidePictureBuffers(instance, vd->self_id, requested_buffer_count,
                                                      &dimensions, GL_TEXTURE_2D);
     pp_resource_acquire(vd->self_id, PP_RESOURCE_VIDEO_DECODER);
 }

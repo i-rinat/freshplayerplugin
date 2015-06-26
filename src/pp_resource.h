@@ -76,7 +76,8 @@
 #endif // HAVE_HWDEC
 
 
-#define MAX_VIDEO_SURFACES              21  // H.264: 1 current and up to 20 references
+#define MAX_VA_SURFACES         21  // H.264: 16 references and 5 additional
+#define MAX_VDP_SURFACES        16  // H.264: 16 references
 
 
 #define free_and_nullify(item)          \
@@ -508,9 +509,9 @@ struct pp_video_decoder_s {
     } *buffers;
     struct vaapi_context    va_context;
     struct AVVDPAUContext   vdpau_context;
-    VASurfaceID             surfaces[MAX_VIDEO_SURFACES];
-    VdpVideoSurface         vdp_video_surfaces[MAX_VIDEO_SURFACES];
-    int                     surface_used[MAX_VIDEO_SURFACES];
+    VASurfaceID             surfaces[MAX_VA_SURFACES];
+    VdpVideoSurface         vdp_video_surfaces[MAX_VDP_SURFACES];
+    int                     surface_used[MAX_VA_SURFACES]; // TODO: use overall maximum
 
     VdpVideoMixer           vdp_video_mixer;
 
