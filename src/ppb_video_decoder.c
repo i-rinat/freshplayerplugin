@@ -586,6 +586,11 @@ ppb_video_decoder_create(PP_Instance instance, PP_Resource context, PP_VideoDeco
         return 0;
     }
 
+    if (!display.glXReleaseTexImageEXT) {
+        trace_info_f("      no glXReleaseTexImageEXT available\n");
+        return 0;
+    }
+
     switch (profile) {
     case PP_VIDEODECODER_H264PROFILE_BASELINE:
     case PP_VIDEODECODER_H264PROFILE_MAIN:
@@ -944,8 +949,23 @@ ppb_video_decoder_reuse_picture_buffer(PP_Resource video_decoder, int32_t pictur
     }
 
     for (uintptr_t k = 0; k < vd->buffer_count; k ++) {
-        if (vd->buffers[k].id == picture_buffer_id && vd->buffers[k].used)
+        if (vd->buffers[k].id == picture_buffer_id && vd->buffers[k].used) {
             vd->buffers[k].used = 0;
+
+            struct pp_graphics3d_s *g3d = pp_resource_acquire(vd->graphics3d,
+                                                              PP_RESOURCE_GRAPHICS3D);
+            if (g3d) {
+                pthread_mutex_lock(&display.lock);
+                glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
+                glBindTexture(GL_TEXTURE_2D, vd->buffers[k].texture_id);
+                display.glXReleaseTexImageEXT(display.x, vd->buffers[k].glx_pixmap, GLX_FRONT_EXT);
+                glXMakeCurrent(display.x, None, NULL);
+                XFlush(display.x);
+                pthread_mutex_unlock(&display.lock);
+
+                pp_resource_release(vd->graphics3d);
+            }
+        }
     }
 
     pp_resource_release(video_decoder);
