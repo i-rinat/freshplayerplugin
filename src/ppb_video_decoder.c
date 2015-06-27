@@ -905,29 +905,34 @@ ppb_video_decoder_assign_picture_buffers(PP_Resource video_decoder, uint32_t no_
         }
 
         if (vd->hwdec_api == HWDEC_VDPAU) {
-            VdpStatus st;
+            VdpStatus                   st;
+            VdpPresentationQueueTarget  pq_target;
+            VdpPresentationQueue        pq;
+            VdpOutputSurface            output_surface;
 
-            pthread_mutex_lock(&display.lock);
             vd->buffers[k].vdp_presentation_queue_target = VDP_INVALID_HANDLE;
             vd->buffers[k].vdp_presentation_queue = VDP_INVALID_HANDLE;
             vd->buffers[k].vdp_output_surface = VDP_INVALID_HANDLE;
 
+            pthread_mutex_lock(&display.lock);
             XSync(display.x, False);
             st = display.vdp_presentation_queue_target_create_x11(
                                                     display.vdp_device, vd->buffers[k].pixmap,
-                                                    &vd->buffers[k].vdp_presentation_queue_target);
+                                                    &pq_target);
             report_vdpau_error(st, "VdpPresentationQueueTargetCreateX11", __func__);
 
-            st = display.vdp_presentation_queue_create(display.vdp_device,
-                                                       vd->buffers[k].vdp_presentation_queue_target,
-                                                       &vd->buffers[k].vdp_presentation_queue);
+            st = display.vdp_presentation_queue_create(display.vdp_device, pq_target, &pq);
             report_vdpau_error(st, "VdpPresentationQueueCreate", __func__);
 
             st = display.vdp_output_surface_create(display.vdp_device, VDP_RGBA_FORMAT_B8G8R8A8,
                                                    vd->buffers[k].width, vd->buffers[k].height,
-                                                   &vd->buffers[k].vdp_output_surface);
+                                                   &output_surface);
             report_vdpau_error(st, "VdpOutputSurfaceCreate", __func__);
             pthread_mutex_unlock(&display.lock);
+
+            vd->buffers[k].vdp_presentation_queue_target = pq_target;
+            vd->buffers[k].vdp_presentation_queue =        pq;
+            vd->buffers[k].vdp_output_surface =            output_surface;
         }
     }
 
