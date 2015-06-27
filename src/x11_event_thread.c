@@ -289,6 +289,12 @@ x11_event_thread_func(void *param)
     while (1) {
         int ret = poll(fds, sizeof(fds)/sizeof(fds[0]), -1);
 
+        if (ret == -1) {
+            trace_error("%s, poll() failed, errno=%d\n", __func__, errno);
+            sleep(1);   // relax tight loop
+            continue;
+        }
+
         if (fds[0].revents & POLLIN) {
             // task has come
             struct task_s       task;
