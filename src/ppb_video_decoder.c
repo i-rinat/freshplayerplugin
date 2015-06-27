@@ -884,7 +884,8 @@ ppb_video_decoder_assign_picture_buffers(PP_Resource video_decoder, uint32_t no_
         int tfp_pixmap_attrs[] = {
             GLX_TEXTURE_TARGET_EXT, GLX_TEXTURE_2D_EXT,
             GLX_MIPMAP_TEXTURE_EXT, GL_FALSE,
-            GLX_TEXTURE_FORMAT_EXT, GLX_TEXTURE_FORMAT_RGB_EXT,
+            GLX_TEXTURE_FORMAT_EXT, g3d->depth == 32 ? GLX_TEXTURE_FORMAT_RGBA_EXT
+                                                     : GLX_TEXTURE_FORMAT_RGB_EXT,
             GL_NONE
         };
         vd->buffers[k].glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config,
