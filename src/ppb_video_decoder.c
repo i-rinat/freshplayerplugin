@@ -372,6 +372,7 @@ release_buffer2(void *opaque, uint8_t *data)
             for (int k = 0; k < MAX_VA_SURFACES; k ++) {
                 if (surface == vd->surfaces[k]) {
                     vd->surface_used[k] = 0;
+                    break;
                 }
             }
         }
@@ -383,6 +384,7 @@ release_buffer2(void *opaque, uint8_t *data)
             for (int k = 0; k < MAX_VDP_SURFACES; k ++) {
                 if (surface == vd->vdp_video_surfaces[k]) {
                     vd->surface_used[k] = 0;
+                    break;
                 }
             }
         }
