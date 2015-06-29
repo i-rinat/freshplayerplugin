@@ -76,9 +76,12 @@
 #endif // HAVE_HWDEC
 
 
-#define MAX_VA_SURFACES         21  // H.264: 16 references and 5 additional
+#define MAX_VA_SURFACES         18  // H.264: 16 references and 2 working
 #define MAX_VDP_SURFACES        16  // H.264: 16 references
 
+// H.264 have maximum 16 reference frames. Plus one current. Plus one frame for delayed
+// release when PPAPI client first calls .decode() and only then calls
+// .reuse_picture_buffer()
 
 #define free_and_nullify(item)          \
     do {                                \
