@@ -508,7 +508,6 @@ struct pp_video_decoder_s {
         GLXPixmap   glx_pixmap;
         VdpPresentationQueueTarget  vdp_presentation_queue_target;
         VdpPresentationQueue        vdp_presentation_queue;
-        VdpOutputSurface            vdp_output_surface;
     } *buffers;
     struct vaapi_context    va_context;
     struct AVVDPAUContext   vdpau_context;
@@ -517,6 +516,7 @@ struct pp_video_decoder_s {
     int                     surface_used[MAX_VA_SURFACES]; // TODO: use overall maximum
 
     VdpVideoMixer           vdp_video_mixer;
+    VdpOutputSurface        vdp_output_surface;
 
     unsigned int            initialized : 1;
     unsigned int            buffers_were_requested : 1;

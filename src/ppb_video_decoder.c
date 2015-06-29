@@ -151,6 +151,11 @@ deinitialize_decoder(struct pp_video_decoder_s *vd)
             vd->vdp_video_mixer = VDP_INVALID_HANDLE;
         }
 
+        if (vd->vdp_output_surface != VDP_INVALID_HANDLE) {
+            display.vdp_output_surface_destroy(vd->vdp_output_surface);
+            vd->vdp_output_surface = VDP_INVALID_HANDLE;
+        }
+
         for (uintptr_t k = 0; k < MAX_VDP_SURFACES; k ++) {
             if (vd->vdp_video_surfaces[k] != VDP_INVALID_HANDLE) {
                 display.vdp_video_surface_destroy(vd->vdp_video_surfaces[k]);
@@ -160,11 +165,6 @@ deinitialize_decoder(struct pp_video_decoder_s *vd)
         }
 
         for (uintptr_t k = 0; k < vd->buffer_count; k ++) {
-            if (vd->buffers[k].vdp_output_surface != VDP_INVALID_HANDLE) {
-                display.vdp_output_surface_destroy(vd->buffers[k].vdp_output_surface);
-                vd->buffers[k].vdp_output_surface = VDP_INVALID_HANDLE;
-            }
-
             if (vd->buffers[k].vdp_presentation_queue != VDP_INVALID_HANDLE) {
                 display.vdp_presentation_queue_destroy(vd->buffers[k].vdp_presentation_queue);
                 vd->buffers[k].vdp_presentation_queue = VDP_INVALID_HANDLE;
@@ -276,6 +276,7 @@ prepare_vdpau_context(struct pp_video_decoder_s *vd, int width, int height)
     vd->hwdec_api = HWDEC_VDPAU;
     vd->vdpau_context.decoder = VDP_INVALID_HANDLE;
     vd->vdp_video_mixer = VDP_INVALID_HANDLE;
+    vd->vdp_output_surface = VDP_INVALID_HANDLE;
 
     for (uintptr_t k = 0; k < MAX_VDP_SURFACES; k ++)
         vd->vdp_video_surfaces[k] = VDP_INVALID_HANDLE;
@@ -313,6 +314,13 @@ prepare_vdpau_context(struct pp_video_decoder_s *vd, int width, int height)
                                         param_names, param_values, &vd->vdp_video_mixer);
     if (st != VDP_STATUS_OK) {
         report_vdpau_error(st, "VdpVideoMixerCreate", __func__);
+        goto err;
+    }
+
+    st = display.vdp_output_surface_create(display.vdp_device, VDP_RGBA_FORMAT_B8G8R8A8,
+                                           width, height, &vd->vdp_output_surface);
+    if (st != VDP_STATUS_OK) {
+        report_vdpau_error(st, "VdpOutputSurfaceCreate", __func__);
         goto err;
     }
 
@@ -732,12 +740,12 @@ issue_frame(struct pp_video_decoder_s *vd)
             st = display.vdp_video_mixer_render(vd->vdp_video_mixer, VDP_INVALID_HANDLE, NULL,
                                                 VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME,
                                                 0, NULL, vdp_surf, 0, NULL, NULL,
-                                                vd->buffers[idx].vdp_output_surface, NULL, NULL,
+                                                vd->vdp_output_surface, NULL, NULL,
                                                 0, NULL);
             report_vdpau_error(st, "VdpVideoMixerRender", __func__);
 
             st = display.vdp_presentation_queue_display(vd->buffers[idx].vdp_presentation_queue,
-                                                        vd->buffers[idx].vdp_output_surface,
+                                                        vd->vdp_output_surface,
                                                         vd->buffers[idx].width,
                                                         vd->buffers[idx].height, 0);
             report_vdpau_error(st, "VdpPresentationQueueDisplay", __func__);
@@ -908,11 +916,9 @@ ppb_video_decoder_assign_picture_buffers(PP_Resource video_decoder, uint32_t no_
             VdpStatus                   st;
             VdpPresentationQueueTarget  pq_target;
             VdpPresentationQueue        pq;
-            VdpOutputSurface            output_surface;
 
             vd->buffers[k].vdp_presentation_queue_target = VDP_INVALID_HANDLE;
             vd->buffers[k].vdp_presentation_queue = VDP_INVALID_HANDLE;
-            vd->buffers[k].vdp_output_surface = VDP_INVALID_HANDLE;
 
             pthread_mutex_lock(&display.lock);
             XSync(display.x, False);
@@ -923,16 +929,10 @@ ppb_video_decoder_assign_picture_buffers(PP_Resource video_decoder, uint32_t no_
 
             st = display.vdp_presentation_queue_create(display.vdp_device, pq_target, &pq);
             report_vdpau_error(st, "VdpPresentationQueueCreate", __func__);
-
-            st = display.vdp_output_surface_create(display.vdp_device, VDP_RGBA_FORMAT_B8G8R8A8,
-                                                   vd->buffers[k].width, vd->buffers[k].height,
-                                                   &output_surface);
-            report_vdpau_error(st, "VdpOutputSurfaceCreate", __func__);
             pthread_mutex_unlock(&display.lock);
 
             vd->buffers[k].vdp_presentation_queue_target = pq_target;
             vd->buffers[k].vdp_presentation_queue =        pq;
-            vd->buffers[k].vdp_output_surface =            output_surface;
         }
     }
 
