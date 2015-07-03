@@ -81,3 +81,7 @@ trick used by libevent2's DNS client. Configuration parameter `randomize_dns_cas
 used to control whenever that trick is used. If you've enabled it, and have network
 issues, turn it off again.
 (See [dns0x20](https://tools.ietf.org/html/draft-vixie-dnsext-dns0x20-00) for details).
+
+## Where is `mms.cfg`?
+
+Try `~/.config/freshwrapper-data/Shockwave Flash/System/mms.cfg`
