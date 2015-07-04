@@ -205,7 +205,10 @@ is_dbus_based_screensaver_active(const char *d_service, const char *d_path,
 
     GVariant *v = g_dbus_message_get_body(reply);
     v = g_variant_get_child_value(v, 0);
-    ret = g_variant_get_boolean(v);
+    if (g_variant_is_of_type(v, G_VARIANT_TYPE_BOOLEAN))
+        ret = g_variant_get_boolean(v);
+    else
+        ret = 0;
 
 err:
     if (reply)
