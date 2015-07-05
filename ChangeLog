@@ -1,3 +1,13 @@
+2015-07-05  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.3.1
+	* core: make compilable against wider range of ffmpeg/libav
+	versions
+	* graphics: inherit Visual from Xembed socket window
+	* graphics: use XRender for transparent 2d explicitly
+	* video: add decoding through VDPAU
+	* core: fix crash on double NP_Initialize call
+
 2015-06-10  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.3.0
