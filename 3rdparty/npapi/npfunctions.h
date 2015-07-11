@@ -6,13 +6,6 @@
 #ifndef npfunctions_h_
 #define npfunctions_h_
 
-#ifdef __OS2__
-#pragma pack(1)
-#define NP_LOADDS _System
-#else
-#define NP_LOADDS
-#endif
-
 #include "npapi.h"
 #include "npruntime.h"
 
@@ -20,27 +13,27 @@
 #include <jni.h>
 #endif
 
-typedef NPError      (* NP_LOADDS NPP_NewProcPtr)(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
-typedef NPError      (* NP_LOADDS NPP_DestroyProcPtr)(NPP instance, NPSavedData** save);
-typedef NPError      (* NP_LOADDS NPP_SetWindowProcPtr)(NPP instance, NPWindow* window);
-typedef NPError      (* NP_LOADDS NPP_NewStreamProcPtr)(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
-typedef NPError      (* NP_LOADDS NPP_DestroyStreamProcPtr)(NPP instance, NPStream* stream, NPReason reason);
-typedef int32_t      (* NP_LOADDS NPP_WriteReadyProcPtr)(NPP instance, NPStream* stream);
-typedef int32_t      (* NP_LOADDS NPP_WriteProcPtr)(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer);
-typedef void         (* NP_LOADDS NPP_StreamAsFileProcPtr)(NPP instance, NPStream* stream, const char* fname);
-typedef void         (* NP_LOADDS NPP_PrintProcPtr)(NPP instance, NPPrint* platformPrint);
-typedef int16_t      (* NP_LOADDS NPP_HandleEventProcPtr)(NPP instance, void* event);
-typedef void         (* NP_LOADDS NPP_URLNotifyProcPtr)(NPP instance, const char* url, NPReason reason, void* notifyData);
+typedef NPError      (* NPP_NewProcPtr)(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
+typedef NPError      (* NPP_DestroyProcPtr)(NPP instance, NPSavedData** save);
+typedef NPError      (* NPP_SetWindowProcPtr)(NPP instance, NPWindow* window);
+typedef NPError      (* NPP_NewStreamProcPtr)(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
+typedef NPError      (* NPP_DestroyStreamProcPtr)(NPP instance, NPStream* stream, NPReason reason);
+typedef int32_t      (* NPP_WriteReadyProcPtr)(NPP instance, NPStream* stream);
+typedef int32_t      (* NPP_WriteProcPtr)(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer);
+typedef void         (* NPP_StreamAsFileProcPtr)(NPP instance, NPStream* stream, const char* fname);
+typedef void         (* NPP_PrintProcPtr)(NPP instance, NPPrint* platformPrint);
+typedef int16_t      (* NPP_HandleEventProcPtr)(NPP instance, void* event);
+typedef void         (* NPP_URLNotifyProcPtr)(NPP instance, const char* url, NPReason reason, void* notifyData);
 /* Any NPObjects returned to the browser via NPP_GetValue should be retained
    by the plugin on the way out. The browser is responsible for releasing. */
-typedef NPError      (* NP_LOADDS NPP_GetValueProcPtr)(NPP instance, NPPVariable variable, void *ret_value);
-typedef NPError      (* NP_LOADDS NPP_SetValueProcPtr)(NPP instance, NPNVariable variable, void *value);
-typedef NPBool       (* NP_LOADDS NPP_GotFocusPtr)(NPP instance, NPFocusDirection direction);
-typedef void         (* NP_LOADDS NPP_LostFocusPtr)(NPP instance);
-typedef void         (* NP_LOADDS NPP_URLRedirectNotifyPtr)(NPP instance, const char* url, int32_t status, void* notifyData);
-typedef NPError      (* NP_LOADDS NPP_ClearSiteDataPtr)(const char* site, uint64_t flags, uint64_t maxAge);
-typedef char**       (* NP_LOADDS NPP_GetSitesWithDataPtr)(void);
-typedef void         (* NP_LOADDS NPP_DidCompositePtr)(NPP instance);
+typedef NPError      (* NPP_GetValueProcPtr)(NPP instance, NPPVariable variable, void *ret_value);
+typedef NPError      (* NPP_SetValueProcPtr)(NPP instance, NPNVariable variable, void *value);
+typedef NPBool       (* NPP_GotFocusPtr)(NPP instance, NPFocusDirection direction);
+typedef void         (* NPP_LostFocusPtr)(NPP instance);
+typedef void         (* NPP_URLRedirectNotifyPtr)(NPP instance, const char* url, int32_t status, void* notifyData);
+typedef NPError      (* NPP_ClearSiteDataPtr)(const char* site, uint64_t flags, uint64_t maxAge);
+typedef char**       (* NPP_GetSitesWithDataPtr)(void);
+typedef void         (* NPP_DidCompositePtr)(NPP instance);
 
 typedef NPError      (*NPN_GetValueProcPtr)(NPP instance, NPNVariable variable, void *ret_value);
 typedef NPError      (*NPN_SetValueProcPtr)(NPP instance, NPPVariable variable, void *value);
@@ -99,9 +92,8 @@ typedef NPBool       (*NPN_ConvertPointPtr)(NPP instance, double sourceX, double
 typedef NPBool       (*NPN_HandleEventPtr)(NPP instance, void *event, NPBool handled);
 typedef NPBool       (*NPN_UnfocusInstancePtr)(NPP instance, NPFocusDirection direction);
 typedef void         (*NPN_URLRedirectResponsePtr)(NPP instance, void* notifyData, NPBool allow);
-typedef NPError      (*NPN_InitAsyncSurfacePtr)(NPP instance, NPSize *size, NPImageFormat format, void *initData, NPAsyncSurface *surface);
-typedef NPError      (*NPN_FinalizeAsyncSurfacePtr)(NPP instance, NPAsyncSurface *surface);
-typedef void         (*NPN_SetCurrentAsyncSurfacePtr)(NPP instance, NPAsyncSurface *surface, NPRect *changed);
+
+typedef void         (*NPN_DummyPtr)(void);
 
 typedef struct _NPPluginFuncs {
   uint16_t size;
@@ -186,9 +178,9 @@ typedef struct _NPNetscapeFuncs {
   NPN_HandleEventPtr handleevent;
   NPN_UnfocusInstancePtr unfocusinstance;
   NPN_URLRedirectResponsePtr urlredirectresponse;
-  NPN_InitAsyncSurfacePtr initasyncsurface;
-  NPN_FinalizeAsyncSurfacePtr finalizeasyncsurface;
-  NPN_SetCurrentAsyncSurfacePtr setcurrentasyncsurface;
+  NPN_DummyPtr initasyncsurfaceOBSOLETE;
+  NPN_DummyPtr finalizeasyncsurfaceOBSOLETE;
+  NPN_DummyPtr setcurrentasyncsurfaceOBSOLETE;
 } NPNetscapeFuncs;
 
 #ifdef XP_MACOSX
@@ -219,11 +211,7 @@ typedef OSErr (*BP_GetSupportedMIMETypesProcPtr)(BPSupportedMIMETypes*, UInt32);
 #if defined(_WIN32)
 #define OSCALL WINAPI
 #else
-#if defined(__OS2__)
-#define OSCALL _System
-#else
 #define OSCALL
-#endif
 #endif
 
 #if defined(XP_UNIX)
@@ -238,24 +226,11 @@ typedef OSErr (*BP_GetSupportedMIMETypesProcPtr)(BPSupportedMIMETypes*, UInt32);
 #define NP_EXPORT(__type) NP_VISIBILITY_DEFAULT __type
 #endif
 
-#if defined(_WIN32) || defined (__OS2__)
+#if defined(_WIN32)
 #ifdef __cplusplus
 extern "C" {
 #endif
 /* plugin meta member functions */
-#if defined(__OS2__)
-typedef struct _NPPluginData {   /* Alternate OS2 Plugin interface */
-  char *pMimeTypes;
-  char *pFileExtents;
-  char *pFileOpenTemplate;
-  char *pProductName;
-  char *pProductDescription;
-  unsigned long dwProductVersionMS;
-  unsigned long dwProductVersionLS;
-} NPPluginData;
-typedef NPError     (OSCALL *NP_GetPluginDataFunc)(NPPluginData*);
-NPError OSCALL      NP_GetPluginData(NPPluginData * pPluginData);
-#endif
 typedef NPError     (OSCALL *NP_GetEntryPointsFunc)(NPPluginFuncs*);
 NPError OSCALL      NP_GetEntryPoints(NPPluginFuncs* pFuncs);
 typedef NPError     (OSCALL *NP_InitializeFunc)(NPNetscapeFuncs*);
@@ -267,10 +242,6 @@ const char*         NP_GetMIMEDescription(void);
 #ifdef __cplusplus
 }
 #endif
-#endif
-
-#if defined(__OS2__)
-#pragma pack()
 #endif
 
 #ifdef XP_UNIX
