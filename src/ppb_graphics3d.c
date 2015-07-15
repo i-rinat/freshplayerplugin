@@ -28,7 +28,6 @@
 #include "ppb_graphics3d.h"
 #include <stdlib.h>
 #include <GL/glx.h>
-#include <GL/glxext.h>
 #include <GLES2/gl2.h>
 #include "trace.h"
 #include "tables.h"
@@ -38,6 +37,7 @@
 #include "config.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
+#include "compat_glx_defines.h"
 
 
 int32_t
