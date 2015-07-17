@@ -319,12 +319,6 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
                 break;
 
             case Expose:
-                if (!seen_expose_event) {
-                    ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt,
-                                                                GINT_TO_POINTER(pp_i->id)),
-                                                  PP_OK, __func__);
-                    pthread_barrier_wait(&cross_thread_call_barrier);
-                }
                 seen_expose_event = 1;
                 handled = 1;
                 break;
