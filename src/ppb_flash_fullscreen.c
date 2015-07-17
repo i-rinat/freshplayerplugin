@@ -326,7 +326,7 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
                     pthread_barrier_wait(&cross_thread_call_barrier);
                 }
                 seen_expose_event = 1;
-                handled = 0;
+                handled = 1;
                 break;
         }
         ev.xany.display = display.x;
