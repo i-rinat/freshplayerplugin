@@ -77,7 +77,7 @@ ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
 
 static
 void
-update_instance_view_comt(void *user_data, int32_t result)
+call_did_change_view_comt(void *user_data, int32_t result)
 {
     PP_Instance instance = GPOINTER_TO_INT(user_data);
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
@@ -165,6 +165,15 @@ append_wm_protocol(Display *dpy, Window wnd, Atom a)
 
 done:
     XFree(protocols);
+}
+
+static
+void
+call_did_change_view(PP_Instance instance_id)
+{
+    ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_did_change_view_comt,
+                                                GINT_TO_POINTER(instance_id)), PP_OK, __func__);
+    pthread_barrier_wait(&cross_thread_call_barrier);
 }
 
 static
@@ -278,7 +287,10 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     pp_i->fs_height =     wnd_size;
     pthread_mutex_unlock(&display.lock);
 
-    int seen_expose_event = 0;
+    int fs_window_mapped = 0;
+    int fs_window_exposed = 0;
+    int called_did_change_view = 0;
+
     while (1) {
         XEvent  ev;
         int     handled = 0;
@@ -303,32 +315,34 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
                 pp_i->fs_height = ev.xconfigure.height;
                 pthread_mutex_unlock(&display.lock);
 
-                if (seen_expose_event) {
-                    ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt,
-                                                                GINT_TO_POINTER(pp_i->id)),
-                                                  PP_OK, __func__);
-                    pthread_barrier_wait(&cross_thread_call_barrier);
-                }
-
                 handled = 1;
                 break;
 
             case ReparentNotify:
+                handled = 1;
+                break;
+
             case MapNotify:
+                fs_window_mapped = 1;
+                if (fs_window_mapped && fs_window_exposed && !called_did_change_view) {
+                    call_did_change_view(pp_i->id);
+                    called_did_change_view = 1;
+                }
+
                 handled = 1;
                 break;
 
             case Expose:
-                if (!seen_expose_event) {
-                    ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt,
-                                                                GINT_TO_POINTER(pp_i->id)),
-                                                  PP_OK, __func__);
-                    pthread_barrier_wait(&cross_thread_call_barrier);
+                fs_window_exposed = 1;
+                if (fs_window_mapped && fs_window_exposed && !called_did_change_view) {
+                    call_did_change_view(pp_i->id);
+                    called_did_change_view = 1;
                 }
-                seen_expose_event = 1;
+
                 handled = 1;
                 break;
         }
+
         ev.xany.display = display.x;
 
         if (!handled) {
@@ -349,9 +363,7 @@ quit_and_destroy_fs_wnd:
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XFlush(dpy);
 
-    ppb_core_call_on_main_thread2(0, PP_MakeCCB(update_instance_view_comt,
-                                                GINT_TO_POINTER(pp_i->id)), PP_OK, __func__);
-    pthread_barrier_wait(&cross_thread_call_barrier);
+    call_did_change_view(pp_i->id);
 
     g_slice_free(struct thread_param_s, tp);
     trace_info_f("%s terminated\n", __func__);
