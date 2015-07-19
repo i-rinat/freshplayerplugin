@@ -345,11 +345,13 @@ tables_open_display(void)
     display.va_available = 0;
     display.vdpau_available = 0;
 
-    if (config.enable_vaapi)
-        initialize_vaapi();
+    if (config.enable_hwdec) {
+        if (config.enable_vaapi)
+            initialize_vaapi();
 
-    if (config.enable_vdpau)
-        initialize_vdpau();
+        if (config.enable_vdpau)
+            initialize_vdpau();
+    }
 
 #endif // HAVE_HWDEC
 
@@ -429,11 +431,13 @@ tables_close_display(void)
 
 #if HAVE_HWDEC
 
-    if (config.enable_vaapi)
-        deinitialize_vaapi();
+    if (config.enable_hwdec) {
+        if (config.enable_vaapi)
+            deinitialize_vaapi();
 
-    if (config.enable_vdpau)
-        deinitialize_vdpau();
+        if (config.enable_vdpau)
+            deinitialize_vdpau();
+    }
 
 #endif // HAVE_HWDEC
 
