@@ -77,3 +77,12 @@ enable_vaapi = 1
 
 # enable using of VDPAU for hardware accelerated video decoding
 enable_vdpau = 1
+
+# microseconds to wait after vsync event
+vsync_afterwait_us = 0
+
+# fullscreen transition delay, in milliseconds
+fs_delay_ms = 300
+
+# wait for vertical blank event before drawing on screen
+enable_vsync = 1

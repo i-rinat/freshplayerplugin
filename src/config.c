@@ -47,6 +47,9 @@ static struct fpp_config_s default_config = {
     .enable_vaapi =             1,
     .enable_vdpau =             1,
     .tie_fullscreen_window_to_browser = 1,
+    .vsync_afterwait_us =       0,
+    .fs_delay_ms =              300,
+    .enable_vsync =             1,
     .quirks = {
         .connect_first_loader_to_unrequested_stream = 0,
         .dump_resource_histogram    = 0,
@@ -161,6 +164,9 @@ fpp_config_initialize(void)
     get_int(&cfg, "enable_vaapi", &config.enable_vaapi);
     get_int(&cfg, "enable_vdpau", &config.enable_vdpau);
     get_int(&cfg, "tie_fullscreen_window_to_browser", &config.tie_fullscreen_window_to_browser);
+    get_int(&cfg, "vsync_afterwait_us", &config.vsync_afterwait_us);
+    get_int(&cfg, "fs_delay_ms", &config.fs_delay_ms);
+    get_int(&cfg, "enable_vsync", &config.enable_vsync);
 
     get_string(&cfg, "pepperflash_path", &config.pepperflash_path);
     get_string(&cfg, "flash_command_line", &config.flash_command_line);

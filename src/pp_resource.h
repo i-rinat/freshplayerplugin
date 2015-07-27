@@ -163,6 +163,7 @@ struct pp_instance_s {
     NPP                             npp;
     uint32_t                        is_fullframe;
     uint32_t                        is_fullscreen;
+    uint32_t                        is_fullscreen_apparent;
     uint32_t                        is_transparent;
     uint32_t                        windowed_mode;
     uint32_t                        use_xembed;

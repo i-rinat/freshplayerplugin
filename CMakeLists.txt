@@ -36,6 +36,7 @@ pkg_check_modules(REQ
     xcursor
     gl
     libconfig
+    libdrm
     libevent
     libevent_pthreads
     cairo

@@ -54,6 +54,12 @@ typedef void
 typedef void
 (*glx_release_tex_image_ext_f)(Display *dpy, GLXDrawable drawable, int buffer);
 
+typedef int
+(*glx_get_video_sync_sgi_f)(unsigned int *count);
+
+typedef int
+(*glx_wait_video_sync_sgi_f)(int divisor, int remainder, unsigned int *count);
+
 
 struct display_s {
     Display                            *x;
@@ -94,9 +100,12 @@ struct display_s {
     glx_create_context_attribs_arb_f    glXCreateContextAttribsARB;
     glx_bind_tex_image_ext_f            glXBindTexImageEXT;
     glx_release_tex_image_ext_f         glXReleaseTexImageEXT;
+    glx_get_video_sync_sgi_f            glXGetVideoSyncSGI;
+    glx_wait_video_sync_sgi_f           glXWaitVideoSyncSGI;
     uint32_t                            glx_arb_create_context;
     uint32_t                            glx_arb_create_context_profile;
     uint32_t                            glx_ext_create_context_es2_profile;
+    int                                 dri_fd;
 };
 
 extern NPNetscapeFuncs  npn;

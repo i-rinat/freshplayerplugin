@@ -200,6 +200,10 @@ check_glx_extensions(void)
         glXGetProcAddress((GLubyte *)"glXBindTexImageEXT");
     display.glXReleaseTexImageEXT = (glx_release_tex_image_ext_f)
         glXGetProcAddress((GLubyte *)"glXReleaseTexImageEXT");
+    display.glXGetVideoSyncSGI = (glx_get_video_sync_sgi_f)
+        glXGetProcAddress((GLubyte *)"glXGetVideoSyncSGI");
+    display.glXWaitVideoSyncSGI = (glx_wait_video_sync_sgi_f)
+        glXGetProcAddress((GLubyte *)"glXWaitVideoSyncSGI");
 }
 
 #if HAVE_HWDEC
@@ -340,6 +344,8 @@ tables_open_display(void)
     if (config.quirks.x_synchronize)
         XSynchronize(display.x, True);
 
+    display.dri_fd = open("/dev/dri/card0", O_RDWR);
+
 #if HAVE_HWDEC
 
     display.va_available = 0;
@@ -440,6 +446,9 @@ tables_close_display(void)
     }
 
 #endif // HAVE_HWDEC
+
+    close(display.dri_fd);
+    display.dri_fd = -1;
 
     XFreeCursor(display.x, display.transparent_cursor);
     XCloseDisplay(display.x);

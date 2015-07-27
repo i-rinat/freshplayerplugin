@@ -36,12 +36,16 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include "pp_interface.h"
+#include <drm.h>
+#include <sys/ioctl.h>
 
 
 static volatile gint        currently_fullscreen = 0;
 static GAsyncQueue         *fullscreen_transition_queue = NULL;
 static volatile gint        run_fullscreen_thread = 1;
+static volatile gint        run_delay_thread = 1;
 static pthread_barrier_t    cross_thread_call_barrier;
+static Atom                 freshwrappercommand_atom;
 
 struct handle_event_comt_param_s {
     PP_Instance instance_id;
@@ -51,6 +55,12 @@ struct handle_event_comt_param_s {
 struct thread_param_s {
     struct pp_instance_s   *pp_i;
     Window                  browser_window;
+};
+
+enum {
+    FSCMD_UNDEFINED = 0,
+    FSCMD_FULLSCREEN_WAIT_IS_OVER,
+    FSCMD_VSYNC,
 };
 
 
@@ -72,7 +82,12 @@ ppb_flash_fullscreen_is_fullscreen(PP_Instance instance)
         trace_error("%s, bad instance\n", __func__);
         return PP_FALSE;
     }
-    return pp_i->is_fullscreen;
+
+    pthread_mutex_lock(&display.lock);
+    uint32_t is_fullscreen = pp_i->is_fullscreen_apparent;
+    pthread_mutex_unlock(&display.lock);
+
+    return is_fullscreen;
 }
 
 static
@@ -81,6 +96,7 @@ call_did_change_view_comt(void *user_data, int32_t result)
 {
     PP_Instance instance = GPOINTER_TO_INT(user_data);
     struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    const int is_fullscreen = result;
 
     // check if instance is still alive
     if (!pp_i)
@@ -99,7 +115,7 @@ call_did_change_view_comt(void *user_data, int32_t result)
 
     v->rect.point.x = 0;
     v->rect.point.y = 0;
-    if (pp_i->is_fullscreen) {
+    if (is_fullscreen) {
         v->rect.size.width = pp_i->fs_width / config.device_scale;
         v->rect.size.height = pp_i->fs_height / config.device_scale;
     } else {
@@ -107,6 +123,10 @@ call_did_change_view_comt(void *user_data, int32_t result)
         v->rect.size.height = pp_i->height / config.device_scale;
     }
     pp_resource_release(view);
+
+    pthread_mutex_lock(&display.lock);
+    pp_i->is_fullscreen_apparent = is_fullscreen;
+    pthread_mutex_unlock(&display.lock);
 
     pp_i->ppp_instance_1_1->DidChangeView(pp_i->id, view);
     ppb_core_release_resource(view);
@@ -169,10 +189,11 @@ done:
 
 static
 void
-call_did_change_view(PP_Instance instance_id)
+call_did_change_view(PP_Instance instance_id, int is_fullscreen)
 {
     ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_did_change_view_comt,
-                                                GINT_TO_POINTER(instance_id)), PP_OK, __func__);
+                                                GINT_TO_POINTER(instance_id)), is_fullscreen,
+                                                __func__);
     pthread_barrier_wait(&cross_thread_call_barrier);
 }
 
@@ -287,26 +308,67 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     pp_i->fs_height =     wnd_size;
     pthread_mutex_unlock(&display.lock);
 
-    int fs_window_mapped = 0;
-    int fs_window_exposed = 0;
     int called_did_change_view = 0;
+    int graphics_expose_events_in_queue = 0;
+    int quit_message_received = 0;
+    int graphics_expose_was_at_least_once = 0;
 
     while (1) {
         XEvent  ev;
         int     handled = 0;
         KeySym  keysym;
 
+        if (quit_message_received && graphics_expose_was_at_least_once)
+            goto quit_and_destroy_fs_wnd;
+
         XNextEvent(dpy, &ev);
         switch (ev.type) {
             case KeyPress:
                 keysym = XLookupKeysym(&ev.xkey, 0);
                 if (XK_Escape == keysym)
-                    goto quit_and_destroy_fs_wnd;
+                    quit_message_received = 1;
                 break;
 
             case ClientMessage:
+                handled = 1;
                 if (ev.xclient.data.l[0] == wm_delete_window_atom)
-                    goto quit_and_destroy_fs_wnd;
+                    quit_message_received = 1;
+
+                if (ev.xclient.message_type == freshwrappercommand_atom) {
+                    switch (ev.xclient.data.l[0]) {
+                    case FSCMD_FULLSCREEN_WAIT_IS_OVER:
+                        if (!called_did_change_view) {
+                            call_did_change_view(pp_i->id, 1);
+                            called_did_change_view = 1;
+                        }
+                        break;
+
+                    case FSCMD_VSYNC:
+                        if (graphics_expose_events_in_queue > 0) {
+
+                            // craft GraphicsExpose event
+                            memset(&ev, 0, sizeof(ev));
+                            ev.xgraphicsexpose.type =     GraphicsExpose;
+                            ev.xgraphicsexpose.display =  dpy;
+                            ev.xgraphicsexpose.drawable = pp_i->fs_wnd;
+                            ev.xgraphicsexpose.width =    pp_i->fs_width;
+                            ev.xgraphicsexpose.height =   pp_i->fs_height;
+
+                            graphics_expose_events_in_queue -= 1;
+                            graphics_expose_was_at_least_once = 1;
+
+                            // feed HandleEvent with crafted event
+                            handled = 0;
+                        }
+                        break;
+
+                    case FSCMD_UNDEFINED:
+                    default:
+                        // do nothing
+                        break;
+                    }
+                }
+
                 break;
 
             case ConfigureNotify:
@@ -319,26 +381,15 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
                 break;
 
             case ReparentNotify:
-                handled = 1;
-                break;
-
             case MapNotify:
-                fs_window_mapped = 1;
-                if (fs_window_mapped && fs_window_exposed && !called_did_change_view) {
-                    call_did_change_view(pp_i->id);
-                    called_did_change_view = 1;
-                }
-
+            case UnmapNotify:
+            case DestroyNotify:
+            case Expose:
                 handled = 1;
                 break;
 
-            case Expose:
-                fs_window_exposed = 1;
-                if (fs_window_mapped && fs_window_exposed && !called_did_change_view) {
-                    call_did_change_view(pp_i->id);
-                    called_did_change_view = 1;
-                }
-
+            case GraphicsExpose:
+                graphics_expose_events_in_queue += 1;
                 handled = 1;
                 break;
         }
@@ -358,15 +409,132 @@ quit_and_destroy_fs_wnd:
 
     pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 0;
+    pp_i->is_fullscreen_apparent = 0;
     pthread_mutex_unlock(&display.lock);
 
     XDestroyWindow(dpy, pp_i->fs_wnd);
     XFlush(dpy);
 
-    call_did_change_view(pp_i->id);
+    call_did_change_view(pp_i->id, 0);
+
+    // GraphicsExpose could be jammed in delay loop. We need to call it here explicitly,
+    // to prevent callback chain breakage.
+    while (graphics_expose_events_in_queue > 0) {
+        XEvent ev = {
+            .xgraphicsexpose = {
+                .type =     GraphicsExpose,
+                .display =  dpy,
+                .drawable = pp_i->wnd,
+                .width =    pp_i->width,
+                .height =   pp_i->height,
+            }
+        };
+
+        struct handle_event_comt_param_s *params = g_slice_alloc(sizeof(*params));
+        params->instance_id =   pp_i->id;
+        params->ev =            ev;
+        ppb_core_call_on_browser_thread(pp_i->id, handle_event_ptac, params);
+        pthread_barrier_wait(&cross_thread_call_barrier);
+
+        graphics_expose_events_in_queue -= 1;
+    }
 
     g_slice_free(struct thread_param_s, tp);
     trace_info_f("%s terminated\n", __func__);
+}
+
+static void
+wait_vsync_opengl(void)
+{
+    unsigned int counter = 0;
+
+    display.glXGetVideoSyncSGI(&counter);
+    display.glXWaitVideoSyncSGI(2, (counter + 1) % 2, &counter);
+
+    if (config.vsync_afterwait_us > 0)
+        usleep(config.vsync_afterwait_us);
+}
+
+static void
+wait_vsync_drm(void)
+{
+    if (display.dri_fd < 0)
+        return;
+
+    int ret;
+    do {
+        drm_wait_vblank_t dwv = {
+            .request.type =     _DRM_VBLANK_RELATIVE,
+            .request.sequence = 1,
+        };
+
+        ret = ioctl(display.dri_fd, DRM_IOCTL_WAIT_VBLANK, &dwv);
+    } while (ret != 0 && errno == EINTR);
+
+    if (config.vsync_afterwait_us > 0)
+        usleep(config.vsync_afterwait_us);
+}
+
+/// thread used for active waiting
+static
+void *
+delay_thread(void *param)
+{
+    struct thread_param_s *tp = param;
+    struct pp_instance_s *pp_i = tp->pp_i;
+
+    // first, wait some time before window manager performs fullscreen transition
+    usleep(config.fs_delay_ms * 1000);
+
+    pthread_mutex_lock(&display.lock);
+    if (pp_i->is_fullscreen) {
+        XEvent ev = {
+            .xclient = {
+                .type =         ClientMessage,
+                .window =       pp_i->fs_wnd,
+                .message_type = freshwrappercommand_atom,
+                .format =       32,
+                .data.l[0] =    FSCMD_FULLSCREEN_WAIT_IS_OVER,
+            }
+        };
+
+        XSendEvent(display.x, ev.xclient.window, False, NoEventMask, &ev);
+        XFlush(display.x);
+    }
+    pthread_mutex_unlock(&display.lock);
+
+    // then wait for vsync events
+    while (g_atomic_int_get(&run_delay_thread)) {
+        pthread_mutex_lock(&display.lock);
+        if (pp_i->is_fullscreen) {
+            XEvent ev = {
+                .xclient = {
+                    .type =         ClientMessage,
+                    .window =       pp_i->fs_wnd,
+                    .message_type = freshwrappercommand_atom,
+                    .format =       32,
+                    .data.l[0] =    FSCMD_VSYNC,
+                }
+            };
+
+            XSendEvent(display.x, ev.xclient.window, False, NoEventMask, &ev);
+            XFlush(display.x);
+        }
+        pthread_mutex_unlock(&display.lock);
+
+        if (config.enable_vsync) {
+            if (display.dri_fd >= 0)
+                wait_vsync_drm();
+            else if (display.glXGetVideoSyncSGI && display.glXWaitVideoSyncSGI)
+                wait_vsync_opengl();
+            else
+                usleep(16 * 1000);
+        } else {
+            usleep(16 * 1000);
+        }
+    }
+
+    return NULL;
 }
 
 static
@@ -376,12 +544,23 @@ fullscreen_window_thread(void *p)
     GAsyncQueue *async_q = fullscreen_transition_queue;
     Display *dpy = XOpenDisplay(NULL);
 
+    freshwrappercommand_atom = XInternAtom(display.x, "FRESHWRAPPER_COMMAND", False);
+
     g_async_queue_ref(async_q);
     while (g_atomic_int_get(&run_fullscreen_thread)) {
         struct thread_param_s *tp = g_async_queue_pop(async_q);
+        pthread_t t;
 
         g_atomic_int_set(&currently_fullscreen, 1);
+
+        g_atomic_int_set(&run_delay_thread, 1);
+        pthread_create(&t, NULL, delay_thread, tp);
+
         fullscreen_window_thread_int(dpy, tp);
+
+        g_atomic_int_set(&run_delay_thread, 0);
+        pthread_join(t, NULL);
+
         g_atomic_int_set(&currently_fullscreen, 0);
     }
 
