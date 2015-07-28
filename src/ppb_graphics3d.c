@@ -393,6 +393,7 @@ call_forceredraw_ptac(void *param)
         return;
     }
 
+    pthread_mutex_lock(&display.lock);
     if (pp_i->is_fullscreen || pp_i->windowed_mode) {
         XEvent ev = {
             .xgraphicsexpose = {
@@ -403,11 +404,11 @@ call_forceredraw_ptac(void *param)
             }
         };
 
-        pthread_mutex_lock(&display.lock);
         XSendEvent(display.x, ev.xgraphicsexpose.drawable, True, ExposureMask, &ev);
         XFlush(display.x);
         pthread_mutex_unlock(&display.lock);
     } else {
+        pthread_mutex_unlock(&display.lock);
         NPRect npr = {.top = 0, .left = 0, .bottom = pp_i->height, .right = pp_i->width};
         npn.invalidaterect(pp_i->npp, &npr);
         npn.forceredraw(pp_i->npp);
