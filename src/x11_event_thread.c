@@ -371,10 +371,10 @@ x11et_register_window(PP_Instance instance, Window wnd, NPP_HandleEventProcPtr h
     g_hash_table_insert(ht, GSIZE_TO_POINTER(wnd), entry);
     pthread_mutex_unlock(&lock);
 
-    struct task_s task = {
-        .socket_wnd =   wnd,
-        .cmd =          X11ET_CMD_REGISTER_WINDOW,
-    };
+    struct task_s task;
+    memset(&task, 0, sizeof(task)); // ensure all bytes are initialized
+    task.socket_wnd = wnd;
+    task.cmd =        X11ET_CMD_REGISTER_WINDOW;
 
     if (task_pipe[1] >= 0) {
         int ret = RETRY_ON_EINTR(write(task_pipe[1], &task, sizeof(task)));
@@ -400,10 +400,10 @@ x11et_unregister_window(Window wnd)
     if (!entry)
         return;
 
-    struct task_s task = {
-        .socket_wnd =   wnd,
-        .cmd =          X11ET_CMD_UNREGISTER_WINDOW,
-    };
+    struct task_s task;
+    memset(&task, 0, sizeof(task)); // ensure all bytes are initialized
+    task.socket_wnd = wnd;
+    task.cmd =        X11ET_CMD_UNREGISTER_WINDOW;
 
     if (task_pipe[1] >= 0) {
         int ret = RETRY_ON_EINTR(write(task_pipe[1], &task, sizeof(task)));
