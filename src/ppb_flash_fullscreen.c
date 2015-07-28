@@ -199,6 +199,18 @@ call_did_change_view(PP_Instance instance_id, int is_fullscreen)
 
 static
 void
+craft_graphicsexpose_event(XEvent *ev, Display *dpy, struct pp_instance_s *pp_i)
+{
+    memset(ev, 0, sizeof(*ev));
+    ev->xgraphicsexpose.type =     GraphicsExpose;
+    ev->xgraphicsexpose.display =  dpy;
+    ev->xgraphicsexpose.drawable = pp_i->fs_wnd;
+    ev->xgraphicsexpose.width =    pp_i->fs_width;
+    ev->xgraphicsexpose.height =   pp_i->fs_height;
+}
+
+static
+void
 fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 {
     struct pp_instance_s *pp_i = tp->pp_i;
@@ -340,25 +352,22 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
                         if (!called_did_change_view) {
                             call_did_change_view(pp_i->id, 1);
                             called_did_change_view = 1;
+
+                            // add unrequested GraphicsExpose in case some was lost during
+                            // fullscreen transition
+                            craft_graphicsexpose_event(&ev, dpy, pp_i);
+                            handled = 0; // feed HandleEvent with crafted event
                         }
                         break;
 
                     case FSCMD_VSYNC:
                         if (graphics_expose_events_in_queue > 0) {
-
-                            // craft GraphicsExpose event
-                            memset(&ev, 0, sizeof(ev));
-                            ev.xgraphicsexpose.type =     GraphicsExpose;
-                            ev.xgraphicsexpose.display =  dpy;
-                            ev.xgraphicsexpose.drawable = pp_i->fs_wnd;
-                            ev.xgraphicsexpose.width =    pp_i->fs_width;
-                            ev.xgraphicsexpose.height =   pp_i->fs_height;
+                            craft_graphicsexpose_event(&ev, dpy, pp_i);
 
                             graphics_expose_events_in_queue -= 1;
                             graphics_expose_was_at_least_once = 1;
 
-                            // feed HandleEvent with crafted event
-                            handled = 0;
+                            handled = 0; // feed HandleEvent with crafted event
                         }
                         break;
 
