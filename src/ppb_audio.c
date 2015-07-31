@@ -48,6 +48,10 @@ playback_cb(void *buf, uint32_t sz, double latency, void *user_data)
     } else if (a->callback_1_1) {
         a->callback_1_1(buf, sz, latency,a->user_data);
     }
+
+    // discard acquired audio data if instance is muted
+    if (g_atomic_int_get(&a->instance->is_muted))
+        memset(buf, 0, sz);
 }
 
 static

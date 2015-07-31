@@ -173,6 +173,7 @@ struct pp_instance_s {
     PP_Resource                     content_url_loader;
     uint32_t                        content_url_loader_used;
     volatile gint                   audio_source_count; ///< number of currently active audiosources
+    volatile gint                   is_muted;
 
     Cursor                          prev_cursor;
     int                             have_prev_cursor;

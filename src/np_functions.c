@@ -1740,8 +1740,31 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
 NPError
 NPP_SetValue(NPP npp, NPNVariable variable, void *value)
 {
-    trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s, value=%p\n", __func__,
-                 npp, reverse_npn_variable(variable), value);
+    const char *var_name = reverse_npn_variable(variable);
+    struct pp_instance_s *pp_i = npp->pdata;
+    NPBool bool_value = 0;
+
+    switch (variable) {
+    case NPNVmuteAudioBool:
+        trace_info_f("[NPP] {full} %s npp=%p, variable=%s, value=%p\n", __func__, npp, var_name,
+                     value);
+
+        // TODO: spec says it should be value, not pointer, but implementation definitely uses
+        //       pointer to NPBool. Which is right?
+        if (value)
+            memcpy(&bool_value, value, sizeof(NPBool));
+
+        if (pp_i)
+            g_atomic_int_set(&pp_i->is_muted, !!bool_value);
+
+        break;
+
+    default:
+        trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s, value=%p\n", __func__, npp, var_name,
+                     value);
+        break;
+    }
+
     return NPERR_NO_ERROR;
 }
 
