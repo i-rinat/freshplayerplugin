@@ -34,6 +34,7 @@ static struct fpp_config_s default_config = {
     .audio_buffer_max_ms =      500,
     .audio_use_jack      =      0,
     .jack_autoconnect_ports =   1,
+    .jack_server_name =         NULL,
     .pepperflash_path    =      NULL,
     .flash_command_line  =      "", // "enable_hw_video_decode=1,enable_stagevideo_auto=1",
     .enable_3d           =      1,
@@ -172,6 +173,7 @@ fpp_config_initialize(void)
 
     get_string(&cfg, "pepperflash_path", &config.pepperflash_path);
     get_string(&cfg, "flash_command_line", &config.flash_command_line);
+    get_string(&cfg, "jack_server_name", &config.jack_server_name);
 
     get_double(&cfg, "device_scale", &config.device_scale);
 
@@ -206,6 +208,7 @@ fpp_config_destroy(void)
 
     FREE_IF_CHANGED(pepperflash_path);
     FREE_IF_CHANGED(flash_command_line);
+    FREE_IF_CHANGED(jack_server_name);
     g_free(pepper_data_dir);
     g_free(pepper_salt_file_name);
     initialized = 0;

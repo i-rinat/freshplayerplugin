@@ -180,7 +180,10 @@ ja_do_create_stream(unsigned int sample_rate, unsigned int sample_frame_count,
 {
     jack_options_t  options = JackNullOption;
     jack_status_t   status;
-    const char     *server_name = NULL; // TODO: make server name configurable
+    const char     *server_name = config.jack_server_name;
+
+    if (server_name)
+        options |= JackServerName;
 
     audio_stream *as = calloc(1, sizeof(*as));
     if (!as) {

@@ -33,6 +33,7 @@ struct fpp_config_s {
     int     audio_buffer_max_ms;
     int     audio_use_jack;
     int     jack_autoconnect_ports;
+    char   *jack_server_name;
     char   *pepperflash_path;
     char   *flash_command_line;
     int     enable_3d;
