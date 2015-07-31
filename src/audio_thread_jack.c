@@ -307,41 +307,44 @@ ja_do_create_stream(unsigned int sample_rate, unsigned int sample_frame_count,
         goto err_6;
     }
 
-    const char **ports;
-    if (direction == STREAM_PLAYBACK) {
-        ports = jack_get_ports(as->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
-        if (!ports) {
-            trace_error("%s, no physical playback ports\n", __func__);
-            goto err_6;
-        }
+    if (config.jack_autoconnect_ports) {
+        const char **ports;
+        if (direction == STREAM_PLAYBACK) {
+            ports = jack_get_ports(as->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
+            if (!ports) {
+                trace_error("%s, no physical playback ports\n", __func__);
+                goto err_6;
+            }
 
-        if (ports[0]) {
-            if (jack_connect(as->client, jack_port_name(as->output_port_1), ports[0]) != 0)
-                trace_error("%s, can't connect output port 1\n", __func__);
-            if (ports[1]) {
-                if (jack_connect(as->client, jack_port_name(as->output_port_2), ports[1]) != 0)
-                    trace_error("%s, can't connect output port 2\n", __func__);
+            if (ports[0]) {
+                if (jack_connect(as->client, jack_port_name(as->output_port_1), ports[0]) != 0)
+                    trace_error("%s, can't connect output port 1\n", __func__);
+                if (ports[1]) {
+                    if (jack_connect(as->client, jack_port_name(as->output_port_2), ports[1]) != 0)
+                        trace_error("%s, can't connect output port 2\n", __func__);
+                }
+            }
+        } else {
+            // STREAM_CAPTURE
+            ports = jack_get_ports(as->client, NULL, NULL, JackPortIsPhysical | JackPortIsOutput);
+            if (!ports) {
+                trace_error("%s, no physical capture ports\n", __func__);
+                goto err_6;
+            }
+
+            if (ports[0]) {
+                if (jack_connect(as->client, ports[0], jack_port_name(as->input_port)) != 0)
+                    trace_error("%s, can't connect input port 1\n", __func__);
+                if (ports[1]) {
+                    if (jack_connect(as->client, ports[1], jack_port_name(as->input_port)) != 0)
+                        trace_error("%s, can't connect input port 2\n", __func__);
+                }
             }
         }
-    } else {
-        // STREAM_CAPTURE
-        ports = jack_get_ports(as->client, NULL, NULL, JackPortIsPhysical | JackPortIsOutput);
-        if (!ports) {
-            trace_error("%s, no physical capture ports\n", __func__);
-            goto err_6;
-        }
 
-        if (ports[0]) {
-            if (jack_connect(as->client, ports[0], jack_port_name(as->input_port)) != 0)
-                trace_error("%s, can't connect input port 1\n", __func__);
-            if (ports[1]) {
-                if (jack_connect(as->client, ports[1], jack_port_name(as->input_port)) != 0)
-                    trace_error("%s, can't connect input port 2\n", __func__);
-            }
-        }
-    }
+        jack_free(ports);
+    } // config.jack_autoconnect_ports
 
-    jack_free(ports);
     return as;
 
 err_6:
