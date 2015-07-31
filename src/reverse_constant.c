@@ -80,6 +80,7 @@ reverse_npn_variable(NPNVariable var)
     CASE(NPNVsupportsAdvancedKeyHandling);
     CASE(NPNVdocumentOrigin);
     CASE(NPNVpluginDrawingModel);
+    CASE(NPNVmuteAudioBool);
     default: return "UNKNOWNVAR";
     }
 }
