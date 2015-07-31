@@ -185,6 +185,9 @@ ja_do_create_stream(unsigned int sample_rate, unsigned int sample_frame_count,
     if (server_name)
         options |= JackServerName;
 
+    if (!config.jack_autostart_server)
+        options |= JackNoStartServer;
+
     audio_stream *as = calloc(1, sizeof(*as));
     if (!as) {
         trace_error("%s, memory allocation failure, point 1\n", __func__);
