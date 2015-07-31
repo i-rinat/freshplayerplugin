@@ -20,6 +20,18 @@ audio_buffer_max_ms = 500
 # your machine doesn't have it, there would be no sound, and no sync
 audio_use_jack = 0
 
+# whenever to automatically connect application ports to system ones.
+# If you set this to one, no sound would be produces until you make
+# connection some way
+jack_autoconnect_ports = 1
+
+# JACK server name. Omit the option to use default value
+#
+# jack_server_name = "default"
+
+# starts JACK server on demand
+jack_autostart_server = 1
+
 # Path to the Pepper Flash plugin.
 # If the option is absent, freshwrapper will search for Pepper Flash in
 # a number of location where it could be. Usually that's enough, but if
