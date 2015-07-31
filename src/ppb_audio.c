@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <ppapi/c/pp_errors.h>
 #include "ppb_audio.h"
+#include "ppb_core.h"
 #include <stdlib.h>
 #include <glib.h>
 #include "trace.h"
@@ -124,6 +125,12 @@ void
 ppb_audio_destroy(void *p)
 {
     struct pp_audio_s *a = p;
+
+    if (a->is_playing) {
+        g_atomic_int_add(&a->instance->audio_source_count, -1);
+        a->is_playing = 0;
+    }
+
     a->stream_ops->destroy(a->stream);
 }
 
@@ -160,6 +167,20 @@ err:
     return audio_config;
 }
 
+static
+void
+update_instance_playing_audio_status_ptac(void *p)
+{
+    PP_Instance instance = GPOINTER_TO_SIZE(p);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+
+    if (!pp_i)
+        return;
+
+    int is_playing_audio = g_atomic_int_get(&pp_i->audio_source_count) > 0;
+    npn.setvalue(pp_i->npp, NPPVpluginIsPlayingAudio, GINT_TO_POINTER(is_playing_audio));
+}
+
 PP_Bool
 ppb_audio_start_playback(PP_Resource audio)
 {
@@ -170,7 +191,16 @@ ppb_audio_start_playback(PP_Resource audio)
     }
 
     a->stream_ops->pause(a->stream, 0);
+    if (!a->is_playing) {
+        g_atomic_int_add(&a->instance->audio_source_count, 1);
+        a->is_playing = 1;
+    }
+
     pp_resource_release(audio);
+
+    ppb_core_call_on_browser_thread(a->instance->id, update_instance_playing_audio_status_ptac,
+                                    GSIZE_TO_POINTER(a->instance->id));
+
     return PP_TRUE;
 }
 
@@ -184,7 +214,16 @@ ppb_audio_stop_playback(PP_Resource audio)
     }
 
     a->stream_ops->pause(a->stream, 1);
+    if (a->is_playing) {
+        g_atomic_int_add(&a->instance->audio_source_count, -1);
+        a->is_playing = 0;
+    }
+
     pp_resource_release(audio);
+
+    ppb_core_call_on_browser_thread(a->instance->id, update_instance_playing_audio_status_ptac,
+                                    GSIZE_TO_POINTER(a->instance->id));
+
     return PP_TRUE;
 }
 

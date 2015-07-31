@@ -172,6 +172,7 @@ struct pp_instance_s {
     uint32_t                        ignore_focus_events_cnt; ///< number of focus events to ignore
     PP_Resource                     content_url_loader;
     uint32_t                        content_url_loader_used;
+    volatile gint                   audio_source_count; ///< number of currently active audiosources
 
     Cursor                          prev_cursor;
     int                             have_prev_cursor;
@@ -360,6 +361,7 @@ struct pp_audio_s {
     void                   *user_data;
     audio_stream_ops       *stream_ops;
     audio_stream           *stream;
+    int                     is_playing;
 };
 
 struct pp_input_event_s {
