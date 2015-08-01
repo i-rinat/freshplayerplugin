@@ -398,8 +398,13 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
                 break;
 
             case GraphicsExpose:
-                graphics_expose_events_in_queue += 1;
-                handled = 1;
+                if (config.enable_vsync) {
+                    graphics_expose_events_in_queue += 1;
+                    handled = 1;
+                } else {
+                    graphics_expose_was_at_least_once = 1;
+                    handled = 0;
+                }
                 break;
         }
 
@@ -512,7 +517,16 @@ delay_thread(void *param)
     }
     pthread_mutex_unlock(&display.lock);
 
-    // then wait for vsync events
+    if (!config.enable_vsync) {
+        // if no vsync required, just wait until thread could be terminated
+        while (g_atomic_int_get(&run_delay_thread)) {
+            usleep(300 * 1000);
+        }
+
+        return NULL;
+    }
+
+    // wait for vsync events, pass them back to fullscreen thread
     while (g_atomic_int_get(&run_delay_thread)) {
         pthread_mutex_lock(&display.lock);
         if (pp_i->is_fullscreen) {
@@ -531,16 +545,12 @@ delay_thread(void *param)
         }
         pthread_mutex_unlock(&display.lock);
 
-        if (config.enable_vsync) {
-            if (display.dri_fd >= 0)
-                wait_vsync_drm();
-            else if (display.glXGetVideoSyncSGI && display.glXWaitVideoSyncSGI)
-                wait_vsync_opengl();
-            else
-                usleep(16 * 1000);
-        } else {
+        if (display.dri_fd >= 0)
+            wait_vsync_drm();
+        else if (display.glXGetVideoSyncSGI && display.glXWaitVideoSyncSGI)
+            wait_vsync_opengl();
+        else
             usleep(16 * 1000);
-        }
     }
 
     return NULL;
