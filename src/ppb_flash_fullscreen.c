@@ -457,6 +457,8 @@ quit_and_destroy_fs_wnd:
     trace_info_f("%s terminated\n", __func__);
 }
 
+static int enable_drm_vsync = 1;
+
 static void
 wait_vsync_drm(void)
 {
@@ -472,6 +474,12 @@ wait_vsync_drm(void)
 
         ret = ioctl(display.dri_fd, DRM_IOCTL_WAIT_VBLANK, &dwv);
     } while (ret != 0 && errno == EINTR);
+
+    if (ret != 0) {
+        trace_warning("Got an error (errno=%d) while waiting for VSYNC event. Disabling VSYNC.\n",
+                      errno);
+        enable_drm_vsync = 0;
+    }
 
     if (config.vsync_afterwait_us > 0)
         usleep(config.vsync_afterwait_us);
@@ -533,10 +541,14 @@ delay_thread(void *param)
         }
         pthread_mutex_unlock(&display.lock);
 
-        if (display.dri_fd >= 0)
-            wait_vsync_drm();
-        else
+        if (display.dri_fd >= 0) {
+            if (enable_drm_vsync)
+                wait_vsync_drm();
+            else
+                usleep(16 * 1000);
+        } else {
             usleep(16 * 1000);
+        }
     }
 
     return NULL;
