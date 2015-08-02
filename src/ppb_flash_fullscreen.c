@@ -458,18 +458,6 @@ quit_and_destroy_fs_wnd:
 }
 
 static void
-wait_vsync_opengl(void)
-{
-    unsigned int counter = 0;
-
-    display.glXGetVideoSyncSGI(&counter);
-    display.glXWaitVideoSyncSGI(2, (counter + 1) % 2, &counter);
-
-    if (config.vsync_afterwait_us > 0)
-        usleep(config.vsync_afterwait_us);
-}
-
-static void
 wait_vsync_drm(void)
 {
     if (display.dri_fd < 0)
@@ -547,8 +535,6 @@ delay_thread(void *param)
 
         if (display.dri_fd >= 0)
             wait_vsync_drm();
-        else if (display.glXGetVideoSyncSGI && display.glXWaitVideoSyncSGI)
-            wait_vsync_opengl();
         else
             usleep(16 * 1000);
     }
