@@ -34,6 +34,7 @@
 #include "ppb_opengles2.h"
 #include "ppb_graphics3d.h"
 #include "config.h"
+#include "compat_glx_defines.h"
 #include "ffmpeg-compat.h"      // generated
 
 
