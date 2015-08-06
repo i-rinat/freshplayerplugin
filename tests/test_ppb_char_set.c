@@ -47,8 +47,8 @@ test_to_utf16(void)
     printf("to utf16: all ASCII\n");
     {
         const char *in = "Hello, world!";
-        const uint16_t out[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77,
-                                0x6f, 0x72, 0x6c, 0x64, 0x21};
+        const uint8_t out[] = {'H', 0, 'e', 0, 'l', 0, 'l', 0, 'o', 0, ',', 0, ' ', 0, 'w', 0,
+                               'o', 0, 'r', 0, 'l', 0, 'd', 0, '!', 0};
         res_len = 7777;
         res = ppb_char_set_char_set_to_utf16(instance, in, strlen(in), "UTF-8",
                                              PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
@@ -60,12 +60,13 @@ test_to_utf16(void)
     printf("to utf16: basic UTF-8\n");
     {
         const char *in = "Привет, мир!";
-        const uint16_t out[] = {0x41f, 0x440, 0x438, 0x432, 0x435, 0x442, 0x2c,
-                                0x20, 0x43c, 0x438, 0x440, 0x21};
+        const uint8_t out[] = {0x1f, 0x04, 0x40, 0x04, 0x38, 0x04, 0x32, 0x04, 0x35, 0x04,
+                               0x42, 0x04, 0x2c, 0x00, 0x20, 0x00, 0x3c, 0x04, 0x38, 0x04,
+                               0x40, 0x04, 0x21, 0x00};
         res_len = 7777;
         res = ppb_char_set_char_set_to_utf16(instance, in, strlen(in), "UTF-8",
                                                  PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
-        assert(res_len == sizeof(out) / sizeof(out[0]));
+        assert(res_len == sizeof(out) / sizeof(uint16_t));
         assert(memcmp(res, out, sizeof(out)) == 0);
         free(res);
     }
@@ -94,12 +95,13 @@ test_from_utf16(void)
 
     printf("from utf16: all ASCII\n");
     {
-        const uint16_t in[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77,
-                                0x6f, 0x72, 0x6c, 0x64, 0x21};
+        const uint8_t in[] = {'H', 0, 'e', 0, 'l', 0, 'l', 0, 'o', 0, ',', 0, ' ', 0, 'w', 0,
+                              'o', 0, 'r', 0, 'l', 0, 'd', 0, '!', 0};
         const char *out = "Hello, world!";
         res_len = 7777;
-        res = ppb_char_set_utf16_to_char_set(instance, in, sizeof(in) / sizeof(in[0]),
-                                             "cp1251", PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
+        res = ppb_char_set_utf16_to_char_set(instance, (const uint16_t *)in,
+                                             sizeof(in) / sizeof(uint16_t), "cp1251",
+                                             PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == strlen(out));
         assert(memcmp(res, out, res_len) == 0);
         free(res);
@@ -107,12 +109,14 @@ test_from_utf16(void)
 
     printf("to utf16: non-ASCII all correct\n");
     {
-        const uint16_t in[] = {0x41f, 0x440, 0x438, 0x432, 0x435, 0x442, 0x2c,
-                               0x20, 0x43c, 0x438, 0x440, 0x21}; // "Привет, мир!"
+        const uint8_t in[] = {0x1f, 0x04, 0x40, 0x04, 0x38, 0x04, 0x32, 0x04, 0x35, 0x04,
+                              0x42, 0x04, 0x2c, 0x00, 0x20, 0x00, 0x3c, 0x04, 0x38, 0x04,
+                              0x40, 0x04, 0x21, 0x00}; // "Привет, мир!"
         const char *out = "\xcf\xf0\xe8\xe2\xe5\xf2\x2c\x20\xec\xe8\xf0\x21"; // "Привет, мир!"
         res_len = 7777;
-        res = ppb_char_set_utf16_to_char_set(instance, in, sizeof(in) / sizeof(in[0]),
-                                             "cp1251", PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
+        res = ppb_char_set_utf16_to_char_set(instance, (const uint16_t *)in,
+                                             sizeof(in) / sizeof(uint16_t), "cp1251",
+                                             PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == strlen(out));
         assert(memcmp(res, out, res_len) == 0);
         free(res);
@@ -120,13 +124,14 @@ test_from_utf16(void)
 
     printf("to utf16: non-ASCII PP_CHARSET_CONVERSIONERROR_FAIL\n");
     {
-
-        const uint16_t in[] = {0x41f, 0x440, 0x438, 0x432, 0x435, 0x442, 0x2c,
-                               0x20, 0x266b, 0x43c, 0x438, 0x440, 0x21}; // "Привет, ♫мир!"
+        const uint8_t in[] = {0x1f, 0x04, 0x40, 0x04, 0x38, 0x04, 0x32, 0x04, 0x35, 0x04,
+                              0x42, 0x04, 0x2c, 0x00, 0x20, 0x00, 0x6b, 0x26, 0x3c, 0x04,
+                              0x38, 0x04, 0x40, 0x04, 0x21, 0x00}; // "Привет, ♫мир!"
         // const char *out = "\xcf\xf0\xe8\xe2\xe5\xf2\x2c\x20\xec\xe8\xf0\x21"; // "Привет, мир!"
         res_len = 7777;
-        res = ppb_char_set_utf16_to_char_set(instance, in, sizeof(in) / sizeof(in[0]),
-                                             "cp1251", PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
+        res = ppb_char_set_utf16_to_char_set(instance, (const uint16_t *)in,
+                                             sizeof(in) / sizeof(uint16_t), "cp1251",
+                                             PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
         assert(res_len == 0);
         assert(res == NULL);
         free(res);
@@ -134,12 +139,14 @@ test_from_utf16(void)
 
     printf("to utf16: non-ASCII PP_CHARSET_CONVERSIONERROR_SKIP\n");
     {
-        const uint16_t in[] = {0x41f, 0x440, 0x438, 0x432, 0x435, 0x442, 0x2c,
-                               0x20, 0x266b, 0x43c, 0x438, 0x440, 0x21}; // "Привет, ♫мир!"
+        const uint8_t in[] = {0x1f, 0x04, 0x40, 0x04, 0x38, 0x04, 0x32, 0x04, 0x35, 0x04,
+                              0x42, 0x04, 0x2c, 0x00, 0x20, 0x00, 0x6b, 0x26, 0x3c, 0x04,
+                              0x38, 0x04, 0x40, 0x04, 0x21, 0x00}; // "Привет, ♫мир!"
         const char *out = "\xcf\xf0\xe8\xe2\xe5\xf2\x2c\x20\xec\xe8\xf0\x21"; // "Привет, мир!"
         res_len = 7777;
-        res = ppb_char_set_utf16_to_char_set(instance, in, sizeof(in) / sizeof(in[0]),
-                                             "cp1251", PP_CHARSET_CONVERSIONERROR_SKIP, &res_len);
+        res = ppb_char_set_utf16_to_char_set(instance, (const uint16_t *)in,
+                                             sizeof(in) / sizeof(uint16_t), "cp1251",
+                                             PP_CHARSET_CONVERSIONERROR_SKIP, &res_len);
         assert(res_len == strlen(out));
         assert(memcmp(res, out, res_len) == 0);
         free(res);
@@ -147,12 +154,14 @@ test_from_utf16(void)
 
     printf("to utf16: non-ASCII PP_CHARSET_CONVERSIONERROR_SUBSTITUTE\n");
     {
-        const uint16_t in[] = {0x41f, 0x440, 0x438, 0x432, 0x435, 0x442, 0x2c,
-                               0x20, 0x266b, 0x43c, 0x438, 0x440, 0x21}; // "Привет, ♫мир!"
+        const uint8_t in[] = {0x1f, 0x04, 0x40, 0x04, 0x38, 0x04, 0x32, 0x04, 0x35, 0x04,
+                              0x42, 0x04, 0x2c, 0x00, 0x20, 0x00, 0x6b, 0x26, 0x3c, 0x04,
+                              0x38, 0x04, 0x40, 0x04, 0x21, 0x00}; // "Привет, ♫мир!"
         const char *out = "\xcf\xf0\xe8\xe2\xe5\xf2\x2c\x20\x3f\xec\xe8\xf0\x21";// "Привет, ?мир!"
         res_len = 7777;
-        res = ppb_char_set_utf16_to_char_set(instance, in, sizeof(in) / sizeof(in[0]),
-                                     "cp1251", PP_CHARSET_CONVERSIONERROR_SUBSTITUTE, &res_len);
+        res = ppb_char_set_utf16_to_char_set(instance, (const uint16_t *)in,
+                                             sizeof(in) / sizeof(uint16_t), "cp1251",
+                                             PP_CHARSET_CONVERSIONERROR_SUBSTITUTE, &res_len);
         assert(res_len == strlen(out));
         assert(memcmp(res, out, res_len) == 0);
         free(res);
