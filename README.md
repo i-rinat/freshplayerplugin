@@ -100,6 +100,15 @@ you disable hwdec by `WITH_HWDEC=0`. To do so, change configuration step command
 Note, even if built, hardware-accelerated video decoding is still disabled by default.
 You need to explicitly enable it in configuration file.
 
+Install / OpenGL|ES 2 support
+-----------------------------
+
+Although it's better to use system implementation of OpenGL|ES 2, it's still possible
+to leverage [ANGLE](https://code.google.com/p/angleproject/) GLES2 emulation by adding
+`WITH_GLES2=0` to cmake command line at configuration time (`-DWITH_GLES2=0` to be exact).
+Note, that requires C++11-capable compiler.
+
+
 License
 =======
 
