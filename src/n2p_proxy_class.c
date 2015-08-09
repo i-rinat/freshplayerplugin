@@ -388,6 +388,11 @@ static
 void
 n2p_deallocate(void *object)
 {
+    if (!object) {
+        trace_warning("%s, object == NULL\n", __func__);
+        return;
+    }
+
     struct deallocate_param_s *p = g_slice_alloc(sizeof(*p));
     p->object = object;
     p->m_loop = ppb_message_loop_get_current();
