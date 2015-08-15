@@ -21,6 +21,15 @@ typedef enum {
 } PP_PrivatePageTransformType;
 PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_PrivatePageTransformType, 4);
 
+typedef enum {
+  PP_PRIVATEDUPLEXMODE_NONE = 0,
+  PP_PRIVATEDUPLEXMODE_SIMPLEX = 1,
+  PP_PRIVATEDUPLEXMODE_SHORT_EDGE = 2,
+  PP_PRIVATEDUPLEXMODE_LONG_EDGE = 3,
+  PP_PRIVATEDUPLEXMODE_LAST = PP_PRIVATEDUPLEXMODE_LONG_EDGE
+} PP_PrivateDuplexMode_Dev;
+PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_PrivateDuplexMode_Dev, 4);
+
 struct PP_PdfPrintPresetOptions_Dev {
   // Returns whether scaling is disabled. Returns same information as the
   // PPP_Printing_Dev's method IsScalingDiabled().
@@ -28,8 +37,17 @@ struct PP_PdfPrintPresetOptions_Dev {
 
   // Number of copies to be printed.
   int32_t copies;
+
+  // DuplexMode to be used for printing.
+  PP_PrivateDuplexMode_Dev duplex;
+
+  // True if all the pages in the PDF are the same size.
+  PP_Bool is_page_size_uniform;
+
+  // Only valid if |is_page_size_uniform| is true. The page size.
+  PP_Size uniform_page_size;
 };
-PP_COMPILE_ASSERT_STRUCT_SIZE_IN_BYTES(PP_PdfPrintPresetOptions_Dev, 8);
+PP_COMPILE_ASSERT_STRUCT_SIZE_IN_BYTES(PP_PdfPrintPresetOptions_Dev, 24);
 
 struct PPP_Pdf_1_1 {
   // Returns an absolute URL if the position is over a link.

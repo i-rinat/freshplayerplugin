@@ -4,7 +4,7 @@
  */
 
 /* From private/ppb_content_decryptor_private.idl,
- *   modified Mon Jan 12 17:33:29 2015.
+ *   modified Mon Mar 30 22:35:33 2015.
  */
 
 #ifndef PPAPI_C_PRIVATE_PPB_CONTENT_DECRYPTOR_PRIVATE_H_
@@ -19,10 +19,10 @@
 #include "ppapi/c/pp_var.h"
 #include "ppapi/c/private/pp_content_decryptor.h"
 
-#define PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_13 \
-    "PPB_ContentDecryptor_Private;0.13"
+#define PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_14 \
+    "PPB_ContentDecryptor_Private;0.14"
 #define PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE \
-    PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_13
+    PPB_CONTENTDECRYPTOR_PRIVATE_INTERFACE_0_14
 
 /**
  * @file
@@ -43,7 +43,7 @@
  * browser side support for the Content Decryption Module (CDM) for Encrypted
  * Media Extensions: http://www.w3.org/TR/encrypted-media/
  */
-struct PPB_ContentDecryptor_Private_0_13 {
+struct PPB_ContentDecryptor_Private_0_14 {
   /**
    * A promise has been resolved by the CDM.
    *
@@ -174,11 +174,11 @@ struct PPB_ContentDecryptor_Private_0_13 {
    * @param[in] error_description A <code>PP_Var</code> of type
    * <code>PP_VARTYPE_STRING</code> containing the error description.
    */
-  void (*SessionError)(PP_Instance instance,
-                       struct PP_Var session_id,
-                       PP_CdmExceptionCode exception_code,
-                       uint32_t system_code,
-                       struct PP_Var error_description);
+  void (*LegacySessionError)(PP_Instance instance,
+                             struct PP_Var session_id,
+                             PP_CdmExceptionCode exception_code,
+                             uint32_t system_code,
+                             struct PP_Var error_description);
   /**
    * Called after the <code>Decrypt()</code> method on the
    * <code>PPP_ContentDecryptor_Private</code> interface completes to
@@ -308,7 +308,7 @@ struct PPB_ContentDecryptor_Private_0_13 {
       const struct PP_DecryptedSampleInfo* decrypted_sample_info);
 };
 
-typedef struct PPB_ContentDecryptor_Private_0_13 PPB_ContentDecryptor_Private;
+typedef struct PPB_ContentDecryptor_Private_0_14 PPB_ContentDecryptor_Private;
 /**
  * @}
  */

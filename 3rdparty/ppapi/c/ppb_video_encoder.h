@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_video_encoder.idl modified Thu Feb  5 10:33:32 2015. */
+/* From ppb_video_encoder.idl modified Tue May  5 23:37:20 2015. */
 
 #ifndef PPAPI_C_PPB_VIDEO_ENCODER_H_
 #define PPAPI_C_PPB_VIDEO_ENCODER_H_
@@ -20,6 +20,7 @@
 #include "ppapi/c/ppb_video_frame.h"
 
 #define PPB_VIDEOENCODER_INTERFACE_0_1 "PPB_VideoEncoder;0.1" /* dev */
+#define PPB_VIDEOENCODER_INTERFACE_0_2 "PPB_VideoEncoder;0.2" /* dev */
 /**
  * @file
  * This file defines the <code>PPB_VideoEncoder</code> interface.
@@ -50,11 +51,10 @@
  *   it. Any pending callbacks will abort before the encoder is destroyed.
  *
  * Available video codecs vary by platform.
- * All: theora, vorbis, vp8.
- * Chrome and ChromeOS: h264.
- * ChromeOS: mpeg4.
+ * All: vp8 (software).
+ * ChromeOS, depending on your device: h264 (hardware), vp8 (hardware)
  */
-struct PPB_VideoEncoder_0_1 { /* dev */
+struct PPB_VideoEncoder_0_2 { /* dev */
   /**
    * Creates a new video encoder resource.
    *
@@ -233,6 +233,41 @@ struct PPB_VideoEncoder_0_1 { /* dev */
    * @param[in] video_encoder A <code>PP_Resource</code> identifying the video
    * encoder.
    */
+  void (*Close)(PP_Resource video_encoder);
+};
+
+struct PPB_VideoEncoder_0_1 { /* dev */
+  PP_Resource (*Create)(PP_Instance instance);
+  PP_Bool (*IsVideoEncoder)(PP_Resource resource);
+  int32_t (*GetSupportedProfiles)(PP_Resource video_encoder,
+                                  struct PP_ArrayOutput output,
+                                  struct PP_CompletionCallback callback);
+  int32_t (*Initialize)(PP_Resource video_encoder,
+                        PP_VideoFrame_Format input_format,
+                        const struct PP_Size* input_visible_size,
+                        PP_VideoProfile output_profile,
+                        uint32_t initial_bitrate,
+                        PP_HardwareAcceleration acceleration,
+                        struct PP_CompletionCallback callback);
+  int32_t (*GetFramesRequired)(PP_Resource video_encoder);
+  int32_t (*GetFrameCodedSize)(PP_Resource video_encoder,
+                               struct PP_Size* coded_size);
+  int32_t (*GetVideoFrame)(PP_Resource video_encoder,
+                           PP_Resource* video_frame,
+                           struct PP_CompletionCallback callback);
+  int32_t (*Encode)(PP_Resource video_encoder,
+                    PP_Resource video_frame,
+                    PP_Bool force_keyframe,
+                    struct PP_CompletionCallback callback);
+  int32_t (*GetBitstreamBuffer)(PP_Resource video_encoder,
+                                struct PP_BitstreamBuffer* bitstream_buffer,
+                                struct PP_CompletionCallback callback);
+  void (*RecycleBitstreamBuffer)(
+      PP_Resource video_encoder,
+      const struct PP_BitstreamBuffer* bitstream_buffer);
+  void (*RequestEncodingParametersChange)(PP_Resource video_encoder,
+                                          uint32_t bitrate,
+                                          uint32_t framerate);
   void (*Close)(PP_Resource video_encoder);
 };
 /**

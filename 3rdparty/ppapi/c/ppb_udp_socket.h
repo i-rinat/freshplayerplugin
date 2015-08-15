@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_udp_socket.idl modified Wed Jan 14 13:13:19 2015. */
+/* From ppb_udp_socket.idl modified Mon Mar  2 16:50:15 2015. */
 
 #ifndef PPAPI_C_PPB_UDP_SOCKET_H_
 #define PPAPI_C_PPB_UDP_SOCKET_H_
@@ -18,6 +18,7 @@
 
 #define PPB_UDPSOCKET_INTERFACE_1_0 "PPB_UDPSocket;1.0"
 #define PPB_UDPSOCKET_INTERFACE_1_1 "PPB_UDPSocket;1.1"
+#define PPB_UDPSOCKET_INTERFACE_1_2 "PPB_UDPSocket;1.2" /* dev */
 #define PPB_UDPSOCKET_INTERFACE PPB_UDPSOCKET_INTERFACE_1_1
 
 /**
@@ -70,7 +71,26 @@ typedef enum {
    * size. Even if <code>SetOption()</code> succeeds, the browser doesn't
    * guarantee it will conform to the size.
    */
-  PP_UDPSOCKET_OPTION_RECV_BUFFER_SIZE = 3
+  PP_UDPSOCKET_OPTION_RECV_BUFFER_SIZE = 3,
+  /**
+   * Specifies whether the packets sent from the host to the multicast group
+   * should be looped back to the host or not. Value's type should be
+   * <code>PP_VARTYPE_BOOL</code>.
+   * This option can only be set before calling <code>Bind()</code>.
+   *
+   * This is only supported in version 1.2 of the API (Chrome 43) and later.
+   */
+  PP_UDPSOCKET_OPTION_MULTICAST_LOOP = 4,
+  /**
+   * Specifies the time-to-live for packets sent to the multicast group. The
+   * value should be within 0 to 255 range. The default value is 1 and means
+   * that packets will not be routed beyond the local network. Value's type
+   * should be <code>PP_VARTYPE_INT32</code>.
+   * This option can only be set before calling <code>Bind()</code>.
+   *
+   * This is only supported in version 1.2 of the API (Chrome 43) and later.
+   */
+  PP_UDPSOCKET_OPTION_MULTICAST_TTL = 5
 } PP_UDPSocket_Option;
 PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_UDPSocket_Option, 4);
 /**
@@ -90,7 +110,7 @@ PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_UDPSocket_Option, 4);
  * For more details about network communication permissions, please see:
  * http://developer.chrome.com/apps/app_network.html
  */
-struct PPB_UDPSocket_1_1 {
+struct PPB_UDPSocket_1_2 { /* dev */
   /**
    * Creates a UDP socket resource.
    *
@@ -215,9 +235,39 @@ struct PPB_UDPSocket_1_1 {
                        PP_UDPSocket_Option name,
                        struct PP_Var value,
                        struct PP_CompletionCallback callback);
+  /**
+   * Joins the multicast group with address specified by <code>group</code>
+   * parameter, which is expected to be a <code>PPB_NetAddress</code> object.
+   *
+   * @param[in] udp_socket A <code>PP_Resource</code> corresponding to a UDP
+   * socket.
+   * @param[in] group A <code>PP_Resource</code> corresponding to the network
+   * address of the multicast group.
+   * @param[in] callback A <code>PP_CompletionCallback</code> to be called upon
+   * completion.
+   *
+   * @return An int32_t containing an error code from <code>pp_errors.h</code>.
+   */
+  int32_t (*JoinGroup)(PP_Resource udp_socket,
+                       PP_Resource group,
+                       struct PP_CompletionCallback callback);
+  /**
+   * Leaves the multicast group with address specified by <code>group</code>
+   * parameter, which is expected to be a <code>PPB_NetAddress</code> object.
+   *
+   * @param[in] udp_socket A <code>PP_Resource</code> corresponding to a UDP
+   * socket.
+   * @param[in] group A <code>PP_Resource</code> corresponding to the network
+   * address of the multicast group.
+   * @param[in] callback A <code>PP_CompletionCallback</code> to be called upon
+   * completion.
+   *
+   * @return An int32_t containing an error code from <code>pp_errors.h</code>.
+   */
+  int32_t (*LeaveGroup)(PP_Resource udp_socket,
+                        PP_Resource group,
+                        struct PP_CompletionCallback callback);
 };
-
-typedef struct PPB_UDPSocket_1_1 PPB_UDPSocket;
 
 struct PPB_UDPSocket_1_0 {
   PP_Resource (*Create)(PP_Instance instance);
@@ -242,6 +292,32 @@ struct PPB_UDPSocket_1_0 {
                        struct PP_Var value,
                        struct PP_CompletionCallback callback);
 };
+
+struct PPB_UDPSocket_1_1 {
+  PP_Resource (*Create)(PP_Instance instance);
+  PP_Bool (*IsUDPSocket)(PP_Resource resource);
+  int32_t (*Bind)(PP_Resource udp_socket,
+                  PP_Resource addr,
+                  struct PP_CompletionCallback callback);
+  PP_Resource (*GetBoundAddress)(PP_Resource udp_socket);
+  int32_t (*RecvFrom)(PP_Resource udp_socket,
+                      char* buffer,
+                      int32_t num_bytes,
+                      PP_Resource* addr,
+                      struct PP_CompletionCallback callback);
+  int32_t (*SendTo)(PP_Resource udp_socket,
+                    const char* buffer,
+                    int32_t num_bytes,
+                    PP_Resource addr,
+                    struct PP_CompletionCallback callback);
+  void (*Close)(PP_Resource udp_socket);
+  int32_t (*SetOption)(PP_Resource udp_socket,
+                       PP_UDPSocket_Option name,
+                       struct PP_Var value,
+                       struct PP_CompletionCallback callback);
+};
+
+typedef struct PPB_UDPSocket_1_1 PPB_UDPSocket;
 /**
  * @}
  */

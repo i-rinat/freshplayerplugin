@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From pp_codecs.idl modified Wed Feb  4 05:24:21 2015. */
+/* From pp_codecs.idl modified Fri Apr 17 10:55:27 2015. */
 
 #ifndef PPAPI_C_PP_CODECS_H_
 #define PPAPI_C_PP_CODECS_H_
@@ -137,6 +137,33 @@ struct PP_VideoPicture_0_1 {
  * GetSupportedProfiles() for more details.
  */
 struct PP_VideoProfileDescription {
+  /**
+   * The codec profile.
+   */
+  PP_VideoProfile profile;
+  /**
+   * Dimensions of the maximum resolution of video frames, in pixels.
+   */
+  struct PP_Size max_resolution;
+  /**
+   * The numerator of the maximum frame rate.
+   */
+  uint32_t max_framerate_numerator;
+  /**
+   * The denominator of the maximum frame rate.
+   */
+  uint32_t max_framerate_denominator;
+  /**
+   * Whether the profile is hardware accelerated.
+   */
+  PP_Bool hardware_accelerated;
+};
+
+/**
+ * Supported video profile information. See the PPB_VideoEncoder function
+ * GetSupportedProfiles() for more details.
+ */
+struct PP_VideoProfileDescription_0_1 {
   /**
    * The codec profile.
    */

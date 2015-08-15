@@ -31,7 +31,7 @@
  */
 struct PPP_Zoom_Dev_0_3 {
   /**
-   * Instruct plug-in to zoom according to the given factor and whether the zoom
+   * Instruct plugin to zoom according to the given factor and whether the zoom
    * only applies to text only.  The scale factor is the percentage divided by
    * 100, i.e. 150% zoom is 1.5.
    */
