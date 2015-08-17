@@ -51,20 +51,19 @@ fpp_config_get_default_plugin_version(void)
 const char *
 fpp_config_get_plugin_name(void)
 {
-    return "libpdf.so from Chrome";
+    return "libpdf.so renderer backend";
 }
 
 const char *
 fpp_config_get_default_plugin_descr(void)
 {
-    return "Display PDF documents in-place";
+    return "libpdf.so renderer backend";
 }
 
 const char *
 fpp_config_get_plugin_mime_type(void)
 {
-    return "application/pdf::Portable Document Format;"
-           "application/x-google-chrome-print-preview-pdf::Portable Document Format";
+    return "application/x-freshwrapper-libpdf-so::libpdf renderer";
 }
 
 char *
