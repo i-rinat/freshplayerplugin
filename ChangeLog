@@ -1,3 +1,11 @@
+2015-08-17  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.3.2
+	* graphics: fix fullscreen geometry issue
+	* grpahics: sync to vblank in fullscreen mode
+	* audio: control JACK port autoconnection and server autostart
+	* audio: add NPAPI audio control
+
 2015-07-05  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.3.1
