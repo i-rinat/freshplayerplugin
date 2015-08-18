@@ -139,4 +139,11 @@ if (WITH_LIBPDF)
     add_library(freshwrapper-libpdf SHARED ${COMMON_OBJ_LIST} config_libpdf.c)
     target_link_libraries(freshwrapper-libpdf ${REQ_LIBRARIES})
     target_link_libraries(dep_check freshwrapper-libpdf)
+
+    add_library(freshwrapper-libpdf-frontend SHARED
+                np_libpdf_frontend.c
+                trace_core.c
+                config.c
+                config_libpdf_frontend.c)
+    target_link_libraries(dep_check freshwrapper-libpdf-frontend)
 endif()
