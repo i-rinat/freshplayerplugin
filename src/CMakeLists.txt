@@ -136,9 +136,9 @@ endif()
 # libpdf wrapper
 set(WITH_LIBPDF FALSE CACHE STRING "generate wrapper for libpdf.so")
 if (WITH_LIBPDF)
-    add_library(freshwrapper-libpdf SHARED ${COMMON_OBJ_LIST} config_libpdf.c)
-    target_link_libraries(freshwrapper-libpdf ${REQ_LIBRARIES})
-    target_link_libraries(dep_check freshwrapper-libpdf)
+    add_library(freshwrapper-libpdf-backend SHARED ${COMMON_OBJ_LIST} config_libpdf_backend.c)
+    target_link_libraries(freshwrapper-libpdf-backend ${REQ_LIBRARIES})
+    target_link_libraries(dep_check freshwrapper-libpdf-backend)
 
     add_library(freshwrapper-libpdf-frontend SHARED
                 np_libpdf_frontend.c
