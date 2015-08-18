@@ -24,6 +24,7 @@ set(source_list
     reverse_constant.c
     tables.c
     trace.c
+    trace_core.c
     n2p_proxy_class.c
     p2n_proxy_class.c
     pp_interface.c

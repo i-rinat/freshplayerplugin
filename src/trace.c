@@ -22,68 +22,12 @@
  * SOFTWARE.
  */
 
-#include <pthread.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/syscall.h>
-#include <stdlib.h>
 #include "trace.h"
-#include "config.h"
 #include "pp_resource.h"
 #include "ppb_var.h"
-#include <inttypes.h>
 #include <ppapi/c/pp_graphics_3d.h>
 #include <glib.h>
 
-
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static __thread struct timespec tictoc_ts;
-
-
-void
-trace_info(const char *fmt, ...)
-{
-    if (config.quiet)
-        return;
-    pthread_mutex_lock(&lock);
-    va_list args;
-//    fprintf(stdout, "[fresh] ");
-    fprintf(stdout, "[fresh %5d] ", (int)syscall(__NR_gettid));
-    va_start(args, fmt);
-    vfprintf(stdout, fmt, args);
-    va_end(args);
-    pthread_mutex_unlock(&lock);
-}
-
-void
-trace_warning(const char *fmt, ...)
-{
-    pthread_mutex_lock(&lock);
-    va_list args;
-    fprintf(stdout, "[fresh] [warning] ");
-    va_start(args, fmt);
-    vfprintf(stdout, fmt, args);
-    va_end(args);
-    pthread_mutex_unlock(&lock);
-}
-
-void
-trace_error(const char *fmt, ...)
-{
-    pthread_mutex_lock(&lock);
-    va_list args;
-    fprintf(stderr, "[fresh] [error] ");
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
-
-    fprintf(stdout, "[fresh] [error] ");
-    va_start(args, fmt);
-    vfprintf(stdout, fmt, args);
-    va_end(args);
-    pthread_mutex_unlock(&lock);
-}
 
 static
 char *
@@ -387,18 +331,4 @@ trace_graphics3d_attributes_as_string(const int32_t attrib_list[])
 
     // return combined string
     return g_string_free(s, FALSE);
-}
-
-void
-trace_duration_tic(void)
-{
-    clock_gettime(CLOCK_REALTIME, &tictoc_ts);
-}
-
-double
-trace_duration_toc(void)
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    return (ts.tv_sec - tictoc_ts.tv_sec) + 1e-9 * (ts.tv_nsec - tictoc_ts.tv_nsec);
 }

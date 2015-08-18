@@ -22,25 +22,38 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_TRACE_H
-#define FPP_TRACE_H
-
-#include <ppapi/c/pp_var.h>
-#include <ppapi/c/pp_rect.h>
-#include <ppapi/c/pp_touch_point.h>
-#include <npapi/npapi.h>
-#include "trace_core.h"
+#ifndef FPP_TRACE_CORE_H
+#define FPP_TRACE_CORE_H
 
 
-char   *trace_var_as_string(struct PP_Var var);
-char   *trace_size_as_string(const struct PP_Size *size);
-char   *trace_rect_as_string(const struct PP_Rect *rect);
-char   *trace_point_as_string(const struct PP_Point *point);
-char   *trace_float_point_as_string(const struct PP_FloatPoint *point);
-char   *trace_touch_point_as_string(const struct PP_TouchPoint *point);
-char   *trace_event_classes_as_string(uint32_t event_classes);
-char   *trace_np_window_as_string(const NPWindow *window);
-char   *trace_graphics3d_attributes_as_string(const int32_t attrib_list[]);
+#define TRACE_WRAPPER       static __attribute__((unused))
+
+// trace non-implemeted or partially implemented function based on build type
+#ifndef NDEBUG
+// debug build have tracing enabled
+#define TWRAPZ(fname)       trace_##fname
+#else
+#define TWRAPZ(fname)       fname
+#endif
+
+// trace implemented function only if TRACE_ALL defined
+#ifdef TRACE_ALL
+#define TWRAPF(fname)       trace_##fname
+#define trace_info_f(...)   trace_info(__VA_ARGS__)
+#else
+#define TWRAPF(fname)       fname
+#define trace_info_f(...)
+#endif
+
+#define trace_info_z(...)   trace_info(__VA_ARGS__)
 
 
-#endif // FPP_TRACE_H
+void    trace_info(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
+void    trace_warning(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
+void    trace_error(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
+
+void    trace_duration_tic(void);
+double  trace_duration_toc(void);
+
+
+#endif // FPP_TRACE_CORE_H
