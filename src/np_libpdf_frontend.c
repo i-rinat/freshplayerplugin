@@ -28,6 +28,7 @@
 #include <string.h>
 #include "trace_core.h"
 #include "config.h"
+#include "txt_resources.h"
 
 
 #define NPString_literal(str) { .UTF8Characters = str, .UTF8Length = strlen(str) }
@@ -57,7 +58,10 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     }
 
     NPVariant result;
-    NPString script = NPString_literal("this.outerHTML='<h1>Hello</h1>';");
+    NPString script = {
+        .UTF8Characters = resource_text_libpdf_frontend_js,
+        .UTF8Length = strlen(resource_text_libpdf_frontend_js),
+    };
 
     if (!npn.evaluate(npp, np_plugin_element_obj, &script, &result)) {
         trace_warning("%s, NPN_Evaluate failed\n", __func__);

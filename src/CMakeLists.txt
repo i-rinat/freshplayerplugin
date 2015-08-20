@@ -149,5 +149,6 @@ if (WITH_LIBPDF)
                 trace_core.c
                 config.c
                 config_libpdf_frontend.c)
+    target_link_libraries(freshwrapper-libpdf-frontend txt-resources)
     target_link_libraries(dep_check freshwrapper-libpdf-frontend)
 endif()
