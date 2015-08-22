@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <glib.h>
+#include "trace_core.h"
 
 
 static struct fpp_config_s default_config = {
@@ -147,7 +148,15 @@ fpp_config_initialize(void)
     config_set_auto_convert(&cfg, 1);
 
     if (!config_read_file(&cfg, local_config)) {
+        if (config_error_type(&cfg) == CONFIG_ERR_PARSE) {
+            trace_warning("failed to parse configuration file %s, trying %s\n", local_config,
+                          global_config);
+        }
+
         if (!config_read_file(&cfg, global_config)) {
+            if (config_error_type(&cfg) == CONFIG_ERR_PARSE)
+                trace_warning("failed to parse configuration file %s\n", global_config);
+
             goto quit;
         }
     }
