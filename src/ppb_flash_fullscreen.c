@@ -113,6 +113,11 @@ call_did_change_view_comt(void *user_data, int32_t result)
         goto done;
     }
 
+    // looks like transition is over, so current window geometry can be safely used as
+    // full screen size
+    pp_i->fs_width = pp_i->fs_width_current;
+    pp_i->fs_height = pp_i->fs_height_current;
+
     v->rect.point.x = 0;
     v->rect.point.y = 0;
     if (is_fullscreen) {
@@ -316,8 +321,8 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 
     pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 1;
-    pp_i->fs_width =      wnd_size;
-    pp_i->fs_height =     wnd_size;
+    pp_i->fs_width_current = wnd_size;
+    pp_i->fs_height_current = wnd_size;
     pthread_mutex_unlock(&display.lock);
 
     int called_did_change_view = 0;
@@ -382,8 +387,8 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 
             case ConfigureNotify:
                 pthread_mutex_lock(&display.lock);
-                pp_i->fs_width =  ev.xconfigure.width;
-                pp_i->fs_height = ev.xconfigure.height;
+                pp_i->fs_width_current = ev.xconfigure.width;
+                pp_i->fs_height_current = ev.xconfigure.height;
                 pthread_mutex_unlock(&display.lock);
 
                 handled = 1;

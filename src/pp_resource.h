@@ -179,10 +179,14 @@ struct pp_instance_s {
     int                             have_prev_cursor;
 
     // full screen
-    pthread_t                       fs_thread;
-    Window                          fs_wnd;
-    uint32_t                        fs_width;
-    uint32_t                        fs_height;
+    pthread_t           fs_thread;
+    Window              fs_wnd;     ///< fullscreen window handle
+    uint32_t            fs_width;   ///< established width of fullscreen window
+    uint32_t            fs_height;  ///< established height of fullscreen window
+
+    // current geometry of fullscreen window. Can change multiple times during transition
+    uint32_t            fs_width_current;
+    uint32_t            fs_height_current;
 
     // geometry
     uint32_t                        width;
