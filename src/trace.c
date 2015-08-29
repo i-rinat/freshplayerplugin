@@ -332,3 +332,27 @@ trace_graphics3d_attributes_as_string(const int32_t attrib_list[])
     // return combined string
     return g_string_free(s, FALSE);
 }
+
+char *
+trace_netaddress_ipv4_as_string(const struct PP_NetAddress_IPv4 *addr)
+{
+    if (!addr)
+        return g_strdup_printf("(nil)");
+
+    return g_strdup_printf("%u.%u.%u.%u:%u", addr->addr[0], addr->addr[1], addr->addr[2],
+                           addr->addr[3], addr->port);
+}
+
+char *
+trace_netaddress_ipv6_as_string(const struct PP_NetAddress_IPv6 *addr)
+{
+    if (!addr)
+        return g_strdup_printf("(nil)");
+
+    return g_strdup_printf("[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:"
+                           "%02x%02x]:%u", addr->addr[0], addr->addr[1], addr->addr[2],
+                           addr->addr[3], addr->addr[4], addr->addr[5], addr->addr[6],
+                           addr->addr[7], addr->addr[8], addr->addr[9], addr->addr[10],
+                           addr->addr[11], addr->addr[12], addr->addr[13], addr->addr[14],
+                           addr->addr[15], addr->port);
+}
