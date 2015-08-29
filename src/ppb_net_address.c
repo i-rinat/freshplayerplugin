@@ -162,7 +162,7 @@ ppb_net_address_private_get_scope_id(const struct PP_NetAddress_Private *addr)
         struct sockaddr_in6 sai6;
 
         memcpy(&sai6, addr->data, sizeof(sai6));
-        return sai6.sin6_scope_id;
+        return ntohl(sai6.sin6_scope_id);
     }
 
     // it's IPv4, function should return 0
