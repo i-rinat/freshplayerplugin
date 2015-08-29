@@ -127,6 +127,7 @@ enum pp_resource_type_e {
     PP_RESOURCE_FONT,
     PP_RESOURCE_DEVICE_REF,
     PP_RESOURCE_HOST_RESOLVER,
+    PP_RESOURCE_NET_ADDRESS,
 
     PP_RESOURCE_TYPES_COUNT,        // must be the last item in the list
 };
@@ -581,6 +582,11 @@ struct pp_host_resolver_s {
     uint32_t                        addr_count;
 };
 
+struct pp_net_address_s {
+    COMMON_STRUCTURE_FIELDS
+    struct PP_NetAddress_Private   addr;
+};
+
 union pp_largest_u {
     struct pp_instance_s            s02;
     struct pp_resource_generic_s    s03;
@@ -615,6 +621,7 @@ union pp_largest_u {
     struct pp_font_s                s32;
     struct pp_device_ref_s          s33;
     struct pp_host_resolver_s       s34;
+    struct pp_net_address_s         s35;
 };
 
 PP_Resource             pp_resource_allocate(enum pp_resource_type_e type,

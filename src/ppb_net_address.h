@@ -26,6 +26,7 @@
 #define FPP_PPB_NET_ADDRESS_H
 
 #include <ppapi/c/private/ppb_net_address_private.h>
+#include <ppapi/c/ppb_net_address.h>
 
 
 PP_Bool
@@ -68,5 +69,29 @@ void
 ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id,
                                                  uint16_t port,
                                                  struct PP_NetAddress_Private *addr_out);
+
+PP_Resource
+ppb_net_address_create_from_ipv4_address(PP_Instance instance,
+                                         const struct PP_NetAddress_IPv4 *ipv4_addr);
+
+PP_Resource
+ppb_net_address_create_from_ipv6_address(PP_Instance instance,
+                                         const struct PP_NetAddress_IPv6 *ipv6_addr);
+
+PP_Bool
+ppb_net_address_is_net_address(PP_Resource resource);
+
+PP_NetAddress_Family
+ppb_net_address_get_family(PP_Resource addr);
+
+struct PP_Var
+ppb_net_address_describe_as_string(PP_Resource addr, PP_Bool include_port);
+
+PP_Bool
+ppb_net_address_describe_as_ipv4_address(PP_Resource addr, struct PP_NetAddress_IPv4 *ipv4_addr);
+
+PP_Bool
+ppb_net_address_describe_as_ipv6_address(PP_Resource addr, struct PP_NetAddress_IPv6 *ipv6_addr);
+
 
 #endif // FPP_PPB_NET_ADDRESS_H

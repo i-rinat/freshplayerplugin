@@ -27,6 +27,8 @@
 #include <string.h>
 #include <netinet/in.h>
 #include "trace.h"
+#include "tables.h"
+#include "pp_resource.h"
 #include "pp_interface.h"
 
 
@@ -194,6 +196,160 @@ ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uint32_t 
     memcpy(addr_out->data, &sai6, sizeof(sai6));
 }
 
+PP_Resource
+ppb_net_address_create_from_ipv4_address(PP_Instance instance,
+                                         const struct PP_NetAddress_IPv4 *ipv4_addr)
+{
+    if (!ipv4_addr) {
+        trace_error("%s, ipv4_addr == NULL\n", __func__);
+        return 0;
+    }
+
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+
+    PP_Resource net_address = pp_resource_allocate(PP_RESOURCE_NET_ADDRESS, pp_i);
+    struct pp_net_address_s *na = pp_resource_acquire(net_address, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, resource allocation failed\n", __func__);
+        return 0;
+    }
+
+    ppb_net_address_private_create_from_ipv4_address(ipv4_addr->addr, ipv4_addr->port, &na->addr);
+
+    pp_resource_release(net_address);
+    return net_address;
+}
+
+PP_Resource
+ppb_net_address_create_from_ipv6_address(PP_Instance instance,
+                                         const struct PP_NetAddress_IPv6 *ipv6_addr)
+{
+    if (!ipv6_addr) {
+        trace_error("%s, ipv6_addr == NULL\n", __func__);
+        return 0;
+    }
+
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return 0;
+    }
+
+    PP_Resource net_address = pp_resource_allocate(PP_RESOURCE_NET_ADDRESS, pp_i);
+    struct pp_net_address_s *na = pp_resource_acquire(net_address, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, resource allocation failed\n", __func__);
+        return 0;
+    }
+
+    ppb_net_address_private_create_from_ipv6_address(ipv6_addr->addr, 0, ipv6_addr->port,
+                                                     &na->addr);
+
+    pp_resource_release(net_address);
+    return net_address;
+}
+
+static
+void
+ppb_net_address_destroy(void *ptr)
+{
+    // nothing to do
+}
+
+PP_Bool
+ppb_net_address_is_net_address(PP_Resource resource)
+{
+    return pp_resource_get_type(resource) == PP_RESOURCE_NET_ADDRESS;
+}
+
+PP_NetAddress_Family
+ppb_net_address_get_family(PP_Resource addr)
+{
+    struct pp_net_address_s *na = pp_resource_acquire(addr, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_NETADDRESS_FAMILY_UNSPECIFIED;
+    }
+
+    PP_NetAddress_Family family;
+
+    if (na->addr.size == sizeof(struct sockaddr_in))
+        family = PP_NETADDRESS_FAMILY_IPV4;
+    else if (na->addr.size == sizeof(struct sockaddr_in6))
+        family = PP_NETADDRESS_FAMILY_IPV6;
+    else
+        family = PP_NETADDRESS_FAMILY_UNSPECIFIED;
+
+    pp_resource_release(addr);
+    return family;
+}
+
+struct PP_Var
+ppb_net_address_describe_as_string(PP_Resource addr, PP_Bool include_port)
+{
+    return PP_MakeUndefined();
+}
+
+PP_Bool
+ppb_net_address_describe_as_ipv4_address(PP_Resource addr, struct PP_NetAddress_IPv4 *ipv4_addr)
+{
+    if (!ipv4_addr) {
+        trace_error("%s, ipv4_addr == NULL\n", __func__);
+        return PP_FALSE;
+    }
+
+    struct pp_net_address_s *na = pp_resource_acquire(addr, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
+
+    if (na->addr.size != sizeof(struct sockaddr_in)) {
+        // not ipv4
+        pp_resource_release(addr);
+        return PP_FALSE;
+    }
+
+    struct sockaddr_in *sai = (void *)na->addr.data;
+    memcpy(ipv4_addr->addr, &sai->sin_addr, sizeof(sai->sin_addr));
+    ipv4_addr->port = ntohs(sai->sin_port);
+
+    pp_resource_release(addr);
+    return PP_TRUE;
+}
+
+PP_Bool
+ppb_net_address_describe_as_ipv6_address(PP_Resource addr, struct PP_NetAddress_IPv6 *ipv6_addr)
+{
+    if (!ipv6_addr) {
+        trace_error("%s, ipv6_addr == NULL\n", __func__);
+        return PP_FALSE;
+    }
+
+    struct pp_net_address_s *na = pp_resource_acquire(addr, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_FALSE;
+    }
+
+    if (na->addr.size != sizeof(struct sockaddr_in6)) {
+        // not ipv6
+        pp_resource_release(addr);
+        return PP_FALSE;
+    }
+
+    struct sockaddr_in6 *sai6 = (void *)na->addr.data;
+    memcpy(ipv6_addr->addr, &sai6->sin6_addr, sizeof(sai6->sin6_addr));
+    ipv6_addr->port = ntohs(sai6->sin6_port);
+
+    pp_resource_release(addr);
+    return PP_TRUE;
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -297,6 +453,66 @@ trace_ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uin
     return ppb_net_address_private_create_from_ipv6_address(ip, scope_id, port, addr_out);
 }
 
+TRACE_WRAPPER
+PP_Resource
+trace_ppb_net_address_create_from_ipv4_address(PP_Instance instance,
+                                               const struct PP_NetAddress_IPv4 *ipv4_addr)
+{
+    trace_info("[PPB] {full} %s\n", __func__+6);
+    return ppb_net_address_create_from_ipv4_address(instance, ipv4_addr);
+}
+
+TRACE_WRAPPER
+PP_Resource
+trace_ppb_net_address_create_from_ipv6_address(PP_Instance instance,
+                                               const struct PP_NetAddress_IPv6 *ipv6_addr)
+{
+    trace_info("[PPB] {full} %s\n", __func__+6);
+    return ppb_net_address_create_from_ipv6_address(instance, ipv6_addr);
+}
+
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_net_address_is_net_address(PP_Resource resource)
+{
+    trace_info("[PPB] {full} %s resource=%d\n", __func__+6, resource);
+    return ppb_net_address_is_net_address(resource);
+}
+
+TRACE_WRAPPER
+PP_NetAddress_Family
+trace_ppb_net_address_get_family(PP_Resource addr)
+{
+    trace_info("[PPB] {full} %s addr=%d\n", __func__+6, addr);
+    return ppb_net_address_get_family(addr);
+}
+
+TRACE_WRAPPER
+struct PP_Var
+trace_ppb_net_address_describe_as_string(PP_Resource addr, PP_Bool include_port)
+{
+    trace_info("[PPB] {zilch} %s addr=%d, include_port=%u\n", __func__+6, addr, include_port);
+    return ppb_net_address_describe_as_string(addr, include_port);
+}
+
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_net_address_describe_as_ipv4_address(PP_Resource addr,
+                                               struct PP_NetAddress_IPv4 *ipv4_addr)
+{
+    trace_info("[PPB] {full} %s addr=%d\n", __func__+6, addr);
+    return ppb_net_address_describe_as_ipv4_address(addr, ipv4_addr);
+}
+
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_net_address_describe_as_ipv6_address(PP_Resource addr,
+                                               struct PP_NetAddress_IPv6 *ipv6_addr)
+{
+    trace_info("[PPB] {full} %s addr=%d\n", __func__+6, addr);
+    return ppb_net_address_describe_as_ipv6_address(addr, ipv6_addr);
+}
+
 
 const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = {
     .AreEqual =              TWRAPF(ppb_net_address_private_are_equal),
@@ -312,6 +528,16 @@ const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = 
     .CreateFromIPv6Address = TWRAPF(ppb_net_address_private_create_from_ipv6_address),
 };
 
+const struct PPB_NetAddress_1_0 ppb_net_address_interface_1_0 = {
+    .CreateFromIPv4Address = TWRAPF(ppb_net_address_create_from_ipv4_address),
+    .CreateFromIPv6Address = TWRAPF(ppb_net_address_create_from_ipv6_address),
+    .IsNetAddress =          TWRAPF(ppb_net_address_is_net_address),
+    .GetFamily =             TWRAPF(ppb_net_address_get_family),
+    .DescribeAsString =      TWRAPZ(ppb_net_address_describe_as_string),
+    .DescribeAsIPv4Address = TWRAPF(ppb_net_address_describe_as_ipv4_address),
+    .DescribeAsIPv6Address = TWRAPF(ppb_net_address_describe_as_ipv6_address),
+};
+
 static
 void
 __attribute__((constructor))
@@ -319,4 +545,6 @@ constructor_ppb_net_address(void)
 {
     register_interface(PPB_NETADDRESS_PRIVATE_INTERFACE_1_1,
                        &ppb_net_address_private_interface_1_1);
+    register_interface(PPB_NETADDRESS_INTERFACE_1_0, &ppb_net_address_interface_1_0);
+    register_resource(PP_RESOURCE_NET_ADDRESS, ppb_net_address_destroy);
 }
