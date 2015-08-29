@@ -458,7 +458,9 @@ PP_Resource
 trace_ppb_net_address_create_from_ipv4_address(PP_Instance instance,
                                                const struct PP_NetAddress_IPv4 *ipv4_addr)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    gchar *s_ipv4_addr = trace_netaddress_ipv4_as_string(ipv4_addr);
+    trace_info("[PPB] {full} %s instance=%d, ipv4_addr=%s\n", __func__+6, instance, s_ipv4_addr);
+    g_free(s_ipv4_addr);
     return ppb_net_address_create_from_ipv4_address(instance, ipv4_addr);
 }
 
@@ -467,7 +469,9 @@ PP_Resource
 trace_ppb_net_address_create_from_ipv6_address(PP_Instance instance,
                                                const struct PP_NetAddress_IPv6 *ipv6_addr)
 {
-    trace_info("[PPB] {full} %s\n", __func__+6);
+    gchar *s_ipv6_addr = trace_netaddress_ipv6_as_string(ipv6_addr);
+    trace_info("[PPB] {full} %s instance=%d, ipv6_addr=%s\n", __func__+6, instance, s_ipv6_addr);
+    g_free(s_ipv6_addr);
     return ppb_net_address_create_from_ipv6_address(instance, ipv6_addr);
 }
 
@@ -500,7 +504,9 @@ PP_Bool
 trace_ppb_net_address_describe_as_ipv4_address(PP_Resource addr,
                                                struct PP_NetAddress_IPv4 *ipv4_addr)
 {
-    trace_info("[PPB] {full} %s addr=%d\n", __func__+6, addr);
+    gchar *s_ipv4_addr = trace_netaddress_ipv4_as_string(ipv4_addr);
+    trace_info("[PPB] {full} %s addr=%d, ipv4_addr=%s\n", __func__+6, addr, s_ipv4_addr);
+    g_free(s_ipv4_addr);
     return ppb_net_address_describe_as_ipv4_address(addr, ipv4_addr);
 }
 
@@ -509,7 +515,9 @@ PP_Bool
 trace_ppb_net_address_describe_as_ipv6_address(PP_Resource addr,
                                                struct PP_NetAddress_IPv6 *ipv6_addr)
 {
-    trace_info("[PPB] {full} %s addr=%d\n", __func__+6, addr);
+    gchar *s_ipv6_addr = trace_netaddress_ipv6_as_string(ipv6_addr);
+    trace_info("[PPB] {full} %s addr=%d, ipv6_addr=%s\n", __func__+6, addr, s_ipv6_addr);
+    g_free(s_ipv6_addr);
     return ppb_net_address_describe_as_ipv6_address(addr, ipv6_addr);
 }
 
