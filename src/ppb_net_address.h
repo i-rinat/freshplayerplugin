@@ -29,43 +29,44 @@
 
 
 PP_Bool
-ppb_net_address_are_equal(const struct PP_NetAddress_Private *addr1,
-                          const struct PP_NetAddress_Private *addr2);
+ppb_net_address_private_are_equal(const struct PP_NetAddress_Private *addr1,
+                                  const struct PP_NetAddress_Private *addr2);
 
 PP_Bool
-ppb_net_address_are_hosts_equal(const struct PP_NetAddress_Private *addr1,
-                                const struct PP_NetAddress_Private *addr2);
+ppb_net_address_private_are_hosts_equal(const struct PP_NetAddress_Private *addr1,
+                                        const struct PP_NetAddress_Private *addr2);
 
 struct PP_Var
-ppb_net_address_describe(PP_Module module, const struct PP_NetAddress_Private *addr,
-                         PP_Bool include_port);
+ppb_net_address_private_describe(PP_Module module, const struct PP_NetAddress_Private *addr,
+                                 PP_Bool include_port);
 
 PP_Bool
-ppb_net_address_replace_port(const struct PP_NetAddress_Private *src_addr, uint16_t port,
-                             struct PP_NetAddress_Private *addr_out);
+ppb_net_address_private_replace_port(const struct PP_NetAddress_Private *src_addr, uint16_t port,
+                                     struct PP_NetAddress_Private *addr_out);
 
 void
-ppb_net_address_get_any_address(PP_Bool is_ipv6, struct PP_NetAddress_Private *addr);
+ppb_net_address_private_get_any_address(PP_Bool is_ipv6, struct PP_NetAddress_Private *addr);
 
 PP_NetAddressFamily_Private
-ppb_net_address_get_family(const struct PP_NetAddress_Private *addr);
+ppb_net_address_private_get_family(const struct PP_NetAddress_Private *addr);
 
 uint16_t
-ppb_net_address_get_port(const struct PP_NetAddress_Private *addr);
+ppb_net_address_private_get_port(const struct PP_NetAddress_Private *addr);
 
 PP_Bool
-ppb_net_address_get_address(const struct PP_NetAddress_Private *addr, void *address,
-                            uint16_t address_size);
+ppb_net_address_private_get_address(const struct PP_NetAddress_Private *addr, void *address,
+                                    uint16_t address_size);
 
 uint32_t
-ppb_net_address_get_scope_id(const struct PP_NetAddress_Private *addr);
+ppb_net_address_private_get_scope_id(const struct PP_NetAddress_Private *addr);
 
 void
-ppb_net_address_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
-                                         struct PP_NetAddress_Private *addr_out);
+ppb_net_address_private_create_from_ipv4_address(const uint8_t ip[4], uint16_t port,
+                                                 struct PP_NetAddress_Private *addr_out);
 
 void
-ppb_net_address_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id, uint16_t port,
-                                         struct PP_NetAddress_Private *addr_out);
+ppb_net_address_private_create_from_ipv6_address(const uint8_t ip[16], uint32_t scope_id,
+                                                 uint16_t port,
+                                                 struct PP_NetAddress_Private *addr_out);
 
 #endif // FPP_PPB_NET_ADDRESS_H
