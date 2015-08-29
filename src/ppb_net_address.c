@@ -30,6 +30,8 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "pp_interface.h"
+#include "ppb_var.h"
+#include "static_assert.h"
 
 
 PP_Bool
@@ -68,7 +70,54 @@ struct PP_Var
 ppb_net_address_private_describe(PP_Module module, const struct PP_NetAddress_Private *addr,
                                  PP_Bool include_port)
 {
-    return PP_MakeUndefined();
+    (void)module;
+
+    if (addr->size == sizeof(struct sockaddr_in)) {
+        struct sockaddr_in sai;
+        char *s;
+        uint8_t ip[4];
+
+        STATIC_ASSERT(sizeof(ip) == sizeof(sai.sin_addr));
+
+        memcpy(&sai, addr->data, sizeof(struct sockaddr_in));
+        memcpy(ip, &sai.sin_addr, sizeof(ip));
+
+        if (include_port)
+            s = g_strdup_printf("%u.%u.%u.%u:%u", ip[0], ip[1], ip[2], ip[3], ntohs(sai.sin_port));
+        else
+            s = g_strdup_printf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+
+        struct PP_Var var = ppb_var_var_from_utf8_z(s);
+        g_free(s);
+        return var;
+
+    } else if (addr->size == sizeof(struct sockaddr_in6)) {
+        struct sockaddr_in6 sai6;
+        char *s;
+        uint16_t ip[8];
+
+        STATIC_ASSERT(sizeof(ip) == sizeof(sai6.sin6_addr));
+
+        memcpy(&sai6, addr->data, sizeof(struct sockaddr_in6));
+        memcpy(ip, &sai6.sin6_addr, sizeof(ip));
+
+        if (include_port) {
+            s = g_strdup_printf("[%x:%x:%x:%x:%x:%x:%x:%x]:%u", ntohs(ip[0]), ntohs(ip[1]),
+                                ntohs(ip[2]), ntohs(ip[3]), ntohs(ip[4]), ntohs(ip[5]),
+                                ntohs(ip[6]), ntohs(ip[7]), ntohs(sai6.sin6_port));
+        } else {
+            s = g_strdup_printf("%x:%x:%x:%x:%x:%x:%x:%x", ntohs(ip[0]), ntohs(ip[1]), ntohs(ip[2]),
+                                ntohs(ip[3]), ntohs(ip[4]), ntohs(ip[5]), ntohs(ip[6]),
+                                ntohs(ip[7]));
+        }
+
+        struct PP_Var var = ppb_var_var_from_utf8_z(s);
+        g_free(s);
+        return var;
+
+    } else {
+        return PP_MakeUndefined();
+    }
 }
 
 PP_Bool
@@ -375,7 +424,8 @@ struct PP_Var
 trace_ppb_net_address_private_describe(PP_Module module, const struct PP_NetAddress_Private *addr,
                                        PP_Bool include_port)
 {
-    trace_info("[PPB] {zilch} %s\n", __func__+6);
+    trace_info("[PPB] {full} %s module=%d, addr={%p}, include_port=%u\n", __func__+6, module,
+               addr, include_port);
     return ppb_net_address_private_describe(module, addr, include_port);
 }
 
@@ -525,7 +575,7 @@ trace_ppb_net_address_describe_as_ipv6_address(PP_Resource addr,
 const struct PPB_NetAddress_Private_1_1 ppb_net_address_private_interface_1_1 = {
     .AreEqual =              TWRAPF(ppb_net_address_private_are_equal),
     .AreHostsEqual =         TWRAPF(ppb_net_address_private_are_hosts_equal),
-    .Describe =              TWRAPZ(ppb_net_address_private_describe),
+    .Describe =              TWRAPF(ppb_net_address_private_describe),
     .ReplacePort =           TWRAPF(ppb_net_address_private_replace_port),
     .GetAnyAddress =         TWRAPF(ppb_net_address_private_get_any_address),
     .GetFamily =             TWRAPF(ppb_net_address_private_get_family),
