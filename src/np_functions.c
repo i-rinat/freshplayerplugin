@@ -1235,7 +1235,7 @@ handle_enter_leave_event(NPP npp, void *event)
                                                               : PP_INPUTEVENT_TYPE_MOUSELEAVE;
     PP_Resource pp_event;
     pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,
-                                            ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
+                                            ev->time/1.0e3, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
                                             &mouse_position, 0, &zero_point);
     ppp_handle_input_event_helper(pp_i, pp_event);
 
@@ -1264,7 +1264,7 @@ handle_motion_event(NPP npp, void *event)
     PP_Resource pp_event;
 
     pp_event = ppb_mouse_input_event_create(pp_i->id, PP_INPUTEVENT_TYPE_MOUSEMOVE,
-                                            ev->time/1.0e6, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
+                                            ev->time/1.0e3, mod, PP_INPUTEVENT_MOUSEBUTTON_NONE,
                                             &mouse_position, 0, &zero_point);
     ppp_handle_input_event_helper(pp_i, pp_event);
     return 1;
@@ -1337,7 +1337,7 @@ handle_button_press_release_event(NPP npp, void *event)
         event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
                                                : PP_INPUTEVENT_TYPE_MOUSEUP;
         pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,
-                                                ev->time/1.0e6, mod, mouse_button,
+                                                ev->time/1.0e3, mod, mouse_button,
                                                 &mouse_position, 1, &zero_point);
         ppp_handle_input_event_helper(pp_i, pp_event);
 
@@ -1345,7 +1345,7 @@ handle_button_press_release_event(NPP npp, void *event)
         if (ev->type == ButtonRelease && ev_button == 3) {
             pp_event = ppb_mouse_input_event_create(pp_i->id,
                                                     PP_INPUTEVENT_TYPE_CONTEXTMENU,
-                                                    ev->time/1.0e6, mod, mouse_button,
+                                                    ev->time/1.0e3, mod, mouse_button,
                                                     &mouse_position, 1, &zero_point);
             ppp_handle_input_event_helper(pp_i, pp_event);
         }
@@ -1356,7 +1356,7 @@ handle_button_press_release_event(NPP npp, void *event)
                                                  .y = wheel_y * scroll_by_tick };
             struct PP_FloatPoint wheel_ticks = { .x = wheel_x, .y = wheel_y };
 
-            PP_Resource pp_event = ppb_wheel_input_event_create(pp_i->id, ev->time/1.0e6, mod,
+            PP_Resource pp_event = ppb_wheel_input_event_create(pp_i->id, ev->time/1.0e3, mod,
                                                                 &wheel_delta, &wheel_ticks,
                                                                 PP_FALSE);
             ppp_handle_input_event_helper(pp_i, pp_event);
@@ -1495,14 +1495,14 @@ handle_key_press_release_event(NPP npp, void *event)
     event_type = (ev->type == KeyPress) ? PP_INPUTEVENT_TYPE_KEYDOWN
                                         : PP_INPUTEVENT_TYPE_KEYUP;
 
-    pp_event = ppb_keyboard_input_event_create_1_0(pp_i->id, event_type, ev->time/1.0e6,
+    pp_event = ppb_keyboard_input_event_create_1_0(pp_i->id, event_type, ev->time/1.0e3,
                                                    mod, pp_keycode, PP_MakeUndefined());
     ppp_handle_input_event_helper(pp_i, pp_event);
 
     if (ev->type == KeyPress && is_printable_sequence(buffer, charcount)) {
         struct PP_Var character_text = ppb_var_var_from_utf8(buffer, charcount);
         pp_event = ppb_keyboard_input_event_create_1_0(
-                        pp_i->id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e6, mod,
+                        pp_i->id, PP_INPUTEVENT_TYPE_CHAR, ev->time/1.0e3, mod,
                         pp_keycode, character_text);
         ppb_var_release(character_text);
 
