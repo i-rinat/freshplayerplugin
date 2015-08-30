@@ -340,7 +340,16 @@ ppb_net_address_get_family(PP_Resource addr)
 struct PP_Var
 ppb_net_address_describe_as_string(PP_Resource addr, PP_Bool include_port)
 {
-    return PP_MakeUndefined();
+    struct pp_net_address_s *na = pp_resource_acquire(addr, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_MakeUndefined();
+    }
+
+    struct PP_Var var = ppb_net_address_private_describe(0, &na->addr, include_port);
+
+    pp_resource_release(addr);
+    return var;
 }
 
 PP_Bool
@@ -545,7 +554,7 @@ TRACE_WRAPPER
 struct PP_Var
 trace_ppb_net_address_describe_as_string(PP_Resource addr, PP_Bool include_port)
 {
-    trace_info("[PPB] {zilch} %s addr=%d, include_port=%u\n", __func__+6, addr, include_port);
+    trace_info("[PPB] {full} %s addr=%d, include_port=%u\n", __func__+6, addr, include_port);
     return ppb_net_address_describe_as_string(addr, include_port);
 }
 
@@ -591,7 +600,7 @@ const struct PPB_NetAddress_1_0 ppb_net_address_interface_1_0 = {
     .CreateFromIPv6Address = TWRAPF(ppb_net_address_create_from_ipv6_address),
     .IsNetAddress =          TWRAPF(ppb_net_address_is_net_address),
     .GetFamily =             TWRAPF(ppb_net_address_get_family),
-    .DescribeAsString =      TWRAPZ(ppb_net_address_describe_as_string),
+    .DescribeAsString =      TWRAPF(ppb_net_address_describe_as_string),
     .DescribeAsIPv4Address = TWRAPF(ppb_net_address_describe_as_ipv4_address),
     .DescribeAsIPv6Address = TWRAPF(ppb_net_address_describe_as_ipv6_address),
 };
