@@ -171,6 +171,59 @@ test_ppb_net_address_private(void)
                       "123:3456:789a:bcde:ef11:2233:4455:6677") == 0);
         ppb_var_release(s);
     }
+
+    printf("  ill-formed PP_NetAddress_Private\n");
+    {
+        const uint8_t ip[4] = {192, 168, 1, 2};
+        const uint16_t port = 1234;
+
+        struct PP_NetAddress_Private addr1;
+        struct PP_NetAddress_Private addr2 = {};
+        struct PP_NetAddress_Private addr3 = {};
+        struct PP_Var s;
+        uint8_t ip_out[4];
+
+        ppb_net_address_private_create_from_ipv4_address(ip, port, &addr1);
+
+        assert(ppb_net_address_private_are_equal(&addr1, &addr2) == PP_FALSE);
+        assert(ppb_net_address_private_are_hosts_equal(&addr1, &addr2) == PP_FALSE);
+        assert(ppb_net_address_private_get_family(&addr2)==PP_NETADDRESSFAMILY_PRIVATE_UNSPECIFIED);
+        assert(ppb_net_address_private_get_port(&addr2) == 0);
+
+        assert(ppb_net_address_private_get_address(&addr2, ip_out, sizeof(ip_out)) == PP_FALSE);
+        assert(ppb_net_address_private_replace_port(&addr2, port, &addr3) == PP_FALSE);
+
+        s = ppb_net_address_private_describe(0, &addr2, PP_TRUE);
+        assert(s.type == PP_VARTYPE_UNDEFINED);
+    }
+
+    printf("  ipv4, get any address\n");
+    {
+        const uint8_t all_zeroes[4] = {};
+        uint8_t ip[4];
+        struct PP_NetAddress_Private addr;
+
+        memset(&addr, 5, sizeof(addr)); // overwrite with something
+        ppb_net_address_private_get_any_address(PP_FALSE, &addr);
+        assert(ppb_net_address_private_get_family(&addr) == PP_NETADDRESSFAMILY_PRIVATE_IPV4);
+
+        ppb_net_address_private_get_address(&addr, ip, sizeof(ip));
+        assert(memcmp(ip, all_zeroes, sizeof(ip)) == 0);
+    }
+
+    printf("  ipv6, get any address\n");
+    {
+        const uint8_t all_zeroes[16] = {};
+        uint8_t ip[16];
+        struct PP_NetAddress_Private addr;
+
+        memset(&addr, 5, sizeof(addr)); // overwrite with something
+        ppb_net_address_private_get_any_address(PP_TRUE, &addr);
+        assert(ppb_net_address_private_get_family(&addr) == PP_NETADDRESSFAMILY_PRIVATE_IPV6);
+
+        ppb_net_address_private_get_address(&addr, ip, sizeof(ip));
+        assert(memcmp(ip, all_zeroes, sizeof(ip)) == 0);
+    }
 }
 
 static
