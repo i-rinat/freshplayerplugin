@@ -35,7 +35,6 @@ pkg_check_modules(REQ
     xrender
     xcursor
     gl
-    libconfig
     libdrm
     libevent
     libevent_pthreads
