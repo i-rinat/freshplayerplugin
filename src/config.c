@@ -151,6 +151,7 @@ fpp_config_initialize(void)
 
         if (cfg_parse(cfg, global_config) != CFG_SUCCESS) {
             trace_warning("failed to parse configuration file %s\n", global_config);
+            config = default_config;
             goto quit;
         }
     }
