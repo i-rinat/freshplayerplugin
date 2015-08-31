@@ -277,7 +277,7 @@ int32_t
 trace_ppb_audio_input_enumerate_devices(PP_Resource audio_input, struct PP_ArrayOutput output,
                                         struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {fake} %s audio_input=%d, output={.GetDataBuffer=%p, .user_data=%p}, "
+    trace_info("[PPB] {full} %s audio_input=%d, output={.GetDataBuffer=%p, .user_data=%p}, "
                "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, audio_input,
                output.GetDataBuffer, output.user_data, callback.func, callback.user_data,
                callback.flags);
