@@ -1,4 +1,5 @@
 add_subdirectory(parson)
+add_subdirectory(confuse-2.7)
 if (NOT WITH_GLES2)
     add_subdirectory(angle)
 endif()

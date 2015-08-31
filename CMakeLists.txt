@@ -140,6 +140,7 @@ add_definitions(${REQ_CFLAGS_OTHER})
 add_definitions(-DXP_UNIX)
 
 include_directories(3rdparty)
+include_directories(3rdparty/confuse-2.7/src)
 if (NOT WITH_GLES2)
     include_directories(3rdparty/angle/include)
     list(APPEND REQ_LIBRARIES shader_translator)
