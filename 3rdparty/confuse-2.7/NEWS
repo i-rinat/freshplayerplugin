@@ -1,0 +1,144 @@
+New in 2.7
+----------
+
+* Bugfix release.
+
+
+New in 2.6
+----------
+
+* added French translation contributed by Matthieu Sion
+* added build script and instructions for compiling with Mingw under Windows
+   (contributed by Matthieu Sion)
+* now accepts a simplified list append syntax:
+    option += "value"
+      insted of
+    option += {"value"}
+* added flag CFGF_NO_TITLE_DUPES: multiple section titles must be unique
+  (duplicates raises an error, only applies to sections)
+  (suggested by Brian Fallik)
+* fixed rpm builds, patch by Dan Lipsitt
+* always installs pkg-config .pc script
+* remove obsolete confuse-config script in favour of pkg-config
+* fixed a bug reported by Josh Kropf with single sections with titles
+* added patch that escapes values with quotes and backslashes when printing.
+* fixed a memory leak in default values for string lists,
+  reported by Vineeth Neelakant.
+* windows build files now only in separate zip distribution
+
+New in 2.5
+----------
+
+* added flag CFGF_NODEFAULT (option has no default value)
+* fixed cfg_set_validate_func() for sections, using the "|" syntax
+* added a tutorial
+* updated autoconf stuff, libconfuse installs with appropriate suffix now
+* added data file for pkg-config (try 'pkg-config --libs libconfuse')
+* updated confuse-config script (now only installed if pkg-config not found)
+* added cfg_name() and cfg_opt_name() functions
+
+
+New in 2.4
+----------
+
+* added option type CFGT_PTR as a user-defined type
+* fixed building of shared libraries
+
+
+New in 2.3
+----------
+
+* fixes compilation errors with gcc < 3.3
+* options passed to cfg_init() are now dynamically duplicated, so it is no
+  longer necessary to declare the cfg_opt_t array static
+* added tests using 'check' (a unit testing framework for C)
+* added config script 'confuse-config'
+
+
+New in 2.2
+----------
+
+* Allows more characters in an unquoted string (thanks Mike)
+* added cfg_opt_get functions
+* added cfg_opt_size function
+* added support to print options to a file
+* added print callback function per option
+* simple options can be retrieved with the cfg_get functions (allows
+  using the cfg_print function for simple values)
+* added validating callback function per option
+
+
+New in 2.1
+----------
+
+* Reversed logic in cfg_getXXX functions, they now abort if given an
+  undeclared option name, and NULL/false if no value is set. Suggested
+  by Ademar de Souza Reis Jr.
+* Sections without CFGF_MULTI flag now have default values
+* The cfg_getXXX functions now accept an extended syntax for the
+  option name, try cfg_getxxx(cfg, "sectionname|optionname"). This way
+  one doesn't have to first get the section with cfg_getsec().
+* Fixed two more memory leaks. (val->section and cfg->filename)
+* Fixed unterminated string bug in replacement strndup function
+* Added project files for MS Visual C++ 6.0
+* Includes io.h on windows
+* Fixed initialization of default values for lists, when given a NULL
+  string. Now initialized to the empty list. Noted by Juraj Variny.
+* Setting a list to the empty list in the config file now possible.
+* Appending to default values in a list is now ok.
+* Hexadecimal escape sequences allowed in double-quoted strings
+* Corrected line number with multi-line quoted strings
+* Fixed undetected /*comment*/ (ie, without space between /* and the text)
+* Forgot to fclose include file after use, found by James Haley
+* Only include NLS support if gettext found in libc or preinstalled
+* Documented the cfg_setlist and cfg_addlist functions
+* The cfg_opt_setxxx functions no longer take a cfg_t parameter (unused anyway)
+
+
+New in 2.0
+----------
+
+ NOTE! Compatibility with earlier versions is broken.
+
+* Changed cfg_flag_t from enum to int (should now compile with c++)
+* Variable number of arguments to functions: function types should no
+  longer specify number of expected arguments in the initializer, the
+  callback should instead check the argc variable.
+* Fixed the cfg_tilde_expand function
+* Added documentation for the value parsing callback
+* Changed the definitions of cfg_func_t and cfg_callback_t, the cfg
+  and option context are now both passed as parameters
+* Fixed and extended the example programs
+* Added a bunch of cfg_setXXX functions to set option values after parsing
+* Some types renamed for consistency (cfgopt_t to cfg_opt_t, cfgval_t
+  to cfg_value_t, cfgbool_t to cfg_bool_t)
+* cfg_free_val() renamed to cfg_free_value()
+* Lexer symbols now uses prefix cfg_ to ease linking with other lexers
+* Forgot to close the file in cfg_parse()
+* Memory leaks fixed (checked with valgrind)
+* Sections with same title are always overwritten
+* Lists can now have (complete) default values in the form of a string
+  that is parsed in the same way as the config file (see doc + examples)
+* Added support for building as a DLL on Windows
+* Included project files for Borland C++ Builder 6.0
+* Included project files for Dev-Cpp 5.0
+* Included project files for MS Visual Studio
+* Pre-built documentation now included in the source tarball
+
+
+New in 1.2.3
+------------
+
+* fixed segfault due to uninitialized user-defined error function
+* added callback support
+
+
+New in 1.2.2
+------------
+
+* changed name to libConfuse (libcfg was way too common)
+* Doesn't build shared libraries by default (only static)
+* More swedish translations
+* Implemented the cfg_free() function (previous versions had only a stub)
+* New function: cfg_free_val()
+* updated the manual
