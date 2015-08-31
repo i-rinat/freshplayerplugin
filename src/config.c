@@ -26,6 +26,7 @@
 #include <confuse.h>
 #include <string.h>
 #include <stdlib.h>
+#include <locale.h>
 #include <glib.h>
 #include "trace_core.h"
 
@@ -144,6 +145,11 @@ fpp_config_initialize(void)
 
     config = default_config;
 
+    // libconfuse treats commas as separators in lists, so if current locale
+    // uses commas as a decimal mark, parsing will fail.
+    // Setting locale to "C" changes decimal mark to point.
+    setlocale(LC_ALL, "C");
+
     cfg = cfg_init(opts, 0);
     if (cfg_parse(cfg, local_config) != CFG_SUCCESS) {
         trace_warning("failed to parse configuration file %s, trying %s\n", local_config,
@@ -159,6 +165,10 @@ fpp_config_initialize(void)
     cfg_free(cfg);
 
 quit:
+
+    // restore locale
+    setlocale(LC_ALL, "");
+
     g_free(local_config);
     g_free(global_config);
 
