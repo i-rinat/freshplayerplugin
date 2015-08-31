@@ -119,6 +119,7 @@ set(COMMON_OBJ_LIST
     $<TARGET_OBJECTS:freshwrapper-obj>
     $<TARGET_OBJECTS:parson-obj>
     $<TARGET_OBJECTS:uri-parser-obj>
+    $<TARGET_OBJECTS:confuse-obj>
 )
 
 # wrapper for PepperFlash
@@ -148,6 +149,7 @@ if (WITH_LIBPDF)
                 np_libpdf_frontend.c
                 trace_core.c
                 config.c
+                $<TARGET_OBJECTS:confuse-obj>
                 config_libpdf_frontend.c)
     target_link_libraries(freshwrapper-libpdf-frontend txt-resources)
     target_link_libraries(dep_check freshwrapper-libpdf-frontend)

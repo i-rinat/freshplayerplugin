@@ -23,7 +23,7 @@
  */
 
 #include "config.h"
-#include <libconfig.h>
+#include <confuse.h>
 #include <string.h>
 #include <stdlib.h>
 #include <glib.h>
@@ -63,6 +63,33 @@ static struct fpp_config_s default_config = {
         .incompatible_npapi_version = 0,
         .x_synchronize              = 0,
     },
+};
+
+static cfg_opt_t opts[] = {
+    CFG_SIMPLE_INT("audio_buffer_min_ms",    &config.audio_buffer_min_ms),
+    CFG_SIMPLE_INT("audio_buffer_max_ms",    &config.audio_buffer_max_ms),
+    CFG_SIMPLE_INT("audio_use_jack",         &config.audio_use_jack),
+    CFG_SIMPLE_INT("jack_autoconnect_ports", &config.jack_autoconnect_ports),
+    CFG_SIMPLE_STR("jack_server_name",    &config.jack_server_name),
+    CFG_SIMPLE_INT("jack_autostart_server",  &config.jack_autostart_server),
+    CFG_SIMPLE_STR("pepperflash_path",    &config.pepperflash_path),
+    CFG_SIMPLE_STR("flash_command_line",  &config.flash_command_line),
+    CFG_SIMPLE_INT("enable_3d",              &config.enable_3d),
+    CFG_SIMPLE_INT("enable_hwdec",           &config.enable_hwdec),
+    CFG_SIMPLE_INT("quiet",                  &config.quiet),
+    CFG_SIMPLE_INT("fullscreen_width",       &config.fullscreen_width),
+    CFG_SIMPLE_INT("fullscreen_height",      &config.fullscreen_height),
+    CFG_SIMPLE_INT("randomize_dns_case",     &config.randomize_dns_case),
+    CFG_SIMPLE_FLOAT("device_scale",         &config.device_scale),
+    CFG_SIMPLE_INT("enable_windowed_mode",   &config.enable_windowed_mode),
+    CFG_SIMPLE_INT("enable_xembed",          &config.enable_xembed),
+    CFG_SIMPLE_INT("enable_vaapi",           &config.enable_vaapi),
+    CFG_SIMPLE_INT("enable_vdpau",           &config.enable_vdpau),
+    CFG_SIMPLE_INT("vsync_afterwait_us",     &config.vsync_afterwait_us),
+    CFG_SIMPLE_INT("fs_delay_ms",            &config.fs_delay_ms),
+    CFG_SIMPLE_INT("enable_vsync",           &config.enable_vsync),
+    CFG_SIMPLE_INT("tie_fullscreen_window_to_browser", &config.tie_fullscreen_window_to_browser),
+    CFG_END()
 };
 
 struct fpp_config_s config = {};
@@ -105,90 +132,30 @@ get_global_config_path(const char *file_name)
     return g_strdup_printf("/etc/%s", file_name);
 }
 
-static
-void
-get_int(const config_t *cfg, const char *name, int *result)
-{
-    long long intval;
-    if (config_lookup_int64(cfg, name, &intval))
-        *result = intval;
-}
-
-static
-void
-get_string(const config_t *cfg, const char *name, char **result)
-{
-    const char *stringval;
-    if (config_lookup_string(cfg, name, &stringval))
-        *result = strdup(stringval);
-}
-
-static
-void
-get_double(const config_t *cfg, const char *name, double *result)
-{
-    double doubleval;
-    if (config_lookup_float(cfg, name, &doubleval))
-        *result = doubleval;
-}
-
 void
 fpp_config_initialize(void)
 {
     if (initialized)
         return;
 
-    config_t    cfg;
-    char       *local_config = get_local_config_path(config_file_name);
-    char       *global_config = get_global_config_path(config_file_name);
+    cfg_t  *cfg;
+    char   *local_config = get_local_config_path(config_file_name);
+    char   *global_config = get_global_config_path(config_file_name);
 
     config = default_config;
 
-    config_init(&cfg);
-    config_set_auto_convert(&cfg, 1);
+    cfg = cfg_init(opts, 0);
+    if (cfg_parse(cfg, local_config) != CFG_SUCCESS) {
+        trace_warning("failed to parse configuration file %s, trying %s\n", local_config,
+                      global_config);
 
-    if (!config_read_file(&cfg, local_config)) {
-        if (config_error_type(&cfg) == CONFIG_ERR_PARSE) {
-            trace_warning("failed to parse configuration file %s, trying %s\n", local_config,
-                          global_config);
-        }
-
-        if (!config_read_file(&cfg, global_config)) {
-            if (config_error_type(&cfg) == CONFIG_ERR_PARSE)
-                trace_warning("failed to parse configuration file %s\n", global_config);
-
+        if (cfg_parse(cfg, global_config) != CFG_SUCCESS) {
+            trace_warning("failed to parse configuration file %s\n", global_config);
             goto quit;
         }
     }
 
-    get_int(&cfg, "audio_buffer_min_ms", &config.audio_buffer_min_ms);
-    get_int(&cfg, "audio_buffer_max_ms", &config.audio_buffer_max_ms);
-    get_int(&cfg, "audio_use_jack", &config.audio_use_jack);
-    get_int(&cfg, "jack_autoconnect_ports", &config.jack_autoconnect_ports);
-    get_int(&cfg, "jack_autostart_server", &config.jack_autostart_server);
-    get_int(&cfg, "enable_3d", &config.enable_3d);
-    get_int(&cfg, "enable_hwdec", &config.enable_hwdec);
-    get_int(&cfg, "quiet", &config.quiet);
-    get_int(&cfg, "fullscreen_width", &config.fullscreen_width);
-    get_int(&cfg, "fullscreen_height", &config.fullscreen_height);
-    get_int(&cfg, "randomize_dns_case", &config.randomize_dns_case);
-    get_int(&cfg, "quirk_plasma5_screensaver", &config.quirks.plasma5_screensaver);
-    get_int(&cfg, "enable_windowed_mode", &config.enable_windowed_mode);
-    get_int(&cfg, "enable_xembed", &config.enable_xembed);
-    get_int(&cfg, "enable_vaapi", &config.enable_vaapi);
-    get_int(&cfg, "enable_vdpau", &config.enable_vdpau);
-    get_int(&cfg, "tie_fullscreen_window_to_browser", &config.tie_fullscreen_window_to_browser);
-    get_int(&cfg, "vsync_afterwait_us", &config.vsync_afterwait_us);
-    get_int(&cfg, "fs_delay_ms", &config.fs_delay_ms);
-    get_int(&cfg, "enable_vsync", &config.enable_vsync);
-
-    get_string(&cfg, "pepperflash_path", &config.pepperflash_path);
-    get_string(&cfg, "flash_command_line", &config.flash_command_line);
-    get_string(&cfg, "jack_server_name", &config.jack_server_name);
-
-    get_double(&cfg, "device_scale", &config.device_scale);
-
-    config_destroy(&cfg);
+    cfg_free(cfg);
 
 quit:
     g_free(local_config);
