@@ -64,11 +64,19 @@ Project is using cmake (>=2.8.8) build system.
 
 * Install prerequisites.
 ```
+    Ubuntu:
     $ sudo apt-get install cmake gcc g++ pkg-config ragel libasound2-dev \
            libssl-dev libglib2.0-dev libpango1.0-dev libgl1-mesa-dev     \
            libevent-dev libgtk2.0-dev libxrandr-dev libxrender-dev       \
            libxcursor-dev libv4l-dev libgles2-mesa-dev libavcodec-dev    \
            libva-dev libvdpau-dev libdrm-dev
+    Fedora:
+    $ sudo dnf install cmake gcc gcc-c++ pkgconfig ragel alsa-lib-devel openssl-devel \
+           glib2-devel pango-devel mesa-libGL-devel libevent-devel gtk2-devel         \
+           libXrandr-devel libXrender-devel libXcursor-devel libv4l-devel             \
+           mesa-libGLES-devel  ffmpeg-devel libva-devel libvdpau-devel libdrm-devel   \
+           pulseaudio-libs-devel
+
 ```
 * (optional) To enable PulseAudio support, install `libpulse-dev`.
 * (optional) To enable JACK support, install `libjack-jackd2-dev` and `libsoxr-dev`
