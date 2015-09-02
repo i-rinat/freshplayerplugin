@@ -64,7 +64,7 @@ Project is using cmake (>=2.8.8) build system.
 
 * Install prerequisites.
 ```
-    Ubuntu:
+    Debian/Ubuntu:
     $ sudo apt-get install cmake gcc g++ pkg-config ragel libasound2-dev \
            libssl-dev libglib2.0-dev libpango1.0-dev libgl1-mesa-dev     \
            libevent-dev libgtk2.0-dev libxrandr-dev libxrender-dev       \
