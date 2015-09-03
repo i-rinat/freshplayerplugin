@@ -26,6 +26,7 @@ foreach(item ${test_list})
         $<TARGET_OBJECTS:freshwrapper-obj>
         $<TARGET_OBJECTS:parson-obj>
         $<TARGET_OBJECTS:uri-parser-obj>
+        $<TARGET_OBJECTS:confuse-obj>
         ../src/config_pepperflash.c
         common.c)
     target_link_libraries(${item}
