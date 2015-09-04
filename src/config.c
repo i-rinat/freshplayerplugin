@@ -90,6 +90,7 @@ static cfg_opt_t opts[] = {
     CFG_SIMPLE_INT("fs_delay_ms",            &config.fs_delay_ms),
     CFG_SIMPLE_INT("enable_vsync",           &config.enable_vsync),
     CFG_SIMPLE_INT("tie_fullscreen_window_to_browser", &config.tie_fullscreen_window_to_browser),
+    CFG_SIMPLE_INT("quirk_plasma5_screensaver",        &config.quirks.plasma5_screensaver),
     CFG_END()
 };
 
