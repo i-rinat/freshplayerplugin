@@ -27,6 +27,7 @@
 #include "ppb_var.h"
 #include <ppapi/c/pp_graphics_3d.h>
 #include <glib.h>
+#include <inttypes.h>
 
 
 static
