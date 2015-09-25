@@ -601,7 +601,30 @@ static
 int
 alsa_available(void)
 {
-    return 1;
+    static int probed = 0;
+    static int available = 0;
+
+    pthread_mutex_lock(&lock);
+    if (probed) {
+        const int status = available;
+        pthread_mutex_unlock(&lock);
+        return status;
+    }
+    pthread_mutex_unlock(&lock);
+
+    snd_pcm_t *pcm;
+    const int ret = snd_pcm_open(&pcm, "default", SND_PCM_STREAM_PLAYBACK, 0);
+
+    pthread_mutex_lock(&lock);
+    available = (ret == 0);
+    probed = 1;
+    const int is_available = available;
+    pthread_mutex_unlock(&lock);
+
+    if (ret == 0)
+        snd_pcm_close(pcm);
+
+    return is_available;
 }
 
 audio_stream_ops audio_alsa = {
