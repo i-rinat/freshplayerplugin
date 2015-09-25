@@ -26,6 +26,7 @@
 #include <stdlib.h>
 
 extern audio_stream_ops audio_alsa;
+extern audio_stream_ops audio_noaudio;
 #if HAVE_PULSEAUDIO
 extern audio_stream_ops audio_pulse;
 #endif
@@ -46,7 +47,10 @@ audio_select_implementation(void)
         return &audio_pulse;
 #endif
 
-    return &audio_alsa;
+    if (audio_alsa.available())
+        return &audio_alsa;
+
+    return &audio_noaudio;
 }
 
 void
