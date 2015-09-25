@@ -995,6 +995,25 @@ NPP_Print(NPP npp, NPPrint *platformPrint)
 }
 
 static
+void
+graphics_ccb_wrapper_comt(void *user_data, int32_t result)
+{
+    PP_Instance instance = GPOINTER_TO_SIZE(user_data);
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i)
+        return;
+
+    pthread_mutex_lock(&display.lock);
+    struct PP_CompletionCallback ccb = pp_i->graphics_ccb;
+    pp_i->graphics_ccb = PP_MakeCCB(NULL, NULL);
+    pp_i->graphics_in_progress = 0;
+    pthread_mutex_unlock(&display.lock);
+
+    if (ccb.func)
+        ccb.func(ccb.user_data, result);
+}
+
+static
 int16_t
 handle_graphics_expose_event(NPP npp, void *event)
 {
@@ -1062,12 +1081,12 @@ handle_graphics_expose_event(NPP npp, void *event)
     pp_resource_release(pp_i->graphics);
     if (pp_i->graphics_in_progress) {
         if (pp_i->graphics_ccb.func)
-            ppb_message_loop_post_work_with_result(pp_i->graphics_ccb_ml, pp_i->graphics_ccb, 0,
-                                                   PP_OK, 0, __func__);
+            ppb_message_loop_post_work_with_result(pp_i->graphics_ccb_ml,
+                                                   PP_MakeCCB(graphics_ccb_wrapper_comt,
+                                                              GSIZE_TO_POINTER(pp_i->id)),
+                                                   0, PP_OK, 0, __func__);
     }
 
-    pp_i->graphics_ccb = PP_MakeCCB(NULL, NULL);
-    pp_i->graphics_in_progress = 0;
     retval = 1;
 
 done:
