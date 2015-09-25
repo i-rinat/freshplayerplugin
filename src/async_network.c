@@ -41,6 +41,7 @@
 #include "ppb_core.h"
 #include "trace.h"
 #include "config.h"
+#include "ppb_message_loop.h"
 
 
 static struct event_base *event_b = NULL;
@@ -155,7 +156,8 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
         ts->is_connected = (getpeername(ts->sock, (struct sockaddr *)buf, &len) == 0);
 
     if (ts->is_connected) {
-        ppb_core_call_on_main_thread2(0, task->callback, PP_OK, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, PP_OK, 0,
+                                               __func__);
         pp_resource_release(task->resource);
         free(task->addr);
         task_destroy(task);
@@ -173,7 +175,8 @@ handle_tcp_connect_stage4(int sock, short event_flags, void *arg)
     // no addresses left, fail gracefully
     trace_warning("%s, connection failed to all addresses (%s:%u)\n", __func__, task->host,
                   (unsigned int)task->port);
-    ppb_core_call_on_main_thread2(0, task->callback, get_pp_errno(), __func__);
+    ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, get_pp_errno(), 0,
+                                           __func__);
     pp_resource_release(task->resource);
     free(task->addr);
     task_destroy(task);
@@ -207,7 +210,8 @@ handle_tcp_connect_stage3(struct async_network_task_s *task)
     if (res != 0 && errno != EINPROGRESS) {
         trace_error("%s, res = %d, errno = %d (%s:%u)\n", __func__, res, errno, task->host,
                     (unsigned int)task->port);
-        ppb_core_call_on_main_thread2(0, task->callback, get_pp_errno(), __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, get_pp_errno(),
+                                               0, __func__);
         free(task->addr);
         task_destroy(task);
         return;
@@ -227,7 +231,8 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
     if (result != DNS_ERR_NONE || count < 1) {
         trace_warning("%s, evdns returned code %d, count = %d (%s:%u)\n", __func__, result, count,
                       task->host, (unsigned int)task->port);
-        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0,
+                                               PP_ERROR_NAME_NOT_RESOLVED, 0, __func__);
         task_destroy(task);
         return;
     }
@@ -247,7 +252,8 @@ handle_tcp_connect_stage2(int result, char type, int count, int ttl, void *addre
     } else {
         trace_error("%s, bad evdns type %d (%s:%u)\n", __func__, type, task->host,
                     (unsigned int)task->port);
-        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_FAILED, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0,
+                                               PP_ERROR_FAILED, 0, __func__);
         task_destroy(task);
         return;
     }
@@ -277,7 +283,8 @@ handle_tcp_connect_stage1(struct async_network_task_s *task)
     if (!req) {
         trace_warning("%s, early dns resolution failure (%s:%u)\n", __func__, task->host,
                       (unsigned int)task->port);
-        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0,
+                                               PP_ERROR_NAME_NOT_RESOLVED, 0, __func__);
         task_destroy(task);
         return;
     }
@@ -297,7 +304,8 @@ handle_tcp_connect_with_net_address(struct async_network_task_s *task)
         handle_tcp_connect_stage2(DNS_ERR_NONE, DNS_IPv6_AAAA, 1, 3600, &sai->sin6_addr, task);
     } else {
         trace_error("%s, bad address type\n", __func__);
-        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0,
+                                               PP_ERROR_NAME_NOT_RESOLVED, 0, __func__);
         task_destroy(task);
     }
 }
@@ -320,7 +328,8 @@ handle_tcp_read_stage2(int sock, short event_flags, void *arg)
         }
     }
 
-    ppb_core_call_on_main_thread2(0, task->callback, retval, __func__);
+    ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, retval, 0,
+                                           __func__);
     task_destroy(task);
 }
 
@@ -351,7 +360,8 @@ handle_tcp_write_stage2(int sock, short event_flags, void *arg)
     if (retval < 0)
         retval = get_pp_errno();
 
-    ppb_core_call_on_main_thread2(0, task->callback, retval, __func__);
+    ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, retval, 0,
+                                           __func__);
     task_destroy(task);
 }
 
@@ -389,7 +399,8 @@ handle_disconnect_stage2(int sock, short event_flags, void *arg)
         if (cur->resource == task->resource) {
             g_hash_table_iter_remove(&iter);
             event_free(cur->event);
-            ppb_core_call_on_main_thread2(0, cur->callback, PP_ERROR_ABORTED, __func__);
+            ppb_message_loop_post_work_with_result(cur->callback_ml, cur->callback, 0,
+                                                   PP_ERROR_ABORTED, 0, __func__);
             g_slice_free(struct async_network_task_s, cur);
         }
     }
@@ -434,7 +445,8 @@ handle_udp_recv_stage2(int sock, short event_flags, void *arg)
     }
 
     pp_resource_release(task->resource);
-    ppb_core_call_on_main_thread2(0, task->callback, retval, __func__);
+    ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, retval, 0,
+                                           __func__);
     task_destroy(task);
 }
 
@@ -468,7 +480,8 @@ handle_udp_send_stage2(int sock, short event_flags, void *arg)
     if (retval < 0)
         retval = get_pp_errno();
 
-    ppb_core_call_on_main_thread2(0, task->callback, retval, __func__);
+    ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, retval, 0,
+                                           __func__);
     task_destroy(task);
 }
 
@@ -490,7 +503,8 @@ handle_udp_send_stage1(struct async_network_task_s *task)
 
     if (retval >= 0) {
         // successfully sent
-        ppb_core_call_on_main_thread2(0, task->callback, retval, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, retval, 0,
+                                               __func__);
         task_destroy(task);
         return;
     }
@@ -510,7 +524,8 @@ handle_host_resolve_stage2(int result, char type, int count, int ttl, void *addr
     if (result != DNS_ERR_NONE || count < 1) {
         trace_warning("%s, evdns returned code %d, count = %d (%s:%u)\n", __func__, result, count,
                       task->host, (unsigned int)task->port);
-        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0,
+                                               PP_ERROR_NAME_NOT_RESOLVED, 0, __func__);
         task_destroy(task);
         return;
     }
@@ -540,7 +555,8 @@ handle_host_resolve_stage2(int result, char type, int count, int ttl, void *addr
             memcpy(hr->addrs[k].data, &sai, sizeof(sai));
         }
 
-        ppb_core_call_on_main_thread2(0, task->callback, PP_OK, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, PP_OK, 0,
+                                               __func__);
 
     } else if (type == DNS_IPv6_AAAA) {
         struct in6_addr *ipv6_addrs = addresses;
@@ -557,12 +573,14 @@ handle_host_resolve_stage2(int result, char type, int count, int ttl, void *addr
             memcpy(hr->addrs[k].data, &sai6, sizeof(sai6));
         }
 
-        ppb_core_call_on_main_thread2(0, task->callback, PP_OK, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0, PP_OK, 0,
+                                               __func__);
 
     } else {
         trace_error("%s, bad evdns type %d (%s:%u)\n", __func__, type, task->host,
                     (unsigned int)task->port);
-        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_FAILED, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0,
+                                               PP_ERROR_FAILED, 0, __func__);
 
     }
 
@@ -584,7 +602,8 @@ handle_host_resolve_stage1(struct async_network_task_s *task)
     if (!req) {
         trace_warning("%s, early dns resolution failure (%s:%u)\n", __func__, task->host,
                       (unsigned int)task->port);
-        ppb_core_call_on_main_thread2(0, task->callback, PP_ERROR_NAME_NOT_RESOLVED, __func__);
+        ppb_message_loop_post_work_with_result(task->callback_ml, task->callback, 0,
+                                               PP_ERROR_NAME_NOT_RESOLVED, 0, __func__);
         task_destroy(task);
         return;
     }

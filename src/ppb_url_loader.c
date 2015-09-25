@@ -321,6 +321,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
 
     ul->fd = open_temporary_file();
     ul->ccb = callback;
+    ul->ccb_ml = ppb_message_loop_get_current();
 
     ppb_var_release(full_url);
     pp_resource_release(request_info);
@@ -361,6 +362,7 @@ ppb_url_loader_open_target(PP_Resource loader, PP_Resource request_info,
         return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
+        // TODO: remove busy loop
         int done = 0;
         while (!done) {
             ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
@@ -413,6 +415,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
     ul->read_pos = 0;
     ul->method = PP_METHOD_GET;
     ul->ccb = callback;
+    ul->ccb_ml = ppb_message_loop_get_current();
 
     struct url_loader_open_param_s *p = g_slice_alloc(sizeof(*p));
     p->url =                ul->url;
@@ -443,6 +446,7 @@ ppb_url_loader_follow_redirect(PP_Resource loader, struct PP_CompletionCallback 
         return PP_ERROR_FAILED;
 
     if (callback.func == NULL) {
+        // TODO: remove busy loop
         int done = 0;
         while (!done) {
             ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
@@ -568,7 +572,8 @@ ppb_url_loader_read_response_body(PP_Resource loader, void *buffer, int32_t byte
     if (callback.flags & PP_COMPLETIONCALLBACK_FLAG_OPTIONAL)
         return read_bytes;
 
-    ppb_core_call_on_main_thread2(0, callback, read_bytes, __func__);
+    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0, read_bytes,
+                                           0, __func__);
     return PP_OK_COMPLETIONPENDING;
 
 schedule_read_task:
@@ -577,6 +582,7 @@ schedule_read_task:
     rt->buffer =        buffer;
     rt->bytes_to_read = bytes_to_read;
     rt->ccb =           callback;
+    rt->ccb_ml =        ppb_message_loop_get_current();
 
     ul->read_tasks = g_list_append(ul->read_tasks, rt);
     pp_resource_release(loader);
@@ -599,6 +605,7 @@ ppb_url_loader_finish_streaming_to_file(PP_Resource loader, struct PP_Completion
     }
 
     ul->stream_to_file_ccb = callback;
+    ul->stream_to_file_ccb_ml = ppb_message_loop_get_current();
     // TODO: handle callback.func == NULL case
 
     pp_resource_release(loader);

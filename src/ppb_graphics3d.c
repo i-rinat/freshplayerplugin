@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include "ppb_graphics3d.h"
+#include "ppb_message_loop.h"
 #include <stdlib.h>
 #include <GL/glx.h>
 #include <GLES2/gl2.h>
@@ -447,6 +448,7 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     pp_resource_release(context);
 
     pp_i->graphics_ccb = callback;
+    pp_i->graphics_ccb_ml = ppb_message_loop_get_current();
     pp_i->graphics_in_progress = 1;
     pthread_mutex_unlock(&display.lock);
 

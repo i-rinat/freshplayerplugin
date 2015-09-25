@@ -209,6 +209,7 @@ struct pp_instance_s {
     PP_Resource                     graphics;
     struct PP_CompletionCallback    graphics_ccb;
     uint32_t                        graphics_in_progress;
+    PP_Resource                     graphics_ccb_ml;
 
     // input method context
     PP_TextInput_Type_Dev           textinput_type;
@@ -245,6 +246,7 @@ struct pp_url_loader_s {
     int32_t                 response_size;  ///< Content-Length value of -1 if absent
     int                     stream_to_file; ///< whenever streaming to file is allowed
     struct PP_CompletionCallback    stream_to_file_ccb; ///< callback to call on end of streaming
+    PP_Resource             stream_to_file_ccb_ml; ///< message loop to call callback on
 
     char                   *request_headers;
     PP_Bool                 follow_redirects;   ///< handle redirections internally
@@ -260,6 +262,7 @@ struct pp_url_loader_s {
     GList                  *read_tasks;     ///< list of url_loader_read_task_s
     NPStream               *np_stream;      ///< associated NPStream
     struct PP_CompletionCallback    ccb;    ///< callback to call on headers arrival
+    PP_Resource                     ccb_ml; ///< message loop to call callback on
 };
 
 struct url_loader_read_task_s {
@@ -267,6 +270,7 @@ struct url_loader_read_task_s {
     void                           *buffer;
     int32_t                         bytes_to_read;
     struct PP_CompletionCallback    ccb;
+    PP_Resource                     ccb_ml;
 };
 
 struct pp_url_request_info_s {
@@ -418,6 +422,7 @@ struct pp_video_capture_s {
     uint32_t            thread_started;
     uint32_t            terminate_thread;
     const struct PPP_VideoCapture_Dev_0_1 *ppp_video_capture_dev;
+    PP_Resource         message_loop;
 };
 
 struct pp_audio_input_s {

@@ -758,6 +758,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
     }
 
     struct PP_CompletionCallback ccb = {};
+    PP_Resource ccb_ml = 0;
 
     stream->pdata = (void*)(size_t)loader;
     struct pp_url_loader_s *ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
@@ -765,6 +766,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
     if (ul) {
         struct parsed_headers_s *ph = hp_parse_headers(stream->headers);
         ccb = ul->ccb;
+        ccb_ml = ul->ccb_ml;
         ul->ccb = PP_MakeCCB(NULL, NULL);  // prevent callback from being called twice
         ul->np_stream = stream;
 
@@ -818,7 +820,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
 
 quit:
     if (ccb.func)
-        ppb_core_call_on_main_thread2(0, ccb, PP_OK, __func__);
+        ppb_message_loop_post_work_with_result(ccb_ml, ccb, 0, PP_OK, 0, __func__);
 
     return NPERR_NO_ERROR;
 }
@@ -889,16 +891,18 @@ NPP_DestroyStream(NPP npp, NPStream *stream, NPReason reason)
             ul->read_pos += read_bytes;
 
         pp_resource_release(loader);
-        ppb_core_call_on_main_thread2(0, PP_MakeCCB(url_read_task_wrapper_comt, rt), read_bytes,
-                                      __func__);
+        ppb_message_loop_post_work_with_result(rt->ccb_ml,
+                                               PP_MakeCCB(url_read_task_wrapper_comt, rt), 0,
+                                               read_bytes, 0, __func__);
         ul = pp_resource_acquire(loader, PP_RESOURCE_URL_LOADER);
     }
 
     if (ul && ul->stream_to_file) {
         struct PP_CompletionCallback ccb = ul->stream_to_file_ccb;
+        PP_Resource                  ccb_ml = ul->stream_to_file_ccb_ml;
 
         pp_resource_release(loader);
-        ppb_core_call_on_main_thread2(0, ccb, PP_OK, __func__);
+        ppb_message_loop_post_work_with_result(ccb_ml, ccb, 0, PP_OK, 0, __func__);
         return NPERR_NO_ERROR;
     }
 
@@ -964,8 +968,9 @@ NPP_Write(NPP npp, NPStream *stream, int32_t offset, int32_t len, void *buffer)
 
     if (read_bytes > 0) {
         pp_resource_release(loader);
-        ppb_core_call_on_main_thread2(0, PP_MakeCCB(url_read_task_wrapper_comt, rt), read_bytes,
-                                      __func__);
+        ppb_message_loop_post_work_with_result(rt->ccb_ml,
+                                               PP_MakeCCB(url_read_task_wrapper_comt, rt), 0,
+                                               read_bytes, 0, __func__);
         return len;
     } else {
         // reschedule task
@@ -1057,7 +1062,8 @@ handle_graphics_expose_event(NPP npp, void *event)
     pp_resource_release(pp_i->graphics);
     if (pp_i->graphics_in_progress) {
         if (pp_i->graphics_ccb.func)
-            ppb_core_call_on_main_thread2(0, pp_i->graphics_ccb, PP_OK, __func__);
+            ppb_message_loop_post_work_with_result(pp_i->graphics_ccb_ml, pp_i->graphics_ccb, 0,
+                                                   PP_OK, 0, __func__);
     }
 
     pp_i->graphics_ccb = PP_MakeCCB(NULL, NULL);
@@ -1640,12 +1646,13 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
         return;
 
     struct PP_CompletionCallback ccb = ul->ccb;
+    PP_Resource                  ccb_ml = ul->ccb_ml;
     ul->ccb = PP_MakeCCB(NULL, NULL); // prevent callback from being called twice
     pp_resource_release(url_loader);
 
     // notify plugin that download have failed
     if (ccb.func)
-        ppb_core_call_on_main_thread2(0, ccb, PP_ERROR_FAILED, __func__);
+        ppb_message_loop_post_work_with_result(ccb_ml, ccb, 0, PP_ERROR_FAILED, 0, __func__);
 }
 
 NPError

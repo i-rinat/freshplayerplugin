@@ -30,6 +30,7 @@
 #include "async_network.h"
 #include "ppb_var.h"
 #include "pp_interface.h"
+#include "ppb_message_loop.h"
 
 
 PP_Resource
@@ -81,6 +82,7 @@ ppb_host_resolver_resolve(PP_Resource host_resolver, const char *host, uint16_t 
     task->host =        nullsafe_strdup(host);
     task->port =        port;
     task->callback =    callback;
+    task->callback_ml = ppb_message_loop_get_current();
 
     pp_resource_release(host_resolver);
     async_network_task_push(task);

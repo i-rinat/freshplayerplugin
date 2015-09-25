@@ -37,6 +37,7 @@
 
 static int32_t                     *popup_menu_result = NULL;
 static struct PP_CompletionCallback popup_menu_ccb = { };
+static PP_Resource                  popup_menu_ccb_ml = 0;
 static int                          popup_menu_sentinel = 0;
 static int                          popup_menu_canceled = 0;
 
@@ -72,7 +73,7 @@ menu_selection_done(GtkMenuShell *object, gboolean user_data)
 {
     int32_t code = popup_menu_canceled ? PP_ERROR_USERCANCEL : PP_OK;
 
-    ppb_core_call_on_main_thread2(0, popup_menu_ccb, code, __func__);
+    ppb_message_loop_post_work_with_result(popup_menu_ccb_ml, popup_menu_ccb, 0, code, 0, __func__);
 
     popup_menu_sentinel = 0;
     popup_menu_result = NULL;
@@ -245,6 +246,7 @@ ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_
     popup_menu_sentinel = 1;
     popup_menu_canceled = 1;
     popup_menu_ccb = callback;
+    popup_menu_ccb_ml = ppb_message_loop_get_current();
     popup_menu_result = selected_id;
 
     pthread_mutex_lock(&display.lock);

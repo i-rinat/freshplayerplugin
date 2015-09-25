@@ -33,6 +33,7 @@
 #include "reverse_constant.h"
 #include "async_network.h"
 #include "pp_interface.h"
+#include "ppb_message_loop.h"
 
 
 PP_Resource
@@ -106,7 +107,8 @@ ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *
 
     us->bound = 1;
     pp_resource_release(udp_socket);
-    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
+    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0, PP_OK, 0,
+                                           __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 
@@ -148,6 +150,7 @@ ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes
     task->buffer =   buffer;
     task->bufsize =  num_bytes;
     task->callback = callback;
+    task->callback_ml = ppb_message_loop_get_current();
 
     pp_resource_release(udp_socket);
     async_network_task_push(task);
@@ -195,6 +198,7 @@ ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t num_b
     task->buffer =   (char *)buffer;
     task->bufsize =  num_bytes;
     task->callback = callback;
+    task->callback_ml = ppb_message_loop_get_current();
     memcpy(&task->netaddr, addr, sizeof(*addr));
 
     pp_resource_release(udp_socket);

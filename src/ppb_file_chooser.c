@@ -23,6 +23,7 @@
  */
 
 #include "ppb_file_chooser.h"
+#include "ppb_message_loop.h"
 #include <stdlib.h>
 #include "pp_resource.h"
 #include "tables.h"
@@ -91,6 +92,7 @@ struct show_param_s {
     PP_FileChooserMode_Dev          mode;
     struct PP_Var                   accept_types;
     PP_Resource                     chooser_id;
+    PP_Resource                     message_loop;
 
     int                             dialog_closed;
 };
@@ -125,7 +127,8 @@ fcd_response_handler(GtkDialog *dialog, gint response_id, gpointer user_data)
     if (!p->dialog_closed)
         gtk_widget_destroy(GTK_WIDGET(dialog));
 
-    ppb_core_call_on_main_thread2(0, p->ccb, callback_result, __func__);
+    ppb_message_loop_post_work_with_result(p->message_loop, p->ccb, 0, callback_result, 0,
+                                           __func__);
 
     ppb_core_release_resource(p->chooser_id);
     g_slice_free(struct show_param_s, p);
@@ -214,6 +217,7 @@ ppb_file_chooser_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
     p->mode =                   fc->mode;
     p->accept_types =           ppb_var_add_ref2(fc->accept_types);
     p->chooser_id =             chooser;
+    p->message_loop =           ppb_message_loop_get_current();
 
     ppb_core_add_ref_resource(chooser);
     ppb_core_call_on_browser_thread(p->pp_i->id, show_without_user_guesture_ptac, p);

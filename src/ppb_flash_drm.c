@@ -26,6 +26,7 @@
 #include "ppb_core.h"
 #include "ppb_var.h"
 #include "ppb_crypto.h"
+#include "ppb_message_loop.h"
 #include "pp_resource.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
@@ -152,7 +153,8 @@ ppb_flash_drm_get_device_id(PP_Resource drm, struct PP_Var *id,
     }
 
     *id = ppb_var_var_from_utf8(salt, salt_length);
-    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
+    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0, PP_OK, 0,
+                                           __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 

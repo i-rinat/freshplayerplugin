@@ -33,6 +33,7 @@
 #include "ppb_core.h"
 #include "ppb_opengles2.h"
 #include "ppb_graphics3d.h"
+#include "ppb_message_loop.h"
 #include "config.h"
 #include "compat_glx_defines.h"
 #include "ffmpeg-compat.h"      // generated
@@ -859,7 +860,8 @@ ppb_video_decoder_decode(PP_Resource video_decoder,
     ppb_buffer_unmap(bitstream_buffer->data);
 
     pp_resource_release(video_decoder);
-    ppb_core_call_on_main_thread(0, callback, PP_OK);
+    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0, PP_OK, 0,
+                                           __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 
@@ -989,7 +991,8 @@ ppb_video_decoder_flush(PP_Resource video_decoder, struct PP_CompletionCallback 
     avcodec_flush_buffers(vd->avctx);
 
     pp_resource_release(video_decoder);
-    ppb_core_call_on_main_thread(0, callback, PP_OK);
+    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0, PP_OK, 0,
+                                           __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 
@@ -1005,7 +1008,8 @@ ppb_video_decoder_reset(PP_Resource video_decoder, struct PP_CompletionCallback 
     deinitialize_decoder(vd);
 
     pp_resource_release(video_decoder);
-    ppb_core_call_on_main_thread(0, callback, PP_OK);
+    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0, PP_OK, 0,
+                                           __func__);
     return PP_OK_COMPLETIONPENDING;
 }
 

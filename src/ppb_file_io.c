@@ -31,6 +31,7 @@
 #include "pp_resource.h"
 #include "ppb_core.h"
 #include "pp_interface.h"
+#include "ppb_message_loop.h"
 
 
 int32_t
@@ -45,7 +46,8 @@ ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
 
     *handle = fio->fd;
 
-    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
+    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0, PP_OK, 0,
+                                           __func__);
     pp_resource_release(file_io);
     return PP_OK;
 }
@@ -124,7 +126,8 @@ ppb_file_io_open(PP_Resource file_io, PP_Resource file_ref, int32_t open_flags,
         goto out;
     }
 
-    ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
+    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0, PP_OK, 0,
+                                           __func__);
     retval = PP_OK_COMPLETIONPENDING;
 
 out:

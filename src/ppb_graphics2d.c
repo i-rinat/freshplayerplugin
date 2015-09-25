@@ -32,6 +32,7 @@
 #include "config.h"
 #include "pp_resource.h"
 #include "pp_interface.h"
+#include "ppb_message_loop.h"
 
 
 struct g2d_paint_task_s {
@@ -241,6 +242,7 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
 
     if (pp_i->graphics == graphics_2d) {
         pp_i->graphics_ccb = callback;
+        pp_i->graphics_ccb_ml = ppb_message_loop_get_current();
         pp_i->graphics_in_progress = 1;
     }
     pthread_mutex_unlock(&display.lock);
@@ -325,7 +327,8 @@ ppb_graphics2d_flush(PP_Resource graphics_2d, struct PP_CompletionCallback callb
     if (callback.func) {
         // invoke callback as soon as possible if graphics device is not bound to an instance
         if (pp_i->graphics != graphics_2d)
-            ppb_core_call_on_main_thread2(0, callback, PP_OK, __func__);
+            ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(), callback, 0,
+                                                   PP_OK, 0, __func__);
         return PP_OK_COMPLETIONPENDING;
     }
 

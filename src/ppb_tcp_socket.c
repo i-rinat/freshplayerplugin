@@ -33,6 +33,7 @@
 #include "pp_resource.h"
 #include "async_network.h"
 #include "pp_interface.h"
+#include "ppb_message_loop.h"
 
 
 PP_Resource
@@ -96,6 +97,7 @@ ppb_tcp_socket_connect(PP_Resource tcp_socket, const char *host, uint16_t port,
     task->host = nullsafe_strdup(host);
     task->port = port;
     task->callback = callback;
+    task->callback_ml = ppb_message_loop_get_current();
     pp_resource_release(tcp_socket);
 
     async_network_task_push(task);
@@ -119,6 +121,7 @@ ppb_tcp_socket_connect_with_net_address(PP_Resource tcp_socket,
     task->sock = ts->sock;
     task->netaddr = *addr;
     task->callback = callback;
+    task->callback_ml = ppb_message_loop_get_current();
     pp_resource_release(tcp_socket);
 
     async_network_task_push(task);
@@ -228,6 +231,7 @@ ppb_tcp_socket_read(PP_Resource tcp_socket, char *buffer, int32_t bytes_to_read,
     task->buffer = buffer;
     task->bufsize = bytes_to_read;
     task->callback = callback;
+    task->callback_ml = ppb_message_loop_get_current();
     pp_resource_release(tcp_socket);
 
     async_network_task_push(task);
@@ -265,6 +269,7 @@ ppb_tcp_socket_write(PP_Resource tcp_socket, const char *buffer, int32_t bytes_t
     task->buffer = (char *)buffer;
     task->bufsize = bytes_to_write;
     task->callback = callback;
+    task->callback_ml = ppb_message_loop_get_current();
     pp_resource_release(tcp_socket);
 
     async_network_task_push(task);
