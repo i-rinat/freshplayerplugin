@@ -134,6 +134,13 @@ get_global_config_path(const char *file_name)
     return g_strdup_printf("/etc/%s", file_name);
 }
 
+static
+void
+error_report_func(const char *s)
+{
+    trace_error("config: %s\n", s);
+}
+
 void
 fpp_config_initialize(void)
 {
@@ -159,6 +166,7 @@ fpp_config_initialize(void)
     setlocale(LC_ALL, "C");
 
     cfg = cfg_init(opts, 0);
+    cfg_set_error_func(cfg, error_report_func);
     if (cfg_parse(cfg, local_config) != CFG_SUCCESS) {
         trace_warning("failed to parse configuration file %s, trying %s\n", local_config,
                       global_config);
