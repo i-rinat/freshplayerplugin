@@ -155,14 +155,13 @@ fpp_config_initialize(void)
 
 #define DUP_CFG_STRING(field) do { if (field) field = strdup(field); } while (0)
 
-    // all non-NULL strings values need to be duplicated, since libconfuse calls free() on them
+    // all non-NULL strings values need to be duplicated, since config parser free()'s
+    // their previous versions
     DUP_CFG_STRING(config.jack_server_name);
     DUP_CFG_STRING(config.pepperflash_path);
     DUP_CFG_STRING(config.flash_command_line);
 
-    // libconfuse treats commas as separators in lists, so if current locale
-    // uses commas as a decimal mark, parsing will fail.
-    // Setting locale to "C" changes decimal mark to point.
+    // Setting locale to "C" changes decimal mark to point for floating point values
     setlocale(LC_ALL, "C");
 
     cfg = cfg_init(opts, 0);
