@@ -159,6 +159,7 @@ struct pp_instance_s {
     uint32_t                        event_mask;
     uint32_t                        filtered_event_mask;
     Window                          wnd;
+    Window                          browser_wnd;
     GtkWidget                      *catcher_widget; ///< catches keypresses returned from IME
     PP_Instance                     id;
     NPP                             npp;

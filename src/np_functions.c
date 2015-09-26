@@ -102,74 +102,6 @@ set_window_comt(void *user_data, int32_t result)
     }
 }
 
-static
-double
-get_double_value(NPVariant variant)
-{
-    switch (variant.type) {
-    case NPVariantType_Bool:    return !!variant.value.boolValue;
-    case NPVariantType_Int32:   return variant.value.intValue;
-    case NPVariantType_Double:  return variant.value.doubleValue;
-    default:                    return 0;
-    }
-}
-
-static
-void
-calculate_absolute_offset(NPP npp, struct pp_instance_s *pp_i)
-{
-    pp_i->offset_x = 0;
-    pp_i->offset_y = 0;
-
-    NPVariant bounding_rect;
-    if (!npn.invoke(npp, pp_i->np_plugin_element_obj,
-                    npn.getstringidentifier("getBoundingClientRect"), NULL, 0, &bounding_rect))
-    {
-        goto err_1;
-    }
-
-    if (bounding_rect.type != NPVariantType_Object)
-        goto err_1;
-
-    NPVariant element_x, element_y;
-    if (!npn.getproperty(npp, bounding_rect.value.objectValue, npn.getstringidentifier("left"),
-                         &element_x))
-    {
-        goto err_2;
-    }
-
-    if (!npn.getproperty(npp, bounding_rect.value.objectValue, npn.getstringidentifier("top"),
-                         &element_y))
-    {
-        goto err_3;
-    }
-
-    NPVariant viewport_x, viewport_y;
-    NPString script_get_x = NPString_literal(
-        "Math.round(window.devicePixelRatio * window.mozInnerScreenX) - window.screenX");
-    NPString script_get_y = NPString_literal(
-        "Math.round(window.devicePixelRatio * window.mozInnerScreenY) - window.screenY");
-    if (!npn.evaluate(npp, pp_i->np_window_obj, &script_get_x, &viewport_x))
-        goto err_4;
-    if (!npn.evaluate(npp, pp_i->np_window_obj, &script_get_y, &viewport_y))
-        goto err_5;
-
-    pp_i->offset_x = get_double_value(element_x) + get_double_value(viewport_x);
-    pp_i->offset_y = get_double_value(element_y) + get_double_value(viewport_y);
-
-    npn.releasevariantvalue(&viewport_y);
-err_5:
-    npn.releasevariantvalue(&viewport_x);
-err_4:
-    npn.releasevariantvalue(&element_y);
-err_3:
-    npn.releasevariantvalue(&element_x);
-err_2:
-    npn.releasevariantvalue(&bounding_rect);
-err_1:
-    return;
-}
-
 NPError
 NPP_SetWindow(NPP npp, NPWindow *window)
 {
@@ -190,12 +122,13 @@ NPP_SetWindow(NPP npp, NPWindow *window)
     pp_i->width = window->width;
     pp_i->height = window->height;
 
+    if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &pp_i->browser_wnd) != NPERR_NO_ERROR)
+        pp_i->browser_wnd = None;
+
     if (pp_i->windowed_mode) {
         pp_i->wnd = x11et_register_window(pp_i->id, (Window)window->window, NPP_HandleEvent,
                                           pp_i->use_xembed);
     }
-
-    calculate_absolute_offset(npp, pp_i);
 
     pthread_mutex_lock(&display.lock);
     if (!pp_i->is_fullscreen) {
@@ -1025,6 +958,22 @@ handle_graphics_expose_event(NPP npp, void *event)
     Drawable drawable = ev->drawable;
     int screen = DefaultScreen(dpy);
     int retval;
+
+    if (pp_i->windowed_mode) {
+        int wnd_x, wnd_y;
+        int browser_x, browser_y;
+        Window child;
+
+        pthread_mutex_lock(&display.lock);
+        XTranslateCoordinates(dpy, (Window)drawable, DefaultRootWindow(dpy), 0, 0,
+                              &wnd_x, &wnd_y, &child);
+        XTranslateCoordinates(dpy, pp_i->browser_wnd, DefaultRootWindow(dpy), 0, 0,
+                              &browser_x, &browser_y, &child);
+        pthread_mutex_unlock(&display.lock);
+
+        pp_i->offset_x = wnd_x - browser_x;
+        pp_i->offset_y = wnd_y - browser_y;
+    }
 
     pthread_mutex_lock(&display.lock);
     if (g2d) {
