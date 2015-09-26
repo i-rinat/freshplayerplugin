@@ -26,8 +26,14 @@
 #define FPP_STATIC_ASSERT_H
 
 
+#if defined(__GNUC__) && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7)))
+#define STATIC_ASSERT_ATTRIBUTE_UNUSED  __attribute__((unused))
+#else
+#define STATIC_ASSERT_ATTRIBUTE_UNUSED
+#endif
+
 #define STATIC_ASSERT_HELPER1(expr, msg)    typedef char static_assertion_##msg[(!!(expr))*2 - 1] \
-                                            __attribute__((used))
+                                            STATIC_ASSERT_ATTRIBUTE_UNUSED
 #define STATIC_ASSERT_HELPER2(expr, msg)    STATIC_ASSERT_HELPER1(expr, msg)
 #define STATIC_ASSERT(expr)                 STATIC_ASSERT_HELPER2(expr, __LINE__)
 
