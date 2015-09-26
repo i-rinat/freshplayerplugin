@@ -23,7 +23,7 @@
  */
 
 #include "config.h"
-#include <confuse.h>
+#include "config_parser/config_parser.h"
 #include <string.h>
 #include <stdlib.h>
 #include <locale.h>

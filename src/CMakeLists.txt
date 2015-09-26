@@ -6,6 +6,7 @@ endif()
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_subdirectory(uri_parser)
+add_subdirectory(config_parser)
 
 include_directories("${GENERATED_INCLUDE_DIRS}")
 
@@ -120,7 +121,7 @@ set(COMMON_OBJ_LIST
     $<TARGET_OBJECTS:freshwrapper-obj>
     $<TARGET_OBJECTS:parson-obj>
     $<TARGET_OBJECTS:uri-parser-obj>
-    $<TARGET_OBJECTS:confuse-obj>
+    $<TARGET_OBJECTS:config-parser-obj>
 )
 
 # wrapper for PepperFlash
@@ -150,7 +151,7 @@ if (WITH_LIBPDF)
                 np_libpdf_frontend.c
                 trace_core.c
                 config.c
-                $<TARGET_OBJECTS:confuse-obj>
+                $<TARGET_OBJECTS:config-parser-obj>
                 config_libpdf_frontend.c)
     target_link_libraries(freshwrapper-libpdf-frontend txt-resources)
     target_link_libraries(dep_check freshwrapper-libpdf-frontend)
