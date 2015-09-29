@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 
-
+__attribute__((visibility("default")))
 int
 main(void)
 {
