@@ -202,6 +202,7 @@ deinitialize_decoder(struct pp_video_decoder_s *vd)
 
     vd->buffer_count = 0;
     vd->buffers_were_requested = 0;
+    vd->initialized = 0;
     free_and_nullify(vd->buffers);
 }
 
@@ -217,7 +218,6 @@ ppb_video_decoder_destroy_priv(void *p)
     }
 
     deinitialize_decoder(vd);
-    vd->initialized = 0;
 }
 
 static
