@@ -127,9 +127,9 @@ set(COMMON_OBJ_LIST
 # wrapper for PepperFlash
 set(WITH_PEPPERFLASH TRUE CACHE STRING "generate wrapper for PepperFlash")
 if (WITH_PEPPERFLASH)
-    add_library(freshwrapper-pepperflash SHARED ${COMMON_OBJ_LIST} config_pepperflash.c)
-    target_link_libraries(freshwrapper-pepperflash ${REQ_LIBRARIES})
-    target_link_libraries(dep_check freshwrapper-pepperflash)
+    add_library(freshwrapper-flashplayer SHARED ${COMMON_OBJ_LIST} config_pepperflash.c)
+    target_link_libraries(freshwrapper-flashplayer ${REQ_LIBRARIES})
+    target_link_libraries(dep_check freshwrapper-flashplayer)
 endif()
 
 # wrapper for Native Client

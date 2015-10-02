@@ -4,7 +4,7 @@ Assuming you have Firefox as a browser.
 
 ## Simplify deploy
 
-First, put a symlink of built `libfreshwrapper-pepperflash.so` to `~/.mozilla/plugins`.
+First, put a symlink of built `libfreshwrapper-flashplayer.so` to `~/.mozilla/plugins`.
 This step simplifies deploy step. You just rebuild, restart browser, and you are running
 new version.
 

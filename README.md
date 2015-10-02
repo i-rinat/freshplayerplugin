@@ -87,7 +87,7 @@ Project is using cmake (>=2.8.8) build system.
     $ make
 ```
 
-* Put generated `libfreshwrapper-pepperflash.so` into browser plugins directory (`~/.mozilla/plugins`)
+* Put generated `libfreshwrapper-flashplayer.so` into browser plugins directory (`~/.mozilla/plugins`)
 
 
 When loaded by browser it will search for `libpepflashplayer.so` in a directories
