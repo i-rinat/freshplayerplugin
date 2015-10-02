@@ -1626,9 +1626,11 @@ NPP_URLNotify(NPP npp, const char *url, NPReason reason, void *notifyData)
 NPError
 NPP_GetValue(NPP npp, NPPVariable variable, void *value)
 {
+    int status = NPERR_INVALID_PARAM;
     struct pp_instance_s *pp_i = npp->pdata;
+
     if (config.quirks.plugin_missing)
-        return NPERR_NO_ERROR;
+        return NPERR_INVALID_PARAM;
 
     const char *var_name = reverse_npp_variable(variable);
 
@@ -1669,6 +1671,7 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
     case NPPVpluginNeedsXEmbed:
         trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         *(NPBool *)value = pp_i->use_xembed;
+        status = NPERR_NO_ERROR;
         break;
     case NPPVpluginScriptableNPObject:
         trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
@@ -1678,6 +1681,7 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
             *(void **)value = np_var.value.objectValue;
             tables_add_npobj_npp_mapping(np_var.value.objectValue, npp);
         } while (0);
+        status = NPERR_NO_ERROR;
         break;
     case NPPVformValue:
         trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
@@ -1688,6 +1692,7 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
     case NPPVpluginWantsAllNetworkStreams:
         trace_info_f("[NPP] {full} %s npp=%p, variable=%s\n", __func__, npp, var_name);
         *(int *)value = 1;
+        status = NPERR_NO_ERROR;
         break;
     case NPPVpluginNativeAccessibleAtkPlugId:
         trace_info_z("[NPP] {zilch} %s npp=%p, variable=%s\n", __func__, npp, var_name);
@@ -1709,7 +1714,7 @@ NPP_GetValue(NPP npp, NPPVariable variable, void *value)
         break;
     }
 
-    return NPERR_NO_ERROR;
+    return status;
 }
 
 NPError
