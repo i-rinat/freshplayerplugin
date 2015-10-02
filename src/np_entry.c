@@ -148,7 +148,8 @@ do_load_ppp_module(const char *fname)
 
     if (!ppp_initialize_module || !ppp_get_interface) {
         trace_error("%s, one of required PPP_* is missing\n", __func__);
-        dlclose(module_dl_handler);
+        if (module_dl_handler)
+            dlclose(module_dl_handler);
         module_dl_handler = NULL;
         return 1;
     }
@@ -335,7 +336,8 @@ unload_ppp_module(void)
     // call module shutdown handler if exists
     call_plugin_shutdown_module();
 
-    dlclose(module_dl_handler);
+    if (module_dl_handler)
+        dlclose(module_dl_handler);
     module_dl_handler = NULL;
 
     fpp_config_destroy();
