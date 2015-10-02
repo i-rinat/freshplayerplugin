@@ -959,7 +959,7 @@ handle_graphics_expose_event(NPP npp, void *event)
     int screen = DefaultScreen(dpy);
     int retval;
 
-    if (pp_i->windowed_mode) {
+    if (pp_i->windowed_mode && pp_i->browser_wnd != None) {
         int wnd_x, wnd_y;
         int browser_x, browser_y;
         Window child;
