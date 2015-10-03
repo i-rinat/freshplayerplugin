@@ -1,3 +1,15 @@
+2015-10-03  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.3.3
+	* graphics: update fullscreen size at the very end of transition
+	* net: implement PPB_NetAddress;1.0 inferface
+	* audio: add "noaudio" backend which only provide sync events
+	* misc: track origin threads of callbacks
+	* misc: drop libconfig dependency, use own config parser
+	* misc: avoid calling Javascript in NPP_SetWindow()
+	* misc: fix -fvisibility=hidden build issue
+	* misc: rename file name to libfreshwrapper-flashplayer.so
+
 2015-08-17  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.3.2
