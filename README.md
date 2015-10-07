@@ -85,6 +85,7 @@ Project is using cmake (>=2.8.8) build system.
 ```
     $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     $ make
+    $ make install ( as root )
 ```
 
 * Put generated `libfreshwrapper-flashplayer.so` into browser plugins directory (`~/.mozilla/plugins`)
