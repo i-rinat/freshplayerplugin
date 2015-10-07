@@ -5,6 +5,11 @@ endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# Defaults MOZPLUGIN_INSTALL_DIR to %{_libdir}/mozilla/plugins/
+if( NOT MOZPLUGIN_INSTALL_DIR )
+    set(MOZPLUGIN_INSTALL_DIR lib${LIB_SUFFIX}/mozilla/plugins/)
+endif( NOT MOZPLUGIN_INSTALL_DIR )
+
 add_subdirectory(uri_parser)
 add_subdirectory(config_parser)
 
@@ -130,6 +135,7 @@ if (WITH_PEPPERFLASH)
     add_library(freshwrapper-flashplayer SHARED ${COMMON_OBJ_LIST} config_pepperflash.c)
     target_link_libraries(freshwrapper-flashplayer ${REQ_LIBRARIES})
     target_link_libraries(dep_check freshwrapper-flashplayer)
+    install(TARGETS freshwrapper-flashplayer DESTINATION ${MOZPLUGIN_INSTALL_DIR})
 endif()
 
 # wrapper for Native Client
@@ -138,6 +144,7 @@ if (WITH_NACL)
     add_library(freshwrapper-nacl SHARED ${COMMON_OBJ_LIST} config_nacl.c)
     target_link_libraries(freshwrapper-nacl ${REQ_LIBRARIES})
     target_link_libraries(dep_check freshwrapper-nacl)
+    install(TARGETS freshwrapper-nacl DESTINATION ${MOZPLUGIN_INSTALL_DIR})
 endif()
 
 # libpdf wrapper
@@ -155,4 +162,5 @@ if (WITH_LIBPDF)
                 config_libpdf_frontend.c)
     target_link_libraries(freshwrapper-libpdf-frontend txt-resources)
     target_link_libraries(dep_check freshwrapper-libpdf-frontend)
+    install(TARGETS freshwrapper-libpdf-backend DESTINATION ${MOZPLUGIN_INSTALL_DIR})
 endif()
