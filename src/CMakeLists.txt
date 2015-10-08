@@ -159,5 +159,7 @@ if (WITH_LIBPDF)
                 config_libpdf_frontend.c)
     target_link_libraries(freshwrapper-libpdf-frontend txt-resources)
     target_link_libraries(dep_check freshwrapper-libpdf-frontend)
+
+    install(TARGETS freshwrapper-libpdf-frontend DESTINATION ${MOZPLUGIN_INSTALL_DIR})
     install(TARGETS freshwrapper-libpdf-backend DESTINATION ${MOZPLUGIN_INSTALL_DIR})
 endif()
