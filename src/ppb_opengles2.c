@@ -2514,7 +2514,7 @@ trace_ppb_opengles2_TexImage2D(PP_Resource context, GLenum target, GLint level,
                "width=%d, height=%d, border=%d, format=%u(%s), type=%u(%s), pixels=%p\n",
                __func__+6, context, target, reverse_gl_enum(target), level, internalformat,
                reverse_gl_enum(internalformat), width, height, border, format,
-               reverse_gl_enum(format), type, reverse_gl_enum(format), pixels);
+               reverse_gl_enum(format), type, reverse_gl_enum(type), pixels);
     ppb_opengles2_TexImage2D(context, target, level, internalformat, width, height, border, format,
                              type, pixels);
 }
