@@ -5,10 +5,7 @@ endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# Defaults MOZPLUGIN_INSTALL_DIR to %{_libdir}/mozilla/plugins/
-if( NOT MOZPLUGIN_INSTALL_DIR )
-    set(MOZPLUGIN_INSTALL_DIR lib${LIB_SUFFIX}/mozilla/plugins/)
-endif( NOT MOZPLUGIN_INSTALL_DIR )
+set(MOZPLUGIN_INSTALL_DIR "lib${LIB_SUFFIX}/mozilla/plugins/" CACHE PATH "plugin install directory")
 
 add_subdirectory(uri_parser)
 add_subdirectory(config_parser)
