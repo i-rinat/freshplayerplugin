@@ -88,7 +88,14 @@ Project is using cmake (>=2.8.8) build system.
 ```
 
 * Put generated `libfreshwrapper-flashplayer.so` into browser plugins directory (`~/.mozilla/plugins`)
+  or instal system-wise by calling:
+```
+    # make install
+```
 
+By default `make install` will put plugin(s) to `${CMAKE_INSTALL_PREFIX}/lib/mozilla/plugins`. The
+path could be changed either by changing CMake parameter `CMAKE_INSTALL_PREFIX`, or by setting
+`MOZPLUGIN_INSTALL_DIR`.
 
 When loaded by browser it will search for `libpepflashplayer.so` in a directories
 where it can be: in Chrome (stable/beta/unstable) directory, and in
