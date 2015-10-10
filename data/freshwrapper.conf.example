@@ -34,10 +34,10 @@ jack_autostart_server = 1
 
 # Path to the Pepper Flash plugin.
 # If the option is absent, freshwrapper will search for Pepper Flash in
-# a number of location where it could be. Usually that's enough, but if
+# a number of locations where it could be. Usually that's enough, but if
 # not, you should manually enter the right path. Multiple paths could
 # be specified, separated by colon.
-pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
+#pepperflash_path = "/opt/google/chrome/PepperFlash/libpepflashplayer.so"
 
 # "Command-line" arguments for Flash
 flash_command_line = "enable_hw_video_decode=1,enable_stagevideo_auto=1"
