@@ -167,11 +167,10 @@ fpp_config_initialize(void)
     cfg = cfg_init(opts, 0);
     cfg_set_error_func(cfg, error_report_func);
     if (cfg_parse(cfg, local_config) != CFG_SUCCESS) {
-        trace_warning("failed to parse configuration file %s, trying %s\n", local_config,
-                      global_config);
+        trace_info_f("can't open configuration file %s, trying %s\n", local_config, global_config);
 
         if (cfg_parse(cfg, global_config) != CFG_SUCCESS) {
-            trace_warning("failed to parse configuration file %s\n", global_config);
+            trace_info_f("can't open configuration file %s, using default values\n", global_config);
             config = default_config;
             goto quit;
         }
