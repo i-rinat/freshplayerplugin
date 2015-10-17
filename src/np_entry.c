@@ -449,15 +449,15 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 
     memcpy(aNPPFuncs, &pf, pf.size);
 
-    if (tables_open_display() != 0)
-        return NPERR_GENERIC_ERROR;
-
     if (aNPNFuncs->version < NPVERS_HAS_PLUGIN_THREAD_ASYNC_CALL) {
         config.quirks.plugin_missing = 1;
         config.quirks.incompatible_npapi_version = 1;
     }
 
     load_ppp_module();
+
+    if (tables_open_display() != 0)
+        return NPERR_GENERIC_ERROR;
 
     int res = call_plugin_init_module();
     if (res != 0) {
