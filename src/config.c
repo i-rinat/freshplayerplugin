@@ -26,6 +26,7 @@
 #include "config_parser/config_parser.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <locale.h>
 #include <glib.h>
 #include "trace_core.h"
@@ -63,6 +64,7 @@ static struct fpp_config_s default_config = {
         .plugin_missing             = 0,
         .incompatible_npapi_version = 0,
         .x_synchronize              = 0,
+        .avoid_stdout               = 0,
     },
 };
 
@@ -108,6 +110,19 @@ void
 initialize_quirks(void)
 {
     fpp_config_detect_plugin_specific_quirks();
+
+    // Webkit2gtk uses stdout to pass plugin name from plugin container to web renderer process.
+    // So stdout should be avoided if possible.
+    FILE *fp = fopen("/proc/self/cmdline", "r");
+    if (fp) {
+        char buf[2048];
+        size_t read_bytes = fread(buf, 1, sizeof(buf) - 1, fp);
+
+        if (read_bytes > 0)
+            if (strstr(buf, "WebKitPluginProcess"))
+                config.quirks.avoid_stdout = 1;
+        fclose(fp);
+    }
 }
 
 static

@@ -41,6 +41,9 @@ trace_info(const char *fmt, ...)
 {
     if (config.quiet)
         return;
+    if (config.quirks.avoid_stdout)
+        return;
+
     pthread_mutex_lock(&lock);
     va_list args;
 //    fprintf(stdout, "[fresh] ");
@@ -54,6 +57,9 @@ trace_info(const char *fmt, ...)
 void
 trace_warning(const char *fmt, ...)
 {
+    if (config.quirks.avoid_stdout)
+        return;
+
     pthread_mutex_lock(&lock);
     va_list args;
     fprintf(stdout, "[fresh] [warning] ");
@@ -73,10 +79,12 @@ trace_error(const char *fmt, ...)
     vfprintf(stderr, fmt, args);
     va_end(args);
 
-    fprintf(stdout, "[fresh] [error] ");
-    va_start(args, fmt);
-    vfprintf(stdout, fmt, args);
-    va_end(args);
+    if (!config.quirks.avoid_stdout) {
+        fprintf(stdout, "[fresh] [error] ");
+        va_start(args, fmt);
+        vfprintf(stdout, fmt, args);
+        va_end(args);
+    }
     pthread_mutex_unlock(&lock);
 }
 

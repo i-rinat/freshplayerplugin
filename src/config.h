@@ -60,6 +60,7 @@ struct fpp_config_s {
         int   plugin_missing;
         int   incompatible_npapi_version;
         int   x_synchronize;
+        int   avoid_stdout;
     } quirks;
 };
 
