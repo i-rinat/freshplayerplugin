@@ -63,7 +63,7 @@ list(APPEND REQ_INCLUDE_DIRS ${GTK_INCLUDE_DIRS})
 list(APPEND REQ_LIBRARIES    ${GTK_LIBRARIES})
 
 # OpenGL ES 2
-set(WITH_GLES2 TRUE CACHE STRING "use system libGLESv2")
+set(WITH_GLES2 FALSE CACHE BOOLEAN "use system libGLESv2")
 if (WITH_GLES2)
     pkg_check_modules(GLES2 glesv2 REQUIRED)
     add_definitions(-DHAVE_GLES2=1)
