@@ -68,12 +68,6 @@ class TCompiler : public TShHandleBase
     // Clears the results from the previous compilation.
     void clearResults();
 
-    const std::vector<sh::Attribute> &getAttributes() const { return attributes; }
-    const std::vector<sh::Attribute> &getOutputVariables() const { return outputVariables; }
-    const std::vector<sh::Uniform> &getUniforms() const { return uniforms; }
-    const std::vector<sh::Varying> &getVaryings() const { return varyings; }
-    const std::vector<sh::InterfaceBlock> &getInterfaceBlocks() const { return interfaceBlocks; }
-
     ShHashFunction64 getHashFunction() const { return hashFunction; }
     NameMap& getNameMap() { return nameMap; }
     TSymbolTable& getSymbolTable() { return symbolTable; }
@@ -103,13 +97,6 @@ class TCompiler : public TShHandleBase
     void writePragma();
 
     const BuiltInFunctionEmulator& getBuiltInFunctionEmulator() const;
-
-    std::vector<sh::Attribute> attributes;
-    std::vector<sh::Attribute> outputVariables;
-    std::vector<sh::Uniform> uniforms;
-    std::vector<sh::ShaderVariable> expandedUniforms;
-    std::vector<sh::Varying> varyings;
-    std::vector<sh::InterfaceBlock> interfaceBlocks;
 
   private:
     // Creates the function call DAG for further analysis, returning false if there is a recursion

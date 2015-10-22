@@ -35,53 +35,6 @@ bool isInitialized = false;
 // and the shading language compiler.
 //
 
-template <typename VarT>
-const std::vector<VarT> *GetVariableList(const TCompiler *compiler, ShaderVariableType variableType);
-
-template <>
-const std::vector<sh::Uniform> *GetVariableList(const TCompiler *compiler, ShaderVariableType)
-{
-    return &compiler->getUniforms();
-}
-
-template <>
-const std::vector<sh::Varying> *GetVariableList(const TCompiler *compiler, ShaderVariableType)
-{
-    return &compiler->getVaryings();
-}
-
-template <>
-const std::vector<sh::Attribute> *GetVariableList(const TCompiler *compiler, ShaderVariableType variableType)
-{
-    return (variableType == SHADERVAR_ATTRIBUTE ?
-        &compiler->getAttributes() :
-        &compiler->getOutputVariables());
-}
-
-template <>
-const std::vector<sh::InterfaceBlock> *GetVariableList(const TCompiler *compiler, ShaderVariableType)
-{
-    return &compiler->getInterfaceBlocks();
-}
-
-template <typename VarT>
-const std::vector<VarT> *GetShaderVariables(const ShHandle handle, ShaderVariableType variableType)
-{
-    if (!handle)
-    {
-        return NULL;
-    }
-
-    TShHandleBase* base = static_cast<TShHandleBase*>(handle);
-    TCompiler* compiler = base->getAsCompiler();
-    if (!compiler)
-    {
-        return NULL;
-    }
-
-    return GetVariableList<VarT>(compiler, variableType);
-}
-
 TCompiler *GetCompilerFromHandle(ShHandle handle)
 {
     if (!handle)
@@ -235,30 +188,11 @@ void ShClearResults(const ShHandle handle)
     compiler->clearResults();
 }
 
-int ShGetShaderVersion(const ShHandle handle)
-{
-    TCompiler* compiler = GetCompilerFromHandle(handle);
-    ASSERT(compiler);
-    return compiler->getShaderVersion();
-}
-
 ShShaderOutput ShGetShaderOutputType(const ShHandle handle)
 {
     TCompiler* compiler = GetCompilerFromHandle(handle);
     ASSERT(compiler);
     return compiler->getOutputType();
-}
-
-//
-// Return any compiler log of messages for the application.
-//
-const std::string &ShGetInfoLog(const ShHandle handle)
-{
-    TCompiler *compiler = GetCompilerFromHandle(handle);
-    ASSERT(compiler);
-
-    TInfoSink &infoSink = compiler->getInfoSink();
-    return infoSink.info.str();
 }
 
 //
@@ -271,51 +205,4 @@ const std::string &ShGetObjectCode(const ShHandle handle)
 
     TInfoSink &infoSink = compiler->getInfoSink();
     return infoSink.obj.str();
-}
-
-const std::map<std::string, std::string> *ShGetNameHashingMap(
-    const ShHandle handle)
-{
-    TCompiler *compiler = GetCompilerFromHandle(handle);
-    ASSERT(compiler);
-    return &(compiler->getNameMap());
-}
-
-const std::vector<sh::Uniform> *ShGetUniforms(const ShHandle handle)
-{
-    return GetShaderVariables<sh::Uniform>(handle, SHADERVAR_UNIFORM);
-}
-
-const std::vector<sh::Varying> *ShGetVaryings(const ShHandle handle)
-{
-    return GetShaderVariables<sh::Varying>(handle, SHADERVAR_VARYING);
-}
-
-const std::vector<sh::Attribute> *ShGetAttributes(const ShHandle handle)
-{
-    return GetShaderVariables<sh::Attribute>(handle, SHADERVAR_ATTRIBUTE);
-}
-
-const std::vector<sh::Attribute> *ShGetOutputVariables(const ShHandle handle)
-{
-    return GetShaderVariables<sh::Attribute>(handle, SHADERVAR_OUTPUTVARIABLE);
-}
-
-const std::vector<sh::InterfaceBlock> *ShGetInterfaceBlocks(const ShHandle handle)
-{
-    return GetShaderVariables<sh::InterfaceBlock>(handle, SHADERVAR_INTERFACEBLOCK);
-}
-
-bool ShGetInterfaceBlockRegister(const ShHandle handle,
-                                 const std::string &interfaceBlockName,
-                                 unsigned int *indexOut)
-{
-    return false;
-}
-
-bool ShGetUniformRegister(const ShHandle handle,
-                          const std::string &uniformName,
-                          unsigned int *indexOut)
-{
-    return false;
 }

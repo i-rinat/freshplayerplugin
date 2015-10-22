@@ -327,13 +327,6 @@ void TCompiler::clearResults()
     infoSink.obj.erase();
     infoSink.debug.erase();
 
-    attributes.clear();
-    outputVariables.clear();
-    uniforms.clear();
-    expandedUniforms.clear();
-    varyings.clear();
-    interfaceBlocks.clear();
-
     builtInFunctionEmulator.Cleanup();
 
     nameMap.clear();

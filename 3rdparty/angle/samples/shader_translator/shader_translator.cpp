@@ -30,7 +30,6 @@ static void usage();
 static sh::GLenum FindShaderType(const char *fileName);
 static bool CompileFile(char *fileName, ShHandle compiler, int compileOptions);
 static void LogMsg(const char *msg, const char *name, const int num, const char *logName);
-static void PrintVariable(const std::string &prefix, size_t index, const sh::ShaderVariable &var);
 static void PrintActiveVariables(ShHandle compiler);
 
 // If NUM_SOURCE_STRINGS is set to a value > 1, the input file data is
@@ -201,12 +200,6 @@ int main(int argc, char *argv[])
             {
                 bool compiled = CompileFile(argv[0], compiler, compileOptions);
 
-                LogMsg("BEGIN", "COMPILER", numCompiles, "INFO LOG");
-                std::string log = ShGetInfoLog(compiler);
-                puts(log.c_str());
-                LogMsg("END", "COMPILER", numCompiles, "INFO LOG");
-                printf("\n\n");
-
                 if (compiled && (compileOptions & SH_OBJECT_CODE))
                 {
                     LogMsg("BEGIN", "COMPILER", numCompiles, "OBJ CODE");
@@ -322,105 +315,6 @@ bool CompileFile(char *fileName, ShHandle compiler, int compileOptions)
 void LogMsg(const char *msg, const char *name, const int num, const char *logName)
 {
     printf("#### %s %s %d %s ####\n", msg, name, num, logName);
-}
-
-void PrintVariable(const std::string &prefix, size_t index, const sh::ShaderVariable &var)
-{
-    std::string typeName;
-    switch (var.type)
-    {
-      case GL_FLOAT: typeName = "GL_FLOAT"; break;
-      case GL_FLOAT_VEC2: typeName = "GL_FLOAT_VEC2"; break;
-      case GL_FLOAT_VEC3: typeName = "GL_FLOAT_VEC3"; break;
-      case GL_FLOAT_VEC4: typeName = "GL_FLOAT_VEC4"; break;
-      case GL_INT: typeName = "GL_INT"; break;
-      case GL_INT_VEC2: typeName = "GL_INT_VEC2"; break;
-      case GL_INT_VEC3: typeName = "GL_INT_VEC3"; break;
-      case GL_INT_VEC4: typeName = "GL_INT_VEC4"; break;
-      case GL_UNSIGNED_INT: typeName = "GL_UNSIGNED_INT"; break;
-      case GL_UNSIGNED_INT_VEC2: typeName = "GL_UNSIGNED_INT_VEC2"; break;
-      case GL_UNSIGNED_INT_VEC3: typeName = "GL_UNSIGNED_INT_VEC3"; break;
-      case GL_UNSIGNED_INT_VEC4: typeName = "GL_UNSIGNED_INT_VEC4"; break;
-      case GL_BOOL: typeName = "GL_BOOL"; break;
-      case GL_BOOL_VEC2: typeName = "GL_BOOL_VEC2"; break;
-      case GL_BOOL_VEC3: typeName = "GL_BOOL_VEC3"; break;
-      case GL_BOOL_VEC4: typeName = "GL_BOOL_VEC4"; break;
-      case GL_FLOAT_MAT2: typeName = "GL_FLOAT_MAT2"; break;
-      case GL_FLOAT_MAT3: typeName = "GL_FLOAT_MAT3"; break;
-      case GL_FLOAT_MAT4: typeName = "GL_FLOAT_MAT4"; break;
-      case GL_FLOAT_MAT2x3: typeName = "GL_FLOAT_MAT2x3"; break;
-      case GL_FLOAT_MAT3x2: typeName = "GL_FLOAT_MAT3x2"; break;
-      case GL_FLOAT_MAT4x2: typeName = "GL_FLOAT_MAT4x2"; break;
-      case GL_FLOAT_MAT2x4: typeName = "GL_FLOAT_MAT2x4"; break;
-      case GL_FLOAT_MAT3x4: typeName = "GL_FLOAT_MAT3x4"; break;
-      case GL_FLOAT_MAT4x3: typeName = "GL_FLOAT_MAT4x3"; break;
-      case GL_SAMPLER_2D: typeName = "GL_SAMPLER_2D"; break;
-      case GL_SAMPLER_CUBE: typeName = "GL_SAMPLER_CUBE"; break;
-      case GL_SAMPLER_EXTERNAL_OES: typeName = "GL_SAMPLER_EXTERNAL_OES"; break;
-      default: typeName = "UNKNOWN"; break;
-    }
-
-    printf("%s %lu : name=%s, type=%s, arraySize=%u\n",
-           prefix.c_str(), index, var.name.c_str(), typeName.c_str(), var.arraySize);
-    if (var.fields.size())
-    {
-        std::string structPrefix;
-        for (size_t i = 0; i < prefix.size(); ++i)
-            structPrefix += ' ';
-        printf("%s  struct %s\n", structPrefix.c_str(), var.structName.c_str());
-        structPrefix += "    field";
-        for (size_t i = 0; i < var.fields.size(); ++i)
-            PrintVariable(structPrefix, i, var.fields[i]);
-    }
-}
-
-static void PrintActiveVariables(ShHandle compiler)
-{
-    const std::vector<sh::Uniform> *uniforms = ShGetUniforms(compiler);
-    const std::vector<sh::Varying> *varyings = ShGetVaryings(compiler);
-    const std::vector<sh::Attribute> *attributes = ShGetAttributes(compiler);
-    const std::vector<sh::Attribute> *outputs = ShGetOutputVariables(compiler);
-    for (size_t varCategory = 0; varCategory < 4; ++varCategory)
-    {
-        size_t numVars = 0;
-        std::string varCategoryName;
-        if (varCategory == 0)
-        {
-            numVars = uniforms->size();
-            varCategoryName = "uniform";
-        }
-        else if (varCategory == 1)
-        {
-            numVars = varyings->size();
-            varCategoryName = "varying";
-        }
-        else if (varCategory == 2)
-        {
-            numVars = attributes->size();
-            varCategoryName = "attribute";
-        }
-        else
-        {
-            numVars         = outputs->size();
-            varCategoryName = "output";
-        }
-
-        for (size_t i = 0; i < numVars; ++i)
-        {
-            const sh::ShaderVariable *var;
-            if (varCategory == 0)
-                var = &((*uniforms)[i]);
-            else if (varCategory == 1)
-                var = &((*varyings)[i]);
-            else if (varCategory == 2)
-                var = &((*attributes)[i]);
-            else
-                var = &((*outputs)[i]);
-
-            PrintVariable(varCategoryName, i, *var);
-        }
-        printf("\n");
-    }
 }
 
 static bool ReadShaderSource(const char *fileName, ShaderSource &source)

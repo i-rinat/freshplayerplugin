@@ -42,10 +42,6 @@ namespace sh
 typedef unsigned int GLenum;
 }
 
-// Must be included after GLenum proxy typedef
-// Note: make sure to increment ANGLE_SH_VERSION when changing ShaderVars.h
-#include "ShaderVars.h"
-
 // Version number for shader translation API.
 // It is incremented every time the API changes.
 #define ANGLE_SH_VERSION 139
@@ -210,71 +206,14 @@ COMPILER_EXPORT bool ShCompile(
 // Clears the results from the previous compilation.
 COMPILER_EXPORT void ShClearResults(const ShHandle handle);
 
-// Return the version of the shader language.
-COMPILER_EXPORT int ShGetShaderVersion(const ShHandle handle);
-
 // Return the currently set language output type.
 COMPILER_EXPORT ShShaderOutput ShGetShaderOutputType(
     const ShHandle handle);
-
-// Returns null-terminated information log for a compiled shader.
-// Parameters:
-// handle: Specifies the compiler
-COMPILER_EXPORT const std::string &ShGetInfoLog(const ShHandle handle);
 
 // Returns null-terminated object code for a compiled shader.
 // Parameters:
 // handle: Specifies the compiler
 COMPILER_EXPORT const std::string &ShGetObjectCode(const ShHandle handle);
 
-// Returns a (original_name, hash) map containing all the user defined
-// names in the shader, including variable names, function names, struct
-// names, and struct field names.
-// Parameters:
-// handle: Specifies the compiler
-COMPILER_EXPORT const std::map<std::string, std::string> *ShGetNameHashingMap(
-    const ShHandle handle);
-
-// Shader variable inspection.
-// Returns a pointer to a list of variables of the designated type.
-// (See ShaderVars.h for type definitions, included above)
-// Returns NULL on failure.
-// Parameters:
-// handle: Specifies the compiler
-COMPILER_EXPORT const std::vector<sh::Uniform> *ShGetUniforms(const ShHandle handle);
-COMPILER_EXPORT const std::vector<sh::Varying> *ShGetVaryings(const ShHandle handle);
-COMPILER_EXPORT const std::vector<sh::Attribute> *ShGetAttributes(const ShHandle handle);
-COMPILER_EXPORT const std::vector<sh::Attribute> *ShGetOutputVariables(const ShHandle handle);
-COMPILER_EXPORT const std::vector<sh::InterfaceBlock> *ShGetInterfaceBlocks(const ShHandle handle);
-
-typedef struct
-{
-    sh::GLenum type;
-    int size;
-} ShVariableInfo;
-
-
-// Gives the compiler-assigned register for an interface block.
-// The method writes the value to the output variable "indexOut".
-// Returns true if it found a valid interface block, false otherwise.
-// Parameters:
-// handle: Specifies the compiler
-// interfaceBlockName: Specifies the interface block
-// indexOut: output variable that stores the assigned register
-COMPILER_EXPORT bool ShGetInterfaceBlockRegister(const ShHandle handle,
-                                                 const std::string &interfaceBlockName,
-                                                 unsigned int *indexOut);
-
-// Gives the compiler-assigned register for uniforms in the default
-// interface block.
-// The method writes the value to the output variable "indexOut".
-// Returns true if it found a valid default uniform, false otherwise.
-// Parameters:
-// handle: Specifies the compiler
-// interfaceBlockName: Specifies the uniform
-// indexOut: output variable that stores the assigned register
-COMPILER_EXPORT bool ShGetUniformRegister(const ShHandle handle,
-                                          const std::string &uniformName,
-                                          unsigned int *indexOut);
 
 #endif // GLSLANG_SHADERLANG_H_

@@ -45,7 +45,6 @@ add_library(shader_translator STATIC
     src/compiler/translator/PruneEmptyDeclarations.cpp
     src/compiler/translator/RecordConstantPrecision.cpp
     src/compiler/translator/ShaderLang.cpp
-    src/compiler/translator/ShaderVars.cpp
     src/compiler/translator/SymbolTable.cpp
     src/compiler/translator/TranslatorGLSL.cpp
     src/compiler/translator/Types.cpp
