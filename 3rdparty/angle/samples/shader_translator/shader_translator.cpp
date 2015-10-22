@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     ShHandle vertexCompiler = 0;
     ShHandle fragmentCompiler = 0;
     ShShaderSpec spec = SH_GLES2_SPEC;
-    ShShaderOutput output = SH_ESSL_OUTPUT;
+    ShShaderOutput output = SH_GLSL_OUTPUT;
 
     ShInitialize();
 
@@ -88,40 +88,17 @@ int main(int argc, char *argv[])
         {
             switch (argv[0][1])
             {
-              case 'i': compileOptions |= SH_INTERMEDIATE_TREE; break;
               case 'o': compileOptions |= SH_OBJECT_CODE; break;
-              case 'u': compileOptions |= SH_VARIABLES; break;
-              case 'l': compileOptions |= SH_UNROLL_FOR_LOOP_WITH_INTEGER_INDEX; break;
-              case 'e': compileOptions |= SH_EMULATE_BUILT_IN_FUNCTIONS; break;
-              case 'd': compileOptions |= SH_DEPENDENCY_GRAPH; break;
-              case 't': compileOptions |= SH_TIMING_RESTRICTIONS; break;
-              case 'p': resources.WEBGL_debug_shader_precision = 1; break;
               case 's':
                 if (argv[0][2] == '=')
                 {
                     switch (argv[0][3])
                     {
                       case 'e':
-                        if (argv[0][4] == '3')
-                        {
-                            spec = SH_GLES3_SPEC;
-                        }
-                        else
                         {
                             spec = SH_GLES2_SPEC;
                         }
                         break;
-                      case 'w':
-                        if (argv[0][4] == '2')
-                        {
-                            spec = SH_WEBGL2_SPEC;
-                        }
-                        else
-                        {
-                            spec = SH_WEBGL_SPEC;
-                        }
-                        break;
-                      case 'c': spec = SH_CSS_SHADERS_SPEC; break;
                       default: failCode = EFailUsage;
                     }
                 }
@@ -135,23 +112,12 @@ int main(int argc, char *argv[])
                 {
                     switch (argv[0][3])
                     {
-                      case 'e': output = SH_ESSL_OUTPUT; break;
                       case 'g':
                           if (!ParseGLSLOutputVersion(&argv[0][sizeof("-b=g") - 1], &output))
                           {
                               failCode = EFailUsage;
                           }
                           break;
-                      case 'h':
-                        if (argv[0][4] == '1' && argv[0][5] == '1')
-                        {
-                            output = SH_HLSL11_OUTPUT;
-                        }
-                        else
-                        {
-                            output = SH_HLSL9_OUTPUT;
-                        }
-                        break;
                       default: failCode = EFailUsage;
                     }
                 }
@@ -247,13 +213,6 @@ int main(int argc, char *argv[])
                     std::string code = ShGetObjectCode(compiler);
                     puts(code.c_str());
                     LogMsg("END", "COMPILER", numCompiles, "OBJ CODE");
-                    printf("\n\n");
-                }
-                if (compiled && (compileOptions & SH_VARIABLES))
-                {
-                    LogMsg("BEGIN", "COMPILER", numCompiles, "VARIABLES");
-                    PrintActiveVariables(compiler);
-                    LogMsg("END", "COMPILER", numCompiles, "VARIABLES");
                     printf("\n\n");
                 }
                 if (!compiled)
@@ -521,41 +480,6 @@ static bool ParseGLSLOutputVersion(const std::string &num, ShShaderOutput *outRe
         return false;
     }
 
-    switch (value)
-    {
-        case 130:
-            *outResult = SH_GLSL_130_OUTPUT;
-            return true;
-        case 140:
-            *outResult = SH_GLSL_140_OUTPUT;
-            return true;
-        case 150:
-            *outResult = SH_GLSL_150_CORE_OUTPUT;
-            return true;
-        case 330:
-            *outResult = SH_GLSL_330_CORE_OUTPUT;
-            return true;
-        case 400:
-            *outResult = SH_GLSL_400_CORE_OUTPUT;
-            return true;
-        case 410:
-            *outResult = SH_GLSL_410_CORE_OUTPUT;
-            return true;
-        case 420:
-            *outResult = SH_GLSL_420_CORE_OUTPUT;
-            return true;
-        case 430:
-            *outResult = SH_GLSL_430_CORE_OUTPUT;
-            return true;
-        case 440:
-            *outResult = SH_GLSL_440_CORE_OUTPUT;
-            return true;
-        case 450:
-            *outResult = SH_GLSL_450_CORE_OUTPUT;
-            return true;
-        default:
-            break;
-    }
     return false;
 }
 

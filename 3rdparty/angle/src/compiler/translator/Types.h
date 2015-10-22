@@ -152,9 +152,7 @@ class TStructure : public TFieldListCollection
 
   private:
     // TODO(zmo): Find a way to get rid of the const_cast in function
-    // setName().  At the moment keep this function private so only
-    // friend class RegenerateStructNames may call it.
-    friend class RegenerateStructNames;
+    // setName().
     void setName(const TString &name)
     {
         TString *mutableName = const_cast<TString *>(mName);

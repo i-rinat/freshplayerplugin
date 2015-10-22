@@ -20,11 +20,6 @@ TranslatorGLSL::TranslatorGLSL(sh::GLenum type,
 
 void TranslatorGLSL::initBuiltInFunctionEmulator(BuiltInFunctionEmulator *emu, int compileOptions)
 {
-    if (compileOptions & SH_EMULATE_BUILT_IN_FUNCTIONS)
-    {
-        InitBuiltInFunctionEmulatorForGLSLWorkarounds(emu, getShaderType());
-    }
-
     int targetGLSLVersion = ShaderOutputTypeToGLSLVersion(getOutputType());
     InitBuiltInFunctionEmulatorForGLSLMissingFunctions(emu, getShaderType(), targetGLSLVersion);
 }
@@ -59,9 +54,6 @@ void TranslatorGLSL::translate(TIntermNode *root, int) {
         sink << "// END: Generated code for built-in function emulation\n\n";
     }
 
-    // Write array bounds clamping emulation if needed.
-    getArrayBoundsClamper().OutputClampingFunctionDefinition(sink);
-
     // Declare gl_FragColor and glFragData as webgl_FragColor and webgl_FragData
     // if it's core profile shaders and they are used.
     if (getShaderType() == GL_FRAGMENT_SHADER)
@@ -69,7 +61,7 @@ void TranslatorGLSL::translate(TIntermNode *root, int) {
         const bool mayHaveESSL1SecondaryOutputs =
             IsExtensionEnabled(getExtensionBehavior(), "GL_EXT_blend_func_extended") &&
             getShaderVersion() == 100;
-        const bool declareGLFragmentOutputs = IsGLSL130OrNewer(getOutputType());
+        const bool declareGLFragmentOutputs = false;
 
         bool hasGLFragColor          = false;
         bool hasGLFragData           = false;

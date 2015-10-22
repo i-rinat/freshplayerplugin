@@ -14,7 +14,6 @@
 #include <map>
 
 #include "compiler/translator/IntermNode.h"
-#include "compiler/translator/VariableInfo.h"
 
 
 // The translator needs to analyze the the graph of the function calls

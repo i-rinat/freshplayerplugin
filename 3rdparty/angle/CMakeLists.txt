@@ -22,28 +22,21 @@ add_library(shader_translator STATIC
     src/compiler/translator/CallDAG.cpp
     src/compiler/translator/CodeGen.cpp
     src/compiler/translator/Compiler.cpp
-    src/compiler/translator/depgraph/DependencyGraphBuilder.cpp
-    src/compiler/translator/depgraph/DependencyGraph.cpp
-    src/compiler/translator/depgraph/DependencyGraphOutput.cpp
-    src/compiler/translator/depgraph/DependencyGraphTraverse.cpp
     src/compiler/translator/Diagnostics.cpp
     src/compiler/translator/DirectiveHandler.cpp
     src/compiler/translator/EmulatePrecision.cpp
-    src/compiler/translator/ForLoopUnroll.cpp
     src/compiler/translator/glslang_lex.cpp
     src/compiler/translator/glslang_tab.cpp
     src/compiler/translator/InfoSink.cpp
     src/compiler/translator/Initialize.cpp
     src/compiler/translator/InitializeDll.cpp
     src/compiler/translator/InitializeParseContext.cpp
-    src/compiler/translator/InitializeVariables.cpp
     src/compiler/translator/Intermediate.cpp
-    src/compiler/translator/IntermNode.cpp
     src/compiler/translator/intermOut.cpp
+    src/compiler/translator/IntermNode.cpp
     src/compiler/translator/IntermTraverse.cpp
     src/compiler/translator/LoopInfo.cpp
     src/compiler/translator/Operator.cpp
-    src/compiler/translator/OutputESSL.cpp
     src/compiler/translator/OutputGLSLBase.cpp
     src/compiler/translator/OutputGLSL.cpp
     src/compiler/translator/parseConst.cpp
@@ -51,27 +44,16 @@ add_library(shader_translator STATIC
     src/compiler/translator/PoolAlloc.cpp
     src/compiler/translator/PruneEmptyDeclarations.cpp
     src/compiler/translator/RecordConstantPrecision.cpp
-    src/compiler/translator/RegenerateStructNames.cpp
-    src/compiler/translator/RemovePow.cpp
-    src/compiler/translator/ScalarizeVecAndMatConstructorArgs.cpp
     src/compiler/translator/ShaderLang.cpp
     src/compiler/translator/ShaderVars.cpp
     src/compiler/translator/SymbolTable.cpp
-    src/compiler/translator/timing/RestrictFragmentShaderTiming.cpp
-    src/compiler/translator/timing/RestrictVertexShaderTiming.cpp
-    src/compiler/translator/TranslatorESSL.cpp
     src/compiler/translator/TranslatorGLSL.cpp
     src/compiler/translator/Types.cpp
-    src/compiler/translator/UnfoldShortCircuitAST.cpp
     src/compiler/translator/util.cpp
     src/compiler/translator/ValidateGlobalInitializer.cpp
-    src/compiler/translator/ValidateLimitations.cpp
     src/compiler/translator/ValidateOutputs.cpp
     src/compiler/translator/ValidateSwitch.cpp
-    src/compiler/translator/VariableInfo.cpp
-    src/compiler/translator/VariablePacker.cpp
     src/compiler/translator/VersionGLSL.cpp
-    src/third_party/compiler/ArrayBoundsClamper.cpp
 )
 
 add_executable(st samples/shader_translator/shader_translator.cpp)

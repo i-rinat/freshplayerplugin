@@ -14,10 +14,6 @@
 #include "compiler/translator/Compiler.h"
 #include "compiler/translator/InitializeDll.h"
 #include "compiler/translator/length_limits.h"
-#ifdef ANGLE_ENABLE_HLSL
-#include "compiler/translator/TranslatorHLSL.h"
-#endif // ANGLE_ENABLE_HLSL
-#include "compiler/translator/VariablePacker.h"
 #include "angle_gl.h"
 
 namespace
@@ -93,16 +89,6 @@ TCompiler *GetCompilerFromHandle(ShHandle handle)
     TShHandleBase *base = static_cast<TShHandleBase *>(handle);
     return base->getAsCompiler();
 }
-
-#ifdef ANGLE_ENABLE_HLSL
-TranslatorHLSL *GetTranslatorHLSLFromHandle(ShHandle handle)
-{
-    if (!handle)
-        return NULL;
-    TShHandleBase *base = static_cast<TShHandleBase *>(handle);
-    return base->getAsTranslatorHLSL();
-}
-#endif // ANGLE_ENABLE_HLSL
 
 }  // namespace anonymous
 
@@ -322,61 +308,16 @@ const std::vector<sh::InterfaceBlock> *ShGetInterfaceBlocks(const ShHandle handl
     return GetShaderVariables<sh::InterfaceBlock>(handle, SHADERVAR_INTERFACEBLOCK);
 }
 
-bool ShCheckVariablesWithinPackingLimits(
-    int maxVectors, ShVariableInfo *varInfoArray, size_t varInfoArraySize)
-{
-    if (varInfoArraySize == 0)
-        return true;
-    ASSERT(varInfoArray);
-    std::vector<sh::ShaderVariable> variables;
-    for (size_t ii = 0; ii < varInfoArraySize; ++ii)
-    {
-        sh::ShaderVariable var(varInfoArray[ii].type, varInfoArray[ii].size);
-        variables.push_back(var);
-    }
-    VariablePacker packer;
-    return packer.CheckVariablesWithinPackingLimits(maxVectors, variables);
-}
-
 bool ShGetInterfaceBlockRegister(const ShHandle handle,
                                  const std::string &interfaceBlockName,
                                  unsigned int *indexOut)
 {
-#ifdef ANGLE_ENABLE_HLSL
-    ASSERT(indexOut);
-
-    TranslatorHLSL *translator = GetTranslatorHLSLFromHandle(handle);
-    ASSERT(translator);
-
-    if (!translator->hasInterfaceBlock(interfaceBlockName))
-    {
-        return false;
-    }
-
-    *indexOut = translator->getInterfaceBlockRegister(interfaceBlockName);
-    return true;
-#else
     return false;
-#endif // ANGLE_ENABLE_HLSL
 }
 
 bool ShGetUniformRegister(const ShHandle handle,
                           const std::string &uniformName,
                           unsigned int *indexOut)
 {
-#ifdef ANGLE_ENABLE_HLSL
-    ASSERT(indexOut);
-    TranslatorHLSL *translator = GetTranslatorHLSLFromHandle(handle);
-    ASSERT(translator);
-
-    if (!translator->hasUniform(uniformName))
-    {
-        return false;
-    }
-
-    *indexOut = translator->getUniformRegister(uniformName);
-    return true;
-#else
     return false;
-#endif // ANGLE_ENABLE_HLSL
 }

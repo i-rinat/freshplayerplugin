@@ -13,8 +13,6 @@ static void writeVectorPrecisionEmulationHelpers(
     TInfoSinkBase& sink, ShShaderOutput outputLanguage, unsigned int size)
 {
     std::stringstream vecTypeStrStr;
-    if (outputLanguage == SH_ESSL_OUTPUT)
-        vecTypeStrStr << "highp ";
     vecTypeStrStr << "vec" << size;
     std::string vecType = vecTypeStrStr.str();
 
@@ -41,8 +39,6 @@ static void writeMatrixPrecisionEmulationHelper(
     TInfoSinkBase& sink, ShShaderOutput outputLanguage, unsigned int size, const char *functionName)
 {
     std::stringstream matTypeStrStr;
-    if (outputLanguage == SH_ESSL_OUTPUT)
-        matTypeStrStr << "highp ";
     matTypeStrStr << "mat" << size;
     std::string matType = matTypeStrStr.str();
 
@@ -110,8 +106,6 @@ static void writeCommonPrecisionEmulationHelpers(TInfoSinkBase& sink, ShShaderOu
     //    normal positive number), this does not introduce any error.
 
     std::string floatType = "float";
-    if (outputLanguage == SH_ESSL_OUTPUT)
-        floatType = "highp float";
 
     sink <<
     floatType << " angle_frm(in " << floatType << " x) {\n"
@@ -147,15 +141,6 @@ static void writeCompoundAssignmentPrecisionEmulation(
 {
     std::string lTypeStr = lType;
     std::string rTypeStr = rType;
-    if (outputLanguage == SH_ESSL_OUTPUT)
-    {
-        std::stringstream lTypeStrStr;
-        lTypeStrStr << "highp " << lType;
-        lTypeStr = lTypeStrStr.str();
-        std::stringstream rTypeStrStr;
-        rTypeStrStr << "highp " << rType;
-        rTypeStr = rTypeStrStr.str();
-    }
 
     // Note that y should be passed through angle_frm at the function call site,
     // but x can't be passed through angle_frm there since it is an inout parameter.
@@ -489,9 +474,7 @@ bool EmulatePrecision::visitUnary(Visit visit, TIntermUnary *node)
 void EmulatePrecision::writeEmulationHelpers(TInfoSinkBase& sink, ShShaderOutput outputLanguage)
 {
     // Other languages not yet supported
-    ASSERT(outputLanguage == SH_GLSL_COMPATIBILITY_OUTPUT ||
-           IsGLSL130OrNewer(outputLanguage) ||
-           outputLanguage == SH_ESSL_OUTPUT);
+    ASSERT(outputLanguage == SH_GLSL_COMPATIBILITY_OUTPUT);
     writeCommonPrecisionEmulationHelpers(sink, outputLanguage);
 
     EmulationSet::const_iterator it;

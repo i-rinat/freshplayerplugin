@@ -461,7 +461,6 @@ void InsertBuiltInFunctions(sh::GLenum type, ShShaderSpec spec, const ShBuiltInR
 
     symbolTable.insertConstInt(ESSL1_BUILTINS, "gl_MaxVaryingVectors", resources.MaxVaryingVectors);
 
-    if (spec != SH_CSS_SHADERS_SPEC)
     {
         symbolTable.insertConstInt(COMMON_BUILTINS, "gl_MaxDrawBuffers", resources.MaxDrawBuffers);
         if (resources.EXT_blend_func_extended)
@@ -496,11 +495,6 @@ void IdentifyBuiltIns(sh::GLenum type, ShShaderSpec spec,
         symbolTable.insert(COMMON_BUILTINS, new TVariable(NewPoolTString("gl_PointCoord"),
             TType(EbtFloat, EbpMedium, EvqPointCoord, 2)));
 
-        //
-        // In CSS Shaders, gl_FragColor, gl_FragData, and gl_MaxDrawBuffers are not available.
-        // Instead, css_MixColor and css_ColorMatrix are available.
-        //
-        if (spec != SH_CSS_SHADERS_SPEC)
         {
             symbolTable.insert(ESSL1_BUILTINS, new TVariable(NewPoolTString("gl_FragColor"),
                 TType(EbtFloat, EbpMedium, EvqFragColor, 4)));
@@ -552,13 +546,6 @@ void IdentifyBuiltIns(sh::GLenum type, ShShaderSpec spec,
                     new TVariable(NewPoolTString("gl_LastFragColorARM"),
                     TType(EbtFloat, EbpMedium, EvqLastFragColor, 4)));
             }
-        }
-        else
-        {
-            symbolTable.insert(ESSL1_BUILTINS, new TVariable(NewPoolTString("css_MixColor"),
-                TType(EbtFloat, EbpMedium, EvqGlobal, 4)));
-            symbolTable.insert(ESSL1_BUILTINS, new TVariable(NewPoolTString("css_ColorMatrix"),
-                TType(EbtFloat, EbpMedium, EvqGlobal, 4, 4)));
         }
 
         break;

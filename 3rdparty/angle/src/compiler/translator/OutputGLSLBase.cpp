@@ -99,28 +99,7 @@ void TOutputGLSLBase::writeVariableType(const TType &type)
     TQualifier qualifier = type.getQualifier();
     if (qualifier != EvqTemporary && qualifier != EvqGlobal)
     {
-        if (IsGLSL130OrNewer(mOutput))
-        {
-            switch (qualifier)
-            {
-              case EvqAttribute:
-                out << "in ";
-                break;
-              case EvqVaryingIn:
-                out << "in ";
-                break;
-              case EvqVaryingOut:
-                out << "out ";
-                break;
-              default:
-                out << type.getQualifierString() << " ";
-                break;
-            }
-        }
-        else
-        {
-            out << type.getQualifierString() << " ";
-        }
+        out << type.getQualifierString() << " ";
     }
     // Declare the struct if we have not done so already.
     if (type.getBasicType() == EbtStruct && !structDeclared(type.getStruct()))

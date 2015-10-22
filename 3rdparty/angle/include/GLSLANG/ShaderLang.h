@@ -52,153 +52,17 @@ typedef unsigned int GLenum;
 
 typedef enum {
   SH_GLES2_SPEC = 0x8B40,
-  SH_WEBGL_SPEC = 0x8B41,
-
-  SH_GLES3_SPEC = 0x8B86,
-  SH_WEBGL2_SPEC = 0x8B87,
-
-  // The CSS Shaders spec is a subset of the WebGL spec.
-  //
-  // In both CSS vertex and fragment shaders, ANGLE:
-  // (1) Reserves the "css_" prefix.
-  // (2) Renames the main function to css_main.
-  // (3) Disables the gl_MaxDrawBuffers built-in.
-  //
-  // In CSS fragment shaders, ANGLE:
-  // (1) Disables the gl_FragColor built-in.
-  // (2) Disables the gl_FragData built-in.
-  // (3) Enables the css_MixColor built-in.
-  // (4) Enables the css_ColorMatrix built-in.
-  //
-  // After passing a CSS shader through ANGLE, the browser is expected to append
-  // a new main function to it.
-  // This new main function will call the css_main function.
-  // It may also perform additional operations like varying assignment, texture
-  // access, and gl_FragColor assignment in order to implement the CSS Shaders
-  // blend modes.
-  //
-  SH_CSS_SHADERS_SPEC = 0x8B42
 } ShShaderSpec;
 
 typedef enum {
-  SH_ESSL_OUTPUT               = 0x8B45,
   // SH_GLSL_OUTPUT is deprecated. This is to not break the build.
   SH_GLSL_OUTPUT               = 0x8B46,
   SH_GLSL_COMPATIBILITY_OUTPUT = 0x8B46,
-  // SH_GLSL_CORE_OUTPUT is deprecated.
-  SH_GLSL_CORE_OUTPUT          = 0x8B47,
-  //Note: GL introduced core profiles in 1.5. However, for compatiblity with Chromium, we treat SH_GLSL_CORE_OUTPUT as GLSL_130_OUTPUT.
-  //TODO: Remove SH_GLSL_CORE_OUTPUT
-  SH_GLSL_130_OUTPUT           = 0x8B47,
-  SH_GLSL_140_OUTPUT           = 0x8B80,
-  SH_GLSL_150_CORE_OUTPUT      = 0x8B81,
-  SH_GLSL_330_CORE_OUTPUT      = 0x8B82,
-  SH_GLSL_400_CORE_OUTPUT      = 0x8B83,
-  SH_GLSL_410_CORE_OUTPUT      = 0x8B84,
-  SH_GLSL_420_CORE_OUTPUT      = 0x8B85,
-  SH_GLSL_430_CORE_OUTPUT      = 0x8B86,
-  SH_GLSL_440_CORE_OUTPUT      = 0x8B87,
-  SH_GLSL_450_CORE_OUTPUT      = 0x8B88,
-
-  // HLSL output only supported in some configurations.
-  SH_HLSL_OUTPUT   = 0x8B48,
-  SH_HLSL9_OUTPUT  = 0x8B48,
-  SH_HLSL11_OUTPUT = 0x8B49
 } ShShaderOutput;
 
 // Compile options.
 typedef enum {
-  SH_VALIDATE                = 0,
-  SH_VALIDATE_LOOP_INDEXING  = 0x0001,
-  SH_INTERMEDIATE_TREE       = 0x0002,
   SH_OBJECT_CODE             = 0x0004,
-  SH_VARIABLES               = 0x0008,
-  SH_LINE_DIRECTIVES         = 0x0010,
-  SH_SOURCE_PATH             = 0x0020,
-  SH_UNROLL_FOR_LOOP_WITH_INTEGER_INDEX = 0x0040,
-  // If a sampler array index happens to be a loop index,
-  //   1) if its type is integer, unroll the loop.
-  //   2) if its type is float, fail the shader compile.
-  // This is to work around a mac driver bug.
-  SH_UNROLL_FOR_LOOP_WITH_SAMPLER_ARRAY_INDEX = 0x0080,
-
-  // This is needed only as a workaround for certain OpenGL driver bugs.
-  SH_EMULATE_BUILT_IN_FUNCTIONS = 0x0100,
-
-  // This is an experimental flag to enforce restrictions that aim to prevent
-  // timing attacks.
-  // It generates compilation errors for shaders that could expose sensitive
-  // texture information via the timing channel.
-  // To use this flag, you must compile the shader under the WebGL spec
-  // (using the SH_WEBGL_SPEC flag).
-  SH_TIMING_RESTRICTIONS = 0x0200,
-
-  // This flag prints the dependency graph that is used to enforce timing
-  // restrictions on fragment shaders.
-  // This flag only has an effect if all of the following are true:
-  // - The shader spec is SH_WEBGL_SPEC.
-  // - The compile options contain the SH_TIMING_RESTRICTIONS flag.
-  // - The shader type is GL_FRAGMENT_SHADER.
-  SH_DEPENDENCY_GRAPH = 0x0400,
-
-  // Enforce the GLSL 1.017 Appendix A section 7 packing restrictions.
-  // This flag only enforces (and can only enforce) the packing
-  // restrictions for uniform variables in both vertex and fragment
-  // shaders. ShCheckVariablesWithinPackingLimits() lets embedders
-  // enforce the packing restrictions for varying variables during
-  // program link time.
-  SH_ENFORCE_PACKING_RESTRICTIONS = 0x0800,
-
-  // This flag ensures all indirect (expression-based) array indexing
-  // is clamped to the bounds of the array. This ensures, for example,
-  // that you cannot read off the end of a uniform, whether an array
-  // vec234, or mat234 type. The ShArrayIndexClampingStrategy enum,
-  // specified in the ShBuiltInResources when constructing the
-  // compiler, selects the strategy for the clamping implementation.
-  SH_CLAMP_INDIRECT_ARRAY_BOUNDS = 0x1000,
-
-  // This flag limits the complexity of an expression.
-  SH_LIMIT_EXPRESSION_COMPLEXITY = 0x2000,
-
-  // This flag limits the depth of the call stack.
-  SH_LIMIT_CALL_STACK_DEPTH = 0x4000,
-
-  // This flag initializes gl_Position to vec4(0,0,0,0) at the
-  // beginning of the vertex shader's main(), and has no effect in the
-  // fragment shader. It is intended as a workaround for drivers which
-  // incorrectly fail to link programs if gl_Position is not written.
-  SH_INIT_GL_POSITION = 0x8000,
-
-  // This flag replaces
-  //   "a && b" with "a ? b : false",
-  //   "a || b" with "a ? true : b".
-  // This is to work around a MacOSX driver bug that |b| is executed
-  // independent of |a|'s value.
-  SH_UNFOLD_SHORT_CIRCUIT = 0x10000,
-
-  // This flag initializes varyings without static use in vertex shader
-  // at the beginning of main(), and has no effects in the fragment shader.
-  // It is intended as a workaround for drivers which incorrectly optimize
-  // out such varyings and cause a link failure.
-  SH_INIT_VARYINGS_WITHOUT_STATIC_USE = 0x20000,
-
-  // This flag scalarizes vec/ivec/bvec/mat constructor args.
-  // It is intended as a workaround for Linux/Mac driver bugs.
-  SH_SCALARIZE_VEC_AND_MAT_CONSTRUCTOR_ARGS = 0x40000,
-
-  // This flag overwrites a struct name with a unique prefix.
-  // It is intended as a workaround for drivers that do not handle
-  // struct scopes correctly, including all Mac drivers and Linux AMD.
-  SH_REGENERATE_STRUCT_NAMES = 0x80000,
-
-  // This flag makes the compiler not prune unused function early in the
-  // compilation process. Pruning coupled with SH_LIMIT_CALL_STACK_DEPTH
-  // helps avoid bad shaders causing stack overflows.
-  SH_DONT_PRUNE_UNUSED_FUNCTIONS = 0x100000,
-
-  // This flag works around a bug in NVIDIA 331 series drivers related
-  // to pow(x, y) where y is a constant vector.
-  SH_REMOVE_POW_WITH_CONSTANT_EXPONENT = 0x200000,
 } ShCompileOptions;
 
 // Defines alternate strategies for implementing array index clamping.
@@ -326,11 +190,8 @@ COMPILER_EXPORT const std::string &ShGetBuiltInResourcesString(const ShHandle ha
 // not supported.
 // Parameters:
 // type: Specifies the type of shader - GL_FRAGMENT_SHADER or GL_VERTEX_SHADER.
-// spec: Specifies the language spec the compiler must conform to -
-//       SH_GLES2_SPEC or SH_WEBGL_SPEC.
-// output: Specifies the output code type - SH_ESSL_OUTPUT, SH_GLSL_OUTPUT,
-//         SH_HLSL9_OUTPUT or SH_HLSL11_OUTPUT. Note: HLSL output is only
-//         supported in some configurations.
+// spec: Specifies the language spec the compiler must conform to SH_GLES2_SPEC
+// output: Specifies the output code type - SH_GLSL_OUTPUT
 // resources: Specifies the built-in resources.
 COMPILER_EXPORT ShHandle ShConstructCompiler(
     sh::GLenum type,
@@ -350,18 +211,8 @@ COMPILER_EXPORT void ShDestruct(ShHandle handle);
 // compileOptions: A mask containing the following parameters:
 // SH_VALIDATE: Validates shader to ensure that it conforms to the spec
 //              specified during compiler construction.
-// SH_VALIDATE_LOOP_INDEXING: Validates loop and indexing in the shader to
-//                            ensure that they do not exceed the minimum
-//                            functionality mandated in GLSL 1.0 spec,
-//                            Appendix A, Section 4 and 5.
-//                            There is no need to specify this parameter when
-//                            compiling for WebGL - it is implied.
-// SH_INTERMEDIATE_TREE: Writes intermediate tree to info log.
-//                       Can be queried by calling ShGetInfoLog().
 // SH_OBJECT_CODE: Translates intermediate tree to glsl or hlsl shader.
 //                 Can be queried by calling ShGetObjectCode().
-// SH_VARIABLES: Extracts attributes, uniforms, and varyings.
-//               Can be queried by calling ShGetVariableInfo().
 //
 COMPILER_EXPORT bool ShCompile(
     const ShHandle handle,
@@ -415,18 +266,6 @@ typedef struct
     int size;
 } ShVariableInfo;
 
-// Returns true if the passed in variables pack in maxVectors following
-// the packing rules from the GLSL 1.017 spec, Appendix A, section 7.
-// Returns false otherwise. Also look at the SH_ENFORCE_PACKING_RESTRICTIONS
-// flag above.
-// Parameters:
-// maxVectors: the available rows of registers.
-// varInfoArray: an array of variable info (types and sizes).
-// varInfoArraySize: the size of the variable array.
-COMPILER_EXPORT bool ShCheckVariablesWithinPackingLimits(
-    int maxVectors,
-    ShVariableInfo *varInfoArray,
-    size_t varInfoArraySize);
 
 // Gives the compiler-assigned register for an interface block.
 // The method writes the value to the output variable "indexOut".

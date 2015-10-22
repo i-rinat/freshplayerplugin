@@ -437,24 +437,6 @@ bool TParseContext::reservedErrorCheck(const TSourceLoc &line, const TString &id
             error(line, reservedErrMsg, "gl_");
             return true;
         }
-        if (IsWebGLBasedSpec(mShaderSpec))
-        {
-            if (identifier.compare(0, 6, "webgl_") == 0)
-            {
-                error(line, reservedErrMsg, "webgl_");
-                return true;
-            }
-            if (identifier.compare(0, 7, "_webgl_") == 0)
-            {
-                error(line, reservedErrMsg, "_webgl_");
-                return true;
-            }
-            if (mShaderSpec == SH_CSS_SHADERS_SPEC && identifier.compare(0, 4, "css_") == 0)
-            {
-                error(line, reservedErrMsg, "css_");
-                return true;
-            }
-        }
         if (identifier.find("__") != TString::npos)
         {
             error(line,
@@ -2710,28 +2692,6 @@ const int kWebGLMaxStructNesting = 4;
 
 bool TParseContext::structNestingErrorCheck(const TSourceLoc &line, const TField &field)
 {
-    if (!IsWebGLBasedSpec(mShaderSpec))
-    {
-        return false;
-    }
-
-    if (field.type()->getBasicType() != EbtStruct)
-    {
-        return false;
-    }
-
-    // We're already inside a structure definition at this point, so add
-    // one to the field's struct nesting.
-    if (1 + field.type()->getDeepestStructNesting() > kWebGLMaxStructNesting)
-    {
-        std::stringstream reasonStream;
-        reasonStream << "Reference of struct type " << field.type()->getStruct()->name().c_str()
-                     << " exceeds maximum allowed nesting level of " << kWebGLMaxStructNesting;
-        std::string reason = reasonStream.str();
-        error(line, reason.c_str(), field.name().c_str(), "");
-        return true;
-    }
-
     return false;
 }
 

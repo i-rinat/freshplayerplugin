@@ -62,8 +62,6 @@ class TIntermediate
     TIntermTyped *addSwizzle(TVectorFields &, const TSourceLoc &);
     TIntermAggregate *postProcess(TIntermNode *root);
 
-    static void outputTree(TIntermNode *, TInfoSinkBase &);
-
     TIntermTyped *foldAggregateBuiltIn(TIntermAggregate *aggregate);
 
   private:
