@@ -42,6 +42,27 @@ class TInfoSink;
 class TInfoSinkBase;
 class TIntermRaw;
 
+class TSymbolTable;
+
+// Encapsulate an identifier string and track whether it is coming from the original shader code
+// (not internal) or from ANGLE (internal). Usually internal names shouldn't be decorated or hashed.
+class TName
+{
+  public:
+    POOL_ALLOCATOR_NEW_DELETE();
+    explicit TName(const TString &name) : mName(name), mIsInternal(false) {}
+    TName() : mName(), mIsInternal(false) {}
+
+    const TString &getString() const { return mName; }
+    void setString(const TString &string) { mName = string; }
+    bool isInternal() const { return mIsInternal; }
+    void setInternal(bool isInternal) { mIsInternal = isInternal; }
+
+  private:
+    TString mName;
+    bool mIsInternal;
+};
+
 //
 // Base class for the tree nodes
 //
@@ -99,7 +120,7 @@ class TIntermTyped : public TIntermNode
 {
   public:
     TIntermTyped(const TType &t) : mType(t)  { }
-    virtual TIntermTyped *getAsTyped() { return this; }
+    TIntermTyped *getAsTyped() override { return this; }
 
     virtual bool hasSideEffects() const = 0;
 
@@ -154,10 +175,10 @@ class TIntermLoop : public TIntermNode
           mBody(body),
           mUnrollFlag(false) { }
 
-    virtual TIntermLoop *getAsLoopNode() { return this; }
-    virtual void traverse(TIntermTraverser *);
-    virtual bool replaceChildNode(
-        TIntermNode *original, TIntermNode *replacement);
+    TIntermLoop *getAsLoopNode() override { return this; }
+    void traverse(TIntermTraverser *it) override;
+    bool replaceChildNode(
+        TIntermNode *original, TIntermNode *replacement) override;
 
     TLoopType getType() const { return mType; }
     TIntermNode *getInit() { return mInit; }
@@ -188,9 +209,9 @@ class TIntermBranch : public TIntermNode
         : mFlowOp(op),
           mExpression(e) { }
 
-    virtual void traverse(TIntermTraverser *);
-    virtual bool replaceChildNode(
-        TIntermNode *original, TIntermNode *replacement);
+    void traverse(TIntermTraverser *it) override;
+    bool replaceChildNode(
+        TIntermNode *original, TIntermNode *replacement) override;
 
     TOperator getFlowOp() { return mFlowOp; }
     TIntermTyped* getExpression() { return mExpression; }
@@ -210,31 +231,27 @@ class TIntermSymbol : public TIntermTyped
     // If sym comes from per process globalpoolallocator, then it causes increased memory usage
     // per compile it is essential to use "symbol = sym" to assign to symbol
     TIntermSymbol(int id, const TString &symbol, const TType &type)
-        : TIntermTyped(type),
-          mId(id),
-          mInternal(false)
+        : TIntermTyped(type), mId(id), mSymbol(symbol)
     {
-        mSymbol = symbol;
     }
 
-    virtual bool hasSideEffects() const { return false; }
+    bool hasSideEffects() const override { return false; }
 
     int getId() const { return mId; }
-    const TString &getSymbol() const { return mSymbol; }
+    const TString &getSymbol() const { return mSymbol.getString(); }
+    const TName &getName() const { return mSymbol; }
 
     void setId(int newId) { mId = newId; }
 
-    bool isInternal() const { return mInternal; }
-    void setInternal(bool isInternal) { mInternal = isInternal; }
+    void setInternal(bool internal) { mSymbol.setInternal(internal); }
 
-    virtual void traverse(TIntermTraverser *);
-    virtual TIntermSymbol *getAsSymbolNode() { return this; }
-    virtual bool replaceChildNode(TIntermNode *, TIntermNode *) { return false; }
+    void traverse(TIntermTraverser *it) override;
+    TIntermSymbol *getAsSymbolNode() override { return this; }
+    bool replaceChildNode(TIntermNode *, TIntermNode *) override { return false; }
 
   protected:
     int mId;
-    bool mInternal;
-    TString mSymbol;
+    TName mSymbol;
 };
 
 // A Raw node stores raw code, that the translator will insert verbatim
@@ -247,14 +264,14 @@ class TIntermRaw : public TIntermTyped
         : TIntermTyped(type),
           mRawText(rawText) { }
 
-    virtual bool hasSideEffects() const { return false; }
+    bool hasSideEffects() const override { return false; }
 
     TString getRawText() const { return mRawText; }
 
-    virtual void traverse(TIntermTraverser *);
+    void traverse(TIntermTraverser *it) override;
 
-    virtual TIntermRaw *getAsRawNode() { return this; }
-    virtual bool replaceChildNode(TIntermNode *, TIntermNode *) { return false; }
+    TIntermRaw *getAsRawNode() override { return this; }
+    bool replaceChildNode(TIntermNode *, TIntermNode *) override { return false; }
 
   protected:
     TString mRawText;
@@ -267,7 +284,7 @@ class TIntermConstantUnion : public TIntermTyped
         : TIntermTyped(type),
           mUnionArrayPointer(unionPointer) { }
 
-    virtual bool hasSideEffects() const { return false; }
+    bool hasSideEffects() const override { return false; }
 
     const TConstantUnion *getUnionArrayPointer() const { return mUnionArrayPointer; }
     TConstantUnion *getUnionArrayPointer() { return mUnionArrayPointer; }
@@ -295,11 +312,15 @@ class TIntermConstantUnion : public TIntermTyped
         mUnionArrayPointer = safeConstantUnion;
     }
 
-    virtual TIntermConstantUnion *getAsConstantUnion()  { return this; }
-    virtual void traverse(TIntermTraverser *);
-    virtual bool replaceChildNode(TIntermNode *, TIntermNode *) { return false; }
+    TIntermConstantUnion *getAsConstantUnion() override { return this; }
+    void traverse(TIntermTraverser *it) override;
+    bool replaceChildNode(TIntermNode *, TIntermNode *) override { return false; }
 
-    TIntermTyped *fold(TOperator op, TIntermConstantUnion *rightNode, TInfoSink &infoSink);
+    TConstantUnion *foldBinary(TOperator op, TIntermConstantUnion *rightNode, TInfoSink &infoSink);
+    TConstantUnion *foldUnaryWithDifferentReturnType(TOperator op, TInfoSink &infoSink);
+    TConstantUnion *foldUnaryWithSameReturnType(TOperator op, TInfoSink &infoSink);
+
+    static TConstantUnion *FoldAggregateBuiltIn(TIntermAggregate *aggregate, TInfoSink &infoSink);
 
   protected:
     TConstantUnion *mUnionArrayPointer;
@@ -319,9 +340,10 @@ class TIntermOperator : public TIntermTyped
     void setOp(TOperator op) { mOp = op; }
 
     bool isAssignment() const;
+    bool isMultiplication() const;
     bool isConstructor() const;
 
-    virtual bool hasSideEffects() const { return isAssignment(); }
+    bool hasSideEffects() const override { return isAssignment(); }
 
   protected:
     TIntermOperator(TOperator op)
@@ -344,12 +366,12 @@ class TIntermBinary : public TIntermOperator
         : TIntermOperator(op),
           mAddIndexClamp(false) {}
 
-    virtual TIntermBinary *getAsBinaryNode() { return this; }
-    virtual void traverse(TIntermTraverser *);
-    virtual bool replaceChildNode(
-        TIntermNode *original, TIntermNode *replacement);
+    TIntermBinary *getAsBinaryNode() override { return this; };
+    void traverse(TIntermTraverser *it) override;
+    bool replaceChildNode(
+        TIntermNode *original, TIntermNode *replacement) override;
 
-    virtual bool hasSideEffects() const
+    bool hasSideEffects() const override
     {
         return isAssignment() || mLeft->hasSideEffects() || mRight->hasSideEffects();
     }
@@ -359,6 +381,7 @@ class TIntermBinary : public TIntermOperator
     TIntermTyped *getLeft() const { return mLeft; }
     TIntermTyped *getRight() const { return mRight; }
     bool promote(TInfoSink &);
+    TIntermTyped *fold(TInfoSink &infoSink);
 
     void setAddIndexClamp() { mAddIndexClamp = true; }
     bool getAddIndexClamp() { return mAddIndexClamp; }
@@ -386,12 +409,12 @@ class TIntermUnary : public TIntermOperator
           mOperand(NULL),
           mUseEmulatedFunction(false) {}
 
-    virtual void traverse(TIntermTraverser *);
-    virtual TIntermUnary *getAsUnaryNode() { return this; }
-    virtual bool replaceChildNode(
-        TIntermNode *original, TIntermNode *replacement);
+    void traverse(TIntermTraverser *it) override;
+    TIntermUnary *getAsUnaryNode() override { return this; }
+    bool replaceChildNode(
+        TIntermNode *original, TIntermNode *replacement) override;
 
-    virtual bool hasSideEffects() const
+    bool hasSideEffects() const override
     {
         return isAssignment() || mOperand->hasSideEffects();
     }
@@ -399,6 +422,7 @@ class TIntermUnary : public TIntermOperator
     void setOperand(TIntermTyped *operand) { mOperand = operand; }
     TIntermTyped *getOperand() { return mOperand; }
     void promote(const TType *funcReturnType);
+    TIntermTyped *fold(TInfoSink &infoSink);
 
     void setUseEmulatedFunction() { mUseEmulatedFunction = true; }
     bool getUseEmulatedFunction() { return mUseEmulatedFunction; }
@@ -423,24 +447,35 @@ class TIntermAggregate : public TIntermOperator
     TIntermAggregate()
         : TIntermOperator(EOpNull),
           mUserDefined(false),
-          mUseEmulatedFunction(false) { }
+          mUseEmulatedFunction(false),
+          mGotPrecisionFromChildren(false)
+    {
+    }
     TIntermAggregate(TOperator op)
         : TIntermOperator(op),
-          mUseEmulatedFunction(false) { }
+          mUseEmulatedFunction(false),
+          mGotPrecisionFromChildren(false)
+    {
+    }
     ~TIntermAggregate() { }
 
-    virtual TIntermAggregate *getAsAggregate() { return this; }
-    virtual void traverse(TIntermTraverser *);
-    virtual bool replaceChildNode(
-        TIntermNode *original, TIntermNode *replacement);
+    TIntermAggregate *getAsAggregate() override { return this; }
+    void traverse(TIntermTraverser *it) override;
+    bool replaceChildNode(
+        TIntermNode *original, TIntermNode *replacement) override;
     bool replaceChildNodeWithMultiple(TIntermNode *original, TIntermSequence replacements);
+    bool insertChildNodes(TIntermSequence::size_type position, TIntermSequence insertions);
     // Conservatively assume function calls and other aggregate operators have side-effects
-    virtual bool hasSideEffects() const { return true; }
+    bool hasSideEffects() const override { return true; }
+    TIntermTyped *fold(TInfoSink &infoSink);
 
     TIntermSequence *getSequence() { return &mSequence; }
 
-    void setName(const TString &name) { mName = name; }
-    const TString &getName() const { return mName; }
+    void setNameObj(const TName &name) { mName = name; }
+    const TName &getNameObj() const { return mName; }
+
+    void setName(const TString &name) { mName.setString(name); }
+    const TString &getName() const { return mName.getString(); }
 
     void setUserDefined() { mUserDefined = true; }
     bool isUserDefined() const { return mUserDefined; }
@@ -459,11 +494,14 @@ class TIntermAggregate : public TIntermOperator
     void setPrecisionFromChildren();
     void setBuiltInFunctionPrecision();
 
+    // Returns true if changing parameter precision may affect the return value.
+    bool gotPrecisionFromChildren() const { return mGotPrecisionFromChildren; }
+
   protected:
     TIntermAggregate(const TIntermAggregate &); // disallow copy constructor
     TIntermAggregate &operator=(const TIntermAggregate &); // disallow assignment operator
     TIntermSequence mSequence;
-    TString mName;
+    TName mName;
     bool mUserDefined; // used for user defined function names
     int mFunctionId;
 
@@ -473,6 +511,8 @@ class TIntermAggregate : public TIntermOperator
     // If set to true, replace the built-in function call with an emulated one
     // to work around driver bugs.
     bool mUseEmulatedFunction;
+
+    bool mGotPrecisionFromChildren;
 };
 
 //
@@ -493,18 +533,18 @@ class TIntermSelection : public TIntermTyped
           mTrueBlock(trueB),
           mFalseBlock(falseB) {}
 
-    virtual void traverse(TIntermTraverser *);
-    virtual bool replaceChildNode(
-        TIntermNode *original, TIntermNode *replacement);
+    void traverse(TIntermTraverser *it) override;
+    bool replaceChildNode(
+        TIntermNode *original, TIntermNode *replacement) override;
 
     // Conservatively assume selections have side-effects
-    virtual bool hasSideEffects() const { return true; }
+    bool hasSideEffects() const override { return true; }
 
     bool usesTernaryOperator() const { return getBasicType() != EbtVoid; }
     TIntermNode *getCondition() const { return mCondition; }
     TIntermNode *getTrueBlock() const { return mTrueBlock; }
     TIntermNode *getFalseBlock() const { return mFalseBlock; }
-    TIntermSelection *getAsSelectionNode() { return this; }
+    TIntermSelection *getAsSelectionNode() override { return this; }
 
 protected:
     TIntermTyped *mCondition;
@@ -531,6 +571,7 @@ class TIntermSwitch : public TIntermNode
 
     TIntermSwitch *getAsSwitchNode() override { return this; }
 
+    TIntermTyped *getInit() { return mInit; }
     TIntermAggregate *getStatementList() { return mStatementList; }
     void setStatementList(TIntermAggregate *statementList) { mStatementList = statementList; }
 
@@ -572,9 +613,12 @@ enum Visit
 };
 
 //
-// For traversing the tree.  User should derive from this,
-// put their traversal specific data in it, and then pass
-// it to a Traverse method.
+// For traversing the tree.  User should derive from this class overriding the visit functions,
+// and then pass an object of the subclass to a traverse method of a node.
+//
+// The traverse*() functions may also be overridden do other bookkeeping on the tree to provide
+// contextual information to the visit functions, such as whether the node is the target of an
+// assignment.
 //
 // When using this, just fill in the methods for nodes you want visited.
 // Return false from a pre-visit to skip visiting that node's subtree.
@@ -583,31 +627,59 @@ class TIntermTraverser : angle::NonCopyable
 {
   public:
     POOL_ALLOCATOR_NEW_DELETE();
-    // TODO(zmo): remove default values.
-    TIntermTraverser(bool preVisit = true, bool inVisit = false, bool postVisit = false,
-                     bool rightToLeft = false)
+    TIntermTraverser(bool preVisit, bool inVisit, bool postVisit)
         : preVisit(preVisit),
           inVisit(inVisit),
           postVisit(postVisit),
-          rightToLeft(rightToLeft),
           mDepth(0),
-          mMaxDepth(0) {}
+          mMaxDepth(0),
+          mTemporaryIndex(nullptr)
+    {
+    }
     virtual ~TIntermTraverser() {}
 
-    virtual void visitSymbol(TIntermSymbol *) {}
-    virtual void visitRaw(TIntermRaw *) {}
-    virtual void visitConstantUnion(TIntermConstantUnion *) {}
-    virtual bool visitBinary(Visit, TIntermBinary *) { return true; }
-    virtual bool visitUnary(Visit, TIntermUnary *) { return true; }
-    virtual bool visitSelection(Visit, TIntermSelection *) { return true; }
-    virtual bool visitSwitch(Visit, TIntermSwitch *) { return true; }
-    virtual bool visitCase(Visit, TIntermCase *) { return true; }
-    virtual bool visitAggregate(Visit, TIntermAggregate *) { return true; }
-    virtual bool visitLoop(Visit, TIntermLoop *) { return true; }
-    virtual bool visitBranch(Visit, TIntermBranch *) { return true; }
+    virtual void visitSymbol(TIntermSymbol *node) {}
+    virtual void visitRaw(TIntermRaw *node) {}
+    virtual void visitConstantUnion(TIntermConstantUnion *node) {}
+    virtual bool visitBinary(Visit visit, TIntermBinary *node) { return true; }
+    virtual bool visitUnary(Visit visit, TIntermUnary *node) { return true; }
+    virtual bool visitSelection(Visit visit, TIntermSelection *node) { return true; }
+    virtual bool visitSwitch(Visit visit, TIntermSwitch *node) { return true; }
+    virtual bool visitCase(Visit visit, TIntermCase *node) { return true; }
+    virtual bool visitAggregate(Visit visit, TIntermAggregate *node) { return true; }
+    virtual bool visitLoop(Visit visit, TIntermLoop *node) { return true; }
+    virtual bool visitBranch(Visit visit, TIntermBranch *node) { return true; }
+
+    // The traverse functions contain logic for iterating over the children of the node
+    // and calling the visit functions in the appropriate places. They also track some
+    // context that may be used by the visit functions.
+    virtual void traverseSymbol(TIntermSymbol *node);
+    virtual void traverseRaw(TIntermRaw *node);
+    virtual void traverseConstantUnion(TIntermConstantUnion *node);
+    virtual void traverseBinary(TIntermBinary *node);
+    virtual void traverseUnary(TIntermUnary *node);
+    virtual void traverseSelection(TIntermSelection *node);
+    virtual void traverseSwitch(TIntermSwitch *node);
+    virtual void traverseCase(TIntermCase *node);
+    virtual void traverseAggregate(TIntermAggregate *node);
+    virtual void traverseLoop(TIntermLoop *node);
+    virtual void traverseBranch(TIntermBranch *node);
 
     int getMaxDepth() const { return mMaxDepth; }
 
+    // Return the original name if hash function pointer is NULL;
+    // otherwise return the hashed name.
+    static TString hash(const TString &name, ShHashFunction64 hashFunction);
+
+    // If traversers need to replace nodes, they can add the replacements in
+    // mReplacements/mMultiReplacements during traversal and the user of the traverser should call
+    // this function after traversal to perform them.
+    void updateTree();
+
+    // Start creating temporary symbols from the given temporary symbol index + 1.
+    void useTemporaryIndex(unsigned int *temporaryIndex);
+
+  protected:
     void incrementDepth(TIntermNode *current)
     {
         mDepth++;
@@ -626,21 +698,19 @@ class TIntermTraverser : angle::NonCopyable
         return mPath.size() == 0 ? NULL : mPath.back();
     }
 
-    // Return the original name if hash function pointer is NULL;
-    // otherwise return the hashed name.
-    static TString hash(const TString& name, ShHashFunction64 hashFunction);
+    void pushParentBlock(TIntermAggregate *node);
+    void incrementParentBlockPos();
+    void popParentBlock();
+
+    bool parentNodeIsBlock()
+    {
+        return !mParentBlockStack.empty() && getParentNode() == mParentBlockStack.back().node;
+    }
 
     const bool preVisit;
     const bool inVisit;
     const bool postVisit;
-    const bool rightToLeft;
 
-    // If traversers need to replace nodes, they can add the replacements in
-    // mReplacements/mMultiReplacements during traversal and the user of the traverser should call
-    // this function after traversal to perform them.
-    void updateTree();
-
-  protected:
     int mDepth;
     int mMaxDepth;
 
@@ -680,11 +750,134 @@ class TIntermTraverser : angle::NonCopyable
         TIntermSequence replacements;
     };
 
+    // To insert multiple nodes on the parent aggregate node
+    struct NodeInsertMultipleEntry
+    {
+        NodeInsertMultipleEntry(TIntermAggregate *_parent, TIntermSequence::size_type _position, TIntermSequence _insertions)
+            : parent(_parent),
+            position(_position),
+            insertions(_insertions)
+        {
+        }
+
+        TIntermAggregate *parent;
+        TIntermSequence::size_type position;
+        TIntermSequence insertions;
+    };
+
     // During traversing, save all the changes that need to happen into
     // mReplacements/mMultiReplacements, then do them by calling updateTree().
     // Multi replacements are processed after single replacements.
     std::vector<NodeUpdateEntry> mReplacements;
     std::vector<NodeReplaceWithMultipleEntry> mMultiReplacements;
+    std::vector<NodeInsertMultipleEntry> mInsertions;
+
+    // Helper to insert statements in the parent block (sequence) of the node currently being traversed.
+    // The statements will be inserted before the node being traversed once updateTree is called.
+    // Should only be called during PreVisit or PostVisit from sequence nodes.
+    // Note that inserting more than one set of nodes to the same parent node on a single updateTree call is not
+    // supported.
+    void insertStatementsInParentBlock(const TIntermSequence &insertions);
+
+    // Helper to create a temporary symbol node with the given qualifier.
+    TIntermSymbol *createTempSymbol(const TType &type, TQualifier qualifier);
+    // Helper to create a temporary symbol node.
+    TIntermSymbol *createTempSymbol(const TType &type);
+    // Create a node that declares but doesn't initialize a temporary symbol.
+    TIntermAggregate *createTempDeclaration(const TType &type);
+    // Create a node that initializes the current temporary symbol with initializer having the given qualifier.
+    TIntermAggregate *createTempInitDeclaration(TIntermTyped *initializer, TQualifier qualifier);
+    // Create a node that initializes the current temporary symbol with initializer.
+    TIntermAggregate *createTempInitDeclaration(TIntermTyped *initializer);
+    // Create a node that assigns rightNode to the current temporary symbol.
+    TIntermBinary *createTempAssignment(TIntermTyped *rightNode);
+    // Increment temporary symbol index.
+    void nextTemporaryIndex();
+
+  private:
+    struct ParentBlock
+    {
+        ParentBlock(TIntermAggregate *nodeIn, TIntermSequence::size_type posIn)
+            : node(nodeIn),
+              pos(posIn)
+        {
+        }
+
+        TIntermAggregate *node;
+        TIntermSequence::size_type pos;
+    };
+    // All the code blocks from the root to the current node's parent during traversal.
+    std::vector<ParentBlock> mParentBlockStack;
+
+    unsigned int *mTemporaryIndex;
+};
+
+// Traverser parent class that tracks where a node is a destination of a write operation and so is
+// required to be an l-value.
+class TLValueTrackingTraverser : public TIntermTraverser
+{
+  public:
+    TLValueTrackingTraverser(bool preVisit,
+                             bool inVisit,
+                             bool postVisit,
+                             const TSymbolTable &symbolTable,
+                             int shaderVersion)
+        : TIntermTraverser(preVisit, inVisit, postVisit),
+          mOperatorRequiresLValue(false),
+          mInFunctionCallOutParameter(false),
+          mSymbolTable(symbolTable),
+          mShaderVersion(shaderVersion)
+    {
+    }
+    virtual ~TLValueTrackingTraverser() {}
+
+    void traverseBinary(TIntermBinary *node) override;
+    void traverseUnary(TIntermUnary *node) override;
+    void traverseAggregate(TIntermAggregate *node) override;
+
+  protected:
+    bool isLValueRequiredHere() const
+    {
+        return mOperatorRequiresLValue || mInFunctionCallOutParameter;
+    }
+
+    // Return true if the prototype or definition of the function being called has been encountered
+    // during traversal.
+    bool isInFunctionMap(const TIntermAggregate *callNode) const;
+
+  private:
+    // Track whether an l-value is required in the node that is currently being traversed by the
+    // surrounding operator.
+    // Use isLValueRequiredHere to check all conditions which require an l-value.
+    void setOperatorRequiresLValue(bool lValueRequired)
+    {
+        mOperatorRequiresLValue = lValueRequired;
+    }
+    bool operatorRequiresLValue() const { return mOperatorRequiresLValue; }
+
+    // Add a function encountered during traversal to the function map.
+    void addToFunctionMap(const TString &name, TIntermSequence *paramSequence);
+
+    // Return the parameters sequence from the function definition or prototype.
+    TIntermSequence *getFunctionParameters(const TIntermAggregate *callNode);
+
+    // Track whether an l-value is required inside a function call.
+    void setInFunctionCallOutParameter(bool inOutParameter);
+    bool isInFunctionCallOutParameter() const;
+
+    bool mOperatorRequiresLValue;
+    bool mInFunctionCallOutParameter;
+
+    struct TStringComparator
+    {
+        bool operator()(const TString &a, const TString &b) const { return a.compare(b) < 0; }
+    };
+
+    // Map from mangled function names to their parameter sequences
+    TMap<TString, TIntermSequence *, TStringComparator> mFunctionMap;
+
+    const TSymbolTable &mSymbolTable;
+    const int mShaderVersion;
 };
 
 //
@@ -696,15 +889,15 @@ class TMaxDepthTraverser : public TIntermTraverser
   public:
     POOL_ALLOCATOR_NEW_DELETE();
     TMaxDepthTraverser(int depthLimit)
-        : TIntermTraverser(true, true, false, false),
+        : TIntermTraverser(true, true, false),
           mDepthLimit(depthLimit) { }
 
-    virtual bool visitBinary(Visit, TIntermBinary *) { return depthCheck(); }
-    virtual bool visitUnary(Visit, TIntermUnary *) { return depthCheck(); }
-    virtual bool visitSelection(Visit, TIntermSelection *) { return depthCheck(); }
-    virtual bool visitAggregate(Visit, TIntermAggregate *) { return depthCheck(); }
-    virtual bool visitLoop(Visit, TIntermLoop *) { return depthCheck(); }
-    virtual bool visitBranch(Visit, TIntermBranch *) { return depthCheck(); }
+    bool visitBinary(Visit, TIntermBinary *) override { return depthCheck(); }
+    bool visitUnary(Visit, TIntermUnary *) override { return depthCheck(); }
+    bool visitSelection(Visit, TIntermSelection *) override { return depthCheck(); }
+    bool visitAggregate(Visit, TIntermAggregate *) override { return depthCheck(); }
+    bool visitLoop(Visit, TIntermLoop *) override { return depthCheck(); }
+    bool visitBranch(Visit, TIntermBranch *) override { return depthCheck(); }
 
   protected:
     bool depthCheck() const { return mMaxDepth < mDepthLimit; }

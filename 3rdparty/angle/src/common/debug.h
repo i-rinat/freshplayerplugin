@@ -47,9 +47,9 @@ class DebugAnnotator : angle::NonCopyable
   public:
     DebugAnnotator() { };
     virtual ~DebugAnnotator() { };
-    virtual void beginEvent(const std::wstring &eventName) = 0;
+    virtual void beginEvent(const wchar_t *eventName) = 0;
     virtual void endEvent() = 0;
-    virtual void setMarker(const std::wstring &markerName) = 0;
+    virtual void setMarker(const wchar_t *markerName) = 0;
     virtual bool getStatus() = 0;
 };
 
@@ -62,6 +62,8 @@ bool DebugAnnotationsActive();
 #if defined(ANGLE_ENABLE_DEBUG_TRACE) || defined(ANGLE_ENABLE_DEBUG_ANNOTATIONS)
 #define ANGLE_TRACE_ENABLED
 #endif
+
+#define ANGLE_EMPTY_STATEMENT for (;;) break
 
 // A macro to output a trace of a function call and its arguments to the debugging log
 #if defined(ANGLE_TRACE_ENABLED)
@@ -101,11 +103,11 @@ bool DebugAnnotationsActive();
 
 // A macro asserting a condition and outputting failures to the debug log
 #if !defined(NDEBUG)
-#define ASSERT(expression) do { \
+#define ASSERT(expression) { \
     if(!(expression)) \
         ERR("\t! Assert failed in %s(%d): "#expression"\n", __FUNCTION__, __LINE__); \
         assert(expression); \
-    } while(0)
+    } ANGLE_EMPTY_STATEMENT
 #define UNUSED_ASSERTION_VARIABLE(variable)
 #else
 #define ASSERT(expression) (void(0))
@@ -131,20 +133,20 @@ bool DebugAnnotationsActive();
 #endif
 
 #if !defined(NDEBUG)
-#define UNIMPLEMENTED() do { \
+#define UNIMPLEMENTED() { \
     FIXME("\t! Unimplemented: %s(%d)\n", __FUNCTION__, __LINE__); \
     assert(NOASSERT_UNIMPLEMENTED); \
-    } while(0)
+    } ANGLE_EMPTY_STATEMENT
 #else
     #define UNIMPLEMENTED() FIXME("\t! Unimplemented: %s(%d)\n", __FUNCTION__, __LINE__)
 #endif
 
 // A macro for code which is not expected to be reached under valid assumptions
 #if !defined(NDEBUG)
-#define UNREACHABLE() do { \
+#define UNREACHABLE() { \
     ERR("\t! Unreachable reached: %s(%d)\n", __FUNCTION__, __LINE__); \
     assert(false); \
-    } while(0)
+    } ANGLE_EMPTY_STATEMENT
 #else
     #define UNREACHABLE() ERR("\t! Unreachable reached: %s(%d)\n", __FUNCTION__, __LINE__)
 #endif

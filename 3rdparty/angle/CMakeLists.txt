@@ -2,11 +2,7 @@ include_directories(include)
 include_directories(src)
 
 add_library(shader_translator STATIC
-    src/common/angleutils.cpp
-    src/common/debug.cpp
-    src/common/event_tracer.cpp
-    src/common/mathutil.cpp
-    src/common/MemoryBuffer.cpp
+    src/common/Float16ToFloat32.cpp
     src/common/tls.cpp
     src/common/utilities.cpp
     src/compiler/preprocessor/DiagnosticsBase.cpp
@@ -20,20 +16,19 @@ add_library(shader_translator STATIC
     src/compiler/preprocessor/Preprocessor.cpp
     src/compiler/preprocessor/Token.cpp
     src/compiler/preprocessor/Tokenizer.cpp
-    src/compiler/translator/ArrayReturnValueToOutParameter.cpp
-    src/compiler/translator/ASTMetadataHLSL.cpp
-    src/compiler/translator/blocklayout.cpp
-    src/compiler/translator/blocklayoutHLSL.cpp
     src/compiler/translator/BuiltInFunctionEmulator.cpp
     src/compiler/translator/BuiltInFunctionEmulatorGLSL.cpp
-    src/compiler/translator/BuiltInFunctionEmulatorHLSL.cpp
+    src/compiler/translator/Cache.cpp
     src/compiler/translator/CallDAG.cpp
     src/compiler/translator/CodeGen.cpp
     src/compiler/translator/Compiler.cpp
+    src/compiler/translator/depgraph/DependencyGraphBuilder.cpp
+    src/compiler/translator/depgraph/DependencyGraph.cpp
+    src/compiler/translator/depgraph/DependencyGraphOutput.cpp
+    src/compiler/translator/depgraph/DependencyGraphTraverse.cpp
     src/compiler/translator/Diagnostics.cpp
     src/compiler/translator/DirectiveHandler.cpp
     src/compiler/translator/EmulatePrecision.cpp
-    src/compiler/translator/FlagStd140Structs.cpp
     src/compiler/translator/ForLoopUnroll.cpp
     src/compiler/translator/glslang_lex.cpp
     src/compiler/translator/glslang_tab.cpp
@@ -51,45 +46,31 @@ add_library(shader_translator STATIC
     src/compiler/translator/OutputESSL.cpp
     src/compiler/translator/OutputGLSLBase.cpp
     src/compiler/translator/OutputGLSL.cpp
-    src/compiler/translator/OutputHLSL.cpp
     src/compiler/translator/parseConst.cpp
     src/compiler/translator/ParseContext.cpp
     src/compiler/translator/PoolAlloc.cpp
     src/compiler/translator/PruneEmptyDeclarations.cpp
-    src/compiler/translator/QualifierAlive.cpp
+    src/compiler/translator/RecordConstantPrecision.cpp
     src/compiler/translator/RegenerateStructNames.cpp
-    src/compiler/translator/RemoveSwitchFallThrough.cpp
-    src/compiler/translator/RewriteElseBlocks.cpp
+    src/compiler/translator/RemovePow.cpp
     src/compiler/translator/ScalarizeVecAndMatConstructorArgs.cpp
-    src/compiler/translator/SearchSymbol.cpp
-    src/compiler/translator/SeparateArrayInitialization.cpp
-    src/compiler/translator/SeparateDeclarations.cpp
     src/compiler/translator/ShaderLang.cpp
     src/compiler/translator/ShaderVars.cpp
-    src/compiler/translator/SimplifyArrayAssignment.cpp
-    src/compiler/translator/StructureHLSL.cpp
     src/compiler/translator/SymbolTable.cpp
+    src/compiler/translator/timing/RestrictFragmentShaderTiming.cpp
+    src/compiler/translator/timing/RestrictVertexShaderTiming.cpp
     src/compiler/translator/TranslatorESSL.cpp
     src/compiler/translator/TranslatorGLSL.cpp
-    src/compiler/translator/TranslatorHLSL.cpp
     src/compiler/translator/Types.cpp
     src/compiler/translator/UnfoldShortCircuitAST.cpp
-    src/compiler/translator/UnfoldShortCircuit.cpp
-    src/compiler/translator/UniformHLSL.cpp
     src/compiler/translator/util.cpp
-    src/compiler/translator/UtilsHLSL.cpp
+    src/compiler/translator/ValidateGlobalInitializer.cpp
     src/compiler/translator/ValidateLimitations.cpp
     src/compiler/translator/ValidateOutputs.cpp
     src/compiler/translator/ValidateSwitch.cpp
     src/compiler/translator/VariableInfo.cpp
     src/compiler/translator/VariablePacker.cpp
     src/compiler/translator/VersionGLSL.cpp
-    src/compiler/translator/depgraph/DependencyGraphBuilder.cpp
-    src/compiler/translator/depgraph/DependencyGraph.cpp
-    src/compiler/translator/depgraph/DependencyGraphOutput.cpp
-    src/compiler/translator/depgraph/DependencyGraphTraverse.cpp
-    src/compiler/translator/timing/RestrictFragmentShaderTiming.cpp
-    src/compiler/translator/timing/RestrictVertexShaderTiming.cpp
     src/third_party/compiler/ArrayBoundsClamper.cpp
 )
 

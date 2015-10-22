@@ -31,6 +31,17 @@ class Platform
     // it is recommended that the fixed point be no further in the past than the epoch.
     virtual double monotonicallyIncreasingTime() { return 0; }
 
+    // Logging ------------------------------------------------------------
+
+    // Log an error message within the platform implementation.
+    virtual void logError(const char *errorMessage) {}
+
+    // Log a warning message within the platform implementation.
+    virtual void logWarning(const char *warningMessage) {}
+
+    // Log an info message within the platform implementation.
+    virtual void logInfo(const char *infoMessage) {}
+
     // Tracing --------
 
     // Get a pointer to the enabled state of the given trace category. The
@@ -114,6 +125,8 @@ class Platform
     virtual void histogramEnumeration(const char *name, int sample, int boundaryValue) { }
     // Unlike enumeration histograms, sparse histograms only allocate memory for non-empty buckets.
     virtual void histogramSparse(const char *name, int sample) { }
+    // Boolean histograms track two-state variables.
+    virtual void histogramBoolean(const char *name, bool sample) { }
 
   protected:
     virtual ~Platform() { }

@@ -39,6 +39,7 @@ class TIntermediate
     TIntermAggregate *growAggregate(
         TIntermNode *left, TIntermNode *right, const TSourceLoc &);
     TIntermAggregate *makeAggregate(TIntermNode *node, const TSourceLoc &);
+    TIntermAggregate *ensureSequence(TIntermNode *node);
     TIntermAggregate *setAggregateOperator(TIntermNode *, TOperator, const TSourceLoc &);
     TIntermNode *addSelection(TIntermTyped *cond, TIntermNodePair code, const TSourceLoc &);
     TIntermTyped *addSelection(TIntermTyped *cond, TIntermTyped *trueBlock, TIntermTyped *falseBlock,
@@ -59,9 +60,11 @@ class TIntermediate
     TIntermBranch *addBranch(TOperator, const TSourceLoc &);
     TIntermBranch *addBranch(TOperator, TIntermTyped *, const TSourceLoc &);
     TIntermTyped *addSwizzle(TVectorFields &, const TSourceLoc &);
-    bool postProcess(TIntermNode *);
+    TIntermAggregate *postProcess(TIntermNode *root);
 
     static void outputTree(TIntermNode *, TInfoSinkBase &);
+
+    TIntermTyped *foldAggregateBuiltIn(TIntermAggregate *aggregate);
 
   private:
     void operator=(TIntermediate &); // prevent assignments

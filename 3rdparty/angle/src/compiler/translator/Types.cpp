@@ -142,7 +142,8 @@ TString TType::buildMangledName() const
         mangledName += interfaceBlock->mangledName();
         break;
       default:
-        UNREACHABLE();
+        // EbtVoid, EbtAddress and non types
+        break;
     }
 
     if (isMatrix())
@@ -195,6 +196,17 @@ bool TStructure::containsArrays() const
     {
         const TType *fieldType = (*mFields)[i]->type();
         if (fieldType->isArray() || fieldType->isStructureContainingArrays())
+            return true;
+    }
+    return false;
+}
+
+bool TStructure::containsType(TBasicType type) const
+{
+    for (size_t i = 0; i < mFields->size(); ++i)
+    {
+        const TType *fieldType = (*mFields)[i]->type();
+        if (fieldType->getBasicType() == type || fieldType->isStructureContainingType(type))
             return true;
     }
     return false;

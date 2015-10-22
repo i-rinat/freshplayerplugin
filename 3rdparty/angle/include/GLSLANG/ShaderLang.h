@@ -48,7 +48,7 @@ typedef unsigned int GLenum;
 
 // Version number for shader translation API.
 // It is incremented every time the API changes.
-#define ANGLE_SH_VERSION 135
+#define ANGLE_SH_VERSION 139
 
 typedef enum {
   SH_GLES2_SPEC = 0x8B40,
@@ -90,8 +90,15 @@ typedef enum {
   //Note: GL introduced core profiles in 1.5. However, for compatiblity with Chromium, we treat SH_GLSL_CORE_OUTPUT as GLSL_130_OUTPUT.
   //TODO: Remove SH_GLSL_CORE_OUTPUT
   SH_GLSL_130_OUTPUT           = 0x8B47,
+  SH_GLSL_140_OUTPUT           = 0x8B80,
+  SH_GLSL_150_CORE_OUTPUT      = 0x8B81,
+  SH_GLSL_330_CORE_OUTPUT      = 0x8B82,
+  SH_GLSL_400_CORE_OUTPUT      = 0x8B83,
   SH_GLSL_410_CORE_OUTPUT      = 0x8B84,
   SH_GLSL_420_CORE_OUTPUT      = 0x8B85,
+  SH_GLSL_430_CORE_OUTPUT      = 0x8B86,
+  SH_GLSL_440_CORE_OUTPUT      = 0x8B87,
+  SH_GLSL_450_CORE_OUTPUT      = 0x8B88,
 
   // HLSL output only supported in some configurations.
   SH_HLSL_OUTPUT   = 0x8B48,
@@ -188,6 +195,10 @@ typedef enum {
   // compilation process. Pruning coupled with SH_LIMIT_CALL_STACK_DEPTH
   // helps avoid bad shaders causing stack overflows.
   SH_DONT_PRUNE_UNUSED_FUNCTIONS = 0x100000,
+
+  // This flag works around a bug in NVIDIA 331 series drivers related
+  // to pow(x, y) where y is a constant vector.
+  SH_REMOVE_POW_WITH_CONSTANT_EXPONENT = 0x200000,
 } ShCompileOptions;
 
 // Defines alternate strategies for implementing array index clamping.
@@ -236,6 +247,7 @@ typedef struct
     int OES_standard_derivatives;
     int OES_EGL_image_external;
     int ARB_texture_rectangle;
+    int EXT_blend_func_extended;
     int EXT_draw_buffers;
     int EXT_frag_depth;
     int EXT_shader_texture_lod;
@@ -259,6 +271,13 @@ typedef struct
     int MaxFragmentInputVectors;
     int MinProgramTexelOffset;
     int MaxProgramTexelOffset;
+
+    // Extension constants.
+
+    // Value of GL_MAX_DUAL_SOURCE_DRAW_BUFFERS_EXT for OpenGL ES output context.
+    // Value of GL_MAX_DUAL_SOURCE_DRAW_BUFFERS for OpenGL output context.
+    // GLES SL version 100 gl_MaxDualSourceDrawBuffersEXT value for EXT_blend_func_extended.
+    int MaxDualSourceDrawBuffers;
 
     // Name Hashing.
     // Set a 64 bit hash function to enable user-defined name hashing.
@@ -349,6 +368,9 @@ COMPILER_EXPORT bool ShCompile(
     const char * const shaderStrings[],
     size_t numStrings,
     int compileOptions);
+
+// Clears the results from the previous compilation.
+COMPILER_EXPORT void ShClearResults(const ShHandle handle);
 
 // Return the version of the shader language.
 COMPILER_EXPORT int ShGetShaderVersion(const ShHandle handle);

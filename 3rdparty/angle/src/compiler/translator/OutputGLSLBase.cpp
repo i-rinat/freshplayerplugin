@@ -783,7 +783,7 @@ bool TOutputGLSLBase::visitAggregate(Visit visit, TIntermAggregate *node)
                 out << arrayBrackets(type);
         }
 
-        out << " " << hashFunctionName(node->getName());
+        out << " " << hashFunctionNameIfNeeded(node->getNameObj());
 
         out << "(";
         writeFunctionParameters(*(node->getSequence()));
@@ -801,7 +801,7 @@ bool TOutputGLSLBase::visitAggregate(Visit visit, TIntermAggregate *node)
                 out << arrayBrackets(type);
         }
 
-        out << " " << hashFunctionName(node->getName());
+        out << " " << hashFunctionNameIfNeeded(node->getNameObj());
 
         incrementDepth(node);
         // Function definition node contains one or two children nodes
@@ -830,16 +830,7 @@ bool TOutputGLSLBase::visitAggregate(Visit visit, TIntermAggregate *node)
       case EOpFunctionCall:
         // Function call.
         if (visit == PreVisit)
-            out << hashFunctionName(node->getName()) << "(";
-        else if (visit == InVisit)
-            out << ", ";
-        else
-            out << ")";
-        break;
-      case EOpInternalFunctionCall:
-        // Function call to an internal helper function.
-        if (visit == PreVisit)
-            out << node->getName() << "(";
+            out << hashFunctionNameIfNeeded(node->getNameObj()) << "(";
         else if (visit == InVisit)
             out << ", ";
         else
@@ -921,11 +912,41 @@ bool TOutputGLSLBase::visitAggregate(Visit visit, TIntermAggregate *node)
       case EOpConstructIVec4:
         writeConstructorTriplet(visit, node->getType(), "ivec4");
         break;
+      case EOpConstructUInt:
+        writeConstructorTriplet(visit, node->getType(), "uint");
+        break;
+      case EOpConstructUVec2:
+        writeConstructorTriplet(visit, node->getType(), "uvec2");
+        break;
+      case EOpConstructUVec3:
+        writeConstructorTriplet(visit, node->getType(), "uvec3");
+        break;
+      case EOpConstructUVec4:
+        writeConstructorTriplet(visit, node->getType(), "uvec4");
+        break;
       case EOpConstructMat2:
         writeConstructorTriplet(visit, node->getType(), "mat2");
         break;
+      case EOpConstructMat2x3:
+        writeConstructorTriplet(visit, node->getType(), "mat2x3");
+        break;
+      case EOpConstructMat2x4:
+        writeConstructorTriplet(visit, node->getType(), "mat2x4");
+        break;
+      case EOpConstructMat3x2:
+        writeConstructorTriplet(visit, node->getType(), "mat3x2");
+        break;
       case EOpConstructMat3:
         writeConstructorTriplet(visit, node->getType(), "mat3");
+        break;
+      case EOpConstructMat3x4:
+        writeConstructorTriplet(visit, node->getType(), "mat3x4");
+        break;
+      case EOpConstructMat4x2:
+        writeConstructorTriplet(visit, node->getType(), "mat4x2");
+        break;
+      case EOpConstructMat4x3:
+        writeConstructorTriplet(visit, node->getType(), "mat4x3");
         break;
       case EOpConstructMat4:
         writeConstructorTriplet(visit, node->getType(), "mat4");
@@ -1167,6 +1188,9 @@ TString TOutputGLSLBase::getTypeName(const TType &type)
           case EbtBool:
             out << "bvec";
             break;
+          case EbtUInt:
+            out << "uvec";
+            break;
           default:
             UNREACHABLE();
         }
@@ -1201,12 +1225,16 @@ TString TOutputGLSLBase::hashVariableName(const TString &name)
     return hashName(name);
 }
 
-TString TOutputGLSLBase::hashFunctionName(const TString &mangled_name)
+TString TOutputGLSLBase::hashFunctionNameIfNeeded(const TName &mangledName)
 {
-    TString name = TFunction::unmangleName(mangled_name);
-    if (mSymbolTable.findBuiltIn(mangled_name, mShaderVersion) != NULL || name == "main")
+    TString mangledStr = mangledName.getString();
+    TString name = TFunction::unmangleName(mangledStr);
+    if (mSymbolTable.findBuiltIn(mangledStr, mShaderVersion) != nullptr || name == "main")
         return translateTextureFunction(name);
-    return hashName(name);
+    if (mangledName.isInternal())
+        return name;
+    else
+        return hashName(name);
 }
 
 bool TOutputGLSLBase::structDeclared(const TStructure *structure) const

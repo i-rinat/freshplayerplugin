@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 //
 
+#include "compiler/translator/Cache.h"
 #include "compiler/translator/Compiler.h"
 #include "compiler/translator/CallDAG.h"
 #include "compiler/translator/ForLoopUnroll.h"
@@ -13,6 +14,7 @@
 #include "compiler/translator/ParseContext.h"
 #include "compiler/translator/PruneEmptyDeclarations.h"
 #include "compiler/translator/RegenerateStructNames.h"
+#include "compiler/translator/RemovePow.h"
 #include "compiler/translator/RenameFunction.h"
 #include "compiler/translator/ScalarizeVecAndMatConstructorArgs.h"
 #include "compiler/translator/UnfoldShortCircuitAST.h"
@@ -37,8 +39,15 @@ bool IsWebGLBasedSpec(ShShaderSpec spec)
 bool IsGLSL130OrNewer(ShShaderOutput output)
 {
     return (output == SH_GLSL_130_OUTPUT ||
+            output == SH_GLSL_140_OUTPUT ||
+            output == SH_GLSL_150_CORE_OUTPUT ||
+            output == SH_GLSL_330_CORE_OUTPUT ||
+            output == SH_GLSL_400_CORE_OUTPUT ||
             output == SH_GLSL_410_CORE_OUTPUT ||
-            output == SH_GLSL_420_CORE_OUTPUT);
+            output == SH_GLSL_420_CORE_OUTPUT ||
+            output == SH_GLSL_430_CORE_OUTPUT ||
+            output == SH_GLSL_440_CORE_OUTPUT ||
+            output == SH_GLSL_450_CORE_OUTPUT);
 }
 
 size_t GetGlobalMaxTokenSize(ShShaderSpec spec)
@@ -202,7 +211,7 @@ TIntermNode *TCompiler::compileTreeImpl(const char* const shaderStrings[],
                                shaderType, shaderSpec, compileOptions, true,
                                infoSink, debugShaderPrecision);
 
-    parseContext.fragmentPrecisionHigh = fragmentPrecisionHigh;
+    parseContext.setFragmentPrecisionHigh(fragmentPrecisionHigh);
     SetGlobalParseContext(&parseContext);
 
     // We preserve symbols at the built-in level from compile-to-compile.
@@ -211,8 +220,8 @@ TIntermNode *TCompiler::compileTreeImpl(const char* const shaderStrings[],
 
     // Parse shader.
     bool success =
-        (PaParseStrings(numStrings - firstSource, &shaderStrings[firstSource], NULL, &parseContext) == 0) &&
-        (parseContext.treeRoot != NULL);
+        (PaParseStrings(numStrings - firstSource, &shaderStrings[firstSource], nullptr, &parseContext) == 0) &&
+        (parseContext.getTreeRoot() != nullptr);
 
     shaderVersion = parseContext.getShaderVersion();
     if (success && MapSpecToShaderVersion(shaderSpec) < shaderVersion)
@@ -222,7 +231,7 @@ TIntermNode *TCompiler::compileTreeImpl(const char* const shaderStrings[],
         success = false;
     }
 
-    TIntermNode *root = NULL;
+    TIntermNode *root = nullptr;
 
     if (success)
     {
@@ -232,8 +241,8 @@ TIntermNode *TCompiler::compileTreeImpl(const char* const shaderStrings[],
             symbolTable.setGlobalInvariant();
         }
 
-        root = parseContext.treeRoot;
-        success = intermediate.postProcess(root);
+        root = parseContext.getTreeRoot();
+        root = intermediate.postProcess(root);
 
         // Disallow expressions deemed too complex.
         if (success && (compileOptions & SH_LIMIT_EXPRESSION_COMPLEXITY))
@@ -310,6 +319,11 @@ TIntermNode *TCompiler::compileTreeImpl(const char* const shaderStrings[],
             UnfoldShortCircuitAST unfoldShortCircuit;
             root->traverse(&unfoldShortCircuit);
             unfoldShortCircuit.updateTree();
+        }
+
+        if (success && (compileOptions & SH_REMOVE_POW_WITH_CONSTANT_EXPONENT))
+        {
+            RemovePow(root);
         }
 
         if (success && (compileOptions & SH_VARIABLES))
@@ -447,6 +461,7 @@ void TCompiler::setResourceString()
               << ":FragmentPrecisionHigh:" << compileResources.FragmentPrecisionHigh
               << ":MaxExpressionComplexity:" << compileResources.MaxExpressionComplexity
               << ":MaxCallStackDepth:" << compileResources.MaxCallStackDepth
+              << ":EXT_blend_func_extended:" << compileResources.EXT_blend_func_extended
               << ":EXT_frag_depth:" << compileResources.EXT_frag_depth
               << ":EXT_shader_texture_lod:" << compileResources.EXT_shader_texture_lod
               << ":EXT_shader_framebuffer_fetch:" << compileResources.EXT_shader_framebuffer_fetch
@@ -456,6 +471,7 @@ void TCompiler::setResourceString()
               << ":MaxFragmentInputVectors:" << compileResources.MaxFragmentInputVectors
               << ":MinProgramTexelOffset:" << compileResources.MinProgramTexelOffset
               << ":MaxProgramTexelOffset:" << compileResources.MaxProgramTexelOffset
+              << ":MaxDualSourceDrawBuffers:" << compileResources.MaxDualSourceDrawBuffers
               << ":NV_draw_buffers:" << compileResources.NV_draw_buffers
               << ":WEBGL_debug_shader_precision:" << compileResources.WEBGL_debug_shader_precision;
 
@@ -528,7 +544,7 @@ bool TCompiler::checkCallDepth()
             infoSink.info << "Call stack too deep (larger than " << maxCallStackDepth
                           << ") with the following call chain: " << record.name;
 
-            int currentFunction = i;
+            int currentFunction = static_cast<int>(i);
             int currentDepth = depth;
 
             while (currentFunction != -1)
@@ -558,7 +574,7 @@ bool TCompiler::checkCallDepth()
 bool TCompiler::tagUsedFunctions()
 {
     // Search from main, starting from the end of the DAG as it usually is the root.
-    for (int i = mCallDag.size(); i-- > 0;)
+    for (size_t i = mCallDag.size(); i-- > 0;)
     {
         if (mCallDag.getRecordFromIndex(i).name == "main(")
         {
@@ -635,16 +651,20 @@ bool TCompiler::pruneUnusedFunctions(TIntermNode *root)
 
     UnusedPredicate isUnused(&mCallDag, &functionMetadata);
     TIntermSequence *sequence = rootNode->getSequence();
-    sequence->erase(std::remove_if(sequence->begin(), sequence->end(), isUnused), sequence->end());
+
+    if (!sequence->empty())
+    {
+        sequence->erase(std::remove_if(sequence->begin(), sequence->end(), isUnused), sequence->end());
+    }
 
     return true;
 }
 
 bool TCompiler::validateOutputs(TIntermNode* root)
 {
-    ValidateOutputs validateOutputs(infoSink.info, compileResources.MaxDrawBuffers);
+    ValidateOutputs validateOutputs(getExtensionBehavior(), compileResources.MaxDrawBuffers);
     root->traverse(&validateOutputs);
-    return (validateOutputs.numErrors() == 0);
+    return (validateOutputs.validateAndCountErrors(infoSink.info) == 0);
 }
 
 void TCompiler::rewriteCSSShader(TIntermNode* root)

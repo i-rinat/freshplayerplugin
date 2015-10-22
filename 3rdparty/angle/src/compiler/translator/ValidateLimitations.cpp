@@ -26,7 +26,11 @@ class ValidateConstIndexExpr : public TIntermTraverser
 {
   public:
     ValidateConstIndexExpr(TLoopStack& stack)
-        : mValid(true), mLoopStack(stack) {}
+        : TIntermTraverser(true, false, false),
+          mValid(true),
+          mLoopStack(stack)
+    {
+    }
 
     // Returns true if the parsed node represents a constant index expression.
     bool isValid() const { return mValid; }
@@ -51,7 +55,8 @@ class ValidateConstIndexExpr : public TIntermTraverser
 
 ValidateLimitations::ValidateLimitations(sh::GLenum shaderType,
                                          TInfoSinkBase &sink)
-    : mShaderType(shaderType),
+    : TIntermTraverser(true, false, false),
+      mShaderType(shaderType),
       mSink(sink),
       mNumErrors(0)
 {
@@ -389,13 +394,13 @@ bool ValidateLimitations::validateFunctionCall(TIntermAggregate *node)
 
     bool valid = true;
     TSymbolTable& symbolTable = GetGlobalParseContext()->symbolTable;
-    TSymbol* symbol = symbolTable.find(node->getName(), GetGlobalParseContext()->shaderVersion);
+    TSymbol* symbol = symbolTable.find(node->getName(), GetGlobalParseContext()->getShaderVersion());
     ASSERT(symbol && symbol->isFunction());
     TFunction *function = static_cast<TFunction *>(symbol);
     for (ParamIndex::const_iterator i = pIndex.begin();
          i != pIndex.end(); ++i)
     {
-        const TParameter &param = function->getParam(*i);
+        const TConstParameter &param = function->getParam(*i);
         TQualifier qual = param.type->getQualifier();
         if ((qual == EvqOut) || (qual == EvqInOut))
         {
