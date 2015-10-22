@@ -51,7 +51,6 @@ bool isSingleStatement(TIntermNode *node)
 }  // namespace
 
 TOutputGLSLBase::TOutputGLSLBase(TInfoSinkBase &objSink,
-                                 ShArrayIndexClampingStrategy clampingStrategy,
                                  ShHashFunction64 hashFunction,
                                  NameMap &nameMap,
                                  TSymbolTable &symbolTable,
@@ -60,7 +59,6 @@ TOutputGLSLBase::TOutputGLSLBase(TInfoSinkBase &objSink,
     : TIntermTraverser(true, true, true),
       mObjSink(objSink),
       mDeclaringVariables(false),
-      mClampingStrategy(clampingStrategy),
       mHashFunction(hashFunction),
       mNameMap(nameMap),
       mSymbolTable(symbolTable),
@@ -295,41 +293,7 @@ bool TOutputGLSLBase::visitBinary(Visit visit, TIntermBinary *node)
         writeTriplet(visit, NULL, "[", "]");
         break;
       case EOpIndexIndirect:
-        if (node->getAddIndexClamp())
-        {
-            if (visit == InVisit)
-            {
-                if (mClampingStrategy == SH_CLAMP_WITH_CLAMP_INTRINSIC)
-                    out << "[int(clamp(float(";
-                else
-                    out << "[webgl_int_clamp(";
-            }
-            else if (visit == PostVisit)
-            {
-                int maxSize;
-                TIntermTyped *left = node->getLeft();
-                TType leftType = left->getType();
-
-                if (left->isArray())
-                {
-                    // The shader will fail validation if the array length is not > 0.
-                    maxSize = leftType.getArraySize() - 1;
-                }
-                else
-                {
-                    maxSize = leftType.getNominalSize() - 1;
-                }
-
-                if (mClampingStrategy == SH_CLAMP_WITH_CLAMP_INTRINSIC)
-                    out << "), 0.0, float(" << maxSize << ")))]";
-                else
-                    out << ", 0, " << maxSize << ")]";
-            }
-        }
-        else
-        {
-            writeTriplet(visit, NULL, "[", "]");
-        }
+        writeTriplet(visit, NULL, "[", "]");
         break;
       case EOpIndexDirectStruct:
         if (visit == InVisit)

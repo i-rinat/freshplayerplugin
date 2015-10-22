@@ -124,7 +124,6 @@ void TranslatorGLSL::translate(TIntermNode *root, int) {
 
     // Write translated shader.
     TOutputGLSL outputGLSL(sink,
-                           getArrayIndexClampingStrategy(),
                            getHashFunction(),
                            getNameMap(),
                            getSymbolTable(),

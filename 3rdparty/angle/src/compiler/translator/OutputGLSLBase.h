@@ -17,7 +17,6 @@ class TOutputGLSLBase : public TIntermTraverser
 {
   public:
     TOutputGLSLBase(TInfoSinkBase &objSink,
-                    ShArrayIndexClampingStrategy clampingStrategy,
                     ShHashFunction64 hashFunction,
                     NameMap &nameMap,
                     TSymbolTable& symbolTable,
@@ -76,8 +75,6 @@ class TOutputGLSLBase : public TIntermTraverser
 
     // Stack of loops that need to be unrolled.
     TLoopStack mLoopUnrollStack;
-
-    ShArrayIndexClampingStrategy mClampingStrategy;
 
     // name hashing.
     ShHashFunction64 mHashFunction;

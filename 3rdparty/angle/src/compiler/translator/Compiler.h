@@ -102,7 +102,6 @@ class TCompiler : public TShHandleBase
     const TPragma& getPragma() const { return mPragma; }
     void writePragma();
 
-    ShArrayIndexClampingStrategy getArrayIndexClampingStrategy() const;
     const BuiltInFunctionEmulator& getBuiltInFunctionEmulator() const;
 
     std::vector<sh::Attribute> attributes;
@@ -155,7 +154,6 @@ class TCompiler : public TShHandleBase
     TExtensionBehavior extensionBehavior;
     bool fragmentPrecisionHigh;
 
-    ShArrayIndexClampingStrategy clampingStrategy;
     BuiltInFunctionEmulator builtInFunctionEmulator;
 
     // Results of compilation.

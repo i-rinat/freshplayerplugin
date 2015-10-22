@@ -65,15 +65,6 @@ typedef enum {
   SH_OBJECT_CODE             = 0x0004,
 } ShCompileOptions;
 
-// Defines alternate strategies for implementing array index clamping.
-typedef enum {
-  // Use the clamp intrinsic for array index clamping.
-  SH_CLAMP_WITH_CLAMP_INTRINSIC = 1,
-
-  // Use a user-defined function for array index clamping.
-  SH_CLAMP_WITH_USER_DEFINED_INT_CLAMP_FUNCTION
-} ShArrayIndexClampingStrategy;
-
 //
 // Driver must call this first, once, before doing any other
 // compiler operations.
@@ -147,10 +138,6 @@ typedef struct
     // Set a 64 bit hash function to enable user-defined name hashing.
     // Default is NULL.
     ShHashFunction64 HashFunction;
-
-    // Selects a strategy to use when implementing array index clamping.
-    // Default is SH_CLAMP_WITH_CLAMP_INTRINSIC.
-    ShArrayIndexClampingStrategy ArrayIndexClampingStrategy;
 
     // The maximum complexity an expression can be.
     int MaxExpressionComplexity;

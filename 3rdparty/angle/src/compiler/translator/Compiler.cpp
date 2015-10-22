@@ -86,7 +86,6 @@ TCompiler::TCompiler(sh::GLenum type, ShShaderSpec spec, ShShaderOutput output)
       maxExpressionComplexity(0),
       maxCallStackDepth(0),
       fragmentPrecisionHigh(false),
-      clampingStrategy(SH_CLAMP_WITH_CLAMP_INTRINSIC),
       builtInFunctionEmulator(),
       mSourcePath(NULL)
 {
@@ -112,8 +111,6 @@ bool TCompiler::Init(const ShBuiltInResources& resources)
         return false;
     InitExtensionBehavior(resources, extensionBehavior);
     fragmentPrecisionHigh = resources.FragmentPrecisionHigh == 1;
-
-    clampingStrategy = resources.ArrayIndexClampingStrategy;
 
     hashFunction = resources.HashFunction;
 
@@ -459,11 +456,6 @@ const char *TCompiler::getSourcePath() const
 const ShBuiltInResources& TCompiler::getResources() const
 {
     return compileResources;
-}
-
-ShArrayIndexClampingStrategy TCompiler::getArrayIndexClampingStrategy() const
-{
-    return clampingStrategy;
 }
 
 const BuiltInFunctionEmulator& TCompiler::getBuiltInFunctionEmulator() const
