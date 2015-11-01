@@ -172,6 +172,7 @@ struct pp_instance_s {
     uint32_t                        incognito_mode;
     volatile gint                   instance_loaded;
     uint32_t                        ignore_focus_events_cnt; ///< number of focus events to ignore
+    unsigned long                   last_button_release_timestamp;
     PP_Resource                     content_url_loader;
     uint32_t                        content_url_loader_used;
     volatile gint                   audio_source_count; ///< number of currently active audiosources

@@ -1303,13 +1303,21 @@ handle_button_press_release_event(NPP npp, void *event)
     if (event_class == PP_INPUTEVENT_CLASS_MOUSE) {
         PP_Resource         pp_event;
         PP_InputEvent_Type  event_type;
+        int                 click_count = 1;
 
         event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
                                                : PP_INPUTEVENT_TYPE_MOUSEUP;
+
+        if (ev->time - pp_i->last_button_release_timestamp < 400)
+            click_count = 2;
+
         pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,
                                                 ev->time/1.0e3, mod, mouse_button,
-                                                &mouse_position, 1, &zero_point);
+                                                &mouse_position, click_count, &zero_point);
         ppp_handle_input_event_helper(pp_i, pp_event);
+
+        if (ev->type == ButtonRelease)
+            pp_i->last_button_release_timestamp = ev->time;
 
         // context menu event
         if (ev->type == ButtonRelease && ev_button == 3) {
