@@ -1296,10 +1296,6 @@ handle_button_press_release_event(NPP npp, void *event)
         break;
     }
 
-    // TODO: Firefox does not pass wheel event to windowless plugins.
-    //       Only windowed plugins can receive such events.
-
-
     const uint32_t combined_mask = pp_i->event_mask | pp_i->filtered_event_mask;
     if (!(event_class & combined_mask))
         return 0;
