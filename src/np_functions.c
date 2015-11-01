@@ -1308,7 +1308,7 @@ handle_button_press_release_event(NPP npp, void *event)
         event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
                                                : PP_INPUTEVENT_TYPE_MOUSEUP;
 
-        if (ev->time - pp_i->last_button_release_timestamp < 400)
+        if (ev->time - pp_i->last_button_release_timestamp < config.double_click_delay_ms)
             click_count = 2;
 
         pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,

@@ -98,3 +98,6 @@ fs_delay_ms = 300
 
 # wait for vertical blank event before drawing on screen
 enable_vsync = 1
+
+# how close in time two clicks should be to treat them as a doubleclick
+double_click_delay_ms = 400
