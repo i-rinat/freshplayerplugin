@@ -1,0 +1,10 @@
+{
+    global:
+        NP_GetMIMEDescription;
+        NP_GetPluginVersion;
+        NP_GetValue;
+        NP_Initialize;
+        NP_Shutdown;
+    local:
+        *;
+};

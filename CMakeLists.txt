@@ -145,6 +145,8 @@ if (NOT WITH_GLES2)
     list(APPEND REQ_LIBRARIES shader_translator)
 endif()
 
+set(SYMBOLMAP "-Wl,-version-script=\"${CMAKE_SOURCE_DIR}/src/symbolmap\"")
+
 add_subdirectory(3rdparty)
 add_subdirectory(resources)
 add_subdirectory(src)
