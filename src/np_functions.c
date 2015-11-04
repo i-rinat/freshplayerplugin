@@ -419,9 +419,6 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     trace_info_f("[NPP] {full} %s pluginType=%s npp=%p, mode=%d, argc=%d, saved=%p\n", __func__,
                  pluginType, npp, mode, argc, saved);
 
-    struct pp_instance_s *pp_i;
-    struct PP_Var         instance_relative_url = PP_MakeUndefined();
-
     for (int k = 0; k < argc; k ++)
         trace_info_f("            argn[%d] = %s, argv[%d] = %s\n", k, argn[k], k, argv[k]);
 
@@ -436,6 +433,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
         trace_error("ppp_get_interface is NULL\n");
         return NPERR_MODULE_LOAD_FAILED_ERROR;
     }
+
+    struct pp_instance_s *pp_i;
 
     pp_i = calloc(sizeof(*pp_i), 1);
     npp->pdata = pp_i;
@@ -453,6 +452,8 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->argc = argc;
     pp_i->argn = malloc(argc * sizeof(char*));
     pp_i->argv = malloc(argc * sizeof(char*));
+
+    struct PP_Var instance_relative_url = PP_MakeUndefined();
     for (int k = 0; k < argc; k ++) {
         pp_i->argn[k] = strdup(argn[k] ? argn[k] : "");
         pp_i->argv[k] = strdup(argv[k] ? argv[k] : "");
