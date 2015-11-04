@@ -523,9 +523,16 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     pp_i->document_url = get_document_url(pp_i);
     pp_i->document_base_url = get_document_base_url(pp_i);
-    pp_i->instance_url = ppb_url_util_resolve_relative_to_url(pp_i->document_base_url,
-                                                              instance_relative_url, NULL);
-    ppb_var_release(instance_relative_url);
+
+    if (instance_relative_url.type == PP_VARTYPE_UNDEFINED) {
+        // there were no 'src' attribute, using document base url as an instance url
+        pp_i->instance_url = ppb_var_add_ref2(pp_i->document_base_url);
+    } else {
+        // resolve instance URL
+        pp_i->instance_url = ppb_url_util_resolve_relative_to_url(pp_i->document_base_url,
+                                                                  instance_relative_url, NULL);
+        ppb_var_release(instance_relative_url);
+    }
 
     // prepare GTK+ widget for catching keypress events returned by IME
     pp_i->catcher_widget = gtk_label_new("");
