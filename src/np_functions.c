@@ -52,6 +52,7 @@
 #include "ppb_url_request_info.h"
 #include "ppb_var.h"
 #include "ppb_core.h"
+#include "ppb_cursor_control.h"
 #include "ppb_message_loop.h"
 #include "ppb_flash_fullscreen.h"
 #include "ppb_url_util.h"
@@ -1188,6 +1189,13 @@ handle_enter_leave_event(NPP npp, void *event)
 {
     XCrossingEvent *ev = event;
     struct pp_instance_s *pp_i = npp->pdata;
+
+    if (ev->type == LeaveNotify) {
+        g_atomic_int_set(&pp_i->cursor_inside_instance, 1);
+        ppb_cursor_control_set_cursor(pp_i->id, PP_CURSORTYPE_POINTER, 0, NULL);
+    }
+
+    g_atomic_int_set(&pp_i->cursor_inside_instance, ev->type == EnterNotify);
 
     // ignore NotifyGrab and NotifyUngrab
     if (ev->mode != NotifyNormal)

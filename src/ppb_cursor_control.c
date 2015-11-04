@@ -121,6 +121,17 @@ PP_Bool
 ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
                               PP_Resource custom_image, const struct PP_Point *hot_spot)
 {
+    struct pp_instance_s *pp_i = tables_get_pp_instance(instance);
+    if (!pp_i) {
+        trace_error("%s, bad instance\n", __func__);
+        return PP_FALSE;
+    }
+
+    if (!g_atomic_int_get(&pp_i->cursor_inside_instance)) {
+        // avoid changing pointer shape
+        return PP_TRUE;
+    }
+
     int xtype = XC_arrow;
     int hide_cursor = 0;
     switch (type) {

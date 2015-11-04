@@ -180,6 +180,7 @@ struct pp_instance_s {
 
     Cursor                          prev_cursor;
     int                             have_prev_cursor;
+    volatile gint                   cursor_inside_instance;
 
     // full screen
     pthread_t           fs_thread;
