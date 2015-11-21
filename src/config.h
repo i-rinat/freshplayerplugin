@@ -53,6 +53,7 @@ struct fpp_config_s {
     int     fs_delay_ms;
     int     enable_vsync;
     int     double_click_delay_ms;
+    int     show_version_info;
     struct {
         int   connect_first_loader_to_unrequested_stream;
         int   dump_resource_histogram;

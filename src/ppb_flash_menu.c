@@ -33,6 +33,8 @@
 #include <ppapi/c/pp_errors.h>
 #include <gtk/gtk.h>
 #include "pp_interface.h"
+#include "version_info.h"
+#include "config.h"
 
 
 static int32_t                     *popup_menu_result = NULL;
@@ -127,6 +129,24 @@ convert_menu(const struct PP_Flash_Menu *pp_menu)
     return menu;
 }
 
+static
+void
+append_version_information(GtkWidget *menu)
+{
+    GtkWidget *mi;
+
+    mi = gtk_separator_menu_item_new();
+    gtk_widget_show(mi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), mi);
+
+    gchar *s = g_strdup_printf("freshwrapper, %s", g_version_info);
+    mi = gtk_menu_item_new_with_label(s);
+    g_free(s);
+    gtk_widget_set_sensitive(mi, FALSE);
+    gtk_widget_show(mi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), mi);
+}
+
 struct flash_menu_create_param_s {
     PP_Resource                 flash_menu;
     const struct PP_Flash_Menu *menu_data;
@@ -147,6 +167,8 @@ flash_menu_create_ptac(void *param)
 
     // recursively construct menu
     fm->menu = convert_menu(p->menu_data);
+    if (config.show_version_info)
+        append_version_information(fm->menu);
 
     // we need notification on menu close
     g_signal_connect(fm->menu, "selection-done", G_CALLBACK(menu_selection_done), NULL);

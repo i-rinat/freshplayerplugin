@@ -57,6 +57,7 @@ static struct fpp_config_s default_config = {
     .fs_delay_ms =              300,
     .enable_vsync =             1,
     .double_click_delay_ms =    400,
+    .show_version_info =        0,
     .quirks = {
         .connect_first_loader_to_unrequested_stream = 0,
         .dump_resource_histogram    = 0,
@@ -95,6 +96,7 @@ static cfg_opt_t opts[] = {
     CFG_SIMPLE_INT("tie_fullscreen_window_to_browser", &config.tie_fullscreen_window_to_browser),
     CFG_SIMPLE_INT("quirk_plasma5_screensaver",        &config.quirks.plasma5_screensaver),
     CFG_SIMPLE_INT("double_click_delay_ms",  &config.double_click_delay_ms),
+    CFG_SIMPLE_INT("show_version_info",      &config.show_version_info),
     CFG_END()
 };
 
