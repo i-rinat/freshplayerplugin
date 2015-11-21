@@ -1,6 +1,11 @@
 project(freshplayerplugin)
 cmake_minimum_required(VERSION 2.8.8)
 
+# version
+set(VER_MAJOR 0)
+set(VER_MINOR 3)
+set(VER_MICRO 4)
+
 # setup compiler flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -fPIC -fvisibility=hidden -pthread")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=format-security")
@@ -17,6 +22,12 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG -g3")
 # generate more debug info for Debug build type
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g3")
+
+add_custom_target(git-revision ALL
+                  COMMAND sh "${CMAKE_SOURCE_DIR}/cmake/update-version-info.sh"
+                  "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" ${VER_MAJOR}
+                  ${VER_MINOR} ${VER_MICRO}
+                  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 # find Ragel
 find_program(RAGEL ragel)
