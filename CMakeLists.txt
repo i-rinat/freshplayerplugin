@@ -23,6 +23,10 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG -g3")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g3")
 
+# directory for auto-generated headers
+include_directories("${CMAKE_BINARY_DIR}")
+
+# determine software version
 add_custom_target(git-revision ALL
                   COMMAND sh "${CMAKE_SOURCE_DIR}/cmake/update-version-info.sh"
                   "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" ${VER_MAJOR}
@@ -127,7 +131,6 @@ if (WITH_HWDEC)
     list(APPEND REQ_INCLUDE_DIRS ${HWDEC_INCLUDE_DIRS})
     list(APPEND REQ_LIBRARIES    ${HWDEC_LIBRARIES})
     add_subdirectory(cmake/ffmpeg-compat)
-    include_directories("${CMAKE_BINARY_DIR}")
 endif()
 
 # using libv4l2 for colorspace conversion
