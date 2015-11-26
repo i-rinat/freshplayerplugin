@@ -101,3 +101,7 @@ enable_vsync = 1
 
 # how close in time two clicks should be to treat them as a doubleclick
 double_click_delay_ms = 400
+
+# show version and git commit hash (if was available) of freshwrapper
+# in the context menu (right mouse button menu)
+show_version_info = 0
