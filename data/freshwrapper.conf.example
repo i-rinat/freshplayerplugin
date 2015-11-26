@@ -105,3 +105,6 @@ double_click_delay_ms = 400
 # show version and git commit hash (if was available) of freshwrapper
 # in the context menu (right mouse button menu)
 show_version_info = 0
+
+# probe video capture devices for their names and capabilities
+probe_video_capture_devices = 1

@@ -30,6 +30,7 @@
 #include "ppb_message_loop.h"
 #include "trace.h"
 #include "tables.h"
+#include "config.h"
 #include "ppb_device_ref.h"
 #include "ppb_var.h"
 #include "ppb_buffer.h"
@@ -137,6 +138,13 @@ static
 int
 video_device_is_usable(const char *dev, char **shortname)
 {
+    if (!config.probe_video_capture_devices) {
+        // do not probe device, assume it have default name,
+        // and is capable of video capturing
+        *shortname = g_strdup("Unknown");
+        return 1;
+    }
+
     int fd = v4l2_open(dev, O_RDWR);
     if (fd < 0)
         return 0;
