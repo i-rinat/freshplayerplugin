@@ -294,7 +294,8 @@ pulse_do_create_stream(unsigned int sample_rate, unsigned int sample_frame_count
             goto err_2;
         }
     } else {
-        if (pa_stream_connect_record(as->stream, NULL, &buf_attr, 0) < 0) {
+        int flags = PA_STREAM_ADJUST_LATENCY;
+        if (pa_stream_connect_record(as->stream, NULL, &buf_attr, flags) < 0) {
             trace_error("%s, can't connect capture stream\n", __func__);
             goto err_2;
         }
