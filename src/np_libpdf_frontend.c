@@ -188,7 +188,6 @@ NPP_DidComposite(NPP npp)
     return;
 }
 
-__attribute__((visibility("default")))
 const char *
 NP_GetMIMEDescription(void)
 {
@@ -196,7 +195,6 @@ NP_GetMIMEDescription(void)
     return fpp_config_get_plugin_mime_type();
 }
 
-__attribute__((visibility("default")))
 char *
 NP_GetPluginVersion(void)
 {
@@ -205,7 +203,6 @@ NP_GetPluginVersion(void)
     return (char *)fpp_config_get_default_plugin_version();
 }
 
-__attribute__((visibility("default")))
 NPError
 NP_GetValue(void *instance, NPPVariable variable, void *value)
 {
@@ -225,7 +222,6 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
     return NPERR_NO_ERROR;
 }
 
-__attribute__((visibility("default")))
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
@@ -263,7 +259,6 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     return NPERR_NO_ERROR;
 }
 
-__attribute__((visibility("default")))
 NPError
 NP_Shutdown(void)
 {

@@ -3,10 +3,6 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 add_definitions(-DTEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 
-# restore default visiblity to workaround linker issue
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=default")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=default")
-
 set(test_list
     test_header_parser
     test_ppb_char_set

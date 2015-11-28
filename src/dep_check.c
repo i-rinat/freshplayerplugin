@@ -27,7 +27,6 @@
 char *
 NP_GetPluginVersion(void);
 
-__attribute__((visibility("default")))
 int
 main(void)
 {
