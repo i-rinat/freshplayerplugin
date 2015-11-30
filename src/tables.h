@@ -92,6 +92,7 @@ struct display_s {
     Cursor                              transparent_cursor;
     pthread_mutexattr_t                 mutex_attr_recursive;
     pthread_mutex_t                     lock;
+    uint32_t                            have_xrender;
     XRenderPictFormat                  *pictfmt_rgb24;
     XRenderPictFormat                  *pictfmt_argb32;
     uint32_t                            min_width;  ///< smallest screen width

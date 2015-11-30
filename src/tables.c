@@ -421,8 +421,19 @@ tables_open_display(void)
     if (config.fullscreen_height > 0)
         display.min_height = config.fullscreen_height;
 
-    display.pictfmt_rgb24 = XRenderFindStandardFormat(display.x, PictStandardRGB24);
-    display.pictfmt_argb32 = XRenderFindStandardFormat(display.x, PictStandardARGB32);
+    int xrender_event_base, xrender_error_base;
+    if (XRenderQueryExtension(display.x, &xrender_event_base, &xrender_error_base)) {
+        trace_info_f("found XRender\n");
+        display.have_xrender = 1;
+    } else {
+        trace_info_f("no XRender available\n");
+        display.have_xrender = 0;
+    }
+
+    if (display.have_xrender) {
+        display.pictfmt_rgb24 = XRenderFindStandardFormat(display.x, PictStandardRGB24);
+        display.pictfmt_argb32 = XRenderFindStandardFormat(display.x, PictStandardARGB32);
+    }
 
 quit:
     pthread_mutex_unlock(&display.lock);
