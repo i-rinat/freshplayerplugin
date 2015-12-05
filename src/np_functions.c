@@ -962,6 +962,91 @@ graphics_ccb_wrapper_comt(void *user_data, int32_t result)
 }
 
 static
+void
+draw_drawable_on_drawable(Display *dpy, int screen, int is_transparent, Drawable src,
+                          int32_t source_x, int32_t source_y, Drawable dst, int32_t target_x,
+                          int32_t target_y, int32_t target_width, int32_t target_height)
+{
+    XVisualInfo vi_src, vi_dst;
+    struct {
+        Window root;
+        int x, y;
+        unsigned int width, height, border, depth;
+    } d_src = {}, d_dst = {};
+
+    XGetGeometry(dpy, src, &d_src.root, &d_src.x, &d_src.y, &d_src.width, &d_src.height,
+                 &d_src.border, &d_src.depth);
+    XGetGeometry(dpy, dst, &d_dst.root, &d_dst.x, &d_dst.y, &d_dst.width, &d_dst.height,
+                 &d_dst.border, &d_dst.depth);
+
+    if (!XMatchVisualInfo(dpy, screen, d_src.depth, TrueColor, &vi_src) ||
+        !XMatchVisualInfo(dpy, screen, d_dst.depth, TrueColor, &vi_dst))
+    {
+        static int reported = 0;
+        if (!reported)
+            trace_error("%s, can't find visual\n", __func__);
+        reported = 1;
+        return;
+    }
+
+    cairo_surface_t *src_surf, *dst_surf;
+
+    dst_surf = cairo_xlib_surface_create(dpy, dst, vi_dst.visual, d_dst.width, d_dst.height);
+    src_surf = cairo_xlib_surface_create(dpy, src, vi_src.visual, d_src.width, d_src.height);
+
+    cairo_t *cr = cairo_create(dst_surf);
+
+    cairo_set_source_surface(cr, src_surf, target_x - source_x, target_y - source_y);
+    cairo_set_operator(cr, is_transparent ? CAIRO_OPERATOR_OVER
+                                          : CAIRO_OPERATOR_SOURCE);
+    cairo_rectangle(cr, target_x, target_y, target_width, target_height);
+    cairo_fill(cr);
+    cairo_destroy(cr);
+    cairo_surface_destroy(dst_surf);
+    cairo_surface_destroy(src_surf);
+}
+
+static
+void
+draw_argb32_on_drawable(Display *dpy, int screen, int is_transparent, char *data, int32_t width,
+                        int32_t height, int32_t stride, int32_t source_x, int32_t source_y,
+                        Drawable drawable, int32_t target_x, int32_t target_y, int32_t target_width,
+                        int32_t target_height)
+{
+    XVisualInfo vi;
+    struct {
+        Window root;
+        int x, y;
+        unsigned int width, height, border, depth;
+    } d = {};
+
+    XGetGeometry(dpy, drawable, &d.root, &d.x, &d.y, &d.width, &d.height, &d.border, &d.depth);
+    if (!XMatchVisualInfo(dpy, screen, d.depth, TrueColor, &vi)) {
+        static int reported = 0;
+        if (!reported)
+            trace_error("%s, can't find visual\n", __func__);
+        reported = 1;
+        return;
+    }
+
+    cairo_surface_t *src_surf, *dst_surf;
+
+    dst_surf = cairo_xlib_surface_create(dpy, drawable, vi.visual, d.width, d.height);
+    src_surf = cairo_image_surface_create_for_data((unsigned char *)data, CAIRO_FORMAT_ARGB32,
+                                                   width, height, stride);
+    cairo_t *cr = cairo_create(dst_surf);
+
+    cairo_set_source_surface(cr, src_surf, target_x - source_x, target_y - source_y);
+    cairo_set_operator(cr, is_transparent ? CAIRO_OPERATOR_OVER
+                                          : CAIRO_OPERATOR_SOURCE);
+    cairo_rectangle(cr, target_x, target_y, target_width, target_height);
+    cairo_fill(cr);
+    cairo_destroy(cr);
+    cairo_surface_destroy(dst_surf);
+    cairo_surface_destroy(src_surf);
+}
+
+static
 int16_t
 handle_graphics_expose_event(NPP npp, void *event)
 {
@@ -990,6 +1075,9 @@ handle_graphics_expose_event(NPP npp, void *event)
         pp_i->offset_y = wnd_y - browser_y;
     }
 
+    const int32_t source_x = pp_i->windowed_mode ? 0 : pp_i->clip_rect.left - pp_i->x;
+    const int32_t source_y = pp_i->windowed_mode ? 0 : pp_i->clip_rect.top - pp_i->y;
+
     pthread_mutex_lock(&display.lock);
     if (g2d) {
         Visual *visual = DefaultVisual(dpy, screen);
@@ -1006,37 +1094,52 @@ handle_graphics_expose_event(NPP npp, void *event)
             trace_warning("%s, can't get visual for depth %d, using default\n", __func__, depth);
         }
 
-        XImage *xi = XCreateImage(dpy, visual, depth, ZPixmap, 0,
-                                  g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
-                                  g2d->scaled_stride);
+        if (display.have_xrender) {
+            XImage *xi = XCreateImage(dpy, visual, depth, ZPixmap, 0,
+                                      g2d->second_buffer, g2d->scaled_width, g2d->scaled_height, 32,
+                                      g2d->scaled_stride);
+            XPutImage(dpy,
+                      pp_i->is_transparent ? g2d->pixmap : drawable,
+                      pp_i->is_transparent ? g2d->gc : DefaultGC(dpy, screen),
+                      xi, 0, 0, ev->x, ev->y,
+                      MIN(g2d->scaled_width, ev->width), MIN(g2d->scaled_height, ev->height));
 
-        XPutImage(dpy,
-                  pp_i->is_transparent ? g2d->pixmap : drawable,
-                  pp_i->is_transparent ? g2d->gc : DefaultGC(dpy, screen),
-                  xi, 0, 0, ev->x, ev->y,
-                  MIN(g2d->scaled_width, ev->width), MIN(g2d->scaled_height, ev->height));
+            if (pp_i->is_transparent) {
+                Picture dst_pict = XRenderCreatePicture(dpy, drawable, display.pictfmt_rgb24, 0, 0);
+                XRenderComposite(dpy, PictOpOver,
+                                 g2d->xr_pict, None, dst_pict,
+                                 ev->x, ev->y, 0, 0,
+                                 ev->x, ev->y, ev->width, ev->height);
+                XRenderFreePicture(dpy, dst_pict);
+            }
 
-        if (pp_i->is_transparent) {
-            Picture dst_pict = XRenderCreatePicture(dpy, drawable, display.pictfmt_rgb24, 0, 0);
-            XRenderComposite(dpy, PictOpOver,
-                             g2d->xr_pict, None, dst_pict,
-                             ev->x, ev->y, 0, 0,
-                             ev->x, ev->y, ev->width, ev->height);
-            XRenderFreePicture(dpy, dst_pict);
+            XFree(xi);
+
+        } else {
+            // software compositing fallback
+            draw_argb32_on_drawable(dpy, screen, pp_i->is_transparent, g2d->second_buffer,
+                                    g2d->scaled_width, g2d->scaled_height, g2d->scaled_stride,
+                                    source_x, source_y, drawable, ev->x, ev->y, ev->width,
+                                    ev->height);
         }
 
-        XFree(xi);
         XFlush(dpy);
 
     } else if (g3d) {
-        Picture dst_pict = XRenderCreatePicture(dpy, drawable, display.pictfmt_rgb24, 0, 0);
-        XRenderComposite(dpy,
-                         pp_i->is_transparent ? PictOpOver : PictOpSrc,
-                         g3d->xr_pict, None, dst_pict,
-                         ev->x, ev->y, 0, 0,
-                         ev->x, ev->y, ev->width, ev->height);
-        XRenderFreePicture(dpy, dst_pict);
-        XFlush(dpy);
+        if (display.have_xrender) {
+            Picture dst_pict = XRenderCreatePicture(dpy, drawable, display.pictfmt_rgb24, 0, 0);
+            XRenderComposite(dpy,
+                             pp_i->is_transparent ? PictOpOver : PictOpSrc,
+                             g3d->xr_pict, None, dst_pict,
+                             ev->x, ev->y, 0, 0,
+                             ev->x, ev->y, ev->width, ev->height);
+            XRenderFreePicture(dpy, dst_pict);
+            XFlush(dpy);
+        } else {
+            // software compositing fallback
+            draw_drawable_on_drawable(dpy, screen, pp_i->is_transparent, g3d->pixmap, source_x,
+                                      source_y, drawable, ev->x, ev->y, ev->width, ev->height);
+        }
     } else {
         retval = 0;
         goto done;
