@@ -193,10 +193,19 @@ struct pp_instance_s {
     uint32_t            fs_height_current;
 
     // geometry
-    uint32_t                        width;
-    uint32_t                        height;
+    int32_t                         x;
+    int32_t                         y;
+    int32_t                         width;
+    int32_t                         height;
     int32_t                         offset_x;   ///< relative to a browser window top left corner
     int32_t                         offset_y;   ///< relative to a browser window top left corner
+
+    struct {
+        int32_t left;
+        int32_t top;
+        int32_t right;
+        int32_t bottom;
+    } clip_rect;
 
     int                             argc;
     char                          **argn;

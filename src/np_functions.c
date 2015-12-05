@@ -91,8 +91,8 @@ set_window_comt(void *user_data, int32_t result)
 
     if (v) {
         pthread_mutex_lock(&display.lock);
-        v->rect.point.x = 0 / config.device_scale; // TODO: pp_i->x
-        v->rect.point.y = 0 / config.device_scale; // TODO: pp_i->y
+        v->rect.point.x = 0;
+        v->rect.point.y = 0;
         v->rect.size.width = pp_i->width / config.device_scale;
         v->rect.size.height = pp_i->height / config.device_scale;
         pp_resource_release(view);
@@ -119,9 +119,15 @@ NPP_SetWindow(NPP npp, NPWindow *window)
         return NPERR_NO_ERROR;
     }
 
-    pp_i->wnd = (Window)window->window;
-    pp_i->width = window->width;
-    pp_i->height = window->height;
+    pp_i->wnd =     (Window)window->window;
+    pp_i->x =       window->x;
+    pp_i->y =       window->y;
+    pp_i->width =   window->width;
+    pp_i->height =  window->height;
+    pp_i->clip_rect.left =   window->clipRect.left;
+    pp_i->clip_rect.right =  window->clipRect.right;
+    pp_i->clip_rect.top =    window->clipRect.top;
+    pp_i->clip_rect.bottom = window->clipRect.bottom;
 
     if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &pp_i->browser_wnd) != NPERR_NO_ERROR)
         pp_i->browser_wnd = None;
