@@ -37,7 +37,7 @@
 struct PP_Var
 ppb_browser_font_get_font_families(PP_Instance instance)
 {
-    return PP_MakeUndefined();
+    return fpp_font_get_font_families();
 }
 
 PP_Resource
@@ -283,7 +283,7 @@ trace_ppb_browser_font_pixel_offset_for_character(PP_Resource font,
 
 
 const struct PPB_BrowserFont_Trusted_1_0 ppb_browser_font_trusted_interface_1_0 = {
-    .GetFontFamilies =          TWRAPZ(ppb_browser_font_get_font_families),
+    .GetFontFamilies =          TWRAPF(ppb_browser_font_get_font_families),
     .Create =                   TWRAPF(ppb_browser_font_create),
     .IsFont =                   TWRAPF(ppb_browser_font_is_font),
     .Describe =                 TWRAPF(ppb_browser_font_describe),
