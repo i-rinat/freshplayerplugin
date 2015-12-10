@@ -430,6 +430,11 @@ tables_open_display(void)
         display.have_xrender = 0;
     }
 
+    if (!config.enable_xrender) {
+        trace_info_f("XRender is disabled\n");
+        display.have_xrender = 0;
+    }
+
     if (display.have_xrender) {
         display.pictfmt_rgb24 = XRenderFindStandardFormat(display.x, PictStandardRGB24);
         display.pictfmt_argb32 = XRenderFindStandardFormat(display.x, PictStandardARGB32);
