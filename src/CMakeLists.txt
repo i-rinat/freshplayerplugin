@@ -109,7 +109,6 @@ add_executable(link_check link_check.c)
 target_link_libraries(link_check ${REQ_LIBRARIES})
 
 add_library(freshwrapper-obj OBJECT ${source_list})
-add_dependencies(freshwrapper-obj img-resources)
 add_dependencies(freshwrapper-obj link_check)
 
 # ensure libfreshwrapper-*.so are linked with all libraries they use
