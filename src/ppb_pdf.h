@@ -30,12 +30,6 @@
 #include <ppapi/c/private/ppb_pdf.h>
 
 
-struct PP_Var
-ppb_pdf_get_localized_string(PP_Instance instance, PP_ResourceString string_id);
-
-PP_Resource
-ppb_pdf_get_resource_image(PP_Instance instance, PP_ResourceImage image_id);
-
 PP_Resource
 ppb_pdf_get_font_file_with_fallback(PP_Instance instance,
                                     const struct PP_BrowserFont_Trusted_Description *description,
@@ -76,15 +70,6 @@ ppb_pdf_print(PP_Instance instance);
 
 PP_Bool
 ppb_pdf_is_feature_enabled(PP_Instance instance, PP_PDFFeature feature);
-
-PP_Resource
-ppb_pdf_get_resource_image_for_scale(PP_Instance instance, PP_ResourceImage image_id, float scale);
-
-struct PP_Var
-ppb_pdf_modal_prompt_for_password(PP_Instance instance, struct PP_Var message);
-
-PP_Bool
-ppb_pdf_is_out_of_process(PP_Instance instance);
 
 void
 ppb_pdf_set_selected_text(PP_Instance instance, const char *selected_text);

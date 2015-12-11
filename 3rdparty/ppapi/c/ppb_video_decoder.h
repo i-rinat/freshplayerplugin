@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_video_decoder.idl modified Wed Nov  5 14:04:14 2014. */
+/* From ppb_video_decoder.idl modified Mon Sep 28 15:23:30 2015. */
 
 #ifndef PPAPI_C_PPB_VIDEO_DECODER_H_
 #define PPAPI_C_PPB_VIDEO_DECODER_H_
@@ -22,7 +22,8 @@
 #define PPB_VIDEODECODER_INTERFACE_0_1 "PPB_VideoDecoder;0.1"
 #define PPB_VIDEODECODER_INTERFACE_0_2 "PPB_VideoDecoder;0.2"
 #define PPB_VIDEODECODER_INTERFACE_1_0 "PPB_VideoDecoder;1.0"
-#define PPB_VIDEODECODER_INTERFACE PPB_VIDEODECODER_INTERFACE_1_0
+#define PPB_VIDEODECODER_INTERFACE_1_1 "PPB_VideoDecoder;1.1"
+#define PPB_VIDEODECODER_INTERFACE PPB_VIDEODECODER_INTERFACE_1_1
 
 /**
  * @file
@@ -57,7 +58,7 @@
  * Chrome and ChromeOS: aac, h264.
  * ChromeOS: mpeg4.
  */
-struct PPB_VideoDecoder_1_0 {
+struct PPB_VideoDecoder_1_1 {
   /**
    * Creates a new video decoder resource.
    *
@@ -90,6 +91,12 @@ struct PPB_VideoDecoder_1_0 {
    * codec profile.
    * @param[in] acceleration A <code>PP_HardwareAcceleration</code> specifying
    * whether to use a hardware accelerated or a software implementation.
+   * @param[in] min_picture_count A count of pictures the plugin would like to
+   * have in flight. This is effectively the number of times the plugin can
+   * call GetPicture() and get a decoded frame without calling
+   * RecyclePicture(). The decoder has its own internal minimum count, and will
+   * take the larger of its internal and this value. A client that doesn't care
+   * can therefore just pass in zero for this argument.
    * @param[in] callback A <code>PP_CompletionCallback</code> to be called upon
    * completion.
    *
@@ -97,11 +104,14 @@ struct PPB_VideoDecoder_1_0 {
    * Returns PP_ERROR_NOTSUPPORTED if video decoding is not available, or the
    * requested profile is not supported. In this case, the client may call
    * Initialize() again with different parameters to find a good configuration.
+   * Returns PP_ERROR_BADARGUMENT if the requested minimum picture count is
+   * unreasonably large.
    */
   int32_t (*Initialize)(PP_Resource video_decoder,
                         PP_Resource graphics3d_context,
                         PP_VideoProfile profile,
                         PP_HardwareAcceleration acceleration,
+                        uint32_t min_picture_count,
                         struct PP_CompletionCallback callback);
   /**
    * Decodes a bitstream buffer. Copies |size| bytes of data from the plugin's
@@ -220,7 +230,7 @@ struct PPB_VideoDecoder_1_0 {
                    struct PP_CompletionCallback callback);
 };
 
-typedef struct PPB_VideoDecoder_1_0 PPB_VideoDecoder;
+typedef struct PPB_VideoDecoder_1_1 PPB_VideoDecoder;
 
 struct PPB_VideoDecoder_0_1 {
   PP_Resource (*Create)(PP_Instance instance);
@@ -261,6 +271,30 @@ struct PPB_VideoDecoder_0_2 {
                     struct PP_CompletionCallback callback);
   int32_t (*GetPicture)(PP_Resource video_decoder,
                         struct PP_VideoPicture_0_1* picture,
+                        struct PP_CompletionCallback callback);
+  void (*RecyclePicture)(PP_Resource video_decoder,
+                         const struct PP_VideoPicture* picture);
+  int32_t (*Flush)(PP_Resource video_decoder,
+                   struct PP_CompletionCallback callback);
+  int32_t (*Reset)(PP_Resource video_decoder,
+                   struct PP_CompletionCallback callback);
+};
+
+struct PPB_VideoDecoder_1_0 {
+  PP_Resource (*Create)(PP_Instance instance);
+  PP_Bool (*IsVideoDecoder)(PP_Resource resource);
+  int32_t (*Initialize)(PP_Resource video_decoder,
+                        PP_Resource graphics3d_context,
+                        PP_VideoProfile profile,
+                        PP_HardwareAcceleration acceleration,
+                        struct PP_CompletionCallback callback);
+  int32_t (*Decode)(PP_Resource video_decoder,
+                    uint32_t decode_id,
+                    uint32_t size,
+                    const void* buffer,
+                    struct PP_CompletionCallback callback);
+  int32_t (*GetPicture)(PP_Resource video_decoder,
+                        struct PP_VideoPicture* picture,
                         struct PP_CompletionCallback callback);
   void (*RecyclePicture)(PP_Resource video_decoder,
                          const struct PP_VideoPicture* picture);

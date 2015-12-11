@@ -36,7 +36,6 @@
 #include <ppapi/c/private/ppb_udp_socket_private.h>
 #include <ppapi/c/dev/pp_video_dev.h>
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
-#include <ppapi/c/dev/ppb_scrollbar_dev.h>
 #include <ppapi/c/private/ppb_x509_certificate_private.h>
 #include <ppapi/c/private/ppb_pdf.h>
 
@@ -57,11 +56,8 @@ const char *reverse_video_decoder_profile(PP_VideoDecoder_Profile profile);
 const char *reverse_file_chooser_mode(PP_FileChooserMode_Dev mode);
 const char *reverse_udp_socket_feature(PP_UDPSocketFeature_Private feature);
 const char *reverse_x509_certificate_field(PP_X509Certificate_Private_Field field);
-const char *reverse_resource_image(PP_ResourceImage resource_image);
 const char *reverse_pdf_feature(PP_PDFFeature feature);
-const char *reverse_resource_string(PP_ResourceString resource_string);
 const char *reverse_private_font_charset(PP_PrivateFontCharset charset);
-const char *reverse_scrollby(PP_ScrollBy_Dev unit);
 const char *reverse_graphics3d_attribute(int32_t attr);
 
 #endif // FPP_REVERSE_CONSTANT_H

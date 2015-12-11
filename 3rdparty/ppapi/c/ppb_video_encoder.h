@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_video_encoder.idl modified Tue May  5 23:37:20 2015. */
+/* From ppb_video_encoder.idl modified Wed Jul 15 11:34:20 2015. */
 
 #ifndef PPAPI_C_PPB_VIDEO_ENCODER_H_
 #define PPAPI_C_PPB_VIDEO_ENCODER_H_
@@ -20,7 +20,9 @@
 #include "ppapi/c/ppb_video_frame.h"
 
 #define PPB_VIDEOENCODER_INTERFACE_0_1 "PPB_VideoEncoder;0.1" /* dev */
-#define PPB_VIDEOENCODER_INTERFACE_0_2 "PPB_VideoEncoder;0.2" /* dev */
+#define PPB_VIDEOENCODER_INTERFACE_0_2 "PPB_VideoEncoder;0.2"
+#define PPB_VIDEOENCODER_INTERFACE PPB_VIDEOENCODER_INTERFACE_0_2
+
 /**
  * @file
  * This file defines the <code>PPB_VideoEncoder</code> interface.
@@ -54,7 +56,7 @@
  * All: vp8 (software).
  * ChromeOS, depending on your device: h264 (hardware), vp8 (hardware)
  */
-struct PPB_VideoEncoder_0_2 { /* dev */
+struct PPB_VideoEncoder_0_2 {
   /**
    * Creates a new video encoder resource.
    *
@@ -235,6 +237,8 @@ struct PPB_VideoEncoder_0_2 { /* dev */
    */
   void (*Close)(PP_Resource video_encoder);
 };
+
+typedef struct PPB_VideoEncoder_0_2 PPB_VideoEncoder;
 
 struct PPB_VideoEncoder_0_1 { /* dev */
   PP_Resource (*Create)(PP_Instance instance);

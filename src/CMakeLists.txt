@@ -69,7 +69,6 @@ set(source_list
     ppb_opengles2.c
     ppb_pdf.c
     ppb_printing.c
-    ppb_scrollbar.c
     ppb_tcp_socket.c
     ppb_text_input_controller.c
     ppb_text_input.c
@@ -82,9 +81,7 @@ set(source_list
     ppb_var.c
     ppb_video_capture.c
     ppb_view.c
-    ppb_widget.c
     ppb_x509_certificate.c
-    ppb_zoom.c
     screensaver_control.c
     x11_event_thread.c
 )

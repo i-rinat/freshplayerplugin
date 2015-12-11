@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From ppb_udp_socket.idl modified Mon Mar  2 16:50:15 2015. */
+/* From ppb_udp_socket.idl modified Tue Mar 17 11:47:56 2015. */
 
 #ifndef PPAPI_C_PPB_UDP_SOCKET_H_
 #define PPAPI_C_PPB_UDP_SOCKET_H_
@@ -18,8 +18,8 @@
 
 #define PPB_UDPSOCKET_INTERFACE_1_0 "PPB_UDPSocket;1.0"
 #define PPB_UDPSOCKET_INTERFACE_1_1 "PPB_UDPSocket;1.1"
-#define PPB_UDPSOCKET_INTERFACE_1_2 "PPB_UDPSocket;1.2" /* dev */
-#define PPB_UDPSOCKET_INTERFACE PPB_UDPSOCKET_INTERFACE_1_1
+#define PPB_UDPSOCKET_INTERFACE_1_2 "PPB_UDPSocket;1.2"
+#define PPB_UDPSOCKET_INTERFACE PPB_UDPSOCKET_INTERFACE_1_2
 
 /**
  * @file
@@ -110,7 +110,7 @@ PP_COMPILE_ASSERT_SIZE_IN_BYTES(PP_UDPSocket_Option, 4);
  * For more details about network communication permissions, please see:
  * http://developer.chrome.com/apps/app_network.html
  */
-struct PPB_UDPSocket_1_2 { /* dev */
+struct PPB_UDPSocket_1_2 {
   /**
    * Creates a UDP socket resource.
    *
@@ -269,6 +269,8 @@ struct PPB_UDPSocket_1_2 { /* dev */
                         struct PP_CompletionCallback callback);
 };
 
+typedef struct PPB_UDPSocket_1_2 PPB_UDPSocket;
+
 struct PPB_UDPSocket_1_0 {
   PP_Resource (*Create)(PP_Instance instance);
   PP_Bool (*IsUDPSocket)(PP_Resource resource);
@@ -316,8 +318,6 @@ struct PPB_UDPSocket_1_1 {
                        struct PP_Var value,
                        struct PP_CompletionCallback callback);
 };
-
-typedef struct PPB_UDPSocket_1_1 PPB_UDPSocket;
 /**
  * @}
  */

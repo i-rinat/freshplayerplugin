@@ -98,7 +98,7 @@ struct PPB_Compositor_0_1 { /* dev */
    * of a module.
    *
    * @return A <code>PP_Resource</code> containing the compositor resource if
-   * sucessful or 0 otherwise.
+   * successful or 0 otherwise.
    */
   PP_Resource (*Create)(PP_Instance instance);
   /**
@@ -115,7 +115,7 @@ struct PPB_Compositor_0_1 { /* dev */
    * a compositor layer resource.
    *
    * @return A <code>PP_Resource</code> containing the compositor layer
-   * resource if sucessful or 0 otherwise.
+   * resource if successful or 0 otherwise.
    */
   PP_Resource (*AddLayer)(PP_Resource compositor);
   /**

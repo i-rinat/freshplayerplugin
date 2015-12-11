@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-/* From private/ppb_flash_font_file.idl modified Thu Dec 13 10:56:15 2012. */
+/* From private/ppb_flash_font_file.idl modified Fri Oct 23 10:34:57 2015. */
 
 #ifndef PPAPI_C_PRIVATE_PPB_FLASH_FONT_FILE_H_
 #define PPAPI_C_PRIVATE_PPB_FLASH_FONT_FILE_H_
@@ -18,7 +18,8 @@
 #include "ppapi/c/trusted/ppb_browser_font_trusted.h"
 
 #define PPB_FLASH_FONTFILE_INTERFACE_0_1 "PPB_Flash_FontFile;0.1"
-#define PPB_FLASH_FONTFILE_INTERFACE PPB_FLASH_FONTFILE_INTERFACE_0_1
+#define PPB_FLASH_FONTFILE_INTERFACE_0_2 "PPB_Flash_FontFile;0.2"
+#define PPB_FLASH_FONTFILE_INTERFACE PPB_FLASH_FONTFILE_INTERFACE_0_2
 
 /**
  * @file
@@ -30,7 +31,7 @@
  * @addtogroup Interfaces
  * @{
  */
-struct PPB_Flash_FontFile_0_1 {
+struct PPB_Flash_FontFile_0_2 {
   /* Returns a resource identifying a font file corresponding to the given font
    * request after applying the browser-specific fallback.
    */
@@ -52,9 +53,25 @@ struct PPB_Flash_FontFile_0_1 {
                           uint32_t table,
                           void* output,
                           uint32_t* output_length);
+  /**
+   * Returns whether <code>PPB_Flash_FontFile</code> is supported on Windows.
+   */
+  PP_Bool (*IsSupportedForWindows)(void);
 };
 
-typedef struct PPB_Flash_FontFile_0_1 PPB_Flash_FontFile;
+typedef struct PPB_Flash_FontFile_0_2 PPB_Flash_FontFile;
+
+struct PPB_Flash_FontFile_0_1 {
+  PP_Resource (*Create)(
+      PP_Instance instance,
+      const struct PP_BrowserFont_Trusted_Description* description,
+      PP_PrivateFontCharset charset);
+  PP_Bool (*IsFlashFontFile)(PP_Resource resource);
+  PP_Bool (*GetFontTable)(PP_Resource font_file,
+                          uint32_t table,
+                          void* output,
+                          uint32_t* output_length);
+};
 /**
  * @}
  */
