@@ -1044,9 +1044,10 @@ trace_ppb_video_decoder_decode(PP_Resource video_decoder,
                                const struct PP_VideoBitstreamBuffer_Dev *bitstream_buffer,
                                struct PP_CompletionCallback callback)
 {
-    trace_info("[PPB] {full} %s video_decoder=%d, bitstream_buffer=%p, "
+    trace_info("[PPB] {full} %s video_decoder=%d, bitstream_buffer={.id=%d, .data=%d, .size=%u}, "
                "callback={.func=%p, .user_data=%p, .flags=%u}\n", __func__+6, video_decoder,
-               bitstream_buffer, callback.func, callback.user_data, callback.flags);
+               bitstream_buffer->id, bitstream_buffer->data, bitstream_buffer->size, callback.func,
+               callback.user_data, callback.flags);
     return ppb_video_decoder_decode(video_decoder, bitstream_buffer, callback);
 }
 
