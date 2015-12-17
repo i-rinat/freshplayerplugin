@@ -397,6 +397,52 @@ x_io_error_hanlder(Display *dpy)
     return 0;
 }
 
+static
+void
+call_gdb_signal_handler(int sig, siginfo_t *si, void *p)
+{
+    static char cmd[4096];
+
+    pid_t pid = getpid();
+    time_t now = time(NULL);
+
+    // ask gdb to debug this process
+    snprintf(cmd, sizeof(cmd), "gdb --pid %d"
+             " -ex 'set logging file /tmp/freshwrapper-backtrace-%d-%d.txt'"
+             " -ex 'set logging on'"
+             " -ex 'set pagination off'"
+             " -ex 'echo === backtrace triggered by signal %d ===\\n'"
+             " -ex 'echo === current thread ===\\n'"
+             " -ex bt"
+             " -ex 'echo === thread list ===\\n'"
+             " -ex 'info threads'"
+             " -ex 'echo === all threads ===\\n'"
+             " -ex 'thread apply all bt full'"
+             " -ex 'set confirm off'"
+             " -ex 'quit'",
+             (int)pid, (int)now, (int)pid, sig);
+
+    // call gdb
+    system(cmd);
+
+    exit(sig);
+}
+
+static
+void
+setup_sig_handlers(void)
+{
+    struct sigaction sa = {};
+
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_sigaction = call_gdb_signal_handler;
+
+    sigaction(SIGSEGV, &sa, NULL);
+    sigaction(SIGILL,  &sa, NULL);
+    sigaction(SIGABRT, &sa, NULL);
+}
+
 NPError
 NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 {
@@ -409,6 +455,8 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     }
 
     np_initialize_was_called = 1;
+
+    setup_sig_handlers();
 
     // set logging-only error handler.
     // Ignore a previous one, we have no plans to restore it
