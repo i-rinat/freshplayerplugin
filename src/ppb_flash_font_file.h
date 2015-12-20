@@ -39,4 +39,7 @@ PP_Bool
 ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *output,
                                    uint32_t *output_length);
 
+PP_Bool
+ppb_flash_font_file_is_supported_for_windows(void);
+
 #endif // FPP_PPB_FLASH_FONT_FILE_H

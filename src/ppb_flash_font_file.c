@@ -113,6 +113,12 @@ ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *
     return retval;
 }
 
+PP_Bool
+ppb_flash_font_file_is_supported_for_windows(void)
+{
+    return PP_TRUE;
+}
+
 
 // trace wrappers
 TRACE_WRAPPER
@@ -150,11 +156,26 @@ trace_ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, 
     return ppb_flash_font_file_get_font_table(font_file, table, output, output_length);
 }
 
+TRACE_WRAPPER
+PP_Bool
+trace_ppb_flash_font_file_is_supported_for_windows(void)
+{
+    trace_info("[PPB] {full} %s\n", __func__+6);
+    return ppb_flash_font_file_is_supported_for_windows();
+}
+
 
 const struct PPB_Flash_FontFile_0_1 ppb_flash_font_file_interface_0_1 = {
     .Create =           TWRAPF(ppb_flash_font_file_create),
     .IsFlashFontFile =  TWRAPF(ppb_flash_font_file_is_flash_font_file),
     .GetFontTable =     TWRAPF(ppb_flash_font_file_get_font_table),
+};
+
+const struct PPB_Flash_FontFile_0_2 ppb_flash_font_file_interface_0_2 = {
+    .Create =           TWRAPF(ppb_flash_font_file_create),
+    .IsFlashFontFile =  TWRAPF(ppb_flash_font_file_is_flash_font_file),
+    .GetFontTable =     TWRAPF(ppb_flash_font_file_get_font_table),
+    .IsSupportedForWindows = TWRAPF(ppb_flash_font_file_is_supported_for_windows),
 };
 
 static
@@ -163,5 +184,6 @@ __attribute__((constructor))
 constructor_ppb_flash_font_file(void)
 {
     register_interface(PPB_FLASH_FONTFILE_INTERFACE_0_1, &ppb_flash_font_file_interface_0_1);
+    register_interface(PPB_FLASH_FONTFILE_INTERFACE_0_2, &ppb_flash_font_file_interface_0_2);
     register_resource(PP_RESOURCE_FLASH_FONT_FILE, ppb_flash_font_file_destroy);
 }
