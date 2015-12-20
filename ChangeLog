@@ -1,3 +1,16 @@
+2015-12-20  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.3.4
+	* graphics: add non-XRender fallback paths
+	* graphics: use ANGLE GLES2 emulation layer by default
+	* graphics: restore mouse pointer when moved outside
+	* audio: request reduced latency when capturing via PulseAudio
+	* input: detect and handle mouse double clicks
+	* misc: add `make install` rule
+	* misc: add option to show version in context menu
+	* misc: call gdb for crash debugging
+	* misc: stop using -fvisibility directives
+
 2015-10-03  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.3.3
