@@ -108,3 +108,6 @@ show_version_info = 0
 
 # probe video capture devices for their names and capabilities
 probe_video_capture_devices = 1
+
+# use XRender to blend images
+enable_xrender = 1
