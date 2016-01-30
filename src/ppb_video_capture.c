@@ -190,15 +190,13 @@ ppb_video_capture_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOu
     GArray *vc_devices = g_array_new(FALSE, TRUE, sizeof(PP_Resource));
 
     struct dirent **namelist;
-    int n = scandir("/dev/v4l/by-path", &namelist, NULL, NULL);
+    int n = scandir("/dev", &namelist, NULL, NULL);
     if (n >= 0) {
         for (int k = 0; k < n; k ++) {
-            if (strcmp(namelist[k]->d_name, ".") == 0)
-                continue;
-            if (strcmp(namelist[k]->d_name, "..") == 0)
+            if (strncmp(namelist[k]->d_name, "video", sizeof("video") - 1) != 0)
                 continue;
 
-            char *fullpath = g_strdup_printf("/dev/v4l/by-path/%s", namelist[k]->d_name);
+            char *fullpath = g_strdup_printf("/dev/%s", namelist[k]->d_name);
             char *shortname = NULL;
             if (video_device_is_usable(fullpath, &shortname)) {
                 struct PP_Var v_shortname = ppb_var_var_from_utf8_z(shortname);
