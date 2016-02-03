@@ -26,6 +26,7 @@
 #define FPP_PPB_HOST_RESOLVER_H
 
 #include <ppapi/c/private/ppb_host_resolver_private.h>
+#include <ppapi/c/ppb_host_resolver.h>
 
 
 PP_Resource
@@ -39,14 +40,25 @@ ppb_host_resolver_resolve(PP_Resource host_resolver, const char *host, uint16_t 
                           const struct PP_HostResolver_Private_Hint *hint,
                           struct PP_CompletionCallback callback);
 
+int32_t
+ppb_host_resolver_resolve_1_0(PP_Resource host_resolver, const char *host, uint16_t port,
+                              const struct PP_HostResolver_Hint *hint,
+                              struct PP_CompletionCallback callback);
+
 struct PP_Var
 ppb_host_resolver_get_canonical_name(PP_Resource host_resolver);
 
 uint32_t
 ppb_host_resolver_get_size(PP_Resource host_resolver);
 
+uint32_t
+ppb_host_resolver_get_net_address_count(PP_Resource host_resolver);
+
 PP_Bool
 ppb_host_resolver_get_net_address(PP_Resource host_resolver, uint32_t index,
                                   struct PP_NetAddress_Private *addr);
+
+PP_Resource
+ppb_host_resolver_get_net_address_1_0(PP_Resource host_resolver, uint32_t index);
 
 #endif // FPP_PPB_HOST_RESOLVER_H

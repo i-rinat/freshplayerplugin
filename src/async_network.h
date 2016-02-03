@@ -50,6 +50,8 @@ struct async_network_task_s {
     char                           *host;
     uint16_t                        port;
     struct PP_NetAddress_Private    netaddr;
+    struct PP_NetAddress_Private   *addr_from;
+    PP_Resource                     addr_from_resource;
     char                           *buffer;
     int32_t                         bufsize;
     int                             sock;

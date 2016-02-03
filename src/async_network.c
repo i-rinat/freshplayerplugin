@@ -433,10 +433,13 @@ handle_udp_recv_stage2(int sock, short event_flags, void *arg)
         return;
     }
 
-    socklen_t len = sizeof(us->addr_from.data);
+    socklen_t len = sizeof(task->addr_from->data);
     int32_t retval = recvfrom(sock, task->buffer, task->bufsize, 0,
-                              (struct sockaddr *)us->addr_from.data, &len);
-    us->addr_from.size = len;
+                              (struct sockaddr *)task->addr_from->data, &len);
+    task->addr_from->size = len;
+
+    if (task->addr_from_resource)
+        pp_resource_unref(task->addr_from_resource);
 
     if (retval < 0)
         retval = get_pp_errno();
@@ -461,7 +464,7 @@ handle_udp_recv_stage1(struct async_network_task_s *task)
         return;
     }
 
-    memset(&us->addr_from, 0, sizeof(us->addr_from));
+    memset(task->addr_from, 0, sizeof(*task->addr_from));
 
     struct event *ev = event_new(event_b, us->sock, EV_READ, handle_udp_recv_stage2, task);
     pp_resource_release(task->resource);

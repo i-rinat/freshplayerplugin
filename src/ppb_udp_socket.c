@@ -81,6 +81,30 @@ ppb_udp_socket_is_udp_socket(PP_Resource resource_id)
 }
 
 int32_t
+ppb_udp_socket_join_group(PP_Resource udp_socket, PP_Resource group,
+                          struct PP_CompletionCallback callback)
+{
+    // TODO: impl
+    return PP_ERROR_FAILED;
+}
+
+int32_t
+ppb_udp_socket_leave_group(PP_Resource udp_socket, PP_Resource group,
+                           struct PP_CompletionCallback callback)
+{
+    // TODO: impl
+    return PP_ERROR_FAILED;
+}
+
+int32_t
+ppb_udp_socket_set_option(PP_Resource udp_socket, PP_UDPSocket_Option name, struct PP_Var value,
+                          struct PP_CompletionCallback callback)
+{
+    // TODO: impl
+    return PP_ERROR_FAILED;
+}
+
+int32_t
 ppb_udp_socket_set_socket_feature(PP_Resource udp_socket, PP_UDPSocketFeature_Private name,
                                   struct PP_Var value)
 {
@@ -112,6 +136,21 @@ ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Private *
     return PP_OK_COMPLETIONPENDING;
 }
 
+int32_t
+ppb_udp_socket_bind_1_0(PP_Resource udp_socket, PP_Resource addr,
+                        struct PP_CompletionCallback callback)
+{
+    struct pp_net_address_s *na = pp_resource_acquire(addr, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    int32_t ret = ppb_udp_socket_bind(udp_socket, &na->addr, callback);
+    pp_resource_release(addr);
+    return ret;
+}
+
 PP_Bool
 ppb_udp_socket_get_bound_address(PP_Resource udp_socket, struct PP_NetAddress_Private *addr)
 {
@@ -133,6 +172,38 @@ ppb_udp_socket_get_bound_address(PP_Resource udp_socket, struct PP_NetAddress_Pr
     return PP_TRUE;
 }
 
+PP_Resource
+ppb_udp_socket_get_bound_address_1_0(PP_Resource udp_socket)
+{
+    PP_Resource net_address = 0;
+    struct pp_udp_socket_s *us = pp_resource_acquire(udp_socket, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        goto err_1;
+    }
+
+    if (!us->bound) {
+        // not bound socket have no address
+        goto err_2;
+    }
+
+    net_address = pp_resource_allocate(PP_RESOURCE_NET_ADDRESS, us->instance);
+    struct pp_net_address_s *na = pp_resource_acquire(net_address, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, resource allocation failed\n", __func__);
+        net_address = 0;
+        goto err_2;
+    }
+
+    memcpy(&na->addr, &us->addr, sizeof(struct PP_NetAddress_Private));
+    pp_resource_release(net_address);
+
+err_2:
+    pp_resource_release(udp_socket);
+err_1:
+    return net_address;
+}
+
 int32_t
 ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes,
                          struct PP_CompletionCallback callback)
@@ -151,11 +222,58 @@ ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num_bytes
     task->bufsize =  num_bytes;
     task->callback = callback;
     task->callback_ml = ppb_message_loop_get_current();
+    task->addr_from = &us->addr_from;
 
     pp_resource_release(udp_socket);
     async_network_task_push(task);
 
     return PP_OK_COMPLETIONPENDING;
+}
+
+int32_t
+ppb_udp_socket_recv_from_1_0(PP_Resource udp_socket, char *buffer, int32_t num_bytes,
+                             PP_Resource *addr, struct PP_CompletionCallback callback)
+{
+    int ret;
+    struct pp_udp_socket_s *us = pp_resource_acquire(udp_socket, PP_RESOURCE_UDP_SOCKET);
+    if (!us) {
+        trace_error("%s, bad resource\n", __func__);
+        ret = PP_ERROR_BADRESOURCE;
+        goto err_1;
+    }
+
+    PP_Resource net_address = pp_resource_allocate(PP_RESOURCE_NET_ADDRESS, us->instance);
+    struct pp_net_address_s *na = pp_resource_acquire(net_address, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, resource allocation failed\n", __func__);
+        ret = PP_ERROR_NOMEMORY;
+        goto err_2;
+    }
+
+    struct async_network_task_s *task = async_network_task_create();
+
+    task->type = ASYNC_NETWORK_UDP_RECV;
+    task->resource = udp_socket;
+    task->buffer =   buffer;
+    task->bufsize =  num_bytes;
+    task->callback = callback;
+    task->callback_ml = ppb_message_loop_get_current();
+    task->addr_from = &na->addr;
+    task->addr_from_resource = net_address;
+
+    ppb_core_add_ref_resource(net_address);
+    pp_resource_release(net_address);
+    pp_resource_release(udp_socket);
+    async_network_task_push(task);
+
+    *addr = net_address;
+
+    return PP_OK_COMPLETIONPENDING;
+
+err_2:
+    pp_resource_release(udp_socket);
+err_1:
+    return ret;
 }
 
 PP_Bool
@@ -207,6 +325,21 @@ ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t num_b
     return PP_OK_COMPLETIONPENDING;
 }
 
+int32_t
+ppb_udp_socket_send_to_1_0(PP_Resource udp_socket, const char *buffer, int32_t num_bytes,
+                           PP_Resource addr, struct PP_CompletionCallback callback)
+{
+    struct pp_net_address_s *na = pp_resource_acquire(addr, PP_RESOURCE_NET_ADDRESS);
+    if (!na) {
+        trace_error("%s, bad resource\n", __func__);
+        return PP_ERROR_BADRESOURCE;
+    }
+
+    int32_t ret = ppb_udp_socket_send_to(udp_socket, buffer, num_bytes, &na->addr, callback);
+    pp_resource_release(addr);
+    return ret;
+}
+
 void
 ppb_udp_socket_close(PP_Resource udp_socket)
 {
@@ -240,6 +373,41 @@ trace_ppb_udp_socket_is_udp_socket(PP_Resource resource_id)
 
 TRACE_WRAPPER
 int32_t
+trace_ppb_udp_socket_join_group(PP_Resource udp_socket, PP_Resource group,
+                                struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {zilch} %s udp_socket=%d, group=%d, callback={.func=%p, .user_data=%p, "
+               ".flags=%u}\n", __func__+6, udp_socket, group, callback.func, callback.user_data,
+               callback.flags);
+    return ppb_udp_socket_join_group(udp_socket, group, callback);
+}
+
+TRACE_WRAPPER
+int32_t
+trace_ppb_udp_socket_leave_group(PP_Resource udp_socket, PP_Resource group,
+                                 struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {zilch} %s udp_socket=%d, group=%d, callback={.func=%p, .user_data=%p, "
+               ".flags=%u}\n", __func__+6, udp_socket, group, callback.func, callback.user_data,
+               callback.flags);
+    return ppb_udp_socket_leave_group(udp_socket, group, callback);
+}
+
+TRACE_WRAPPER
+int32_t
+trace_ppb_udp_socket_set_option(PP_Resource udp_socket, PP_UDPSocket_Option name,
+                                struct PP_Var value, struct PP_CompletionCallback callback)
+{
+    gchar *s_value = trace_var_as_string(value);
+    trace_info("[PPB] {zilch} %s udp_socket=%d, name=%d, value=%s, vallback={.func=%p, "
+               ".user_data=%p, .flags=%u}\n", __func__+6, udp_socket, name, s_value, callback.func,
+               callback.user_data, callback.flags);
+    g_free(s_value);
+    return ppb_udp_socket_set_option(udp_socket, name, value, callback);
+}
+
+TRACE_WRAPPER
+int32_t
 trace_ppb_udp_socket_set_socket_feature(PP_Resource udp_socket, PP_UDPSocketFeature_Private name,
                                         struct PP_Var value)
 {
@@ -262,11 +430,30 @@ trace_ppb_udp_socket_bind(PP_Resource udp_socket, const struct PP_NetAddress_Pri
 }
 
 TRACE_WRAPPER
+int32_t
+trace_ppb_udp_socket_bind_1_0(PP_Resource udp_socket, PP_Resource addr,
+                              struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {full} %s udp_socket=%d, addr=%d, callback={.func=%p, .user_data=%p, "
+               ".flags=%u}\n", __func__+6, udp_socket, addr, callback.func, callback.user_data,
+               callback.flags);
+    return ppb_udp_socket_bind_1_0(udp_socket, addr, callback);
+}
+
+TRACE_WRAPPER
 PP_Bool
 trace_ppb_udp_socket_get_bound_address(PP_Resource udp_socket, struct PP_NetAddress_Private *addr)
 {
     trace_info("[PPB] {full} %s udp_socket=%d, addr=%p\n", __func__+6, udp_socket, addr);
     return ppb_udp_socket_get_bound_address(udp_socket, addr);
+}
+
+TRACE_WRAPPER
+PP_Resource
+trace_ppb_udp_socket_get_bound_address_1_0(PP_Resource udp_socket)
+{
+    trace_info("[PPB] {full} %s udp_socket=%d\n", __func__+6, udp_socket);
+    return ppb_udp_socket_get_bound_address_1_0(udp_socket);
 }
 
 TRACE_WRAPPER
@@ -278,6 +465,17 @@ trace_ppb_udp_socket_recv_from(PP_Resource udp_socket, char *buffer, int32_t num
                ".user_data=%p, .flags=%u}\n", __func__+6, udp_socket, buffer, num_bytes,
                callback.func, callback.user_data, callback.flags);
     return ppb_udp_socket_recv_from(udp_socket, buffer, num_bytes, callback);
+}
+
+TRACE_WRAPPER
+int32_t
+trace_ppb_udp_socket_recv_from_1_0(PP_Resource udp_socket, char *buffer, int32_t num_bytes,
+                                   PP_Resource *addr, struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {full} %s udp_socket=%d, buffer=%p, num_bytes=%d, callback={.func=%p, "
+               ".user_data=%p, .flags=%u}\n", __func__+6, udp_socket, buffer, num_bytes,
+               callback.func, callback.user_data, callback.flags);
+    return ppb_udp_socket_recv_from_1_0(udp_socket, buffer, num_bytes, addr, callback);
 }
 
 TRACE_WRAPPER
@@ -302,6 +500,17 @@ trace_ppb_udp_socket_send_to(PP_Resource udp_socket, const char *buffer, int32_t
 }
 
 TRACE_WRAPPER
+int32_t
+trace_ppb_udp_socket_send_to_1_0(PP_Resource udp_socket, const char *buffer, int32_t num_bytes,
+                                 PP_Resource addr, struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {full} %s udp_socket=%d, buffer=%p, num_bytes=%d, addr=%d, callback={"
+               ".func=%p, .user_data=%p, .flags=%u}\n", __func__+6, udp_socket, buffer, num_bytes,
+               addr, callback.func, callback.user_data, callback.flags);
+    return ppb_udp_socket_send_to_1_0(udp_socket, buffer, num_bytes, addr, callback);
+}
+
+TRACE_WRAPPER
 void
 trace_ppb_udp_socket_close(PP_Resource udp_socket)
 {
@@ -322,11 +531,48 @@ const struct PPB_UDPSocket_Private_0_4 ppb_udp_socket_private_interface_0_4 = {
     .Close =                TWRAPF(ppb_udp_socket_close),
 };
 
+const struct PPB_UDPSocket_1_2 ppb_udp_socket_interface_1_2 = {
+    .Create =           TWRAPF(ppb_udp_socket_create),
+    .IsUDPSocket =      TWRAPF(ppb_udp_socket_is_udp_socket),
+    .Bind =             TWRAPF(ppb_udp_socket_bind_1_0),
+    .GetBoundAddress =  TWRAPF(ppb_udp_socket_get_bound_address_1_0),
+    .RecvFrom =         TWRAPF(ppb_udp_socket_recv_from_1_0),
+    .SendTo =           TWRAPF(ppb_udp_socket_send_to_1_0),
+    .Close =            TWRAPF(ppb_udp_socket_close),
+    .SetOption =        TWRAPZ(ppb_udp_socket_set_option),
+    .JoinGroup =        TWRAPZ(ppb_udp_socket_join_group),
+    .LeaveGroup =       TWRAPZ(ppb_udp_socket_leave_group),
+};
+const struct PPB_UDPSocket_1_1 ppb_udp_socket_interface_1_1 = {
+    .Create =           TWRAPF(ppb_udp_socket_create),
+    .IsUDPSocket =      TWRAPF(ppb_udp_socket_is_udp_socket),
+    .Bind =             TWRAPF(ppb_udp_socket_bind_1_0),
+    .GetBoundAddress =  TWRAPF(ppb_udp_socket_get_bound_address_1_0),
+    .RecvFrom =         TWRAPF(ppb_udp_socket_recv_from_1_0),
+    .SendTo =           TWRAPF(ppb_udp_socket_send_to_1_0),
+    .Close =            TWRAPF(ppb_udp_socket_close),
+    .SetOption =        TWRAPZ(ppb_udp_socket_set_option),
+};
+
+const struct PPB_UDPSocket_1_0 ppb_udp_socket_interface_1_0 = {
+    .Create =           TWRAPF(ppb_udp_socket_create),
+    .IsUDPSocket =      TWRAPF(ppb_udp_socket_is_udp_socket),
+    .Bind =             TWRAPF(ppb_udp_socket_bind_1_0),
+    .GetBoundAddress =  TWRAPF(ppb_udp_socket_get_bound_address_1_0),
+    .RecvFrom =         TWRAPF(ppb_udp_socket_recv_from_1_0),
+    .SendTo =           TWRAPF(ppb_udp_socket_send_to_1_0),
+    .Close =            TWRAPF(ppb_udp_socket_close),
+    .SetOption =        TWRAPZ(ppb_udp_socket_set_option),
+};
+
 static
 void
 __attribute__((constructor))
 constructor_ppb_udp_socket(void)
 {
     register_interface(PPB_UDPSOCKET_PRIVATE_INTERFACE_0_4, &ppb_udp_socket_private_interface_0_4);
+    register_interface(PPB_UDPSOCKET_INTERFACE_1_0, &ppb_udp_socket_interface_1_0);
+    register_interface(PPB_UDPSOCKET_INTERFACE_1_1, &ppb_udp_socket_interface_1_1);
+    register_interface(PPB_UDPSOCKET_INTERFACE_1_2, &ppb_udp_socket_interface_1_2);
     register_resource(PP_RESOURCE_UDP_SOCKET, ppb_udp_socket_destroy);
 }
