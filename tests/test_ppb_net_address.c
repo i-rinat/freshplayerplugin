@@ -239,7 +239,8 @@ test_ppb_net_address(void)
 
     printf("  ipv4, compose/decompose\n");
     {
-        const struct PP_NetAddress_IPv4 ipv4 = { .addr = {192, 168, 1, 2}, .port = 3456 };
+        const struct PP_NetAddress_IPv4 ipv4 = { .addr = {192, 168, 1, 2},
+                                                 .port = htons(3456) };
         struct PP_NetAddress_IPv4 ipv4_a = {};
         struct PP_NetAddress_IPv6 ipv6 = {};
 
@@ -261,7 +262,8 @@ test_ppb_net_address(void)
     printf("  ipv6, compose/decompose\n");
     {
         const struct PP_NetAddress_IPv6 ipv6 = { .addr = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                                                          12, 13, 14, 15, 16}, .port = 3456 };
+                                                          12, 13, 14, 15, 16},
+                                                 .port = htons(3456) };
         struct PP_NetAddress_IPv6 ipv6_a = {};
         struct PP_NetAddress_IPv4 ipv4 = {};
 

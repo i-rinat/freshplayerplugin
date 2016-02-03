@@ -267,7 +267,8 @@ ppb_net_address_create_from_ipv4_address(PP_Instance instance,
         return 0;
     }
 
-    ppb_net_address_private_create_from_ipv4_address(ipv4_addr->addr, ipv4_addr->port, &na->addr);
+    ppb_net_address_private_create_from_ipv4_address(ipv4_addr->addr, ntohs(ipv4_addr->port),
+                                                     &na->addr);
 
     pp_resource_release(net_address);
     return net_address;
@@ -295,7 +296,7 @@ ppb_net_address_create_from_ipv6_address(PP_Instance instance,
         return 0;
     }
 
-    ppb_net_address_private_create_from_ipv6_address(ipv6_addr->addr, 0, ipv6_addr->port,
+    ppb_net_address_private_create_from_ipv6_address(ipv6_addr->addr, 0, ntohs(ipv6_addr->port),
                                                      &na->addr);
 
     pp_resource_release(net_address);
@@ -374,7 +375,7 @@ ppb_net_address_describe_as_ipv4_address(PP_Resource addr, struct PP_NetAddress_
 
     struct sockaddr_in *sai = (void *)na->addr.data;
     memcpy(ipv4_addr->addr, &sai->sin_addr, sizeof(sai->sin_addr));
-    ipv4_addr->port = ntohs(sai->sin_port);
+    ipv4_addr->port = sai->sin_port;
 
     pp_resource_release(addr);
     return PP_TRUE;
@@ -402,7 +403,7 @@ ppb_net_address_describe_as_ipv6_address(PP_Resource addr, struct PP_NetAddress_
 
     struct sockaddr_in6 *sai6 = (void *)na->addr.data;
     memcpy(ipv6_addr->addr, &sai6->sin6_addr, sizeof(sai6->sin6_addr));
-    ipv6_addr->port = ntohs(sai6->sin6_port);
+    ipv6_addr->port = sai6->sin6_port;
 
     pp_resource_release(addr);
     return PP_TRUE;
@@ -563,9 +564,7 @@ PP_Bool
 trace_ppb_net_address_describe_as_ipv4_address(PP_Resource addr,
                                                struct PP_NetAddress_IPv4 *ipv4_addr)
 {
-    gchar *s_ipv4_addr = trace_netaddress_ipv4_as_string(ipv4_addr);
-    trace_info("[PPB] {full} %s addr=%d, ipv4_addr=%s\n", __func__+6, addr, s_ipv4_addr);
-    g_free(s_ipv4_addr);
+    trace_info("[PPB] {full} %s addr=%d\n", __func__+6, addr);
     return ppb_net_address_describe_as_ipv4_address(addr, ipv4_addr);
 }
 
@@ -574,9 +573,7 @@ PP_Bool
 trace_ppb_net_address_describe_as_ipv6_address(PP_Resource addr,
                                                struct PP_NetAddress_IPv6 *ipv6_addr)
 {
-    gchar *s_ipv6_addr = trace_netaddress_ipv6_as_string(ipv6_addr);
-    trace_info("[PPB] {full} %s addr=%d, ipv6_addr=%s\n", __func__+6, addr, s_ipv6_addr);
-    g_free(s_ipv6_addr);
+    trace_info("[PPB] {full} %s addr=%d\n", __func__+6, addr);
     return ppb_net_address_describe_as_ipv6_address(addr, ipv6_addr);
 }
 
