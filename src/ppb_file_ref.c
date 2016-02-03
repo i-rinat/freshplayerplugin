@@ -31,12 +31,13 @@
 #include "eintr_retry.h"
 #include "ppb_var.h"
 #include "pp_interface.h"
+#include <ppapi/c/pp_errors.h>
 
 
 PP_Resource
 ppb_file_ref_create(PP_Resource file_system, const char *path)
 {
-    return 0;
+    return PP_ERROR_FAILED;
 }
 
 PP_Resource
@@ -76,7 +77,7 @@ ppb_file_ref_is_file_ref(PP_Resource resource)
 PP_FileSystemType
 ppb_file_ref_get_file_system_type(PP_Resource file_ref)
 {
-    return 0;
+    return PP_ERROR_FAILED;
 }
 
 struct PP_Var
@@ -117,48 +118,55 @@ ppb_file_ref_get_path(PP_Resource file_ref)
 PP_Resource
 ppb_file_ref_get_parent(PP_Resource file_ref)
 {
-    return 0;
+    return PP_ERROR_FAILED;
 }
 
 int32_t
 ppb_file_ref_make_directory(PP_Resource directory_ref, PP_Bool make_ancestors,
                             struct PP_CompletionCallback callback)
 {
-    return 0;
+    return PP_ERROR_FAILED;
+}
+
+int32_t
+ppb_file_ref_make_directory_1_2(PP_Resource directory_ref, int32_t make_directory_flags,
+                                struct PP_CompletionCallback callback)
+{
+    return PP_ERROR_FAILED;
 }
 
 int32_t
 ppb_file_ref_touch(PP_Resource file_ref, PP_Time last_access_time, PP_Time last_modified_time,
                    struct PP_CompletionCallback callback)
 {
-    return 0;
+    return PP_ERROR_FAILED;
 }
 
 int32_t
 ppb_file_ref_delete(PP_Resource file_ref, struct PP_CompletionCallback callback)
 {
-    return 0;
+    return PP_ERROR_FAILED;
 }
 
 int32_t
 ppb_file_ref_rename(PP_Resource file_ref, PP_Resource new_file_ref,
                     struct PP_CompletionCallback callback)
 {
-    return 0;
+    return PP_ERROR_FAILED;
 }
 
 int32_t
 ppb_file_ref_query(PP_Resource file_ref, struct PP_FileInfo *info,
                    struct PP_CompletionCallback callback)
 {
-    return 0;
+    return PP_ERROR_FAILED;
 }
 
 int32_t
 ppb_file_ref_read_directory_entries(PP_Resource file_ref, struct PP_ArrayOutput output,
                                     struct PP_CompletionCallback callback)
 {
-    return 0;
+    return PP_ERROR_FAILED;
 }
 
 
@@ -220,6 +228,17 @@ trace_ppb_file_ref_make_directory(PP_Resource directory_ref, PP_Bool make_ancest
                ".user_data=%p, .flags=%u}\n", __func__+6, directory_ref, make_ancestors,
                callback.func, callback.user_data, callback.flags);
     return ppb_file_ref_make_directory(directory_ref, make_ancestors, callback);
+}
+
+TRACE_WRAPPER
+int32_t
+trace_ppb_file_ref_make_directory_1_2(PP_Resource directory_ref, int32_t make_directory_flags,
+                                      struct PP_CompletionCallback callback)
+{
+    trace_info("[PPB] {zilch} %s directory_ref=%d, make_directory_flags=%d, callback={.func=%p, "
+               ".user_data=%p, .flags=%u}\n", __func__+6, directory_ref, make_directory_flags,
+               callback.func, callback.user_data, callback.flags);
+    return ppb_file_ref_make_directory_1_2(directory_ref, make_directory_flags, callback);
 }
 
 TRACE_WRAPPER
@@ -305,6 +324,21 @@ const struct PPB_FileRef_1_0 ppb_file_ref_interface_1_0 = {
     .Rename =               TWRAPZ(ppb_file_ref_rename),
 };
 
+const struct PPB_FileRef_1_2 ppb_file_ref_interface_1_2 = {
+    .Create =               TWRAPZ(ppb_file_ref_create),
+    .IsFileRef =            TWRAPF(ppb_file_ref_is_file_ref),
+    .GetFileSystemType =    TWRAPZ(ppb_file_ref_get_file_system_type),
+    .GetName =              TWRAPF(ppb_file_ref_get_name),
+    .GetPath =              TWRAPF(ppb_file_ref_get_path),
+    .GetParent =            TWRAPZ(ppb_file_ref_get_parent),
+    .MakeDirectory =        TWRAPZ(ppb_file_ref_make_directory_1_2),
+    .Touch =                TWRAPZ(ppb_file_ref_touch),
+    .Delete =               TWRAPZ(ppb_file_ref_delete),
+    .Rename =               TWRAPZ(ppb_file_ref_rename),
+    .Query =                TWRAPZ(ppb_file_ref_query),
+    .ReadDirectoryEntries = TWRAPZ(ppb_file_ref_read_directory_entries),
+};
+
 static
 void
 __attribute__((constructor))
@@ -312,5 +346,6 @@ constructor_ppb_file_ref(void)
 {
     register_interface(PPB_FILEREF_INTERFACE_1_0, &ppb_file_ref_interface_1_0);
     register_interface(PPB_FILEREF_INTERFACE_1_1, &ppb_file_ref_interface_1_1);
+    register_interface(PPB_FILEREF_INTERFACE_1_2, &ppb_file_ref_interface_1_2);
     register_resource(PP_RESOURCE_FILE_REF, ppb_file_ref_destroy);
 }
