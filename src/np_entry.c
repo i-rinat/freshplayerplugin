@@ -131,29 +131,37 @@ call_plugin_init_module(void)
 }
 
 static
+int
+file_exists_and_is_regular_and_readable(const char *fname)
+{
+    struct stat sb;
+    int ret = lstat(fname, &sb);
+
+    // should exist
+    if (ret != 0)
+        return 0;
+
+    // should be a regular file
+    if (!S_ISREG(sb.st_mode))
+        return 0;
+
+    // should be readable
+    if (!(sb.st_mode & 0444))
+        return 0;
+
+    return 1;
+}
+
+static
 uintptr_t
-do_load_ppp_module(const char *fname)
+do_probe_ppp_module(const char *fname)
 {
     tried_files = g_list_prepend(tried_files, g_strdup(fname));
 
-    module_dl_handler = dlopen(fname, RTLD_LAZY);
-    if (!module_dl_handler) {
-        trace_info_f("%s, can't open %s\n", __func__, fname);
+    if (!file_exists_and_is_regular_and_readable(fname))
         return 1;
-    }
 
-    int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
-    ppp_initialize_module = dlsym(module_dl_handler, "PPP_InitializeModule");
-    ppp_get_interface = dlsym(module_dl_handler, "PPP_GetInterface");
-
-    if (!ppp_initialize_module || !ppp_get_interface) {
-        trace_error("%s, one of required PPP_* is missing\n", __func__);
-        if (module_dl_handler)
-            dlclose(module_dl_handler);
-        module_dl_handler = NULL;
-        return 1;
-    }
-
+    g_free(module_file_name);
     module_file_name = g_strdup(fname);
 
     if (!fpp_config_plugin_has_manifest()) {
@@ -189,6 +197,61 @@ do_load_ppp_module(const char *fname)
 }
 
 static
+int
+probe_ppp_module(void)
+{
+    fpp_config_initialize();
+
+    if (tried_files) {
+        g_list_free_full(tried_files, g_free);
+        tried_files = NULL;
+    }
+
+    if (fpp_config_get_plugin_path()) {
+        const char *ptr = fpp_config_get_plugin_path();
+        const char *last = strchr(ptr, ':');
+        uintptr_t   ret;
+
+        // parse ':'-separated list
+        while (last != NULL) {
+            // try entries one by one
+            char *entry = strndup(ptr, last - ptr);
+            ret = do_probe_ppp_module(entry);
+            free(entry);
+            if (ret == 0)
+                return 0;
+
+            ptr = last + 1;
+            last = strchr(ptr, ':');
+        }
+
+        // and the last entry
+        ret = do_probe_ppp_module(ptr);
+        if (ret == 0)
+            return 0;
+
+        goto failure;
+    }
+
+    // try all paths
+    const char **path_list = fpp_config_get_plugin_path_list();
+    while (*path_list) {
+        gchar *fname = g_strdup_printf("%s/%s", *path_list, fpp_config_get_plugin_file_name());
+        uintptr_t ret = do_probe_ppp_module(fname);
+        g_free(fname);
+        if (ret == 0)
+            return 0;
+        path_list ++;
+    }
+
+failure:
+    config.quirks.plugin_missing = 1;
+    use_fallback_version_strings();
+    trace_error("%s, can't find %s\n", __func__, fpp_config_get_plugin_file_name());
+    return 1;
+}
+
+static
 uintptr_t
 load_ppp_module()
 {
@@ -197,11 +260,37 @@ load_ppp_module()
         return 0;
     }
 
+    // ensure we have a module name
+    if (!module_file_name) {
+        if (probe_ppp_module() != 0)
+            goto err;
+        if (!module_file_name)
+            goto err;
+    }
+
+    module_dl_handler = dlopen(module_file_name, RTLD_LAZY);
+    if (!module_dl_handler) {
+        trace_info_f("%s, can't open %s\n", __func__, module_file_name);
+        goto err;
+    }
+
+    int32_t (*ppp_initialize_module)(PP_Module module_id, PPB_GetInterface get_browser_interface);
+    ppp_initialize_module = dlsym(module_dl_handler, "PPP_InitializeModule");
+    ppp_get_interface = dlsym(module_dl_handler, "PPP_GetInterface");
+
+    if (!ppp_initialize_module || !ppp_get_interface) {
+        trace_error("%s, one of required PPP_* is missing\n", __func__);
+        if (module_dl_handler)
+            dlclose(module_dl_handler);
+        module_dl_handler = NULL;
+        goto err;
+    }
+
     // allocate auxiliary instance
     if (!aux_instance) {
         aux_instance = calloc(1, sizeof(*aux_instance));
         if (!aux_instance)
-            return 1;
+            goto err;
 
         aux_instance->id = tables_generate_new_pp_instance_id();
         tables_add_pp_instance(aux_instance->id, aux_instance);
@@ -223,54 +312,10 @@ load_ppp_module()
         pthread_barrier_destroy(&aux_instance->main_thread_barrier);
     }
 
-    fpp_config_initialize();
+    return 0;
 
-    if (tried_files) {
-        g_list_free_full(tried_files, g_free);
-        tried_files = NULL;
-    }
-
-    if (fpp_config_get_plugin_path()) {
-        const char *ptr = fpp_config_get_plugin_path();
-        const char *last = strchr(ptr, ':');
-        uintptr_t   ret;
-
-        // parse ':'-separated list
-        while (last != NULL) {
-            // try entries one by one
-            char *entry = strndup(ptr, last - ptr);
-            ret = do_load_ppp_module(entry);
-            free(entry);
-            if (ret == 0)
-                return 0;
-
-            ptr = last + 1;
-            last = strchr(ptr, ':');
-        }
-
-        // and the last entry
-        ret = do_load_ppp_module(ptr);
-        if (ret == 0)
-            return 0;
-
-        goto failure;
-    }
-
-    // try all paths
-    const char **path_list = fpp_config_get_plugin_path_list();
-    while (*path_list) {
-        gchar *fname = g_strdup_printf("%s/%s", *path_list, fpp_config_get_plugin_file_name());
-        uintptr_t ret = do_load_ppp_module(fname);
-        g_free(fname);
-        if (ret == 0)
-            return 0;
-        path_list ++;
-    }
-
-failure:
+err:
     config.quirks.plugin_missing = 1;
-    use_fallback_version_strings();
-    trace_error("%s, can't find %s\n", __func__, fpp_config_get_plugin_file_name());
     return 1;
 }
 
@@ -355,7 +400,7 @@ char *
 NP_GetPluginVersion(void)
 {
     trace_info_f("[NP] %s\n", __func__);
-    load_ppp_module();
+    probe_ppp_module();
     return module_version;
 }
 
@@ -364,7 +409,9 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
 {
     trace_info_f("[NP] %s instance=%p, variable=%s, value=%p\n", __func__, instance,
                  reverse_npp_variable(variable), value);
-    load_ppp_module();
+
+    probe_ppp_module();
+
     switch (variable) {
     case NPPVpluginNameString:
         *(const char **)value = fpp_config_get_plugin_name();

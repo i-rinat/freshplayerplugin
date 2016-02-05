@@ -633,6 +633,9 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     if (config.quirks.plugin_missing)
         return NPERR_NO_ERROR;
 
+    if (!pp_i)
+        goto no_pp_i;
+
     if (pp_i->windowed_mode)
         x11et_unregister_window(pp_i->wnd);
 
@@ -669,6 +672,7 @@ NPP_Destroy(NPP npp, NPSavedData **save)
     ppb_var_release(pp_i->scriptable_pp_obj);
     free(pp_i);
 
+no_pp_i:
     if (save)
         *save = NULL;
     return NPERR_NO_ERROR;
