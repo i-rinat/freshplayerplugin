@@ -479,15 +479,32 @@ static
 void
 setup_sig_handlers(void)
 {
+    int s[] = { SIGSEGV, SIGILL, SIGABRT };
     struct sigaction sa = {};
 
     sa.sa_flags = SA_SIGINFO;
     sigemptyset(&sa.sa_mask);
+    for (int k = 0; k < sizeof(s) / sizeof(s[0]); k ++)
+        sigaddset(&sa.sa_mask, s[k]);
     sa.sa_sigaction = call_gdb_signal_handler;
 
-    sigaction(SIGSEGV, &sa, NULL);
-    sigaction(SIGILL,  &sa, NULL);
-    sigaction(SIGABRT, &sa, NULL);
+    for (int k = 0; k < sizeof(s) / sizeof(s[0]); k ++) {
+        struct sigaction prev;
+
+        // ensure there were no handlers before
+        if (sigaction(s[k], NULL, &prev) != 0)
+            continue;
+
+        if ((prev.sa_flags & SA_SIGINFO) && prev.sa_sigaction != NULL)
+            continue;
+
+        if (!(prev.sa_flags & SA_SIGINFO) && prev.sa_handler != NULL)
+            continue;
+
+        // install own handler
+        if (sigaction(s[k], &sa, NULL) != 0)
+            trace_error("%s, can't set signal %d handler\n", __func__, s[k]);
+    }
 }
 
 NPError
