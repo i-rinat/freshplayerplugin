@@ -470,7 +470,7 @@ call_gdb_signal_handler(int sig, siginfo_t *si, void *p)
              (int)pid, (int)now, (int)pid, sig);
 
     // call gdb
-    system(cmd);
+    (void)system(cmd); // ignore result
 
     exit(sig);
 }
