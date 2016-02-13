@@ -12,6 +12,7 @@ set(test_list
     test_uri_parser
     test_ppb_net_address
     test_config_parser
+    test_thread_specifier
 )
 
 link_directories(
