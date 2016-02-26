@@ -29,12 +29,12 @@ const char *pepperflash_path_list[] = {
     "/opt/google/chrome/PepperFlash",           // Chrome
     "/opt/google/chrome-beta/PepperFlash",      // Chrome beta
     "/opt/google/chrome-unstable/PepperFlash",  // Chrome unstable
+    "/usr/lib/adobe-flashplugin",               // adobe-flashplugin (Ubuntu)
     "/usr/lib/pepperflashplugin-nonfree",       // pepperflashplugin-nonfree (Debian)
     "/usr/lib/PepperFlash",                     // chromium-pepperflash-plugin (Slackware)
     "/usr/lib64/PepperFlash",                   // chromium-pepperflash-plugin (Slackware)
     "/usr/lib/chromium-browser/PepperFlash",    // chrome-binary-plugins (Gentoo/Sabayon)
     "/usr/lib64/chromium-browser/PepperFlash",  // chrome-binary-plugins (Gentoo/Sabayon)
-    "/usr/lib/adobe-flashplugin",               // adobe-flashplugin (Ubuntu)
     "/usr/lib/chromium/PepperFlash",            // chromium-pepper-flash (Old Build) (CentOS/Read Hat/Fedora)
     "/usr/lib64/chromium/PepperFlash",          // chromium-pepper-flash (Old Build) (CentOS/Read Hat/Fedora)
     "/opt/chromium/PepperFlash",                // chromium-pepper-flash (New Build) (CentOS/Read Hat/Fedora)
