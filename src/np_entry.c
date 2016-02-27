@@ -484,11 +484,11 @@ setup_sig_handlers(void)
 
     sa.sa_flags = SA_SIGINFO;
     sigemptyset(&sa.sa_mask);
-    for (int k = 0; k < sizeof(s) / sizeof(s[0]); k ++)
+    for (uintptr_t k = 0; k < sizeof(s) / sizeof(s[0]); k ++)
         sigaddset(&sa.sa_mask, s[k]);
     sa.sa_sigaction = call_gdb_signal_handler;
 
-    for (int k = 0; k < sizeof(s) / sizeof(s[0]); k ++) {
+    for (uintptr_t k = 0; k < sizeof(s) / sizeof(s[0]); k ++) {
         struct sigaction prev;
 
         // ensure there were no handlers before

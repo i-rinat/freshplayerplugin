@@ -57,7 +57,7 @@ fpp_font_init(struct fpp_font *ff, const struct PP_FontDescription_Dev *descript
 {
     PangoFontDescription *font_desc = pp_font_desc_to_pango_font_desc(description);
 
-    ff->family = description->face.type == PP_VARTYPE_STRING ? -1 : description->family;
+    ff->family = description->face.type == PP_VARTYPE_STRING ? 0 : description->family;
     ff->letter_spacing = description->letter_spacing;
     ff->word_spacing = description->word_spacing;
     ff->font = pango_context_load_font(tables_get_pango_ctx(), font_desc);

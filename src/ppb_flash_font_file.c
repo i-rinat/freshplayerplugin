@@ -106,8 +106,9 @@ ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *
         retval = ft_error == 0 ? PP_TRUE : PP_FALSE;
     }
 
-    if (ft_error != 0)
+    if (ft_error != 0) {
         trace_info_f("               ft_error=0x%02x\n", ft_error);
+    }
 
     pp_resource_release(font_file);
     return retval;

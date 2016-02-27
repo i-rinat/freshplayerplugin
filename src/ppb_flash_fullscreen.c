@@ -348,7 +348,7 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 
             case ClientMessage:
                 handled = 1;
-                if (ev.xclient.data.l[0] == wm_delete_window_atom)
+                if (ev.xclient.data.l[0] == (long)wm_delete_window_atom)
                     quit_message_received = 1;
 
                 if (ev.xclient.message_type == freshwrappercommand_atom) {

@@ -386,8 +386,8 @@ alsa_create_stream(audio_stream_direction direction, unsigned int sample_rate,
 
     unsigned int period_time = (long long)sample_frame_count * 1000 * 1000 / sample_rate;
     period_time = CLAMP(period_time,
-                        1000 * config.audio_buffer_min_ms,
-                        1000 * config.audio_buffer_max_ms);
+                        1000 * (unsigned int)config.audio_buffer_min_ms,
+                        1000 * (unsigned int)config.audio_buffer_max_ms);
     dir = 1;
     CHECK_A(snd_pcm_hw_params_set_period_time_near, (as->pcm, hw_params, &period_time, &dir));
 

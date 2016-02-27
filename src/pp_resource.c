@@ -150,7 +150,7 @@ count_resources_cb(gpointer key, gpointer value, gpointer user_data)
     int *counts = user_data;
     struct pp_resource_generic_s *r = value;
 
-    if (0 <= r->resource_type && r->resource_type < PP_RESOURCE_TYPES_COUNT)
+    if (r->resource_type < PP_RESOURCE_TYPES_COUNT)
         counts[r->resource_type] ++;
     else
         counts[PP_RESOURCE_TYPES_COUNT] ++;

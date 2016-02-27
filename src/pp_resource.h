@@ -195,8 +195,8 @@ struct pp_instance_s {
     // geometry
     int32_t                         x;
     int32_t                         y;
-    int32_t                         width;
-    int32_t                         height;
+    uint32_t                        width;
+    uint32_t                        height;
     int32_t                         offset_x;   ///< relative to a browser window top left corner
     int32_t                         offset_y;   ///< relative to a browser window top left corner
 
@@ -232,7 +232,7 @@ struct pp_instance_s {
 
 
 #define COMMON_STRUCTURE_FIELDS                 \
-    int                     resource_type;      \
+    uint32_t                resource_type;      \
     int                     ref_cnt;            \
     struct pp_instance_s   *instance;           \
     PP_Resource             self_id;            \
@@ -255,7 +255,7 @@ struct pp_url_loader_s {
     char                   *redirect_url;   ///< value of the Location header if this is
                                             ///< a redirection response
     int                     finished_loading;   ///< if whole stream loaded already
-    int32_t                 response_size;  ///< Content-Length value of -1 if absent
+    int64_t                 response_size;  ///< Content-Length value of -1 if absent
     int                     stream_to_file; ///< whenever streaming to file is allowed
     struct PP_CompletionCallback    stream_to_file_ccb; ///< callback to call on end of streaming
     PP_Resource             stream_to_file_ccb_ml; ///< message loop to call callback on

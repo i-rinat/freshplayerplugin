@@ -312,7 +312,7 @@ post_data_get_item_length(struct post_data_item_s *pdi)
 
         if (pdi->number_of_bytes >= 0) {
             return (size_t)pdi->number_of_bytes;
-        } else if (finfo.size <= start_offset) {
+        } else if (finfo.size <= (int64_t)start_offset) {
             return 0;
         } else {
             return finfo.size - start_offset;

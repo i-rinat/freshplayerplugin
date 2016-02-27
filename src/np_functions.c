@@ -178,7 +178,7 @@ call_plugin_did_create_comt(void *user_data, int32_t result)
                                       (const char **)pp_i->argv);
 
     // no need to keep argn/argv after initialization
-    for (uintptr_t k = 0; k < pp_i->argc; k++) {
+    for (intptr_t k = 0; k < pp_i->argc; k++) {
         free(pp_i->argn[k]);
         free(pp_i->argv[k]);
     }
@@ -763,7 +763,7 @@ NPP_NewStream(NPP npp, NPMIMEType type, NPStream *stream, NPBool seekable, uint1
         }
         *ptr = 0;
         ul->http_code = ph->http_code;
-        ul->response_size = stream->end > 0 ? stream->end : -1;
+        ul->response_size = stream->end > 0 ? (int64_t)stream->end : -1;
         ul->status_line = nullsafe_strdup(ph->status_line);
 
         hp_free_parsed_headers(ph);
@@ -1437,7 +1437,7 @@ handle_button_press_release_event(NPP npp, void *event)
         event_type = (ev->type == ButtonPress) ? PP_INPUTEVENT_TYPE_MOUSEDOWN
                                                : PP_INPUTEVENT_TYPE_MOUSEUP;
 
-        if (ev->time - pp_i->last_button_release_timestamp < config.double_click_delay_ms)
+        if (ev->time < config.double_click_delay_ms + pp_i->last_button_release_timestamp)
             click_count = 2;
 
         pp_event = ppb_mouse_input_event_create(pp_i->id, event_type,

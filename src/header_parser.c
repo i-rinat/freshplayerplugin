@@ -35,7 +35,7 @@ hp_parse_headers(const char *headers)
     struct parsed_headers_s *ph = calloc(1, sizeof(*ph));
     const char *delimiter = "\r\n";
     char *headers_copy, *saveptr, *part;
-    int k;
+    unsigned int k;
 
     if (headers == NULL) {
         // all fields zeroed

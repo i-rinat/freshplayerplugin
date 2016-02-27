@@ -221,12 +221,12 @@ ppb_video_capture_enumerate_devices(PP_Resource video_capture, struct PP_ArrayOu
                                              sizeof(PP_Resource));
     if (!devs) {
         retval = PP_ERROR_FAILED;
-        for (int k = 0; k < vc_devices->len; k ++)
+        for (uintptr_t k = 0; k < vc_devices->len; k ++)
             ppb_core_release_resource(g_array_index(vc_devices, PP_Resource, k));
         goto err;
     }
 
-    for (int k = 0; k < vc_devices->len; k ++)
+    for (uintptr_t k = 0; k < vc_devices->len; k ++)
         devs[k] = g_array_index(vc_devices, PP_Resource, k);
 
     retval = PP_OK_COMPLETIONPENDING;
