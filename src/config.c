@@ -125,6 +125,7 @@ initialize_quirks(void)
     if (fp) {
         char buf[2048];
         size_t read_bytes = fread(buf, 1, sizeof(buf) - 1, fp);
+        buf[MIN(read_bytes, sizeof(buf) - 1)] = 0;
 
         if (read_bytes > 0)
             if (strstr(buf, "WebKitPluginProcess"))
