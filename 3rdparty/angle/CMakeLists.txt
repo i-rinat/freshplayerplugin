@@ -1,6 +1,9 @@
 include_directories(include)
 include_directories(src)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+
 add_library(shader_translator STATIC
     src/common/Float16ToFloat32.cpp
     src/common/tls.cpp
