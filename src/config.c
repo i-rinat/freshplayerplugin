@@ -196,13 +196,10 @@ fpp_config_initialize(void)
         if (cfg_parse(cfg, global_config) != CFG_SUCCESS) {
             trace_info_f("can't open configuration file %s, using default values\n", global_config);
             config = default_config;
-            goto quit;
         }
     }
 
     cfg_free(cfg);
-
-quit:
 
     // restore locale
     setlocale(LC_ALL, "");
