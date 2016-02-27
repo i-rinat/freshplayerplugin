@@ -41,9 +41,9 @@ endif()
 
 # dependencies
 find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLIB glib-2.0 REQUIRED)
 pkg_check_modules(REQ
     alsa
-    glib-2.0
     gio-2.0
     x11
     xrandr
@@ -60,6 +60,11 @@ pkg_check_modules(REQ
     freetype2
     openssl
     REQUIRED)
+
+# merge glib-2.0
+list(APPEND REQ_LIBRARY_DIRS ${GLIB_LIBRARY_DIRS})
+list(APPEND REQ_INCLUDE_DIRS ${GLIB_INCLUDE_DIRS})
+list(APPEND REQ_LIBRARIES    ${GLIB_LIBRARIES})
 
 # libdl.so, librt.so, and libm.so
 list(APPEND REQ_LIBRARIES dl rt m)

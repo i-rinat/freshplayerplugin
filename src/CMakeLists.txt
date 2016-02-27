@@ -153,7 +153,7 @@ if (WITH_LIBPDF)
                 config.c
                 $<TARGET_OBJECTS:config-parser-obj>
                 config_libpdf_frontend.c)
-    target_link_libraries(freshwrapper-libpdf-frontend ${SYMBOLMAP} txt-resources)
+    target_link_libraries(freshwrapper-libpdf-frontend ${SYMBOLMAP} txt-resources ${GLIB_LIBRARIES})
     target_link_libraries(dep_check freshwrapper-libpdf-frontend)
 
     install(TARGETS freshwrapper-libpdf-frontend DESTINATION ${MOZPLUGIN_INSTALL_DIR})
