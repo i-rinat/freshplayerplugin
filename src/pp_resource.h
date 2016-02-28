@@ -483,7 +483,7 @@ struct pp_file_io_s {
 struct pp_message_loop_s {
     COMMON_STRUCTURE_FIELDS
     GAsyncQueue            *async_q;
-    GQueue                 *int_q;
+    GTree                  *int_q;
     int                     running;
     int                     teardown;
     int                     depth;

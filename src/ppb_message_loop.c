@@ -40,6 +40,34 @@ static          PP_Resource main_thread_message_loop = 0;
 static          PP_Resource browser_thread_message_loop = 0;
 
 
+struct message_loop_task_s {
+    struct timespec                 when;
+    int                             terminate;
+    int                             depth;
+    const char                     *origin;     ///< name of the function that scheduled the task
+    struct PP_CompletionCallback    ccb;
+    int32_t                         result_to_pass;
+    PP_Bool                         should_destroy_ml;
+};
+
+static gint
+task_tree_compare_func(gconstpointer a, gconstpointer b)
+{
+    const struct message_loop_task_s *task_a = a;
+    const struct message_loop_task_s *task_b = b;
+
+    if (task_a->when.tv_sec < task_b->when.tv_sec)
+        return -1;
+    else if (task_a->when.tv_sec > task_b->when.tv_sec)
+        return 1;
+    else if (task_a->when.tv_nsec < task_b->when.tv_nsec)
+        return -1;
+    else if (task_a->when.tv_nsec > task_b->when.tv_nsec)
+        return 1;
+    else
+        return 0;
+}
+
 PP_Resource
 ppb_message_loop_create(PP_Instance instance)
 {
@@ -57,7 +85,7 @@ ppb_message_loop_create(PP_Instance instance)
     }
 
     ml->async_q = g_async_queue_new();
-    ml->int_q = g_queue_new();
+    ml->int_q = g_tree_new(task_tree_compare_func);
     ml->depth = 0;  // running loop will always have depth > 0
 
     pp_resource_release(message_loop);
@@ -76,7 +104,7 @@ ppb_message_loop_destroy(void *p)
     }
 
     if (ml->int_q) {
-        g_queue_free(ml->int_q);
+        g_tree_destroy(ml->int_q);
         ml->int_q = NULL;
     }
 }
@@ -165,34 +193,6 @@ ppb_message_loop_attach_to_current_thread(PP_Resource message_loop)
     return PP_OK;
 }
 
-struct message_loop_task_s {
-    struct timespec                 when;
-    int                             terminate;
-    int                             depth;
-    const char                     *origin;     ///< name of the function that scheduled the task
-    struct PP_CompletionCallback    ccb;
-    int32_t                         result_to_pass;
-    PP_Bool                         should_destroy_ml;
-};
-
-static gint
-time_compare_func(gconstpointer a, gconstpointer b, gpointer user_data)
-{
-    const struct message_loop_task_s *task_a = a;
-    const struct message_loop_task_s *task_b = b;
-
-    if (task_a->when.tv_sec < task_b->when.tv_sec)
-        return -1;
-    else if (task_a->when.tv_sec > task_b->when.tv_sec)
-        return 1;
-    else if (task_a->when.tv_nsec < task_b->when.tv_nsec)
-        return -1;
-    else if (task_a->when.tv_nsec > task_b->when.tv_nsec)
-        return 1;
-    else
-        return 0;
-}
-
 int32_t
 ppb_message_loop_run(PP_Resource message_loop)
 {
@@ -206,18 +206,45 @@ ppb_message_loop_run_nested(PP_Resource message_loop)
     return ppb_message_loop_run_int(message_loop, ML_NESTED | ML_INCREASE_DEPTH);
 }
 
-static
-struct timespec
-add_ms(struct timespec t, unsigned int ms)
+struct task_tree_traverse_func_state {
+    int                          current_depth;
+    struct message_loop_task_s  *result;
+};
+
+static gboolean
+task_tree_traverse_func(gpointer key, gpointer value, gpointer data)
 {
-    t.tv_sec += ms / 1000;
-    t.tv_nsec += (ms % 1000) * 1000 * 1000;
-    if (t.tv_nsec > 1000 * 1000 * 1000) {
-        t.tv_sec += 1;
-        t.tv_nsec -= 1000 * 1000 * 1000;
+    (void)value; // value is not used here
+    struct message_loop_task_s *task = key;
+    struct task_tree_traverse_func_state *state = data;
+
+    if (task->depth == 0 || task->depth >= state->current_depth) {
+        // appropriate tasks are:
+        //     either tasks with depth 0, which means any time is good;
+        //     or tasks with current depth;
+        //     or tasks left from previous nesting.
+
+        state->result = task;
+
+        // stop here
+        return TRUE;
     }
 
-    return t;
+    // otherwise continue traversing
+    return FALSE;
+}
+
+static struct message_loop_task_s *
+find_first_task_with_appropriate_depth(GTree *q, int current_depth)
+{
+    struct task_tree_traverse_func_state state = {
+        .result =        NULL,
+        .current_depth = current_depth,
+    };
+
+    g_tree_foreach(q, task_tree_traverse_func, &state);
+
+    return state.result;
 }
 
 int32_t
@@ -259,7 +286,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
     int depth = ml->depth;
     pp_resource_ref(message_loop);
     GAsyncQueue *async_q = ml->async_q;
-    GQueue *int_q = ml->int_q;
+    GTree *int_q = ml->int_q;
     pp_resource_release(message_loop);
 
     if (flags & ML_EXIT_ON_EMPTY) {
@@ -269,13 +296,13 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
         do {
             task = g_async_queue_try_pop(async_q);
             if (task)
-                g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
+                g_tree_insert(int_q, task, GINT_TO_POINTER(1));
         } while (task != NULL);
     }
 
     while (1) {
         struct timespec now;
-        struct message_loop_task_s *task = g_queue_peek_head(int_q);
+        struct message_loop_task_s *task = find_first_task_with_appropriate_depth(int_q, depth);
         gint64 timeout = 1000 * 1000;
         if (task) {
             clock_gettime(CLOCK_REALTIME, &now);
@@ -283,15 +310,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
                       (task->when.tv_nsec - now.tv_nsec) / 1000;
             if (timeout <= 0) {
                 // remove task from the queue
-                g_queue_pop_head(int_q);
-
-                // check if depth is correct
-                if (task->depth > 0 && task->depth < depth) {
-                    // wrong, reschedule it a bit later
-                    task->when = add_ms(now, 10);
-                    g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
-                    continue;
-                }
+                g_tree_remove(int_q, task);
 
                 if (task->terminate) {
                     // if depth > 1 or loop was reentered with no depth increase, it's a nested loop
@@ -340,7 +359,7 @@ ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
 
         task = g_async_queue_timeout_pop(async_q, timeout);
         if (task)
-            g_queue_insert_sorted(int_q, task, time_compare_func, NULL);
+            g_tree_insert(int_q, task, GINT_TO_POINTER(1));
     }
 
     // mark thread as non-running
