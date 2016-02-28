@@ -700,24 +700,6 @@ find_free_buffer(struct pp_video_decoder_s *vd)
     return (uint32_t)-1;
 }
 
-struct picture_ready_param_s {
-    struct PP_Picture_Dev   picture;
-    PP_Instance             instance;
-    PP_Resource             video_decoder;
-    const struct PPP_VideoDecoder_Dev_0_11 *ppp_video_decoder_dev;
-};
-
-static
-void
-picture_ready_ptac(void *param, int32_t result)
-{
-    struct picture_ready_param_s *p = param;
-
-    p->ppp_video_decoder_dev->PictureReady(p->instance, p->video_decoder, &p->picture);
-
-    g_slice_free1(sizeof(*p), p);
-}
-
 static
 void
 issue_frame(struct pp_video_decoder_s *vd)
@@ -782,17 +764,15 @@ issue_frame(struct pp_video_decoder_s *vd)
 
     pp_resource_release(vd->graphics3d);
 
-    struct picture_ready_param_s *p = g_slice_alloc(sizeof(*p));
+    const PP_Instance instance = vd->instance->id;
+    const struct PP_Picture_Dev picture = {
+        .picture_buffer_id = vd->buffers[idx].id,
+        .bitstream_buffer_id = bitstream_buffer_id,
+    };
 
-    p->instance =                    vd->instance->id;
-    p->video_decoder =               vd->self_id;
-    p->picture.picture_buffer_id =   vd->buffers[idx].id;
-    p->picture.bitstream_buffer_id = bitstream_buffer_id;
-    p->ppp_video_decoder_dev =       vd->ppp_video_decoder_dev;
-
-    ppb_message_loop_post_work_with_result(ppb_message_loop_get_current(),
-                                           PP_MakeCCB(picture_ready_ptac, p), 0, PP_OK, 0,
-                                           __func__);
+    pp_resource_release(vd->self_id);
+    vd->ppp_video_decoder_dev->PictureReady(instance, vd->self_id, &picture);
+    pp_resource_acquire(vd->self_id, PP_RESOURCE_VIDEO_DECODER);
 }
 
 static
