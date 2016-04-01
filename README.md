@@ -146,4 +146,4 @@ http://mirror.pcbeta.com/google/chrome/deb/pool/main/g/google-chrome-stable/goog
 
 http://mirror.pcbeta.com/google/rpm/i386/google-chrome32/google-chrome-stable-48.0.2564.116-1.i386.rpm
 
-you can also download the torrent file see google chrome linux i386 latest.torrent
+you can also download the torrent file see https://github.com/i-rinat/freshplayerplugin/raw/master/google%20chrome%20linux%20i386%20latest.torrent
