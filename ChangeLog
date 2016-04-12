@@ -1,3 +1,12 @@
+2016-04-12  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release v0.3.5
+	* video: try /dev/video* instead of /dev/v4l/by-path/*
+	* network: fix byte order in PPB_NetAddress
+	* network: partially implement PPB_HostResolver;1.0 and
+	PPB_UDPSocket;1.2
+	* mics: keep task order in PPB_MessageLoop
+
 2015-12-20  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.3.4
