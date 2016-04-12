@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.8)
 # version
 set(VER_MAJOR 0)
 set(VER_MINOR 3)
-set(VER_MICRO 5)
+set(VER_MICRO 6)
 
 # setup compiler flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -fPIC -pthread")
