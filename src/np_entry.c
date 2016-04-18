@@ -46,9 +46,8 @@
 
 
 static void *module_dl_handler;
-static gchar *module_version;
-static gchar *module_descr;
-static GList *tried_files = NULL;
+static gchar *module_version = NULL;
+static gchar *module_descr = NULL;
 static gchar *module_file_name = NULL;
 static struct pp_instance_s *aux_instance = NULL;
 static int np_initialize_was_called = 0;
@@ -59,12 +58,6 @@ use_fallback_version_strings(void)
 {
     module_version = g_strdup(fpp_config_get_default_plugin_version());
     module_descr = g_strdup(fpp_config_get_default_plugin_descr());
-}
-
-GList *
-np_entry_get_tried_plugin_files(void)
-{
-    return tried_files;
 }
 
 gchar *
@@ -131,124 +124,12 @@ call_plugin_init_module(void)
 }
 
 static
-int
-file_exists_and_is_regular_and_readable(const char *fname)
-{
-    struct stat sb;
-    int ret = lstat(fname, &sb);
-
-    // should exist
-    if (ret != 0)
-        return 0;
-
-    // should be a regular file
-    if (!S_ISREG(sb.st_mode))
-        return 0;
-
-    // should be readable
-    if (!(sb.st_mode & 0444))
-        return 0;
-
-    return 1;
-}
-
-static
-uintptr_t
-do_probe_ppp_module(const char *fname)
-{
-    tried_files = g_list_prepend(tried_files, g_strdup(fname));
-
-    if (!file_exists_and_is_regular_and_readable(fname))
-        return 1;
-
-    g_free(module_file_name);
-    module_file_name = g_strdup(fname);
-
-    if (!fpp_config_plugin_has_manifest()) {
-        use_fallback_version_strings();
-        return 0;
-    }
-
-    // try to read manifest.json file (only for those who can have it)
-    char *manifest_dir = strdup(fname);
-    gchar *manifest_path = g_strdup_printf("%s/manifest.json", dirname(manifest_dir));
-    free(manifest_dir);
-
-    JSON_Value *root_val = json_parse_file(manifest_path);
-    g_free(manifest_path);
-    if (!root_val) {
-        use_fallback_version_strings();
-        return 0;
-    }
-
-    JSON_Object *root_obj = json_value_get_object(root_val);
-    const char *version = json_object_get_string(root_obj, "version");
-    if (version) {
-        int v1 = 0, v2 = 0, v3 = 0, v4 = 0;
-        module_version = g_strdup(version);
-        (void)sscanf(module_version, "%9d.%9d.%9d.%9d", &v1, &v2, &v3, &v4);
-        module_descr = g_strdup_printf("%s %d.%d r%d", fpp_config_get_plugin_name(), v1, v2, v3);
-    } else {
-        use_fallback_version_strings();
-    }
-
-    json_value_free(root_val);
-    return 0;
-}
-
-static
-int
+void
 probe_ppp_module(void)
 {
     fpp_config_initialize();
 
-    if (tried_files) {
-        g_list_free_full(tried_files, g_free);
-        tried_files = NULL;
-    }
-
-    if (fpp_config_get_plugin_path()) {
-        const char *ptr = fpp_config_get_plugin_path();
-        const char *last = strchr(ptr, ':');
-        uintptr_t   ret;
-
-        // parse ':'-separated list
-        while (last != NULL) {
-            // try entries one by one
-            char *entry = strndup(ptr, last - ptr);
-            ret = do_probe_ppp_module(entry);
-            free(entry);
-            if (ret == 0)
-                return 0;
-
-            ptr = last + 1;
-            last = strchr(ptr, ':');
-        }
-
-        // and the last entry
-        ret = do_probe_ppp_module(ptr);
-        if (ret == 0)
-            return 0;
-
-        goto failure;
-    }
-
-    // try all paths
-    const char **path_list = fpp_config_get_plugin_path_list();
-    while (*path_list) {
-        gchar *fname = g_strdup_printf("%s/%s", *path_list, fpp_config_get_plugin_file_name());
-        uintptr_t ret = do_probe_ppp_module(fname);
-        g_free(fname);
-        if (ret == 0)
-            return 0;
-        path_list ++;
-    }
-
-failure:
-    config.quirks.plugin_missing = 1;
-    use_fallback_version_strings();
-    trace_error("%s, can't find %s\n", __func__, fpp_config_get_plugin_file_name());
-    return 1;
+    fpp_config_get_plugin(&module_file_name, &module_descr, &module_version);
 }
 
 static
@@ -262,8 +143,7 @@ load_ppp_module()
 
     // ensure we have a module name
     if (!module_file_name) {
-        if (probe_ppp_module() != 0)
-            goto err;
+        probe_ppp_module();
         if (!module_file_name)
             goto err;
     }
@@ -316,6 +196,8 @@ load_ppp_module()
 
 err:
     config.quirks.plugin_missing = 1;
+    use_fallback_version_strings();
+    trace_error("%s, can't find %s\n", __func__, fpp_config_get_plugin_file_name());
     return 1;
 }
 
@@ -373,10 +255,6 @@ unload_ppp_module(void)
     g_free(module_descr); module_descr = NULL;
     g_free(module_version); module_version = NULL;
     g_free(module_file_name); module_file_name = NULL;
-    if (tried_files) {
-        g_list_free_full(tried_files, g_free);
-        tried_files = NULL;
-    }
 
     // call module shutdown handler if exists
     call_plugin_shutdown_module();

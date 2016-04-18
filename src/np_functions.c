@@ -1212,19 +1212,9 @@ handle_placeholder_graphics_expose_event(NPP npp, void *event)
             "Failed to load \"%s\".\n"
             "Freshwrapper is a translation layer which needs\n"
             "PPAPI plugin backend. Ensure your system have\n"
-            "\"%s\" available.\n"
-            "Paths tried:\n",
+            "\"%s\" available.\n",
             plugin_name, plugin_name);
 
-        // append list of tried paths
-        GList *tried_files = g_list_copy(np_entry_get_tried_plugin_files());
-        tried_files = g_list_reverse(tried_files); // list was built in reverse
-        GList *ll = tried_files;
-        while (ll) {
-            g_string_append_printf(builder, "%s\n", (char *)ll->data);
-            ll = g_list_next(ll);
-        }
-        g_list_free(tried_files);
         txt = g_string_free(builder, FALSE); // keep buffer
     }
 

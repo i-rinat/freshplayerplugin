@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <locale.h>
 #include <glib.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "trace_core.h"
 
 
@@ -215,6 +217,8 @@ fpp_config_initialize(void)
     pepper_salt_file_name = g_strdup_printf("%s/%s", local_config, salt_file_name);
     g_free(local_config);
 
+    fpp_config_plugin_initialize();
+
     initialized = 1;
 }
 
@@ -248,4 +252,22 @@ const char *
 fpp_config_get_pepper_salt_file_name(void)
 {
     return pepper_salt_file_name;
+}
+
+char *
+fpp_config_find_file_among_paths(const char *file, const char **paths)
+{
+    gchar *fullpath = NULL;
+    int ret;
+    for (const char **path = paths; *path; path++) {
+        fullpath = g_strdup_printf("%s/%s", *path, file);
+        // Check if file is readable by us
+        if ((ret = open(fullpath, O_RDONLY)) < 0) continue;
+        else {
+            close(ret);
+            return fullpath;
+        }
+    }
+
+    return NULL;
 }
