@@ -101,7 +101,8 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
     }
     attrib_len ++;
 
-    int *cfg_attrs = calloc(attrib_len + 3 * 2, sizeof(int));
+    const int max_attrib_count = attrib_len + 3 * 2;
+    int *cfg_attrs = calloc(max_attrib_count, sizeof(int));
     int k2 = 0;
     cfg_attrs[k2++] = GLX_X_RENDERABLE;
     cfg_attrs[k2++] = True;
@@ -186,6 +187,8 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
             break;
         }
     }
+
+    assert(k2 <= max_attrib_count);
 
     pthread_mutex_lock(&display.lock);
     int screen = DefaultScreen(display.x);
