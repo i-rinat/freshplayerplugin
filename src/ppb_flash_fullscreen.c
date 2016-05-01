@@ -653,6 +653,8 @@ ppb_flash_fullscreen_get_screen_size(PP_Instance instance, struct PP_Size *size)
     size->width = pp_i->fs_width > 0 ? pp_i->fs_width : display.min_width;
     size->height = pp_i->fs_height > 0 ? pp_i->fs_height : display.min_height;
 
+    size->width /= config.device_scale;
+    size->height /= config.device_scale;
     return PP_TRUE;
 }
 

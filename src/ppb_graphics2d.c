@@ -349,9 +349,7 @@ ppb_graphics2d_set_scale(PP_Resource resource, float scale)
     }
 
     g2d->external_scale = scale;
-    g2d->scale = scale;
-    if (!g2d->instance->is_fullscreen)
-        g2d->scale *= config.device_scale;
+    g2d->scale = scale * config.device_scale;
 
     g2d->scaled_width = g2d->width * g2d->scale + 0.5;
     g2d->scaled_height = g2d->height * g2d->scale + 0.5;
