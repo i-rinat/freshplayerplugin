@@ -63,6 +63,7 @@ ppb_graphics2d_create(PP_Instance instance, const struct PP_Size *size, PP_Bool 
 
     g2d->is_always_opaque = is_always_opaque;
     g2d->scale = config.device_scale;
+    g2d->external_scale = 1.0;
     g2d->width =  size->width;
     g2d->height = size->height;
     g2d->stride = 4 * size->width;
@@ -347,7 +348,11 @@ ppb_graphics2d_set_scale(PP_Resource resource, float scale)
         return PP_ERROR_BADRESOURCE;
     }
 
-    g2d->scale = scale * config.device_scale;
+    g2d->external_scale = scale;
+    g2d->scale = scale;
+    if (!g2d->instance->is_fullscreen)
+        g2d->scale *= config.device_scale;
+
     g2d->scaled_width = g2d->width * g2d->scale + 0.5;
     g2d->scaled_height = g2d->height * g2d->scale + 0.5;
     g2d->scaled_stride = 4 * g2d->scaled_width;
@@ -369,7 +374,7 @@ ppb_graphics2d_get_scale(PP_Resource resource)
         return PP_ERROR_BADRESOURCE;
     }
 
-    float scale = g2d->scale / config.device_scale;
+    float scale = g2d->external_scale;
     pp_resource_release(resource);
     return scale;
 }

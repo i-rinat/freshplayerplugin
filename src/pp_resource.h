@@ -347,6 +347,7 @@ struct pp_graphics2d_s {
     int32_t             height;
     int32_t             stride;
     double              scale;
+    double              external_scale;
     int32_t             scaled_width;
     int32_t             scaled_height;
     int32_t             scaled_stride;
