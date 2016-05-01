@@ -321,9 +321,9 @@ struct pp_graphics3d_s {
     GLXContext          glc;
     GLXFBConfig         fb_config;
     int32_t             depth;          ///< depth of the pixmap, 32 for transparent, 24 otherwise
-    Pixmap              pixmap;
     GLXPixmap           glx_pixmap;
-    Picture             xr_pict;
+    Pixmap              pixmap[2];      ///< first for immediate drawing, second - to store copy
+    Picture             xr_pict[2];     ///< XRender pictures for X pixmaps
     XRenderPictFormat  *xr_pictfmt;
     int32_t             width;
     int32_t             height;

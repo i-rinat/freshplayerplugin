@@ -259,17 +259,23 @@ ppb_graphics3d_create(PP_Instance instance, PP_Resource share_context, const int
         goto err;
     }
 
-    g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
-                                g3d->depth);
-    g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
+    // Creating two X pixmaps. First one is for drawing into, with a GLX Pixmap associated.
+    // Second one is for double buffering.
+    g3d->pixmap[0] = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
+                                   g3d->depth);
+    g3d->pixmap[1] = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
+                                   g3d->depth);
+    g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap[0], NULL);
     if (g3d->glx_pixmap == None) {
         trace_error("%s, failed to create GLX pixmap\n", __func__);
         goto err;
     }
 
     XFlush(display.x);
-    if (display.have_xrender)
-        g3d->xr_pict = XRenderCreatePicture(display.x, g3d->pixmap, g3d->xr_pictfmt, 0, 0);
+    if (display.have_xrender) {
+        g3d->xr_pict[0] = XRenderCreatePicture(display.x, g3d->pixmap[0], g3d->xr_pictfmt, 0, 0);
+        g3d->xr_pict[1] = XRenderCreatePicture(display.x, g3d->pixmap[1], g3d->xr_pictfmt, 0, 0);
+    }
 
     int ret = glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     if (!ret) {
@@ -310,9 +316,14 @@ ppb_graphics3d_destroy(void *p)
     glXMakeCurrent(display.x, None, NULL);
 
     glXDestroyPixmap(display.x, g3d->glx_pixmap);
-    if (display.have_xrender)
-        XRenderFreePicture(display.x, g3d->xr_pict);
-    XFreePixmap(display.x, g3d->pixmap);
+
+    if (display.have_xrender) {
+        XRenderFreePicture(display.x, g3d->xr_pict[0]);
+        XRenderFreePicture(display.x, g3d->xr_pict[1]);
+    }
+
+    XFreePixmap(display.x, g3d->pixmap[0]);
+    XFreePixmap(display.x, g3d->pixmap[1]);
 
     glXDestroyContext(display.x, g3d->glc);
     pthread_mutex_unlock(&display.lock);
@@ -360,18 +371,22 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
     g3d->height = height;
 
     GLXPixmap old_glx_pixmap = g3d->glx_pixmap;
-    Pixmap    old_pixmap = g3d->pixmap;
-    Picture   old_pict = g3d->xr_pict;
+    Pixmap    old_pixmap[2] = { g3d->pixmap[0], g3d->pixmap[1] };
+    Picture   old_pict[2] = { g3d->xr_pict[0], g3d->xr_pict[1] };
 
     // release possibly bound to other thread g3d->glx_pixmap and bind it to the current one
     pthread_mutex_lock(&display.lock);
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
-    g3d->pixmap = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
-                                g3d->depth);
-    g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap, NULL);
+    g3d->pixmap[0] = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
+                                   g3d->depth);
+    g3d->pixmap[1] = XCreatePixmap(display.x, DefaultRootWindow(display.x), g3d->width, g3d->height,
+                                   g3d->depth);
+    g3d->glx_pixmap = glXCreatePixmap(display.x, g3d->fb_config, g3d->pixmap[0], NULL);
     XFlush(display.x);
-    if (display.have_xrender)
-        g3d->xr_pict = XRenderCreatePicture(display.x, g3d->pixmap, g3d->xr_pictfmt, 0, 0);
+    if (display.have_xrender) {
+        g3d->xr_pict[0] = XRenderCreatePicture(display.x, g3d->pixmap[0], g3d->xr_pictfmt, 0, 0);
+        g3d->xr_pict[1] = XRenderCreatePicture(display.x, g3d->pixmap[1], g3d->xr_pictfmt, 0, 0);
+    }
 
     // make new g3d->glx_pixmap current to the current thread to allow releasing old_glx_pixmap
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
@@ -382,9 +397,14 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 
     // destroy previous glx and x pixmaps
     glXDestroyPixmap(display.x, old_glx_pixmap);
-    if (display.have_xrender)
-        XRenderFreePicture(display.x, old_pict);
-    XFreePixmap(display.x, old_pixmap);
+
+    if (display.have_xrender) {
+        XRenderFreePicture(display.x, old_pict[0]);
+        XRenderFreePicture(display.x, old_pict[1]);
+    }
+
+    XFreePixmap(display.x, old_pixmap[0]);
+    XFreePixmap(display.x, old_pixmap[1]);
 
     pthread_mutex_unlock(&display.lock);
     pp_resource_release(context);
@@ -451,6 +471,20 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     glXMakeCurrent(display.x, g3d->glx_pixmap, g3d->glc);
     glFinish();  // ensure painting is done
     glXMakeCurrent(display.x, None, NULL);
+
+    glXWaitGL();
+
+    // copy from pixmap[0] to pixmap[1]
+    if (display.have_xrender) {
+        XRenderComposite(display.x, PictOpSrc, g3d->xr_pict[0], None, g3d->xr_pict[1],
+                         0, 0, 0, 0, 0, 0, g3d->width, g3d->height);
+
+    } else {
+        const int screen = DefaultScreen(display.x);
+        const GC gc = DefaultGC(display.x, screen);
+        XCopyArea(display.x, g3d->pixmap[0], g3d->pixmap[1], gc, 0, 0, g3d->width, g3d->height,
+                  0, 0);
+    }
 
     pp_resource_release(context);
 

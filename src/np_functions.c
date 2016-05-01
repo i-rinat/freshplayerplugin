@@ -1134,14 +1134,14 @@ handle_graphics_expose_event(NPP npp, void *event)
             Picture dst_pict = XRenderCreatePicture(dpy, drawable, display.pictfmt_rgb24, 0, 0);
             XRenderComposite(dpy,
                              pp_i->is_transparent ? PictOpOver : PictOpSrc,
-                             g3d->xr_pict, None, dst_pict,
+                             g3d->xr_pict[1], None, dst_pict,
                              ev->x, ev->y, 0, 0,
                              ev->x, ev->y, ev->width, ev->height);
             XRenderFreePicture(dpy, dst_pict);
             XFlush(dpy);
         } else {
             // software compositing fallback
-            draw_drawable_on_drawable(dpy, screen, pp_i->is_transparent, g3d->pixmap, source_x,
+            draw_drawable_on_drawable(dpy, screen, pp_i->is_transparent, g3d->pixmap[1], source_x,
                                       source_y, drawable, ev->x, ev->y, ev->width, ev->height);
         }
     } else {
