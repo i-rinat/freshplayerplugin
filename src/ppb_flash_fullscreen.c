@@ -121,11 +121,11 @@ call_did_change_view_comt(void *user_data, int32_t result)
     v->rect.point.x = 0;
     v->rect.point.y = 0;
     if (is_fullscreen) {
-        v->rect.size.width = pp_i->fs_width / config.device_scale;
-        v->rect.size.height = pp_i->fs_height / config.device_scale;
+        v->rect.size.width = pp_i->fs_width / config.device_scale + 0.5;
+        v->rect.size.height = pp_i->fs_height / config.device_scale + 0.5;
     } else {
-        v->rect.size.width = pp_i->width / config.device_scale;
-        v->rect.size.height = pp_i->height / config.device_scale;
+        v->rect.size.width = pp_i->width / config.device_scale + 0.5;
+        v->rect.size.height = pp_i->height / config.device_scale + 0.5;
     }
     pp_resource_release(view);
 
