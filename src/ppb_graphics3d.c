@@ -472,7 +472,8 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
     glFinish();  // ensure painting is done
     glXMakeCurrent(display.x, None, NULL);
 
-    glXWaitGL();
+    // a round-trip to an X server is required here to be sure that drawing is completed
+    XSync(display.x, False);
 
     // copy from pixmap[0] to pixmap[1]
     if (display.have_xrender) {
@@ -485,6 +486,11 @@ ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback ca
         XCopyArea(display.x, g3d->pixmap[0], g3d->pixmap[1], gc, 0, 0, g3d->width, g3d->height,
                   0, 0);
     }
+
+    // a round-trip to an X server is required here to ensure that copying is completed, and further
+    // GL drawing in this thread into pixmap[0] will not affect pixmap[1] which will be used in
+    // another, browser thread
+    XSync(display.x, False);
 
     pp_resource_release(context);
 
