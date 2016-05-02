@@ -59,7 +59,6 @@ pkg_check_modules(REQ
     pangoft2
     freetype2
     openssl
-    icu-uc
     REQUIRED)
 
 # merge glib-2.0
