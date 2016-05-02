@@ -27,83 +27,74 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <langinfo.h>
-#include <iconv.h>
 #include "trace.h"
 #include "tables.h"
 #include "reverse_constant.h"
 #include "ppb_var.h"
 #include "pp_interface.h"
+#include <unicode/ucnv.h>
+#include <unicode/ucnv_cb.h>
+#include <unicode/ucnv_err.h>
+#include <unicode/ustring.h>
 
-
-static
-const char *
-get_supported_charset_alias(const char *charset)
-{
-    if (strcasecmp(charset, "gb2312-80") == 0) {
-        return "gb2312";
-    } else {
-        return charset;
-    }
-}
 
 char *
 ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,
                                const char *output_char_set,
                                enum PP_CharSet_ConversionError on_error, uint32_t *output_length)
 {
+    // each character could take up to 4 bytes in UTF-8; with additional zero-terminator byte
     const uint32_t output_buffer_length = (utf16_len + 1) * 4 + 1;
     char *output = ppb_memory_mem_alloc(output_buffer_length);
-    char *inbuf = (char*)utf16;
-    char *outbuf = (char*)output;
-    size_t inbytesleft = utf16_len * 2;
-    size_t outbytesleft = output_buffer_length - 1;
-    iconv_t cd;
-    char *tmp;
 
-    output_char_set = get_supported_charset_alias(output_char_set);
+    if (!output) {
+        trace_error("%s, can't allocate memory, %u bytes\n", __func__, output_buffer_length);
+        goto err;
+    }
+
+    const UChar subst = '?';
+    UErrorCode st = U_ZERO_ERROR;
+    UConverter *u = ucnv_open(output_char_set, &st);
+    if (!U_SUCCESS(st)) {
+        trace_error("%s, wrong charset %s\n", __func__, output_char_set);
+        goto err;
+    }
 
     switch (on_error) {
     default:
     case PP_CHARSET_CONVERSIONERROR_FAIL:
-        cd = iconv_open(output_char_set, "UTF16LE");
+        st = U_ZERO_ERROR;
+        ucnv_setFromUCallBack(u, UCNV_FROM_U_CALLBACK_STOP, NULL, NULL, NULL, &st);
         break;
+
     case PP_CHARSET_CONVERSIONERROR_SKIP:
-        tmp = g_strdup_printf("%s//IGNORE", output_char_set);
-        cd = iconv_open(tmp, "UTF16LE");
-        g_free(tmp);
+        st = U_ZERO_ERROR;
+        ucnv_setFromUCallBack(u, UCNV_FROM_U_CALLBACK_SKIP, NULL, NULL, NULL, &st);
         break;
+
     case PP_CHARSET_CONVERSIONERROR_SUBSTITUTE:
-        tmp = g_strdup_printf("%s//TRANSLIT", output_char_set);
-        cd = iconv_open(tmp, "UTF16LE");
-        g_free(tmp);
+        st = U_ZERO_ERROR;
+        ucnv_setFromUCallBack(u, UCNV_FROM_U_CALLBACK_SUBSTITUTE, NULL, NULL, NULL, &st);
+
+        st = U_ZERO_ERROR;
+        ucnv_setSubstString(u, &subst, 1, &st);
         break;
     }
 
-    if (cd == (iconv_t)-1) {
-        trace_error("%s, wrong charset %s\n", __func__, output_char_set);
-        memcpy(output, utf16, inbytesleft);
-        *output_length = inbytesleft;
-        return output;
-    }
+    *output_length = ucnv_fromUChars(u, output, output_buffer_length, utf16, utf16_len, &st);
 
-    size_t ret = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-    if (ret == (size_t) -1) {
-        if (errno == E2BIG) {
-            trace_warning("%s, this should never happen\n", __func__);
-        } else {
-            if (on_error == PP_CHARSET_CONVERSIONERROR_FAIL) {
-                ppb_memory_mem_free(output);
-                *output_length = 0;
-                iconv_close(cd);
-                return NULL;
-            }
-        }
-    }
+    if (st != U_BUFFER_OVERFLOW_ERROR && !U_SUCCESS(st))
+        goto err;
 
-    *output_length = output_buffer_length - 1 - outbytesleft;
-    output[*output_length] = 0;
-    iconv_close(cd);
+    ucnv_close(u);
     return output;
+
+err:
+    *output_length = 0;
+    ppb_memory_mem_free(output);
+    if (u)
+        ucnv_close(u);
+    return NULL;
 }
 
 uint16_t *
@@ -111,54 +102,60 @@ ppb_char_set_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t
                                const char *input_char_set, enum PP_CharSet_ConversionError on_error,
                                uint32_t *output_length)
 {
-    const uint32_t output_buffer_length = (input_len + 2) * sizeof(uint16_t);
+    // each character could be converted into a surrogate pair
+    const uint32_t output_buffer_length = (input_len + 2) * 2 * sizeof(uint16_t);
     uint16_t *output = ppb_memory_mem_alloc(output_buffer_length);
-    char *inbuf = (char *)input;
-    char *outbuf = (char *)output;
-    size_t inbytesleft = input_len;
-    size_t outbytesleft = output_buffer_length - 2;
-    iconv_t cd;
 
-    input_char_set = get_supported_charset_alias(input_char_set);
+    if (!output) {
+        trace_error("%s, can't allocate memory, %u bytes\n", __func__, output_buffer_length);
+        goto err;
+    }
+
+    const UChar subst = '?';
+    UErrorCode st = U_ZERO_ERROR;
+    UConverter *u = ucnv_open(input_char_set, &st);
+    if (!U_SUCCESS(st)) {
+        trace_error("%s, wrong charset %s\n", __func__, input_char_set);
+        goto err;
+    }
 
     switch (on_error) {
     default:
     case PP_CHARSET_CONVERSIONERROR_FAIL:
-        cd = iconv_open("UTF16LE", input_char_set);
+        st = U_ZERO_ERROR;
+        ucnv_setToUCallBack(u, UCNV_TO_U_CALLBACK_STOP, NULL, NULL, NULL, &st);
         break;
+
     case PP_CHARSET_CONVERSIONERROR_SKIP:
-        cd = iconv_open("UTF16LE//IGNORE", input_char_set);
+        st = U_ZERO_ERROR;
+        ucnv_setToUCallBack(u, UCNV_TO_U_CALLBACK_SKIP, NULL, NULL, NULL, &st);
         break;
+
     case PP_CHARSET_CONVERSIONERROR_SUBSTITUTE:
-        cd = iconv_open("UTF16LE//TRANSLIT", input_char_set);
+        st = U_ZERO_ERROR;
+        ucnv_setToUCallBack(u, UCNV_TO_U_CALLBACK_SUBSTITUTE, NULL, NULL, NULL, &st);
+
+        st = U_ZERO_ERROR;
+        ucnv_setSubstString(u, &subst, 1, &st);
         break;
     }
 
-    if (cd == (iconv_t)-1) {
-        trace_error("%s, wrong charset %s\n", __func__, input_char_set);
-        memcpy(output, input, inbytesleft);
-        *output_length = inbytesleft / 2;
-        return output;
-    }
+    st = U_ZERO_ERROR;
+    *output_length = ucnv_toUChars(u, output, output_buffer_length / sizeof(uint16_t),
+                                   input, input_len, &st);
 
-    size_t ret = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-    if (ret == (size_t) -1) {
-        if (errno == E2BIG) {
-            trace_warning("%s, this should never happen\n", __func__);
-        } else {
-            if (on_error == PP_CHARSET_CONVERSIONERROR_FAIL) {
-                ppb_memory_mem_free(output);
-                *output_length = 0;
-                iconv_close(cd);
-                return NULL;
-            }
-        }
-    }
+    if (st != U_BUFFER_OVERFLOW_ERROR && !U_SUCCESS(st))
+        goto err;
 
-    *output_length = (output_buffer_length - 2 - outbytesleft) / sizeof(uint16_t);
-    output[*output_length] = 0;
-    iconv_close(cd);
+    ucnv_close(u);
     return output;
+
+err:
+    *output_length = 0;
+    ppb_memory_mem_free(output);
+    if (u)
+        ucnv_close(u);
+    return NULL;
 }
 
 struct PP_Var
