@@ -30,6 +30,7 @@ foreach(item ${test_list})
         $<TARGET_OBJECTS:uri-parser-obj>
         $<TARGET_OBJECTS:config-parser-obj>
         ../src/config_pepperflash.c
+        test.c
         common.c)
     target_link_libraries(${item}
         "-Wl,-z,muldefs"
