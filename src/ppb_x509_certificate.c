@@ -50,10 +50,13 @@ void
 ppb_x509_certificate_destroy(void *ptr)
 {
     struct pp_x509_certificate_s *xc = ptr;
+
     if (xc->cert) {
         X509_free(xc->cert);
         xc->cert = NULL;
     }
+
+    free(xc->raw_data);
 }
 
 PP_Bool
@@ -65,14 +68,14 @@ ppb_x509_certificate_is_x509_certificate(PP_Resource resource)
 PP_Bool
 ppb_x509_certificate_initialize(PP_Resource resource, const char *bytes, uint32_t length)
 {
-    const unsigned char **in = (const unsigned char **)&bytes;
+    const unsigned char *in = (const unsigned char *)bytes;
     struct pp_x509_certificate_s *xc = pp_resource_acquire(resource, PP_RESOURCE_X509_CERTIFICATE);
     if (!xc) {
         return PP_FALSE;
     }
 
     PP_Bool retval = PP_TRUE;
-    if (d2i_X509(&xc->cert, in, length) == NULL) {
+    if (d2i_X509(&xc->cert, &in, length) == NULL) {
         retval = PP_FALSE;
         goto done;
     }
