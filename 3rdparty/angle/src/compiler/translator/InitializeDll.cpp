@@ -16,12 +16,12 @@
 bool InitProcess()
 {
     if (!InitializePoolIndex()) {
-        assert(0 && "InitProcess(): Failed to initalize global pool");
+        assert(0 && "InitProcess(): Failed to initialize global pool");
         return false;
     }
 
     if (!InitializeParseContextIndex()) {
-        assert(0 && "InitProcess(): Failed to initalize parse context");
+        assert(0 && "InitProcess(): Failed to initialize parse context");
         return false;
     }
 
