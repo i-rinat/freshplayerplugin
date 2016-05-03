@@ -1,15 +1,15 @@
-#undef NDEBUG
-#include <assert.h>
+#include "test.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <src/config_parser/config_parser.h>
 
-static
-void
-test_1(void)
+
+TEST(config_parser, test_1)
 {
+    ASSERT_TRUE((void*)1);
+
     const char *s =
         "param1= value\n"                   // simple key-value
         "param2 =  123\r\n"                 // number value; different line ending
@@ -30,13 +30,14 @@ test_1(void)
     };
 
     cfg_t *cfg = cfg_init(opts, 0);
-    assert(cfg);
+    ASSERT_NE(cfg, NULL);
 
     cfg_parse_string(cfg, s);
-    assert(strcmp(value1, "value") == 0);
-    assert(value2 == 123);
-    assert(strcmp(value3, "qwe") == 0);
-    assert(strcmp(value4, "defaultvalue") == 0);
+
+    ASSERT_TRUE(strcmp(value1, "value") == 0);
+    ASSERT_TRUE(value2 == 123);
+    ASSERT_TRUE(strcmp(value3, "qwe") == 0);
+    ASSERT_TRUE(strcmp(value4, "defaultvalue") == 0);
 
     cfg_free(cfg);
 
@@ -45,9 +46,7 @@ test_1(void)
     free(value4);
 }
 
-static
-void
-test_2(void)
+TEST(config_parser, test_2)
 {
     const char *s =
         "param1_float = qwe\n"          // invalid float value
@@ -66,21 +65,19 @@ test_2(void)
     };
 
     cfg_t *cfg = cfg_init(opts, 0);
-    assert(cfg);
+    ASSERT_NE(cfg, NULL);
 
     cfg_parse_string(cfg, s);
-    assert(fabs(value1 - 0) < 1e-5);
-    assert(fabs(value2 - 3.45) < 1e-5);
-    assert(strcmp(value3, "value3") == 0);
+    ASSERT_TRUE(fabs(value1 - 0) < 1e-5);
+    ASSERT_TRUE(fabs(value2 - 3.45) < 1e-5);
+    ASSERT_TRUE(strcmp(value3, "value3") == 0);
 
     cfg_free(cfg);
 
     free(value3);
 }
 
-static
-void
-test_3(void)
+TEST(config_parser, test_3)
 {
     const char *s =
         "# commented line\n"            // comment
@@ -97,22 +94,11 @@ test_3(void)
     };
 
     cfg_t *cfg = cfg_init(opts, 0);
-    assert(cfg);
+    ASSERT_NE(cfg, NULL);
 
     cfg_parse_string(cfg, s);
-    assert(strcmp(value1, "var2") == 0);
+    ASSERT_TRUE(strcmp(value1, "var2") == 0);
 
     cfg_free(cfg);
     free(value1);
-}
-
-int
-main(void)
-{
-    test_1();
-    test_2();
-    test_3();
-
-    printf("pass\n");
-    return 0;
 }

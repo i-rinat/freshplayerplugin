@@ -1,13 +1,10 @@
-#undef NDEBUG
-#include <assert.h>
+#include "test.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <src/header_parser.c>
 
-int
-main(void)
+TEST(header_parser, test_1)
 {
-    // ===
     struct parsed_headers_s *ph = hp_parse_headers(
         "HTTP/1.1 200 OK\r\n"
         "Date: Sat, 19 Apr 2014 15:53:34 GMT\r\n"
@@ -21,49 +18,52 @@ main(void)
         "Content-Type: application/x-shockwave-flash\r\n"
     );
 
-    assert(ph);
-    assert(ph->http_code == 200);
-    assert(hp_header_exists(ph, "Date") == 1);
-    assert(hp_header_exists(ph, "date") == 1);
-    assert(hp_header_exists(ph, "Date2") == 0);
-    assert(hp_header_exists(ph, "Content-Type") == 1);
-    assert(hp_header_exists(ph, "bytes") == 0);
+    ASSERT_TRUE(ph);
+    ASSERT_EQ(ph->http_code, 200);
+    ASSERT_TRUE(hp_header_exists(ph, "Date"));
+    ASSERT_TRUE(hp_header_exists(ph, "date"));
+    ASSERT_FALSE(hp_header_exists(ph, "Date2"));
+    ASSERT_TRUE(hp_header_exists(ph, "Content-Type"));
+    ASSERT_FALSE(hp_header_exists(ph, "bytes"));
 
-    assert(0 == strcmp(hp_get_header_value(ph, "Date"), "Sat, 19 Apr 2014 15:53:34 GMT"));
-    assert(0 == strcmp(ph->status_line, "HTTP/1.1 200 OK"));
+    ASSERT_STREQ(hp_get_header_value(ph, "Date"), "Sat, 19 Apr 2014 15:53:34 GMT");
+    ASSERT_STREQ(ph->status_line, "HTTP/1.1 200 OK");
     hp_free_parsed_headers(ph);
+}
 
-    // ===
-    ph = hp_parse_headers(
+TEST(header_parser, test_2)
+{
+    struct parsed_headers_s *ph = hp_parse_headers(
         "HTTP/1.0 301 Moved Permanently\r\n"
         "Location: http://example.org\r\n"
         "Connection: Keep-Alive\r\n"
     );
 
-    assert(ph->http_code == 301);
-    assert(0 == strcmp(hp_get_header_value(ph, "Location"), "http://example.org"));
-    assert(0 == strcmp(ph->status_line, "HTTP/1.0 301 Moved Permanently"));
+    ASSERT_EQ(ph->http_code, 301);
+    ASSERT_STREQ(hp_get_header_value(ph, "Location"), "http://example.org");
+    ASSERT_STREQ(ph->status_line, "HTTP/1.0 301 Moved Permanently");
     hp_free_parsed_headers(ph);
+}
 
-    // ===
-    ph = hp_parse_headers(NULL);
-    assert(0 == ph->cnt);
+TEST(header_parser, test_3)
+{
+    struct parsed_headers_s *ph = hp_parse_headers(NULL);
+
+    ASSERT_EQ(ph->cnt, 0);
     hp_free_parsed_headers(ph);
+}
 
-    // ===
+TEST(header_parser, test_4)
+{
     // no \r\n at the end of last header line
-    ph = hp_parse_headers(
+    struct parsed_headers_s *ph = hp_parse_headers(
         "HTTP/1.0 301 Moved Permanently\r\n"
         "Location: http://example.org\r\n"
         "Connection: Keep-Alive"
     );
 
-    assert(hp_header_exists(ph, "Location") == 1);
-    assert(hp_header_exists(ph, "Connection") == 1);
-    assert(0 == strcmp(hp_get_header_value(ph, "Connection"), "Keep-Alive"));
+    ASSERT_TRUE(hp_header_exists(ph, "Location"));
+    ASSERT_TRUE(hp_header_exists(ph, "Connection"));
+    ASSERT_STREQ(hp_get_header_value(ph, "Connection"), "Keep-Alive");
     hp_free_parsed_headers(ph);
-
-    // ===
-    printf("pass\n");
-    return 0;
 }

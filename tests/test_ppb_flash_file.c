@@ -1,5 +1,4 @@
-#undef NDEBUG
-#include <assert.h>
+#include "test.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <glib.h>
@@ -9,14 +8,13 @@ static
 void
 test_case(const char *s, const char *res)
 {
-    printf("/%s -> %s\n", s, res);
+    printf("  /%s -> %s\n", s, res);
     char *got = to_abs_path("/start", s);
-    assert(strcmp(got, res) == 0);
+    ASSERT_STREQ(got, res);
     free(got);
 }
 
-int
-main(void)
+TEST(ppb_flash_file, to_abs_path)
 {
     test_case("WritableRoot/#SharedObjects/4TVF7XJR/macromedia.com/support/flashplayer/sys/#127.0.0.1",
               "/start/WritableRoot/#SharedObjects/4TVF7XJR/macromedia.com/support/flashplayer/sys/#127.0.0.1");
@@ -36,7 +34,4 @@ main(void)
     test_case("g.", "/start/g.");
     test_case("g../a", "/start/g../a");
     test_case("g./a", "/start/g./a");
-
-    printf("pass\n");
-    return 0;
 }
