@@ -149,3 +149,24 @@ TEST(ppb_char_set, to_utf16_non_ASCII_PP_CHARSET_CONVERSIONERROR_SUBSTITUTE)
     ASSERT_EQ(memcmp(res, out, res_len), 0);
     free(res);
 }
+
+TEST(ppb_char_set, gb2312_ASCII_to_utf16)
+{
+    // gb2312 is a variable-length encoding, with ASCII encoded as is
+
+    // "Hello, world!" in ASCII
+    const uint8_t in[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77, 0x6f, 0x72,
+                          0x6c, 0x64, 0x21};
+
+    // "Hello, world!" in UTF16-LE
+    const uint8_t out[] = {0x48, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x6c, 0x00, 0x6f, 0x00,
+                           0x2c, 0x00, 0x20, 0x00, 0x77, 0x00, 0x6f, 0x00, 0x72, 0x00,
+                           0x6c, 0x00, 0x64, 0x00, 0x21, 0x00};
+
+    uint32_t res_len = 7777;
+    uint16_t *res = ppb_char_set_char_set_to_utf16(0, (const char *)in, sizeof(in), "gb2312",
+                                                   PP_CHARSET_CONVERSIONERROR_FAIL, &res_len);
+    ASSERT_EQ(res_len, sizeof(out) / sizeof(uint16_t));
+    ASSERT_EQ(memcmp(res, out, sizeof(out)), 0);
+    free(res);
+}
