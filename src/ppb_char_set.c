@@ -161,11 +161,110 @@ ppb_char_set_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t
     return output;
 }
 
+static
+char *
+extract_relevant_part_from_locale_name(const char *locale_name)
+{
+    char *lang = strdup(locale_name ? locale_name : "en");
+
+    if (strncmp(lang, "zh", 2) == 0) {
+        // starts with zh. For Chinese languages country is required too
+
+        // replace "_" by "-". That way "zh_CN.utf8" becomes "zh-CN.utf8"
+        char *ptr = strchr(lang, '_');
+        if (ptr)
+            *ptr = '-';
+
+        // cut at ".". That way "zh-CN.utf8" becomes "zh-CN"
+        ptr = strchr(lang, '.');
+        if (ptr)
+            *ptr = '\0';
+
+        return lang;
+    }
+
+    // otherwise, leave only language. Cut at "_". That makes "ru" from "ru_RU.utf8"
+    char *ptr = strchr(lang,  '_');
+    if (ptr)
+        *ptr = '\0';
+
+    return lang;
+}
+
 struct PP_Var
 ppb_char_set_get_default_char_set(PP_Instance instance)
 {
-    setlocale(LC_ALL, "");
-    return ppb_var_var_from_utf8_z(nl_langinfo(CODESET));
+    char *lang = extract_relevant_part_from_locale_name(getenv("LANG"));
+
+    struct lang_encoding {
+        const char *lang;
+        const char *encoding;
+    };
+
+    static const struct lang_encoding pairs[] = {
+        {"am", "windows-1252"},
+        {"ar", "windows-1256"},
+        {"bg", "windows-1251"},
+        {"bn", "windows-1252"},
+        {"ca", "windows-1252"},
+        {"cs", "windows-1250"},
+        {"da", "windows-1252"},
+        {"de", "windows-1252"},
+        {"el", "ISO-8859-7"},
+        {"en", "windows-1252"},
+        {"es", "windows-1252"},
+        {"et", "windows-1257"},
+        {"fa", "windows-1256"},
+        {"fil", "windows-1252"},
+        {"fi", "windows-1252"},
+        {"fr", "windows-1252"},
+        {"gu", "windows-1252"},
+        {"he", "windows-1255"},
+        {"hi", "windows-1252"},
+        {"hr", "windows-1250"},
+        {"hu", "ISO-8859-2"},
+        {"id", "windows-1252"},
+        {"it", "windows-1252"},
+        {"ja", "Shift_JIS"},
+        {"kn", "windows-1252"},
+        {"ko", "windows-949"},
+        {"lt", "windows-1257"},
+        {"lv", "windows-1257"},
+        {"ml", "windows-1252"},
+        {"mr", "windows-1252"},
+        {"nb", "windows-1252"},
+        {"nl", "windows-1252"},
+        {"pl", "ISO-8859-2"},
+        {"pt", "windows-1252"},
+        {"pt", "windows-1252"},
+        {"ro", "ISO-8859-2"},
+        {"ru", "windows-1251"},
+        {"sk", "windows-1250"},
+        {"sl", "ISO-8859-2"},
+        {"sr", "windows-1251"},
+        {"sv", "windows-1252"},
+        {"sw", "windows-1252"},
+        {"ta", "windows-1252"},
+        {"te", "windows-1252"},
+        {"th", "windows-874"},
+        {"tr", "ISO-8859-9"},
+        {"uk", "windows-1251"},
+        {"vi", "windows-1258"},
+        {"zh-CN", "GBK"},
+        {"zh-TW", "Big5"},
+    };
+
+    const char *enc = "windows-1252";
+    for (uint32_t k = 0; k < sizeof(pairs)/sizeof(pairs[0]); k ++) {
+        if (strcasecmp(pairs[k].lang, lang) == 0) {
+            enc = pairs[k].encoding;
+            break;
+        }
+    }
+
+    struct PP_Var ret = ppb_var_var_from_utf8_z(enc);
+    free(lang);
+    return ret;
 }
 
 

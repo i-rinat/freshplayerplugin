@@ -24,15 +24,25 @@ initializer(void)
 
 TEST_CONSTRUCTOR(initializer);
 
-TEST(ppb_char_set, default_charset)
+TEST(ppb_char_set, extract_relevant_part_from_locale_name)
 {
-    // silly test actually. Both test and implementation contains almost the same code
-    setlocale(LC_ALL, "");
-    char *current_charset = nl_langinfo(CODESET);
-    struct PP_Var cs = ppb_char_set_get_default_char_set(0);
-    ASSERT_STREQ(ppb_var_var_to_utf8(cs, NULL), current_charset);
-    printf("  default charset = %s\n", current_charset);
-    ppb_var_release(cs);
+    char *s;
+
+    s = extract_relevant_part_from_locale_name("ru_RU.UTF-8");
+    ASSERT_STREQ(s, "ru");
+    free(s);
+
+    s = extract_relevant_part_from_locale_name("en_US");
+    ASSERT_STREQ(s, "en");
+    free(s);
+
+    s = extract_relevant_part_from_locale_name("zh_CN.utf8");
+    ASSERT_STREQ(s, "zh-CN");
+    free(s);
+
+    s = extract_relevant_part_from_locale_name("zh_TW.utf8");
+    ASSERT_STREQ(s, "zh-TW");
+    free(s);
 }
 
 TEST(ppb_char_set, to_utf16_all_ASCII)
