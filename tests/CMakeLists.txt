@@ -4,6 +4,7 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 add_definitions(-DTEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 
 set(test_list
+    test_encoding_alias
     test_header_parser
     test_ppb_char_set
     test_ppb_flash_file

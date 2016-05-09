@@ -19,6 +19,7 @@ set(source_list
     audio_thread_noaudio.c
     config.c
     compat.c
+    encoding_alias.c
     font.c
     header_parser.c
     keycodeconvert.c
