@@ -24,6 +24,7 @@
 
 #include "ppb_char_set.h"
 #include "ppb_memory.h"
+#include "encoding_alias.h"
 #include <stdlib.h>
 #include <locale.h>
 #include <langinfo.h>
@@ -37,17 +38,6 @@
 #include <unicode/ucnv_err.h>
 #include <unicode/ustring.h>
 
-
-static
-const char *
-get_supported_charset_alias(const char *charset)
-{
-    if (strcasecmp(charset, "gb2312-80") == 0) {
-        return "gb2312";
-    } else {
-        return charset;
-    }
-}
 
 char *
 ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,
@@ -63,11 +53,11 @@ ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint
         goto err;
     }
 
-    output_char_set = get_supported_charset_alias(output_char_set);
+    const char *charset = encoding_alias_get_canonical_name(output_char_set);
 
     const UChar subst = '?';
     UErrorCode st = U_ZERO_ERROR;
-    UConverter *u = ucnv_open(output_char_set, &st);
+    UConverter *u = ucnv_open(charset, &st);
     if (!U_SUCCESS(st)) {
         trace_error("%s, wrong charset %s\n", __func__, output_char_set);
         goto err;
@@ -124,11 +114,11 @@ ppb_char_set_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t
         goto err;
     }
 
-    input_char_set = get_supported_charset_alias(input_char_set);
+    const char *charset = encoding_alias_get_canonical_name(input_char_set);
 
     const UChar subst = '?';
     UErrorCode st = U_ZERO_ERROR;
-    UConverter *u = ucnv_open(input_char_set, &st);
+    UConverter *u = ucnv_open(charset, &st);
     if (!U_SUCCESS(st)) {
         trace_error("%s, wrong charset %s\n", __func__, input_char_set);
         goto err;
