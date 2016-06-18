@@ -29,10 +29,10 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "reverse_constant.h"
-#include <gtk/gtk.h>
 #include "ppb_core.h"
 #include <ppapi/c/pp_errors.h>
 #include "pp_interface.h"
+#include "gtk_wrapper.h"
 
 
 struct set_text_input_type_param_s {
@@ -52,7 +52,7 @@ set_text_input_type_ptac(void *param)
     }
 
     if (pp_i->im_context)
-        gtk_im_context_focus_out(pp_i->im_context);
+        gw_gtk_im_context_focus_out(pp_i->im_context);
 
     switch (p->type) {
     case PP_TEXTINPUT_TYPE_DEV_NONE:
@@ -69,7 +69,7 @@ set_text_input_type_ptac(void *param)
 
     pp_i->textinput_type = p->type;
     if (pp_i->im_context)
-        gtk_im_context_focus_in(pp_i->im_context);
+        gw_gtk_im_context_focus_in(pp_i->im_context);
 
     g_slice_free1(sizeof(*p), p);
 }
@@ -104,7 +104,7 @@ update_caret_position_ptac(void *param)
     p->caret.y += pp_i->offset_y;
 
     if (pp_i->im_context)
-        gtk_im_context_set_cursor_location(pp_i->im_context, &p->caret);
+        gw_gtk_im_context_set_cursor_location(pp_i->im_context, &p->caret);
     g_slice_free1(sizeof(*p), p);
 }
 
@@ -137,7 +137,7 @@ cancel_composition_text_ptac(void *param)
     }
 
     if (pp_i->im_context)
-        gtk_im_context_reset(pp_i->im_context);
+        gw_gtk_im_context_reset(pp_i->im_context);
 }
 
 void
@@ -166,7 +166,7 @@ update_surrounding_text_ptac(void *param)
 
     if (pp_i->im_context) {
         const size_t len = p->text ? strlen(p->text) : 0;
-        gtk_im_context_set_surrounding(pp_i->im_context, p->text, len, p->caret);
+        gw_gtk_im_context_set_surrounding(pp_i->im_context, p->text, len, p->caret);
     }
 
 done:

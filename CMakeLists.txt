@@ -70,19 +70,6 @@ list(APPEND REQ_LIBRARIES    ${GLIB_LIBRARIES})
 # libdl.so, librt.so, and libm.so
 list(APPEND REQ_LIBRARIES dl rt m)
 
-# select GTK+ version
-set(WITH_GTK 2 CACHE INTEGER "select GTK+ major version to link with (2 or 3)")
-if (WITH_GTK EQUAL 2)
-    pkg_check_modules(GTK gtk+-2.0 REQUIRED)
-elseif (WITH_GTK EQUAL 3)
-    pkg_check_modules(GTK gtk+-3.0 REQUIRED)
-else()
-    message(FATAL_ERROR "Unsupported GTK+ version ${GTK_VERSION}")
-endif()
-list(APPEND REQ_LIBRARY_DIRS ${GTK_LIBRARY_DIRS})
-list(APPEND REQ_INCLUDE_DIRS ${GTK_INCLUDE_DIRS})
-list(APPEND REQ_LIBRARIES    ${GTK_LIBRARIES})
-
 # OpenGL ES 2
 set(WITH_GLES2 FALSE CACHE BOOLEAN "use system libGLESv2")
 if (WITH_GLES2)

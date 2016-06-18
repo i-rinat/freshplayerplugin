@@ -34,8 +34,6 @@
 #include <cairo-xlib.h>
 #include <GLES2/gl2.h>
 #include <pthread.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkx.h>
 #include "trace.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
@@ -340,7 +338,7 @@ im_preedit_changed(GtkIMContext *im_context, struct pp_instance_s *pp_i)
     struct PP_Var   text;
     uint32_t        offsets[2];
 
-    gtk_im_context_get_preedit_string(im_context, &preedit_string, NULL, &cursor_pos);
+    gw_gtk_im_context_get_preedit_string(im_context, &preedit_string, NULL, &cursor_pos);
 
     ptr = preedit_string;
     for (int k = 0; k < cursor_pos; k ++)
@@ -412,7 +410,7 @@ catcher_key_press(GtkWidget *widget, GdkEvent *event, struct pp_instance_s *pp_i
     };
 
     // untie GdkWindow from auxiliary widget
-    gdk_window_set_user_data(event->key.window, NULL);
+    gw_gdk_window_set_user_data(event->key.window, NULL);
 
     handle_key_press_release_event(pp_i->npp, &ev);
     return TRUE;
@@ -541,13 +539,13 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     }
 
     // prepare GTK+ widget for catching keypress events returned by IME
-    pp_i->catcher_widget = gtk_label_new("");
-    gtk_widget_set_realized(pp_i->catcher_widget, TRUE);
+    pp_i->catcher_widget = gw_gtk_label_new("");
+    gw_gtk_widget_set_realized(pp_i->catcher_widget, TRUE);
     g_signal_connect(pp_i->catcher_widget, "key-press-event", G_CALLBACK(catcher_key_press), pp_i);
 
     pp_i->textinput_type = PP_TEXTINPUT_TYPE_DEV_NONE;
-    pp_i->im_context_multi = gtk_im_multicontext_new();
-    pp_i->im_context_simple = gtk_im_context_simple_new();
+    pp_i->im_context_multi = gw_gtk_im_multicontext_new();
+    pp_i->im_context_simple = gw_gtk_im_context_simple_new();
     pp_i->im_context = NULL;
 
     g_signal_connect(pp_i->im_context_multi, "commit", G_CALLBACK(im_commit), pp_i);
@@ -1476,9 +1474,9 @@ handle_button_press_release_event(NPP npp, void *event)
 static GdkEvent *
 make_gdk_key_event_from_x_key(XKeyEvent *ev)
 {
-    GdkDisplay *gdpy = gdk_x11_lookup_xdisplay(ev->display);
+    GdkDisplay *gdpy = gw_gdk_x11_lookup_xdisplay(ev->display);
     if (!gdpy)
-        gdpy = gdk_display_get_default();
+        gdpy = gw_gdk_display_get_default();
 
     if (!gdpy) {
         trace_error("%s, gdpy is NULL\n", __func__);
@@ -1488,12 +1486,12 @@ make_gdk_key_event_from_x_key(XKeyEvent *ev)
     KeySym keysym = NoSymbol;
     guint8 keyboard_group = 0;
     XLookupString(ev, NULL, 0, &keysym, NULL);
-    GdkKeymap *keymap = gdk_keymap_get_for_display(gdpy);
+    GdkKeymap *keymap = gw_gdk_keymap_get_for_display(gdpy);
     GdkKeymapKey *keys = NULL;
     guint *keyvals = NULL;
     gint n_entries = 0;
     if (keymap &&
-        gdk_keymap_get_entries_for_keycode(keymap, ev->keycode, &keys, &keyvals, &n_entries))
+        gw_gdk_keymap_get_entries_for_keycode(keymap, ev->keycode, &keys, &keyvals, &n_entries))
     {
         for (gint i = 0; i < n_entries; ++i) {
             if (keyvals[i] == keysym) {
@@ -1506,11 +1504,11 @@ make_gdk_key_event_from_x_key(XKeyEvent *ev)
     g_free(keyvals); keyvals = NULL;
 
     // Get a GdkWindow.
-    GdkWindow *gwnd = gdk_x11_window_lookup_for_display(gdpy, ev->window);
+    GdkWindow *gwnd = gw_gdk_x11_window_lookup_for_display(gdpy, ev->window);
     if (gwnd)
         g_object_ref(gwnd);
     else
-        gwnd = gdk_x11_window_foreign_new_for_display(gdpy, ev->window);
+        gwnd = gw_gdk_x11_window_foreign_new_for_display(gdpy, ev->window);
     if (!gwnd) {
         trace_error("%s, gdpy is NULL (2)\n", __func__);
         return NULL;
@@ -1518,7 +1516,7 @@ make_gdk_key_event_from_x_key(XKeyEvent *ev)
 
     // Create a GdkEvent.
     GdkEventType event_type = ev->type == KeyPress ? GDK_KEY_PRESS : GDK_KEY_RELEASE;
-    GdkEvent *event = gdk_event_new(event_type);
+    GdkEvent *event = gw_gdk_event_new(event_type);
     event->key.type = event_type;
     event->key.window = gwnd;
 
@@ -1559,18 +1557,18 @@ handle_key_press_release_event(NPP npp, void *event)
         GdkEvent *gev = make_gdk_key_event_from_x_key(ev);
         if (gev) {
             // tie catcher_widget to GdkWindow
-            gdk_window_set_user_data(gev->key.window, pp_i->catcher_widget);
+            gw_gdk_window_set_user_data(gev->key.window, pp_i->catcher_widget);
 
-            gtk_im_context_set_client_window(pp_i->im_context, gev->key.window);
-            gboolean stop = gtk_im_context_filter_keypress(pp_i->im_context, &gev->key);
+            gw_gtk_im_context_set_client_window(pp_i->im_context, gev->key.window);
+            gboolean stop = gw_gtk_im_context_filter_keypress(pp_i->im_context, &gev->key);
 
             if (!stop) {
                 // stop == 0 means gev and its GdkWindow is no longer needed and will be freed
                 // by subsequent gdk_event_free, therefore we untie auxiliary widget, just in case.
-                gdk_window_set_user_data(gev->key.window, NULL);
+                gw_gdk_window_set_user_data(gev->key.window, NULL);
             }
 
-            gdk_event_free(gev);
+            gw_gdk_event_free(gev);
             if (stop) {
                 pthread_mutex_unlock(&display.lock);
                 return 1;
@@ -1652,9 +1650,9 @@ handle_focus_in_out_event(NPP npp, void *event)
     PP_Bool has_focus = (ev->type == FocusIn) ? PP_TRUE : PP_FALSE;
     if (pp_i->im_context) {
         if (ev->type == FocusIn)
-            gtk_im_context_focus_in(pp_i->im_context);
+            gw_gtk_im_context_focus_in(pp_i->im_context);
         else
-            gtk_im_context_focus_out(pp_i->im_context);
+            gw_gtk_im_context_focus_out(pp_i->im_context);
     }
 
     ppb_core_call_on_main_thread2(0, PP_MakeCCB(call_ppp_did_change_focus_comt,

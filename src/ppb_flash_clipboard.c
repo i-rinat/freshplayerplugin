@@ -117,9 +117,9 @@ get_clipboard_of_type(PP_Flash_Clipboard_Type clipboard_type)
 {
     switch (clipboard_type) {
     case PP_FLASH_CLIPBOARD_TYPE_STANDARD:
-        return gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+        return gw_gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     case PP_FLASH_CLIPBOARD_TYPE_SELECTION:
-        return gtk_clipboard_get(GDK_SELECTION_PRIMARY);
+        return gw_gtk_clipboard_get(GDK_SELECTION_PRIMARY);
     default:
         return NULL;
     }
@@ -131,11 +131,11 @@ get_clipboard_target_atom(uint32_t format)
 {
     switch (format) {
     case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
-        return gdk_atom_intern_static_string("UTF8_STRING");
+        return gw_gdk_atom_intern_static_string("UTF8_STRING");
     case PP_FLASH_CLIPBOARD_FORMAT_HTML:
-        return gdk_atom_intern("text/html", FALSE);
+        return gw_gdk_atom_intern("text/html", FALSE);
     case PP_FLASH_CLIPBOARD_FORMAT_RTF:
-        return gdk_atom_intern("text/rtf", FALSE);
+        return gw_gdk_atom_intern("text/rtf", FALSE);
     default:
         break;
     }
@@ -144,7 +144,7 @@ get_clipboard_target_atom(uint32_t format)
     gchar *custom_format_name = g_hash_table_lookup(format_name_ht, GINT_TO_POINTER(format));
     pthread_mutex_unlock(&lock);
     if (custom_format_name)
-        return gdk_atom_intern(custom_format_name, FALSE);
+        return gw_gdk_atom_intern(custom_format_name, FALSE);
 
     return GDK_NONE;
 }
@@ -172,7 +172,7 @@ clipboard_is_format_available_ptac(void *user_data)
     if (target == GDK_NONE)
         goto quit;
 
-    p->result = gtk_clipboard_wait_is_target_available(clipboard, target);
+    p->result = gw_gtk_clipboard_wait_is_target_available(clipboard, target);
 
 quit:
     ppb_message_loop_post_quit_depth(p->m_loop, PP_FALSE, p->depth);
@@ -232,10 +232,10 @@ clipboard_read_data_ptac(void *user_data)
     if (target == GDK_NONE)
         goto quit;
 
-    GtkSelectionData *sd = gtk_clipboard_wait_for_contents(clipboard, target);
+    GtkSelectionData *sd = gw_gtk_clipboard_wait_for_contents(clipboard, target);
     if (sd) {
-        const guchar *sd_data = gtk_selection_data_get_data(sd);
-        const gint sd_length = gtk_selection_data_get_length(sd);
+        const guchar *sd_data = gw_gtk_selection_data_get_data(sd);
+        const gint sd_length = gw_gtk_selection_data_get_length(sd);
         switch (p->format) {
         case PP_FLASH_CLIPBOARD_FORMAT_PLAINTEXT:
         case PP_FLASH_CLIPBOARD_FORMAT_HTML:
@@ -248,7 +248,7 @@ clipboard_read_data_ptac(void *user_data)
             break;
         }
 
-        gtk_selection_data_free(sd);
+        gw_gtk_selection_data_free(sd);
     }
 
 quit:
@@ -321,7 +321,7 @@ clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *selection_data, gu
         len = 0;
     }
 
-    gtk_selection_data_set(selection_data, item->type, 8, (const guchar *)data, len);
+    gw_gtk_selection_data_set(selection_data, item->type, 8, (const guchar *)data, len);
 
     if (item->var.type == PP_VARTYPE_ARRAY_BUFFER)
         ppb_var_array_buffer_unmap(item->var);
@@ -355,7 +355,7 @@ clipboard_write_data_ptac(void *user_data)
 
     if (p->data_item_count == 0) {
         // one can pass zero items to clear clipboard
-        gtk_clipboard_clear(clipboard);
+        gw_gtk_clipboard_clear(clipboard);
         goto quit;
     }
 
@@ -369,23 +369,23 @@ clipboard_write_data_ptac(void *user_data)
                 trace_error("%s, plaintext format, var is not a string\n", __func__);
                 break;
             }
-            item.type = gdk_atom_intern("text/html", FALSE);
+            item.type = gw_gdk_atom_intern("text/html", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
 
-            item.type = gdk_atom_intern("TEXT", FALSE);
+            item.type = gw_gdk_atom_intern("TEXT", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
 
-            item.type = gdk_atom_intern("STRING", FALSE);
+            item.type = gw_gdk_atom_intern("STRING", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
 
-            item.type = gdk_atom_intern("UTF8_STRING", FALSE);
+            item.type = gw_gdk_atom_intern("UTF8_STRING", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
 
-            item.type = gdk_atom_intern("COMPOUND_TEXT", FALSE);
+            item.type = gw_gdk_atom_intern("COMPOUND_TEXT", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
             break;
@@ -394,7 +394,7 @@ clipboard_write_data_ptac(void *user_data)
                 trace_error("%s, html format, var is not a string\n", __func__);
                 break;
             }
-            item.type = gdk_atom_intern("text/html", FALSE);
+            item.type = gw_gdk_atom_intern("text/html", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
             break;
@@ -403,7 +403,7 @@ clipboard_write_data_ptac(void *user_data)
                 trace_error("%s, rtf, var is not an array buffer\n", __func__);
                 break;
             }
-            item.type = gdk_atom_intern("text/rtf", FALSE);
+            item.type = gw_gdk_atom_intern("text/rtf", FALSE);
             ppb_var_add_ref(item.var);
             g_array_append_val(items, item);
             break;
@@ -423,14 +423,15 @@ clipboard_write_data_ptac(void *user_data)
 
     GtkTargetEntry *targets = g_new0(GtkTargetEntry, items->len);
     for (uint32_t k = 0; k < items->len; k ++) {
-        targets[k].target = gdk_atom_name(g_array_index(items, struct selection_entry_s, k).type);
+        targets[k].target =
+            gw_gdk_atom_name(g_array_index(items, struct selection_entry_s, k).type);
         targets[k].info = k;
     }
 
-    if (gtk_clipboard_set_with_data(clipboard, targets, items->len, clipboard_get_func,
-                                    clipboard_clear_func, items))
+    if (gw_gtk_clipboard_set_with_data(clipboard, targets, items->len, clipboard_get_func,
+                                       clipboard_clear_func, items))
     {
-        gtk_clipboard_set_can_store(clipboard, targets, items->len);
+        gw_gtk_clipboard_set_can_store(clipboard, targets, items->len);
     } else {
         p->result = PP_ERROR_FAILED;
     }

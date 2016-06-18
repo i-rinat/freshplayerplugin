@@ -21,6 +21,7 @@ set(source_list
     compat.c
     encoding_alias.c
     font.c
+    gtk_wrapper.c
     header_parser.c
     keycodeconvert.c
     np_entry.c

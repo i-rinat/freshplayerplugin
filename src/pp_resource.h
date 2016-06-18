@@ -59,10 +59,10 @@
 #include <pango/pangocairo.h>
 #include <cairo.h>
 #include <asoundlib.h>
-#include <gtk/gtk.h>
 #include "audio_thread.h"
 #include <openssl/x509.h>
 #include "font.h"
+#include "gtk_wrapper.h"
 
 #if HAVE_HWDEC
 #include <libavcodec/avcodec.h>

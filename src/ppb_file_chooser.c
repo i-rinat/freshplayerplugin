@@ -33,7 +33,6 @@
 #include "ppb_file_ref.h"
 #include "reverse_constant.h"
 #include <ppapi/c/pp_errors.h>
-#include <gdk/gdkx.h>
 #include "pp_interface.h"
 
 
@@ -106,7 +105,7 @@ fcd_response_handler(GtkDialog *dialog, gint response_id, gpointer user_data)
 
     if (response_id == GTK_RESPONSE_OK) {
         PP_Resource *file_refs, *file_ref;
-        GSList *fname_lst = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(dialog));
+        GSList *fname_lst = gw_gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(dialog));
         guint cnt = g_slist_length(fname_lst);
 
         callback_result = PP_OK;
@@ -125,7 +124,7 @@ fcd_response_handler(GtkDialog *dialog, gint response_id, gpointer user_data)
     }
 
     if (!p->dialog_closed)
-        gtk_widget_destroy(GTK_WIDGET(dialog));
+        gw_gtk_widget_destroy(GTK_WIDGET(dialog));
 
     ppb_message_loop_post_work_with_result(p->message_loop, p->ccb, 0, callback_result, 0,
                                            __func__);
@@ -158,30 +157,27 @@ show_without_user_guesture_ptac(void *param)
         dialog_title = "Open file";
     }
 
-#if GTK_MAJOR_VERSION == 3
-    void *open_button_title = "_Open";
-    void *close_button_title = "_Close";
-#elif GTK_MAJOR_VERSION == 2
-    void *open_button_title = GTK_STOCK_OPEN;
-    void *close_button_title = GTK_STOCK_CANCEL;
-#else
-#error Unknown GTK version
-#endif
+    const int gtk_version = gw_major_version();
 
-    fcd = gtk_file_chooser_dialog_new(dialog_title, NULL,
-                                      p->save_as ? GTK_FILE_CHOOSER_ACTION_SAVE
-                                                 : GTK_FILE_CHOOSER_ACTION_OPEN,
-                                      close_button_title, GTK_RESPONSE_CANCEL,
-                                      open_button_title, GTK_RESPONSE_OK, NULL);
+    void *open_button_title =  gtk_version == 2 ? "gtk-open"
+                                                : "_Open";
+    void *close_button_title = gtk_version == 2 ? "gtk-close"
+                                                : "_Close";
+
+    fcd = gw_gtk_file_chooser_dialog_new(dialog_title, NULL,
+                                         p->save_as ? GTK_FILE_CHOOSER_ACTION_SAVE
+                                                    : GTK_FILE_CHOOSER_ACTION_OPEN,
+                                         close_button_title, GTK_RESPONSE_CANCEL,
+                                         open_button_title, GTK_RESPONSE_OK, NULL);
 
     if (p->mode == PP_FILECHOOSERMODE_OPENMULTIPLE)
-        gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fcd), 1);
+        gw_gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fcd), 1);
 
-    gtk_widget_realize(fcd);
+    gw_gtk_widget_realize(fcd);
 
     Window parent_wnd;
     if (npn.getvalue(p->pp_i->npp, NPNVnetscapeWindow, &parent_wnd) == NPERR_NO_ERROR) {
-        GdkWindow *fcd_wnd = gtk_widget_get_window(fcd);
+        GdkWindow *fcd_wnd = gw_gtk_widget_get_window(fcd);
 
         XSetTransientForHint(GDK_WINDOW_XDISPLAY(fcd_wnd),
                              GDK_WINDOW_XID(fcd_wnd),
@@ -193,7 +189,7 @@ show_without_user_guesture_ptac(void *param)
     g_signal_connect(G_OBJECT(fcd), "response", G_CALLBACK(fcd_response_handler), p);
     g_signal_connect(G_OBJECT(fcd), "close", G_CALLBACK(fcd_close_handler), p);
 
-    gtk_widget_show(fcd);
+    gw_gtk_widget_show(fcd);
 }
 
 int32_t

@@ -43,6 +43,7 @@
 #include "tables.h"
 #include "main_thread.h"
 #include "ppb_core.h"
+#include "gtk_wrapper.h"
 
 
 static void *module_dl_handler;
@@ -523,6 +524,14 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
     np_initialize_was_called = 1;
 
     setup_sig_handlers();
+    gtk_wrapper_initialize();
+
+    if (!gw_gtk_available()) {
+        trace_error("no GTK+ loaded\n");
+        return NPERR_NO_ERROR;
+    }
+
+    trace_info_f("found GTK+ %d.%d\n", gw_major_version(), gw_minor_version());
 
     // set logging-only error handler.
     // Ignore a previous one, we have no plans to restore it
