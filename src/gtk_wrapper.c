@@ -32,9 +32,10 @@
 
 
 static struct {
-    int major_version;
-    int minor_version;
-    int available_flag;
+    int     major_version;
+    int     minor_version;
+    int     available_flag;
+    void   *dl_handler;
 } gw = {};
 
 GdkAtom
@@ -232,12 +233,16 @@ find_gtk_cb(struct dl_phdr_info *info, size_t size, void *data)
         return 0;
 
     // try GTK+ 2
-    if (strstr(info->dlpi_name, "/libgtk-x11-2.0"))
+    if (strstr(info->dlpi_name, "/libgtk-x11-2.0")) {
+        gw.dl_handler = dlopen(info->dlpi_name, RTLD_NOW);
         gw.major_version = 2;
+    }
 
     // try GTK+ 3
-    if (strstr(info->dlpi_name, "/libgtk-3.so"))
+    if (strstr(info->dlpi_name, "/libgtk-3.so")) {
+        gw.dl_handler = dlopen(info->dlpi_name, RTLD_NOW);
         gw.major_version = 3;
+    }
 
     // don't care if both versions are loaded.
     // In that case we're in a buggy state anyway.
@@ -285,7 +290,7 @@ gtk_wrapper_initialize(void)
 
 #define GET_SYMBOL2(symname, libname)                   \
 do {                                                    \
-    gw_ ## symname = dlsym(RTLD_DEFAULT, #libname);     \
+    gw_ ## symname = dlsym(gw.dl_handler, #libname);    \
     if (gw_ ## symname == NULL)                         \
         trace_error("can't resolve " #libname "\n");    \
 } while (0)
