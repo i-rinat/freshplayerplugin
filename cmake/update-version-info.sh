@@ -18,7 +18,7 @@ update_header() {
 GIT_COMMAND_EXISTS=1
 command -v git >/dev/null 2>&1 || GIT_COMMAND_EXISTS=0
 
-if [ $GIT_COMMAND_EXISTS -eq 0 ]; then
+if [ ! -d "$CMAKE_SOURCE_DIR/.git" -o $GIT_COMMAND_EXISTS -eq 0 ]; then
     update_header "no vcs hash"
     exit 0
 fi
