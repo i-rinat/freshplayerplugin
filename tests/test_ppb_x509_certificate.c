@@ -1,4 +1,4 @@
-#include "test.h"
+#include "nih_test.h"
 #include <stdio.h>
 #include <src/ppb_x509_certificate.c>
 #include <src/ppb_core.h>

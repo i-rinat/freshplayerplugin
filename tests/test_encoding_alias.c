@@ -1,4 +1,4 @@
-#include "test.h"
+#include "nih_test.h"
 #include <src/encoding_alias.c>
 
 

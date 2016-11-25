@@ -1,4 +1,4 @@
-#include "test.h"
+#include "nih_test.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <src/header_parser.c>

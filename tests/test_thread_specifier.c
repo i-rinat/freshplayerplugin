@@ -1,6 +1,6 @@
 // testing that "__thread" specifier works
 
-#include "test.h"
+#include "nih_test.h"
 #include <pthread.h>
 #include <stdio.h>
 

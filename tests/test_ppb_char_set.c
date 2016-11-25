@@ -1,4 +1,4 @@
-#include "test.h"
+#include "nih_test.h"
 #include <stdio.h>
 #include <string.h>
 #include <langinfo.h>
@@ -13,16 +13,12 @@ t_memalloc(uint32_t sz)
     return malloc(sz);
 }
 
-static
-void
-initializer(void)
+TESTSUITE_SETUP(void)
 {
     // npn is globally visible struct
     npn.memalloc = t_memalloc;
     npn.memfree = free;
 }
-
-TEST_CONSTRUCTOR(initializer);
 
 TEST(ppb_char_set, extract_relevant_part_from_locale_name)
 {

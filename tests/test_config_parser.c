@@ -1,4 +1,4 @@
-#include "test.h"
+#include "nih_test.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
