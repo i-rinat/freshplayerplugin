@@ -46,7 +46,7 @@ g_array_set_clear_func(GArray *array, GDestroyNotify clear_func)
 {
    //  Only for compatibility.
    // TODO: memory leaks?
-} 
+}
 #endif
 
 

@@ -18,7 +18,7 @@ TEST(ppb_flash_file, to_abs_path)
 {
     test_case("WritableRoot/#SharedObjects/4TVF7XJR/macromedia.com/support/flashplayer/sys/#127.0.0.1",
               "/start/WritableRoot/#SharedObjects/4TVF7XJR/macromedia.com/support/flashplayer/sys/#127.0.0.1");
-    
+
     test_case("qw/../../../../", "/start/");
     test_case("qw/../../../..", "/start/");
     test_case("p1/p2/p3/../p4", "/start/p1/p2/p4");

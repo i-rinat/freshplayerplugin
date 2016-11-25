@@ -70,7 +70,7 @@ nih_test_run_all(void)
     // call all tests, one by one
     for (struct testcase *t = head.next; t != NULL; t = t->next) {
         printf("running %s\n", t->name);
-        
+
         // initialize, if needed
         if (nih_test_setup_func)
             nih_test_setup_func();
