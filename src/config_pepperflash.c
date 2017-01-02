@@ -51,7 +51,7 @@ fpp_config_get_plugin_path_list(void)
 const char *
 fpp_config_get_default_plugin_version(void)
 {
-    return "13.1.2.3";
+    return "24.0.0.186";
 }
 
 const char *
@@ -63,7 +63,7 @@ fpp_config_get_plugin_name(void)
 const char *
 fpp_config_get_default_plugin_descr(void)
 {
-    return "Shockwave Flash 13.1 r2";
+    return "Shockwave Flash 24.0 r0";
 }
 
 const char *
