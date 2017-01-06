@@ -29,6 +29,8 @@ const char *pepperflash_path_list[] = {
     "/opt/google/chrome/PepperFlash",           // Chrome
     "/opt/google/chrome-beta/PepperFlash",      // Chrome beta
     "/opt/google/chrome-unstable/PepperFlash",  // Chrome unstable
+    "/usr/lib/flash-plugin",                    // Adobe package
+    "/usr/lib64/flash-plugin",                  // Adobe package
     "/usr/lib/adobe-flashplugin",               // adobe-flashplugin (Ubuntu)
     "/usr/lib/pepperflashplugin-nonfree",       // pepperflashplugin-nonfree (Debian)
     "/usr/lib/PepperFlash",                     // chromium-pepperflash-plugin (Slackware)
