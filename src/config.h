@@ -42,6 +42,8 @@ struct fpp_config_s {
     int     quiet;
     int     fullscreen_width;
     int     fullscreen_height;
+    int     fullscreen_horz_maximize_atom;
+    int     fullscreen_vert_maximize_atom;
     int     randomize_dns_case;
     double  device_scale;
     int     enable_windowed_mode;
