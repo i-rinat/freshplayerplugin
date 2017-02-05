@@ -59,6 +59,12 @@ quiet = 0
 fullscreen_width = 0
 fullscreen_height = 0
 
+# Controls whenever _NET_WM_STATE_MAXIMIZED_HORZ and
+# _NET_WM_STATE_MAXIMIZED_VERT will be added to _NET_WM_STATE during fullscreen
+# transition. If going to full screen mode doesn't work, try to set them to 0.
+fullscreen_horz_maximize_atom = 1
+fullscreen_vert_maximize_atom = 1
+
 # Enables DNS query case randomization to partially protect against DNS
 # poisoning attacks. It was reported that some Mikrotik routers do not
 # support this trick. Set parameter to 0 if you have an affected model
