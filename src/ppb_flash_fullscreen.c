@@ -256,27 +256,35 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     // update windows state properties
     Atom netwm_state_atom = XInternAtom(dpy, "_NET_WM_STATE", False);
 
+    // build state atom list
+    Atom atom;
+    GArray *state_atoms = g_array_sized_new(FALSE, TRUE, sizeof(Atom), 10);
+
+    if (config.fullscreen_horz_maximize_atom) {
+        atom = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);  // fill horizontal space
+        g_array_append_val(state_atoms, atom);
+    }
+
+    if (config.fullscreen_vert_maximize_atom) {
+        atom = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);  // fill vertical space
+        g_array_append_val(state_atoms, atom);
+    }
+
+    atom = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);  // go fullscreen
+    g_array_append_val(state_atoms, atom);
 
     if (config.tie_fullscreen_window_to_browser) {
-        Atom state_atoms[] = {
-            XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False),// fill horizontal space
-            XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False),// fill vertical space
-            XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False),    // go fullscreen
-            XInternAtom(dpy, "_NET_WM_STATE_SKIP_PAGER", False),    // do not appear in pager
-            XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", False),  // do not appear in taskbar
-        };
-        XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
-                        (unsigned char *)&state_atoms, sizeof(state_atoms)/sizeof(state_atoms[0]));
-    } else {
+        atom = XInternAtom(dpy, "_NET_WM_STATE_SKIP_PAGER", False);  // do not appear in pager
+        g_array_append_val(state_atoms, atom);
 
-        Atom state_atoms[] = {
-            XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False),// fill horizontal space
-            XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False),// fill vertical space
-            XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False),    // go fullscreen
-        };
-        XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
-                        (unsigned char *)&state_atoms, sizeof(state_atoms)/sizeof(state_atoms[0]));
+        atom = XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", False);  // do not appear in taskbar
+        g_array_append_val(state_atoms, atom);
     }
+
+    XChangeProperty(dpy, pp_i->fs_wnd, netwm_state_atom, XA_ATOM, 32, PropModeReplace,
+                    (unsigned char *)state_atoms->data, state_atoms->len);
+
+    g_array_free(state_atoms, TRUE);
 
     // give window a name
     const char *fs_window_name = "freshwrapper fullscreen window";
