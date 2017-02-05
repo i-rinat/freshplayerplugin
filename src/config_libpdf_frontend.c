@@ -23,16 +23,21 @@
  */
 
 #include "config.h"
+#include <glib.h>
 #include <stdlib.h>
 
 static
 const char *
 plugin_path_list[] = { NULL };
 
-const char **
-fpp_config_get_plugin_path_list(void)
+void
+fpp_config_get_plugin(char **path, char **desc, char **version)
 {
-    return plugin_path_list;
+    g_free(*path);
+    *path = fpp_config_find_file_among_paths(fpp_config_get_plugin_file_name(), plugin_path_list);
+
+    *desc = (char *)fpp_config_get_default_plugin_descr();
+    *version = (char *)fpp_config_get_default_plugin_version();
 }
 
 const char *
@@ -59,22 +64,10 @@ fpp_config_get_plugin_mime_type(void)
     return "application/pdf::Portable Document Format";
 }
 
-char *
-fpp_config_get_plugin_path(void)
-{
-    return NULL;
-}
-
 const char *
 fpp_config_get_plugin_file_name(void)
 {
     return "";
-}
-
-uintptr_t
-fpp_config_plugin_has_manifest(void)
-{
-    return 0;
 }
 
 void
