@@ -131,3 +131,19 @@ The MIT License. See `LICENSE` file for full text.
 
 Directory `3rdparty/` contains source code from 3rd parties which can be
 distributed under other license terms. See source code for details.
+
+32 bit (i386,i586,686)
+=======
+
+Google Chrome has stopped supporting the 32 bit version for linux system
+
+the installation files of cel it was therefore deleted from their server
+
+Here backup link to the most recent version 48.0.2564.116-1.i386
+
+http://mirror.pcbeta.com/google/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_48.0.2564.116-1_i386.deb
+
+
+http://mirror.pcbeta.com/google/rpm/i386/google-chrome32/google-chrome-stable-48.0.2564.116-1.i386.rpm
+
+you can also download the torrent file see https://github.com/i-rinat/freshplayerplugin/raw/master/google%20chrome%20linux%20i386%20latest.torrent
