@@ -57,6 +57,16 @@ allows sandboxed implementations. This particular implementation
 through plugin security, there is no additional barriers. This is the
 same level of security as NPAPI Flash have.
 
+Prerequisites
+=============
+
+On Ubuntu-based Linuxes:
+
+``` sh
+sudo apt-get install cmake libevent-dev libegl1-mesa-dev \
+libgles2-mesa-dev liburiparser-dev libconfig-dev
+```
+
 Install
 =======
 
