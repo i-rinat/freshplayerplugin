@@ -224,15 +224,15 @@ static void remove_comments(char *string, const char *start_token, const char *e
         } else if (current_char == '\"' && !escaped) {
             in_string = !in_string;
         } else if (!in_string && strncmp(string, start_token, start_token_len) == 0) {
-			for(i = 0; i < start_token_len; i++)
+            for(i = 0; i < start_token_len; i++)
                 string[i] = ' ';
-        	string = string + start_token_len;
+            string = string + start_token_len;
             ptr = strstr(string, end_token);
             if (!ptr)
                 return;
             for (i = 0; i < (ptr - string) + end_token_len; i++)
                 string[i] = ' ';
-          	string = ptr + end_token_len - 1;
+            string = ptr + end_token_len - 1;
         }
         escaped = 0;
         string++;
