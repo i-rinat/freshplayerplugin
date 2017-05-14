@@ -44,6 +44,11 @@ const char *pepperflash_path_list[] = {
     NULL,
 };
 
+void
+fpp_config_find_backend_plugin(void)
+{
+}
+
 const char **
 fpp_config_get_plugin_path_list(void)
 {

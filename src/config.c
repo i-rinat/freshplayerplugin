@@ -220,6 +220,8 @@ fpp_config_initialize(void)
     pepper_salt_file_name = g_strdup_printf("%s/%s", local_config, salt_file_name);
     g_free(local_config);
 
+    fpp_config_find_backend_plugin();
+
     initialized = 1;
 }
 

@@ -58,3 +58,6 @@ fpp_config_plugin_has_manifest(void);
 
 void
 fpp_config_detect_plugin_specific_quirks(void);
+
+void
+fpp_config_find_backend_plugin(void);
