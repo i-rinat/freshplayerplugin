@@ -40,6 +40,7 @@
 #include "pp_resource.h"
 #include "tables.h"
 #include "config.h"
+#include "config_priv.h"
 #include "p2n_proxy_class.h"
 #include <ppapi/c/ppp_instance.h>
 #include <ppapi/c/ppp_input_event.h>

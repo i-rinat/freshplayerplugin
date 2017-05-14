@@ -28,6 +28,7 @@
 #include <string.h>
 #include "trace_core.h"
 #include "config.h"
+#include "config_priv.h"
 #include "txt_resources.h"
 
 

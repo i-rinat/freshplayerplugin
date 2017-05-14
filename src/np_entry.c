@@ -34,6 +34,7 @@
 #include "trace.h"
 #include "tables.h"
 #include "config.h"
+#include "config_priv.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
 #include <glib.h>

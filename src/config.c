@@ -23,6 +23,7 @@
  */
 
 #include "config.h"
+#include "config_priv.h"
 #include "config_parser/config_parser.h"
 #include <string.h>
 #include <stdlib.h>

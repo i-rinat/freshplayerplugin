@@ -78,45 +78,10 @@ fpp_config_initialize(void);
 void
 fpp_config_destroy(void);
 
-// plugin-specific
-/** array of directories where plugin can be found */
-const char **
-fpp_config_get_plugin_path_list(void);
-
-/** name of binary (without path) */
-const char *
-fpp_config_get_plugin_file_name(void);
-
-/** default name of plugin to display on plugin list page */
-const char *
-fpp_config_get_plugin_name(void);
-
-/** list of mime types in NPAPI format */
-const char *
-fpp_config_get_plugin_mime_type(void);
-
-/** list of mime types in NPAPI format */
-const char *
-fpp_config_get_default_plugin_version(void);
-
-/** default plugin description to display on plugin list page */
-const char *
-fpp_config_get_default_plugin_descr(void);
-
-/** return full path to a plugin if set */
-char *
-fpp_config_get_plugin_path(void);
-
-uintptr_t
-fpp_config_plugin_has_manifest(void);
-
 const char *
 fpp_config_get_pepper_data_dir(void);
 
 const char *
 fpp_config_get_pepper_salt_file_name(void);
-
-void
-fpp_config_detect_plugin_specific_quirks(void);
 
 #endif // FPP_CONFIG_H
