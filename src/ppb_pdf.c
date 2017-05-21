@@ -32,8 +32,8 @@
 #include "ppb_flash_font_file.h"
 #include "ppb_image_data.h"
 #include "ppb_var.h"
-#include "np_entry.h"
 #include "pp_interface.h"
+#include "config_priv.h"
 
 
 static GMappedFile  *natives_blob = NULL;
@@ -134,7 +134,7 @@ ppb_pdf_get_v8_external_snapshot_data(PP_Instance instance, const char **natives
                                       int *snapshot_size_out)
 {
     if (!natives_blob || !snapshot_blob) {
-        gchar *tmp = g_strdup(np_entry_get_module_file_name());
+        gchar *tmp = g_strdup(fpp_config_get_plugin_path());
         gchar *module_dir = dirname(tmp);
         gchar *natives_path = g_strdup_printf("%s/natives_blob.bin", module_dir);
         gchar *snapshot_path = g_strdup_printf("%s/snapshot_blob.bin", module_dir);

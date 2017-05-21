@@ -58,7 +58,6 @@
 #include "header_parser.h"
 #include "keycodeconvert.h"
 #include "eintr_retry.h"
-#include "np_entry.h"
 #include "compat.h"
 #include "x11_event_thread.h"
 

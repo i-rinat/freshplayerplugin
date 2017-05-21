@@ -37,7 +37,6 @@
 #include "pp_interface.h"
 #include <glib.h>
 #include "compat.h"
-#include "np_entry.h"
 #include "ppb_message_loop.h"
 #include "tables.h"
 #include "main_thread.h"
@@ -48,12 +47,6 @@
 static void *module_dl_handler;
 static struct pp_instance_s *aux_instance = NULL;
 static int np_initialize_was_called = 0;
-
-gchar *
-np_entry_get_module_file_name(void)
-{
-    return ""; // TODO: remove
-}
 
 struct call_plugin_init_module_param_s {
     PP_Resource     m_loop;
