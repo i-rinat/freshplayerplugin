@@ -1204,27 +1204,15 @@ handle_placeholder_graphics_expose_event(NPP npp, void *event)
     gchar *txt;
     if (config.quirks.incompatible_npapi_version) {
         txt = g_strdup_printf("NPAPI version too old (%d)", npn.version);
+
     } else {
-        GString *builder = g_string_new(NULL);
         const char *plugin_name = fpp_config_get_plugin_file_name();
-        g_string_printf(builder,
+        txt = g_strdup_printf(
             "Failed to load \"%s\".\n"
             "Freshwrapper is a translation layer which needs\n"
-            "PPAPI plugin backend. Ensure your system have\n"
-            "\"%s\" available.\n"
-            "Paths tried:\n",
+            "a PPAPI plugin backend. Ensure your system have\n"
+            "\"%s\" available.\n",
             plugin_name, plugin_name);
-
-        // append list of tried paths
-        GList *tried_files = g_list_copy(np_entry_get_tried_plugin_files());
-        tried_files = g_list_reverse(tried_files); // list was built in reverse
-        GList *ll = tried_files;
-        while (ll) {
-            g_string_append_printf(builder, "%s\n", (char *)ll->data);
-            ll = g_list_next(ll);
-        }
-        g_list_free(tried_files);
-        txt = g_string_free(builder, FALSE); // keep buffer
     }
 
     const double pos_x = 10.0;

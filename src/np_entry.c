@@ -50,7 +50,6 @@
 static void *module_dl_handler;
 static gchar *module_version;
 static gchar *module_descr;
-static GList *tried_files = NULL;
 static gchar *module_file_name = NULL;
 static struct pp_instance_s *aux_instance = NULL;
 static int np_initialize_was_called = 0;
@@ -61,12 +60,6 @@ use_fallback_version_strings(void)
 {
     module_version = g_strdup(fpp_config_get_default_plugin_version());
     module_descr = g_strdup(fpp_config_get_default_plugin_descr());
-}
-
-GList *
-np_entry_get_tried_plugin_files(void)
-{
-    return tried_files;
 }
 
 gchar *
@@ -158,8 +151,6 @@ static
 uintptr_t
 do_probe_ppp_module(const char *fname)
 {
-    tried_files = g_list_prepend(tried_files, g_strdup(fname));
-
     if (!file_exists_and_is_regular_and_readable(fname))
         return 1;
 
@@ -203,11 +194,6 @@ int
 probe_ppp_module(void)
 {
     fpp_config_initialize();
-
-    if (tried_files) {
-        g_list_free_full(tried_files, g_free);
-        tried_files = NULL;
-    }
 
     if (fpp_config_get_plugin_path()) {
         const char *ptr = fpp_config_get_plugin_path();
@@ -375,10 +361,6 @@ unload_ppp_module(void)
     g_free(module_descr); module_descr = NULL;
     g_free(module_version); module_version = NULL;
     g_free(module_file_name); module_file_name = NULL;
-    if (tried_files) {
-        g_list_free_full(tried_files, g_free);
-        tried_files = NULL;
-    }
 
     // call module shutdown handler if exists
     call_plugin_shutdown_module();

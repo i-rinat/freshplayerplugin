@@ -27,10 +27,6 @@
 
 #include <glib.h>
 
-
-GList *
-np_entry_get_tried_plugin_files(void);
-
 /// returns full path to a PPAPI module if loaded
 gchar *
 np_entry_get_module_file_name(void);
