@@ -254,7 +254,7 @@ fpp_config_get_plugin_mime_type(void)
 char *
 fpp_config_get_plugin_path(void)
 {
-    return config.pepperflash_path;
+    return flapper_path;
 }
 
 const char *
