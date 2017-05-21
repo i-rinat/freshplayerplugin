@@ -221,6 +221,12 @@ fpp_config_get_default_plugin_version(void)
 }
 
 const char *
+fpp_config_get_plugin_version(void)
+{
+    return flapper_str_version;
+}
+
+const char *
 fpp_config_get_plugin_name(void)
 {
     return "Shockwave Flash";
