@@ -133,15 +133,6 @@ if (WITH_PEPPERFLASH)
     install(TARGETS freshwrapper-flashplayer DESTINATION ${MOZPLUGIN_INSTALL_DIR})
 endif()
 
-# wrapper for Native Client
-set(WITH_NACL FALSE CACHE STRING "generate wrapper for Native Client")
-if (WITH_NACL)
-    add_library(freshwrapper-nacl SHARED ${COMMON_OBJ_LIST} config_nacl.c)
-    target_link_libraries(freshwrapper-nacl ${SYMBOLMAP} ${REQ_LIBRARIES})
-    target_link_libraries(dep_check freshwrapper-nacl)
-    install(TARGETS freshwrapper-nacl DESTINATION ${MOZPLUGIN_INSTALL_DIR})
-endif()
-
 # libpdf wrapper
 set(WITH_LIBPDF FALSE CACHE STRING "generate wrapper for libpdf.so")
 if (WITH_LIBPDF)
