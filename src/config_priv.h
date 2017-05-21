@@ -49,6 +49,9 @@ fpp_config_get_default_plugin_version(void);
 const char *
 fpp_config_get_default_plugin_descr(void);
 
+const char *
+fpp_config_get_plugin_descr(void);
+
 /** return full path to a plugin if set */
 char *
 fpp_config_get_plugin_path(void);

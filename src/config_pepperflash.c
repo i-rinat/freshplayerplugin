@@ -233,6 +233,12 @@ fpp_config_get_default_plugin_descr(void)
 }
 
 const char *
+fpp_config_get_plugin_descr(void)
+{
+    return flapper_descr;
+}
+
+const char *
 fpp_config_get_plugin_mime_type(void)
 {
     return "application/x-shockwave-flash:swf:Shockwave Flash;"

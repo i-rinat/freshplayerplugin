@@ -419,7 +419,7 @@ NP_GetValue(void *instance, NPPVariable variable, void *value)
         *(const char **)value = fpp_config_get_plugin_name();
         break;
     case NPPVpluginDescriptionString:
-        *(char **)value = module_descr;
+        *(const char **)value = fpp_config_get_plugin_descr();
         break;
     default:
         trace_info_z("    not implemented variable %d\n", variable);
