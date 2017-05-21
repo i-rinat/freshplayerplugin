@@ -208,18 +208,6 @@ fpp_config_find_backend_plugin(void)
                                           flapper_version.v[2], flapper_version.v[3]);
 }
 
-const char **
-fpp_config_get_plugin_path_list(void)
-{
-    return pepperflash_path_list;
-}
-
-const char *
-fpp_config_get_default_plugin_version(void)
-{
-    return "24.0.0.186";
-}
-
 const char *
 fpp_config_get_plugin_version(void)
 {
@@ -230,12 +218,6 @@ const char *
 fpp_config_get_plugin_name(void)
 {
     return "Shockwave Flash";
-}
-
-const char *
-fpp_config_get_default_plugin_descr(void)
-{
-    return "Shockwave Flash 24.0 r0";
 }
 
 const char *
@@ -261,12 +243,6 @@ const char *
 fpp_config_get_plugin_file_name(void)
 {
     return "libpepflashplayer.so";
-}
-
-uintptr_t
-fpp_config_plugin_has_manifest(void)
-{
-    return 1;
 }
 
 void
