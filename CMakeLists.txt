@@ -152,6 +152,5 @@ endif()
 set(SYMBOLMAP "-Wl,-version-script=\"${CMAKE_SOURCE_DIR}/src/symbolmap\"")
 
 add_subdirectory(3rdparty)
-add_subdirectory(resources)
 add_subdirectory(src)
 add_subdirectory(tests)

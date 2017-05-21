@@ -10,8 +10,6 @@ set(MOZPLUGIN_INSTALL_DIR "lib${LIB_SUFFIX}/mozilla/plugins/" CACHE STRING "plug
 add_subdirectory(uri_parser)
 add_subdirectory(config_parser)
 
-include_directories("${GENERATED_INCLUDE_DIRS}")
-
 set(source_list
     async_network.c
     audio_thread.c
