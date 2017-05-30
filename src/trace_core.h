@@ -22,9 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_TRACE_CORE_H
-#define FPP_TRACE_CORE_H
-
+#pragma once
 
 #define TRACE_WRAPPER       static __attribute__((unused))
 
@@ -54,6 +52,3 @@ void    trace_error(const char *fmt, ...) __attribute__((format (printf, 1, 2)))
 
 void    trace_duration_tic(void);
 double  trace_duration_toc(void);
-
-
-#endif // FPP_TRACE_CORE_H

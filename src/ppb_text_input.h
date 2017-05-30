@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_TEXT_INPUT_H
-#define FPP_PPB_TEXT_INPUT_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_text_input_dev.h>
 
@@ -44,5 +43,3 @@ ppb_text_input_interface_update_surrounding_text(PP_Instance instance, const cha
 
 void
 ppb_text_input_interface_selection_changed(PP_Instance instance);
-
-#endif // FPP_PPB_TEXT_INPUT_H

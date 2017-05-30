@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_X11_EVENT_THREAD_H
-#define FPP_X11_EVENT_THREAD_H
+#pragma once
 
 #include <npapi/npfunctions.h>
 #include <X11/Xlib.h>
@@ -36,6 +35,3 @@ x11et_register_window(PP_Instance instance, Window wnd, NPP_HandleEventProcPtr h
 
 void
 x11et_unregister_window(Window wnd);
-
-
-#endif // FPP_X11_EVENT_THREAD_H

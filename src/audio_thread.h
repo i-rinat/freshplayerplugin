@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_AUDIO_THREAD_H
-#define FPP_AUDIO_THREAD_H
+#pragma once
 
 #include <stdint.h>
 
@@ -85,6 +84,3 @@ audio_select_implementation(void);
 
 void
 audio_capture_device_list_free(audio_device_name *list);
-
-
-#endif // FPP_AUDIO_THREAD_H

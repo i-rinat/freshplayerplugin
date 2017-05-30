@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_VAR_H
-#define FPP_PPB_VAR_H
+#pragma once
 
 #include <ppapi/c/ppb_var.h>
 #include <ppapi/c/ppb_var_array_buffer.h>
@@ -150,6 +149,3 @@ ppb_var_array_get_length(struct PP_Var array);
 
 PP_Bool
 ppb_var_array_set_length(struct PP_Var array, uint32_t length);
-
-
-#endif // FPP_PPB_VAR_H

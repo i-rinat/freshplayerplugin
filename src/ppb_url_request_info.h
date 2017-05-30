@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_URL_REQUEST_INFO_H
-#define FPP_PPB_URL_REQUEST_INFO_H
+#pragma once
 
 #include <ppapi/c/ppb_url_request_info.h>
 #include <stdlib.h>
@@ -74,5 +73,3 @@ PP_Bool
 ppb_url_request_info_append_file_to_body(PP_Resource request, PP_Resource file_ref,
                                          int64_t start_offset, int64_t number_of_bytes,
                                          PP_Time expected_last_modified_time);
-
-#endif // FPP_PPB_URL_REQUEST_INFO_H

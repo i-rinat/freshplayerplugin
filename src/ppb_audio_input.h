@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_AUDIO_INPUT_H
-#define FPP_PPB_AUDIO_INPUT_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_audio_input_dev.h>
 
@@ -63,5 +62,3 @@ ppb_audio_input_stop_capture(PP_Resource audio_input);
 
 void
 ppb_audio_input_close(PP_Resource audio_input);
-
-#endif // FPP_PPB_AUDIO_INPUT_H

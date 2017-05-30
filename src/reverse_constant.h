@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_REVERSE_CONSTANT_H
-#define FPP_REVERSE_CONSTANT_H
+#pragma once
 
 #include <npapi/npapi.h>
 #include <ppapi/c/ppb_url_response_info.h>
@@ -59,5 +58,3 @@ const char *reverse_x509_certificate_field(PP_X509Certificate_Private_Field fiel
 const char *reverse_pdf_feature(PP_PDFFeature feature);
 const char *reverse_private_font_charset(PP_PrivateFontCharset charset);
 const char *reverse_graphics3d_attribute(int32_t attr);
-
-#endif // FPP_REVERSE_CONSTANT_H

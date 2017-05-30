@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PP_RESOURCE_H
-#define FPP_PP_RESOURCE_H
+#pragma once
 
 #define GL_GLEXT_LEGACY             // prevent inclusion of glext.h
 #define GLX_GLXEXT_LEGACY           // prevent inclusion of glxext.h
@@ -653,5 +652,3 @@ void                    pp_resource_unref(PP_Resource resource);
 
 void                    register_resource(enum pp_resource_type_e type,
                                           void (*destructor)(void *ptr));
-
-#endif // FPP_PP_RESOURCE_H

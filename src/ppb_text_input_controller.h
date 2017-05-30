@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_TEXT_INPUT_CONTROLLER_H
-#define FPP_PPB_TEXT_INPUT_CONTROLLER_H
+#pragma once
 
 #include <ppapi/c/ppb_text_input_controller.h>
 
@@ -40,5 +39,3 @@ ppb_text_input_controller_cancel_composition_text(PP_Instance instance);
 void
 ppb_text_input_controller_update_surrounding_text(PP_Instance instance, struct PP_Var text,
                                                   uint32_t caret, uint32_t anchor);
-
-#endif // FPP_PPB_TEXT_INPUT_CONTROLLER_H

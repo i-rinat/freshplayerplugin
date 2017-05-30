@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_FLASH_FILE_H
-#define FPP_PPB_FLASH_FILE_H
+#pragma once
 
 #include <ppapi/c/dev/deprecated_bool.h>
 #include <ppapi/c/private/ppb_flash_file.h>
@@ -70,6 +69,3 @@ ppb_flash_file_modulelocal_free_dir_contents(PP_Instance instance,
 
 int32_t
 ppb_flash_file_modulelocal_create_temporary_file(PP_Instance instance, PP_FileHandle *file);
-
-
-#endif // FPP_PPB_FLASH_FILE_H

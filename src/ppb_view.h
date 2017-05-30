@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_VIEW_H
-#define FPP_PPB_VIEW_H
+#pragma once
 
 #include <ppapi/c/ppb_view.h>
 #include <ppapi/c/dev/ppb_view_dev.h>
@@ -54,6 +53,3 @@ ppb_view_get_css_scale(PP_Resource resource);
 
 PP_Bool
 ppb_view_get_scroll_offset(PP_Resource resource, struct PP_Point *offset);
-
-
-#endif // FPP_PPB_VIEW_H

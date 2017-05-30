@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_SHADER_TRANSLATOR_H
-#define FPP_SHADER_TRANSLATOR_H
+#pragma once
 
 #include <GLES2/gl2.h>
 
@@ -38,5 +37,3 @@ translate_shader(GLenum type, const char *str);
 #ifdef __cplusplus
 }
 #endif
-
-#endif // FPP_SHADER_TRANSLATOR_H

@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_FONT_H
-#define FPP_FONT_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_font_dev.h>
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
@@ -77,6 +76,3 @@ pp_browser_font_desc_to_pp_font_desc(const struct PP_BrowserFont_Trusted_Descrip
 
 PangoFontDescription *
 pp_browser_font_desc_to_pango_font_desc(const struct PP_BrowserFont_Trusted_Description *descr);
-
-
-#endif // FPP_FONT_H

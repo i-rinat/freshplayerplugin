@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_FILE_CHOOSER_H
-#define FPP_PPB_FILE_CHOOSER_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_file_chooser_dev.h>
 #include <ppapi/c/trusted/ppb_file_chooser_trusted.h>
@@ -44,5 +43,3 @@ ppb_file_chooser_show_without_user_gesture(PP_Resource chooser, PP_Bool save_as,
                                            struct PP_Var suggested_file_name,
                                            struct PP_ArrayOutput output,
                                            struct PP_CompletionCallback callback);
-
-#endif // FPP_PPB_FILE_CHOOSER_H

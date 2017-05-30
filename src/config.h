@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_CONFIG_H
-#define FPP_CONFIG_H
+#pragma once
 
 #include <stdint.h>
 
@@ -83,5 +82,3 @@ fpp_config_get_pepper_data_dir(void);
 
 const char *
 fpp_config_get_pepper_salt_file_name(void);
-
-#endif // FPP_CONFIG_H

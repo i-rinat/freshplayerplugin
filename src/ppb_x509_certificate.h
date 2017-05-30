@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_X509_CERTIFICATE_H
-#define FPP_PPB_X509_CERTIFICATE_H
+#pragma once
 
 #include <ppapi/c/private/ppb_x509_certificate_private.h>
 
@@ -39,5 +38,3 @@ ppb_x509_certificate_initialize(PP_Resource resource, const char *bytes, uint32_
 
 struct PP_Var
 ppb_x509_certificate_get_field(PP_Resource resource, PP_X509Certificate_Private_Field field);
-
-#endif // FPP_PPB_X509_CERTIFICATE_H

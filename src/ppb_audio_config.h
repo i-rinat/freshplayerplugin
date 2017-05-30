@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_AUDIO_CONFIG_H
-#define FPP_PPB_AUDIO_CONFIG_H
+#pragma once
 
 #include <ppapi/c/ppb_audio_config.h>
 
@@ -47,5 +46,3 @@ ppb_audio_config_get_sample_frame_count(PP_Resource config);
 
 PP_AudioSampleRate
 ppb_audio_config_recommend_sample_rate(PP_Instance instance);
-
-#endif // FPP_PPB_AUDIO_CONFIG_H

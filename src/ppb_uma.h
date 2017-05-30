@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_UMA_H
-#define FPP_PPB_UMA_H
+#pragma once
 
 #include <ppapi/c/private/ppb_uma_private.h>
 
@@ -42,5 +41,3 @@ ppb_uma_histogram_enumeration(PP_Instance instance, struct PP_Var name, int32_t 
 
 int32_t
 ppb_uma_is_crash_reporting_enabled(PP_Instance instance, struct PP_CompletionCallback callback);
-
-#endif // FPP_PPB_UMA_H

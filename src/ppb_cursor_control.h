@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_CURSOR_CONTROL_H
-#define FPP_PPB_CURSOR_CONTROL_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_cursor_control_dev.h>
 
@@ -43,5 +42,3 @@ ppb_cursor_control_has_cursor_lock(PP_Instance instance);
 
 PP_Bool
 ppb_cursor_control_can_lock_cursor(PP_Instance instance);
-
-#endif // FPP_PPB_CURSOR_CONTROL_H

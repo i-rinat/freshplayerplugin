@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_URL_RESPONSE_INFO_H
-#define FPP_PPB_URL_RESPONSE_INFO_H
+#pragma once
 
 #include <ppapi/c/ppb_url_response_info.h>
 
@@ -36,5 +35,3 @@ ppb_url_response_info_get_property(PP_Resource response, PP_URLResponseProperty 
 
 PP_Resource
 ppb_url_response_info_get_body_as_file_ref(PP_Resource response);
-
-#endif // FPP_PPB_URL_RESPONSE_INFO_H

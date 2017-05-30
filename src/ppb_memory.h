@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_MEMORY_H
-#define FPP_PPB_MEMORY_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_memory_dev.h>
 
@@ -33,5 +32,3 @@ ppb_memory_mem_alloc(uint32_t num_bytes);
 
 void
 ppb_memory_mem_free(void *ptr);
-
-#endif // FPP_PPB_MEMORY_H

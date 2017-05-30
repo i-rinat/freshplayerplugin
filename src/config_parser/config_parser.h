@@ -22,9 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_CONFIG_PARSER_CONFIG_PARSER_H
-#define FPP_CONFIG_PARSER_CONFIG_PARSER_H
-
+#pragma once
 
 enum {
     CFG_TYPE_UNKNOWN,
@@ -67,6 +65,3 @@ cfg_free(cfg_t *cfg);
 
 void
 cfg_set_error_func(cfg_t *cfg, cfg_report_error_f func);
-
-
-#endif // FPP_CONFIG_PARSER_CONFIG_PARSER_H

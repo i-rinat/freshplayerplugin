@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_TRACE_H
-#define FPP_TRACE_H
+#pragma once
 
 #include <ppapi/c/pp_var.h>
 #include <ppapi/c/pp_rect.h>
@@ -44,6 +43,3 @@ char   *trace_np_window_as_string(const NPWindow *window);
 char   *trace_graphics3d_attributes_as_string(const int32_t attrib_list[]);
 char   *trace_netaddress_ipv4_as_string(const struct PP_NetAddress_IPv4 *addr);
 char   *trace_netaddress_ipv6_as_string(const struct PP_NetAddress_IPv6 *addr);
-
-
-#endif // FPP_TRACE_H

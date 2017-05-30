@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_KEYCODEPP_H
-#define FPP_KEYCODEPP_H
+#pragma once
 
 #define VK_LBUTTON      0x01    // Left mouse button
 #define VK_RBUTTON      0x02    // Right mouse button
@@ -201,5 +200,3 @@
 #define VK_NONAME       0xFC    // Reserved
 #define VK_PA1          0xFD    // PA1 key
 #define VK_OEM_CLEAR    0xFE    // Clear key
-
-#endif // FPP_KEYCODEPP_H

@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_VIDEO_DECODER_DEV_H
-#define FPP_PPB_VIDEO_DECODER_DEV_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_video_decoder_dev.h>
 
@@ -55,5 +54,3 @@ ppb_video_decoder_reset(PP_Resource video_decoder, struct PP_CompletionCallback 
 
 void
 ppb_video_decoder_destroy(PP_Resource video_decoder);
-
-#endif // FPP_PPB_VIDEO_DECODER_DEV_H

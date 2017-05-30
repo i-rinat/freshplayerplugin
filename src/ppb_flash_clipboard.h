@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_FLASH_CLIPBOARD_H
-#define FPP_PPB_FLASH_CLIPBOARD_H
+#pragma once
 
 #include <ppapi/c/private/ppb_flash_clipboard.h>
 
@@ -48,5 +47,3 @@ PP_Bool
 ppb_flash_clipboard_get_sequence_number(PP_Instance instance_id,
                                         PP_Flash_Clipboard_Type clipboard_type,
                                         uint64_t *sequence_number);
-
-#endif // FPP_PPB_FLASH_CLIPBOARD_H

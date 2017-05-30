@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_OPENGLES2_H
-#define FPP_PPB_OPENGLES2_H
+#pragma once
 
 #include <GLES2/gl2.h>
 #include <ppapi/c/ppb_opengles2.h>
@@ -568,5 +567,3 @@ ppb_opengles2_query_get_queryiv_ext(PP_Resource context, GLenum target, GLenum p
 void
 ppb_opengles2_query_get_query_objectuiv_ext(PP_Resource context, GLuint id, GLenum pname,
                                             GLuint *params);
-
-#endif // FPP_PPB_OPENGLES2_H

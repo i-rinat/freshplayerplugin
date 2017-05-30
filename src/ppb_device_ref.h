@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_DEVICE_REF_H
-#define FPP_PPB_DEVICE_REF_H
+#pragma once
 
 #include <ppapi/c/pp_instance.h>
 #include <ppapi/c/dev/ppb_device_ref_dev.h>
@@ -44,5 +43,3 @@ ppb_device_ref_get_name(PP_Resource device_ref);
 
 struct PP_Var
 ppb_device_ref_get_longname(PP_Resource device_ref);
-
-#endif // FPP_PPB_DEVICE_REF_H

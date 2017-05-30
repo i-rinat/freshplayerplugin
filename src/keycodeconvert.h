@@ -22,13 +22,10 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_KEYCODECONVERT_H
-#define FPP_KEYCODECONVERT_H
+#pragma once
 
 int
 xkeycode_to_pp_keycode(int xkeycode);
 
 int
 get_left_right_pp_flag(int xkeycode);
-
-#endif // FPP_KEYCODECONVERT_H

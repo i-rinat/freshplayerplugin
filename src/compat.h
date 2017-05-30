@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_COMPAT_H
-#define FPP_COMPAT_H
+#pragma once
 
 #include <glib.h>
 #include <X11/Xlib.h>
@@ -55,5 +54,3 @@ g_list_free_full(GList *list, GDestroyNotify free_func);
 #endif
 
 #undef VER
-
-#endif // FPP_COMPAT_H

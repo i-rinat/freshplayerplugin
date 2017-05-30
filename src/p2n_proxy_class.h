@@ -22,13 +22,10 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_P2N_PROXY_CLASS_H
-#define FPP_P2N_PROXY_CLASS_H
+#pragma once
 
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
 
 
 extern struct NPClass p2n_proxy_class;
-
-#endif // FPP_P2N_PROXY_CLASS_H

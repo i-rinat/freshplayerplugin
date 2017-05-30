@@ -1,5 +1,4 @@
-#ifndef FPP_XEMBED_H
-#define FPP_XEMBED_H
+#pragma once
 
 // See http://standards.freedesktop.org/xembed-spec/xembed-spec-latest.html for details
 
@@ -42,5 +41,3 @@
 #define XEMBED_DIRECTION_DEFAULT    0
 #define XEMBED_DIRECTION_UP_DOWN    1
 #define XEMBED_DIRECTION_LEFT_RIGHT 2
-
-#endif // FPP_XEMBED_H

@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_CHAR_SET_H
-#define FPP_PPB_CHAR_SET_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_char_set_dev.h>
 
@@ -40,5 +39,3 @@ ppb_char_set_char_set_to_utf16(PP_Instance instance, const char *input, uint32_t
 
 struct PP_Var
 ppb_char_set_get_default_char_set(PP_Instance instance);
-
-#endif // FPP_PPB_CHAR_SET_H

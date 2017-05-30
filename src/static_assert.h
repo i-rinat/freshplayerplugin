@@ -22,9 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_STATIC_ASSERT_H
-#define FPP_STATIC_ASSERT_H
-
+#pragma once
 
 #if defined(__GNUC__) && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7)))
 #define STATIC_ASSERT_ATTRIBUTE_UNUSED  __attribute__((unused))
@@ -39,5 +37,3 @@
 
 
 #define STATIC_ASSERT_LESS_OR_EQ(expr1, expr2)  STATIC_ASSERT(expr1 <= expr2)
-
-#endif // FPP_STATIC_ASSERT_H

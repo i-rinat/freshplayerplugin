@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_URL_LOADER_H
-#define FPP_PPB_URL_LOADER_H
+#pragma once
 
 #include <ppapi/c/ppb_url_loader.h>
 #include <ppapi/c/trusted/ppb_url_loader_trusted.h>
@@ -73,5 +72,3 @@ ppb_url_loader_grant_universal_access(PP_Resource loader);
 void
 ppb_url_loader_register_status_callback(PP_Resource loader,
                                         PP_URLLoaderTrusted_StatusCallback cb);
-
-#endif // FPP_PPB_URL_LOADER_H

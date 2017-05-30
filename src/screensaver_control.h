@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_SCREENSAVER_CONTROL_H
-#define FPP_SCREENSAVER_CONTROL_H
+#pragma once
 
 #include <X11/Xlib.h>
 #include <stdint.h>
@@ -50,6 +49,3 @@ screensaver_connect(void);
 
 void
 screensaver_disconnect(void);
-
-
-#endif // FPP_SCREENSAVER_CONTROL_H

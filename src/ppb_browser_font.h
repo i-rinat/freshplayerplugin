@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_BROWSER_FONT_H
-#define FPP_PPB_BROWSER_FONT_H
+#pragma once
 
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 
@@ -60,5 +59,3 @@ int32_t
 ppb_browser_font_pixel_offset_for_character(PP_Resource font,
                                             const struct PP_BrowserFont_Trusted_TextRun *text,
                                             uint32_t char_offset);
-
-#endif // FPP_PPB_BROWSER_FONT_H

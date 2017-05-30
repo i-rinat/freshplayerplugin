@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_EINTR_RETRY_H
-#define FPP_EINTR_RETRY_H
+#pragma once
 
 #include <errno.h>
 
@@ -35,5 +34,3 @@
     } while (___tmp_res == -1 && errno == EINTR);   \
     ___tmp_res;                                     \
 })
-
-#endif // FPP_EINTR_RETRY_H

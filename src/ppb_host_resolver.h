@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_HOST_RESOLVER_H
-#define FPP_PPB_HOST_RESOLVER_H
+#pragma once
 
 #include <ppapi/c/private/ppb_host_resolver_private.h>
 #include <ppapi/c/ppb_host_resolver.h>
@@ -60,5 +59,3 @@ ppb_host_resolver_get_net_address(PP_Resource host_resolver, uint32_t index,
 
 PP_Resource
 ppb_host_resolver_get_net_address_1_0(PP_Resource host_resolver, uint32_t index);
-
-#endif // FPP_PPB_HOST_RESOLVER_H

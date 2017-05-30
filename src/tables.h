@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_TABLES_H
-#define FPP_TABLES_H
+#pragma once
 
 #include <pthread.h>
 #include <ppapi/c/pp_var.h>
@@ -129,5 +128,3 @@ void    tables_remove_npobj_npp_mapping(NPObject *npobj);
 
 int     tables_open_display(void);
 void    tables_close_display(void);
-
-#endif // FPP_TABLES_H

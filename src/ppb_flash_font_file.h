@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_FLASH_FONT_FILE_H
-#define FPP_PPB_FLASH_FONT_FILE_H
+#pragma once
 
 #include <ppapi/c/private/ppb_flash_font_file.h>
 
@@ -41,5 +40,3 @@ ppb_flash_font_file_get_font_table(PP_Resource font_file, uint32_t table, void *
 
 PP_Bool
 ppb_flash_font_file_is_supported_for_windows(void);
-
-#endif // FPP_PPB_FLASH_FONT_FILE_H

@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_FLASH_MENU_H
-#define FPP_PPB_FLASH_MENU_H
+#pragma once
 
 #include <ppapi/c/private/ppb_flash_menu.h>
 
@@ -37,5 +36,3 @@ ppb_flash_menu_is_flash_menu(PP_Resource resource_id);
 int32_t
 ppb_flash_menu_show(PP_Resource menu_id, const struct PP_Point *location, int32_t *selected_id,
                     struct PP_CompletionCallback callback);
-
-#endif // FPP_PPB_FLASH_MENU_H

@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_URI_PARSER_URI_PARSER_H
-#define FPP_URI_PARSER_URI_PARSER_H
+#pragma once
 
 #include <ppapi/c/dev/ppb_url_util_dev.h>
 #include <glib.h>
@@ -33,5 +32,3 @@ uri_parser_parse_uri(const char *s, struct PP_URLComponents_Dev *components);
 
 gchar *
 uri_parser_merge_uris(const char *base_uri, const char *rel_uri);
-
-#endif // FPP_URI_PARSER_URI_PARSER_H

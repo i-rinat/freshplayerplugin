@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_GRAPHICS3D_H
-#define FPP_PPB_GRAPHICS3D_H
+#pragma once
 
 #include <ppapi/c/ppb_graphics_3d.h>
 
@@ -51,5 +50,3 @@ ppb_graphics3d_resize_buffers(PP_Resource context, int32_t width, int32_t height
 
 int32_t
 ppb_graphics3d_swap_buffers(PP_Resource context, struct PP_CompletionCallback callback);
-
-#endif // FPP_PPB_GRAPHICS3D_H

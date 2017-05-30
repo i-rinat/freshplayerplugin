@@ -22,9 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_COMPAT_GLX_DEFINES_H
-#define FPP_COMPAT_GLX_DEFINES_H
-
+#pragma once
 
 // https://www.opengl.org/registry/specs/ARB/glx_create_context.txt
 #define GLX_CONTEXT_MAJOR_VERSION_ARB           0x2091
@@ -75,6 +73,3 @@
 #define GLX_AUX7_EXT                       0x20E9
 #define GLX_AUX8_EXT                       0x20EA
 #define GLX_AUX9_EXT                       0x20EB
-
-
-#endif // FPP_COMPAT_GLX_DEFINES_H

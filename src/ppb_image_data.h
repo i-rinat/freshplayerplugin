@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_IMAGE_DATA_H
-#define FPP_PPB_IMAGE_DATA_H
+#pragma once
 
 #include <ppapi/c/ppb_image_data.h>
 
@@ -49,5 +48,3 @@ ppb_image_data_map(PP_Resource image_data);
 
 void
 ppb_image_data_unmap(PP_Resource image_data);
-
-#endif // FPP_PPB_IMAGE_DATA_H

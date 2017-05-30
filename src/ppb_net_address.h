@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_NET_ADDRESS_H
-#define FPP_PPB_NET_ADDRESS_H
+#pragma once
 
 #include <ppapi/c/private/ppb_net_address_private.h>
 #include <ppapi/c/ppb_net_address.h>
@@ -92,6 +91,3 @@ ppb_net_address_describe_as_ipv4_address(PP_Resource addr, struct PP_NetAddress_
 
 PP_Bool
 ppb_net_address_describe_as_ipv6_address(PP_Resource addr, struct PP_NetAddress_IPv6 *ipv6_addr);
-
-
-#endif // FPP_PPB_NET_ADDRESS_H

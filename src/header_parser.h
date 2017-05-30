@@ -22,9 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_HEADER_PARSER_H
-#define FPP_HEADER_PARSER_H
-
+#pragma once
 
 struct parsed_headers_s {
     unsigned int    cnt;
@@ -45,5 +43,3 @@ hp_get_header_value(struct parsed_headers_s *ph, const char *name);
 
 int
 hp_header_exists(struct parsed_headers_s *ph, const char *name);
-
-#endif // FPP_HEADER_PARSER_H

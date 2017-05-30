@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_UTILS_H
-#define FPP_UTILS_H
+#pragma once
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -38,5 +37,3 @@ make_nonblock(int fd)
     flags = fcntl(fd, F_GETFL, 0) | O_NONBLOCK;
     (void)fcntl(fd, F_SETFL, flags);
 }
-
-#endif // FPP_UTILS_H

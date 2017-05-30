@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef FPP_PPB_TCP_SOCKET_H
-#define FPP_PPB_TCP_SOCKET_H
+#pragma once
 
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
 
@@ -76,5 +75,3 @@ ppb_tcp_socket_disconnect(PP_Resource tcp_socket);
 int32_t
 ppb_tcp_socket_set_option(PP_Resource tcp_socket, PP_TCPSocketOption_Private name,
                           struct PP_Var value, struct PP_CompletionCallback callback);
-
-#endif // FPP_PPB_TCP_SOCKET_H
