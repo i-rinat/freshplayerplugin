@@ -1,3 +1,12 @@
+2017-05-31  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.3.7
+	* graphics: add more fullscreen _NET_WM controls
+	* misc: drop libpdf wrapper
+	* misc: drop NaCl wrapper
+	* misc: search for PepperFlash in Chrome component update
+	directories
+
 2016-10-05  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.3.6
