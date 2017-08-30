@@ -186,7 +186,7 @@ typedef struct _NPNetscapeFuncs {
 #ifdef XP_MACOSX
 /*
  * Mac OS X version(s) of NP_GetMIMEDescription(const char *)
- * These can be called to retreive MIME information from the plugin dynamically
+ * These can be called to retrieve MIME information from the plugin dynamically
  *
  * Note: For compatibility with Quicktime, BPSupportedMIMEtypes is another way
  *       to get mime info from the plugin only on OSX and may not be supported
@@ -199,8 +199,8 @@ enum
 typedef struct _BPSupportedMIMETypes
 {
  SInt32    structVersion;      /* struct version */
- Handle    typeStrings;        /* STR# formated handle, allocated by plug-in */
- Handle    infoStrings;        /* STR# formated handle, allocated by plug-in */
+ Handle    typeStrings;        /* STR# formatted handle, allocated by plug-in */
+ Handle    infoStrings;        /* STR# formatted handle, allocated by plug-in */
 } BPSupportedMIMETypes;
 OSErr BP_GetSupportedMIMETypes(BPSupportedMIMETypes *mimeInfo, UInt32 flags);
 #define NP_GETMIMEDESCRIPTION_NAME "NP_GetMIMEDescription"

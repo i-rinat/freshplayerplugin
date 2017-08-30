@@ -4,7 +4,7 @@
 // found in the LICENSE file.
 //
 
-// CallDAG.h: Implements a call graph DAG of functions to be re-used accross
+// CallDAG.h: Implements a call graph DAG of functions to be re-used across
 // analyses, allows to efficiently traverse the functions in topological
 // order.
 
