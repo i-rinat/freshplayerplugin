@@ -132,7 +132,7 @@ ppb_core_call_on_browser_thread(PP_Instance instance, void (*func)(void *), void
     task->user_data = user_data;
 
     // Push task into queue. The only purpose is to put task into queue even if message loop
-    // is currenly terminating (in teardown state), so we are ignoring that. There are three
+    // is currently terminating (in teardown state), so we are ignoring that. There are three
     // possible loop states. Message loop is either running, stopped, or terminating. If it's
     // still running, task will be executed in the context of that loop. If it's stopped or
     // stopping right now, task will be pushed to a queue. After that code below will schedule

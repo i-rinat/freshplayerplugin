@@ -77,7 +77,7 @@ struct PPB_Flash_MessageLoop_0_1 {
    * return back to the caller after you call <code>Run()</code>.
    *
    * If <code>Quit()</code> is not called to balance the call to
-   * <code>Run()</code>, the outermost nested message loop will be quitted
+   * <code>Run()</code>, the outermost nested message loop will be quit
    * implicitly when the resource is destroyed.
    *
    * @param[in] flash_message_loop The Flash message loop.

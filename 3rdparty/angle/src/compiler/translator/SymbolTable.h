@@ -93,7 +93,7 @@ class TSymbol : angle::NonCopyable
 
 // Variable class, meaning a symbol that's not a function.
 // 
-// There could be a separate class heirarchy for Constant variables;
+// There could be a separate class hierarchy for Constant variables;
 // Only one of int, bool, or float, (or none) is correct for
 // any particular use, but it's easy to do this way, and doesn't
 // seem worth having separate classes, and "getConst" can't simply return
