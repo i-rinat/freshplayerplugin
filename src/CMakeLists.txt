@@ -22,6 +22,7 @@ set(source_list
     gtk_wrapper.c
     header_parser.c
     keycodeconvert.c
+    np_asynccall.c
     np_entry.c
     np_functions.c
     main_thread.c
