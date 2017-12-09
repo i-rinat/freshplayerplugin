@@ -42,6 +42,7 @@
 #include "main_thread.h"
 #include "ppb_core.h"
 #include "gtk_wrapper.h"
+#include "np_asynccall.h"
 
 
 static void *module_dl_handler;
@@ -396,6 +397,18 @@ NP_Initialize(NPNetscapeFuncs *aNPNFuncs, NPPluginFuncs *aNPPFuncs)
 
     memset(&npn, 0, sizeof(npn));
     memcpy(&npn, aNPNFuncs, sizeof(npn) < aNPNFuncs->size ? sizeof(npn) : aNPNFuncs->size);
+
+    if (npn.pluginthreadasynccall == NULL) {
+        trace_info_f("browser have npn.pluginthreadasynccall == NULL\n");
+        if (np_asynccall_initialize() != 0) {
+            trace_error("can't initialize async call emulation\n");
+
+            // It's required, can't continue.
+            return NPERR_GENERIC_ERROR;
+        }
+
+        npn.pluginthreadasynccall = np_asynccall_call;
+    }
 
     NPPluginFuncs pf;
     memset(&pf, 0, sizeof(NPPluginFuncs));
