@@ -1,3 +1,8 @@
+2017-12-09  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release: v0.3.8
+	* misc: add NPN_PluginThreadAsyncCall emulation for Firefox 58
+
 2017-05-31  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.3.7
