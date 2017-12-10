@@ -361,7 +361,7 @@ post_data_free(GArray *post_data)
 }
 
 void
-post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp)
+post_data_write_to_gstring(GArray *post_data, guint idx, GString *s)
 {
     char buf[128 * 1024];
     struct post_data_item_s *pdi = &g_array_index(post_data, struct post_data_item_s, idx);
@@ -378,14 +378,14 @@ post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp)
             ssize_t read_bytes = RETRY_ON_EINTR(read(fd, buf, MIN(to_write, sizeof(buf))));
             if (read_bytes == -1)
                 goto err;
-            fwrite(buf, 1, (size_t)read_bytes, fp);
+            g_string_append_len(s, buf, (size_t)read_bytes);
             to_write -= read_bytes;
         }
 err:
         if (fd >= 0)
             close(fd);
     } else {
-        fwrite(pdi->data, 1, pdi->len, fp);
+        g_string_append_len(s, pdi->data, pdi->len);
     }
 }
 

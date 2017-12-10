@@ -54,7 +54,7 @@ size_t
 post_data_get_all_item_length(GArray *post_data);
 
 void
-post_data_write_to_fp(GArray *post_data, guint idx, FILE *fp);
+post_data_write_to_gstring(GArray *post_data, guint idx, GString *buf);
 
 PP_Resource
 ppb_url_request_info_create(PP_Instance instance);
