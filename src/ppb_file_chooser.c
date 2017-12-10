@@ -183,7 +183,7 @@ show_without_user_guesture_ptac(void *param)
                              GDK_WINDOW_XID(fcd_wnd),
                              parent_wnd);
     } else {
-        trace_warning("%s, can't get NPNVnetscapeWindow", __func__);
+        trace_error("%s, failed to get NPNVnetscapeWindow\n", __func__);
     }
 
     g_signal_connect(G_OBJECT(fcd), "response", G_CALLBACK(fcd_response_handler), p);

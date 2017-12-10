@@ -203,9 +203,14 @@ url_loader_open_ptac(void *user_data)
 
         if (p->target) {
             p->retval = npn.posturl(pp_i->npp, p->url, p->target, strlen(tmpfname), tmpfname, true);
+            if (p->retval != NPERR_NO_ERROR)
+                trace_error("%s, NPN_PostURL returned %d\n", __func__, p->retval);
+
         } else {
             p->retval = npn.posturlnotify(pp_i->npp, p->url, NULL, strlen(tmpfname), tmpfname, true,
                                           (void*)(size_t)p->loader);
+            if (p->retval != NPERR_NO_ERROR)
+                trace_error("%s, NPN_PostURLNotify returned %d\n", __func__, p->retval);
         }
 err:
         if (fp)
@@ -216,8 +221,12 @@ err:
         // GET request
         if (p->target) {
             p->retval = npn.geturl(pp_i->npp, p->url, p->target);
+            if (p->retval != NPERR_NO_ERROR)
+                trace_warning("%s, NPN_GetUrl returned %d\n", __func__, p->retval);
         } else {
             p->retval = npn.geturlnotify(pp_i->npp, p->url, NULL, (void*)(size_t)p->loader);
+            if (p->retval != NPERR_NO_ERROR)
+                trace_warning("%s, NPN_GetUrlNotify returned %d\n", __func__, p->retval);
         }
     }
 

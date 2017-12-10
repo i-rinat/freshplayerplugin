@@ -157,6 +157,8 @@ get_proxy_for_url_ptac(void *user_data)
         err = npn.getvalueforurl(pp_i->npp, NPNURLVProxy, p->url, &value, &len);
         if (err == NPERR_NO_ERROR) {
             p->result = ppb_var_var_from_utf8(value, len);
+        } else {
+            trace_info_f("%s, failed to get NPNURLVProxy, code %d\n", __func__, err);
         }
     }
 
@@ -269,8 +271,10 @@ topmost_rect_ptac(void *param)
         "})");
     NPVariant topmost_func;
 
-    if (!npn.evaluate(pp_i->npp, pp_i->np_window_obj, &topmost_func_src, &topmost_func))
+    if (!npn.evaluate(pp_i->npp, pp_i->np_window_obj, &topmost_func_src, &topmost_func)) {
+        trace_error("%s, NPN_Evaluate failed\n", __func__);
         goto err_1;
+    }
 
     if (!NPVARIANT_IS_OBJECT(topmost_func))
         goto err_1;
@@ -284,8 +288,10 @@ topmost_rect_ptac(void *param)
     INT32_TO_NPVARIANT(p->rect.point.x + p->rect.size.width / 2, args[1]);
     INT32_TO_NPVARIANT(p->rect.point.y + p->rect.size.height / 2, args[2]);
 
-    if (!npn.invokeDefault(pp_i->npp, topmost_func_obj, args, 3, &is_topmost))
+    if (!npn.invokeDefault(pp_i->npp, topmost_func_obj, args, 3, &is_topmost)) {
+        trace_error("%s, NPN_InvokeDefault failed\n", __func__);
         goto err_2;
+    }
 
     if (!NPVARIANT_IS_BOOLEAN(is_topmost))
         goto err_3;

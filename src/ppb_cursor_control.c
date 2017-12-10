@@ -85,8 +85,10 @@ set_cursor_ptac(void *user_data)
     } else if (pp_i->windowed_mode) {
         wnd = pp_i->wnd;
     } else {
-        if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) != NPERR_NO_ERROR)
+        if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &wnd) != NPERR_NO_ERROR) {
+            trace_error("%s, failed to get NPNnetscapeWindow\n", __func__);
             wnd = None;
+        }
     }
 
     pthread_mutex_lock(&display.lock);

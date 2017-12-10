@@ -182,7 +182,10 @@ update_instance_playing_audio_status_ptac(void *p)
         return;
 
     int is_playing_audio = g_atomic_int_get(&pp_i->audio_source_count) > 0;
-    npn.setvalue(pp_i->npp, NPPVpluginIsPlayingAudio, GINT_TO_POINTER(is_playing_audio));
+    NPError err = npn.setvalue(pp_i->npp, NPPVpluginIsPlayingAudio,
+                               GINT_TO_POINTER(is_playing_audio));
+    if (err != NPERR_NO_ERROR)
+        trace_info_f("%s, failed to set NPPVpluginIsPlayingAudio\n", __func__);
 }
 
 PP_Bool

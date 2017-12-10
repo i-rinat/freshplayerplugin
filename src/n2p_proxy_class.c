@@ -235,6 +235,7 @@ n2p_call_ptac(void *param)
 
         p->result = var;
     } else {
+        trace_error("%s, NPN_Invoke failed (or there were no npp)\n", __func__);
         p->result = PP_MakeUndefined();
     }
 

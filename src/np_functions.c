@@ -127,8 +127,10 @@ NPP_SetWindow(NPP npp, NPWindow *window)
     pp_i->clip_rect.top =    window->clipRect.top;
     pp_i->clip_rect.bottom = window->clipRect.bottom;
 
-    if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &pp_i->browser_wnd) != NPERR_NO_ERROR)
+    if (npn.getvalue(pp_i->npp, NPNVnetscapeWindow, &pp_i->browser_wnd) != NPERR_NO_ERROR) {
         pp_i->browser_wnd = None;
+        trace_error("%s, failed to get NPNVnetscapeWindow\n", __func__);
+    }
 
     if (pp_i->windowed_mode) {
         pp_i->wnd = x11et_register_window(pp_i->id, (Window)window->window, NPP_HandleEvent,
@@ -428,7 +430,11 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     if (config.quirks.plugin_missing) {
         trace_info_z("plugin missing, using placeholder\n");
-        npn.setvalue(npp, NPPVpluginWindowBool, (void*)0); // ask windowsless mode
+
+        // ask windowsless mode
+        if (npn.setvalue(npp, NPPVpluginWindowBool, (void*)0) != NPERR_NO_ERROR)
+            trace_error("%s, failed to set NPPVpluginWindowBool\n", __func__);
+
         return NPERR_NO_ERROR;
     }
 
@@ -478,21 +484,30 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
 
     if (pp_i->windowed_mode) {
         // ask windowed mode
-        npn.setvalue(npp, NPPVpluginWindowBool, (void*)1);
+        if (npn.setvalue(npp, NPPVpluginWindowBool, (void*)1) != NPERR_NO_ERROR)
+            trace_error("%s, failed to set NPPVpluginWindowBool\n", __func__);
+
     } else {
         // ask windowsless mode
-        npn.setvalue(npp, NPPVpluginWindowBool, (void*)0);
+        if (npn.setvalue(npp, NPPVpluginWindowBool, (void*)0) != NPERR_NO_ERROR)
+            trace_error("%s, failed to set NPPVpluginWindowBool\n", __func__);
     }
 
     // determine whenever XEmbed is used
     NPBool browser_supports_xembed = false;
-    npn.getvalue(npp, NPNVSupportsXEmbedBool, &browser_supports_xembed);
+    if (npn.getvalue(npp, NPNVSupportsXEmbedBool, &browser_supports_xembed) != NPERR_NO_ERROR)
+        trace_error("%s, failed to get NPNVSupportsXEmbedBool\n", __func__);
+
     pp_i->use_xembed = browser_supports_xembed && config.enable_xembed;
     trace_info_f("      XEmbed is %s\n", browser_supports_xembed ? "supported" : "not supported");
     trace_info_f("      XEmbed is %s\n", pp_i->use_xembed ? "used" : "not used");
 
     // set transparency mode
-    npn.setvalue(npp, NPPVpluginTransparentBool, (void*)(size_t)pp_i->is_transparent);
+    if (npn.setvalue(npp, NPPVpluginTransparentBool,
+                     (void *)(size_t)pp_i->is_transparent) != NPERR_NO_ERROR)
+    {
+        trace_error("%s, failed to set NPPVpluginTransparentBool\n", __func__);
+    }
 
     pp_i->is_fullframe = (mode == NP_FULL);
     pp_i->id = tables_generate_new_pp_instance_id();
@@ -501,8 +516,12 @@ NPP_New(NPMIMEType pluginType, NPP npp, uint16_t mode, int16_t argc, char *argn[
     pp_i->incognito_mode = 0;
     if (npn.version >= NPVERS_HAS_PRIVATE_MODE) {
         NPBool private = false;
-        if (npn.getvalue(pp_i->npp, NPNVprivateModeBool, &private) == NPERR_NO_ERROR)
+        if (npn.getvalue(pp_i->npp, NPNVprivateModeBool, &private) == NPERR_NO_ERROR) {
             pp_i->incognito_mode = private ? 1 : 0;
+        } else {
+            // Not an error, actually. Browser can have no support for that variable.
+            trace_info_f("%s, failed to get NPNVprivateModeBool\n", __func__);
+        }
     }
 
     do {
@@ -1537,8 +1556,10 @@ handle_key_press_release_event(NPP npp, void *event)
 
     if (pp_i->im_context && ev->type == KeyPress) {
         Window browser_window;
-        if (npn.getvalue(npp, NPNVnetscapeWindow, &browser_window) != NPERR_NO_ERROR)
+        if (npn.getvalue(npp, NPNVnetscapeWindow, &browser_window) != NPERR_NO_ERROR) {
+            trace_error("%s, failed to get NPNVnetscapeWindow\n", __func__);
             browser_window = None;
+        }
         ev->window = browser_window;
 
         pthread_mutex_lock(&display.lock);

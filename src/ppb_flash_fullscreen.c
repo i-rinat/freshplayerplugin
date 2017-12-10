@@ -159,8 +159,10 @@ get_browser_window(void *p)
 {
     struct thread_param_s *tp = p;
 
-    if (npn.getvalue(tp->pp_i->npp, NPNVnetscapeWindow, &tp->browser_window) != NPERR_NO_ERROR)
+    if (npn.getvalue(tp->pp_i->npp, NPNVnetscapeWindow, &tp->browser_window) != NPERR_NO_ERROR) {
         tp->browser_window = None;
+        trace_error("%s, failed to get NPNVnetscapeWindow\n", __func__);
+    }
 
     pthread_barrier_wait(&cross_thread_call_barrier);
 }
