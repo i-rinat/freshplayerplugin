@@ -22,17 +22,16 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
 #include "ppb_crypto.h"
+#include "tables.h"
+#include "trace.h"
 #include <fcntl.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <sys/types.h>
 #include <time.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_interface.h"
-
+#include <unistd.h>
 
 void
 ppb_crypto_get_random_bytes(char *buffer, uint32_t num_bytes)

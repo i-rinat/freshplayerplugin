@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
 #include "ppb_input_event.h"
 #include "ppb_instance.h"
+#include "ppb_var.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include "utils.h"
+#include <ppapi/c/pp_errors.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include <ppapi/c/pp_errors.h>
-#include "trace.h"
-#include "tables.h"
-#include "ppb_var.h"
-#include "pp_interface.h"
-#include "static_assert.h"
-#include "utils.h"
 
 struct pp_input_event_s {
     COMMON_STRUCTURE_FIELDS

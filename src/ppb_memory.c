@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 
-#include "ppb_memory.h"
-#include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
 #include "pp_interface.h"
-
+#include "ppb_memory.h"
+#include "tables.h"
+#include "trace.h"
+#include <stdlib.h>
 
 void *
 ppb_memory_mem_alloc(uint32_t num_bytes)

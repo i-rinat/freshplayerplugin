@@ -1,10 +1,9 @@
-#include <X11/Xlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
-
+#include <X11/Xlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 Window      wnd;
 Window      root_wnd;

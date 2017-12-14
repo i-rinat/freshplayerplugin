@@ -27,7 +27,6 @@
 #include <GLES2/gl2.h>
 #include <ppapi/c/ppb_opengles2.h>
 
-
 void
 ppb_opengles2_ActiveTexture(PP_Resource context, GLenum texture);
 

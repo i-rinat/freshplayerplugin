@@ -1,10 +1,9 @@
 #include "nih_test.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
 #include <src/config_parser/config_parser.h>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 TEST(config_parser, test_1)
 {

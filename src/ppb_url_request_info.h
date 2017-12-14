@@ -24,11 +24,11 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_url_request_info.h>
-#include <stdlib.h>
-#include <glib.h>
-#include <stdio.h>
 #include "pp_resource.h"
+#include <glib.h>
+#include <ppapi/c/ppb_url_request_info.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 struct pp_url_request_info_s {
     COMMON_STRUCTURE_FIELDS

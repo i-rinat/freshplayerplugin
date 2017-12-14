@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_text_input_dev.h>
 
-
 void
 ppb_text_input_interface_set_text_input_type(PP_Instance instance, PP_TextInput_Type_Dev type);
 

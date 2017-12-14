@@ -27,7 +27,6 @@
 #include <ppapi/c/dev/deprecated_bool.h>
 #include <ppapi/c/private/ppb_flash_file.h>
 
-
 int32_t
 ppb_flash_file_file_ref_open_file(PP_Resource file_ref_id, int32_t mode, PP_FileHandle *file);
 

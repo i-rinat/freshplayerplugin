@@ -24,12 +24,12 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_graphics_3d.h>
+#include "glx.h"
 #include "pp_resource.h"
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrender.h>
-#include "glx.h"
 #include <glib.h>
+#include <ppapi/c/ppb_graphics_3d.h>
 
 struct pp_graphics3d_s {
     COMMON_STRUCTURE_FIELDS

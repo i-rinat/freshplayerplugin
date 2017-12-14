@@ -26,7 +26,6 @@
 
 #include <ppapi/c/ppb_network_monitor.h>
 
-
 PP_Resource
 ppb_network_monitor_create(PP_Instance instance);
 

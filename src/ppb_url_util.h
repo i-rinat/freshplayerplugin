@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_url_util_dev.h>
 
-
 struct PP_Var
 ppb_url_util_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components);
 

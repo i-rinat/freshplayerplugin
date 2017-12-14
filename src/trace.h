@@ -24,13 +24,12 @@
 
 #pragma once
 
-#include <ppapi/c/pp_var.h>
+#include "trace_core.h"
+#include <npapi/npapi.h>
 #include <ppapi/c/pp_rect.h>
 #include <ppapi/c/pp_touch_point.h>
+#include <ppapi/c/pp_var.h>
 #include <ppapi/c/ppb_net_address.h>
-#include <npapi/npapi.h>
-#include "trace_core.h"
-
 
 char   *trace_var_as_string(struct PP_Var var);
 char   *trace_size_as_string(const struct PP_Size *size);

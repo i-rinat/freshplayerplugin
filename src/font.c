@@ -24,13 +24,12 @@
 
 #include "font.h"
 #include "pp_resource.h"
-#include "tables.h"
-#include <ppapi/c/pp_errors.h>
-#include "ppb_var.h"
-#include "trace.h"
 #include "ppb_image_data.h"
+#include "ppb_var.h"
+#include "tables.h"
+#include "trace.h"
 #include <pango/pangocairo.h>
-
+#include <ppapi/c/pp_errors.h>
 
 struct PP_Var
 fpp_font_get_font_families(void)

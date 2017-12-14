@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
-#include "ppb_x509_certificate.h"
-#include "ppb_var.h"
-#include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
-#include "reverse_constant.h"
-#include <openssl/x509.h>
-#include <ctype.h>
 #include "pp_interface.h"
+#include "ppb_var.h"
+#include "ppb_x509_certificate.h"
+#include "reverse_constant.h"
 #include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
+#include <ctype.h>
+#include <openssl/x509.h>
+#include <stdlib.h>
 
 struct pp_x509_certificate_s {
     COMMON_STRUCTURE_FIELDS

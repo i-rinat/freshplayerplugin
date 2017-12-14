@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <ppapi/c/private/ppb_host_resolver_private.h>
-#include <ppapi/c/ppb_host_resolver.h>
 #include "pp_resource.h"
+#include <ppapi/c/ppb_host_resolver.h>
+#include <ppapi/c/private/ppb_host_resolver_private.h>
 
 struct pp_host_resolver_s {
     COMMON_STRUCTURE_FIELDS

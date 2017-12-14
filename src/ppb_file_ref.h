@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_file_ref.h>
 #include "pp_resource.h"
+#include <ppapi/c/ppb_file_ref.h>
 
 enum file_ref_type_e {
     PP_FILE_REF_TYPE_NAME,

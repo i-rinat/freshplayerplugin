@@ -22,15 +22,15 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_flash_message_loop.h"
+#include "ppb_message_loop.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
-#include "ppb_message_loop.h"
-#include "pp_interface.h"
-#include "static_assert.h"
 
 struct pp_flash_message_loop_s {
     COMMON_STRUCTURE_FIELDS

@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_char_set_dev.h>
 
-
 char *
 ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,
                                const char *output_char_set,

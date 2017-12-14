@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_image_data.h>
 #include "pp_resource.h"
 #include <cairo.h>
+#include <ppapi/c/ppb_image_data.h>
 
 struct pp_image_data_s {
     COMMON_STRUCTURE_FIELDS

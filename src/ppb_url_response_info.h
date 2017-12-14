@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_url_response_info.h>
 #include "pp_resource.h"
+#include <ppapi/c/ppb_url_response_info.h>
 
 struct pp_url_response_info_s {
     COMMON_STRUCTURE_FIELDS

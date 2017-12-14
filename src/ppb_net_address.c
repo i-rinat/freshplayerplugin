@@ -22,16 +22,16 @@
  * SOFTWARE.
  */
 
-#include "ppb_net_address.h"
-#include <stdlib.h>
-#include <string.h>
-#include <netinet/in.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_net_address.h"
 #include "ppb_var.h"
 #include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
 
 STATIC_ASSERT(sizeof(struct pp_net_address_s) <= LARGEST_RESOURCE_SIZE);
 

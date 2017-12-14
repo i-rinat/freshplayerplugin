@@ -22,21 +22,22 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_graphics3d.h"
 #include "ppb_opengles2.h"
+#include "reverse_constant.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <GLES2/gl2ext.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
-#include "reverse_constant.h"
-#include <GLES2/gl2ext.h>
+
 #if !HAVE_GLES2
 #include "shader_translator.h"
 #endif
-#include "pp_interface.h"
-#include "ppb_graphics3d.h"
-#include "static_assert.h"
 
 STATIC_ASSERT(sizeof(struct pp_graphics3d_s) <= LARGEST_RESOURCE_SIZE);
 

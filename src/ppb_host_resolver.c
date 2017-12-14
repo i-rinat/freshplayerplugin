@@ -22,18 +22,18 @@
  * SOFTWARE.
  */
 
-#include "ppb_host_resolver.h"
-#include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
-#include <ppapi/c/pp_errors.h>
 #include "async_network.h"
-#include "ppb_var.h"
 #include "pp_interface.h"
+#include "ppb_host_resolver.h"
 #include "ppb_message_loop.h"
 #include "ppb_net_address.h"
+#include "ppb_var.h"
 #include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
+#include <ppapi/c/pp_errors.h>
+#include <stdlib.h>
 
 STATIC_ASSERT(sizeof(struct pp_host_resolver_s) <= LARGEST_RESOURCE_SIZE);
 

@@ -1,14 +1,13 @@
 #include "nih_test.h"
-#include <stdio.h>
-#include <src/ppb_x509_certificate.c>
-#include <src/ppb_core.h>
-#include <src/pp_resource.h>
-#include <src/ppb_var.h>
-#include <tests/common.h>
 #include <glib.h>
-#include <src/trace.h>
 #include <math.h>
-
+#include <src/pp_resource.h>
+#include <src/ppb_core.h>
+#include <src/ppb_var.h>
+#include <src/ppb_x509_certificate.c>
+#include <src/trace.h>
+#include <stdio.h>
+#include <tests/common.h>
 
 static
 void

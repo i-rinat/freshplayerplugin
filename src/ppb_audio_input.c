@@ -22,21 +22,21 @@
  * SOFTWARE.
  */
 
+#include "audio_thread.h"
+#include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_audio_config.h"
 #include "ppb_audio_input.h"
+#include "ppb_core.h"
 #include "ppb_device_ref.h"
 #include "ppb_instance.h"
-#include "ppb_var.h"
-#include <stdlib.h>
-#include <ppapi/c/pp_errors.h>
-#include "ppb_core.h"
-#include "pp_resource.h"
-#include "pp_interface.h"
-#include "trace.h"
-#include "tables.h"
 #include "ppb_message_loop.h"
+#include "ppb_var.h"
 #include "static_assert.h"
-#include "audio_thread.h"
+#include "tables.h"
+#include "trace.h"
+#include <ppapi/c/pp_errors.h>
+#include <stdlib.h>
 
 struct pp_audio_input_s {
     COMMON_STRUCTURE_FIELDS

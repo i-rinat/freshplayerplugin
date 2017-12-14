@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
 
 #define free_and_nullify(item)          \
     do {                                \

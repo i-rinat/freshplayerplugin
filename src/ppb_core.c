@@ -22,20 +22,19 @@
  * SOFTWARE.
  */
 
-#include <assert.h>
-#include "ppb_core.h"
-#include <stdlib.h>
-#include <pthread.h>
-#include <time.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_core.h"
 #include "ppb_instance.h"
 #include "ppb_message_loop.h"
-#include <ppapi/c/pp_errors.h>
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
-
+#include <assert.h>
+#include <ppapi/c/pp_errors.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <time.h>
 
 void
 ppb_core_add_ref_resource(PP_Resource resource)

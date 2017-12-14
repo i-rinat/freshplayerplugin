@@ -24,15 +24,14 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_var.h>
-#include <ppapi/c/ppb_var_array_buffer.h>
-#include <ppapi/c/ppb_var_array.h>
-#include <ppapi/c/ppb_var_dictionary.h>
-#include <ppapi/c/dev/ppb_var_deprecated.h>
-#include <string.h>
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
-
+#include <ppapi/c/dev/ppb_var_deprecated.h>
+#include <ppapi/c/ppb_var.h>
+#include <ppapi/c/ppb_var_array.h>
+#include <ppapi/c/ppb_var_array_buffer.h>
+#include <ppapi/c/ppb_var_dictionary.h>
+#include <string.h>
 
 void
 ppb_var_add_ref(struct PP_Var var);

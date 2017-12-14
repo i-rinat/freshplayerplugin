@@ -22,18 +22,18 @@
  * SOFTWARE.
  */
 
-#include "ppb_file_io.h"
-#include <stdlib.h>
-#include <ppapi/c/pp_errors.h>
-#include <inttypes.h>
-#include "trace.h"
-#include "tables.h"
+#include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_core.h"
-#include "pp_interface.h"
-#include "ppb_message_loop.h"
+#include "ppb_file_io.h"
 #include "ppb_file_ref.h"
+#include "ppb_message_loop.h"
 #include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <inttypes.h>
+#include <ppapi/c/pp_errors.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 struct pp_file_io_s {

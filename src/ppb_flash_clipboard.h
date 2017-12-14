@@ -26,7 +26,6 @@
 
 #include <ppapi/c/private/ppb_flash_clipboard.h>
 
-
 uint32_t
 ppb_flash_clipboard_register_custom_format(PP_Instance instance_id, const char *format_name);
 

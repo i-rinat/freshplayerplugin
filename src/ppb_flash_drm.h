@@ -26,7 +26,6 @@
 
 #include <ppapi/c/private/ppb_flash_drm.h>
 
-
 PP_Resource
 ppb_flash_drm_create(PP_Instance instance);
 

@@ -24,9 +24,11 @@
 
 #include "keycodeconvert.h"
 #include "keycodepp.h"
+
 #define XK_3270
-#include <X11/keysym.h>
+
 #include <X11/XF86keysym.h>
+#include <X11/keysym.h>
 #include <ppapi/c/ppb_input_event.h>
 
 int

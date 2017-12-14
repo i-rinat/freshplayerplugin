@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_video_capture_dev.h>
 
-
 PP_Resource
 ppb_video_capture_create(PP_Instance instance);
 

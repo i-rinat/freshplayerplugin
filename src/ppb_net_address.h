@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <ppapi/c/private/ppb_net_address_private.h>
-#include <ppapi/c/ppb_net_address.h>
 #include "pp_resource.h"
+#include <ppapi/c/ppb_net_address.h>
+#include <ppapi/c/private/ppb_net_address_private.h>
 
 struct pp_net_address_s {
     COMMON_STRUCTURE_FIELDS

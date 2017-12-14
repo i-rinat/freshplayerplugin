@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <ppapi/c/private/ppb_udp_socket_private.h>
-#include <ppapi/c/ppb_udp_socket.h>
 #include "pp_resource.h"
+#include <ppapi/c/ppb_udp_socket.h>
+#include <ppapi/c/private/ppb_udp_socket_private.h>
 
 struct pp_udp_socket_s {
     COMMON_STRUCTURE_FIELDS

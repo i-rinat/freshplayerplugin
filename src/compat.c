@@ -24,7 +24,6 @@
 
 #include "compat.h"
 
-
 #ifdef VER
 #error macro name collision
 #endif

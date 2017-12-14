@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_view.h>
-#include <ppapi/c/dev/ppb_view_dev.h>
 #include "pp_resource.h"
+#include <ppapi/c/dev/ppb_view_dev.h>
+#include <ppapi/c/ppb_view.h>
 
 struct pp_view_s {
     COMMON_STRUCTURE_FIELDS

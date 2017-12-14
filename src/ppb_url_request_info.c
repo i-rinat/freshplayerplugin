@@ -22,27 +22,27 @@
  * SOFTWARE.
  */
 
-#include <assert.h>
-#include "ppb_url_request_info.h"
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
-#include "reverse_constant.h"
-#include "ppb_var.h"
-#include <ppapi/c/pp_file_info.h>
-#include <ppapi/c/ppb_file_io.h>
-#include <ppapi/c/pp_errors.h>
-#include "ppb_flash_file.h"
-#include "ppb_core.h"
 #include "eintr_retry.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_core.h"
+#include "ppb_flash_file.h"
+#include "ppb_url_request_info.h"
+#include "ppb_var.h"
+#include "reverse_constant.h"
 #include "static_assert.h"
-#include <unistd.h>
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
+#include <assert.h>
+#include <ctype.h>
+#include <inttypes.h>
+#include <ppapi/c/pp_errors.h>
+#include <ppapi/c/pp_file_info.h>
+#include <ppapi/c/ppb_file_io.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 STATIC_ASSERT(sizeof(struct pp_url_request_info_s) <= LARGEST_RESOURCE_SIZE);
 

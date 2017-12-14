@@ -22,19 +22,19 @@
  * SOFTWARE.
  */
 
-#include <assert.h>
+#include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_file_ref.h"
+#include "ppb_url_loader.h"
 #include "ppb_url_response_info.h"
+#include "ppb_var.h"
+#include "reverse_constant.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "trace.h"
-#include "tables.h"
-#include "reverse_constant.h"
-#include "pp_resource.h"
-#include "ppb_var.h"
-#include "pp_interface.h"
-#include "ppb_url_loader.h"
-#include "ppb_file_ref.h"
-#include "static_assert.h"
 #include <unistd.h>
 
 STATIC_ASSERT(sizeof(struct pp_url_response_info_s) <= LARGEST_RESOURCE_SIZE);

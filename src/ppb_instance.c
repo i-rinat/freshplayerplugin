@@ -22,22 +22,22 @@
  * SOFTWARE.
  */
 
-#include "ppb_instance.h"
-#include <pthread.h>
-#include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
-#include "ppb_var.h"
-#include "ppb_core.h"
-#include "ppb_message_loop.h"
 #include "n2p_proxy_class.h"
-#include <ppapi/c/pp_errors.h>
 #include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_core.h"
 #include "ppb_graphics2d.h"
 #include "ppb_graphics3d.h"
+#include "ppb_instance.h"
+#include "ppb_message_loop.h"
+#include "ppb_var.h"
 #include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
+#include <ppapi/c/pp_errors.h>
+#include <pthread.h>
+#include <stdlib.h>
 
 STATIC_ASSERT(sizeof(struct pp_instance_s) <= LARGEST_RESOURCE_SIZE);
 

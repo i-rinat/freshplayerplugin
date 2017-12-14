@@ -22,25 +22,25 @@
  * SOFTWARE.
  */
 
+#include "compat_glx_defines.h"
+#include "config.h"
+#include "pp_interface.h"
 #include "pp_resource.h"
-#include <assert.h>
-#include <pthread.h>
+#include "ppb_core.h"
 #include "ppb_graphics3d.h"
 #include "ppb_instance.h"
 #include "ppb_message_loop.h"
-#include <stdlib.h>
+#include "ppb_opengles2.h"
+#include "reverse_constant.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 #include <GL/glx.h>
 #include <GLES2/gl2.h>
-#include "trace.h"
-#include "tables.h"
+#include <assert.h>
 #include <ppapi/c/pp_errors.h>
-#include "ppb_core.h"
-#include "ppb_opengles2.h"
-#include "config.h"
-#include "reverse_constant.h"
-#include "pp_interface.h"
-#include "compat_glx_defines.h"
-#include "static_assert.h"
+#include <pthread.h>
+#include <stdlib.h>
 
 STATIC_ASSERT(sizeof(struct pp_graphics3d_s) <= LARGEST_RESOURCE_SIZE);
 

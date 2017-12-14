@@ -22,22 +22,21 @@
  * SOFTWARE.
  */
 
-#include "ppb_flash_clipboard.h"
-#include <stdlib.h>
-#include <pthread.h>
-#include "trace.h"
-#include "tables.h"
+#include "gtk_wrapper.h"
+#include "pp_interface.h"
 #include "pp_resource.h"
-#include "reverse_constant.h"
+#include "ppb_core.h"
+#include "ppb_flash_clipboard.h"
 #include "ppb_message_loop.h"
 #include "ppb_var.h"
-#include "ppb_core.h"
-#include <ppapi/c/pp_errors.h>
-#include <glib.h>
-#include "pp_interface.h"
-#include "gtk_wrapper.h"
+#include "reverse_constant.h"
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
-
+#include <glib.h>
+#include <ppapi/c/pp_errors.h>
+#include <pthread.h>
+#include <stdlib.h>
 
 static GHashTable      *format_id_ht;       ///< maps name to id
 static GHashTable      *format_name_ht;     ///< maps id to name

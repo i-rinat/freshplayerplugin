@@ -22,31 +22,29 @@
  * SOFTWARE.
  */
 
-#include <dlfcn.h>
-#include <npapi/npapi.h>
-#include <npapi/npfunctions.h>
-#include <string.h>
-#include <ppapi/c/ppb.h>
-#include <ppapi/c/pp_errors.h>
-#include <ppapi/c/pp_module.h>
-#include "trace.h"
-#include "tables.h"
+#include "compat.h"
 #include "config.h"
 #include "config_priv.h"
-#include "reverse_constant.h"
-#include "pp_interface.h"
-#include <glib.h>
-#include "compat.h"
-#include "ppb_message_loop.h"
-#include "tables.h"
-#include "main_thread.h"
-#include "ppb_core.h"
 #include "gtk_wrapper.h"
+#include "main_thread.h"
 #include "np_asynccall.h"
+#include "pp_interface.h"
+#include "ppb_core.h"
 #include "ppb_instance.h"
-#include <unistd.h>
+#include "ppb_message_loop.h"
+#include "reverse_constant.h"
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
-
+#include <dlfcn.h>
+#include <glib.h>
+#include <npapi/npapi.h>
+#include <npapi/npfunctions.h>
+#include <ppapi/c/pp_errors.h>
+#include <ppapi/c/pp_module.h>
+#include <ppapi/c/ppb.h>
+#include <string.h>
+#include <unistd.h>
 
 static void *module_dl_handler;
 static struct pp_instance_s *aux_instance = NULL;

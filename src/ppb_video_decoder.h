@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_video_decoder_dev.h>
 
-
 PP_Resource
 ppb_video_decoder_create(PP_Instance instance, PP_Resource context,
                          PP_VideoDecoder_Profile profile);

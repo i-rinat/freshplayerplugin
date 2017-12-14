@@ -22,30 +22,31 @@
  * SOFTWARE.
  */
 
-#include "ppb_video_capture.h"
-#include <ppapi/c/pp_errors.h>
-#include <ppapi/c/dev/ppp_video_capture_dev.h>
-#include <stdlib.h>
-#include "pp_resource.h"
-#include "ppb_core.h"
-#include "ppb_message_loop.h"
-#include "trace.h"
-#include "tables.h"
 #include "config.h"
-#include "ppb_device_ref.h"
-#include "ppb_var.h"
-#include "ppb_buffer.h"
-#include "ppb_instance.h"
-#include <linux/videodev2.h>
-#include "pp_interface.h"
 #include "eintr_retry.h"
+#include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_buffer.h"
+#include "ppb_core.h"
+#include "ppb_device_ref.h"
+#include "ppb_instance.h"
+#include "ppb_message_loop.h"
+#include "ppb_var.h"
+#include "ppb_video_capture.h"
 #include "static_assert.h"
-#include <dirent.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <sys/stat.h>
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
+#include <dirent.h>
+#include <fcntl.h>
+#include <linux/videodev2.h>
+#include <ppapi/c/dev/ppp_video_capture_dev.h>
+#include <ppapi/c/pp_errors.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #if HAVE_LIBV4L2
 #include <libv4l2.h>
 #endif // HAVE_LIBV4L2

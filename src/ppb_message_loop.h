@@ -26,7 +26,6 @@
 
 #include <ppapi/c/ppb_message_loop.h>
 
-
 enum ppb_message_loop_flags_e {
     ML_NO_FLAGS =           0,
     ML_NESTED =             (1 << 0),

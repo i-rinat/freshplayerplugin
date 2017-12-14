@@ -1,11 +1,10 @@
 #undef NDEBUG
-#include <assert.h>
+#include <GL/glx.h>
 #include <X11/Xlib.h>
-#include <unistd.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <GL/glx.h>
-
+#include <unistd.h>
 
 Window      wnd;
 Window      root_wnd;

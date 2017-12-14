@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_memory_dev.h>
 
-
 void *
 ppb_memory_mem_alloc(uint32_t num_bytes);
 

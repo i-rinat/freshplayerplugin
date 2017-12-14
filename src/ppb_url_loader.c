@@ -23,32 +23,31 @@
  */
 
 #define _XOPEN_SOURCE   600
-#include "ppb_url_loader.h"
+#include "config.h"
+#include "eintr_retry.h"
+#include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_core.h"
+#include "ppb_instance.h"
+#include "ppb_message_loop.h"
+#include "ppb_url_loader.h"
+#include "ppb_url_request_info.h"
+#include "ppb_url_response_info.h"
 #include "ppb_url_util.h"
 #include "ppb_var.h"
-#include "ppb_message_loop.h"
-#include <ppapi/c/pp_errors.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <inttypes.h>
-#include <string.h>
-#include <stdio.h>
-#include "trace.h"
-#include "pp_resource.h"
-#include "tables.h"
-#include "eintr_retry.h"
-#include "ppb_url_request_info.h"
-#include "config.h"
-#include "pp_interface.h"
 #include "static_assert.h"
-#include "ppb_instance.h"
-#include "ppb_url_response_info.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include "tables.h"
+#include "trace.h"
 #include "utils.h"
+#include <inttypes.h>
+#include <ppapi/c/pp_errors.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 STATIC_ASSERT(sizeof(struct pp_url_loader_s) <= LARGEST_RESOURCE_SIZE);
 

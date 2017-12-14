@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
-#include "ppb_image_data.h"
+#include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_core.h"
+#include "ppb_image_data.h"
+#include "reverse_constant.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include "utils.h"
 #include <stdlib.h>
 #include <string.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
-#include "reverse_constant.h"
-#include "pp_interface.h"
-#include "static_assert.h"
-#include "utils.h"
 
 STATIC_ASSERT(sizeof(struct pp_image_data_s) <= LARGEST_RESOURCE_SIZE);
 

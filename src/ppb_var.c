@@ -22,25 +22,25 @@
  * SOFTWARE.
  */
 
-#include "ppb_var.h"
-#include "ppb_message_loop.h"
+#include "compat.h"
+#include "config.h"
+#include "n2p_proxy_class.h"
+#include "p2n_proxy_class.h"
+#include "pp_interface.h"
 #include "ppb_core.h"
-#include <pthread.h>
-#include <inttypes.h>
-#include <stdlib.h>
-#include <string.h>
-#include "trace.h"
+#include "ppb_instance.h"
+#include "ppb_message_loop.h"
+#include "ppb_var.h"
 #include "tables.h"
+#include "trace.h"
+#include "utils.h"
+#include <inttypes.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>
 #include <ppapi/c/dev/ppp_class_deprecated.h>
 #include <ppapi/c/pp_errors.h>
-#include "n2p_proxy_class.h"
-#include "p2n_proxy_class.h"
-#include "compat.h"
-#include "config.h"
-#include "pp_interface.h"
-#include "ppb_instance.h"
-#include "utils.h"
+#include <pthread.h>
+#include <stdlib.h>
+#include <string.h>
 
 static GHashTable      *var_ht;
 static pthread_mutex_t  lock;

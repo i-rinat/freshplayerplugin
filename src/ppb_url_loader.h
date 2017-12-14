@@ -24,12 +24,12 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_url_loader.h>
-#include <ppapi/c/trusted/ppb_url_loader_trusted.h>
-#include <npapi/npapi.h>
-#include <npapi/npruntime.h>
 #include "pp_resource.h"
 #include <glib.h>
+#include <npapi/npapi.h>
+#include <npapi/npruntime.h>
+#include <ppapi/c/ppb_url_loader.h>
+#include <ppapi/c/trusted/ppb_url_loader_trusted.h>
 
 struct pp_url_loader_s {
     COMMON_STRUCTURE_FIELDS

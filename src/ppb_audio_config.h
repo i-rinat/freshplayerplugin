@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_audio_config.h>
 #include "pp_resource.h"
+#include <ppapi/c/ppb_audio_config.h>
 
 struct pp_audio_config_s {
     COMMON_STRUCTURE_FIELDS

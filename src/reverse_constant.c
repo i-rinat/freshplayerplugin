@@ -26,7 +26,6 @@
 #include <X11/Xlib.h>
 #include <ppapi/c/pp_graphics_3d.h>
 
-
 #define CASE(q) case q: return #q
 
 const char *

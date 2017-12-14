@@ -22,11 +22,10 @@
  * SOFTWARE.
  */
 
-#include <glib.h>
-#include <string.h>
 #include "pp_interface.h"
 #include "trace.h"
-
+#include <glib.h>
+#include <string.h>
 
 static GHashTable      *interface_ht = NULL;
 static pthread_mutex_t  lock = PTHREAD_MUTEX_INITIALIZER;

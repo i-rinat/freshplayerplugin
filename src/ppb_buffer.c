@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
 #include "ppb_buffer.h"
 #include "ppb_core.h"
-#include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_interface.h"
 #include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <stdlib.h>
 
 struct pp_buffer_s {
     COMMON_STRUCTURE_FIELDS

@@ -1,7 +1,7 @@
 #include "nih_test.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include <src/header_parser.c>
+#include <stdio.h>
+#include <stdlib.h>
 
 TEST(header_parser, test_1)
 {

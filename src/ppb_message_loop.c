@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
-#include "ppb_message_loop.h"
-#include <ppapi/c/pp_errors.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <glib.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
 #include "compat.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_message_loop.h"
 #include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <glib.h>
+#include <inttypes.h>
+#include <ppapi/c/pp_errors.h>
+#include <stdlib.h>
 
 struct pp_message_loop_s {
     COMMON_STRUCTURE_FIELDS

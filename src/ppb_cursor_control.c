@@ -22,21 +22,20 @@
  * SOFTWARE.
  */
 
-#include "ppb_cursor_control.h"
-#include "ppb_instance.h"
-#include <stdlib.h>
-#include <X11/Xlib.h>
-#include <X11/cursorfont.h>
-#include <X11/Xcursor/Xcursor.h>
-#include <pthread.h>
+#include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_core.h"
+#include "ppb_cursor_control.h"
+#include "ppb_image_data.h"
+#include "ppb_instance.h"
 #include "tables.h"
 #include "trace.h"
-#include "pp_interface.h"
-#include "ppb_image_data.h"
+#include <X11/Xcursor/Xcursor.h>
+#include <X11/Xlib.h>
+#include <X11/cursorfont.h>
+#include <pthread.h>
+#include <stdlib.h>
 #include <string.h>
-
 
 struct comt_param_s {
     PP_Instance     instance_id;

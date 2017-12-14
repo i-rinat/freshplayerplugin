@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <glib.h>
-#include <X11/Xlib.h>
 #include "gtk_wrapper.h"
+#include <X11/Xlib.h>
+#include <glib.h>
 
 #ifdef VER
 #error macro name collision

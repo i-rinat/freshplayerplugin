@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <ppapi/c/private/ppb_tcp_socket_private.h>
 #include "pp_resource.h"
+#include <ppapi/c/private/ppb_tcp_socket_private.h>
 
 struct pp_tcp_socket_s {
     COMMON_STRUCTURE_FIELDS

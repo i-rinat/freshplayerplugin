@@ -25,9 +25,8 @@
 #pragma once
 
 #include <ppapi/c/dev/deprecated_bool.h>
-#include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 #include <ppapi/c/private/ppb_pdf.h>
-
+#include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 
 PP_Resource
 ppb_pdf_get_font_file_with_fallback(PP_Instance instance,

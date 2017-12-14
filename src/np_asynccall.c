@@ -23,10 +23,9 @@
  */
 
 #include "np_asynccall.h"
-#include "utils.h"
 #include "trace_core.h"
+#include "utils.h"
 #include <glib.h>
-#include <glib-unix.h>
 
 static GMainContext *g_main_context_of_main_thread;
 

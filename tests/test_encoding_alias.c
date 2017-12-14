@@ -1,7 +1,6 @@
 #include "nih_test.h"
 #include <src/encoding_alias.c>
 
-
 TEST(encoding_alias, utf8)
 {
     // UTF-8

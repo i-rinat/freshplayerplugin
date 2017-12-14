@@ -22,15 +22,14 @@
  * SOFTWARE.
  */
 
+#include "config.h"
 #include "pp_resource.h"
 #include "tables.h"
 #include "trace.h"
-#include "config.h"
-#include <pthread.h>
 #include <glib.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
-
 
 static GHashTable      *res_tbl;
 static GHashTable      *destructors_ht = NULL;

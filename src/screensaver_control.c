@@ -22,16 +22,15 @@
  * SOFTWARE.
  */
 
-#include <assert.h>
-#include "screensaver_control.h"
-#include <X11/Xatom.h>
-#include <string.h>
-#include <glib.h>
-#include <gio/gio.h>
-#include "trace.h"
-#include "config.h"
 #include "compat.h"
-
+#include "config.h"
+#include "screensaver_control.h"
+#include "trace.h"
+#include <X11/Xatom.h>
+#include <assert.h>
+#include <gio/gio.h>
+#include <glib.h>
+#include <string.h>
 
 #define GS_SERVICE      "org.gnome.ScreenSaver"
 #define GS_PATH         "/org/gnome/ScreenSaver"

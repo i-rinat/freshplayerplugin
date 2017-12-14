@@ -22,20 +22,19 @@
  * SOFTWARE.
  */
 
-#include "ppb_flash_drm.h"
-#include "ppb_core.h"
-#include "ppb_var.h"
-#include "ppb_crypto.h"
-#include "ppb_message_loop.h"
+#include "config.h"
+#include "pp_interface.h"
 #include "pp_resource.h"
+#include "ppb_core.h"
+#include "ppb_crypto.h"
+#include "ppb_flash_drm.h"
+#include "ppb_message_loop.h"
+#include "ppb_var.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
-#include "config.h"
-#include "static_assert.h"
-#include "pp_interface.h"
-
 
 #define salt_length             32
 

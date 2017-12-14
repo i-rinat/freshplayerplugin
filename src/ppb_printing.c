@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-#include "ppb_printing.h"
-#include "pp_resource.h"
-#include "trace.h"
-#include "tables.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_printing.h"
 #include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 
 struct pp_printing_s {
     COMMON_STRUCTURE_FIELDS

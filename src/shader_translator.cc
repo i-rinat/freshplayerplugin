@@ -26,7 +26,6 @@
 #include <GLSLANG/ShaderLang.h>
 #include <glib.h>
 
-
 static
 void
 __attribute__((constructor))

@@ -22,14 +22,14 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_network_monitor.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
-#include "pp_resource.h"
-#include "trace.h"
-#include "tables.h"
-#include "pp_interface.h"
-#include "static_assert.h"
 
 struct pp_network_monitor_s {
     COMMON_STRUCTURE_FIELDS

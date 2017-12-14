@@ -24,10 +24,9 @@
 
 #pragma once
 
+#include <ppapi/c/dev/ppb_ime_input_event_dev.h>
 #include <ppapi/c/ppb_input_event.h>
 #include <ppapi/c/ppp_input_event.h>
-#include <ppapi/c/dev/ppb_ime_input_event_dev.h>
-
 
 int32_t
 ppb_input_event_request_input_events(PP_Instance instance, uint32_t event_classes);

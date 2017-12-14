@@ -23,13 +23,12 @@
  */
 
 #include "main_thread.h"
-#include "ppb_message_loop.h"
-#include "ppb_instance.h"
 #include "pp_resource.h"
-#include <pthread.h>
+#include "ppb_instance.h"
+#include "ppb_message_loop.h"
 #include "trace.h"
 #include "utils.h"
-
+#include <pthread.h>
 
 static
 void

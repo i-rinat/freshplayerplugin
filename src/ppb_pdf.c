@@ -22,19 +22,18 @@
  * SOFTWARE.
  */
 
-#include "ppb_pdf.h"
-#include <stdlib.h>
-#include <libgen.h>
-#include <glib.h>
-#include "trace.h"
+#include "config_priv.h"
+#include "pp_interface.h"
 #include "pp_resource.h"
-#include "reverse_constant.h"
 #include "ppb_flash_font_file.h"
 #include "ppb_image_data.h"
+#include "ppb_pdf.h"
 #include "ppb_var.h"
-#include "pp_interface.h"
-#include "config_priv.h"
-
+#include "reverse_constant.h"
+#include "trace.h"
+#include <glib.h>
+#include <libgen.h>
+#include <stdlib.h>
 
 static GMappedFile  *natives_blob = NULL;
 static GMappedFile  *snapshot_blob = NULL;

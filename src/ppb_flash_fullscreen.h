@@ -26,7 +26,6 @@
 
 #include <ppapi/c/private/ppb_flash_fullscreen.h>
 
-
 PP_Bool
 ppb_flash_fullscreen_is_fullscreen(PP_Instance instance);
 

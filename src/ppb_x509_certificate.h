@@ -26,7 +26,6 @@
 
 #include <ppapi/c/private/ppb_x509_certificate_private.h>
 
-
 PP_Resource
 ppb_x509_certificate_create(PP_Instance instance);
 

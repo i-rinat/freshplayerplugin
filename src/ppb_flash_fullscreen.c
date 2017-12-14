@@ -22,29 +22,28 @@
  * SOFTWARE.
  */
 
+#include "config.h"
+#include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_core.h"
 #include "ppb_flash_fullscreen.h"
 #include "ppb_instance.h"
 #include "ppb_view.h"
-#include "ppb_core.h"
-#include <pthread.h>
-#include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
-#include "config.h"
-#include "pp_resource.h"
-#include <ppapi/c/ppp_instance.h>
-#include <ppapi/c/pp_errors.h>
 #include "reverse_constant.h"
+#include "tables.h"
+#include "trace.h"
+#include "utils.h"
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
-#include "pp_interface.h"
 #include <drm.h>
-#include <sys/ioctl.h>
 #include <errno.h>
-#include <unistd.h>
+#include <ppapi/c/pp_errors.h>
+#include <ppapi/c/ppp_instance.h>
+#include <pthread.h>
+#include <stdlib.h>
 #include <string.h>
-#include "utils.h"
-
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 static volatile gint        currently_fullscreen = 0;
 static GAsyncQueue         *fullscreen_transition_queue = NULL;

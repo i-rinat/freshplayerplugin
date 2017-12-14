@@ -22,15 +22,14 @@
  * SOFTWARE.
  */
 
-#include <stdarg.h>
-#include <time.h>
-#include <stdio.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <sys/syscall.h>
-#include "trace_core.h"
 #include "config.h"
-
+#include "trace_core.h"
+#include <pthread.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <sys/syscall.h>
+#include <time.h>
+#include <unistd.h>
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static __thread struct timespec tictoc_ts;
