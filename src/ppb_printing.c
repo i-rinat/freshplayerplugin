@@ -27,7 +27,13 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_interface.h"
+#include "static_assert.h"
 
+struct pp_printing_s {
+    COMMON_STRUCTURE_FIELDS
+};
+
+STATIC_ASSERT(sizeof(struct pp_printing_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_printing_create(PP_Instance instance)

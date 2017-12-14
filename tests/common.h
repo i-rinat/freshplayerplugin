@@ -1,7 +1,7 @@
 #ifndef FPP_TESTS_COMMON_H
 #define FPP_TESTS_COMMON_H
 
-#include <src/pp_resource.h>
+#include <ppapi/c/pp_instance.h>
 
 #ifndef TEST_DATA_DIR
 #error TEST_DATA_DIR not defined

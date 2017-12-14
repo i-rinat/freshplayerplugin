@@ -23,6 +23,8 @@
  */
 
 #include "ppb_flash_fullscreen.h"
+#include "ppb_instance.h"
+#include "ppb_view.h"
 #include "ppb_core.h"
 #include <pthread.h>
 #include <stdlib.h>
@@ -38,6 +40,10 @@
 #include "pp_interface.h"
 #include <drm.h>
 #include <sys/ioctl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <string.h>
+#include "utils.h"
 
 
 static volatile gint        currently_fullscreen = 0;

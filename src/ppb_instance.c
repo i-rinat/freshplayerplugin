@@ -34,7 +34,12 @@
 #include "n2p_proxy_class.h"
 #include <ppapi/c/pp_errors.h>
 #include "pp_interface.h"
+#include "ppb_graphics2d.h"
+#include "ppb_graphics3d.h"
+#include "static_assert.h"
+#include "utils.h"
 
+STATIC_ASSERT(sizeof(struct pp_instance_s) <= LARGEST_RESOURCE_SIZE);
 
 static
 void

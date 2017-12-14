@@ -40,7 +40,11 @@
 #include "ppb_core.h"
 #include "eintr_retry.h"
 #include "pp_interface.h"
+#include "static_assert.h"
+#include <unistd.h>
+#include "utils.h"
 
+STATIC_ASSERT(sizeof(struct pp_url_request_info_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_url_request_info_create(PP_Instance instance)

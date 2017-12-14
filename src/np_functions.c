@@ -52,14 +52,21 @@
 #include "ppb_var.h"
 #include "ppb_core.h"
 #include "ppb_cursor_control.h"
+#include "ppb_instance.h"
+#include "ppb_graphics2d.h"
+#include "ppb_graphics3d.h"
 #include "ppb_message_loop.h"
 #include "ppb_flash_fullscreen.h"
 #include "ppb_url_util.h"
+#include "ppb_view.h"
 #include "header_parser.h"
 #include "keycodeconvert.h"
 #include "eintr_retry.h"
 #include "compat.h"
+#include "utils.h"
 #include "x11_event_thread.h"
+#include <pango/pangocairo.h>
+#include <unistd.h>
 
 
 int16_t

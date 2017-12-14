@@ -1,5 +1,6 @@
 #include "common.h"
 #include <src/tables.h>
+#include <src/ppb_instance.h>
 
 PP_Instance
 create_instance(void)

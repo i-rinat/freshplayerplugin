@@ -37,6 +37,7 @@
 #include "ppb_core.h"
 #include "ppb_message_loop.h"
 #include "n2p_proxy_class.h"
+#include "utils.h"
 
 
 NPObject *

@@ -33,6 +33,7 @@
 #include "ppb_var.h"
 #include "static_assert.h"
 
+STATIC_ASSERT(sizeof(struct pp_net_address_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Bool
 ppb_net_address_private_are_equal(const struct PP_NetAddress_Private *addr1,

@@ -30,6 +30,7 @@
 #include "tables.h"
 #include "config.h"
 #include "reverse_constant.h"
+#include "ppb_instance.h"
 #include "ppb_var.h"
 #include "ppb_url_loader.h"
 #include "ppb_core.h"
@@ -40,7 +41,9 @@
 #include "screensaver_control.h"
 #include "pp_interface.h"
 #include "ppb_video_capture.h"
-
+#include "ppb_url_request_info.h"
+#include "ppb_image_data.h"
+#include "utils.h"
 
 void
 ppb_flash_set_instance_always_on_top(PP_Instance instance, PP_Bool on_top)

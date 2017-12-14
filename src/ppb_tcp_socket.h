@@ -25,7 +25,15 @@
 #pragma once
 
 #include <ppapi/c/private/ppb_tcp_socket_private.h>
+#include "pp_resource.h"
 
+struct pp_tcp_socket_s {
+    COMMON_STRUCTURE_FIELDS
+    int             sock;
+    unsigned int    is_connected;
+    unsigned int    destroyed;
+    unsigned int    seen_eof;
+};
 
 PP_Resource
 ppb_tcp_socket_create(PP_Instance instance);

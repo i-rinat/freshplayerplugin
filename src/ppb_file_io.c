@@ -32,7 +32,16 @@
 #include "ppb_core.h"
 #include "pp_interface.h"
 #include "ppb_message_loop.h"
+#include "ppb_file_ref.h"
+#include "static_assert.h"
+#include <unistd.h>
 
+struct pp_file_io_s {
+    COMMON_STRUCTURE_FIELDS
+    int             fd;
+};
+
+STATIC_ASSERT(sizeof(struct pp_file_io_s) <= LARGEST_RESOURCE_SIZE);
 
 int32_t
 ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,

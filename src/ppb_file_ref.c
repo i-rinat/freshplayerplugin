@@ -32,7 +32,11 @@
 #include "ppb_var.h"
 #include "pp_interface.h"
 #include <ppapi/c/pp_errors.h>
+#include "static_assert.h"
+#include <unistd.h>
+#include "utils.h"
 
+STATIC_ASSERT(sizeof(struct pp_file_ref_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_file_ref_create(PP_Resource file_system, const char *path)

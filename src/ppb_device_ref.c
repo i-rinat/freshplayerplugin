@@ -28,7 +28,16 @@
 #include "trace.h"
 #include "tables.h"
 #include "pp_interface.h"
+#include "static_assert.h"
 
+struct pp_device_ref_s {
+    COMMON_STRUCTURE_FIELDS
+    struct PP_Var           name;
+    struct PP_Var           longname;
+    PP_DeviceType_Dev       type;
+};
+
+STATIC_ASSERT(sizeof(struct pp_device_ref_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_device_ref_create(PP_Instance instance, struct PP_Var name, struct PP_Var longname,

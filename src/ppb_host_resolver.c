@@ -31,7 +31,11 @@
 #include "ppb_var.h"
 #include "pp_interface.h"
 #include "ppb_message_loop.h"
+#include "ppb_net_address.h"
+#include "static_assert.h"
+#include "utils.h"
 
+STATIC_ASSERT(sizeof(struct pp_host_resolver_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_host_resolver_create(PP_Instance instance)

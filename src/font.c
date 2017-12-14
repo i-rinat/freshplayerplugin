@@ -28,6 +28,8 @@
 #include <ppapi/c/pp_errors.h>
 #include "ppb_var.h"
 #include "trace.h"
+#include "ppb_image_data.h"
+#include <pango/pangocairo.h>
 
 
 struct PP_Var

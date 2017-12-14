@@ -33,7 +33,13 @@
 #include "pp_resource.h"
 #include "pp_interface.h"
 #include "ppb_message_loop.h"
+#include "ppb_image_data.h"
+#include "ppb_instance.h"
+#include "static_assert.h"
+#include <string.h>
+#include "utils.h"
 
+STATIC_ASSERT(sizeof(struct pp_graphics2d_s) <= LARGEST_RESOURCE_SIZE);
 
 struct g2d_paint_task_s {
     enum g2d_paint_task_type_e {

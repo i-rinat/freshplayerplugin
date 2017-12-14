@@ -26,6 +26,7 @@
 #define _FILE_OFFSET_BITS  64
 
 #include "ppb_flash_file.h"
+#include "ppb_file_ref.h"
 #include <stdlib.h>
 #include "pp_resource.h"
 #include <ppapi/c/pp_errors.h>

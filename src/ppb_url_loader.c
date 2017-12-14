@@ -42,7 +42,15 @@
 #include "ppb_url_request_info.h"
 #include "config.h"
 #include "pp_interface.h"
+#include "static_assert.h"
+#include "ppb_instance.h"
+#include "ppb_url_response_info.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include "utils.h"
 
+STATIC_ASSERT(sizeof(struct pp_url_loader_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_url_loader_create(PP_Instance instance)

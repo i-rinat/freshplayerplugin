@@ -28,7 +28,9 @@
 #include "config.h"
 #include "pp_resource.h"
 #include "pp_interface.h"
+#include "static_assert.h"
 
+STATIC_ASSERT(sizeof(struct pp_view_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Bool
 ppb_view_is_view(PP_Resource resource)

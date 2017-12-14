@@ -24,6 +24,7 @@
 
 #include "ppb_video_capture.h"
 #include <ppapi/c/pp_errors.h>
+#include <ppapi/c/dev/ppp_video_capture_dev.h>
 #include <stdlib.h>
 #include "pp_resource.h"
 #include "ppb_core.h"
@@ -34,15 +35,39 @@
 #include "ppb_device_ref.h"
 #include "ppb_var.h"
 #include "ppb_buffer.h"
+#include "ppb_instance.h"
 #include <linux/videodev2.h>
 #include "pp_interface.h"
 #include "eintr_retry.h"
+#include "static_assert.h"
 #include <dirent.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include "utils.h"
 #if HAVE_LIBV4L2
 #include <libv4l2.h>
 #endif // HAVE_LIBV4L2
 
+struct pp_video_capture_s {
+    COMMON_STRUCTURE_FIELDS
+    int                 fd;
+    uint32_t            width;
+    uint32_t            height;
+    uint32_t            fps;
+    size_t              buffer_size;
+    uint32_t            buffer_count;
+    PP_Resource        *buffers;
+    char               *buffer_is_free;
+    pthread_t           thread;
+    uint32_t            thread_started;
+    uint32_t            terminate_thread;
+    const struct PPP_VideoCapture_Dev_0_1 *ppp_video_capture_dev;
+    PP_Resource         message_loop;
+};
+
+STATIC_ASSERT(sizeof(struct pp_video_capture_s) <= LARGEST_RESOURCE_SIZE);
 
 const char *default_capture_device = "/dev/video0";
 

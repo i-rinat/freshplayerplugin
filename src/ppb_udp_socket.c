@@ -34,7 +34,11 @@
 #include "async_network.h"
 #include "pp_interface.h"
 #include "ppb_message_loop.h"
+#include "ppb_net_address.h"
+#include "static_assert.h"
+#include <string.h>
 
+STATIC_ASSERT(sizeof(struct pp_udp_socket_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_udp_socket_create(PP_Instance instance_id)

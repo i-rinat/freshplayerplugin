@@ -43,6 +43,9 @@
 #include "ppb_core.h"
 #include "gtk_wrapper.h"
 #include "np_asynccall.h"
+#include "ppb_instance.h"
+#include <unistd.h>
+#include "utils.h"
 
 
 static void *module_dl_handler;

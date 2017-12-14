@@ -41,6 +41,12 @@
 
 STATIC_ASSERT_LESS_OR_EQ(salt_length, 32);
 
+struct pp_flash_drm_s {
+    COMMON_STRUCTURE_FIELDS
+};
+
+STATIC_ASSERT(sizeof(struct pp_flash_drm_s) <= LARGEST_RESOURCE_SIZE);
+
 PP_Resource
 ppb_flash_drm_create(PP_Instance instance)
 {

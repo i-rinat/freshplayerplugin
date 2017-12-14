@@ -31,7 +31,10 @@
 #include "pp_resource.h"
 #include "reverse_constant.h"
 #include "pp_interface.h"
+#include "static_assert.h"
+#include "utils.h"
 
+STATIC_ASSERT(sizeof(struct pp_image_data_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_ImageDataFormat
 ppb_image_data_get_native_image_data_format(void)

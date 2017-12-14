@@ -32,7 +32,14 @@
 #include "pp_resource.h"
 #include "pp_interface.h"
 #include "font.h"
+#include "static_assert.h"
 
+struct pp_browser_font_s {
+    COMMON_STRUCTURE_FIELDS
+    struct fpp_font         ff;
+};
+
+STATIC_ASSERT(sizeof(struct pp_browser_font_s) <= LARGEST_RESOURCE_SIZE);
 
 struct PP_Var
 ppb_browser_font_get_font_families(PP_Instance instance)

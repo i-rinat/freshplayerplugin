@@ -25,8 +25,11 @@
 #include <pthread.h>
 #include <ppapi/c/pp_errors.h>
 #include "ppb_audio.h"
+#include "ppb_audio_config.h"
 #include "ppb_core.h"
+#include "ppb_instance.h"
 #include <stdlib.h>
+#include <string.h>
 #include <glib.h>
 #include "trace.h"
 #include "tables.h"
@@ -36,6 +39,21 @@
 #include "ppb_message_loop.h"
 #include "eintr_retry.h"
 #include "audio_thread.h"
+#include "static_assert.h"
+
+struct pp_audio_s {
+    COMMON_STRUCTURE_FIELDS
+    uint32_t                sample_rate;
+    uint32_t                sample_frame_count;
+    PPB_Audio_Callback_1_0  callback_1_0;
+    PPB_Audio_Callback      callback_1_1;
+    void                   *user_data;
+    audio_stream_ops       *stream_ops;
+    audio_stream           *stream;
+    int                     is_playing;
+};
+
+STATIC_ASSERT(sizeof(struct pp_audio_s) <= LARGEST_RESOURCE_SIZE);
 
 static
 void

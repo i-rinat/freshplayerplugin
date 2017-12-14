@@ -26,7 +26,12 @@
 
 #include <ppapi/c/private/ppb_net_address_private.h>
 #include <ppapi/c/ppb_net_address.h>
+#include "pp_resource.h"
 
+struct pp_net_address_s {
+    COMMON_STRUCTURE_FIELDS
+    struct PP_NetAddress_Private   addr;
+};
 
 PP_Bool
 ppb_net_address_private_are_equal(const struct PP_NetAddress_Private *addr1,

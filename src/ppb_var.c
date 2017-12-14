@@ -39,7 +39,8 @@
 #include "compat.h"
 #include "config.h"
 #include "pp_interface.h"
-
+#include "ppb_instance.h"
+#include "utils.h"
 
 static GHashTable      *var_ht;
 static pthread_mutex_t  lock;

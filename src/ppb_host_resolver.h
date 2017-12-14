@@ -26,7 +26,14 @@
 
 #include <ppapi/c/private/ppb_host_resolver_private.h>
 #include <ppapi/c/ppb_host_resolver.h>
+#include "pp_resource.h"
 
+struct pp_host_resolver_s {
+    COMMON_STRUCTURE_FIELDS
+    char                           *host;
+    struct PP_NetAddress_Private   *addrs;
+    uint32_t                        addr_count;
+};
 
 PP_Resource
 ppb_host_resolver_create(PP_Instance instance);

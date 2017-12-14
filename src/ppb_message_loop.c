@@ -32,7 +32,18 @@
 #include "pp_resource.h"
 #include "compat.h"
 #include "pp_interface.h"
+#include "static_assert.h"
 
+struct pp_message_loop_s {
+    COMMON_STRUCTURE_FIELDS
+    GAsyncQueue            *async_q;
+    GTree                  *int_q;
+    int                     running;
+    int                     teardown;
+    int                     depth;
+};
+
+STATIC_ASSERT(sizeof(struct pp_message_loop_s) <= LARGEST_RESOURCE_SIZE);
 
 static __thread PP_Resource this_thread_message_loop = 0;
 static __thread int         thread_is_not_suitable_for_message_loop = 0;

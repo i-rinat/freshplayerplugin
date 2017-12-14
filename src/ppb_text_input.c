@@ -23,6 +23,7 @@
  */
 
 #include "ppb_text_input.h"
+#include "ppb_instance.h"
 #include <stdlib.h>
 #include <glib.h>
 #include "trace.h"
@@ -33,7 +34,10 @@
 #include <ppapi/c/pp_errors.h>
 #include "pp_interface.h"
 #include "gtk_wrapper.h"
-
+#include <ppapi/c/dev/ppp_text_input_dev.h>
+#include <ppapi/c/dev/ppb_text_input_dev.h>
+#include <string.h>
+#include "utils.h"
 
 struct set_text_input_type_param_s {
     PP_Instance             instance;

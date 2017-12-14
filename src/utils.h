@@ -26,7 +26,17 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 
+#define free_and_nullify(item)          \
+    do {                                \
+        free(item);                     \
+        (item) = NULL;                  \
+    } while (0)
+
+#define nullsafe_strdup(s)       ((s) ? strdup(s) : NULL)
+
+#define PP_MakeCCB(func, user_data) PP_MakeCompletionCallback(func, user_data)
 
 static
 inline

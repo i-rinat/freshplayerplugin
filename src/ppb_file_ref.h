@@ -25,7 +25,19 @@
 #pragma once
 
 #include <ppapi/c/ppb_file_ref.h>
+#include "pp_resource.h"
 
+enum file_ref_type_e {
+    PP_FILE_REF_TYPE_NAME,
+    PP_FILE_REF_TYPE_FD,
+};
+
+struct pp_file_ref_s {
+    COMMON_STRUCTURE_FIELDS
+    int                     fd;
+    char                   *path;
+    enum file_ref_type_e    type;
+};
 
 PP_Resource
 ppb_file_ref_create(PP_Resource file_system, const char *path);

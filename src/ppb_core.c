@@ -31,8 +31,10 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "pp_interface.h"
+#include "ppb_instance.h"
 #include "ppb_message_loop.h"
 #include <ppapi/c/pp_errors.h>
+#include "utils.h"
 
 
 void

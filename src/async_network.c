@@ -25,6 +25,8 @@
 #include "async_network.h"
 #include <glib.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -42,7 +44,9 @@
 #include "trace.h"
 #include "config.h"
 #include "ppb_message_loop.h"
-
+#include "ppb_tcp_socket.h"
+#include "ppb_udp_socket.h"
+#include "ppb_host_resolver.h"
 
 static struct event_base *event_b = NULL;
 static struct evdns_base *evdns_b = NULL;

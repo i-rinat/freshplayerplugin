@@ -26,6 +26,11 @@
 
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
+#include <ppapi/c/pp_var.h>
 
+struct np_proxy_object_s {
+    NPObject npobj;
+    struct PP_Var ppobj;
+};
 
 extern struct NPClass p2n_proxy_class;

@@ -25,7 +25,18 @@
 #pragma once
 
 #include <ppapi/c/ppb_image_data.h>
+#include "pp_resource.h"
+#include <cairo.h>
 
+struct pp_image_data_s {
+    COMMON_STRUCTURE_FIELDS
+    int32_t             width;
+    int32_t             height;
+    int32_t             stride;
+    char               *data;
+    PP_ImageDataFormat  format;
+    cairo_surface_t    *cairo_surf;
+};
 
 PP_ImageDataFormat
 ppb_image_data_get_native_image_data_format(void);

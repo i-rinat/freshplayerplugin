@@ -36,6 +36,7 @@
 #include "ppb_var.h"
 #include "ppb_message_loop.h"
 #include <ppapi/c/pp_errors.h>
+#include "utils.h"
 
 
 struct has_property_param_s {

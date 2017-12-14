@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "ppb_instance.h"
 #include "ppb_url_util.h"
 #include "ppb_var.h"
 #include "ppb_core.h"

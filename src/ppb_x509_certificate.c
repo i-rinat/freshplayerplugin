@@ -31,7 +31,17 @@
 #include <openssl/x509.h>
 #include <ctype.h>
 #include "pp_interface.h"
+#include "static_assert.h"
+#include "utils.h"
 
+struct pp_x509_certificate_s {
+    COMMON_STRUCTURE_FIELDS
+    X509           *cert;
+    char           *raw_data;
+    uint32_t        raw_data_length;
+};
+
+STATIC_ASSERT(sizeof(struct pp_x509_certificate_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_x509_certificate_create(PP_Instance instance)

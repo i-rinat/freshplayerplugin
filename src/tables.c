@@ -37,6 +37,10 @@
 #include <X11/extensions/Xrandr.h>
 #include <GL/glx.h>
 #include "screensaver_control.h"
+#include "ppb_instance.h"
+#include <pango/pangoft2.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 
 NPNetscapeFuncs     npn;

@@ -30,11 +30,20 @@
 #include "trace.h"
 #include "ppb_var.h"
 #include "ppb_core.h"
+#include "ppb_instance.h"
 #include "ppb_file_ref.h"
 #include "reverse_constant.h"
 #include <ppapi/c/pp_errors.h>
 #include "pp_interface.h"
+#include "static_assert.h"
 
+struct pp_file_chooser_s {
+    COMMON_STRUCTURE_FIELDS
+    PP_FileChooserMode_Dev  mode;
+    struct PP_Var           accept_types;
+};
+
+STATIC_ASSERT(sizeof(struct pp_file_chooser_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_file_chooser_create(PP_Instance instance, PP_FileChooserMode_Dev mode,

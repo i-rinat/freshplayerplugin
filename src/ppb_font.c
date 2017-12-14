@@ -32,6 +32,14 @@
 #include "font.h"
 #include <ppapi/c/pp_errors.h>
 #include "pp_interface.h"
+#include "static_assert.h"
+
+struct pp_font_s {
+    COMMON_STRUCTURE_FIELDS
+    struct fpp_font         ff;
+};
+
+STATIC_ASSERT(sizeof(struct pp_font_s) <= LARGEST_RESOURCE_SIZE);
 
 
 struct PP_Var

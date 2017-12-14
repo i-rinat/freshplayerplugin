@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include "ppb_graphics3d.h"
+#include "ppb_instance.h"
 #include "ppb_message_loop.h"
 #include <stdlib.h>
 #include <GL/glx.h>
@@ -39,7 +40,9 @@
 #include "reverse_constant.h"
 #include "pp_interface.h"
 #include "compat_glx_defines.h"
+#include "static_assert.h"
 
+STATIC_ASSERT(sizeof(struct pp_graphics3d_s) <= LARGEST_RESOURCE_SIZE);
 
 int32_t
 ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t *value)

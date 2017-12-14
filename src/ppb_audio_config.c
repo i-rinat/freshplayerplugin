@@ -28,7 +28,9 @@
 #include "tables.h"
 #include "pp_resource.h"
 #include "pp_interface.h"
+#include "static_assert.h"
 
+STATIC_ASSERT(sizeof(struct pp_audio_config_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate sample_rate,

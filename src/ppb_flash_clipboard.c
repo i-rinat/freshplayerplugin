@@ -35,6 +35,8 @@
 #include <ppapi/c/pp_errors.h>
 #include <glib.h>
 #include "pp_interface.h"
+#include "gtk_wrapper.h"
+#include "utils.h"
 
 
 static GHashTable      *format_id_ht;       ///< maps name to id

@@ -25,7 +25,25 @@
 #pragma once
 
 #include <ppapi/c/ppb_graphics_3d.h>
+#include "pp_resource.h"
+#include <X11/Xlib.h>
+#include <X11/extensions/Xrender.h>
+#include "glx.h"
+#include <glib.h>
 
+struct pp_graphics3d_s {
+    COMMON_STRUCTURE_FIELDS
+    GLXContext          glc;
+    GLXFBConfig         fb_config;
+    int32_t             depth;          ///< depth of the pixmap, 32 for transparent, 24 otherwise
+    GLXPixmap           glx_pixmap;
+    Pixmap              pixmap[2];      ///< first for immediate drawing, second - to store copy
+    Picture             xr_pict[2];     ///< XRender pictures for X pixmaps
+    XRenderPictFormat  *xr_pictfmt;
+    int32_t             width;
+    int32_t             height;
+    GHashTable         *sub_maps;
+};
 
 int32_t
 ppb_graphics3d_get_attrib_max_value(PP_Resource instance, int32_t attribute, int32_t *value);

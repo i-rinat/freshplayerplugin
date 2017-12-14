@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 
+#include "ppb_audio_config.h"
 #include "ppb_audio_input.h"
 #include "ppb_device_ref.h"
+#include "ppb_instance.h"
 #include "ppb_var.h"
 #include <stdlib.h>
 #include <ppapi/c/pp_errors.h>
@@ -33,7 +35,21 @@
 #include "trace.h"
 #include "tables.h"
 #include "ppb_message_loop.h"
+#include "static_assert.h"
+#include "audio_thread.h"
 
+struct pp_audio_input_s {
+    COMMON_STRUCTURE_FIELDS
+    uint32_t                    sample_rate;
+    uint32_t                    sample_frame_count;
+    PPB_AudioInput_Callback_0_3 cb_0_3;
+    PPB_AudioInput_Callback     cb_0_4;
+    void                       *cb_user_data;
+    audio_stream_ops           *stream_ops;
+    audio_stream               *stream;
+};
+
+STATIC_ASSERT(sizeof(struct pp_audio_input_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_audio_input_create(PP_Instance instance)

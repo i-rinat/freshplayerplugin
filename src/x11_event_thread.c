@@ -33,6 +33,7 @@
 #include "utils.h"
 #include "eintr_retry.h"
 #include <poll.h>
+#include "ppb_instance.h"
 
 
 static GHashTable        *ht = NULL;  // Window -> struct ht_entry_s
