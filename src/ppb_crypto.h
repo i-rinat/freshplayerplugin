@@ -26,6 +26,5 @@
 
 #include <ppapi/c/dev/ppb_crypto_dev.h>
 
-
 void
 ppb_crypto_get_random_bytes(char *buffer, uint32_t num_bytes);

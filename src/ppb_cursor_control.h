@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_cursor_control_dev.h>
 
-
 PP_Bool
 ppb_cursor_control_set_cursor(PP_Instance instance, enum PP_CursorType_Dev type,
                               PP_Resource custom_image, const struct PP_Point *hot_spot);

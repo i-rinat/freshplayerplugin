@@ -24,9 +24,8 @@
 
 #pragma once
 
-#include <ppapi/c/pp_instance.h>
 #include <ppapi/c/dev/ppb_device_ref_dev.h>
-
+#include <ppapi/c/pp_instance.h>
 
 PP_Resource
 ppb_device_ref_create(PP_Instance instance, struct PP_Var name, struct PP_Var longname,

@@ -26,7 +26,6 @@
 
 #include <ppapi/c/private/ppb_flash_message_loop.h>
 
-
 PP_Resource
 ppb_flash_message_loop_create(PP_Instance instance);
 

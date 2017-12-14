@@ -22,14 +22,16 @@
  * SOFTWARE.
  */
 
-#include "trace.h"
 #include "pp_resource.h"
 #include "ppb_var.h"
-#include <ppapi/c/pp_graphics_3d.h>
+#include "trace.h"
+#include <arpa/inet.h>
 #include <glib.h>
 #include <inttypes.h>
-#include <arpa/inet.h>
-
+#include <ppapi/c/pp_graphics_3d.h>
+#include <ppapi/c/ppb_input_event.h>
+#include <stdlib.h>
+#include <string.h>
 
 static
 char *

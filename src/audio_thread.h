@@ -26,7 +26,6 @@
 
 #include <stdint.h>
 
-
 typedef enum {
     STREAM_PLAYBACK,
     STREAM_CAPTURE,

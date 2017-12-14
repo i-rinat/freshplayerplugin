@@ -22,25 +22,28 @@
  * SOFTWARE.
  */
 
-#include "ppb_flash.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h>
-#include "trace.h"
-#include "tables.h"
 #include "config.h"
-#include "reverse_constant.h"
-#include "ppb_var.h"
-#include "ppb_url_loader.h"
-#include "ppb_core.h"
-#include "ppb_message_loop.h"
+#include "pp_interface.h"
 #include "pp_resource.h"
+#include "ppb_core.h"
+#include "ppb_flash.h"
+#include "ppb_image_data.h"
+#include "ppb_instance.h"
+#include "ppb_message_loop.h"
+#include "ppb_url_loader.h"
+#include "ppb_url_request_info.h"
+#include "ppb_var.h"
+#include "ppb_video_capture.h"
+#include "reverse_constant.h"
+#include "screensaver_control.h"
+#include "tables.h"
+#include "trace.h"
+#include "utils.h"
 #include <ppapi/c/dev/ppb_font_dev.h>
 #include <ppapi/c/pp_errors.h>
-#include "screensaver_control.h"
-#include "pp_interface.h"
-#include "ppb_video_capture.h"
-
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 void
 ppb_flash_set_instance_always_on_top(PP_Instance instance, PP_Bool on_top)

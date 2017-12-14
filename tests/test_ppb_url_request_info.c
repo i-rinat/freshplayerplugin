@@ -1,6 +1,6 @@
 #include "nih_test.h"
-#include <stdio.h>
 #include <src/ppb_url_request_info.c>
+#include <stdio.h>
 
 #define test_ltrim(in, out)                                         \
     do {                                                            \

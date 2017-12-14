@@ -22,13 +22,12 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
 #include "ppb_messaging.h"
-#include <stdlib.h>
 #include "trace.h"
 #include <glib.h>
 #include <ppapi/c/pp_errors.h>
-#include "pp_interface.h"
-
+#include <stdlib.h>
 
 void
 ppb_messaging_post_message(PP_Instance instance, struct PP_Var message)

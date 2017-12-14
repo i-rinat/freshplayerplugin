@@ -26,7 +26,6 @@
 
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 
-
 struct PP_Var
 ppb_browser_font_get_font_families(PP_Instance instance);
 

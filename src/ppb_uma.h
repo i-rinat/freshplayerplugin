@@ -26,7 +26,6 @@
 
 #include <ppapi/c/private/ppb_uma_private.h>
 
-
 void
 ppb_uma_histogram_custom_times(PP_Instance instance, struct PP_Var name, int64_t sample,
                                int64_t min, int64_t max, uint32_t bucket_count);

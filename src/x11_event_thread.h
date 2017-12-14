@@ -24,10 +24,9 @@
 
 #pragma once
 
-#include <npapi/npfunctions.h>
 #include <X11/Xlib.h>
+#include <npapi/npfunctions.h>
 #include <ppapi/c/pp_instance.h>
-
 
 Window
 x11et_register_window(PP_Instance instance, Window wnd, NPP_HandleEventProcPtr handle_event_cb,

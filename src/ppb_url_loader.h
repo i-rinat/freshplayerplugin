@@ -24,9 +24,54 @@
 
 #pragma once
 
+#include "pp_resource.h"
+#include <glib.h>
+#include <npapi/npapi.h>
+#include <npapi/npruntime.h>
 #include <ppapi/c/ppb_url_loader.h>
 #include <ppapi/c/trusted/ppb_url_loader_trusted.h>
 
+struct pp_url_loader_s {
+    COMMON_STRUCTURE_FIELDS
+    char                   *status_line;    ///< HTTP/1.1 200 OK
+    char                   *headers;        ///< response headers
+    int                     http_code;      ///< HTTP response code
+    int                     fd;             ///< file used to store response
+    size_t                  read_pos;       ///< reading position
+    enum pp_request_method_e method;        ///< GET/POST
+    char                   *url;            ///< request URL
+    char                   *redirect_url;   ///< value of the Location header if this is
+                                            ///< a redirection response
+    int                     finished_loading;   ///< if whole stream loaded already
+    int64_t                 response_size;  ///< Content-Length value of -1 if absent
+    int                     stream_to_file; ///< whenever streaming to file is allowed
+    struct PP_CompletionCallback    stream_to_file_ccb; ///< callback to call on end of streaming
+    PP_Resource             stream_to_file_ccb_ml; ///< message loop to call callback on
+
+    char                   *request_headers;
+    PP_Bool                 follow_redirects;   ///< handle redirections internally
+    PP_Bool                 record_download_progress;
+    PP_Bool                 record_upload_progress;
+    char                   *custom_referrer_url;
+    PP_Bool                 allow_cross_origin_requests;
+    PP_Bool                 allow_credentials;
+    char                   *custom_content_transfer_encoding;
+    char                   *custom_user_agent;
+    char                   *target;
+    GArray                 *post_data;
+    GList                  *read_tasks;     ///< list of url_loader_read_task_s
+    NPStream               *np_stream;      ///< associated NPStream
+    struct PP_CompletionCallback    ccb;    ///< callback to call on headers arrival
+    PP_Resource                     ccb_ml; ///< message loop to call callback on
+};
+
+struct url_loader_read_task_s {
+    PP_Resource                     url_loader;
+    void                           *buffer;
+    int32_t                         bytes_to_read;
+    struct PP_CompletionCallback    ccb;
+    PP_Resource                     ccb_ml;
+};
 
 PP_Resource
 ppb_url_loader_create(PP_Instance instance);

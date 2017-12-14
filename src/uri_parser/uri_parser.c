@@ -22,13 +22,12 @@
  * SOFTWARE.
  */
 
+#include "../compat.h"
 #include "uri_parser.h"
 #include <assert.h>
-#include <string.h>
-#include <stdio.h>
 #include <glib.h>
-#include "../compat.h"
-
+#include <stdio.h>
+#include <string.h>
 
 typedef struct {
     int   len;

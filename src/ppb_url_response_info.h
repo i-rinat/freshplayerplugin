@@ -24,8 +24,14 @@
 
 #pragma once
 
+#include "pp_resource.h"
 #include <ppapi/c/ppb_url_response_info.h>
 
+struct pp_url_response_info_s {
+    COMMON_STRUCTURE_FIELDS
+    PP_Resource                 url_loader_id;
+    struct pp_url_loader_s     *url_loader;
+};
 
 PP_Bool
 ppb_url_response_info_is_url_response_info(PP_Resource resource);

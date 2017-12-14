@@ -24,9 +24,8 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_core.h>
 #include <ppapi/c/pp_instance.h>
-
+#include <ppapi/c/ppb_core.h>
 
 void
 ppb_core_add_ref_resource(PP_Resource resource);

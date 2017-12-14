@@ -23,15 +23,14 @@
  */
 
 #include "config.h"
-#include "config_priv.h"
 #include "config_parser/config_parser.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <locale.h>
-#include <glib.h>
+#include "config_priv.h"
 #include "trace_core.h"
-
+#include <glib.h>
+#include <locale.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static struct fpp_config_s default_config = {
     .audio_buffer_min_ms =      20,

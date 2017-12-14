@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <ppapi/c/dev/ppb_url_util_dev.h>
 #include <glib.h>
+#include <ppapi/c/dev/ppb_url_util_dev.h>
 
 void
 uri_parser_parse_uri(const char *s, struct PP_URLComponents_Dev *components);

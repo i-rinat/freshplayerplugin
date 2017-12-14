@@ -24,10 +24,9 @@
 
 #pragma once
 
+#include <pango/pango.h>
 #include <ppapi/c/dev/ppb_font_dev.h>
 #include <ppapi/c/trusted/ppb_browser_font_trusted.h>
-#include <pango/pango.h>
-
 
 struct fpp_font {
     PangoFont              *font;

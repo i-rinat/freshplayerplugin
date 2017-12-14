@@ -1,10 +1,9 @@
 #include "nih_test.h"
+#include <langinfo.h>
+#include <src/ppb_char_set.c>
+#include <src/ppb_var.h>
 #include <stdio.h>
 #include <string.h>
-#include <langinfo.h>
-#include <src/ppb_var.h>
-#include <src/ppb_char_set.c>
-
 
 static
 void *

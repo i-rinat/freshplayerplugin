@@ -26,7 +26,6 @@
 
 #include <ppapi/c/ppb_audio.h>
 
-
 PP_Resource
 ppb_audio_create_1_0(PP_Instance instance, PP_Resource audio_config,
                      PPB_Audio_Callback_1_0 audio_callback, void *user_data);

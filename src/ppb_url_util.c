@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
+#include "ppb_core.h"
+#include "ppb_instance.h"
+#include "ppb_message_loop.h"
 #include "ppb_url_util.h"
 #include "ppb_var.h"
-#include "ppb_core.h"
-#include "ppb_message_loop.h"
+#include "tables.h"
+#include "trace.h"
+#include "uri_parser/uri_parser.h"
 #include <stdlib.h>
 #include <string.h>
-#include "uri_parser/uri_parser.h"
-#include "trace.h"
-#include "tables.h"
-#include "pp_interface.h"
-
 
 struct PP_Var
 ppb_url_util_canonicalize(struct PP_Var url, struct PP_URLComponents_Dev *components)

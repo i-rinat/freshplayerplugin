@@ -23,16 +23,16 @@
  */
 
 #include "audio_thread.h"
-#include <pthread.h>
+#include "config.h"
+#include "trace.h"
+#include <glib.h>
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
-#include <soxr.h>
-#include <glib.h>
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
-#include "trace.h"
-#include "config.h"
+#include <pthread.h>
+#include <soxr.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define CLIENT_NAME     "freshwrapper"
 

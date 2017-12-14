@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_font_dev.h>
 
-
 struct PP_Var
 ppb_font_get_font_families(PP_Instance instance);
 

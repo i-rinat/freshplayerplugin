@@ -27,7 +27,6 @@
 #include <ppapi/c/ppb_file_io.h>
 #include <ppapi/c/private/ppb_file_io_private.h>
 
-
 int32_t
 ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,
                                    struct PP_CompletionCallback callback);

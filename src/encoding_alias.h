@@ -24,6 +24,5 @@
 
 #pragma once
 
-
 const char *
 encoding_alias_get_canonical_name(const char *name);

@@ -24,9 +24,19 @@
 
 #pragma once
 
-#include <ppapi/c/private/ppb_udp_socket_private.h>
+#include "pp_resource.h"
 #include <ppapi/c/ppb_udp_socket.h>
+#include <ppapi/c/private/ppb_udp_socket_private.h>
 
+struct pp_udp_socket_s {
+    COMMON_STRUCTURE_FIELDS
+    int                             sock;
+    int                             bound;
+    int                             seen_eof;
+    int                             destroyed;
+    struct PP_NetAddress_Private    addr;
+    struct PP_NetAddress_Private    addr_from;
+};
 
 PP_Resource
 ppb_udp_socket_create(PP_Instance instance_id);

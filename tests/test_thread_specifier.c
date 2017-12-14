@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <stdio.h>
 
-
 static pthread_barrier_t b1, b2;
 static pthread_t         t;
 static __thread int      v;

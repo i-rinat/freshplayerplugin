@@ -24,11 +24,10 @@
 
 #pragma once
 
-#include <glib.h>
-#include <pango/pango.h>
 #include <X11/Xlib.h>
 #include <cairo.h>
-
+#include <glib.h>
+#include <pango/pango.h>
 
 // GTK+ type mockups
 

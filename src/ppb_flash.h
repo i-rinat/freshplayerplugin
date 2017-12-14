@@ -26,7 +26,6 @@
 
 #include <ppapi/c/private/ppb_flash.h>
 
-
 void
 ppb_flash_set_instance_always_on_top(PP_Instance instance, PP_Bool on_top);
 

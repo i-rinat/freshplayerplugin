@@ -25,11 +25,10 @@
 #define _GNU_SOURCE
 
 #include "gtk_wrapper.h"
+#include "trace_core.h"
 #include <link.h>
 #include <stdio.h>
 #include <string.h>
-#include "trace_core.h"
-
 
 static struct {
     int     major_version;

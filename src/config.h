@@ -26,7 +26,6 @@
 
 #include <stdint.h>
 
-
 struct fpp_config_s {
     int     audio_buffer_min_ms;
     int     audio_buffer_max_ms;

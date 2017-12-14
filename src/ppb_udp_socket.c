@@ -22,19 +22,23 @@
  * SOFTWARE.
  */
 
-#include "ppb_udp_socket.h"
-#include "ppb_core.h"
-#include <ppapi/c/pp_errors.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include "trace.h"
-#include "tables.h"
-#include "reverse_constant.h"
 #include "async_network.h"
 #include "pp_interface.h"
+#include "ppb_core.h"
 #include "ppb_message_loop.h"
+#include "ppb_net_address.h"
+#include "ppb_udp_socket.h"
+#include "reverse_constant.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <ppapi/c/pp_errors.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
+STATIC_ASSERT(sizeof(struct pp_udp_socket_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_udp_socket_create(PP_Instance instance_id)

@@ -23,16 +23,14 @@
  */
 
 #include "audio_thread.h"
-#include <pthread.h>
-#include <pulse/pulseaudio.h>
-#include <pulse/mainloop.h>
-#include <glib.h>
-#include <string.h>
 #include "trace.h"
-
+#include <glib.h>
+#include <pthread.h>
+#include <pulse/mainloop.h>
+#include <pulse/pulseaudio.h>
+#include <string.h>
 
 #define CLIENT_NAME     "freshwrapper"
-
 
 struct audio_stream_s {
     struct pa_sample_spec       sample_spec;

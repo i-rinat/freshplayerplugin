@@ -26,7 +26,6 @@
 
 #include <ppapi/c/ppb_messaging.h>
 
-
 void
 ppb_messaging_post_message(PP_Instance instance, struct PP_Var message);
 

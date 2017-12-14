@@ -26,7 +26,6 @@
 #include "nih_test.h"
 #include <string.h>
 
-
 struct testcase {
     char             *name;
     void            (*f)(void);

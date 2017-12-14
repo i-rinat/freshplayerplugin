@@ -24,8 +24,14 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_view.h>
+#include "pp_resource.h"
 #include <ppapi/c/dev/ppb_view_dev.h>
+#include <ppapi/c/ppb_view.h>
+
+struct pp_view_s {
+    COMMON_STRUCTURE_FIELDS
+    struct PP_Rect      rect;
+};
 
 PP_Bool
 ppb_view_is_view(PP_Resource resource);

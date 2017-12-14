@@ -24,8 +24,14 @@
 
 #pragma once
 
+#include "pp_resource.h"
 #include <ppapi/c/ppb_audio_config.h>
 
+struct pp_audio_config_s {
+    COMMON_STRUCTURE_FIELDS
+    PP_AudioSampleRate      sample_rate;
+    uint32_t                sample_frame_count;
+};
 
 PP_Resource
 ppb_audio_config_create_stereo_16_bit(PP_Instance instance, PP_AudioSampleRate sample_rate,

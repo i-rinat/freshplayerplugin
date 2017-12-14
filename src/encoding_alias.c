@@ -24,10 +24,9 @@
 
 #include "encoding_alias.h"
 #include <glib.h>
-#include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-
+#include <string.h>
 
 enum {
     UIGNORE = 0,

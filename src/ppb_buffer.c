@@ -22,13 +22,21 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
 #include "ppb_buffer.h"
 #include "ppb_core.h"
-#include <stdlib.h>
-#include "trace.h"
+#include "static_assert.h"
 #include "tables.h"
-#include "pp_interface.h"
+#include "trace.h"
+#include <stdlib.h>
 
+struct pp_buffer_s {
+    COMMON_STRUCTURE_FIELDS
+    void                   *data;
+    uint32_t                len;
+};
+
+STATIC_ASSERT(sizeof(struct pp_buffer_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_buffer_create(PP_Instance instance, uint32_t size_in_bytes)

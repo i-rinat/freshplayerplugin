@@ -22,17 +22,26 @@
  * SOFTWARE.
  */
 
-#include "ppb_file_io.h"
-#include <stdlib.h>
-#include <ppapi/c/pp_errors.h>
-#include <inttypes.h>
-#include "trace.h"
-#include "tables.h"
+#include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_core.h"
-#include "pp_interface.h"
+#include "ppb_file_io.h"
+#include "ppb_file_ref.h"
 #include "ppb_message_loop.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <inttypes.h>
+#include <ppapi/c/pp_errors.h>
+#include <stdlib.h>
+#include <unistd.h>
 
+struct pp_file_io_s {
+    COMMON_STRUCTURE_FIELDS
+    int             fd;
+};
+
+STATIC_ASSERT(sizeof(struct pp_file_io_s) <= LARGEST_RESOURCE_SIZE);
 
 int32_t
 ppb_file_io_request_os_file_handle(PP_Resource file_io, PP_FileHandle *handle,

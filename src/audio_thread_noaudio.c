@@ -23,15 +23,14 @@
  */
 
 #include "audio_thread.h"
-#include <pthread.h>
-#include <unistd.h>
-#include <glib.h>
-#include "trace.h"
 #include "config.h"
-#include "utils.h"
 #include "eintr_retry.h"
 #include "ppb_message_loop.h"
-
+#include "trace.h"
+#include "utils.h"
+#include <glib.h>
+#include <pthread.h>
+#include <unistd.h>
 
 struct audio_stream_s {
     size_t                      sample_frame_count;

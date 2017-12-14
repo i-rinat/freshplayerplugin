@@ -22,22 +22,21 @@
  * SOFTWARE.
  */
 
+#include "encoding_alias.h"
+#include "pp_interface.h"
 #include "ppb_char_set.h"
 #include "ppb_memory.h"
-#include "encoding_alias.h"
-#include <stdlib.h>
-#include <locale.h>
-#include <langinfo.h>
-#include "trace.h"
-#include "tables.h"
-#include "reverse_constant.h"
 #include "ppb_var.h"
-#include "pp_interface.h"
+#include "reverse_constant.h"
+#include "tables.h"
+#include "trace.h"
+#include <langinfo.h>
+#include <locale.h>
+#include <stdlib.h>
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_cb.h>
 #include <unicode/ucnv_err.h>
 #include <unicode/ustring.h>
-
 
 char *
 ppb_char_set_utf16_to_char_set(PP_Instance instance, const uint16_t *utf16, uint32_t utf16_len,

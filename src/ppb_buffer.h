@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_buffer_dev.h>
 
-
 PP_Resource
 ppb_buffer_create(PP_Instance instance, uint32_t size_in_bytes);
 

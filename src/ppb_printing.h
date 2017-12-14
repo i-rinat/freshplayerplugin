@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_printing_dev.h>
 
-
 PP_Resource
 ppb_printing_create(PP_Instance instance);
 

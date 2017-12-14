@@ -26,7 +26,6 @@
 
 #include <ppapi/c/private/ppb_flash_menu.h>
 
-
 PP_Resource
 ppb_flash_menu_create(PP_Instance instance_id, const struct PP_Flash_Menu *menu_data);
 

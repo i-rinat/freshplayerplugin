@@ -23,11 +23,10 @@
  */
 
 #include "header_parser.h"
-#include <string.h>
 #include <ctype.h>
-#include <stdlib.h>
 #include <stdio.h>
-
+#include <stdlib.h>
+#include <string.h>
 
 struct parsed_headers_s *
 hp_parse_headers(const char *headers)

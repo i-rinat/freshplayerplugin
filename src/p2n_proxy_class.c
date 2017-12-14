@@ -26,18 +26,18 @@
  * proxy class which wraps PP_Var object to provide NPObject interface
  */
 
+#include "n2p_proxy_class.h"
 #include "p2n_proxy_class.h"
-#include "trace.h"
-#include "tables.h"
-#include <ppapi/c/private/ppp_instance_private.h>
-#include <ppapi/c/pp_errors.h>
 #include "pp_interface.h"
 #include "pp_resource.h"
-#include "ppb_var.h"
 #include "ppb_core.h"
 #include "ppb_message_loop.h"
-#include "n2p_proxy_class.h"
-
+#include "ppb_var.h"
+#include "tables.h"
+#include "trace.h"
+#include "utils.h"
+#include <ppapi/c/pp_errors.h>
+#include <ppapi/c/private/ppp_instance_private.h>
 
 NPObject *
 p2n_allocate(NPP npp, NPClass *aClass)

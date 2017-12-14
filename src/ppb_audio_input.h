@@ -26,7 +26,6 @@
 
 #include <ppapi/c/dev/ppb_audio_input_dev.h>
 
-
 PP_Resource
 ppb_audio_input_create(PP_Instance instance);
 

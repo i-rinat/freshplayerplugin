@@ -22,17 +22,28 @@
  * SOFTWARE.
  */
 
-#include "ppb_message_loop.h"
-#include <ppapi/c/pp_errors.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <glib.h>
-#include "trace.h"
-#include "tables.h"
-#include "pp_resource.h"
 #include "compat.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
+#include "ppb_message_loop.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include <glib.h>
+#include <inttypes.h>
+#include <ppapi/c/pp_errors.h>
+#include <stdlib.h>
 
+struct pp_message_loop_s {
+    COMMON_STRUCTURE_FIELDS
+    GAsyncQueue            *async_q;
+    GTree                  *int_q;
+    int                     running;
+    int                     teardown;
+    int                     depth;
+};
+
+STATIC_ASSERT(sizeof(struct pp_message_loop_s) <= LARGEST_RESOURCE_SIZE);
 
 static __thread PP_Resource this_thread_message_loop = 0;
 static __thread int         thread_is_not_suitable_for_message_loop = 0;

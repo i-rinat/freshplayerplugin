@@ -1,11 +1,10 @@
+#include "common.h"
 #include "nih_test.h"
+#include "src/ppb_core.h"
+#include "src/ppb_var.h"
+#include <src/ppb_net_address.c>
 #include <stdio.h>
 #include <string.h>
-#include <src/ppb_net_address.c>
-#include "src/ppb_var.h"
-#include "common.h"
-#include "src/ppb_core.h"
-
 
 TEST(ppb_net_address_private, ipv4_compose_decompose)
 {

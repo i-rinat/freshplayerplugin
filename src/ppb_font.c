@@ -22,16 +22,24 @@
  * SOFTWARE.
  */
 
+#include "font.h"
+#include "pp_interface.h"
 #include "ppb_font.h"
-#include <stdlib.h>
+#include "ppb_var.h"
+#include "static_assert.h"
+#include "tables.h"
 #include "trace.h"
 #include <glib.h>
 #include <pango/pangoft2.h>
-#include "tables.h"
-#include "ppb_var.h"
-#include "font.h"
 #include <ppapi/c/pp_errors.h>
-#include "pp_interface.h"
+#include <stdlib.h>
+
+struct pp_font_s {
+    COMMON_STRUCTURE_FIELDS
+    struct fpp_font         ff;
+};
+
+STATIC_ASSERT(sizeof(struct pp_font_s) <= LARGEST_RESOURCE_SIZE);
 
 
 struct PP_Var

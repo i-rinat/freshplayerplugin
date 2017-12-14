@@ -24,10 +24,9 @@
 
 #include "config_parser.h"
 #include <glib.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-
 
 struct cfg_s {
     GHashTable         *entries_ht;

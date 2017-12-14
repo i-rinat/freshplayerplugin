@@ -24,11 +24,31 @@
 
 #pragma once
 
-#include <ppapi/c/ppb_url_request_info.h>
-#include <stdlib.h>
+#include "pp_resource.h"
 #include <glib.h>
+#include <ppapi/c/ppb_url_request_info.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+struct pp_url_request_info_s {
+    COMMON_STRUCTURE_FIELDS
+    enum pp_request_method_e    method;
+    char                       *url;
+    char                       *headers;
+    unsigned int                is_immediate_javascript; // data in url is javascript line
+    PP_Bool                     stream_to_file;
+    PP_Bool                     follow_redirects;
+    PP_Bool                     record_download_progress;
+    PP_Bool                     record_upload_progress;
+    char                       *custom_referrer_url;
+    PP_Bool                     allow_cross_origin_requests;
+    PP_Bool                     allow_credentials;
+    char                       *custom_content_transfer_encoding;
+    int32_t                     prefetch_buffer_upper_threshold;
+    int32_t                     prefetch_buffer_lower_threshold;
+    char                       *custom_user_agent;
+    GArray                     *post_data;
+};
 
 /// descriptor of post data item
 struct post_data_item_s {

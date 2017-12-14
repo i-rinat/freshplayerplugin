@@ -22,24 +22,29 @@
  * SOFTWARE.
  */
 
-#include "ppb_flash_drm.h"
-#include "ppb_core.h"
-#include "ppb_var.h"
-#include "ppb_crypto.h"
-#include "ppb_message_loop.h"
+#include "config.h"
+#include "pp_interface.h"
 #include "pp_resource.h"
+#include "ppb_core.h"
+#include "ppb_crypto.h"
+#include "ppb_flash_drm.h"
+#include "ppb_message_loop.h"
+#include "ppb_var.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
-#include "trace.h"
-#include "tables.h"
-#include "config.h"
-#include "static_assert.h"
-#include "pp_interface.h"
-
 
 #define salt_length             32
 
 STATIC_ASSERT_LESS_OR_EQ(salt_length, 32);
+
+struct pp_flash_drm_s {
+    COMMON_STRUCTURE_FIELDS
+};
+
+STATIC_ASSERT(sizeof(struct pp_flash_drm_s) <= LARGEST_RESOURCE_SIZE);
 
 PP_Resource
 ppb_flash_drm_create(PP_Instance instance)

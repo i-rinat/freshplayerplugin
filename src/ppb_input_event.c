@@ -22,15 +22,42 @@
  * SOFTWARE.
  */
 
+#include "pp_interface.h"
 #include "ppb_input_event.h"
+#include "ppb_instance.h"
+#include "ppb_var.h"
+#include "static_assert.h"
+#include "tables.h"
+#include "trace.h"
+#include "utils.h"
+#include <ppapi/c/pp_errors.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include <ppapi/c/pp_errors.h>
-#include "trace.h"
-#include "tables.h"
-#include "ppb_var.h"
-#include "pp_interface.h"
 
+struct pp_input_event_s {
+    COMMON_STRUCTURE_FIELDS
+    uint32_t                    event_class;
+    PP_InputEvent_Type          type;
+    PP_TimeTicks                time_stamp;
+    uint32_t                    modifiers;
+    PP_InputEvent_MouseButton   mouse_button;
+    struct PP_Point             mouse_position;
+    int32_t                     click_count;
+    struct PP_Point             mouse_movement;
+    struct PP_FloatPoint        wheel_delta;
+    struct PP_FloatPoint        wheel_ticks;
+    PP_Bool                     scroll_by_page;
+    uint32_t                    key_code;
+    struct PP_Var               code;
+    struct PP_Var               text;
+    uint32_t                    segment_number;
+    uint32_t                   *segment_offsets;
+    int32_t                     target_segment;
+    uint32_t                    selection_start;
+    uint32_t                    selection_end;
+};
+
+STATIC_ASSERT(sizeof(struct pp_input_event_s) <= LARGEST_RESOURCE_SIZE);
 
 static
 void

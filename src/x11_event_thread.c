@@ -22,18 +22,18 @@
  * SOFTWARE.
  */
 
-#include "x11_event_thread.h"
-#include <glib.h>
-#include <pthread.h>
+#include "eintr_retry.h"
 #include "pp_resource.h"
-#include "tables.h"
-#include "xembed.h"
+#include "ppb_instance.h"
 #include "reverse_constant.h"
+#include "tables.h"
 #include "trace.h"
 #include "utils.h"
-#include "eintr_retry.h"
+#include "x11_event_thread.h"
+#include "xembed.h"
+#include <glib.h>
 #include <poll.h>
-
+#include <pthread.h>
 
 static GHashTable        *ht = NULL;  // Window -> struct ht_entry_s
 static GHashTable        *socket_ht = NULL; // plug_wnd -> socket wnd
