@@ -25,9 +25,9 @@
 #pragma once
 
 #include <ppapi/c/pp_completion_callback.h>
-#include <ppapi/c/pp_instance.h>
 #include <ppapi/c/pp_resource.h>
 #include <ppapi/c/private/ppb_net_address_private.h>
+#include <stdint.h>
 
 enum async_network_task_type_e {
     ASYNC_NETWORK_TCP_CONNECT,

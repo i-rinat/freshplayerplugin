@@ -27,6 +27,7 @@
 #include "pp_resource.h"
 #include <glib.h>
 #include <ppapi/c/ppb_url_request_info.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 

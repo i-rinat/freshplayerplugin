@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "gtk_wrapper.h"
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_core.h"
@@ -34,6 +35,9 @@
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
+#include <X11/Xlib.h>
+#include <glib.h>
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
 

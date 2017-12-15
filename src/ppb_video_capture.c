@@ -35,17 +35,18 @@
 #include "ppb_video_capture.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
 #include <dirent.h>
 #include <fcntl.h>
+#include <glib.h>
 #include <linux/videodev2.h>
 #include <ppapi/c/dev/ppp_video_capture_dev.h>
 #include <ppapi/c/pp_errors.h>
+#include <pthread.h>
 #include <stdlib.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <string.h>
+#include <unistd.h>
 
 #if HAVE_LIBV4L2
 #include <libv4l2.h>

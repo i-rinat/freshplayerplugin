@@ -34,10 +34,10 @@
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
 #include <ppapi/c/pp_errors.h>
 #include <pthread.h>
-#include <stdlib.h>
 
 STATIC_ASSERT(sizeof(struct pp_instance_s) <= LARGEST_RESOURCE_SIZE);
 

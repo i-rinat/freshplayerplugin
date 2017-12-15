@@ -23,13 +23,11 @@
  */
 
 #include "audio_thread.h"
-#include "config.h"
-#include "eintr_retry.h"
 #include "ppb_message_loop.h"
-#include "trace.h"
-#include "utils.h"
 #include <glib.h>
 #include <pthread.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 struct audio_stream_s {

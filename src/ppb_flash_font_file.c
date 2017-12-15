@@ -24,13 +24,15 @@
 
 #include "font.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_flash_font_file.h"
-#include "ppb_var.h"
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include <arpa/inet.h>  // for htonl()
 #include <pango/pangoft2.h>
+#include <glib.h>
 #include <stdlib.h>
 
 #include <ft2build.h>

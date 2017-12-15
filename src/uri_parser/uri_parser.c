@@ -24,7 +24,6 @@
 
 #include "../compat.h"
 #include "uri_parser.h"
-#include <assert.h>
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>

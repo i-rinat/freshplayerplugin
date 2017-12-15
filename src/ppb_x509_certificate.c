@@ -23,16 +23,19 @@
  */
 
 #include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_var.h"
 #include "ppb_x509_certificate.h"
 #include "reverse_constant.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
 #include <ctype.h>
 #include <openssl/x509.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 struct pp_x509_certificate_s {
     COMMON_STRUCTURE_FIELDS

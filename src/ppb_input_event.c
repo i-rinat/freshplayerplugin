@@ -23,16 +23,20 @@
  */
 
 #include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_input_event.h"
 #include "ppb_instance.h"
 #include "ppb_var.h"
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
+#include <glib.h>
 #include <ppapi/c/pp_errors.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct pp_input_event_s {
     COMMON_STRUCTURE_FIELDS

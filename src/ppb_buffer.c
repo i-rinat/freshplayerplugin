@@ -23,11 +23,12 @@
  */
 
 #include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_buffer.h"
 #include "ppb_core.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <stdlib.h>
 
 struct pp_buffer_s {

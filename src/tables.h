@@ -25,20 +25,18 @@
 #pragma once
 
 #include "glx.h"
-#include "pp_resource.h"
+#include <ppapi/c/pp_instance.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrender.h>
 #include <npapi/npapi.h>
 #include <npapi/npfunctions.h>
 #include <npapi/npruntime.h>
 #include <pango/pango.h>
-#include <ppapi/c/pp_var.h>
-#include <ppapi/c/trusted/ppb_browser_font_trusted.h>
 #include <pthread.h>
+#include <stdint.h>
 
 #if HAVE_HWDEC
 #include <va/va.h>
-#include <va/va_x11.h>
 #include <vdpau/vdpau.h>
 #include <vdpau/vdpau_x11.h>
 #endif // HAVE_HWDEC

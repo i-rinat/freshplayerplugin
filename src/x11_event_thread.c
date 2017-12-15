@@ -23,17 +23,20 @@
  */
 
 #include "eintr_retry.h"
-#include "pp_resource.h"
 #include "ppb_instance.h"
-#include "reverse_constant.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
 #include "x11_event_thread.h"
 #include "xembed.h"
+#include <X11/Xlib.h>
+#include <errno.h>
 #include <glib.h>
 #include <poll.h>
+#include <ppapi/c/pp_instance.h>
 #include <pthread.h>
+#include <string.h>
+#include <unistd.h>
 
 static GHashTable        *ht = NULL;  // Window -> struct ht_entry_s
 static GHashTable        *socket_ht = NULL; // plug_wnd -> socket wnd

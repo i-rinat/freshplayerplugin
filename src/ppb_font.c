@@ -24,15 +24,14 @@
 
 #include "font.h"
 #include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_font.h"
-#include "ppb_var.h"
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include <glib.h>
-#include <pango/pangoft2.h>
 #include <ppapi/c/pp_errors.h>
-#include <stdlib.h>
 
 struct pp_font_s {
     COMMON_STRUCTURE_FIELDS

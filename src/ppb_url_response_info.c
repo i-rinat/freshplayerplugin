@@ -30,11 +30,7 @@
 #include "ppb_var.h"
 #include "reverse_constant.h"
 #include "static_assert.h"
-#include "tables.h"
-#include "trace.h"
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+#include "trace_core.h"
 #include <unistd.h>
 
 STATIC_ASSERT(sizeof(struct pp_url_response_info_s) <= LARGEST_RESOURCE_SIZE);

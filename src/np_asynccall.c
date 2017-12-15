@@ -24,8 +24,9 @@
 
 #include "np_asynccall.h"
 #include "trace_core.h"
-#include "utils.h"
 #include <glib.h>
+#include <npapi/npapi.h>
+#include <stddef.h>
 
 static GMainContext *g_main_context_of_main_thread;
 

@@ -34,7 +34,7 @@
 #include "ppb_var.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
 

@@ -26,6 +26,7 @@
 
 #include "pp_resource.h"
 #include <ppapi/c/ppb_audio_config.h>
+#include <stdint.h>
 
 struct pp_audio_config_s {
     COMMON_STRUCTURE_FIELDS

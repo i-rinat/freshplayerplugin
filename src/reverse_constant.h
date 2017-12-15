@@ -32,6 +32,7 @@
 #include <ppapi/c/ppb_image_data.h>
 #include <ppapi/c/ppb_url_request_info.h>
 #include <ppapi/c/ppb_url_response_info.h>
+#include <ppapi/c/private/pp_private_font_charset.h>
 #include <ppapi/c/private/ppb_flash.h>
 #include <ppapi/c/private/ppb_flash_clipboard.h>
 #include <ppapi/c/private/ppb_pdf.h>

@@ -23,8 +23,9 @@
  */
 
 #include "pp_interface.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <glib.h>
+#include <pthread.h>
 #include <string.h>
 
 static GHashTable      *interface_ht = NULL;

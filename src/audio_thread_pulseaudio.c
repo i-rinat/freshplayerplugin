@@ -28,6 +28,8 @@
 #include <pthread.h>
 #include <pulse/mainloop.h>
 #include <pulse/pulseaudio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define CLIENT_NAME     "freshwrapper"

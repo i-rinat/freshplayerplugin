@@ -28,11 +28,13 @@
 #include "ppb_message_loop.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <glib.h>
 #include <inttypes.h>
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
+#include <sys/time.h>
+#include <time.h>
 
 struct pp_message_loop_s {
     COMMON_STRUCTURE_FIELDS

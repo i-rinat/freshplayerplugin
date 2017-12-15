@@ -25,6 +25,7 @@
 #include "shader_translator.h"
 #include <GLSLANG/ShaderLang.h>
 #include <glib.h>
+#include <string>
 
 static
 void

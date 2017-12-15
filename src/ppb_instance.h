@@ -25,13 +25,15 @@
 #pragma once
 
 #include "gtk_wrapper.h"
-#include "pp_resource.h"
+#include <glib.h>
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
 #include <ppapi/c/dev/ppb_text_input_dev.h>
 #include <ppapi/c/pp_completion_callback.h>
 #include <ppapi/c/ppb_instance.h>
 #include <ppapi/c/private/ppb_instance_private.h>
+#include <pthread.h>
+#include <stdint.h>
 
 struct pp_instance_s {
     const struct PPP_Instance_1_1  *ppp_instance_1_1;

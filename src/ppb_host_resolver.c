@@ -30,10 +30,11 @@
 #include "ppb_var.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
+#include <string.h>
 
 STATIC_ASSERT(sizeof(struct pp_host_resolver_s) <= LARGEST_RESOURCE_SIZE);
 

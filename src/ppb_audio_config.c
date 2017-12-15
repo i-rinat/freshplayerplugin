@@ -27,8 +27,8 @@
 #include "ppb_audio_config.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
-#include <stdlib.h>
+#include "trace_core.h"
+#include <glib.h>
 
 STATIC_ASSERT(sizeof(struct pp_audio_config_s) <= LARGEST_RESOURCE_SIZE);
 

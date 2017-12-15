@@ -28,9 +28,9 @@
 #include "ppb_instance.h"
 #include "ppb_message_loop.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
-#include <assert.h>
+#include <glib.h>
 #include <ppapi/c/pp_errors.h>
 #include <pthread.h>
 #include <stdlib.h>

@@ -23,12 +23,12 @@
  */
 
 #include "pp_interface.h"
+#include "pp_resource.h"
 #include "ppb_device_ref.h"
 #include "ppb_var.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
-#include <stdlib.h>
+#include "trace_core.h"
 
 struct pp_device_ref_s {
     COMMON_STRUCTURE_FIELDS

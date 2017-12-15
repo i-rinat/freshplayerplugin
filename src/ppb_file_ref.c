@@ -25,16 +25,15 @@
 #define _FILE_OFFSET_BITS   64
 #define _GNU_SOURCE             // for basename()
 
-#include "eintr_retry.h"
 #include "pp_interface.h"
 #include "ppb_file_ref.h"
 #include "ppb_var.h"
 #include "static_assert.h"
-#include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
 #include <ppapi/c/pp_errors.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 STATIC_ASSERT(sizeof(struct pp_file_ref_s) <= LARGEST_RESOURCE_SIZE);

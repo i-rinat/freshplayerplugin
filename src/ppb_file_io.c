@@ -24,16 +24,15 @@
 
 #include "pp_interface.h"
 #include "pp_resource.h"
-#include "ppb_core.h"
 #include "ppb_file_io.h"
 #include "ppb_file_ref.h"
 #include "ppb_message_loop.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <inttypes.h>
 #include <ppapi/c/pp_errors.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 
 struct pp_file_io_s {

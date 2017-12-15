@@ -29,8 +29,9 @@
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
+#include <glib.h>
 #include <netinet/in.h>
-#include <stdlib.h>
 #include <string.h>
 
 STATIC_ASSERT(sizeof(struct pp_net_address_s) <= LARGEST_RESOURCE_SIZE);

@@ -30,11 +30,12 @@
 #include "ppb_instance.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include <X11/Xcursor/Xcursor.h>
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
+#include <glib.h>
 #include <pthread.h>
-#include <stdlib.h>
 #include <string.h>
 
 struct comt_param_s {

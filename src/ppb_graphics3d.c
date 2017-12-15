@@ -23,20 +23,20 @@
  */
 
 #include "compat_glx_defines.h"
-#include "config.h"
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_core.h"
 #include "ppb_graphics3d.h"
 #include "ppb_instance.h"
 #include "ppb_message_loop.h"
-#include "ppb_opengles2.h"
 #include "reverse_constant.h"
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include <GL/glx.h>
 #include <GLES2/gl2.h>
+#include <X11/Xlib.h>
 #include <assert.h>
 #include <ppapi/c/pp_errors.h>
 #include <pthread.h>

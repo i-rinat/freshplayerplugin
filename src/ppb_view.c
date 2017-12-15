@@ -27,8 +27,7 @@
 #include "pp_resource.h"
 #include "ppb_view.h"
 #include "static_assert.h"
-#include "trace.h"
-#include <stdlib.h>
+#include "trace_core.h"
 
 STATIC_ASSERT(sizeof(struct pp_view_s) <= LARGEST_RESOURCE_SIZE);
 

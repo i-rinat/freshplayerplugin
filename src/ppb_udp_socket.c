@@ -32,11 +32,11 @@
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
+#include <glib.h>
 #include <ppapi/c/pp_errors.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 
 STATIC_ASSERT(sizeof(struct pp_udp_socket_s) <= LARGEST_RESOURCE_SIZE);
 

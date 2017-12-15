@@ -28,11 +28,10 @@
 #include "ppb_memory.h"
 #include "ppb_var.h"
 #include "reverse_constant.h"
-#include "tables.h"
-#include "trace.h"
-#include <langinfo.h>
+#include "trace_core.h"
 #include <locale.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_cb.h>
 #include <unicode/ucnv_err.h>

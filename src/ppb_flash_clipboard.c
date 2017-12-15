@@ -24,19 +24,19 @@
 
 #include "gtk_wrapper.h"
 #include "pp_interface.h"
-#include "pp_resource.h"
 #include "ppb_core.h"
 #include "ppb_flash_clipboard.h"
 #include "ppb_message_loop.h"
 #include "ppb_var.h"
 #include "reverse_constant.h"
-#include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
 #include <glib.h>
 #include <ppapi/c/pp_errors.h>
+#include <ppapi/c/pp_resource.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
 
 static GHashTable      *format_id_ht;       ///< maps name to id
 static GHashTable      *format_name_ht;     ///< maps id to name

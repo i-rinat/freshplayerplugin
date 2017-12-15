@@ -24,13 +24,11 @@
 
 #include "config_priv.h"
 #include "pp_interface.h"
-#include "pp_resource.h"
 #include "ppb_flash_font_file.h"
-#include "ppb_image_data.h"
 #include "ppb_pdf.h"
-#include "ppb_var.h"
 #include "reverse_constant.h"
 #include "trace.h"
+#include "trace_core.h"
 #include <glib.h>
 #include <libgen.h>
 #include <stdlib.h>

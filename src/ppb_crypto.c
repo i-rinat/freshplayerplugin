@@ -25,12 +25,8 @@
 #include "pp_interface.h"
 #include "ppb_crypto.h"
 #include "tables.h"
-#include "trace.h"
-#include <fcntl.h>
+#include "trace_core.h"
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <time.h>
 #include <unistd.h>
 
 void

@@ -1,5 +1,4 @@
 #include "nih_test.h"
-#include <glib.h>
 #include <src/ppb_flash_file.c>
 #include <stdio.h>
 #include <stdlib.h>

@@ -27,16 +27,25 @@
  */
 
 #include "n2p_proxy_class.h"
-#include "pp_resource.h"
-#include "ppapi/c/dev/deprecated_bool.h"
 #include "ppb_core.h"
 #include "ppb_message_loop.h"
 #include "ppb_var.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
+#include <glib.h>
+#include <npapi/npapi.h>
+#include <npapi/npfunctions.h>
 #include <npapi/npruntime.h>
+#include <ppapi/c/dev/ppp_class_deprecated.h>
+#include <ppapi/c/pp_bool.h>
 #include <ppapi/c/pp_errors.h>
+#include <ppapi/c/pp_resource.h>
+#include <ppapi/c/pp_var.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 struct has_property_param_s {
     struct PP_Var       name;

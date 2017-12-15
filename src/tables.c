@@ -23,16 +23,12 @@
  */
 
 #include "config.h"
-#include "n2p_proxy_class.h"
-#include "p2n_proxy_class.h"
 #include "ppb_instance.h"
-#include "ppb_var.h"
 #include "screensaver_control.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <GL/glx.h>
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/extensions/Xrandr.h>
 #include <fcntl.h>
 #include <glib.h>
@@ -40,7 +36,9 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
+#include <va/va_x11.h>
 
 NPNetscapeFuncs     npn;
 struct display_s    display;

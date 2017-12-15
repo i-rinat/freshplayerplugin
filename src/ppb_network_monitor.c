@@ -27,9 +27,8 @@
 #include "ppb_network_monitor.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <ppapi/c/pp_errors.h>
-#include <stdlib.h>
 
 struct pp_network_monitor_s {
     COMMON_STRUCTURE_FIELDS

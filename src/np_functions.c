@@ -22,13 +22,12 @@
  * SOFTWARE.
  */
 
-#include "compat.h"
 #include "config.h"
 #include "config_priv.h"
 #include "eintr_retry.h"
+#include "gtk_wrapper.h"
 #include "header_parser.h"
 #include "keycodeconvert.h"
-#include "p2n_proxy_class.h"
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_core.h"
@@ -47,25 +46,30 @@
 #include "reverse_constant.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
 #include "x11_event_thread.h"
-#include <GLES2/gl2.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xrender.h>
-#include <assert.h>
 #include <cairo-xlib.h>
 #include <cairo.h>
+#include <fcntl.h>
+#include <glib.h>
 #include <inttypes.h>
 #include <npapi/npapi.h>
+#include <npapi/npfunctions.h>
+#include <npapi/npruntime.h>
 #include <pango/pangocairo.h>
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/c/ppp_input_event.h>
 #include <ppapi/c/ppp_instance.h>
 #include <ppapi/c/private/ppp_instance_private.h>
 #include <pthread.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 int16_t

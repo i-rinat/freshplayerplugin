@@ -26,7 +26,9 @@
 
 #include "gtk_wrapper.h"
 #include "trace_core.h"
+#include <dlfcn.h>
 #include <link.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 

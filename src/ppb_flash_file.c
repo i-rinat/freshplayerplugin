@@ -29,8 +29,7 @@
 #include "pp_resource.h"
 #include "ppb_file_ref.h"
 #include "ppb_flash_file.h"
-#include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -42,7 +41,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 /// resolve pp module local path to absolute one

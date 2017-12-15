@@ -29,9 +29,12 @@
 #include "reverse_constant.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
+#include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <glib.h>
 #include <pthread.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 

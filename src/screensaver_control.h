@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "compat.h"
 #include <X11/Xlib.h>
 #include <stdint.h>
 

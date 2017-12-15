@@ -38,11 +38,19 @@
 #include "screensaver_control.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
+#include <cairo.h>
+#include <glib.h>
+#include <npapi/npapi.h>
+#include <npapi/npfunctions.h>
+#include <npapi/npruntime.h>
 #include <ppapi/c/dev/ppb_font_dev.h>
 #include <ppapi/c/pp_errors.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 void

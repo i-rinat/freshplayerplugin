@@ -25,13 +25,13 @@
 #include "async_network.h"
 #include "config.h"
 #include "pp_resource.h"
-#include "ppb_core.h"
 #include "ppb_host_resolver.h"
 #include "ppb_message_loop.h"
 #include "ppb_tcp_socket.h"
 #include "ppb_udp_socket.h"
 #include "trace.h"
 #include <arpa/inet.h>
+#include <errno.h>
 #include <event2/dns.h>
 #include <event2/event.h>
 #include <event2/thread.h>
@@ -43,8 +43,10 @@
 #include <ppapi/c/private/ppb_net_address_private.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 

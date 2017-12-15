@@ -25,7 +25,7 @@
 #include "compat.h"
 #include "config.h"
 #include "screensaver_control.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <X11/Xatom.h>
 #include <assert.h>
 #include <gio/gio.h>

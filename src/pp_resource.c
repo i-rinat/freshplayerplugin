@@ -24,11 +24,12 @@
 
 #include "config.h"
 #include "pp_resource.h"
-#include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <glib.h>
+#include <ppapi/c/pp_resource.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 static GHashTable      *res_tbl;

@@ -28,12 +28,11 @@
 #include <glib.h>
 #include <libgen.h>
 #include <parson/parson.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <wordexp.h>
 
 struct flapper_version {

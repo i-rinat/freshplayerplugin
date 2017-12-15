@@ -37,16 +37,15 @@
 #include "ppb_var.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
+#include <fcntl.h>
 #include <inttypes.h>
 #include <ppapi/c/pp_errors.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 STATIC_ASSERT(sizeof(struct pp_url_loader_s) <= LARGEST_RESOURCE_SIZE);

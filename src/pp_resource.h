@@ -26,6 +26,7 @@
 
 #include <ppapi/c/pp_resource.h>
 #include <pthread.h>
+#include <stdint.h>
 
 enum pp_resource_type_e {
     PP_RESOURCE_UNKNOWN = 0,

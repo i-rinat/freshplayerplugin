@@ -27,9 +27,11 @@
 #include "ppb_image_data.h"
 #include "ppb_var.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
+#include <cairo.h>
+#include <glib.h>
 #include <pango/pangocairo.h>
-#include <ppapi/c/pp_errors.h>
+#include <string.h>
 
 struct PP_Var
 fpp_font_get_font_families(void)

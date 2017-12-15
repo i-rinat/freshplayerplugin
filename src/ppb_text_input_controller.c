@@ -24,8 +24,7 @@
 
 #include "pp_interface.h"
 #include "ppb_text_input_controller.h"
-#include "trace.h"
-#include <stdlib.h>
+#include "trace_core.h"
 
 void
 ppb_text_input_controller_set_text_input_type(PP_Instance instance, PP_TextInput_Type type)

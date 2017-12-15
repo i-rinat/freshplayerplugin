@@ -27,7 +27,7 @@
 #include "ppb_printing.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 
 struct pp_printing_s {
     COMMON_STRUCTURE_FIELDS

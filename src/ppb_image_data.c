@@ -30,9 +30,11 @@
 #include "static_assert.h"
 #include "tables.h"
 #include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
+#include <cairo.h>
+#include <glib.h>
 #include <stdlib.h>
-#include <string.h>
 
 STATIC_ASSERT(sizeof(struct pp_image_data_s) <= LARGEST_RESOURCE_SIZE);
 

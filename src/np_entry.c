@@ -34,16 +34,26 @@
 #include "ppb_message_loop.h"
 #include "reverse_constant.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include "utils.h"
+#include <X11/Xlib.h>
 #include <dlfcn.h>
 #include <glib.h>
 #include <npapi/npapi.h>
 #include <npapi/npfunctions.h>
+#include <ppapi/c/pp_bool.h>
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/c/pp_module.h>
+#include <ppapi/c/pp_resource.h>
 #include <ppapi/c/ppb.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 static void *module_dl_handler;

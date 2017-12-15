@@ -24,8 +24,7 @@
 
 #include "pp_interface.h"
 #include "ppb_uma.h"
-#include "trace.h"
-#include <stdlib.h>
+#include "trace_core.h"
 
 void
 ppb_uma_histogram_custom_times(PP_Instance instance, struct PP_Var name, int64_t sample,

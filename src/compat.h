@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include "gtk_wrapper.h"
-#include <X11/Xlib.h>
 #include <glib.h>
 
 #ifdef VER

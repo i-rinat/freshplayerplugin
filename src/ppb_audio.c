@@ -23,21 +23,20 @@
  */
 
 #include "audio_thread.h"
-#include "config.h"
-#include "eintr_retry.h"
 #include "pp_interface.h"
 #include "pp_resource.h"
 #include "ppb_audio.h"
 #include "ppb_audio_config.h"
 #include "ppb_core.h"
 #include "ppb_instance.h"
-#include "ppb_message_loop.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
+#include "trace_core.h"
 #include <glib.h>
+#include <npapi/npapi.h>
+#include <npapi/npfunctions.h>
 #include <ppapi/c/pp_errors.h>
-#include <pthread.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
