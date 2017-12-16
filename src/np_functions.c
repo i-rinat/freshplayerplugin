@@ -45,8 +45,8 @@
 #include "ppb_view.h"
 #include "reverse_constant.h"
 #include "tables.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include "utils.h"
 #include "x11_event_thread.h"
 #include <X11/Xlib.h>

@@ -23,7 +23,7 @@
  */
 
 #include "ppb_var.h"
-#include "trace.h"
+#include "trace_helpers.h"
 #include <glib.h>
 #include <inttypes.h>
 #include <netinet/in.h>

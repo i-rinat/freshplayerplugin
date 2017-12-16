@@ -29,7 +29,8 @@
 #include "ppb_message_loop.h"
 #include "ppb_tcp_socket.h"
 #include "ppb_udp_socket.h"
-#include "trace.h"
+#include "trace_core.h"
+#include "trace_helpers.h"
 #include <arpa/inet.h>
 #include <errno.h>
 #include <event2/dns.h>

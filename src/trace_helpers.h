@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "trace_core.h"
 #include <npapi/npapi.h>
 #include <ppapi/c/pp_rect.h>
 #include <ppapi/c/pp_touch_point.h>

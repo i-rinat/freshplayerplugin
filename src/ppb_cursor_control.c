@@ -29,8 +29,8 @@
 #include "ppb_image_data.h"
 #include "ppb_instance.h"
 #include "tables.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include <X11/Xcursor/Xcursor.h>
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>

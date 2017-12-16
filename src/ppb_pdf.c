@@ -27,8 +27,8 @@
 #include "ppb_flash_font_file.h"
 #include "ppb_pdf.h"
 #include "reverse_constant.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include <glib.h>
 #include <libgen.h>
 #include <stdlib.h>

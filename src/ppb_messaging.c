@@ -24,8 +24,8 @@
 
 #include "pp_interface.h"
 #include "ppb_messaging.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include <glib.h>
 #include <ppapi/c/pp_errors.h>
 

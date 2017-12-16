@@ -32,8 +32,8 @@
 #include "ppb_message_loop.h"
 #include "ppb_var.h"
 #include "tables.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include "utils.h"
 #include <glib.h>
 #include <ppapi/c/dev/ppb_var_deprecated.h>

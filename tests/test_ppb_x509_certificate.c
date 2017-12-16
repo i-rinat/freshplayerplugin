@@ -5,7 +5,6 @@
 #include <src/ppb_core.h>
 #include <src/ppb_var.h>
 #include <src/ppb_x509_certificate.c>
-#include <src/trace.h>
 #include <stdio.h>
 #include <tests/common.h>
 

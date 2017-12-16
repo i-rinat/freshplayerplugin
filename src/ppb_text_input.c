@@ -29,8 +29,8 @@
 #include "ppb_text_input.h"
 #include "reverse_constant.h"
 #include "tables.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include "utils.h"
 #include <glib.h>
 #include <ppapi/c/dev/ppp_text_input_dev.h>

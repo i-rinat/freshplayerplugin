@@ -33,8 +33,8 @@
 #include "ppb_message_loop.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include "utils.h"
 #include <glib.h>
 #include <ppapi/c/pp_errors.h>

@@ -29,8 +29,8 @@
 #include "reverse_constant.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include "utils.h"
 #include <cairo.h>
 #include <glib.h>

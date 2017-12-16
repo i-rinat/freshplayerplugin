@@ -23,7 +23,8 @@
  */
 
 #include "audio_thread.h"
-#include "trace.h"
+#include "trace_core.h"
+#include "trace_helpers.h"
 #include <glib.h>
 #include <pthread.h>
 #include <pulse/mainloop.h>

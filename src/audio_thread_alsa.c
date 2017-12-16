@@ -26,7 +26,8 @@
 #include "config.h"
 #include "eintr_retry.h"
 #include "ppb_message_loop.h"
-#include "trace.h"
+#include "trace_core.h"
+#include "trace_helpers.h"
 #include "utils.h"
 #include <asoundlib.h>
 #include <errno.h>

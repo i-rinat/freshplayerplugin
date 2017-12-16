@@ -28,11 +28,11 @@
 #include "ppb_flash_font_file.h"
 #include "static_assert.h"
 #include "tables.h"
-#include "trace.h"
 #include "trace_core.h"
+#include "trace_helpers.h"
 #include <arpa/inet.h>  // for htonl()
-#include <pango/pangoft2.h>
 #include <glib.h>
+#include <pango/pangoft2.h>
 #include <stdlib.h>
 
 #include <ft2build.h>
