@@ -24,7 +24,7 @@ link_directories(
 include_directories(..)
 
 foreach(item ${test_list})
-    add_executable(${item} EXCLUDE_FROM_ALL
+    add_executable(${item}
         ${item}.c
         $<TARGET_OBJECTS:freshwrapper-obj>
         $<TARGET_OBJECTS:parson-obj>
@@ -40,6 +40,6 @@ foreach(item ${test_list})
     add_dependencies(check ${item})
 endforeach()
 
-add_executable(util_glx_pixmap EXCLUDE_FROM_ALL util_glx_pixmap.c)
+add_executable(util_glx_pixmap util_glx_pixmap.c)
 add_dependencies(check util_glx_pixmap)
 target_link_libraries(util_glx_pixmap ${REQ_LIBRARIES})
