@@ -1,3 +1,8 @@
+2017-12-23  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release v0.3.9
+	* network: stop using files with NPN_PostURL
+
 2017-12-09  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release: v0.3.8
