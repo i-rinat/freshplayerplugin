@@ -70,6 +70,11 @@
 #define AV_CODEC_ID_H264        CODEC_ID_H264
 #endif // !HAVE_AVCodecID
 
+#if !HAVE_AV_CODEC_FLAGS
+#define AV_CODEC_CAP_TRUNCATED  CODEC_CAP_TRUNCATED
+#define AV_CODEC_FLAG_TRUNCATED CODEC_FLAG_TRUNCATED
+#endif // !HAVE_AV_CODEC_FLAGS
+
 enum hwdec_api_e {
     HWDEC_NONE = 0,
     HWDEC_VAAPI,
@@ -620,9 +625,9 @@ initialize_decoder(struct pp_video_decoder_s *vd)
         goto err;
     }
 
-    if (vd->avcodec->capabilities & CODEC_CAP_TRUNCATED) {
-        trace_info("%s, codec have CODEC_CAP_TRUNCATED\n", __func__);
-        vd->avctx->flags |= CODEC_FLAG_TRUNCATED;
+    if (vd->avcodec->capabilities & AV_CODEC_CAP_TRUNCATED) {
+        trace_info("%s, codec have AV_CODEC_CAP_TRUNCATED\n", __func__);
+        vd->avctx->flags |= AV_CODEC_FLAG_TRUNCATED;
     }
 
     vd->avctx->opaque = vd;
