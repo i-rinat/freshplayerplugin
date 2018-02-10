@@ -23,6 +23,7 @@
  */
 
 #include "config.h"
+#include "thread_local.h"
 #include "trace_core.h"
 #include <pthread.h>
 #include <stdarg.h>
@@ -32,8 +33,6 @@
 #include <unistd.h>
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static __thread struct timespec tictoc_ts;
-
 
 void
 trace_info(const char *fmt, ...)
@@ -90,13 +89,14 @@ trace_error(const char *fmt, ...)
 void
 trace_duration_tic(void)
 {
-    clock_gettime(CLOCK_REALTIME, &tictoc_ts);
+    clock_gettime(CLOCK_REALTIME, &get_thread_local()->tictoc_ts);
 }
 
 double
 trace_duration_toc(void)
 {
+    struct timespec *tictoc_ts = &get_thread_local()->tictoc_ts;
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    return (ts.tv_sec - tictoc_ts.tv_sec) + 1e-9 * (ts.tv_nsec - tictoc_ts.tv_nsec);
+    return (ts.tv_sec - tictoc_ts->tv_sec) + 1e-9 * (ts.tv_nsec - tictoc_ts->tv_nsec);
 }

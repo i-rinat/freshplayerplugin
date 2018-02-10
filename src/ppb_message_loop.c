@@ -28,6 +28,7 @@
 #include "ppb_message_loop.h"
 #include "static_assert.h"
 #include "tables.h"
+#include "thread_local.h"
 #include "trace_core.h"
 #include <glib.h>
 #include <inttypes.h>
@@ -47,11 +48,8 @@ struct pp_message_loop_s {
 
 STATIC_ASSERT(sizeof(struct pp_message_loop_s) <= LARGEST_RESOURCE_SIZE);
 
-static __thread PP_Resource this_thread_message_loop = 0;
-static __thread int         thread_is_not_suitable_for_message_loop = 0;
-static          PP_Resource main_thread_message_loop = 0;
-static          PP_Resource browser_thread_message_loop = 0;
-
+static PP_Resource main_thread_message_loop = 0;
+static PP_Resource browser_thread_message_loop = 0;
 
 struct message_loop_task_s {
     struct timespec                 when;
@@ -131,12 +129,12 @@ ppb_message_loop_get_for_main_thread(void)
 int32_t
 ppb_message_loop_proclaim_this_thread_main(void)
 {
-    if (this_thread_message_loop == 0) {
+    if (get_thread_local()->this_thread_message_loop == 0) {
         trace_error("%s, no message loop attached\n", __func__);
         return PP_ERROR_WRONG_THREAD;
     }
 
-    main_thread_message_loop = this_thread_message_loop;
+    main_thread_message_loop = get_thread_local()->this_thread_message_loop;
     return PP_OK;
 }
 
@@ -149,19 +147,19 @@ ppb_message_loop_get_for_browser_thread(void)
 int32_t
 ppb_message_loop_proclaim_this_thread_browser(void)
 {
-    if (this_thread_message_loop == 0) {
+    if (get_thread_local()->this_thread_message_loop == 0) {
         trace_error("%s, no message loop attached\n", __func__);
         return PP_ERROR_WRONG_THREAD;
     }
 
-    browser_thread_message_loop = this_thread_message_loop;
+    browser_thread_message_loop = get_thread_local()->this_thread_message_loop;
     return PP_OK;
 }
 
 PP_Resource
 ppb_message_loop_get_current(void)
 {
-    return this_thread_message_loop;
+    return get_thread_local()->this_thread_message_loop;
 }
 
 int
@@ -181,7 +179,7 @@ ppb_message_loop_get_depth(PP_Resource message_loop)
 void
 ppb_message_loop_mark_thread_unsuitable(void)
 {
-    thread_is_not_suitable_for_message_loop = 1;
+    get_thread_local()->thread_is_not_suitable_for_message_loop = 1;
 }
 
 int32_t
@@ -192,17 +190,17 @@ ppb_message_loop_attach_to_current_thread(PP_Resource message_loop)
         return PP_ERROR_BADRESOURCE;
     }
 
-    if (thread_is_not_suitable_for_message_loop) {
+    if (get_thread_local()->thread_is_not_suitable_for_message_loop) {
         trace_error("%s, can't attach to this thread\n", __func__);
         return PP_ERROR_WRONG_THREAD;
     }
 
-    if (this_thread_message_loop != 0) {
+    if (get_thread_local()->this_thread_message_loop != 0) {
         trace_error("%s, thread already have message loop attached\n", __func__);
         return PP_ERROR_INPROGRESS;
     }
 
-    this_thread_message_loop = message_loop;
+    get_thread_local()->this_thread_message_loop = message_loop;
     return PP_OK;
 }
 
@@ -263,7 +261,7 @@ find_first_task_with_appropriate_depth(GTree *q, int current_depth)
 int32_t
 ppb_message_loop_run_int(PP_Resource message_loop, uint32_t flags)
 {
-    if (this_thread_message_loop != message_loop) {
+    if (get_thread_local()->this_thread_message_loop != message_loop) {
         trace_error("%s, not attached to current thread\n", __func__);
         return PP_ERROR_WRONG_THREAD;
     }
