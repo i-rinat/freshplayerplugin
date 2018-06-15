@@ -275,9 +275,6 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     if (config.fullscreen_window_geometry != NULL)
         get_window_geometry_from_string(config.fullscreen_window_geometry, &fs_wnd_rect);
 
-    printf("fs_wnd_rect: %d %d %d %d\n", fs_wnd_rect.point.x,
-           fs_wnd_rect.point.y, fs_wnd_rect.size.width, fs_wnd_rect.size.height);
-
     XSetWindowAttributes attrs = {
         .background_pixel = 0x000000,
         .backing_store =    Always,
