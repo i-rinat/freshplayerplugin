@@ -48,6 +48,7 @@ static struct fpp_config_s default_config = {
     .fullscreen_height   =      0,
     .fullscreen_horz_maximize_atom = 1,
     .fullscreen_vert_maximize_atom = 1,
+    .fullscreen_window_geometry =    NULL,
     .randomize_dns_case =       0,
     .device_scale        =      1.0,
     .enable_windowed_mode   =   1,
@@ -90,6 +91,7 @@ static cfg_opt_t opts[] = {
     CFG_SIMPLE_INT("fullscreen_height",      &config.fullscreen_height),
     CFG_SIMPLE_INT("fullscreen_horz_maximize_atom", &config.fullscreen_horz_maximize_atom),
     CFG_SIMPLE_INT("fullscreen_vert_maximize_atom", &config.fullscreen_vert_maximize_atom),
+    CFG_SIMPLE_STR("fullscreen_window_geometry", &config.fullscreen_window_geometry),
     CFG_SIMPLE_INT("randomize_dns_case",     &config.randomize_dns_case),
     CFG_SIMPLE_FLOAT("device_scale",         &config.device_scale),
     CFG_SIMPLE_INT("enable_windowed_mode",   &config.enable_windowed_mode),
@@ -239,6 +241,7 @@ fpp_config_destroy(void)
     FREE_IF_CHANGED(pepperflash_path);
     FREE_IF_CHANGED(flash_command_line);
     FREE_IF_CHANGED(jack_server_name);
+    FREE_IF_CHANGED(fullscreen_window_geometry);
     g_free(pepper_data_dir);
     g_free(pepper_salt_file_name);
     initialized = 0;

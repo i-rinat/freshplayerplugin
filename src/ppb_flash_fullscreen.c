@@ -223,6 +223,31 @@ craft_graphicsexpose_event(XEvent *ev, Display *dpy, struct pp_instance_s *pp_i)
     ev->xgraphicsexpose.height =   pp_i->fs_height;
 }
 
+static int
+get_window_geometry_from_string(const char *str, struct PP_Rect *out)
+{
+    struct PP_Rect res = {};
+
+    gchar **parts = g_strsplit(str, ",", -1);
+    unsigned int n = 0;
+    for (gchar **ptr = parts; *ptr != NULL; ptr++)
+        n += 1;
+
+    if (n < 4) {
+        g_strfreev(parts);
+        return -1;
+    }
+
+    res.point.x = MIN(G_MAXINT32, g_ascii_strtoull(parts[0], NULL, 10));
+    res.point.y = MIN(G_MAXINT32, g_ascii_strtoull(parts[1], NULL, 10));
+    res.size.width = MIN(G_MAXINT32, g_ascii_strtoull(parts[2], NULL, 10));
+    res.size.height = MIN(G_MAXINT32, g_ascii_strtoull(parts[3], NULL, 10));
+
+    g_strfreev(parts);
+    *out = res;
+    return 0;
+}
+
 static
 void
 fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
@@ -240,15 +265,29 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     // get current mouse pointer position
     XQueryPointer(dpy, DefaultRootWindow(dpy), &root, &child, &px, &py, &rel_x, &rel_y, &mask);
 
-    // create tiny window where mouse pointer is
+    // Create a window for the fullscreen content. By default, it's a small window just under
+    // mouse cursor. That hint a window manager on which monitor to expand the window.
+    struct PP_Rect fs_wnd_rect = {
+        .point = {.x = px - wnd_size / 2, .y = py - wnd_size / 2},
+        .size = {.width = wnd_size, .height = wnd_size},
+    };
+
+    if (config.fullscreen_window_geometry != NULL)
+        get_window_geometry_from_string(config.fullscreen_window_geometry, &fs_wnd_rect);
+
+    printf("fs_wnd_rect: %d %d %d %d\n", fs_wnd_rect.point.x,
+           fs_wnd_rect.point.y, fs_wnd_rect.size.width, fs_wnd_rect.size.height);
+
     XSetWindowAttributes attrs = {
         .background_pixel = 0x000000,
         .backing_store =    Always,
     };
-    pp_i->fs_wnd = XCreateWindow(dpy, DefaultRootWindow(dpy),
-                                 px - wnd_size / 2, py - wnd_size / 2, wnd_size, wnd_size,
-                                 0, DefaultDepth(dpy, screen), InputOutput,
-                                 DefaultVisual(dpy, screen), CWBackPixel | CWBackingStore, &attrs);
+
+    pp_i->fs_wnd = XCreateWindow(
+        dpy, DefaultRootWindow(dpy), fs_wnd_rect.point.x, fs_wnd_rect.point.y,
+        fs_wnd_rect.size.width, fs_wnd_rect.size.height, 0,
+        DefaultDepth(dpy, screen), InputOutput, DefaultVisual(dpy, screen),
+        CWBackPixel | CWBackingStore, &attrs);
 
     XSelectInput(dpy, pp_i->fs_wnd, KeyPressMask | KeyReleaseMask | ButtonPressMask |
                                     ButtonReleaseMask | PointerMotionMask | ExposureMask |
@@ -257,8 +296,8 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
     // tell window manager we want exact position
     XSizeHints size_hints = {
         .flags = USPosition,
-        .x = px - wnd_size / 2,
-        .y = py - wnd_size / 2,
+        .x = fs_wnd_rect.point.x,
+        .y = fs_wnd_rect.point.y,
     };
     XSetWMNormalHints(dpy, pp_i->fs_wnd, &size_hints);
 
@@ -338,8 +377,8 @@ fullscreen_window_thread_int(Display *dpy, struct thread_param_s *tp)
 
     pthread_mutex_lock(&display.lock);
     pp_i->is_fullscreen = 1;
-    pp_i->fs_width_current = wnd_size;
-    pp_i->fs_height_current = wnd_size;
+    pp_i->fs_width_current = fs_wnd_rect.size.width;
+    pp_i->fs_height_current = fs_wnd_rect.size.height;
     pthread_mutex_unlock(&display.lock);
 
     int called_did_change_view = 0;
