@@ -1,3 +1,12 @@
+2019-05-24  Rinat Ibragimov  <ibragimovrinat@mail.ru>
+
+	* release v0.3.11
+	* misc: build compatibility with newer FFmpeg (AV-prefixed macros)
+	* misc: stop using __thread for thread-local variables
+	* graphics: add explicit fullscreen window position configuration
+	* misc: fix tests on big-endian machines
+	* misc: mention that v0.3.10 existed, but without a changelog entry
+
 2017-12-23  Rinat Ibragimov  <ibragimovrinat@mail.ru>
 
 	* release v0.3.9
