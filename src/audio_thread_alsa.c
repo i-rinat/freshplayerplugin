@@ -29,7 +29,7 @@
 #include "trace_core.h"
 #include "trace_helpers.h"
 #include "utils.h"
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 #include <errno.h>
 #include <glib.h>
 #include <poll.h>
