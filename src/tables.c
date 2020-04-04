@@ -38,7 +38,9 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#if HAVE_HWDEC
 #include <va/va_x11.h>
+#endif
 
 NPNetscapeFuncs     npn;
 struct display_s    display;
