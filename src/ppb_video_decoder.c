@@ -55,25 +55,25 @@
 #include <vdpau/vdpau.h>
 
 // compatibility definitions
-#if !HAVE_AVPixelFormat
+#ifndef HAVE_AVPixelFormat
 #define AVPixelFormat           PixelFormat
 #define AV_PIX_FMT_NONE         PIX_FMT_NONE
 #define AV_PIX_FMT_YUV420P      PIX_FMT_YUV420P
 #define AV_PIX_FMT_VAAPI_VLD    PIX_FMT_VAAPI_VLD
-#endif // !HAVE_AVPixelFormat
+#endif // HAVE_AVPixelFormat
 
-#if !HAVE_AV_PIX_FMT_VDPAU
+#ifndef HAVE_AV_PIX_FMT_VDPAU
 #define AV_PIX_FMT_VDPAU        (-2)
-#endif // !HAVE_AV_PIX_FMT_VDPAU
+#endif // HAVE_AV_PIX_FMT_VDPAU
 
-#if !HAVE_AVCodecID
+#ifndef HAVE_AVCodecID
 #define AV_CODEC_ID_H264        CODEC_ID_H264
-#endif // !HAVE_AVCodecID
+#endif // HAVE_AVCodecID
 
-#if !HAVE_AV_CODEC_FLAGS
+#ifndef HAVE_AV_CODEC_FLAGS
 #define AV_CODEC_CAP_TRUNCATED  CODEC_CAP_TRUNCATED
 #define AV_CODEC_FLAG_TRUNCATED CODEC_FLAG_TRUNCATED
-#endif // !HAVE_AV_CODEC_FLAGS
+#endif // HAVE_AV_CODEC_FLAGS
 
 enum hwdec_api_e {
     HWDEC_NONE = 0,
@@ -81,13 +81,13 @@ enum hwdec_api_e {
     HWDEC_VDPAU,
 };
 
-#if !HAVE_AVVDPAUContext
+#ifndef HAVE_AVVDPAUContext
 struct AVVDPAUContext {
     VdpDecoder decoder;
     VdpDecoderRender *render;
     char reserved[256];
 };
-#endif // !HAVE_AVVDPAUContext
+#endif // HAVE_AVVDPAUContext
 
 #define MAX_VA_SURFACES         18  // H.264: 16 references and 2 working
 #define MAX_VDP_SURFACES        16  // H.264: 16 references
@@ -138,30 +138,30 @@ struct pp_video_decoder_s {
 
 STATIC_ASSERT(sizeof(struct pp_video_decoder_s) <= LARGEST_RESOURCE_SIZE);
 
-#if !HAVE_av_frame_alloc
+#ifndef HAVE_av_frame_alloc
 static inline AVFrame *
 av_frame_alloc(void)
 {
     return avcodec_alloc_frame();
 }
-#endif // !HAVE_av_frame_alloc
+#endif // HAVE_av_frame_alloc
 
-#if !HAVE_av_frame_free
+#ifndef HAVE_av_frame_free
 static inline void
 av_frame_free(AVFrame **frame)
 {
     av_free(*frame);
     *frame = NULL;
 }
-#endif // !HAVE_av_frame_free
+#endif // HAVE_av_frame_free
 
-#if HAVE_AVCodecContext_get_buffer2
+#ifdef HAVE_AVCodecContext_get_buffer2
 #define AVCTX_HAVE_REFCOUNTED_BUFFERS   1
 #else
 #define AVCTX_HAVE_REFCOUNTED_BUFFERS   0
 #endif // HAVE_AVCodecContext_get_buffer2
 
-#if !HAVE_avcodec_free_context
+#ifndef HAVE_avcodec_free_context
 static
 void
 avcodec_free_context(AVCodecContext **pavctx)
@@ -170,7 +170,7 @@ avcodec_free_context(AVCodecContext **pavctx)
     av_free(*pavctx);
     *pavctx = NULL;
 }
-#endif // !HAVE_avcodec_free_context
+#endif // HAVE_avcodec_free_context
 
 
 static
